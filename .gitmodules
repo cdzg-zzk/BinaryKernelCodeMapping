@@ -1,0 +1,3 @@
+[submodule "kernel_cgd/src/ELFIO"]
+	path = kernel_cgd/src/ELFIO
+	url = https://github.com/serge1/ELFIO.git
