@@ -67,6 +67,8 @@ MODULES ?=
 DEBUG   ?= 0
 # 调试聚焦符号（DBG_SYM=xxx → --dbg-sym=xxx）
 DBG_SYM ?=
+# DEBUG 日志输出文件（相对当前目录）
+LOGFILE ?= build.log
 
 # ---------------- 源/目标文件 ----------------
 SRC   := krg.cpp
@@ -88,10 +90,16 @@ $(BIN): $(OBJ)
 # 以 root 身份调用 krg 构图（默认使用 $(VMLINUX)，输出 $(OUT)）
 krg-build: $(BIN)
 	@echo ">> Building KRG graph to $(OUT) using VMLINUX=$(VMLINUX)"
-	sudo ./$(BIN) build $(VMLINUX) -o $(OUT) \
+	@cmd="./$(BIN) build $(VMLINUX) -o $(OUT) \
 	  $(if $(MODULES),$(foreach m,$(MODULES),-m $(m)),) \
 	  $(if $(filter 1,$(DEBUG)),--debug,) \
-	  $(if $(DBG_SYM),--dbg-sym=$(DBG_SYM),)
+	  $(if $(DBG_SYM),--dbg-sym=$(DBG_SYM),)"; \
+	if [ "$(filter 1,$(DEBUG))" = "1" ]; then \
+	  echo ">> DEBUG=1: stderr will be redirected to $(LOGFILE)"; \
+	  sudo $$cmd 2>$(LOGFILE); \
+	else \
+	  sudo $$cmd; \
+	fi
 
 # 以 root 身份查询某个 symbol 的闭包（需先执行 krg-build 生成 $(OUT)）
 # 用法：make query SYMBOL=<你的符号名>

@@ -8,6 +8,9 @@ synthetic address space, and emits a minimal yet linkable ELF shared object.
 CHANGES:
 - Uses sparse file techniques (lseek) for .text and .rodata sections.
 - Physical disk usage is minimal, while logical size matches kernel mapping requirements.
+
+Usage:
+    python3 build_parse_so.py --symbols symbols.txt --krg ../kernel_cgd/src/out.krg --output libgenerated_parse_library.so
 """
 
 from __future__ import annotations

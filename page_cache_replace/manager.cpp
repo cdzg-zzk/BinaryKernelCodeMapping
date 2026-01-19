@@ -1,3 +1,5 @@
+// compile: g++ -o manager -std=c++17 -g manager.cpp
+// run: sudo ./manager
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,7 +21,7 @@
 
 // #define PAGE_SIZE 4096
 #define PAGE_SIZE 4096
-#define REL_FILEPATH "../make_dll/libgenerated_library.so"
+#define REL_FILEPATH "../make_dll/libgenerated_parse_library.so"
 #define REL_SYMBOL_ADDR_FILE "../make_dll/resolved_symbol_addresses.txt"
 
 // Netlink 消息格式 - 支持多页面

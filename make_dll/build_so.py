@@ -4,6 +4,9 @@ Manual ELF64 shared library builder.
 
 This tool reads `symbols.txt`, remaps the provided kernel symbols into a
 synthetic address space, and emits a minimal yet linkable ELF shared object.
+
+Usage:
+    python3 build_so.py --symbols symbols.txt --krg ../kernel_cgd/src/out.krg --output libgenerated_library.so
 """
 
 from __future__ import annotations

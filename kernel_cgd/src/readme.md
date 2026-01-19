@@ -156,7 +156,7 @@ sudo ./krg query out.krg klist_add_head
 make
 make krg-build VMLINUX=/path/to/vmlinux OUT=mygraph.krg
 make krg-build MODULES="a.ko b.ko"
-make krg-build DEBUG=1 DBG_SYM=klist_add_head
+make krg-build DEBUG=1 DBG_SYM=klist_add_head   # DEBUG=1 时 stderr 重定向到 ./build.log
 make query OUT=mygraph.krg SYMBOL=klist_add_head
 ```
 
