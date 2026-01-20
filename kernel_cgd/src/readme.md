@@ -1,6 +1,33 @@
 # KRG: Linux 内核符号依赖图（SAFE-only）技术说明
 
-> 代码基线：`krg.cpp`（本仓库当前版本）。以下内容与实现细节均以该文件为准。
+> 代码基线：`krg.cpp`（当前版本）。v2 格式新增模块表和 module_id，便于下游按模块拆分依赖并生成多模块 .so（含 shim）。v1 仍可读，模块默认视为 kernel。
+
+## 文件格式（out.krg）
+
+- Header v2（兼容 v1）：
+  ```
+  struct FileHeader {
+      u32 magic;              // 'KRG1' = 0x3147524b
+      u32 version;            // 2 (v1 无 n_modules/module_blob_bytes)
+      u32 n_nodes;
+      u32 n_edges;
+      u32 name_blob_bytes;
+      u32 arch;               // 0 = x86_64
+      u32 is_runtime_address; // 是否已按 KASLR 调整
+      u32 reserved1;
+      u32 n_modules;          // v2: 模块数（含 kernel=0）
+      u32 module_blob_bytes;  // v2: 模块名字符串表大小
+  };
+  // v2 Node：module=0 -> kernel；v1 仅 {addr,size,kind}
+  struct Node { u64 addr; u32 size; u16 module; u8 kind; u8 pad; };
+  ```
+- 序列化顺序：Header -> Node[n] -> row_ptr[n+1] -> col_idx[m] -> name_off[n] -> name_blob -> module_off[n_modules] -> module_blob（v1 无 module 段）。
+
+## 与下游（build_PIC_so.py）的接口
+
+- 下游期望 v2（含 module），以便按模块拆分 .so；若用 v1，所有节点视为 kernel。
+- shim 符号由 `shim.txt` 单独声明，下游映射为 `libshim.so`（外部提供）。
+- 多模块依赖通过 module_id 推导，下游生成 `module_deps.txt`、`resolved_symbol_addresses.txt`，并递归生成各模块 .so。
 
 ## 1. 背景与目标
 

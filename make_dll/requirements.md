@@ -27,23 +27,18 @@
 
   ### 3.1 输入文件：symbols.txt
 
-  - 每行定义一个符号，使用空白分隔字段：
-
-    symbol_name    address    size    kind
-  - 字段含义：
-      - symbol_name：符号名称，ASCII 字符串，无空格；
-      - address：内核虚拟地址，建议使用 16 进制形式（例如 0xffffffff918585d0），在代码中解析为 64 位整数；
-      - size：符号大小（字节，十进制）；
-      - kind：
-          - 0：代码符号，映射到 .text；
-          - 1：只读数据符号，映射到 .rodata。
-  - 行规则：
-      - 忽略空行；
-      - 忽略以 # 开头的注释行。
+  - 现在仅列出「根模块需要导出的符号名」，每行一个（空白后内容和以 # 开头的注释会被忽略）。
+  - 所有根符号必须来自同一个模块；构建器会从 out.krg 中解析地址、大小、kind 与依赖。
+  - 行规则：忽略空行；忽略以 # 开头的注释行。
   - 示例（当前仓库中的 symbols.txt）：
 
-    crc32_be        0xffffffff918585d0      272     0
-    xxh32           0xffffffff91858900      336     0
+    LZ4_compress_HC_continue
+    LZ4_compress_HC
+
+  ### 3.2 其他输入
+
+  - out.krg：由 krg.cpp 生成的 SAFE 图（v2，包含 module 信息）。
+  - shim.txt（可选）：列出需要由用户态 shim 提供的内核符号（对应 libshim.so，必须自行编译提供）。
 
   ### 3.2 输出文件：generated_library.so
 
@@ -52,6 +47,11 @@
       - file generated_library.so 能识别为 ELF 64-bit LSB shared object, x86-64；
       - readelf -a、nm -D 对其操作正常；
       - ELF 头、程序头、节头的字段满足本文件后续规范。
+
+  ### 3.3 自动生成的中间/辅助文件
+  - resolved_symbol_addresses.txt：汇总所有构建出的模块符号（符号、地址、大小、所属模块、角色 export/internal/import）。
+  - module_deps.txt：模块依赖摘要（形如 A -> kernel: memcpy memset）。
+  - 最终 .so 命名规则：根模块生成 lib<module>.so，递归为依赖模块也生成对应 .so；shim 只作为外部依赖，不在此处生成。
 
   ## 4. 符号分组与地址映射规则
 

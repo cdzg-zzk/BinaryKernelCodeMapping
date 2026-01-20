@@ -15,6 +15,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -22,9 +23,8 @@
 
 using u8 = uint8_t; using u16 = uint16_t; using u32 = uint32_t; using u64 = uint64_t; using i32 = int32_t; using i64 = long long;
 
-// struct Node { u64 addr; u32 size; u8 kind; u8 _pad{0}; };   // kind: 0=code, 1=data
 struct Node { u64 addr; u32 size; u8 kind; };   // kind: 0=code, 1=data
-struct BuildSym { std::string name; Node n{}; u16 sec_idx{0}; bool defined{false}; u8 is_primary{0}; };
+struct BuildSym { std::string name; Node n{}; u16 sec_idx{0}; bool defined{false}; u8 is_primary{0}; u32 origin{0}; };
 struct SectionInfo { ELFIO::section* sec{nullptr}; std::string name; u64 addr{0}, size{0}, offset{0}, flags{0}; u32 idx{0}; };
 struct Range { u64 start, end; u32 id; }; // [start,end)
 
@@ -42,6 +42,68 @@ struct FileHeader {
 static inline bool is_exec(u64 f){ return (f & ELFIO::SHF_EXECINSTR) != 0; }
 static inline bool is_write(u64 f){ return (f & ELFIO::SHF_WRITE)     != 0; }
 static inline bool starts_with_dot(const std::string& n){ return !n.empty() && n[0]=='.'; }
+static inline u64 align_up(u64 v, u64 a){ return (a<=1) ? v : (v + a - 1) & ~(a - 1); }
+
+static std::string basename_noext(const std::string& path){
+    size_t pos = path.find_last_of('/');
+    std::string base = (pos == std::string::npos) ? path : path.substr(pos + 1);
+    const std::string exts[] = {".ko.xz", ".ko.gz", ".ko.zst", ".ko"};
+    for (const auto& ext : exts){
+        if (base.size() >= ext.size() && base.compare(base.size() - ext.size(), ext.size(), ext) == 0){
+            base.resize(base.size() - ext.size());
+            break;
+        }
+    }
+    return base;
+}
+
+static std::optional<std::string> modinfo_name(const ELFIO::elfio& r){
+    const ELFIO::section* modinfo = nullptr;
+    for (u32 i = 0; i < r.sections.size(); ++i){
+        const auto* s = r.sections[i];
+        if (s && s->get_name() == ".modinfo") { modinfo = s; break; }
+    }
+    if (!modinfo) return std::nullopt;
+    const char* data = modinfo->get_data();
+    if (!data) return std::nullopt;
+    const size_t size = modinfo->get_size();
+    size_t i = 0;
+    while (i < size){
+        const char* cur = data + i;
+        const char* end = static_cast<const char*>(std::memchr(cur, '\0', size - i));
+        const size_t len = end ? (size_t)(end - cur) : (size - i);
+        if (len == 0) { ++i; continue; }
+        if (len > 5 && std::strncmp(cur, "name=", 5) == 0){
+            return std::string(cur + 5, len - 5);
+        }
+        if (!end) break;
+        i += len + 1;
+    }
+    return std::nullopt;
+}
+
+static std::string module_sys_name(const std::string& path, const ELFIO::elfio& r){
+    if (auto n = modinfo_name(r)) return *n;
+    std::string base = basename_noext(path);
+    for (char& c : base){
+        if (c == '-') c = '_';
+    }
+    return base;
+}
+
+static std::optional<u64> read_hex_file(const std::string& path){
+    std::ifstream in(path);
+    if (!in) return std::nullopt;
+    std::string s;
+    in >> s;
+    if (s.rfind("0x", 0) == 0 || s.rfind("0X", 0) == 0) s = s.substr(2);
+    if (s.empty()) return std::nullopt;
+    try {
+        return std::stoull(s, nullptr, 16);
+    } catch (...) {
+        return std::nullopt;
+    }
+}
 
 static std::optional<u64> read_kallsyms_addr(const std::string& name){
     std::ifstream in("/proc/kallsyms");
@@ -63,7 +125,14 @@ static std::optional<u64> read_kallsyms_addr(const std::string& name){
 
 struct Builder {
     // 基本
-    ELFIO::elfio reader;
+    struct InputFile {
+        std::string path;
+        std::unique_ptr<ELFIO::elfio> reader;
+        u64 base{0};
+        bool is_relocatable{false};
+        std::vector<u32> sec_map;
+    };
+    std::vector<InputFile> inputs;
     std::vector<SectionInfo> secs;                 // 所有节
     std::vector<BuildSym>    syms;                 // 所有符号
     std::unordered_map<std::string,u32> name2id;
@@ -96,7 +165,7 @@ struct Builder {
     // 软忽略（CALL/JMP 命中 → 仅不过边）
     const std::vector<std::string> soft_ig = {
         "__x86_return_thunk", "__x86_indirect_thunk_", "__retpoline_",
-        "__fentry__", "mcount"
+        "__fentry__", "mcount", "__stack_chk_fail"
     };
 
     // Debug
@@ -115,23 +184,70 @@ struct Builder {
     }
 
     // 基础
-    bool load_elf(const std::string& p){ return reader.load(p); }
+    bool add_input(const std::string& p, u64 base){
+        InputFile in;
+        in.path = p;
+        in.base = base;
+        in.reader = std::make_unique<ELFIO::elfio>();
+        if (!in.reader->load(p)) return false;
+        in.is_relocatable = (in.reader->get_type() == ELFIO::ET_REL);
+        inputs.push_back(std::move(in));
+        return true;
+    }
+
+    u16 map_sec_idx(const InputFile& in, ELFIO::Elf_Half si) const {
+        if (si == ELFIO::SHN_UNDEF) return ELFIO::SHN_UNDEF;
+        if (si < in.sec_map.size()) return (u16)in.sec_map[si];
+        return si;
+    }
+
+    u64 sym_addr(const InputFile& in, ELFIO::Elf_Half si, ELFIO::Elf64_Addr v) const {
+        if (si == ELFIO::SHN_UNDEF || si == ELFIO::SHN_ABS) return v;
+        if (in.is_relocatable) {
+            if (si < in.sec_map.size()) return secs[in.sec_map[si]].addr + v;
+            return v;
+        }
+        return in.base + v;
+    }
 
     void collect_sections(){
-        secs.reserve(reader.sections.size());
-        for (u32 i=0;i<reader.sections.size();++i){
-            const auto* s = reader.sections[i];
+        secs.clear(); sec_primary_funcs.clear(); alloc_secs_.clear();
+        size_t total = 0;
+        for (const auto& in : inputs){
+            total += in.reader->sections.size();
+        }
+        secs.reserve(total);
+        for (auto& in : inputs){
+            auto &r = *in.reader;
+            in.sec_map.assign(r.sections.size(), 0);
+            u64 cur = in.base;
+            for (u32 i=0;i<r.sections.size();++i){
+                const auto* s = r.sections[i];
+                u64 addr = 0;
+                if (in.is_relocatable) {
+                    if (s->get_flags() & ELFIO::SHF_ALLOC) {
+                        u64 align = s->get_addr_align();
+                        cur = align_up(cur, align);
+                        addr = cur;
+                        cur += s->get_size();
+                    }
+                } else {
+                    addr = in.base + s->get_address();
+                }
+                const u32 gid = (u32)secs.size();
             SectionInfo si;
             si.sec    = const_cast<ELFIO::section*>(s);
             si.name   = s->get_name();
-            si.addr   = s->get_address();
+            si.addr   = addr;
             si.size   = s->get_size();
             si.offset = s->get_offset();
             si.flags  = s->get_flags();
-            si.idx    = i;
+            si.idx    = gid;
             secs.push_back(std::move(si));
+                in.sec_map[i] = gid;
+            }
         }
-        sec_primary_funcs.resize(reader.sections.size());
+        sec_primary_funcs.resize(secs.size());
 
         // 构建 alloc 节区间表（只含 SHF_ALLOC）
         alloc_secs_.reserve(secs.size());
@@ -144,39 +260,54 @@ struct Builder {
                   [](const Range&a, const Range&b){ return a.start < b.start; });
     }
 
-    void add_symbol(const std::string& nm, u64 addr, u64 size, unsigned char type, u16 sec_idx){
-        if(nm.empty()) return;
+    u32 add_symbol(const std::string& nm, u64 addr, u64 size, unsigned char type, u16 sec_idx, u32 origin, bool* was_new=nullptr){
+        if(nm.empty()){
+            if (was_new) *was_new = false;
+            return UINT32_MAX;
+        }
         BuildSym bs; bs.name=nm;
         bs.n.addr=addr; bs.n.size=(u32)size; bs.sec_idx=sec_idx; bs.defined=(sec_idx!=ELFIO::SHN_UNDEF);
         if (type==ELFIO::STT_FUNC) bs.n.kind=0;
         else if (type==ELFIO::STT_OBJECT) bs.n.kind=1;
         else bs.n.kind = (bs.defined && sec_idx<secs.size() && is_exec(secs[sec_idx].flags))?0:1;
         bs.is_primary = (bs.n.kind==0 && !starts_with_dot(nm)) ? 1 : 0;
+        bs.origin = origin;
 
         auto it=name2id.find(bs.name);
         if(it==name2id.end()){
             u32 id=(u32)syms.size();
             syms.push_back(std::move(bs));
             name2id[syms.back().name]=id;
+            if (was_new) *was_new = true;
+            return id;
         }else{
             auto &cur=syms[it->second];
             if(!cur.defined && bs.defined) cur=std::move(bs);
+            if (was_new) *was_new = false;
+            return it->second;
         }
     }
 
     void collect_symbols(){
         // 收集所有符号
-        for (auto &S : secs){
-            if(!S.sec) continue;
-            auto t=S.sec->get_type();
-            if (t==ELFIO::SHT_SYMTAB || t==ELFIO::SHT_DYNSYM){
-                ELFIO::symbol_section_accessor acc(reader, S.sec);
-                const auto n = acc.get_symbols_num();
-                for (ELFIO::Elf_Xword i=0;i<n;++i){
-                    std::string nstr; ELFIO::Elf64_Addr v; ELFIO::Elf_Xword sz;
-                    unsigned char b,t,other; ELFIO::Elf_Half si;
-                    acc.get_symbol(i,nstr,v,sz,b,t,si,other);
-                    add_symbol(nstr,v,sz,t,si);
+        for (u32 fi=0; fi<inputs.size(); ++fi){
+            auto &in = inputs[fi];
+            auto &r = *in.reader;
+            for (u32 si=0; si<r.sections.size(); ++si){
+                ELFIO::section* S = r.sections[si];
+                if(!S) continue;
+                auto t=S->get_type();
+                if (t==ELFIO::SHT_SYMTAB || t==ELFIO::SHT_DYNSYM){
+                    ELFIO::symbol_section_accessor acc(r, S);
+                    const auto n = acc.get_symbols_num();
+                    for (ELFIO::Elf_Xword i=0;i<n;++i){
+                        std::string nstr; ELFIO::Elf64_Addr v; ELFIO::Elf_Xword sz;
+                        unsigned char b,t,other; ELFIO::Elf_Half si;
+                        acc.get_symbol(i,nstr,v,sz,b,t,si,other);
+                        u16 sec_idx = map_sec_idx(in, si);
+                        u64 addr = sym_addr(in, si, v);
+                        add_symbol(nstr, addr, sz, t, sec_idx, fi);
+                    }
                 }
             }
         }
@@ -305,60 +436,65 @@ struct Builder {
 
     // 重定位：owner/target 用主表（更稳）
     void add_edges_from_relocs(){
-        for (auto &s: secs){
-            if(!s.sec) { continue; }
-            auto ty=s.sec->get_type();
-            if (ty!=ELFIO::SHT_REL && ty!=ELFIO::SHT_RELA) { continue; }
+        for (u32 fi=0; fi<inputs.size(); ++fi){
+            auto &in = inputs[fi];
+            auto &r = *in.reader;
+            for (u32 si=0; si<r.sections.size(); ++si){
+                ELFIO::section* s = r.sections[si];
+                if(!s) { continue; }
+                auto ty=s->get_type();
+                if (ty!=ELFIO::SHT_REL && ty!=ELFIO::SHT_RELA) { continue; }
 
-            const ELFIO::section* targ=nullptr;
-            auto info=s.sec->get_info();
-            if (info<reader.sections.size()) targ=reader.sections[info];
-            if (!targ) { continue; }
+                auto info=s->get_info();
+                if (info>=r.sections.size()) { continue; }
+                u16 targ_idx = map_sec_idx(in, (ELFIO::Elf_Half)info);
+                if (targ_idx>=secs.size()) { continue; }
 
-            ELFIO::relocation_section_accessor rels(reader, s.sec);
-            for (ELFIO::Elf_Xword i=0;i<rels.get_entries_num();++i){
-                ELFIO::Elf64_Addr off=0; ELFIO::Elf_Word sym=0; unsigned type=0; ELFIO::Elf_Sxword addend=0;
-                rels.get_entry(i,off,sym,type,addend);
-                u64 at = targ->get_address() + off;
+                ELFIO::relocation_section_accessor rels(r, s);
+                for (ELFIO::Elf_Xword i=0;i<rels.get_entries_num();++i){
+                    ELFIO::Elf64_Addr off=0; ELFIO::Elf_Word sym=0; unsigned type=0; ELFIO::Elf_Sxword addend=0;
+                    rels.get_entry(i,off,sym,type,addend);
+                    u64 at = secs[targ_idx].addr + off;
 
-                // owner by ranges
-                auto owner = target_func_by_addr(at);
-                if (!owner) { continue; }
-                u32 u = *owner;
+                    // owner by ranges
+                    auto owner = target_func_by_addr(at);
+                    if (!owner) { continue; }
+                    u32 u = *owner;
 
-                const ELFIO::section* link = reader.sections[s.sec->get_link()];
-                if (!link) { continue; }
-                auto tlink = link->get_type();
-                if (tlink!=ELFIO::SHT_SYMTAB && tlink!=ELFIO::SHT_DYNSYM) { continue; }
+                auto link_idx = s->get_link();
+                if (link_idx>=r.sections.size()) { continue; }
+                ELFIO::section* link = r.sections[link_idx];
+                    if (!link) { continue; }
+                    auto tlink = link->get_type();
+                    if (tlink!=ELFIO::SHT_SYMTAB && tlink!=ELFIO::SHT_DYNSYM) { continue; }
 
-                ELFIO::symbol_section_accessor acc(reader, const_cast<ELFIO::section*>(link));
-                std::string nm; ELFIO::Elf64_Addr v; ELFIO::Elf_Xword sz; unsigned char b,t,other; ELFIO::Elf_Half sidx;
-                acc.get_symbol(sym,nm,v,sz,b,t,sidx,other);
+                    ELFIO::symbol_section_accessor acc(r, const_cast<ELFIO::section*>(link));
+                    std::string nm; ELFIO::Elf64_Addr v; ELFIO::Elf_Xword sz; unsigned char b,t,other; ELFIO::Elf_Half sidx;
+                    acc.get_symbol(sym,nm,v,sz,b,t,sidx,other);
 
-                u32 vid;
-                auto it=name2id.find(nm);
-                if (it==name2id.end()){
-                    BuildSym bs; bs.name=nm; bs.n.addr=v; bs.n.size=(u32)sz;
-                    bs.n.kind=(t==ELFIO::STT_FUNC?0:1); bs.sec_idx=sidx; bs.defined=(sidx!=ELFIO::SHN_UNDEF);
-                    bs.is_primary = (bs.n.kind==0 && !starts_with_dot(nm)) ? 1 : 0;
-                    vid=(u32)syms.size();
-                    syms.push_back(std::move(bs));
-                    name2id[nm]=vid;
-                    adj.emplace_back(); data_refs.emplace_back();
-                    data_is_writable.push_back(0); calls_blacklisted.push_back(0);
-                } else {
-                    vid = it->second;
-                }
+                    u16 sec_idx = map_sec_idx(in, sidx);
+                    u64 addr = sym_addr(in, sidx, v);
+                    bool was_new = false;
+                    u32 vid = add_symbol(nm, addr, sz, t, sec_idx, fi, &was_new);
+                    if (vid==UINT32_MAX) continue;
+                    if (was_new){
+                        adj.emplace_back(); data_refs.emplace_back();
+                        data_is_writable.push_back(0); calls_blacklisted.push_back(0);
+                        if (syms[vid].defined && syms[vid].n.kind==1 && sec_idx<secs.size() && is_write(secs[sec_idx].flags)){
+                            data_is_writable[vid]=1;
+                        }
+                    }
 
-                if (syms[vid].n.kind==0){
-                    const std::string &nm2 = syms[vid].name;
-                    if (in_soft_ig(nm2)) { if (want(u)) dlog("[RELOC] %s -> %s (soft-ignore)\n", syms[u].name.c_str(), nm2.c_str()); continue; }
-                    if (in_hard_bl(nm2)) { if (want(u)) dlog("[RELOC] %s -> %s (hard-BL; mark UNSAFE)\n", syms[u].name.c_str(), nm2.c_str()); calls_blacklisted[u]=1; continue; }
-                    if (want(u)) dlog("[RELOC] %s -> %s (edge)\n", syms[u].name.c_str(), nm2.c_str());
-                    add_edge(u, vid);
-                } else {
-                    if (want(u)) dlog("[RELOC] %s -> DATA[%s]\n", syms[u].name.c_str(), syms[vid].name.c_str());
-                    add_data_ref(u, vid);
+                    if (syms[vid].n.kind==0){
+                        const std::string &nm2 = syms[vid].name;
+                        if (in_soft_ig(nm2)) { if (want(u)) dlog("[RELOC] %s -> %s (soft-ignore)\n", syms[u].name.c_str(), nm2.c_str()); continue; }
+                        if (in_hard_bl(nm2)) { if (want(u)) dlog("[RELOC] %s -> %s (hard-BL; mark UNSAFE)\n", syms[u].name.c_str(), nm2.c_str()); calls_blacklisted[u]=1; continue; }
+                        if (want(u)) dlog("[RELOC] %s -> %s (edge)\n", syms[u].name.c_str(), nm2.c_str());
+                        add_edge(u, vid);
+                    } else {
+                        if (want(u)) dlog("[RELOC] %s -> DATA[%s]\n", syms[u].name.c_str(), syms[vid].name.c_str());
+                        add_data_ref(u, vid);
+                    }
                 }
             }
         }
@@ -596,16 +732,73 @@ struct Builder {
             }
         }
 
+        // 计算模块运行时 section base（用于把合成地址转换为真实内核地址）
+        std::vector<std::unordered_map<u32,u64>> mod_sec_base(inputs.size());
+        std::vector<std::optional<u64>> mod_text_base(inputs.size());
+        std::vector<std::string> mod_names(inputs.size());
+        for (u32 fi=1; fi<inputs.size(); ++fi){
+            const auto& in = inputs[fi];
+            std::string mod = module_sys_name(in.path, *in.reader);
+            if (mod.empty()){
+                std::fprintf(stderr, "[KRG] module path '%s' has empty name\n", in.path.c_str());
+                return false;
+            }
+            mod_names[fi] = mod;
+            auto text = read_hex_file("/sys/module/" + mod + "/sections/.text");
+            if (!text){
+                std::fprintf(stderr, "[KRG] module '%s': missing /sys/module/%s/sections/.text (load module or fix name)\n",
+                             mod.c_str(), mod.c_str());
+                return false;
+            }
+            mod_text_base[fi] = *text;
+            auto &r = *in.reader;
+            for (u32 si=0; si<r.sections.size(); ++si){
+                ELFIO::section* s = r.sections[si];
+                if (!s) continue;
+                if (!(s->get_flags() & ELFIO::SHF_ALLOC)) continue;
+                const std::string &sec_name = s->get_name();
+                auto sec_base = read_hex_file("/sys/module/" + mod + "/sections/" + sec_name);
+                if (!sec_base) continue;
+                if (si < in.sec_map.size()){
+                    mod_sec_base[fi][in.sec_map[si]] = *sec_base;
+                }
+            }
+        }
+
         // 节点 + 名字
         std::vector<Node> nodes; nodes.reserve(M);
         std::vector<u32> name_off; name_off.reserve(M);
         std::string blob; blob.reserve(M*16);
         for (u32 i=0;i<N;++i){
             i32 ni=idmap[i]; if (ni<0) continue;
-            if(have_delta) {
-                syms[i].n.addr += delta; 
+            Node out = syms[i].n;
+            if (syms[i].origin == 0) {
+                if (have_delta) out.addr += delta;
+            } else {
+                const u32 origin = syms[i].origin;
+                bool adjusted = false;
+                if (origin < mod_sec_base.size()) {
+                    auto it = mod_sec_base[origin].find(syms[i].sec_idx);
+                    if (it != mod_sec_base[origin].end() && syms[i].sec_idx < secs.size()) {
+                        u64 off = syms[i].n.addr - secs[syms[i].sec_idx].addr;
+                        out.addr = it->second + off;
+                        adjusted = true;
+                    }
+                }
+                if (!adjusted && origin < mod_text_base.size() && mod_text_base[origin].has_value() &&
+                    syms[i].sec_idx < secs.size() && secs[syms[i].sec_idx].name == ".text") {
+                    u64 off = syms[i].n.addr - secs[syms[i].sec_idx].addr;
+                    out.addr = *mod_text_base[origin] + off;
+                    adjusted = true;
+                }
+                if (!adjusted) {
+                    const char* mod = (origin < mod_names.size() && !mod_names[origin].empty()) ? mod_names[origin].c_str() : "?";
+                    const char* sec = (syms[i].sec_idx < secs.size()) ? secs[syms[i].sec_idx].name.c_str() : "?";
+                    std::fprintf(stderr, "[KRG] module '%s' section '%s' runtime base missing; rebuild with module loaded\n", mod, sec);
+                    return false;
+                }
             }
-            nodes.push_back(syms[i].n);
+            nodes.push_back(out);
             name_off.push_back((u32)blob.size());
             blob.append(syms[i].name); blob.push_back('\0');
         }
@@ -628,7 +821,6 @@ struct Builder {
         row_ptr[M]=(u32)col_idx.size();
 
         FileHeader H; H.n_nodes=M; H.n_edges=(u32)col_idx.size(); H.name_blob_bytes=(u32)blob.size(); H.arch=0;
-        // H.is_runtime_address = have_delta ? 1u : 0u;       // [KASLR@build] 1 = 本文件的地址已是 runtime
 
         std::FILE* f=std::fopen(out_path.c_str(),"wb");
         if(!f){ std::perror("fopen"); return false; }
@@ -728,55 +920,6 @@ struct Graph {
                         nodes[i].size,
                         (unsigned)nodes[i].kind);
         }
-        return;
-        
-        // // 情况一：build 阶段已将地址固化为 runtime，直接输出
-        // if (H.is_runtime_address == 1u) {
-        //     for (u32 i = 0; i < N; ++i) {
-        //         if (!seen[i]) continue;
-        //         const char* nm = blob.data() + name_off[i];
-        //         std::printf("%s\t0x%llx\t%u\t%u\n",
-        //                     nm,
-        //                     (unsigned long long)nodes[i].addr,
-        //                     nodes[i].size,
-        //                     (unsigned)nodes[i].kind);
-        //     }
-        //     return;
-        // }
-    
-        // // 情况二：仍需在 query 阶段做 KASLR 对齐
-        // u64 vml_ref = 0, run_ref = 0;
-        // bool have_ref = false;
-    
-        // // 2.1 优先尝试 _stext 作为参考点
-        // if (auto gid = id_of("_stext")) {
-        //     vml_ref = nodes[gid.value()].addr;
-        //     if (auto r = read_kallsyms_addr("_stext")) {
-        //         run_ref = *r; have_ref = true;
-        //     }
-        // }
-    
-        // // 2.2 回退：用 root 节点名做参考点
-        // if (!have_ref) {
-        //     vml_ref = nodes[root].addr;
-        //     const char* root_nm = blob.data() + name_off[root];
-        //     if (auto r = read_kallsyms_addr(root_nm)) {
-        //         run_ref = *r; have_ref = true;
-        //     }
-        // }
-    
-        // // 2.3 按是否拿到参考点输出
-        // for (u32 i = 0; i < N; ++i) {
-        //     if (!seen[i]) continue;
-        //     const char* nm = blob.data() + name_off[i];
-        //     u64 out = have_ref ? (run_ref + (nodes[i].addr - vml_ref))
-        //                        : nodes[i].addr;
-        //     std::printf("%s\t0x%llx\t%u\t%u\n",
-        //                 nm,
-        //                 (unsigned long long)out,
-        //                 nodes[i].size,
-        //                 (unsigned)nodes[i].kind);
-        // }
     }
     
 };
@@ -784,7 +927,7 @@ struct Graph {
 static void usage(){
     std::fprintf(stderr,
         "Usage:\n"
-        "  krg build vmlinux -o out.krg [--debug] [--dbg-sym=<name>]\n"
+        "  krg build vmlinux -o out.krg [-m module.ko ...] [--debug] [--dbg-sym=<name>]\n"
         "  krg query out.krg <symbol>\n");
 }
 
@@ -795,11 +938,14 @@ int main(int argc, char** argv){
     if(cmd=="build"){
         if(argc<5){ usage(); return 1; }
         std::string vmlinux=argv[2], out; bool dbg=false; std::string dbg_sym;
+        std::vector<std::string> mods;
         for(int i=3;i<argc;++i){
             std::string a=argv[i];
             if(a=="-o" && i+1<argc){ out=argv[++i]; }
             else if(a=="--debug"){ dbg=true; }
             else if(a.rfind("--dbg-sym=",0)==0){ dbg_sym=a.substr(10); }
+            else if((a=="-m" || a=="--module") && i+1<argc){ mods.push_back(argv[++i]); }
+            else if(a.rfind("--module=",0)==0){ mods.push_back(a.substr(9)); }
         }
         if(out.empty()){
             std::fprintf(stderr,"-o out.krg required\n"); return 1;
@@ -807,8 +953,16 @@ int main(int argc, char** argv){
 
         Builder B; B.debug=dbg; B.dbg_sym=dbg_sym;
 
-        if(!B.load_elf(vmlinux)){
+        if(!B.add_input(vmlinux, 0)){
             std::fprintf(stderr,"Failed to load %s\n", vmlinux.c_str()); return 2;
+        }
+        const u64 mod_base = 0x1000000000ULL;
+        const u64 mod_stride = 0x10000000ULL;
+        for (size_t i=0; i<mods.size(); ++i){
+            u64 base = mod_base + (u64)i * mod_stride;
+            if(!B.add_input(mods[i], base)){
+                std::fprintf(stderr,"Failed to load module %s\n", mods[i].c_str()); return 2;
+            }
         }
         B.collect_sections();
         B.collect_symbols();

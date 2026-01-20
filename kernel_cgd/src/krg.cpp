@@ -1,7 +1,7 @@
 // krg.cpp — SAFE-only build/query for Linux vmlinux (x86-64)
 // Fast + clean: primary-only ranges, ABSMEM support, global binary searches, deep logs.
 //
-// Build: g++ -O3 -std=c++20 -Wall -Wextra -Wpedantic krg.cpp -o krg -lcapstone -I ./ELFIO
+// Build: g++ -O3 -std=c++2a -Wall -Wextra -Wpedantic krg.cpp -o krg -lcapstone -I ./ELFIO
 // Usage: sudo ./krg build /usr/lib/debug/boot/vmlinux-$(uname -r) -o out.krg [--debug] [--dbg-sym=<name>]
 //        sudo ./krg query out.krg <symbol>
 
@@ -23,18 +23,31 @@
 
 using u8 = uint8_t; using u16 = uint16_t; using u32 = uint32_t; using u64 = uint64_t; using i32 = int32_t; using i64 = long long;
 
-struct Node { u64 addr; u32 size; u8 kind; };   // kind: 0=code, 1=data
+struct Node { u64 addr; u32 size; u16 module; u8 kind; u8 pad{0}; };   // kind: 0=code, 1=data; module: 0=kernel, >0=modules
 struct BuildSym { std::string name; Node n{}; u16 sec_idx{0}; bool defined{false}; u8 is_primary{0}; u32 origin{0}; };
 struct SectionInfo { ELFIO::section* sec{nullptr}; std::string name; u64 addr{0}, size{0}, offset{0}, flags{0}; u32 idx{0}; };
 struct Range { u64 start, end; u32 id; }; // [start,end)
 
 struct FileHeader {
     u32 magic{0x3147524b}; // 'KRG1'
-    u32 version{1};
+    u32 version{2};
     u32 n_nodes{0};
     u32 n_edges{0};
     u32 name_blob_bytes{0};
     u32 arch{0}; // 0=x86_64
+    u32 is_runtime_address{0};
+    u32 reserved1{0};
+    u32 n_modules{0};
+    u32 module_blob_bytes{0};
+};
+
+struct FileHeaderV1 {
+    u32 magic{0x3147524b};
+    u32 version{1};
+    u32 n_nodes{0};
+    u32 n_edges{0};
+    u32 name_blob_bytes{0};
+    u32 arch{0};
     u32 is_runtime_address{0};
     u32 reserved1{0};
 };
@@ -736,6 +749,7 @@ struct Builder {
         std::vector<std::unordered_map<u32,u64>> mod_sec_base(inputs.size());
         std::vector<std::optional<u64>> mod_text_base(inputs.size());
         std::vector<std::string> mod_names(inputs.size());
+        if (!mod_names.empty()) mod_names[0] = "kernel";
         for (u32 fi=1; fi<inputs.size(); ++fi){
             const auto& in = inputs[fi];
             std::string mod = module_sys_name(in.path, *in.reader);
@@ -765,6 +779,16 @@ struct Builder {
             }
         }
 
+        // 模块字符串表
+        std::vector<u32> module_off; module_off.reserve(mod_names.size());
+        std::string module_blob; module_blob.reserve(mod_names.size() * 8);
+        for (const auto& mn : mod_names){
+            std::string name = mn.empty() ? "kernel" : mn;
+            module_off.push_back((u32)module_blob.size());
+            module_blob.append(name);
+            module_blob.push_back('\0');
+        }
+
         // 节点 + 名字
         std::vector<Node> nodes; nodes.reserve(M);
         std::vector<u32> name_off; name_off.reserve(M);
@@ -772,6 +796,7 @@ struct Builder {
         for (u32 i=0;i<N;++i){
             i32 ni=idmap[i]; if (ni<0) continue;
             Node out = syms[i].n;
+            out.module = (syms[i].origin < module_off.size()) ? (u16)syms[i].origin : 0;
             if (syms[i].origin == 0) {
                 if (have_delta) out.addr += delta;
             } else {
@@ -820,7 +845,13 @@ struct Builder {
         }
         row_ptr[M]=(u32)col_idx.size();
 
-        FileHeader H; H.n_nodes=M; H.n_edges=(u32)col_idx.size(); H.name_blob_bytes=(u32)blob.size(); H.arch=0;
+        FileHeader H;
+        H.n_nodes = M;
+        H.n_edges = (u32)col_idx.size();
+        H.name_blob_bytes = (u32)blob.size();
+        H.arch = 0;
+        H.n_modules = (u32)module_off.size();
+        H.module_blob_bytes = (u32)module_blob.size();
 
         std::FILE* f=std::fopen(out_path.c_str(),"wb");
         if(!f){ std::perror("fopen"); return false; }
@@ -835,6 +866,8 @@ struct Builder {
         if(H.n_edges && !W(col_idx.data(), col_idx.size()*sizeof(u32))) return false;
         if(M && !W(name_off.data(), name_off.size()*sizeof(u32))) return false;
         if(H.name_blob_bytes && !W(blob.data(), blob.size())) return false;
+        if(H.n_modules && !W(module_off.data(), module_off.size()*sizeof(u32))) return false;
+        if(H.module_blob_bytes && !W(module_blob.data(), module_blob.size())) return false;
         std::fclose(f);
 
         if (debug) std::fprintf(stderr,"[SAVE] safe nodes=%u, edges=%u -> %s\n", M, H.n_edges, out_path.c_str());
@@ -850,18 +883,59 @@ struct Graph {
     std::vector<u32> row_ptr, col_idx, name_off;
     std::string blob;
     std::unordered_map<std::string,u32> name2id;
+    std::vector<u32> module_off;
+    std::string module_blob;
+    std::vector<std::string> module_names;
 
     bool load(const std::string& path){
         std::FILE* f=std::fopen(path.c_str(),"rb");
         if(!f){ std::perror("fopen"); return false; }
         auto R=[&](void* p,size_t n){ return std::fread(p,1,n,f)==n; };
 
-        if(!R(&H,sizeof(H))){ std::cerr<<"bad header\n"; std::fclose(f); return false; }
-        if(H.magic!=0x3147524b || H.version!=1){ std::cerr<<"bad magic/version\n"; std::fclose(f); return false; }
+        FileHeaderV1 Hv1{};
+        if(!R(&Hv1,sizeof(Hv1))){ std::cerr<<"bad header\n"; std::fclose(f); return false; }
+        if(Hv1.magic!=0x3147524b){ std::cerr<<"bad magic\n"; std::fclose(f); return false; }
+        H.magic = Hv1.magic;
+        H.version = Hv1.version;
+        H.n_nodes = Hv1.n_nodes;
+        H.n_edges = Hv1.n_edges;
+        H.name_blob_bytes = Hv1.name_blob_bytes;
+        H.arch = Hv1.arch;
+        H.is_runtime_address = Hv1.is_runtime_address;
+        H.reserved1 = Hv1.reserved1;
+        if (Hv1.version >= 2){
+            u32 extra[2]{0,0};
+            if(!R(extra, sizeof(extra))){ std::cerr<<"bad header (v2)\n"; std::fclose(f); return false; }
+            H.n_modules = extra[0];
+            H.module_blob_bytes = extra[1];
+        } else {
+            H.n_modules = 1;
+            H.module_blob_bytes = 0;
+        }
+        if(H.version!=1 && H.version!=2){
+            std::cerr<<"unsupported version\n"; std::fclose(f); return false;
+        }
 
-        nodes.resize(H.n_nodes);
-        if(H.n_nodes && !R(nodes.data(), nodes.size()*sizeof(Node))){
-            std::cerr<<"bad nodes\n"; std::fclose(f); return false;
+        if (H.version == 1){
+            struct NodeV1 { u64 addr; u32 size; u8 kind; u8 pad[3]; };
+            std::vector<NodeV1> nodes_v1;
+            nodes_v1.resize(H.n_nodes);
+            if(H.n_nodes && !R(nodes_v1.data(), nodes_v1.size()*sizeof(NodeV1))){
+                std::cerr<<"bad nodes\n"; std::fclose(f); return false;
+            }
+            nodes.resize(H.n_nodes);
+            for (u32 i=0;i<H.n_nodes;++i){
+                nodes[i].addr = nodes_v1[i].addr;
+                nodes[i].size = nodes_v1[i].size;
+                nodes[i].kind = nodes_v1[i].kind;
+                nodes[i].module = 0;
+                nodes[i].pad = 0;
+            }
+        } else {
+            nodes.resize(H.n_nodes);
+            if(H.n_nodes && !R(nodes.data(), nodes.size()*sizeof(Node))){
+                std::cerr<<"bad nodes\n"; std::fclose(f); return false;
+            }
         }
         row_ptr.resize(H.n_nodes+1);
         if((H.n_nodes+1)&&!R(row_ptr.data(), row_ptr.size()*sizeof(u32))){
@@ -878,6 +952,33 @@ struct Graph {
         blob.resize(H.name_blob_bytes);
         if(H.name_blob_bytes && !R(blob.data(), blob.size())){
             std::cerr<<"bad blob\n"; std::fclose(f); return false;
+        }
+
+        if (H.version >= 2){
+            module_off.resize(H.n_modules);
+            if(H.n_modules && !R(module_off.data(), module_off.size()*sizeof(u32))){
+                std::cerr<<"bad module_off\n"; std::fclose(f); return false;
+            }
+            module_blob.resize(H.module_blob_bytes);
+            if(H.module_blob_bytes && !R(module_blob.data(), module_blob.size())){
+                std::cerr<<"bad module_blob\n"; std::fclose(f); return false;
+            }
+            module_names.clear();
+            module_names.reserve(H.n_modules);
+            for (u32 i=0;i<H.n_modules;++i){
+                if (module_off[i] >= module_blob.size()){
+                    std::cerr<<"bad module offset\n"; std::fclose(f); return false;
+                }
+                const char* s = module_blob.data() + module_off[i];
+                module_names.emplace_back(s);
+            }
+        } else {
+            module_names = {"kernel"};
+            module_off = {0};
+            module_blob = "kernel\0";
+        }
+        if (module_names.empty()){
+            module_names.push_back("kernel");
         }
         std::fclose(f);
 
@@ -914,11 +1015,16 @@ struct Graph {
         for (u32 i = 0; i < N; ++i) {
             if (!seen[i]) continue;
             const char* nm = blob.data() + name_off[i];
-            std::printf("%s\t0x%llx\t%u\t%u\n",
+            const char* mod = "kernel";
+            if (!module_names.empty() && nodes[i].module < module_names.size()){
+                mod = module_names[nodes[i].module].c_str();
+            }
+            std::printf("%s\t0x%llx\t%u\t%u\t%s\n",
                         nm,
                         (unsigned long long)nodes[i].addr,
                         nodes[i].size,
-                        (unsigned)nodes[i].kind);
+                        (unsigned)nodes[i].kind,
+                        mod);
         }
     }
     

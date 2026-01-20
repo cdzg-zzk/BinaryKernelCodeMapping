@@ -1,5 +1,14 @@
 # Manual ELF Builder Technical Report
 
+## Latest Architecture (Recursive, Module-Aware, Shim-Aware)
+
+- **Inputs**: root `symbols.txt` (names only, one module), `out.krg` v2 (addresses/sizes/kinds + module ids), optional `shim.txt` (user-space replacements mapped to `libshim.so`).
+- **Outputs**: One `.so` per module in the dependency closure (root + transitive deps), named `lib<module>.so` (kernel -> `libkernel.so`, shim is external); aggregated `resolved_symbol_addresses.txt` (symbol, addr, size, module, role); `module_deps.txt` (module-level edges).
+- **Dependency resolution**: `resolve_requested_symbols` uses krg module ids plus `shim.txt` overrides to tag symbols; exports come from root list, intra-module symbols are defined/internal, cross-module symbols become imports with DT_NEEDED for each distinct module.
+- **Recursive build**: A queue drives multi-module emission; already-built modules are skipped; shim is treated as an external dependency and not auto-built.
+- **No-GOT optimization**: modules with zero imports drop `.got` and DT_PLTGOT.
+- **Sparse layout**: Region-based `.text*`/`.rodata*` with per-region PT_LOAD preserved.
+
 ## Background
 
 We started with `build_so.py`, a handcrafted ELF64 shared-object generator used to turn kernel
@@ -100,12 +109,17 @@ addresses remain exactly where callers expect them.
 3. **Deterministic exports** – The exported symbol set and ordering are fully defined by the input
    name list, simplifying reproducibility in papers and tooling.
 4. **Pure Python workflow** – The entire build pipeline works without recompiling `krg.cpp` or
-   relying on capstone/ELFIO, which keeps the environment lightweight and reproducible.
+  relying on capstone/ELFIO, which keeps the environment lightweight and reproducible.
 
 This architecture allowed us to iteratively solve each challenge: first by teaching the Python
 script to query `out.krg`, then by separating exports from dependencies, and finally by developing a
 region-based layout engine that faithfully reproduces the kernel’s sparse address space without
 wasting space or breaking compatibility.
+
+## Current Build Flow (CLI)
+- Root build: `python3 build_PIC_so.py --symbols symbols.txt --krg ../kernel_cgd/src/out.krg --shim-list shim.txt`
+- Produces: `lib<root>.so` + any dependent `lib<mod>.so` (excluding shim), `module_deps.txt`, `resolved_symbol_addresses.txt`.
+- External deps: `libshim.so` must be provided separately (compile `shim.c` with `gcc -shared -fPIC shim.c -o libshim.so`).
 
 
 
