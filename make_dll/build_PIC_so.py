@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """
-Position-independent shared object builder with explicit GOT/REL support.
+Sparse ELF64 shared-object builder for kernel code mapping.
 
-Workflow:
-  - Read root symbols from symbols.txt (all must come from the same module/kernel)
-  - Resolve them (and their closures) via out.krg, optionally dumping resolved_symbol_addresses.txt
-  - Emit a sparse .so named after the owning module: kernel -> libkernel.so, module `foo` -> libfoo.so
-  - Dependencies (DT_NEEDED) are other modules seen in the closure; self is omitted
+High-level idea:
+  - Use `out.krg` to resolve a closure of kernel/module symbols from `symbols.txt`.
+  - Emit a sparse ET_DYN `.so` whose `.text*`/`.rodata*` are *logical* ranges (holes on disk),
+    so later the page cache can be hijacked to back them with kernel/module physical pages.
 
-No export-map is required; krg supplies addresses/sizes. GOT/RELA remain empty when no unresolved cross-module imports exist.
-
-Usage:
-  python3 build_PIC_so.py --symbols symbols.txt --krg ../kernel_cgd/src/out.krg
+Pseudo-GOT mode (for LKMs that cannot use -fPIC):
+  - Provide `--ko <module.ko>` to extract the module's core `.data` bytes and relocations that
+    initialize a manually-built "pseudo GOT" struct (function pointers stored in `.data`).
+  - Convert module `.rela.data` entries into `.so` `.rela.dyn` so `ld.so` can fill the table.
+  - Only symbols listed in `shim.txt` are treated as imports (DT_NEEDED: `libshim.so`).
+    All other symbols are included in this `.so` (no `libkernel.so` dependency).
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ import sys
 import struct
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Sequence, Set
+from typing import Dict, List, Sequence, Set, Tuple
 
 # -----------------------------------------------------------------------------
 # ELF constants
@@ -57,17 +58,18 @@ SHF_ALLOC = 0x2
 SHF_EXECINSTR = 0x4
 
 SHN_UNDEF = 0
+SHN_ABS = 0xFFF1
 
 STB_GLOBAL = 1
 STT_NOTYPE = 0
 STT_OBJECT = 1
 STT_FUNC = 2
 
-R_X86_64_GLOB_DAT = 6
+R_X86_64_64 = 1
+R_X86_64_RELATIVE = 8
 
 DT_NULL = 0
 DT_NEEDED = 1
-DT_PLTGOT = 3
 DT_STRTAB = 5
 DT_SYMTAB = 6
 DT_RELA = 7
@@ -86,8 +88,6 @@ TEXT_BASE_VADDR = 0x1000
 TEXT_BASE_OFFSET = 0x1000
 DEFAULT_EXPORT_STUB_SIZE = 0x10
 
-LIB_KERNEL = "libkernel.so"
-LIB_SELF = "libA.so"
 LIB_SHIM = "libshim.so"
 
 # -----------------------------------------------------------------------------
@@ -301,7 +301,7 @@ class KrgGraph:
             )
             self.name_to_id[name] = idx
 
-    def closure(self, symbol_name: str) -> List[KrgResolvedSymbol]:
+    def closure(self, symbol_name: str, stop_names: Set[str] | None = None) -> List[KrgResolvedSymbol]:
         try:
             root = self.name_to_id[symbol_name]
         except KeyError as exc:
@@ -311,6 +311,8 @@ class KrgGraph:
         seen[root] = 1
         while stack:
             node = stack.pop()
+            if stop_names and self.nodes[node].name in stop_names:
+                continue
             row_start = self.row_ptr[node]
             row_end = self.row_ptr[node + 1]
             for edge_idx in range(row_start, row_end):
@@ -325,6 +327,340 @@ class KrgGraph:
         if idx is None:
             return None
         return self.nodes[idx]
+
+
+# -----------------------------------------------------------------------------
+# ELF64 relocatable (.ko) reader (pseudo-GOT extraction)
+# -----------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class KoSection:
+    index: int
+    name: str
+    sh_type: int
+    sh_flags: int
+    sh_offset: int
+    sh_size: int
+    sh_link: int
+    sh_info: int
+    sh_addralign: int
+    sh_entsize: int
+
+    @property
+    def is_alloc(self) -> bool:
+        return bool(self.sh_flags & SHF_ALLOC)
+
+    @property
+    def is_write(self) -> bool:
+        return bool(self.sh_flags & SHF_WRITE)
+
+    @property
+    def is_exec(self) -> bool:
+        return bool(self.sh_flags & SHF_EXECINSTR)
+
+
+@dataclass(frozen=True)
+class KoSymbol:
+    name: str
+    st_info: int
+    st_other: int
+    st_shndx: int
+    st_value: int
+    st_size: int
+
+    @property
+    def bind(self) -> int:
+        return self.st_info >> 4
+
+    @property
+    def typ(self) -> int:
+        return self.st_info & 0xF
+
+    @property
+    def is_undef(self) -> bool:
+        return self.st_shndx == SHN_UNDEF
+
+
+@dataclass(frozen=True)
+class KoDataReloc:
+    offset: int  # offset within core data image
+    sym_idx: int
+    symbol_name: str
+    sym_shndx: int
+    sym_value: int
+    addend: int
+    r_type: int
+    is_undef: bool
+
+
+@dataclass(frozen=True)
+class KoCoreLayout:
+    section_offsets: Dict[int, int]  # core alloc section index -> module offset
+    text_start: int
+    text_end: int
+    ro_start: int
+    ro_end: int
+    data_start: int
+    data_end: int
+    ro_image: bytes
+    data_image: bytes
+    data_relocs: List[KoDataReloc]
+
+    @property
+    def text_size(self) -> int:
+        return self.text_end - self.text_start
+
+    @property
+    def ro_size(self) -> int:
+        return self.ro_end - self.ro_start
+
+    @property
+    def data_size(self) -> int:
+        return self.data_end - self.data_start
+
+
+class KoFile:
+    _EHDR = struct.Struct("<16sHHIQQQIHHHHHH")
+    _SHDR = struct.Struct("<IIQQQQIIQQ")
+    _SYMENT = struct.Struct("<IBBHQQ")
+    _RELA = struct.Struct("<QQq")
+
+    def __init__(self, path: Path) -> None:
+        self.path = path
+        self._blob = memoryview(path.read_bytes())
+        self.sections: List[KoSection] = []
+        self._sections_by_name: Dict[str, KoSection] = {}
+        self.symbols: List[KoSymbol] = []
+        self._sym_by_name: Dict[str, int] = {}
+        self._load()
+
+    def _load(self) -> None:
+        blob = self._blob
+        if len(blob) < self._EHDR.size:
+            raise ValueError(f"{self.path}: file too small for ELF header")
+        (e_ident, e_type, e_machine, _e_version, _e_entry, _e_phoff, e_shoff, _e_flags,
+         _e_ehsize, _e_phentsize, _e_phnum, e_shentsize, e_shnum, e_shstrndx) = self._EHDR.unpack_from(blob, 0)
+        if e_ident[0:4] != b"\x7fELF" or e_ident[4] != ELFCLASS64:
+            raise ValueError(f"{self.path}: not an ELF64 file")
+        if e_type != 1:
+            raise ValueError(f"{self.path}: expected ET_REL (.ko), got e_type={e_type}")
+        if e_machine != EM_X86_64:
+            raise ValueError(f"{self.path}: expected EM_X86_64, got e_machine={e_machine}")
+        if e_shentsize != self._SHDR.size:
+            raise ValueError(f"{self.path}: unexpected section header size {e_shentsize}")
+        if e_shoff == 0 or e_shnum == 0:
+            raise ValueError(f"{self.path}: missing section header table")
+
+        raw_shdrs: List[tuple[int, int, int, int, int, int, int, int, int, int]] = []
+        for idx in range(e_shnum):
+            off = e_shoff + idx * e_shentsize
+            if off + self._SHDR.size > len(blob):
+                raise ValueError(f"{self.path}: truncated section header table")
+            raw_shdrs.append(self._SHDR.unpack_from(blob, off))
+
+        if e_shstrndx >= e_shnum:
+            raise ValueError(f"{self.path}: invalid e_shstrndx {e_shstrndx}")
+        shstr = raw_shdrs[e_shstrndx]
+        shstr_off = shstr[4]
+        shstr_size = shstr[5]
+        if shstr_off + shstr_size > len(blob):
+            raise ValueError(f"{self.path}: truncated shstrtab")
+        shstr_blob = bytes(blob[shstr_off : shstr_off + shstr_size])
+
+        self.sections.clear()
+        self._sections_by_name.clear()
+        for idx, sh in enumerate(raw_shdrs):
+            sh_name, sh_type, _sh_flags, _sh_addr, sh_offset, sh_size, sh_link, sh_info, sh_addralign, sh_entsize = sh
+            name = ""
+            if sh_name < len(shstr_blob):
+                end = shstr_blob.find(b"\x00", sh_name)
+                if end != -1:
+                    name = shstr_blob[sh_name:end].decode("utf-8", errors="ignore")
+            sec = KoSection(
+                index=idx,
+                name=name,
+                sh_type=sh_type,
+                sh_flags=_sh_flags,
+                sh_offset=sh_offset,
+                sh_size=sh_size,
+                sh_link=sh_link,
+                sh_info=sh_info,
+                sh_addralign=sh_addralign,
+                sh_entsize=sh_entsize,
+            )
+            self.sections.append(sec)
+            if name and name not in self._sections_by_name:
+                self._sections_by_name[name] = sec
+
+        symtab = self._sections_by_name.get(".symtab")
+        if symtab is None or symtab.sh_entsize != self._SYMENT.size:
+            raise ValueError(f"{self.path}: missing or unsupported .symtab")
+        if symtab.sh_link >= len(self.sections):
+            raise ValueError(f"{self.path}: invalid .symtab sh_link {symtab.sh_link}")
+        strtab = self.sections[symtab.sh_link]
+        if strtab.sh_offset + strtab.sh_size > len(blob):
+            raise ValueError(f"{self.path}: truncated .strtab")
+        str_blob = bytes(blob[strtab.sh_offset : strtab.sh_offset + strtab.sh_size])
+
+        if symtab.sh_offset + symtab.sh_size > len(blob):
+            raise ValueError(f"{self.path}: truncated .symtab")
+        self.symbols.clear()
+        self._sym_by_name.clear()
+        for entry_off in range(symtab.sh_offset, symtab.sh_offset + symtab.sh_size, symtab.sh_entsize):
+            st_name, st_info, st_other, st_shndx, st_value, st_size = self._SYMENT.unpack_from(
+                blob, entry_off
+            )
+            name = ""
+            if st_name < len(str_blob):
+                end = str_blob.find(b"\x00", st_name)
+                if end != -1:
+                    name = str_blob[st_name:end].decode("utf-8", errors="ignore")
+            sym = KoSymbol(
+                name=name,
+                st_info=st_info,
+                st_other=st_other,
+                st_shndx=st_shndx,
+                st_value=st_value,
+                st_size=st_size,
+            )
+            idx = len(self.symbols)
+            self.symbols.append(sym)
+            if name and name not in self._sym_by_name:
+                self._sym_by_name[name] = idx
+
+    def find_symbol(self, name: str) -> tuple[int, KoSymbol] | None:
+        idx = self._sym_by_name.get(name)
+        if idx is None:
+            return None
+        return idx, self.symbols[idx]
+
+    @staticmethod
+    def _is_core_section(name: str) -> bool:
+        if not name:
+            return False
+        if name.startswith(".init") or name.startswith(".exit"):
+            return False
+        return True
+
+    def compute_core_layout(self) -> KoCoreLayout:
+        core_alloc = [s for s in self.sections if s.is_alloc and self._is_core_section(s.name)]
+        text_secs = [s for s in core_alloc if s.is_exec]
+        ro_secs = [s for s in core_alloc if (not s.is_exec) and (not s.is_write)]
+        data_secs = [s for s in core_alloc if s.is_write]
+
+        section_offsets: Dict[int, int] = {}
+        cursor = 0
+        text_start = cursor
+        for sec in text_secs:
+            cursor = align(cursor, max(1, sec.sh_addralign))
+            section_offsets[sec.index] = cursor
+            cursor += sec.sh_size
+        cursor = align(cursor, PAGE_SIZE)
+        text_end = cursor
+
+        ro_start = cursor
+        for sec in ro_secs:
+            cursor = align(cursor, max(1, sec.sh_addralign))
+            section_offsets[sec.index] = cursor
+            cursor += sec.sh_size
+        cursor = align(cursor, PAGE_SIZE)
+        ro_end = cursor
+
+        data_start = cursor
+        for sec in data_secs:
+            cursor = align(cursor, max(1, sec.sh_addralign))
+            section_offsets[sec.index] = cursor
+            cursor += sec.sh_size
+        cursor = align(cursor, PAGE_SIZE)
+        data_end = cursor
+
+        # Build rodata image (logical; contents kept for potential relocation application)
+        ro_size = ro_end - ro_start
+        ro_image = bytearray(ro_size)
+        for sec in ro_secs:
+            if sec.sh_size == 0:
+                continue
+            dest_off = section_offsets[sec.index] - ro_start
+            if sec.sh_type == SHT_NOBITS:
+                continue
+            end = sec.sh_offset + sec.sh_size
+            if end > len(self._blob):
+                raise ValueError(f"{self.path}: truncated section {sec.name}")
+            ro_image[dest_off : dest_off + sec.sh_size] = bytes(
+                self._blob[sec.sh_offset : end]
+            )
+
+        data_size = data_end - data_start
+        data_image = bytearray(data_size)
+        for sec in data_secs:
+            if sec.sh_size == 0:
+                continue
+            dest_off = section_offsets[sec.index] - data_start
+            if sec.sh_type == SHT_NOBITS:
+                continue
+            end = sec.sh_offset + sec.sh_size
+            if end > len(self._blob):
+                raise ValueError(f"{self.path}: truncated section {sec.name}")
+            data_image[dest_off : dest_off + sec.sh_size] = bytes(
+                self._blob[sec.sh_offset : end]
+            )
+
+        data_sec_indices = {sec.index for sec in data_secs}
+        data_relocs: List[KoDataReloc] = []
+        for sec in self.sections:
+            if sec.sh_type != SHT_RELA or not sec.name.startswith(".rela."):
+                continue
+            if sec.sh_info not in data_sec_indices:
+                continue
+            if sec.sh_entsize != self._RELA.size:
+                raise ValueError(f"{self.path}: unexpected rela entsize in {sec.name}")
+            target_base = section_offsets.get(sec.sh_info)
+            if target_base is None:
+                continue
+            base_off = target_base - data_start
+            end = sec.sh_offset + sec.sh_size
+            if end > len(self._blob):
+                raise ValueError(f"{self.path}: truncated relocation section {sec.name}")
+            for entry_off in range(sec.sh_offset, end, sec.sh_entsize):
+                r_offset, r_info, r_addend = self._RELA.unpack_from(self._blob, entry_off)
+                sym_idx = (r_info >> 32) & 0xFFFFFFFF
+                r_type = r_info & 0xFFFFFFFF
+                sym_name = ""
+                is_undef = False
+                sym_shndx = 0
+                sym_value = 0
+                if sym_idx < len(self.symbols):
+                    sym = self.symbols[sym_idx]
+                    sym_name = sym.name
+                    is_undef = sym.is_undef
+                    sym_shndx = sym.st_shndx
+                    sym_value = sym.st_value
+                data_relocs.append(
+                    KoDataReloc(
+                        offset=base_off + r_offset,
+                        sym_idx=sym_idx,
+                        symbol_name=sym_name,
+                        sym_shndx=sym_shndx,
+                        sym_value=sym_value,
+                        addend=r_addend,
+                        r_type=r_type,
+                        is_undef=is_undef,
+                    )
+                )
+
+        return KoCoreLayout(
+            section_offsets=section_offsets,
+            text_start=text_start,
+            text_end=text_end,
+            ro_start=ro_start,
+            ro_end=ro_end,
+            data_start=data_start,
+            data_end=data_end,
+            ro_image=bytes(ro_image),
+            data_image=bytes(data_image),
+            data_relocs=data_relocs,
+        )
 
 
 # -----------------------------------------------------------------------------
@@ -358,9 +694,9 @@ class ResolvedSymbol:
 
 
 def role_for_symbol(sym: ResolvedSymbol, owner_module: str) -> str:
-    if sym.module_name == owner_module:
-        return "export" if sym.exported else "internal"
-    return "import"
+    if not sym.defined:
+        return "import"
+    return "export" if sym.exported else "internal"
 
 
 def resolve_requested_symbols(
@@ -368,7 +704,9 @@ def resolve_requested_symbols(
 ) -> tuple[List[ResolvedSymbol], List[str], str, str, List[str]]:
     """
     Resolve requested symbols by walking the krg dependency graph.
-    Requested symbols become exports; symbols in the same module are defined, others are imports.
+    Requested symbols become exports. Only symbols listed in `shim.txt` are treated as imports
+    (DT_NEEDED: libshim.so). All other resolved symbols are defined in the output DSO, even if
+    they originate from other kernel modules.
 
     Returns:
         (resolved_symbols, needed_libraries, owner_module_name, owner_library_name)
@@ -386,8 +724,6 @@ def resolve_requested_symbols(
     owner_module: str | None = None
 
     def module_to_lib(module: str) -> str:
-        if module == "kernel":
-            return LIB_KERNEL
         if module == "shim":
             return LIB_SHIM
         return f"lib{module}.so"
@@ -425,12 +761,13 @@ def resolve_requested_symbols(
             module_name = module_for_entry(entry)
             lib_name = module_to_lib(module_name)
             is_export = entry.name in export_order
+            is_shim = module_name == "shim"
             is_owner_module = module_name == owner_module
             if sym is None:
                 sym = ResolvedSymbol(
                     name=entry.name,
-                    source=module_to_lib(owner_module or module_name) if is_owner_module else lib_name,
-                    defined=is_owner_module,
+                    source=module_to_lib(owner_module or module_name),
+                    defined=not is_shim,
                     exported=is_export,
                     st_type=expected_type,
                     size=entry.size,
@@ -452,9 +789,9 @@ def resolve_requested_symbols(
                     raise ValueError(
                         f"{entry.name}: inconsistent metadata between queries"
                     )
-            if not is_owner_module:
-                if lib_name not in needed_libs:
-                    needed_libs.append(lib_name)
+            if is_shim:
+                if LIB_SHIM not in needed_libs:
+                    needed_libs.append(LIB_SHIM)
                 if module_name not in dep_modules:
                     dep_modules.append(module_name)
         if name not in resolved:
@@ -467,8 +804,6 @@ def resolve_requested_symbols(
         )
     owner_module = owner_module or "kernel"
     owner_lib = module_to_lib(owner_module)
-    needed_libs = [lib for lib in needed_libs if lib != owner_lib]
-    dep_modules = [m for m in dep_modules if m != owner_module]
     return ordered, needed_libs, owner_module, owner_lib, dep_modules
 
 
@@ -550,12 +885,29 @@ class SectionDef:
         return bool(self.sh_flags & SHF_ALLOC)
 
 
+@dataclass(frozen=True)
+class DataRelocation:
+    offset: int  # byte offset within .data
+    symbol: ResolvedSymbol | None
+    addend: int = 0
+    r_type: int = R_X86_64_64
+
+
 class ManualElfBuilder:
     def __init__(
         self,
         symbols: List[ResolvedSymbol],
         needed_libraries: List[str],
         export_stub_size: int = DEFAULT_EXPORT_STUB_SIZE,
+        ro_bytes: bytes = b"",
+        data_bytes: bytes = b"",
+        data_relocations: List[DataRelocation] | None = None,
+        rw_base_vaddr: int | None = None,
+        extra_text_ranges: List[tuple[int, int]] | None = None,
+        extra_ro_ranges: List[tuple[int, int]] | None = None,
+        owner_module_name: str | None = None,
+        include_data: bool = True,
+        text_min_override: int | None = None,
     ) -> None:
         self.symbols = symbols
         self.defined_symbols = [sym for sym in symbols if sym.defined]
@@ -563,6 +915,15 @@ class ManualElfBuilder:
         self.imports = [sym for sym in symbols if sym.is_import]
         self.needed_libraries = needed_libraries
         self.export_stub_size = export_stub_size
+        self.ro_bytes = ro_bytes
+        self.data_bytes = data_bytes
+        self.data_relocations = data_relocations or []
+        self.rw_base_vaddr = rw_base_vaddr
+        self.extra_text_ranges = extra_text_ranges or []
+        self.extra_ro_ranges = extra_ro_ranges or []
+        self.owner_module_name = owner_module_name
+        self.include_data = include_data
+        self.text_min_override = text_min_override
         self.sections: Dict[str, SectionDef] = {}
         self.section_order: List[str] = []
         self.section_indices: Dict[str, int] = {}
@@ -570,7 +931,19 @@ class ManualElfBuilder:
         self.dynstr_offsets: Dict[str, int] = {}
         self.dynstr_needed_offsets: Dict[str, int] = {}
         self.strtab_offsets: Dict[str, int] = {}
-        self.dynamic_symbols: List[ResolvedSymbol] = list(self.symbols)
+        # Only exports and imports need to appear in .dynsym; keep order stable and unique.
+        reloc_syms: List[ResolvedSymbol] = [
+            reloc.symbol for reloc in (data_relocations or []) if reloc.symbol is not None
+        ]
+        dynsyms_ordered: List[ResolvedSymbol] = []
+        seen_ids = set()
+        for sym in self.exports + self.imports + reloc_syms:
+            sid = id(sym)
+            if sid in seen_ids:
+                continue
+            dynsyms_ordered.append(sym)
+            seen_ids.add(sid)
+        self.dynamic_symbols: List[ResolvedSymbol] = dynsyms_ordered
         self.gnu_nbuckets = max(3, len(self.dynamic_symbols)) if self.dynamic_symbols else 1
         self.gnu_bloom_size = max(1, (len(self.dynamic_symbols) + 63) // 64) if self.dynamic_symbols else 1
         self.gnu_bloom_shift = 6
@@ -597,7 +970,7 @@ class ManualElfBuilder:
         self._reorder_symbols_for_hash()
         self._build_content_sections()
         self._assign_offsets_and_addresses()
-        self.build_got_and_relocs()
+        self.build_relocations()
         self._finalize_dynamic_section()
         ph_entries = self._build_program_headers()
         with open(output_path, "wb") as f:
@@ -639,8 +1012,15 @@ class ManualElfBuilder:
     # ------------------------------------------------------------------
 
     def _prepare_symbol_virtual_addresses(self) -> None:
-        code_symbols = [sym for sym in self.defined_symbols if sym.st_type == STT_FUNC]
-        ro_symbols = [sym for sym in self.defined_symbols if sym.st_type == STT_OBJECT]
+        def keep(sym: ResolvedSymbol) -> bool:
+            if self.owner_module_name is None:
+                return True
+            return sym.module_name == self.owner_module_name
+
+        code_symbols = [sym for sym in self.defined_symbols if sym.st_type == STT_FUNC and keep(sym)]
+        # 粗分：对象符号里，名称以 .rodata+ 开头的当作 ro，其余当作 data
+        ro_symbols = [sym for sym in self.defined_symbols if sym.st_type == STT_OBJECT and keep(sym) and sym.name.startswith(".rodata+")]
+        data_symbols = [sym for sym in self.defined_symbols if sym.st_type == STT_OBJECT and keep(sym) and sym not in ro_symbols]
 
         cursor = TEXT_BASE_VADDR
         for sym in self.defined_symbols:
@@ -655,27 +1035,43 @@ class ManualElfBuilder:
             if self.defined_symbols
             else TEXT_BASE_VADDR
         )
-        if code_symbols:
-            self.text_min_page = align_down(min(sym.address for sym in code_symbols), PAGE_SIZE)
+        if self.text_min_override is not None:
+            self.text_min_page = align_down(self.text_min_override, PAGE_SIZE)
         else:
-            self.text_min_page = overall_min_page
-
+            candidate_text_min = None
+            if code_symbols:
+                candidate_text_min = min(sym.address for sym in code_symbols)
+            if self.extra_text_ranges:
+                extra_min = min(start for start, _ in self.extra_text_ranges)
+                candidate_text_min = extra_min if candidate_text_min is None else min(candidate_text_min, extra_min)
+            if candidate_text_min is not None:
+                self.text_min_page = align_down(candidate_text_min, PAGE_SIZE)
+            else:
+                self.text_min_page = overall_min_page
         for sym in self.defined_symbols:
             sym.virtual_address = TEXT_BASE_VADDR + (sym.address - self.text_min_page)
 
         self.region_by_name.clear()
-        self.text_regions = self._build_regions(code_symbols, ".text")
-        self.ro_regions = self._build_regions(ro_symbols, ".rodata")
+        self.text_regions = self._build_regions(code_symbols, ".text", self.extra_text_ranges)
+        self.ro_regions = self._build_regions(ro_symbols, ".rodata", self.extra_ro_ranges)
         for region in self.text_regions + self.ro_regions:
             self.region_by_name[region.name] = region
         self.text_section_names = [region.name for region in self.text_regions]
         self.ro_section_names = [region.name for region in self.ro_regions]
         self._assign_symbol_sections(code_symbols, self.text_regions)
         self._assign_symbol_sections(ro_symbols, self.ro_regions)
+        # All object symbols are placed in .data for now.
+        for sym in data_symbols:
+            sym.section_name = ".data"
 
-    def _build_regions(self, symbols: List[ResolvedSymbol], base_name: str) -> List[Region]:
+    def _build_regions(
+        self,
+        symbols: List[ResolvedSymbol],
+        base_name: str,
+        extra_ranges: List[tuple[int, int]] | None = None,
+    ) -> List[Region]:
         if not symbols:
-            return []
+            symbols = []
         intervals: List[tuple[int, int]] = []
         for sym in symbols:
             size = max(sym.size, 1)
@@ -684,6 +1080,14 @@ class ManualElfBuilder:
             if end == start:
                 end += PAGE_SIZE
             intervals.append((start, end))
+        for start, end in (extra_ranges or []):
+            s = align_down(start, PAGE_SIZE)
+            e = align(end, PAGE_SIZE)
+            if e == s:
+                e += PAGE_SIZE
+            intervals.append((s, e))
+        if not intervals:
+            return []
         intervals.sort()
         merged: List[List[int]] = []
         for start, end in intervals:
@@ -724,19 +1128,13 @@ class ManualElfBuilder:
     def _derive_section_order(self) -> None:
         order: List[str] = []
         order.extend(self.text_section_names)
-        order.extend(
-            [
-                ".dynstr",
-                ".dynsym",
-                ".gnu.hash",
-                ".rela.dyn",
-                ".dynamic",
-                ".got",
-                ".strtab",
-                ".symtab",
-                ".shstrtab",
-            ]
-        )
+        order.extend(self.ro_section_names)
+        if self.include_data:
+            order.append(".data")
+        order.extend([".dynstr", ".dynsym", ".gnu.hash"])
+        if self.include_data and self.data_relocations:
+            order.append(".rela.dyn")
+        order.extend([".dynamic", ".strtab", ".symtab", ".shstrtab"])
         self.section_order = order
         names_with_null = [".null"] + order
         self.section_indices = {name: idx for idx, name in enumerate(names_with_null)}
@@ -772,13 +1170,21 @@ class ManualElfBuilder:
                 sh_type=SHT_PROGBITS,
                 sh_flags=SHF_ALLOC,
                 align=PAGE_SIZE,
-                data=b"",
+                data=b"",  # keep logical placeholder; do not emit actual bytes
                 size=region.size,
+            )
+        if self.include_data:
+            self.sections[".data"] = SectionDef(
+                name=".data",
+                sh_type=SHT_PROGBITS,
+                sh_flags=SHF_ALLOC | SHF_WRITE,
+                align=8,
+                data=self.data_bytes,
+                size=len(self.data_bytes),
             )
         dynstr = self._build_dynstr()
         dynsym = self._build_dynsym()
         gnu_hash_data = self._build_gnu_hash()
-        rela_size = len(self.imports) * 24
         dynamic_guess_entries = len(self.needed_libraries) + 10
         self.sections[".dynstr"] = SectionDef(
             name=".dynstr",
@@ -805,17 +1211,19 @@ class ManualElfBuilder:
             data=gnu_hash_data,
             link=self.section_indices[".dynsym"],
         )
-        self.sections[".rela.dyn"] = SectionDef(
-            name=".rela.dyn",
-            sh_type=SHT_RELA,
-            sh_flags=SHF_ALLOC,
-            align=8,
-            data=bytes(rela_size),
-            size=rela_size,
-            link=self.section_indices[".dynsym"],
-            info=0,
-            entsize=24,
-        )
+        if ".rela.dyn" in self.section_order:
+            rela_size = len(self.data_relocations) * 24
+            self.sections[".rela.dyn"] = SectionDef(
+                name=".rela.dyn",
+                sh_type=SHT_RELA,
+                sh_flags=SHF_ALLOC,
+                align=8,
+                data=bytes(rela_size),
+                size=rela_size,
+                link=self.section_indices[".dynsym"],
+                info=0,
+                entsize=24,
+            )
         self.sections[".dynamic"] = SectionDef(
             name=".dynamic",
             sh_type=SHT_DYNAMIC,
@@ -824,14 +1232,6 @@ class ManualElfBuilder:
             data=bytes(dynamic_guess_entries * 16),
             entsize=16,
             link=self.section_indices[".dynstr"],
-        )
-        self.sections[".got"] = SectionDef(
-            name=".got",
-            sh_type=SHT_PROGBITS,
-            sh_flags=SHF_ALLOC | SHF_WRITE,
-            align=8,
-            data=bytes(len(self.imports) * 8),
-            size=len(self.imports) * 8,
         )
         strtab = self._build_strtab()
         symtab = self._build_symtab()
@@ -881,13 +1281,16 @@ class ManualElfBuilder:
         for idx, sym in enumerate(self.dynamic_symbols, start=1):
             st_name = self.dynstr_offsets[sym.name]
             st_info = (STB_GLOBAL << 4) | sym.st_type
-            st_shndx = self.section_indices.get(sym.section_name, SHN_UNDEF)
+            if sym.section_name is None:
+                st_shndx = SHN_ABS if sym.defined else SHN_UNDEF
+            else:
+                st_shndx = self.section_indices.get(sym.section_name, SHN_UNDEF)
             entries.append(
                 self._pack_sym_entry(
                     st_name=st_name,
                     st_type=st_info,
                     st_shndx=st_shndx,
-                    st_value=sym.virtual_address if sym.defined else 0,
+                    st_value=(sym.virtual_address if sym.defined else 0) & 0xFFFFFFFFFFFFFFFF,
                     st_size=sym.size,
                 )
             )
@@ -952,13 +1355,16 @@ class ManualElfBuilder:
         for sym in self.symbols:
             st_name = self.strtab_offsets[sym.name]
             st_info = (STB_GLOBAL << 4) | sym.st_type
-            st_shndx = self.section_indices.get(sym.section_name, SHN_UNDEF)
+            if sym.section_name is None:
+                st_shndx = SHN_ABS if sym.defined else SHN_UNDEF
+            else:
+                st_shndx = self.section_indices.get(sym.section_name, SHN_UNDEF)
             entries.append(
                 self._pack_sym_entry(
                     st_name=st_name,
                     st_type=st_info,
                     st_shndx=st_shndx,
-                    st_value=sym.virtual_address if sym.defined else 0,
+                    st_value=(sym.virtual_address if sym.defined else 0) & 0xFFFFFFFFFFFFFFFF,
                     st_size=sym.size,
                 )
             )
@@ -1011,7 +1417,10 @@ class ManualElfBuilder:
         ]
 
         cursor_offset = align(current_offset, PAGE_SIZE)
-        cursor_addr = align(last_alloc_addr, PAGE_SIZE)
+        cursor_addr_default = align(last_alloc_addr, PAGE_SIZE)
+        cursor_addr = cursor_addr_default
+        if self.rw_base_vaddr is not None:
+            cursor_addr = align(self.rw_base_vaddr, PAGE_SIZE)
 
         rw_start_offset: int | None = None
         rw_start_addr: int | None = None
@@ -1053,28 +1462,28 @@ class ManualElfBuilder:
     # GOT/RELA and dynamic finalization
     # ------------------------------------------------------------------
 
-    def build_got_and_relocs(self) -> None:
-        got_sec = self.sections[".got"]
-        rela_sec = self.sections[".rela.dyn"]
-        if not self.imports:
-            rela_sec.data = b""
-            rela_sec.size = 0
-            got_sec.data = b""
-            got_sec.size = 0
-            got_sec.offset = 0
-            got_sec.addr = 0
+    def build_relocations(self) -> None:
+        if not self.data_relocations:
             return
+        rela_sec = self.sections.get(".rela.dyn")
+        if rela_sec is None:
+            raise ValueError("internal error: data relocations present but .rela.dyn missing")
+        data_sec = self.sections[".data"]
+        if data_sec.addr is None:
+            raise ValueError(".data has no assigned address")
         rela_entries: List[bytes] = []
-        for idx, sym in enumerate(self.imports):
-            sym.got_offset = idx * 8
-            r_offset = (got_sec.addr or 0) + sym.got_offset
-            r_info = (sym.dynsym_index << 32) | R_X86_64_GLOB_DAT
-            rela_entries.append(struct.pack("<QQq", r_offset, r_info, 0))
+        for reloc in self.data_relocations:
+            r_offset = data_sec.addr + reloc.offset
+            if reloc.r_type == R_X86_64_RELATIVE:
+                sym_index = 0
+            else:
+                if reloc.symbol is None:
+                    raise ValueError(f"relocation at .data+0x{reloc.offset:x} missing symbol")
+                sym_index = reloc.symbol.dynsym_index
+            r_info = (sym_index << 32) | reloc.r_type
+            rela_entries.append(struct.pack("<QQq", r_offset, r_info, reloc.addend))
         rela_sec.data = b"".join(rela_entries)
         rela_sec.size = len(rela_sec.data)
-        if not got_sec.data:
-            got_sec.data = bytes(got_sec.content_size)
-        got_sec.size = got_sec.content_size
 
     def _finalize_dynamic_section(self) -> None:
         dynamic = self.sections[".dynamic"]
@@ -1086,20 +1495,24 @@ class ManualElfBuilder:
                 (DT_GNU_HASH, self.sections[".gnu.hash"].addr or 0),
                 (DT_STRTAB, self.sections[".dynstr"].addr or 0),
                 (DT_SYMTAB, self.sections[".dynsym"].addr or 0),
-                (DT_RELA, self.sections[".rela.dyn"].addr or 0),
-                (DT_RELASZ, self.sections[".rela.dyn"].content_size),
-                (DT_RELAENT, 24),
+            ]
+        )
+        rela_sec = self.sections.get(".rela.dyn")
+        if rela_sec is not None and rela_sec.content_size:
+            entries.extend(
+                [
+                    (DT_RELA, rela_sec.addr or 0),
+                    (DT_RELASZ, rela_sec.content_size),
+                    (DT_RELAENT, 24),
+                ]
+            )
+        entries.extend(
+            [
                 (DT_STRSZ, self.sections[".dynstr"].content_size),
                 (DT_SYMENT, 24),
                 (DT_NULL, 0),
             ]
         )
-        got_sec = self.sections[".got"]
-        if got_sec.content_size:
-            entries.insert(
-                -1,
-                (DT_PLTGOT, got_sec.addr or 0),
-            )
         payload = bytearray()
         for tag, value in entries:
             payload.extend(struct.pack("<QQ", tag, value))
@@ -1112,37 +1525,45 @@ class ManualElfBuilder:
         entries: List[bytes] = []
         for name in self.text_section_names:
             section = self.sections[name]
+            # Keep a logical size so the loader maps a page; data may still be sparse.
+            file_size = section.content_size
             entries.append(
                 self._make_ph_load(
                     offset=section.offset or 0,
                     addr=section.addr or 0,
-                    size=section.content_size,
+                    file_size=file_size,
+                    mem_size=section.content_size,
                     flags=PF_R | PF_X,
                 )
             )
         for name in self.ro_section_names:
             section = self.sections[name]
+            file_size = section.content_size
             entries.append(
                 self._make_ph_load(
                     offset=section.offset or 0,
                     addr=section.addr or 0,
-                    size=section.content_size,
+                    file_size=file_size,
+                    mem_size=section.content_size,
                     flags=PF_R,
                 )
             )
         if self.rw_segment_file_end > self.rw_segment_start_offset:
+            file_size = max(0, self.rw_segment_file_end - self.rw_segment_start_offset)
+            mem_size = self.rw_segment_mem_end - self.rw_segment_start_addr
             entries.append(
                 self._make_ph_load(
                     offset=self.rw_segment_start_offset,
                     addr=self.rw_segment_start_addr,
-                    size=self.rw_segment_mem_end - self.rw_segment_start_addr,
+                    file_size=file_size,
+                    mem_size=mem_size,
                     flags=PF_R | PF_W,
                 )
             )
         entries.append(self._make_ph_dynamic())
         return entries
 
-    def _make_ph_load(self, offset: int, addr: int, size: int, flags: int) -> bytes:
+    def _make_ph_load(self, offset: int, addr: int, file_size: int, mem_size: int, flags: int) -> bytes:
         return struct.pack(
             "<IIQQQQQQ",
             PT_LOAD,
@@ -1150,8 +1571,8 @@ class ManualElfBuilder:
             offset,
             addr,
             addr,
-            size,
-            size,
+            file_size,
+            mem_size,
             PAGE_SIZE,
         )
 
@@ -1238,51 +1659,201 @@ def build_shared_object(
     export_stub_size: int = DEFAULT_EXPORT_STUB_SIZE,
     symbol_dump_path: Path | None = None,
     shim_list_path: Path | None = None,
+    ko_path: Path | None = None,
 ) -> None:
     graph = KrgGraph(krg_path)
     shim_symbols = load_shim_symbols(shim_list_path)
-    pending: List[tuple[str | None, List[str]]] = [(None, parse_symbol_requests(symbols_path))]
-    built: Set[str] = set()
-    dep_lines: List[str] = []
-    all_symbol_groups: List[tuple[str, List[ResolvedSymbol]]] = []
+    requested = parse_symbol_requests(symbols_path)
 
-    while pending:
-        _, sym_names = pending.pop(0)
-        resolved, needed_libs, owner_module, owner_lib, dep_modules = resolve_requested_symbols(
-            sym_names, graph, shim_symbols
-        )
-        if owner_module in built:
-            continue
-        built.add(owner_module)
-        out_so = Path(owner_lib)
-        all_symbol_groups.append((owner_module, resolved))
-        dep_lines.extend(format_module_deps(owner_module, dep_modules, resolved))
-        builder = ManualElfBuilder(
-            symbols=resolved,
-            needed_libraries=needed_libs,
-            export_stub_size=export_stub_size,
-        )
-        builder.write(out_so)
-        for mod in dep_modules:
-            if mod in built:
-                continue
-            if any(item[0] == mod for item in pending):
-                continue
-            if mod == "shim":
-                continue
-            dep_syms = sorted({sym.name for sym in resolved if sym.module_name == mod})
-            if dep_syms:
-                pending.append((mod, dep_syms))
+    resolved, needed_libs, owner_module, owner_lib, dep_modules = resolve_requested_symbols(
+        requested, graph, shim_symbols
+    )
 
-    if dep_lines:
-        module_deps_path = symbols_path.parent / "module_deps.txt"
-        module_deps_path.write_text("".join(dep_lines))
-    if symbol_dump_path is not None and all_symbol_groups:
-        dump_symbol_addresses_all(all_symbol_groups, symbol_dump_path)
+    extra_text_ranges: List[tuple[int, int]] = []
+    extra_ro_ranges: List[tuple[int, int]] = []
+    data_bytes = b""
+    data_relocations: List[DataRelocation] = []
+    rw_base_vaddr: int | None = None
+
+    def compute_text_min_page(
+        symbols: Sequence[ResolvedSymbol], text_ranges: Sequence[tuple[int, int]]
+    ) -> int:
+        addrs: List[int] = [
+            sym.address
+            for sym in symbols
+            if sym.defined and sym.st_type == STT_FUNC and sym.address
+        ]
+        if text_ranges:
+            addrs.append(min(start for start, _ in text_ranges))
+        if not addrs:
+            addrs = [sym.address for sym in symbols if sym.defined and sym.address]
+        if not addrs:
+            return TEXT_BASE_VADDR
+        return align_down(min(addrs), PAGE_SIZE)
+
+    if ko_path is not None:
+        ko = KoFile(ko_path)
+        layout = ko.compute_core_layout()
+
+        def infer_module_core_base_kernel() -> int:
+            for name in requested:
+                found = ko.find_symbol(name)
+                if found is None:
+                    continue
+                _, ko_sym = found
+                if ko_sym.is_undef:
+                    continue
+                sec_off = layout.section_offsets.get(ko_sym.st_shndx)
+                if sec_off is None:
+                    continue
+                entry = graph.lookup(name)
+                if entry is None:
+                    continue
+                return entry.address - (sec_off + ko_sym.st_value)
+            raise ValueError(
+                f"{ko_path}: unable to anchor module layout to out.krg; no common symbol found"
+            )
+
+        module_core_base_kernel = infer_module_core_base_kernel()
+
+        text_kernel_start = module_core_base_kernel + layout.text_start
+        text_kernel_end = module_core_base_kernel + layout.text_end
+        if text_kernel_end > text_kernel_start:
+            extra_text_ranges.append((text_kernel_start, text_kernel_end))
+
+        ro_kernel_start = module_core_base_kernel + layout.ro_start
+        ro_kernel_end = module_core_base_kernel + layout.ro_end
+        if ro_kernel_end > ro_kernel_start:
+            extra_ro_ranges.append((ro_kernel_start, ro_kernel_end))
+
+        data_kernel_start = module_core_base_kernel + layout.data_start
+        data_bytes = layout.data_image
+        export_order = {name: idx for idx, name in enumerate(requested)}
+        by_name: Dict[str, ResolvedSymbol] = {sym.name: sym for sym in resolved}
+
+        def add_krg_closure(root_name: str) -> None:
+            try:
+                closure = graph.closure(root_name)
+            except KeyError as exc:
+                raise ValueError(
+                    f"{ko_path}: relocation references {root_name} but out.krg has no such symbol; add it or shim it"
+                ) from exc
+            for entry in closure:
+                module_name = "shim" if entry.name in shim_symbols else (entry.module_name or "kernel")
+                is_shim = module_name == "shim"
+                expected_type = STT_FUNC if entry.kind == 0 else STT_OBJECT
+                is_export = entry.name in export_order
+                sym = by_name.get(entry.name)
+                if sym is None:
+                    sym = ResolvedSymbol(
+                        name=entry.name,
+                        source=LIB_SHIM if is_shim else owner_lib,
+                        defined=not is_shim,
+                        exported=is_export,
+                        st_type=expected_type,
+                        size=entry.size,
+                        address=entry.address if not is_shim else 0,
+                        export_order=export_order.get(entry.name, len(resolved)),
+                        original_order=len(resolved),
+                        module_id=entry.module_id,
+                        module_name=module_name,
+                    )
+                    resolved.append(sym)
+                    by_name[entry.name] = sym
+                else:
+                    if (
+                        sym.defined != (not is_shim)
+                        or sym.st_type != expected_type
+                        or sym.size != entry.size
+                        or (not is_shim and sym.address != entry.address)
+                        or sym.module_name != module_name
+                    ):
+                        raise ValueError(
+                            f"{entry.name}: inconsistent metadata between krg queries/relocation expansion"
+                        )
+                    if is_export and not sym.exported:
+                        sym.exported = True
+                        sym.export_order = export_order[entry.name]
+                if is_shim and LIB_SHIM not in needed_libs:
+                    needed_libs.append(LIB_SHIM)
+
+        # Expand dependency closure using undefined data relocations (pseudo-GOT targets).
+        for reloc in layout.data_relocs:
+            if not reloc.is_undef:
+                continue
+            if reloc.r_type != R_X86_64_64:
+                continue
+            if not reloc.symbol_name:
+                continue
+            name = reloc.symbol_name
+            if name in shim_symbols:
+                if name not in by_name:
+                    sym = ResolvedSymbol(
+                        name=name,
+                        source=LIB_SHIM,
+                        defined=False,
+                        exported=False,
+                        st_type=STT_FUNC,
+                        module_name="shim",
+                        export_order=export_order.get(name, len(resolved)),
+                        original_order=len(resolved),
+                    )
+                    resolved.append(sym)
+                    by_name[name] = sym
+                if LIB_SHIM not in needed_libs:
+                    needed_libs.append(LIB_SHIM)
+                continue
+            if name not in by_name:
+                add_krg_closure(name)
+
+        text_min_page = compute_text_min_page(resolved, extra_text_ranges)
+        rw_base_vaddr = TEXT_BASE_VADDR + (data_kernel_start - text_min_page)
+
+        # Build .so relocations that initialize the pseudo-GOT data.
+        for reloc in layout.data_relocs:
+            if not reloc.is_undef:
+                continue
+            if reloc.r_type != R_X86_64_64:
+                raise ValueError(
+                    f"{ko_path}: unsupported pseudo-GOT relocation type {reloc.r_type} (symbol {reloc.symbol_name or reloc.sym_idx})"
+                )
+            if not reloc.symbol_name:
+                raise ValueError(
+                    f"{ko_path}: relocation has undefined symbol with empty name (sym_idx={reloc.sym_idx})"
+                )
+            target = by_name[reloc.symbol_name]
+            data_relocations.append(
+                DataRelocation(
+                    offset=reloc.offset,
+                    symbol=target,
+                    addend=reloc.addend,
+                    r_type=R_X86_64_64,
+                )
+            )
+
+    dep_modules = ["shim"] if LIB_SHIM in needed_libs else []
+    module_deps_path = symbols_path.parent / "module_deps.txt"
+    module_deps_path.write_text("".join(format_module_deps(owner_module, dep_modules, resolved)))
+    if symbol_dump_path is not None:
+        dump_symbol_addresses_all([(owner_module, resolved)], symbol_dump_path)
+
+    builder = ManualElfBuilder(
+        symbols=resolved,
+        needed_libraries=needed_libs,
+        export_stub_size=export_stub_size,
+        data_bytes=data_bytes,
+        data_relocations=data_relocations,
+        rw_base_vaddr=rw_base_vaddr,
+        extra_text_ranges=extra_text_ranges,
+        extra_ro_ranges=extra_ro_ranges,
+    )
+    builder.write(Path(owner_lib))
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build a GOT-only shared object (libA.so)")
+    parser = argparse.ArgumentParser(
+        description="Build a sparse kernel-mapped .so (optional: extract pseudo-GOT relocations from a .ko)"
+    )
     parser.add_argument("--symbols", type=Path, default=Path("symbols.txt"), help="List of root symbols to export")
     parser.add_argument(
         "--symbol-addresses",
@@ -1311,7 +1882,13 @@ def main() -> None:
         "--shim-list",
         type=Path,
         default=Path("shim.txt"),
-        help="Optional file listing shim-provided symbols (defaults to builtin list)",
+        help="File listing shim-provided symbols (default: shim.txt)",
+    )
+    parser.add_argument(
+        "--ko",
+        type=Path,
+        default=None,
+        help="Optional kernel module .ko (ET_REL) to extract core .data bytes and .rela.data relocations",
     )
     args = parser.parse_args()
     krg_path = args.krg
@@ -1328,6 +1905,7 @@ def main() -> None:
         export_stub_size=args.export_stub_size,
         symbol_dump_path=symbol_dump_path,
         shim_list_path=args.shim_list,
+        ko_path=args.ko,
     )
 
 

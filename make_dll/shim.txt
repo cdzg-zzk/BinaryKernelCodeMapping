@@ -1,8 +1,12 @@
 # Shim symbols: kernel-only APIs that have user-space stand-ins and should be linked via libshim.so.
 # Update this list to match the functions implemented in shim.c.
 kmalloc
+__kmalloc
 kfree
+_printk
 printk
+vprintk
+memcpy
 kstrdup
 ktime_get
 ktime_get_ns

@@ -1,10 +1,15 @@
 // krg.cpp — SAFE-only build/query for Linux vmlinux (x86-64)
 // Fast + clean: primary-only ranges, ABSMEM support, global binary searches, deep logs.
 //
-// Build: g++ -O3 -std=c++20 -Wall -Wextra -Wpedantic krg.cpp -o krg -lcapstone -I ./ELFIO
+// Build: g++ -O3 -std=c++2a -Wall -Wextra -Wpedantic krg.cpp -o krg -lcapstone -I ./ELFIO
 // Usage: sudo ./krg build /usr/lib/debug/boot/vmlinux-$(uname -r) -o out.krg [--debug] [--dbg-sym=<name>]
 //        sudo ./krg query out.krg <symbol>
 
+
+// sudo ./krg build /usr/lib/debug/boot/vmlinux-$(uname -r) \                                                                INT ✘  zzk@zzk200  00:43:12  
+//    -o /home/zzk/workspace/BinaryKernelCodeMapping/kernel_cgd/src/out.krg \
+//    -m /home/zzk/workspace/BinaryKernelCodeMapping/test/test_lkm_locate/lkm_locate.ko 
+//
 #include <elfio/elfio.hpp>
 #include <capstone/capstone.h>
 
@@ -19,22 +24,36 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 using u8 = uint8_t; using u16 = uint16_t; using u32 = uint32_t; using u64 = uint64_t; using i32 = int32_t; using i64 = long long;
 
-struct Node { u64 addr; u32 size; u8 kind; };   // kind: 0=code, 1=data
+struct Node { u64 addr; u32 size; u16 module; u8 kind; u8 pad{0}; };   // kind: 0=code, 1=data; module: 0=kernel, >0=modules
 struct BuildSym { std::string name; Node n{}; u16 sec_idx{0}; bool defined{false}; u8 is_primary{0}; u32 origin{0}; };
 struct SectionInfo { ELFIO::section* sec{nullptr}; std::string name; u64 addr{0}, size{0}, offset{0}, flags{0}; u32 idx{0}; };
 struct Range { u64 start, end; u32 id; }; // [start,end)
 
 struct FileHeader {
     u32 magic{0x3147524b}; // 'KRG1'
-    u32 version{1};
+    u32 version{2};
     u32 n_nodes{0};
     u32 n_edges{0};
     u32 name_blob_bytes{0};
     u32 arch{0}; // 0=x86_64
+    u32 is_runtime_address{0};
+    u32 reserved1{0};
+    u32 n_modules{0};
+    u32 module_blob_bytes{0};
+};
+
+struct FileHeaderV1 {
+    u32 magic{0x3147524b};
+    u32 version{1};
+    u32 n_nodes{0};
+    u32 n_edges{0};
+    u32 name_blob_bytes{0};
+    u32 arch{0};
     u32 is_runtime_address{0};
     u32 reserved1{0};
 };
@@ -42,7 +61,14 @@ struct FileHeader {
 static inline bool is_exec(u64 f){ return (f & ELFIO::SHF_EXECINSTR) != 0; }
 static inline bool is_write(u64 f){ return (f & ELFIO::SHF_WRITE)     != 0; }
 static inline bool starts_with_dot(const std::string& n){ return !n.empty() && n[0]=='.'; }
+static inline bool has_prefix(const std::string& s, const std::string& p){
+    return s.size() >= p.size() && std::memcmp(s.data(), p.data(), p.size()) == 0;
+}
 static inline u64 align_up(u64 v, u64 a){ return (a<=1) ? v : (v + a - 1) & ~(a - 1); }
+static constexpr const char* KERNEL_MODULE_LABEL = "kernel";
+static constexpr unsigned R_X86_64_64  = 1;
+static constexpr unsigned R_X86_64_PC32 = 2;
+static inline u64 sec_off_key(u32 sec_idx, u32 off){ return (u64(sec_idx) << 32) | u64(off); }
 
 static std::string basename_noext(const std::string& path){
     size_t pos = path.find_last_of('/');
@@ -89,6 +115,32 @@ static std::string module_sys_name(const std::string& path, const ELFIO::elfio& 
         if (c == '-') c = '_';
     }
     return base;
+}
+
+static const std::vector<std::string>& default_stop_names() {
+    static const std::vector<std::string> names = {
+        "__kmalloc", "kmalloc", "kfree", "printk", "vprintk", "kstrdup",
+        "ktime_get", "ktime_get_ns", "ktime_get_real_ts64", "do_gettimeofday"
+    };
+    return names;
+}
+
+static std::vector<std::string> read_symbol_list(const std::string& path){
+    std::vector<std::string> out;
+    std::ifstream in(path);
+    if (!in) return out;
+    std::string line;
+    while (std::getline(in, line)){
+        auto pos_hash = line.find('#');
+        if (pos_hash != std::string::npos) line.resize(pos_hash);
+        // trim
+        auto l = line.find_first_not_of(" \t\r\n");
+        if (l == std::string::npos) continue;
+        auto r = line.find_last_not_of(" \t\r\n");
+        std::string tok = line.substr(l, r - l + 1);
+        if (!tok.empty()) out.push_back(tok);
+    }
+    return out;
 }
 
 static std::optional<u64> read_hex_file(const std::string& path){
@@ -141,6 +193,10 @@ struct Builder {
     std::vector<std::vector<u32>> sec_primary_funcs;
     // 全局主函数区间表（按 start 升序）
     std::vector<Range> fun_ranges_;
+    // 数据符号区间表（按 start 升序），用于将“section+addend”映射回具体 data 符号
+    std::vector<Range> data_ranges_;
+    // 同起始地址的别名函数（alias）：start_addr -> [func_ids...]
+    std::unordered_map<u64, std::vector<u32>> alias_by_start_;
     // 可分配节的区间表（按 start 升序），用于 ABS/RIP 指针定位
     std::vector<Range> alloc_secs_;
 
@@ -156,15 +212,12 @@ struct Builder {
     const std::vector<std::string> hard_bl_prefix = {
         "schedule", "preempt_", "cond_resched", "msleep", "udelay", "mdelay",
         "copy_to_user", "copy_from_user", "get_user", "put_user",
-        "kmalloc", "kzalloc", "kvalloc", "vmalloc", "kfree", "vfree",
         "ioremap", "iounmap",
         "pci_", "net_", "sock_", "blk_", "vfs_", "fs_", "dev_",
-        // "printk", "pr_", "__warn_printk", "__sanitizer_", "__ubsan_"
-        "printk", "pr_", "__warn_printk", "__sanitizer_"
+        "__sanitizer_"
     };
     // 软忽略（CALL/JMP 命中 → 仅不过边）
     const std::vector<std::string> soft_ig = {
-        "__x86_return_thunk", "__x86_indirect_thunk_", "__retpoline_",
         "__fentry__", "mcount", "__stack_chk_fail"
     };
 
@@ -332,18 +385,30 @@ struct Builder {
         }
         // 按地址排序 + 统一重算主函数区间
         fun_ranges_.clear();
+        alias_by_start_.clear();
         for (u32 sid=0; sid<sec_primary_funcs.size(); ++sid){
             auto &vec = sec_primary_funcs[sid];
             std::sort(vec.begin(), vec.end(),
                       [&](u32 a,u32 b){ return syms[a].n.addr < syms[b].n.addr; });
             const u64 sec_end = (sid < secs.size()) ? secs[sid].addr + secs[sid].size : ~0ULL;
-            for (size_t k=0;k<vec.size();++k){
-                BuildSym &fn = syms[vec[k]];
-                const u64 cur = fn.n.addr;
-                const u64 nxt = (k+1<vec.size()) ? syms[vec[k+1]].n.addr : sec_end;
+            for (size_t k=0;k<vec.size();){
+                const u64 cur = syms[vec[k]].n.addr;
+                size_t k2 = k + 1;
+                while (k2 < vec.size() && syms[vec[k2]].n.addr == cur) ++k2;
+                const u64 nxt = (k2 < vec.size()) ? syms[vec[k2]].n.addr : sec_end;
                 const u64 span = (nxt>cur && (nxt-cur)<(1ull<<31)) ? (nxt-cur) : 1u;
-                fn.n.size = (u32)span;
-                fun_ranges_.push_back({cur, cur+fn.n.size, vec[k]});
+                if (k2 - k > 1) {
+                    auto &grp = alias_by_start_[cur];
+                    grp.clear();
+                    grp.reserve(k2 - k);
+                    for (size_t j=k; j<k2; ++j) grp.push_back(vec[j]);
+                }
+                for (size_t j=k; j<k2; ++j){
+                    BuildSym &fn = syms[vec[j]];
+                    fn.n.size = (u32)span;
+                    fun_ranges_.push_back({cur, cur+fn.n.size, vec[j]});
+                }
+                k = k2;
             }
         }
         std::sort(fun_ranges_.begin(), fun_ranges_.end(),
@@ -370,6 +435,43 @@ struct Builder {
                 }
             }
         }
+
+        // 构建 data_ranges_（用于把“section 符号 + addend”映射回具体数据符号）
+        data_ranges_.clear();
+        std::vector<std::vector<u32>> sec_data;
+        sec_data.resize(secs.size());
+        for (u32 i=0;i<N;++i){
+            auto &s = syms[i];
+            if (!s.defined || s.n.kind!=1) continue;
+            if (s.name.empty() || starts_with_dot(s.name)) continue;
+            if (s.sec_idx >= secs.size()) continue;
+            const auto &S = secs[s.sec_idx];
+            if (!(S.flags & ELFIO::SHF_ALLOC)) continue;
+            if (is_exec(S.flags)) continue;
+            sec_data[s.sec_idx].push_back(i);
+        }
+        for (u32 sid=0; sid<sec_data.size(); ++sid){
+            auto &vec = sec_data[sid];
+            if (vec.empty()) continue;
+            std::sort(vec.begin(), vec.end(),
+                      [&](u32 a,u32 b){ return syms[a].n.addr < syms[b].n.addr; });
+            const u64 sec_end = (sid < secs.size()) ? secs[sid].addr + secs[sid].size : ~0ULL;
+            for (size_t k=0;k<vec.size();++k){
+                const u32 id = vec[k];
+                const u64 cur = syms[id].n.addr;
+                u64 end = cur;
+                if (syms[id].n.size) {
+                    end = cur + syms[id].n.size;
+                } else {
+                    const u64 nxt = (k+1<vec.size()) ? syms[vec[k+1]].n.addr : sec_end;
+                    end = (nxt>cur && (nxt-cur)<(1ull<<31)) ? nxt : (cur + 1);
+                }
+                if (end <= cur) end = cur + 1;
+                data_ranges_.push_back({cur, end, id});
+            }
+        }
+        std::sort(data_ranges_.begin(), data_ranges_.end(),
+                  [](const Range&a, const Range&b){ return a.start < b.start; });
     }
 
     // 名单判定
@@ -406,6 +508,22 @@ struct Builder {
         return std::nullopt;
     }
 
+    // 二分：data_ranges_ 中查 addr 落入哪个数据符号
+    std::optional<u32> target_data_by_addr(u64 addr) const {
+        i64 lo=0, hi=(i64)data_ranges_.size()-1, ans=-1;
+        while (lo<=hi){
+            i64 mid=(lo+hi)>>1;
+            const auto &r = data_ranges_[(size_t)mid];
+            if (addr < r.start) hi=mid-1;
+            else { ans=mid; lo=mid+1; }
+        }
+        if (ans>=0){
+            const auto &r = data_ranges_[(size_t)ans];
+            if (addr>=r.start && addr<r.end) return r.id;
+        }
+        return std::nullopt;
+    }
+
     // 二分：alloc_secs_ 中查 ptr_va 属于哪个节
     const SectionInfo* find_alloc_section(u64 ptr_va) const {
         i64 lo=0, hi=(i64)alloc_secs_.size()-1, ans=-1;
@@ -423,19 +541,153 @@ struct Builder {
     }
 
     // 写边
+    const std::vector<u32>* alias_group(u32 u) const {
+        auto it = alias_by_start_.find(syms[u].n.addr);
+        return (it == alias_by_start_.end()) ? nullptr : &it->second;
+    }
+    void mark_calls_blacklisted(u32 u){
+        if (auto g = alias_group(u)){
+            for (u32 uu : *g) calls_blacklisted[uu] = 1;
+        } else {
+            calls_blacklisted[u] = 1;
+        }
+    }
     void add_edge(u32 u,u32 v){
         if(u==v) return;
+        if (auto g = alias_group(u)){
+            for (u32 uu : *g){
+                if (uu==v) continue;
+                auto &vct=adj[uu];
+                if(std::find(vct.begin(),vct.end(),v)==vct.end()) vct.push_back(v);
+            }
+            return;
+        }
         auto &vct=adj[u];
         if(std::find(vct.begin(),vct.end(),v)==vct.end()) vct.push_back(v);
     }
     void add_data_ref(u32 u,u32 v){
         if(u==v) return;
+        if (auto g = alias_group(u)){
+            for (u32 uu : *g){
+                if (uu==v) continue;
+                auto &vct=data_refs[uu];
+                if(std::find(vct.begin(),vct.end(),v)==vct.end()) vct.push_back(v);
+            }
+            return;
+        }
         auto &vct=data_refs[u];
         if(std::find(vct.begin(),vct.end(),v)==vct.end()) vct.push_back(v);
     }
 
     // 重定位：owner/target 用主表（更稳）
     void add_edges_from_relocs(){
+        // 伪 GOT：先从 .rela.data* 收集“slot(offset) -> imported symbol”
+        // 然后在 .rela.text* 里识别 RIP-relative 访问到该 slot 的指令，补齐 code->import 边。
+        std::unordered_map<u64, u32> pseudo_got_import_slots;
+        pseudo_got_import_slots.reserve(4096);
+
+        for (u32 fi=0; fi<inputs.size(); ++fi){
+            auto &in = inputs[fi];
+            if (!in.is_relocatable) continue; // 伪 GOT 仅出现在可重定位的 LKM
+            auto &r = *in.reader;
+            for (u32 si=0; si<r.sections.size(); ++si){
+                ELFIO::section* s = r.sections[si];
+                if(!s) { continue; }
+                auto ty=s->get_type();
+                if (ty!=ELFIO::SHT_REL && ty!=ELFIO::SHT_RELA) { continue; }
+
+                auto info=s->get_info();
+                if (info>=r.sections.size()) { continue; }
+                u16 targ_idx = map_sec_idx(in, (ELFIO::Elf_Half)info);
+                if (targ_idx>=secs.size()) { continue; }
+
+                const auto& tsec = secs[targ_idx];
+                if (!(tsec.flags & ELFIO::SHF_ALLOC)) continue;
+                if (is_exec(tsec.flags)) continue;
+                if (!is_write(tsec.flags)) continue; // 只关心可写 data（伪 GOT）
+
+                auto link_idx = s->get_link();
+                if (link_idx>=r.sections.size()) { continue; }
+                ELFIO::section* link = r.sections[link_idx];
+                if (!link) { continue; }
+                auto tlink = link->get_type();
+                if (tlink!=ELFIO::SHT_SYMTAB && tlink!=ELFIO::SHT_DYNSYM) { continue; }
+
+                ELFIO::symbol_section_accessor acc(r, const_cast<ELFIO::section*>(link));
+                ELFIO::relocation_section_accessor rels(r, s);
+                for (ELFIO::Elf_Xword i=0;i<rels.get_entries_num();++i){
+                    ELFIO::Elf64_Addr off=0; ELFIO::Elf_Word sym=0; unsigned type=0; ELFIO::Elf_Sxword addend=0;
+                    rels.get_entry(i,off,sym,type,addend);
+                    if (type != R_X86_64_64) continue;
+
+                    std::string nm; ELFIO::Elf64_Addr v; ELFIO::Elf_Xword sz; unsigned char b,t,other; ELFIO::Elf_Half sidx;
+                    acc.get_symbol(sym,nm,v,sz,b,t,sidx,other);
+                    if (nm.empty()) continue;
+                    if (sidx != ELFIO::SHN_UNDEF) continue; // 只记录 import
+
+                    u16 sec_idx = map_sec_idx(in, sidx);
+                    u64 addr = sym_addr(in, sidx, v);
+                    bool was_new = false;
+                    u32 vid = add_symbol(nm, addr, sz, t, sec_idx, fi, &was_new);
+                    if (vid==UINT32_MAX) continue;
+                    if (was_new){
+                        adj.emplace_back(); data_refs.emplace_back();
+                        data_is_writable.push_back(0); calls_blacklisted.push_back(0);
+                        if (syms[vid].defined && syms[vid].n.kind==1 && sec_idx<secs.size() && is_write(secs[sec_idx].flags)){
+                            data_is_writable[vid]=1;
+                        }
+                    }
+
+                    pseudo_got_import_slots.emplace(sec_off_key((u32)targ_idx, (u32)off), vid);
+                }
+            }
+        }
+
+        // PC32 的 addend 并不总是 “-4”，取决于重定位字段在指令中的位置（例如 mov imm->mem 的 disp32 不在指令末尾）。
+        // 为了正确反推出“真实目标地址”，需要计算 (insn_end - reloc_field_addr) 这个 delta。
+        csh cs_h = 0;
+        bool cs_ready = false;
+        std::unordered_map<u64, u32> pc32_delta_cache;
+        pc32_delta_cache.reserve(4096);
+        auto pc32_delta = [&](u16 sec_idx, u64 reloc_at) -> u32 {
+            auto it = pc32_delta_cache.find(reloc_at);
+            if (it != pc32_delta_cache.end()) return it->second;
+            const auto &S = secs[sec_idx];
+            u32 delta = 4;
+            if (!S.sec || !is_exec(S.flags)) { pc32_delta_cache.emplace(reloc_at, delta); return delta; }
+            const uint8_t* buf = reinterpret_cast<const uint8_t*>(S.sec->get_data());
+            if (!buf || S.size == 0) { pc32_delta_cache.emplace(reloc_at, delta); return delta; }
+            if (!cs_ready) {
+                if (cs_open(CS_ARCH_X86, CS_MODE_64, &cs_h) != CS_ERR_OK) {
+                    pc32_delta_cache.emplace(reloc_at, delta);
+                    return delta;
+                }
+                cs_option(cs_h, CS_OPT_DETAIL, CS_OPT_OFF);
+                cs_ready = true;
+            }
+            cs_insn* insn = cs_malloc(cs_h);
+            if (!insn) { pc32_delta_cache.emplace(reloc_at, delta); return delta; }
+            const uint8_t* p = buf;
+            size_t len = (size_t)S.size;
+            u64 va = S.addr;
+            while (len > 0) {
+                const uint8_t* p_before = p; u64 va_before = va; size_t len_before = len;
+                if (!cs_disasm_iter(cs_h, &p, &len, &va, insn)) {
+                    if (len_before <= 1) break;
+                    p = p_before + 1; len = len_before - 1; va = va_before + 1;
+                    continue;
+                }
+                const u64 insn_end = insn->address + insn->size;
+                if (reloc_at >= insn->address && reloc_at < insn_end) {
+                    delta = (u32)(insn_end - reloc_at);
+                    break;
+                }
+            }
+            cs_free(insn, 1);
+            pc32_delta_cache.emplace(reloc_at, delta);
+            return delta;
+        };
+
         for (u32 fi=0; fi<inputs.size(); ++fi){
             auto &in = inputs[fi];
             auto &r = *in.reader;
@@ -460,6 +712,10 @@ struct Builder {
                     auto owner = target_func_by_addr(at);
                     if (!owner) { continue; }
                     u32 u = *owner;
+                    u32 pc32_adj = 4;
+                    if (type == R_X86_64_PC32 && in.is_relocatable && is_exec(secs[targ_idx].flags)) {
+                        pc32_adj = pc32_delta(targ_idx, at);
+                    }
 
                 auto link_idx = s->get_link();
                 if (link_idx>=r.sections.size()) { continue; }
@@ -471,6 +727,13 @@ struct Builder {
                     ELFIO::symbol_section_accessor acc(r, const_cast<ELFIO::section*>(link));
                     std::string nm; ELFIO::Elf64_Addr v; ELFIO::Elf_Xword sz; unsigned char b,t,other; ELFIO::Elf_Half sidx;
                     acc.get_symbol(sym,nm,v,sz,b,t,sidx,other);
+                    // 对于 STT_SECTION 符号，symtab 的 st_name 往往为空；但重定位会用它来表示 .text/.data/.bss 等。
+                    // 若直接跳过，会漏掉“伪 GOT”以及大量 RIP-relative data 引用。
+                    if (nm.empty() && sidx != ELFIO::SHN_UNDEF && sidx != ELFIO::SHN_ABS &&
+                        sidx < r.sections.size() && r.sections[sidx]) {
+                        nm = r.sections[sidx]->get_name();
+                        if (!nm.empty()) nm += "@" + std::to_string(fi);
+                    }
 
                     u16 sec_idx = map_sec_idx(in, sidx);
                     u64 addr = sym_addr(in, sidx, v);
@@ -485,19 +748,57 @@ struct Builder {
                         }
                     }
 
+                    // 若这是 RIP-relative 访问伪 GOT slot（典型 R_X86_64_PC32），补齐对 slot 指向的 import 的依赖
+                    if (type == R_X86_64_PC32 && syms[vid].defined && syms[vid].sec_idx < secs.size()){
+                        const u16 dsec = syms[vid].sec_idx;
+                        const auto& ds = secs[dsec];
+                        if ((ds.flags & ELFIO::SHF_ALLOC) && !is_exec(ds.flags) && is_write(ds.flags)){
+                            const i64 sym_off = (i64)syms[vid].n.addr - (i64)ds.addr;
+                            const i64 slot_off = sym_off + (i64)addend + (i64)pc32_adj;
+                            if (slot_off >= 0 && (u64)slot_off < ds.size){
+                                auto it = pseudo_got_import_slots.find(sec_off_key((u32)dsec, (u32)slot_off));
+                                if (it != pseudo_got_import_slots.end()){
+                                    const u32 imp = it->second;
+                                    if (syms[imp].n.kind==0){
+                                        const std::string &nm2 = syms[imp].name;
+                                        if (in_soft_ig(nm2)) { if (want(u)) dlog("[PSEUDOGOT] %s -> %s (soft-ignore)\n", syms[u].name.c_str(), nm2.c_str()); }
+                                        else if (in_hard_bl(nm2)) { if (want(u)) dlog("[PSEUDOGOT] %s -> %s (hard-BL; mark UNSAFE)\n", syms[u].name.c_str(), nm2.c_str()); mark_calls_blacklisted(u); }
+                                        else { if (want(u)) dlog("[PSEUDOGOT] %s -> %s (edge)\n", syms[u].name.c_str(), nm2.c_str()); add_edge(u, imp); }
+                                    } else {
+                                        if (want(u)) dlog("[PSEUDOGOT] %s -> DATA[%s]\n", syms[u].name.c_str(), syms[imp].name.c_str());
+                                        add_data_ref(u, imp);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     if (syms[vid].n.kind==0){
-                        const std::string &nm2 = syms[vid].name;
+                        u32 tgt = vid;
+                        // 对于 R_X86_64_PC32，很多 LKM 会用 section 符号（如 .text）+ addend 表示“模块内目标地址”。
+                        // 这里用 S + A + (insn_end - reloc_field) 反算真实目标虚拟地址，并映射到主函数区间。
+                        if (type == R_X86_64_PC32){
+                            const u64 tgt_va = syms[vid].n.addr + (i64)addend + (i64)pc32_adj;
+                            if (auto to = target_func_by_addr(tgt_va)) tgt = *to;
+                        }
+                        const std::string &nm2 = syms[tgt].name;
                         if (in_soft_ig(nm2)) { if (want(u)) dlog("[RELOC] %s -> %s (soft-ignore)\n", syms[u].name.c_str(), nm2.c_str()); continue; }
-                        if (in_hard_bl(nm2)) { if (want(u)) dlog("[RELOC] %s -> %s (hard-BL; mark UNSAFE)\n", syms[u].name.c_str(), nm2.c_str()); calls_blacklisted[u]=1; continue; }
+                        if (in_hard_bl(nm2)) { if (want(u)) dlog("[RELOC] %s -> %s (hard-BL; mark UNSAFE)\n", syms[u].name.c_str(), nm2.c_str()); mark_calls_blacklisted(u); continue; }
                         if (want(u)) dlog("[RELOC] %s -> %s (edge)\n", syms[u].name.c_str(), nm2.c_str());
-                        add_edge(u, vid);
+                        add_edge(u, tgt);
                     } else {
-                        if (want(u)) dlog("[RELOC] %s -> DATA[%s]\n", syms[u].name.c_str(), syms[vid].name.c_str());
-                        add_data_ref(u, vid);
+                        u32 ref = vid;
+                        if (type == R_X86_64_PC32 && syms[vid].defined){
+                            const u64 tgt_va = syms[vid].n.addr + (i64)addend + (i64)pc32_adj;
+                            if (auto to = target_data_by_addr(tgt_va)) ref = *to;
+                        }
+                        if (want(u)) dlog("[RELOC] %s -> DATA[%s]\n", syms[u].name.c_str(), syms[ref].name.c_str());
+                        add_data_ref(u, ref);
                     }
                 }
             }
         }
+        if (cs_ready) cs_close(&cs_h);
     }
 
     // 反汇编：IMM + MEM(RIP/ABS)
@@ -553,7 +854,7 @@ struct Builder {
                         }
                         u32 v=*to; const std::string &nm=syms[v].name;
                         if (in_soft_ig(nm)) { if (want(u)) dlog("[CALL IMM] %s -> %s (soft-ignore)\n", syms[u].name.c_str(), nm.c_str()); continue; }
-                        if (in_hard_bl(nm)) { if (want(u)) dlog("[CALL IMM] %s -> %s (HARD-BL; mark UNSAFE)\n", syms[u].name.c_str(), nm.c_str()); calls_blacklisted[u]=1; continue; }
+                        if (in_hard_bl(nm)) { if (want(u)) dlog("[CALL IMM] %s -> %s (HARD-BL; mark UNSAFE)\n", syms[u].name.c_str(), nm.c_str()); mark_calls_blacklisted(u); continue; }
                         if (want(u)) dlog("[CALL IMM] %s -> %s (edge)\n", syms[u].name.c_str(), nm.c_str());
                         add_edge(u,v);
                     }
@@ -606,7 +907,7 @@ struct Builder {
                     }
                     u32 v=*to; const std::string &nm=syms[v].name;
                     if (in_soft_ig(nm)) { if (want(u)) dlog("[%s %sMEM] %s -> %s (soft-ignore)\n", is_call?"CALL":"JMP", tag, syms[u].name.c_str(), nm.c_str()); continue; }
-                    if (is_call && in_hard_bl(nm)) { if (want(u)) dlog("[CALL %sMEM] %s -> %s (HARD-BL; mark UNSAFE)\n", tag, syms[u].name.c_str(), nm.c_str()); calls_blacklisted[u]=1; continue; }
+                    if (is_call && in_hard_bl(nm)) { if (want(u)) dlog("[CALL %sMEM] %s -> %s (HARD-BL; mark UNSAFE)\n", tag, syms[u].name.c_str(), nm.c_str()); mark_calls_blacklisted(u); continue; }
                     if (is_jmp && v==u) { if (want(u)) dlog("[JMP %sMEM] %s -> (intra) ignored\n", tag, syms[u].name.c_str()); continue; }
                     if (want(u)) dlog("[%s %sMEM] %s -> %s (edge)\n", is_call?"CALL":"JMP", tag, syms[u].name.c_str(), nm.c_str());
                     add_edge(u,v);
@@ -648,11 +949,14 @@ struct Builder {
         const u32 N=(u32)syms.size();
         std::vector<u8> ok(N,0);
 
-        auto all_data_ro = [&](u32 u)->bool{
+        auto data_refs_ok = [&](u32 u)->bool{
             for (u32 v: data_refs[u]){
                 if (v>=N) continue;
                 if (syms[v].n.kind!=1) continue;
-                if (data_is_writable[v]) return false;
+                if (!data_is_writable[v]) continue;
+                // LKM 的“伪 GOT”是写段 data：允许访问本模块内的可写 data（地址填充压力转移到数据段）
+                if (syms[u].origin != 0 && syms[u].origin == syms[v].origin) continue;
+                return false;
             }
             return true;
         };
@@ -665,29 +969,11 @@ struct Builder {
                 if (want(u)) dlog("[PRUNE] drop %s : CALL-hardBL\n", syms[u].name.c_str());
                 continue;
             }
-            if (!all_data_ro(u)) {
+            if (!data_refs_ok(u)) {
                 if (want(u)) dlog("[PRUNE] drop %s : writable-data\n", syms[u].name.c_str());
                 continue;
             }
             ok[u]=1;
-        }
-        // 传递剪枝
-        bool changed=true;
-        while (changed){
-            changed=false;
-            for (u32 u=0; u<N; ++u){
-                if (!ok[u]) continue;
-                bool bad=false;
-                for (u32 v: adj[u]){
-                    if (v>=N) continue;
-                    if (syms[v].n.kind!=0) continue;
-                    if (!ok[v]) { bad=true; break; }
-                }
-                if (bad){
-                    ok[u]=0; changed=true;
-                    if (want(u)) dlog("[PRUNE] drop %s : callee-unsafe\n", syms[u].name.c_str());
-                }
-            }
         }
         // 清空不安全函数出边
         for (u32 u=0; u<N; ++u){
@@ -706,12 +992,38 @@ struct Builder {
         std::vector<u8> ok = prune_to_safe_subgraph();
 
         const u32 N=(u32)syms.size();
+        std::vector<u8> need(N, 0);
+        for (u32 i=0;i<N;++i){
+            if (syms[i].n.kind==0 && ok[i]) need[i]=1;
+        }
+        // 额外包含 SAFE code 直接调用到的函数（即便它们本身不在 SAFE 集内，也需要作为“依赖叶子”输出）
+        for (u32 u=0; u<N; ++u){
+            if (syms[u].n.kind!=0 || !ok[u]) continue;
+            for (u32 v: adj[u]){
+                if (v>=N) continue;
+                if (syms[v].n.kind!=0) continue;
+                if (!syms[v].defined) continue;
+                need[v]=1;
+            }
+        }
+        // 保留 safe code 直接引用的数据符号（用于下游处理 rodata/data 依赖；伪 GOT 也在 data）
+        for (u32 u=0; u<N; ++u){
+            if (!need[u]) continue;
+            if (syms[u].n.kind!=0) continue;
+            for (u32 v: data_refs[u]){
+                if (v>=N) continue;
+                if (syms[v].n.kind!=1) continue;
+                if (!syms[v].defined) continue;
+                if (starts_with_dot(syms[v].name)) continue;
+                need[v]=1;
+            }
+        }
+
         std::vector<i32> idmap(N,-1);
         u32 M=0;
         for (u32 i=0;i<N;++i){
-            if (syms[i].n.kind==0 && ok[i]){
-                idmap[i]=(i32)M++;
-            }
+            if (!need[i]) continue;
+            idmap[i]=(i32)M++;
         }
 
         // [KASLR@build] 计算 delta（run__stext - vml__stext），并在 header 标记为 runtime
@@ -726,8 +1038,11 @@ struct Builder {
 
                 // 读运行时 /proc/kallsyms 的 _stext
                 if (auto run_stext = read_kallsyms_addr("_stext")) {
-                    delta = *run_stext - vml_stext;
-                    have_delta = true;
+                    // 非特权环境下 /proc/kallsyms 可能被 kptr_restrict 隐藏为 0
+                    if (*run_stext != 0) {
+                        delta = *run_stext - vml_stext;
+                        have_delta = true;
+                    }
                 }
             }
         }
@@ -735,7 +1050,10 @@ struct Builder {
         // 计算模块运行时 section base（用于把合成地址转换为真实内核地址）
         std::vector<std::unordered_map<u32,u64>> mod_sec_base(inputs.size());
         std::vector<std::optional<u64>> mod_text_base(inputs.size());
-        std::vector<std::string> mod_names(inputs.size());
+        std::vector<std::string> mod_sys_names(inputs.size());
+        std::vector<std::string> mod_out_names(inputs.size());
+        if (!mod_sys_names.empty()) mod_sys_names[0] = "kernel";
+        if (!mod_out_names.empty()) mod_out_names[0] = KERNEL_MODULE_LABEL;
         for (u32 fi=1; fi<inputs.size(); ++fi){
             const auto& in = inputs[fi];
             std::string mod = module_sys_name(in.path, *in.reader);
@@ -743,12 +1061,15 @@ struct Builder {
                 std::fprintf(stderr, "[KRG] module path '%s' has empty name\n", in.path.c_str());
                 return false;
             }
-            mod_names[fi] = mod;
+            mod_sys_names[fi] = mod;
+            mod_out_names[fi] = in.path;
             auto text = read_hex_file("/sys/module/" + mod + "/sections/.text");
-            if (!text){
-                std::fprintf(stderr, "[KRG] module '%s': missing /sys/module/%s/sections/.text (load module or fix name)\n",
-                             mod.c_str(), mod.c_str());
-                return false;
+            if (!text || *text == 0){
+                // 无权限或模块未加载：允许继续构图，但地址为“静态/合成地址”，而非真实运行时地址。
+                std::fprintf(stderr,
+                             "[KRG] module '%s': runtime section base unavailable; using static addresses for this module\n",
+                             mod.c_str());
+                continue;
             }
             mod_text_base[fi] = *text;
             auto &r = *in.reader;
@@ -765,6 +1086,16 @@ struct Builder {
             }
         }
 
+        // 模块字符串表（输出用：kernel 固定为 "[kernel]"，其余为 .ko 路径）
+        std::vector<u32> module_off; module_off.reserve(mod_out_names.size());
+        std::string module_blob; module_blob.reserve(mod_out_names.size() * 32);
+        for (const auto& mn : mod_out_names){
+            std::string name = mn.empty() ? KERNEL_MODULE_LABEL : mn;
+            module_off.push_back((u32)module_blob.size());
+            module_blob.append(name);
+            module_blob.push_back('\0');
+        }
+
         // 节点 + 名字
         std::vector<Node> nodes; nodes.reserve(M);
         std::vector<u32> name_off; name_off.reserve(M);
@@ -772,30 +1103,36 @@ struct Builder {
         for (u32 i=0;i<N;++i){
             i32 ni=idmap[i]; if (ni<0) continue;
             Node out = syms[i].n;
+            out.module = (syms[i].origin < module_off.size()) ? (u16)syms[i].origin : 0;
             if (syms[i].origin == 0) {
                 if (have_delta) out.addr += delta;
             } else {
                 const u32 origin = syms[i].origin;
-                bool adjusted = false;
-                if (origin < mod_sec_base.size()) {
-                    auto it = mod_sec_base[origin].find(syms[i].sec_idx);
-                    if (it != mod_sec_base[origin].end() && syms[i].sec_idx < secs.size()) {
+                const bool have_mod_runtime =
+                    (origin < mod_text_base.size() && mod_text_base[origin].has_value()) ||
+                    (origin < mod_sec_base.size() && !mod_sec_base[origin].empty());
+                if (have_mod_runtime) {
+                    bool adjusted = false;
+                    if (origin < mod_sec_base.size()) {
+                        auto it = mod_sec_base[origin].find(syms[i].sec_idx);
+                        if (it != mod_sec_base[origin].end() && syms[i].sec_idx < secs.size()) {
+                            u64 off = syms[i].n.addr - secs[syms[i].sec_idx].addr;
+                            out.addr = it->second + off;
+                            adjusted = true;
+                        }
+                    }
+                    if (!adjusted && origin < mod_text_base.size() && mod_text_base[origin].has_value() &&
+                        syms[i].sec_idx < secs.size() && secs[syms[i].sec_idx].name == ".text") {
                         u64 off = syms[i].n.addr - secs[syms[i].sec_idx].addr;
-                        out.addr = it->second + off;
+                        out.addr = *mod_text_base[origin] + off;
                         adjusted = true;
                     }
-                }
-                if (!adjusted && origin < mod_text_base.size() && mod_text_base[origin].has_value() &&
-                    syms[i].sec_idx < secs.size() && secs[syms[i].sec_idx].name == ".text") {
-                    u64 off = syms[i].n.addr - secs[syms[i].sec_idx].addr;
-                    out.addr = *mod_text_base[origin] + off;
-                    adjusted = true;
-                }
-                if (!adjusted) {
-                    const char* mod = (origin < mod_names.size() && !mod_names[origin].empty()) ? mod_names[origin].c_str() : "?";
-                    const char* sec = (syms[i].sec_idx < secs.size()) ? secs[syms[i].sec_idx].name.c_str() : "?";
-                    std::fprintf(stderr, "[KRG] module '%s' section '%s' runtime base missing; rebuild with module loaded\n", mod, sec);
-                    return false;
+                    if (!adjusted) {
+                        const char* mod = (origin < mod_sys_names.size() && !mod_sys_names[origin].empty()) ? mod_sys_names[origin].c_str() : "?";
+                        const char* sec = (syms[i].sec_idx < secs.size()) ? secs[syms[i].sec_idx].name.c_str() : "?";
+                        std::fprintf(stderr, "[KRG] module '%s' section '%s' runtime base missing; rebuild with module loaded\n", mod, sec);
+                        return false;
+                    }
                 }
             }
             nodes.push_back(out);
@@ -803,13 +1140,13 @@ struct Builder {
             blob.append(syms[i].name); blob.push_back('\0');
         }
 
-        // CSR（仅 safe→safe）
+        // CSR（仅保留被序列化的 node 之间的边；code->data 也会写入）
         std::vector<u32> row_ptr(M+1,0), col_idx; col_idx.reserve(M*2);
         for (u32 i=0;i<N;++i){
             i32 ui=idmap[i]; if (ui<0) continue;
             row_ptr[ui]=(u32)col_idx.size();
-            auto &v = adj[i];
-            std::vector<u32> tmp = v;
+            std::vector<u32> tmp = adj[i];
+            tmp.insert(tmp.end(), data_refs[i].begin(), data_refs[i].end());
             std::sort(tmp.begin(), tmp.end());
             tmp.erase(std::unique(tmp.begin(), tmp.end()), tmp.end());
             for (u32 x : tmp){
@@ -820,7 +1157,13 @@ struct Builder {
         }
         row_ptr[M]=(u32)col_idx.size();
 
-        FileHeader H; H.n_nodes=M; H.n_edges=(u32)col_idx.size(); H.name_blob_bytes=(u32)blob.size(); H.arch=0;
+        FileHeader H;
+        H.n_nodes = M;
+        H.n_edges = (u32)col_idx.size();
+        H.name_blob_bytes = (u32)blob.size();
+        H.arch = 0;
+        H.n_modules = (u32)module_off.size();
+        H.module_blob_bytes = (u32)module_blob.size();
 
         std::FILE* f=std::fopen(out_path.c_str(),"wb");
         if(!f){ std::perror("fopen"); return false; }
@@ -835,6 +1178,8 @@ struct Builder {
         if(H.n_edges && !W(col_idx.data(), col_idx.size()*sizeof(u32))) return false;
         if(M && !W(name_off.data(), name_off.size()*sizeof(u32))) return false;
         if(H.name_blob_bytes && !W(blob.data(), blob.size())) return false;
+        if(H.n_modules && !W(module_off.data(), module_off.size()*sizeof(u32))) return false;
+        if(H.module_blob_bytes && !W(module_blob.data(), module_blob.size())) return false;
         std::fclose(f);
 
         if (debug) std::fprintf(stderr,"[SAVE] safe nodes=%u, edges=%u -> %s\n", M, H.n_edges, out_path.c_str());
@@ -850,18 +1195,72 @@ struct Graph {
     std::vector<u32> row_ptr, col_idx, name_off;
     std::string blob;
     std::unordered_map<std::string,u32> name2id;
+    std::vector<u32> module_off;
+    std::string module_blob;
+    std::vector<std::string> module_names;
+    std::unordered_set<std::string> stop_set;
+
+    Graph(){
+        set_stop_names({});
+    }
+
+    void set_stop_names(const std::vector<std::string>& extra){
+        stop_set.clear();
+        for (const auto& s : default_stop_names()) stop_set.insert(s);
+        for (const auto& s : extra){
+            if (!s.empty()) stop_set.insert(s);
+        }
+    }
 
     bool load(const std::string& path){
         std::FILE* f=std::fopen(path.c_str(),"rb");
         if(!f){ std::perror("fopen"); return false; }
         auto R=[&](void* p,size_t n){ return std::fread(p,1,n,f)==n; };
 
-        if(!R(&H,sizeof(H))){ std::cerr<<"bad header\n"; std::fclose(f); return false; }
-        if(H.magic!=0x3147524b || H.version!=1){ std::cerr<<"bad magic/version\n"; std::fclose(f); return false; }
+        FileHeaderV1 Hv1{};
+        if(!R(&Hv1,sizeof(Hv1))){ std::cerr<<"bad header\n"; std::fclose(f); return false; }
+        if(Hv1.magic!=0x3147524b){ std::cerr<<"bad magic\n"; std::fclose(f); return false; }
+        H.magic = Hv1.magic;
+        H.version = Hv1.version;
+        H.n_nodes = Hv1.n_nodes;
+        H.n_edges = Hv1.n_edges;
+        H.name_blob_bytes = Hv1.name_blob_bytes;
+        H.arch = Hv1.arch;
+        H.is_runtime_address = Hv1.is_runtime_address;
+        H.reserved1 = Hv1.reserved1;
+        if (Hv1.version >= 2){
+            u32 extra[2]{0,0};
+            if(!R(extra, sizeof(extra))){ std::cerr<<"bad header (v2)\n"; std::fclose(f); return false; }
+            H.n_modules = extra[0];
+            H.module_blob_bytes = extra[1];
+        } else {
+            H.n_modules = 1;
+            H.module_blob_bytes = 0;
+        }
+        if(H.version!=1 && H.version!=2){
+            std::cerr<<"unsupported version\n"; std::fclose(f); return false;
+        }
 
-        nodes.resize(H.n_nodes);
-        if(H.n_nodes && !R(nodes.data(), nodes.size()*sizeof(Node))){
-            std::cerr<<"bad nodes\n"; std::fclose(f); return false;
+        if (H.version == 1){
+            struct NodeV1 { u64 addr; u32 size; u8 kind; u8 pad[3]; };
+            std::vector<NodeV1> nodes_v1;
+            nodes_v1.resize(H.n_nodes);
+            if(H.n_nodes && !R(nodes_v1.data(), nodes_v1.size()*sizeof(NodeV1))){
+                std::cerr<<"bad nodes\n"; std::fclose(f); return false;
+            }
+            nodes.resize(H.n_nodes);
+            for (u32 i=0;i<H.n_nodes;++i){
+                nodes[i].addr = nodes_v1[i].addr;
+                nodes[i].size = nodes_v1[i].size;
+                nodes[i].kind = nodes_v1[i].kind;
+                nodes[i].module = 0;
+                nodes[i].pad = 0;
+            }
+        } else {
+            nodes.resize(H.n_nodes);
+            if(H.n_nodes && !R(nodes.data(), nodes.size()*sizeof(Node))){
+                std::cerr<<"bad nodes\n"; std::fclose(f); return false;
+            }
         }
         row_ptr.resize(H.n_nodes+1);
         if((H.n_nodes+1)&&!R(row_ptr.data(), row_ptr.size()*sizeof(u32))){
@@ -879,6 +1278,34 @@ struct Graph {
         if(H.name_blob_bytes && !R(blob.data(), blob.size())){
             std::cerr<<"bad blob\n"; std::fclose(f); return false;
         }
+
+        if (H.version >= 2){
+            module_off.resize(H.n_modules);
+            if(H.n_modules && !R(module_off.data(), module_off.size()*sizeof(u32))){
+                std::cerr<<"bad module_off\n"; std::fclose(f); return false;
+            }
+            module_blob.resize(H.module_blob_bytes);
+            if(H.module_blob_bytes && !R(module_blob.data(), module_blob.size())){
+                std::cerr<<"bad module_blob\n"; std::fclose(f); return false;
+            }
+            module_names.clear();
+            module_names.reserve(H.n_modules);
+            for (u32 i=0;i<H.n_modules;++i){
+                if (module_off[i] >= module_blob.size()){
+                    std::cerr<<"bad module offset\n"; std::fclose(f); return false;
+                }
+                const char* s = module_blob.data() + module_off[i];
+                module_names.emplace_back(s);
+            }
+        } else {
+            module_names = {KERNEL_MODULE_LABEL};
+            module_off = {0};
+            module_blob = std::string(KERNEL_MODULE_LABEL);
+            module_blob.push_back('\0');
+        }
+        if (module_names.empty()){
+            module_names.push_back(KERNEL_MODULE_LABEL);
+        }
         std::fclose(f);
 
         for (u32 i=0;i<H.n_nodes;++i){
@@ -894,9 +1321,13 @@ struct Graph {
         return it->second;
     }
 
-
     void closure_and_print(u32 root) {
         const u32 N = H.n_nodes;
+        std::vector<u8> stop_expand(N, 0);
+        for (u32 i = 0; i < N; ++i) {
+            const char* nm = blob.data() + name_off[i];
+            if (stop_set.find(nm) != stop_set.end()) stop_expand[i] = 1;
+        }
     
         // 先做一次可达性标记，避免对未达节点输出
         std::vector<u8> seen(N, 0);
@@ -905,6 +1336,7 @@ struct Graph {
         st.push_back(root);
         while (!st.empty()) {
             u32 u = st.back(); st.pop_back();
+            if (stop_expand[u]) continue;
             for (u32 i = row_ptr[u]; i < row_ptr[u + 1]; ++i) {
                 u32 v = col_idx[i];
                 if (!seen[v]) { seen[v] = 1; st.push_back(v); }
@@ -914,11 +1346,16 @@ struct Graph {
         for (u32 i = 0; i < N; ++i) {
             if (!seen[i]) continue;
             const char* nm = blob.data() + name_off[i];
-            std::printf("%s\t0x%llx\t%u\t%u\n",
+            const char* mod = KERNEL_MODULE_LABEL;
+            if (!module_names.empty() && nodes[i].module < module_names.size()){
+                mod = module_names[nodes[i].module].c_str();
+            }
+            std::printf("%s\t0x%llx\t%u\t%u\t%s\n",
                         nm,
                         (unsigned long long)nodes[i].addr,
                         nodes[i].size,
-                        (unsigned)nodes[i].kind);
+                        (unsigned)nodes[i].kind,
+                        mod);
         }
     }
     
@@ -976,9 +1413,28 @@ int main(int argc, char** argv){
 
     } else if(cmd=="query"){
         if(argc<4){ usage(); return 1; }
-        std::string path=argv[2], sym=argv[3];
+        std::string krg_path = argv[2];
+        std::string sym;
+        std::string shim_path;
+        for (int i=3; i<argc; ++i){
+            std::string a = argv[i];
+            if (a.rfind("--shim=", 0) == 0){
+                shim_path = a.substr(7);
+            } else if (a == "--shim" && i+1 < argc){
+                shim_path = argv[++i];
+            } else if (sym.empty()){
+                sym = a;
+            } else {
+                sym = a;
+            }
+        }
+        if (sym.empty()){ usage(); return 1; }
 
-        Graph G; if(!G.load(path)) return 2;
+        Graph G; if(!G.load(krg_path)) return 2;
+        if (!shim_path.empty()){
+            auto syms = read_symbol_list(shim_path);
+            G.set_stop_names(syms);
+        }
         auto id = G.id_of(sym);
         if(!id){
             std::fprintf(stderr,"Symbol not found: %s\n", sym.c_str()); return 3;

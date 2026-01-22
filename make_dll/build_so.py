@@ -357,7 +357,7 @@ def infer_default_krg_path() -> Path | None:
 
 
 class ManualElfBuilder:
-    def __init__(self, symbols: List[Symbol]):
+    def __init__(self, symbols: List[Symbol], ro_bytes: bytes | None = None):
         self.symbols = symbols
         self.exported_symbols = [sym for sym in self.symbols if sym.exported]
         self.sections: Dict[str, SectionDef] = {}
@@ -386,6 +386,7 @@ class ManualElfBuilder:
         self.region_by_name: Dict[str, Region] = {}
         self.text_section_names: List[str] = []
         self.ro_section_names: List[str] = []
+        self.ro_bytes = ro_bytes or b""
 
     def build(self) -> bytes:
         self._prepare_symbol_virtual_addresses()

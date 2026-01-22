@@ -1,1 +1,2 @@
-xxh32
+lkm_locate_local_add
+lkm_locate_test_pseudo_got

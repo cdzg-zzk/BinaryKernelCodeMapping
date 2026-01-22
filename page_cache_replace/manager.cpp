@@ -21,7 +21,8 @@
 
 // #define PAGE_SIZE 4096
 #define PAGE_SIZE 4096
-#define REL_FILEPATH "../make_dll/libgenerated_parse_library.so"
+// #define REL_FILEPATH "../make_dll/libgenerated_parse_library.so"
+#define REL_FILEPATH "../make_dll/liblkm_locate.so"
 #define REL_SYMBOL_ADDR_FILE "../make_dll/resolved_symbol_addresses.txt"
 
 // Netlink 消息格式 - 支持多页面
@@ -46,6 +47,7 @@ struct SymbolAddressEntry {
     std::string name;
     unsigned long address;
     unsigned long size;
+    std::string module;
 };
 
 using SymbolAddressList = std::vector<SymbolAddressEntry>;
@@ -120,8 +122,8 @@ bool load_symbol_addresses(const char *filename, SymbolAddressList &symbol_addre
             continue;
         }
 
-        char *comma = strchr(line, ',');
-        if (!comma) {
+        char *comma1 = strchr(line, ',');
+        if (!comma1) {
             fprintf(stderr,
                     "Skipping malformed line %zu in %s: %s\n",
                     line_number,
@@ -130,15 +132,33 @@ bool load_symbol_addresses(const char *filename, SymbolAddressList &symbol_addre
             continue;
         }
 
-        *comma = '\0';
+        *comma1 = '\0';
         const char *symbol_name = trim_whitespace(line);
-        char *rest = comma + 1;
+        char *rest = comma1 + 1;
+
         char *comma2 = strchr(rest, ',');
-        if (comma2) {
-            *comma2 = '\0';
+        if (!comma2) {
+            fprintf(stderr,
+                    "Skipping malformed line %zu in %s: %s\n",
+                    line_number,
+                    filename,
+                    line);
+            continue;
         }
+        *comma2 = '\0';
         const char *addr_text = trim_whitespace(rest);
-        const char *size_text = comma2 ? trim_whitespace(comma2 + 1) : NULL;
+
+        char *rest2 = comma2 + 1;
+        char *comma3 = strchr(rest2, ',');
+        const char *size_text = "";
+        const char *module_text = "";
+        if (comma3) {
+            *comma3 = '\0';
+            size_text = trim_whitespace(rest2);
+            module_text = trim_whitespace(comma3 + 1);
+        } else {
+            size_text = trim_whitespace(rest2);
+        }
 
         if (symbol_name[0] == '\0' || addr_text[0] == '\0') {
             fprintf(stderr,
@@ -177,6 +197,7 @@ bool load_symbol_addresses(const char *filename, SymbolAddressList &symbol_addre
         entry.name = symbol_name;
         entry.address = (unsigned long)addr;
         entry.size = (unsigned long)size;
+        entry.module = module_text ? module_text : "";
         symbol_addresses.push_back(entry);
     }
 
@@ -205,6 +226,10 @@ bool build_page_replacement_plan(const SymbolAddressList &symbol_addresses,
     std::map<unsigned long, page_plan_entry> page_map;
 
     for (const auto &entry : symbol_addresses) {
+        // Skip shim-provided symbols; only replace kernel/LKM pages.
+        if (entry.module.find("libshim.so") != std::string::npos) {
+            continue;
+        }
         if (entry.address == 0) {
             continue;
         }
