@@ -1,4 +1,6 @@
 // Simple user-space harness to call functions from liblkm_locate.so.
+
+// LD_LIBRARY_PATH=../../make_dll  ./test_liblkm_locate
 #include <stdio.h>
 #include <stdlib.h>
 

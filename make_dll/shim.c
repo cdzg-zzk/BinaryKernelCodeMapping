@@ -26,7 +26,7 @@
     - 解决办法是让被调用方宽容（入口重对齐，比如 force_align_arg_pointer 或 -mstackrealign），或让调用
       方遵守 16 字节对齐。
  */
-
+// gcc -shared -fPIC shim.c -o libshim.so
 typedef unsigned long gfp_t;
 
 struct timespec64 {
