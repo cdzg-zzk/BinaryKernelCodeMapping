@@ -18,7 +18,7 @@
 
 #define NETLINK_MODIFY 30  // 自定义 Netlink 协议号
 #define NETLINK_RESTORE 29  // 恢复操作的 Netlink 协议号
-#define MAX_PAGES_PER_OPERATION 100  // 每次操作的最大页面数
+#define MAX_PAGES_PER_OPERATION 256  // 每次操作的最大页面数（需覆盖最大 replace 页数）
 
 static struct sock *nl_sk = NULL;
 static struct sock *nl_restore_sk = NULL;
