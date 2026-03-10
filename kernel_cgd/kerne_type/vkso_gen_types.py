@@ -14,6 +14,9 @@ import argparse, json, subprocess, sys, os, shutil, platform, struct
 from dataclasses import dataclass, field
 from typing import Optional
 
+DEFAULT_VMLINUX_BTF = "/sys/kernel/btf/vmlinux"
+MODULE_BTF_DIR = "/sys/kernel/btf"
+
 def find_bpftool(explicit):
     if explicit: return explicit
     p = shutil.which("bpftool")
@@ -32,19 +35,25 @@ def run(bpftool, args):
     p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, text=True)
     return p.returncode, p.stdout, p.stderr, " ".join(cmd)
 
-def load_btf_json(bpftool, btf_path=None, vmlinux=None):
+def load_btf_json(bpftool, btf_path=None, vmlinux=None, base_btf=None):
     """Try multiple json styles:
        1) btf dump file ... -j
        2) -j btf dump file ...
        3) btf dump file ... format json
        Return a list[dict] of types.
     """
-    path = vmlinux if vmlinux else (btf_path or "/sys/kernel/btf/vmlinux")
+    path = vmlinux if vmlinux else (btf_path or DEFAULT_VMLINUX_BTF)
     variants = [
         ["btf","dump","file",path,"-j"],
         ["-j","btf","dump","file",path],
         ["btf","dump","file",path,"format","json"],
     ]
+    if base_btf and path != base_btf:
+        variants.extend([
+            ["btf","dump","file",path,"-j","--base-btf",base_btf],
+            ["-j","btf","dump","file",path,"--base-btf",base_btf],
+            ["btf","dump","file",path,"format","json","--base-btf",base_btf],
+        ])
     last_err = ""
     for v in variants:
         rc,out,err,cmd = run(bpftool, v)
@@ -103,50 +112,63 @@ def resolve_module_btf_path(mod):
         base = os.path.basename(mod)
         mod_name = _strip_ko_ext(base)
         if mod_name:
-            btf_path = f"/sys/kernel/btf/{mod_name}"
+            btf_path = f"{MODULE_BTF_DIR}/{mod_name}"
             if os.path.exists(btf_path):
                 return btf_path
         return mod
     candidates = []
     if "/" not in mod:
-        candidates.append(f"/sys/kernel/btf/{mod}")
+        candidates.append(f"{MODULE_BTF_DIR}/{mod}")
         if mod.endswith(".ko"):
-            candidates.append(f"/sys/kernel/btf/{mod[:-3]}")
+            candidates.append(f"{MODULE_BTF_DIR}/{mod[:-3]}")
     for c in candidates:
         if os.path.exists(c):
             return c
     raise ValueError(f"module BTF not found for '{mod}' (tried {', '.join(candidates)})")
 
-def add_type_closure(by_id, root_id, marked):
-    if not root_id or root_id in marked: return
-    marked.add(root_id)
-    o = by_id.get(root_id)
+def add_type_closure(src, root_id):
+    if not root_id:
+        return
+    if root_id in src.marked:
+        return
+    o = src.by_id.get(root_id)
+    if not o and src.base is not None and root_id in src.base.by_id:
+        add_type_closure(src.base, root_id)
+        return
+    src.marked.add(root_id)
     if not o: return
     k = o.get("kind")
     if k in ("TYPEDEF","CONST","VOLATILE","RESTRICT"):
-        add_type_closure(by_id, o.get("type_id"), marked); return
+        add_type_closure(src, o.get("type_id")); return
     if k == "PTR":
-        add_type_closure(by_id, o.get("type_id"), marked); return
+        add_type_closure(src, o.get("type_id")); return
     if k == "ARRAY":
-        add_type_closure(by_id, o.get("elem_type_id"), marked); return
+        add_type_closure(src, o.get("elem_type_id")); return
     if k in ("STRUCT","UNION"):
         for m in (o.get("members") or []):
-            add_type_closure(by_id, m.get("type_id"), marked)
+            add_type_closure(src, m.get("type_id"))
         return
     if k in ("ENUM","ENUM64"):
         return
     if k == "FUNC_PROTO":
-        add_type_closure(by_id, o.get("ret_type_id"), marked)
+        add_type_closure(src, o.get("ret_type_id"))
         for p in (o.get("params") or []):
-            add_type_closure(by_id, p.get("type_id"), marked)
+            add_type_closure(src, p.get("type_id"))
         return
     if k == "FUNC":
-        add_type_closure(by_id, o.get("type_id"), marked); return
+        add_type_closure(src, o.get("type_id")); return
     # VAR / DATASEC / SEC etc. ignored
 
 import re
 
 SAFE_KRG_MAGIC = 0x3147524B  # 'KRG1'
+
+@dataclass
+class FunctionRequest:
+    name: str
+    source_id: Optional[str] = None
+    required: bool = True
+    origin: str = ""
 
 def _read_funcs_from_text(path):
     with open(path, encoding="utf-8") as f:
@@ -193,35 +215,56 @@ def _load_safe_func_list(path):
         raise ValueError("SAFE graph contained no symbol names")
     return names
 
-def iter_funcs_from_file(path):
+def _looks_like_resolved_entry(line):
+    parts = [p.strip() for p in line.split(",")]
+    return len(parts) == 5 and parts[-1] in ("0", "1")
+
+def load_requests_from_file(path):
     lower = path.lower()
     try_text_first = not lower.endswith(".krg")
     if try_text_first:
         try:
-            yield from _read_funcs_from_text(path)
-            return
+            with open(path, encoding="utf-8") as f:
+                for lineno, raw in enumerate(f, start=1):
+                    line = raw.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if _looks_like_resolved_entry(line):
+                        raise ValueError(
+                            f"{path}:{lineno}: resolved_symbol_addresses.txt is no longer accepted by --funcs-file; "
+                            "pass a plain API symbol list such as symbols.txt"
+                        )
+                    break
+            return [FunctionRequest(name=n, required=True, origin=path)
+                    for n in _read_funcs_from_text(path)]
         except UnicodeDecodeError:
             pass  # fall back to SAFE decoding
-    for name in _load_safe_func_list(path):
-        yield name
+    return [FunctionRequest(name=n, required=True, origin=path)
+            for n in _load_safe_func_list(path)]
 
-def dump_c_for_ids(bpftool, by_id, layout_ids, out, btf_path=None, vmlinux=None):
+def dump_c_for_ids(bpftool, by_id, layout_ids, out, btf_path=None, vmlinux=None, base_btf=None):
     """
     Try per-id dump (new and old syntaxes). If both unsupported, fall back to
     dumping the whole C and slicing out only the needed decls by kind+name,
     using brace-depth counting to handle nested unions/structs.
     """
     printed_txt = set()
-    path = vmlinux if vmlinux else (btf_path or "/sys/kernel/btf/vmlinux")
+    path = vmlinux if vmlinux else (btf_path or DEFAULT_VMLINUX_BTF)
 
     # 1) Fast path: per-id dump (old/new syntaxes)
     all_ok = True
     for tid in sorted(layout_ids):
         # old syntax: ... type id <T> ...
-        rc, txt, err, cmd = run(bpftool, ["btf","dump","file", path, "type", "id", str(tid), "format", "c"])
+        cmd_args = ["btf","dump","file", path, "type", "id", str(tid), "format", "c"]
+        if base_btf and path != base_btf:
+            cmd_args.extend(["--base-btf", base_btf])
+        rc, txt, err, cmd = run(bpftool, cmd_args)
         if rc != 0:
             # new syntax: ... id <T> ...
-            rc2, txt2, err2, cmd2 = run(bpftool, ["btf","dump","file", path, "id", str(tid), "format", "c"])
+            cmd_args = ["btf","dump","file", path, "id", str(tid), "format", "c"]
+            if base_btf and path != base_btf:
+                cmd_args.extend(["--base-btf", base_btf])
+            rc2, txt2, err2, cmd2 = run(bpftool, cmd_args)
             if rc2 != 0:
                 all_ok = False
                 break
@@ -239,7 +282,10 @@ def dump_c_for_ids(bpftool, by_id, layout_ids, out, btf_path=None, vmlinux=None)
         return  # done
 
     # 2) Fallback: dump full C then slice out required decls with brace-depth tracking
-    rc, full, err, cmd = run(bpftool, ["btf","dump","file", path, "format", "c"])
+    cmd_args = ["btf","dump","file", path, "format", "c"]
+    if base_btf and path != base_btf:
+        cmd_args.extend(["--base-btf", base_btf])
+    rc, full, err, cmd = run(bpftool, cmd_args)
     if rc != 0:
         sys.stderr.write(f"[bpftool] error (full dump failed): {cmd}\n{err}\n")
         sys.exit(1)
@@ -392,11 +438,136 @@ def dump_c_for_ids(bpftool, by_id, layout_ids, out, btf_path=None, vmlinux=None)
 
 @dataclass
 class BtfSource:
+    source_id: str
     label: str
     btf_path: Optional[str]
     vmlinux: Optional[str]
     by_id: dict
+    base: Optional["BtfSource"] = None
     marked: set = field(default_factory=set)
+
+def list_module_btf_candidates():
+    try:
+        names = sorted(os.listdir(MODULE_BTF_DIR))
+    except OSError:
+        return []
+    out = []
+    for name in names:
+        if name == os.path.basename(DEFAULT_VMLINUX_BTF):
+            continue
+        path = os.path.join(MODULE_BTF_DIR, name)
+        if os.path.isfile(path):
+            out.append(path)
+    return out
+
+def ensure_source_loaded(bpftool, source_id, sources_by_id, source_order, base_source, base_btf_path):
+    if source_id in sources_by_id:
+        return sources_by_id[source_id]
+    if source_id == base_btf_path:
+        return base_source
+    mod_objs = load_btf_json(bpftool, btf_path=source_id, base_btf=base_btf_path)
+    src = BtfSource(
+        source_id=source_id,
+        label=os.path.basename(source_id),
+        btf_path=source_id,
+        vmlinux=None,
+        by_id=build_index(mod_objs),
+        base=base_source,
+    )
+    sources_by_id[source_id] = src
+    source_order.append(source_id)
+    return src
+
+def discover_sources_for_func(fn, bpftool, sources_by_id, source_order, base_source, base_btf_path, module_candidates):
+    matches = []
+    if find_func_proto_id(base_source.by_id, fn) is not None:
+        matches.append(base_source)
+    for source_id in module_candidates:
+        src = ensure_source_loaded(bpftool, source_id, sources_by_id, source_order, base_source, base_btf_path)
+        if find_func_proto_id(src.by_id, fn) is not None:
+            matches.append(src)
+    return matches
+
+def lookup_type(src, tid):
+    cur = src
+    while cur is not None:
+        obj = cur.by_id.get(tid)
+        if obj is not None:
+            return cur, obj
+        cur = cur.base
+    return src, None
+
+def _group_decl_if_needed(decl):
+    if decl and any(ch in decl for ch in "*[("):
+        return f"({decl})"
+    return decl
+
+def render_c_decl(src, tid, decl=""):
+    owner, obj = lookup_type(src, tid)
+    if obj is None:
+        return f"/* unresolved_btf_{tid} */ {decl}".strip()
+    kind = obj.get("kind")
+    name = obj.get("name")
+
+    if kind == "TYPEDEF":
+        return f"{name} {decl}".strip()
+    if kind == "INT":
+        return f"{name} {decl}".strip()
+    if kind == "FLOAT":
+        return f"{name} {decl}".strip()
+    if kind == "VOID":
+        return f"void {decl}".strip()
+    if kind == "ENUM":
+        base = f"enum {name}" if name and name != "(anon)" else "enum"
+        return f"{base} {decl}".strip()
+    if kind == "ENUM64":
+        base = f"enum {name}" if name and name != "(anon)" else "enum"
+        return f"{base} {decl}".strip()
+    if kind == "STRUCT":
+        base = f"struct {name}" if name and name != "(anon)" else "struct"
+        return f"{base} {decl}".strip()
+    if kind == "UNION":
+        base = f"union {name}" if name and name != "(anon)" else "union"
+        return f"{base} {decl}".strip()
+    if kind == "PTR":
+        inner_decl = "*" if not decl else "*" + _group_decl_if_needed(decl)
+        return render_c_decl(owner, obj.get("type_id"), inner_decl)
+    if kind == "ARRAY":
+        nr_elems = obj.get("nr_elems", 0)
+        inner_decl = f"{decl}[{nr_elems}]" if decl else f"[{nr_elems}]"
+        return render_c_decl(owner, obj.get("elem_type_id"), inner_decl)
+    if kind in ("CONST", "VOLATILE", "RESTRICT"):
+        qualifier = kind.lower()
+        rendered = render_c_decl(owner, obj.get("type_id"), decl)
+        if decl and rendered.endswith(decl):
+            prefix = rendered[:-len(decl)].rstrip()
+            return f"{qualifier} {prefix} {decl}".strip()
+        return f"{qualifier} {rendered}".strip()
+    if kind == "FUNC_PROTO":
+        params = []
+        for idx, p in enumerate(obj.get("params") or []):
+            p_name = p.get("name") or f"arg{idx}"
+            p_tid = p.get("type_id")
+            if p_tid == 0:
+                params.append("...")
+            else:
+                params.append(render_c_decl(owner, p_tid, p_name))
+        params_text = ", ".join(params) if params else "void"
+        inner_decl = f"{_group_decl_if_needed(decl)}({params_text})" if decl else f"({params_text})"
+        return render_c_decl(owner, obj.get("ret_type_id"), inner_decl)
+    return f"/* unsupported_{kind}_{tid} */ {decl}".strip()
+
+def render_function_decl(src, fn):
+    func_id = None
+    proto_id = None
+    for tid, obj in src.by_id.items():
+        if obj.get("kind") == "FUNC" and obj.get("name") == fn:
+            func_id = tid
+            proto_id = obj.get("type_id")
+            break
+    if proto_id is None:
+        return None
+    return render_c_decl(src, proto_id, fn) + ";"
 
 
 
@@ -418,76 +589,135 @@ def main():
     bpftool = find_bpftool(args.bpftool)
     if not bpftool: sys.exit(1)
 
-    roots = set()
+    base_btf_path = args.vmlinux if args.vmlinux else (args.btf_path or DEFAULT_VMLINUX_BTF)
+    requests = []
     if args.funcs_file:
         try:
-            for n in iter_funcs_from_file(args.funcs_file):
-                roots.add(n)
+            requests.extend(load_requests_from_file(args.funcs_file))
         except (OSError, ValueError) as e:
             sys.stderr.write(f"Failed to read --funcs-file {args.funcs_file}: {e}\n")
             sys.exit(1)
     if args.funcs:
         for n in args.funcs.split(","):
-            n=n.strip()
-            if n: roots.add(n)
-    if not roots:
+            n = n.strip()
+            if n:
+                requests.append(FunctionRequest(name=n, required=True, origin="--funcs"))
+    if not requests:
         sys.stderr.write("No functions provided (use --funcs-file or --funcs)\n"); sys.exit(1)
 
     module_inputs = list(args.module or [])
     if args.modules:
         module_inputs.extend([m.strip() for m in args.modules.split(",") if m.strip()])
-
-    sources = []
-    objs = load_btf_json(bpftool, args.btf_path, args.vmlinux)
-    sources.append(BtfSource(label="vmlinux",
-                             btf_path=args.btf_path,
-                             vmlinux=args.vmlinux,
-                             by_id=build_index(objs)))
+    module_candidates = []
+    seen_candidates = set()
     for mod in module_inputs:
         try:
-            mod_path = resolve_module_btf_path(mod)
+            source_id = resolve_module_btf_path(mod)
         except ValueError as e:
             sys.stderr.write(f"ERROR: {e}\n")
             sys.exit(1)
-        mod_objs = load_btf_json(bpftool, btf_path=mod_path)
-        sources.append(BtfSource(label=os.path.basename(mod_path),
-                                 btf_path=mod_path,
-                                 vmlinux=None,
-                                 by_id=build_index(mod_objs)))
+        if source_id not in seen_candidates:
+            seen_candidates.add(source_id)
+            module_candidates.append(source_id)
+    for source_id in list_module_btf_candidates():
+        if source_id not in seen_candidates:
+            seen_candidates.add(source_id)
+            module_candidates.append(source_id)
 
-    missing = []
-    matched = {src.label: [] for src in sources}
-    for fn in sorted(roots):
-        found_any = False
-        for src in sources:
-            proto = find_func_proto_id(src.by_id, fn)
+    base_objs = load_btf_json(bpftool, btf_path=base_btf_path)
+    base_source = BtfSource(
+        source_id=base_btf_path,
+        label="vmlinux",
+        btf_path=base_btf_path,
+        vmlinux=None,
+        by_id=build_index(base_objs),
+    )
+    sources_by_id = {base_btf_path: base_source}
+    source_order = [base_btf_path]
+    matched = {base_btf_path: []}
+    missing_required = []
+    matched_count = 0
+    decl_order = []
+    seen_decl_keys = set()
+
+    for req in requests:
+        if req.source_id is not None:
+            src = ensure_source_loaded(
+                bpftool, req.source_id, sources_by_id, source_order, base_source, base_btf_path
+            )
+            matched.setdefault(src.source_id, [])
+            proto = find_func_proto_id(src.by_id, req.name)
             if proto is None:
+                level = "ERROR" if req.required else "WARN"
+                sys.stderr.write(
+                    f"{level}: func={req.name} not found in BTF source '{src.label}'"
+                    f" (origin={req.origin or 'unknown'})\n"
+                )
+                if req.required:
+                    missing_required.append(req.name)
                 continue
-            add_type_closure(src.by_id, proto, src.marked)
-            matched[src.label].append(fn)
-            found_any = True
-        if not found_any:
-            missing.append(fn)
+            sys.stderr.write(f"INFO: func={req.name} resolved in BTF source '{src.label}'\n")
+            add_type_closure(src, proto)
+            matched[src.source_id].append(req.name)
+            matched_count += 1
+            decl_key = (src.source_id, req.name)
+            if decl_key not in seen_decl_keys:
+                seen_decl_keys.add(decl_key)
+                decl_order.append(decl_key)
+            continue
 
-    if missing:
-        sys.stderr.write("ERROR: functions not found in any BTF source:\n")
-        for fn in missing:
+        matches = discover_sources_for_func(
+            req.name, bpftool, sources_by_id, source_order, base_source, base_btf_path, module_candidates
+        )
+        if not matches:
+            level = "ERROR" if req.required else "WARN"
+            sys.stderr.write(
+                f"{level}: func={req.name} not found in vmlinux or any loaded module"
+                f" (origin={req.origin or 'unknown'})\n"
+            )
+            if req.required:
+                missing_required.append(req.name)
+            continue
+        if len(matches) > 1:
+            labels = ", ".join(src.label for src in matches)
+            sys.stderr.write(
+                f"ERROR: func={req.name} matched multiple BTF sources: {labels}"
+                f" (origin={req.origin or 'unknown'})\n"
+            )
+            missing_required.append(req.name)
+            continue
+        src = matches[0]
+        matched.setdefault(src.source_id, [])
+        sys.stderr.write(f"INFO: func={req.name} auto-resolved to BTF source '{src.label}'\n")
+        add_type_closure(src, find_func_proto_id(src.by_id, req.name))
+        matched[src.source_id].append(req.name)
+        matched_count += 1
+        decl_key = (src.source_id, req.name)
+        if decl_key not in seen_decl_keys:
+            seen_decl_keys.add(decl_key)
+            decl_order.append(decl_key)
+
+    if missing_required:
+        sys.stderr.write("ERROR: required functions were not resolved:\n")
+        for fn in sorted(set(missing_required)):
             sys.stderr.write(f"  - {fn}\n")
         sys.exit(1)
+    if matched_count == 0:
+        sys.stderr.write("ERROR: no functions were resolved from the provided inputs\n")
+        sys.exit(1)
 
-    if module_inputs:
-        for src in sources[1:]:
-            hits = matched.get(src.label, [])
-            if not hits:
-                sys.stderr.write(f"WARN: no functions matched in module BTF source '{src.label}'\n")
-            else:
-                sys.stderr.write(f"INFO: module BTF source '{src.label}' matched {len(hits)} functions\n")
+    for source_id in source_order:
+        src = sources_by_id[source_id]
+        hits = matched.get(source_id, [])
+        if hits:
+            sys.stderr.write(f"INFO: BTF source '{src.label}' matched {len(hits)} functions\n")
 
     out = open(args.out,"w") if args.out else sys.stdout
     out.write("/* Auto-generated by vkso-gen-types (safe funcs only). */\n")
     out.write("#pragma once\n#include <stddef.h>\n#include <stdint.h>\n\n")
     emitted = set()
-    for src in sources:
+    for source_id in source_order:
+        src = sources_by_id[source_id]
         if not src.marked:
             continue
         layout_ids = set()
@@ -510,10 +740,21 @@ def main():
                 layout_ids.add(tid)
         if not layout_ids:
             continue
-        src_path = src.vmlinux or src.btf_path or "/sys/kernel/btf/vmlinux"
+        src_path = src.vmlinux or src.btf_path or DEFAULT_VMLINUX_BTF
         out.write(f"/* --- BTF source: {src.label} ({src_path}) --- */\n")
         dump_c_for_ids(bpftool, src.by_id, layout_ids, out,
-                       btf_path=src.btf_path, vmlinux=src.vmlinux)
+                       btf_path=src.btf_path, vmlinux=src.vmlinux,
+                       base_btf=base_btf_path if src.base is not None else None)
+    if decl_order:
+        out.write("/* --- API function declarations --- */\n")
+        for source_id, fn in decl_order:
+            src = sources_by_id[source_id]
+            decl = render_function_decl(src, fn)
+            if decl is None:
+                sys.stderr.write(f"WARN: failed to render declaration for {fn} from {src.label}\n")
+                continue
+            out.write(decl)
+            out.write("\n")
     if out is not sys.stdout: out.close()
 
 if __name__ == "__main__":
