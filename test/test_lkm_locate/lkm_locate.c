@@ -31,6 +31,22 @@
      385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577
  };
  
+ struct lkm_locate_table_entry {
+     int bias;
+     int (*func)(int x);
+ };
+
+static noinline int lkm_locate_table_func_add(int x)
+{
+    return x + static_array[0];
+}
+
+static noinline int lkm_locate_table_func_sub(int x)
+{
+    return x - static_array[1];
+}
+
+
  struct lkm_locate_ctx {
      void *(*kmalloc_fn)(size_t size, gfp_t flags);
      void (*kfree_fn)(const void *objp);
@@ -50,8 +66,8 @@
   * Keep ctx in .data with explicit pointer initializers so builder can
   * collect stable data relocations (including shim targets) at -O2.
   */
-//  static volatile struct lkm_locate_ctx lkm_locate_ctx_default = {
-static struct lkm_locate_ctx lkm_locate_ctx_default = {
+ static volatile struct lkm_locate_ctx lkm_locate_ctx_default = {
+// static struct lkm_locate_ctx lkm_locate_ctx_default = {
      .kmalloc_fn = __kmalloc,
      .kfree_fn = kfree,
      .kprint_fn = _printk,
@@ -62,51 +78,7 @@ static struct lkm_locate_ctx lkm_locate_ctx_default = {
      .p_fmt = my_fmt_str,
      .p_dmin = dmin_data,
  };
- 
 
-//  noinline int lkm_locate_test_all_pseudo_got_inter(int x,  const volatile struct lkm_locate_ctx* lkm_locate_ctx_defaultp)
-// {
-//     int sum = 0;
-//     int arr_idx;
-//     char *dst;
-
-//     /* 直接通过结构体变量调用内存分配函数 */
-//     dst = lkm_locate_ctx_defaultp->kmalloc_fn(32, GFP_KERNEL);
-//     if (!dst)
-//         return -ENOMEM;
-
-//     /* 直接通过结构体变量访问数据指针 */
-//     *(lkm_locate_ctx_defaultp->p_bss) = x;
-//     *(lkm_locate_ctx_defaultp->p_data) += 1;
-
-//     arr_idx = x % 4;
-
-//     sum += *(lkm_locate_ctx_defaultp->p_bss);
-//     sum += *(lkm_locate_ctx_defaultp->p_data);
-//     sum += *(lkm_locate_ctx_defaultp->p_rodata);
-//     sum += lkm_locate_ctx_defaultp->p_array[arr_idx];
-//     sum += lkm_locate_ctx_defaultp->p_dmin[arr_idx % 30];
-
-//     /* 直接通过结构体变量调用打印函数并传入对应格式和参数 */
-//     lkm_locate_ctx_defaultp->kprint_fn(
-//         lkm_locate_ctx_defaultp->p_fmt,
-//             *(lkm_locate_ctx_defaultp->p_bss),
-//             *(lkm_locate_ctx_defaultp->p_data),
-//             *(lkm_locate_ctx_defaultp->p_rodata),
-//             arr_idx,
-//             lkm_locate_ctx_defaultp->p_array[arr_idx]);
-
-//     /* 直接通过结构体变量调用释放函数 */
-//     lkm_locate_ctx_defaultp->kfree_fn(dst);
-
-//     return sum;
-// }
-// noinline int lkm_locate_test_all_pseudo_got(int x)
-// {
-//     int ret = lkm_locate_test_all_pseudo_got_inter(x, &lkm_locate_ctx_default);
-//     return ret;
-// }
-// EXPORT_SYMBOL(lkm_locate_test_all_pseudo_got);
 noinline int lkm_locate_test_all_pseudo_got(int x)
 {
     int sum = 0;
@@ -146,9 +118,39 @@ noinline int lkm_locate_test_all_pseudo_got(int x)
 }
 EXPORT_SYMBOL(lkm_locate_test_all_pseudo_got);
 
+/*
+ * Keep the table separate from ctx and force an explicit RIP-relative LEA
+ * before indexed field access.
+ */
+static struct lkm_locate_table_entry lkm_locate_config_table[] __used = {
+// static const struct lkm_locate_table_entry lkm_locate_config_table[] __used = {
+    { .bias = 0x10, .func = lkm_locate_table_func_add },
+    { .bias = 0x20, .func = lkm_locate_table_func_sub },
+};
+
+noinline int lkm_locate_test_table(int selector)
+{
+    volatile struct lkm_locate_table_entry *base;
+    const volatile struct lkm_locate_table_entry *entry;
+    int index;
+
+    index = selector & 1;
+
+    asm volatile(
+        "lea lkm_locate_config_table(%%rip), %0"
+        : "=r"(base)
+    );
+
+    entry = &base[index];
+
+    return entry->func(selector + entry->bias);
+
+}
+EXPORT_SYMBOL(lkm_locate_test_table);
  static int __init lkm_locate_init(void)
  {
      lkm_locate_sink = lkm_locate_test_all_pseudo_got(42);
+     lkm_locate_sink += lkm_locate_test_table(1);
      return 0;
  }
  
