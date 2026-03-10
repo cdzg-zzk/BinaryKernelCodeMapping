@@ -179,19 +179,19 @@ typedef z_stream *z_streamp;
 
                         /* basic functions */
 
-extern int zlib_deflate_workspacesize (int windowBits, int memLevel);
+extern int mz_zlib_deflate_workspacesize (int windowBits, int memLevel);
 /*
    Returns the number of bytes that needs to be allocated for a per-
    stream workspace with the specified parameters.  A pointer to this
    number of bytes should be returned in stream->workspace before
-   you call zlib_deflateInit() or zlib_deflateInit2().  If you call
+   you call zlib_deflateInit() or mz_zlib_deflateInit2().  If you call
    zlib_deflateInit(), specify windowBits = MAX_WBITS and memLevel =
-   MAX_MEM_LEVEL here.  If you call zlib_deflateInit2(), the windowBits
-   and memLevel parameters passed to zlib_deflateInit2() must not
+   MAX_MEM_LEVEL here.  If you call mz_zlib_deflateInit2(), the windowBits
+   and memLevel parameters passed to mz_zlib_deflateInit2() must not
    exceed those passed here.
 */
 
-extern int zlib_deflate_dfltcc_enabled (void);
+extern int mz_zlib_deflate_dfltcc_enabled (void);
 /*
    Returns 1 if Deflate-Conversion facility is installed and enabled,
    otherwise 0.
@@ -220,7 +220,7 @@ extern int deflateInit (z_streamp strm, int level);
 */
 
 
-extern int zlib_deflate (z_streamp strm, int flush);
+extern int mz_zlib_deflate (z_streamp strm, int flush);
 /*
     deflate compresses as much data as possible, and stops when the input
   buffer becomes empty or the output buffer becomes full. It may introduce some
@@ -298,7 +298,7 @@ extern int zlib_deflate (z_streamp strm, int flush);
 */
 
 
-extern int zlib_deflateEnd (z_streamp strm);
+extern int mz_zlib_deflateEnd (z_streamp strm);
 /*
      All dynamically allocated data structures for this stream are freed.
    This function discards any unprocessed input and does not flush any
@@ -500,7 +500,7 @@ extern int deflateInit2 (z_streamp strm,
    not perform any compression: this will be done by deflate().
 */
 
-extern int zlib_deflateReset (z_streamp strm);
+extern int mz_zlib_deflateReset (z_streamp strm);
 /*
      This function is equivalent to deflateEnd followed by deflateInit,
    but does not free and reallocate all the internal compression state.
@@ -578,12 +578,12 @@ extern int zlib_inflateIncomp (z_stream *strm);
 */
 
 #define zlib_deflateInit(strm, level) \
-	zlib_deflateInit2((strm), (level), Z_DEFLATED, MAX_WBITS, \
+	mz_zlib_deflateInit2((strm), (level), Z_DEFLATED, MAX_WBITS, \
 			      DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY)
 #define zlib_inflateInit(strm) \
 	zlib_inflateInit2((strm), DEF_WBITS)
 
-extern int zlib_deflateInit2(z_streamp strm, int  level, int  method,
+extern int mz_zlib_deflateInit2(z_streamp strm, int  level, int  method,
                                       int windowBits, int memLevel,
                                       int strategy);
 extern int zlib_inflateInit2(z_streamp strm, int  windowBits);

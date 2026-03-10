@@ -34,8 +34,8 @@
 
 /* #include "deflate.h" */
 
-#include <linux/zutil.h>
-#include <linux/bitrev.h>
+#include "zutil.h"
+#include "bitrev.h"
 #include "defutil.h"
 
 #ifdef DEBUG_ZLIB
@@ -83,7 +83,7 @@ static const uch bl_order[BL_CODES]
 static ct_data static_ltree[L_CODES+2];
 /* The static literal tree. Since the bit lengths are imposed, there is no
  * need for the L_CODES extra codes used during heap construction. However
- * The codes 286 and 287 are needed to build a canonical tree (see zlib_tr_init
+ * The codes 286 and 287 are needed to build a canonical tree (see mz_zlib_tr_init
  * below).
  */
 
@@ -238,7 +238,7 @@ static void tr_static_init(void)
 /* ===========================================================================
  * Initialize the tree data structures for a new zlib stream.
  */
-void zlib_tr_init(
+void mz_zlib_tr_init(
 	deflate_state *s
 )
 {
@@ -735,7 +735,7 @@ static void send_all_trees(
 /* ===========================================================================
  * Send a stored block
  */
-void zlib_tr_stored_block(
+void mz_zlib_tr_stored_block(
 	deflate_state *s,
 	char *buf,        /* input block */
 	ulg stored_len,   /* length of input block */
@@ -751,7 +751,7 @@ void zlib_tr_stored_block(
 
 /* Send just the `stored block' type code without any length bytes or data.
  */
-void zlib_tr_stored_type_only(
+void mz_zlib_tr_stored_type_only(
 	deflate_state *s
 )
 {
@@ -772,7 +772,7 @@ void zlib_tr_stored_type_only(
  * To simplify the code, we assume the worst case of last real code encoded
  * on one bit only.
  */
-void zlib_tr_align(
+void mz_zlib_tr_align(
 	deflate_state *s
 )
 {
@@ -799,7 +799,7 @@ void zlib_tr_align(
  * trees or store, and output the encoded block to the zip file. This function
  * returns the total compressed length for the file so far.
  */
-ulg zlib_tr_flush_block(
+ulg mz_zlib_tr_flush_block(
 	deflate_state *s,
 	char *buf,        /* input block, or NULL if too old */
 	ulg stored_len,   /* length of input block */
@@ -878,7 +878,7 @@ ulg zlib_tr_flush_block(
          * successful. If LIT_BUFSIZE <= WSIZE, it is never too late to
          * transform a block into a stored block.
          */
-        zlib_tr_stored_block(s, buf, stored_len, eof);
+        mz_zlib_tr_stored_block(s, buf, stored_len, eof);
 
 #ifdef FORCE_STATIC
     } else if (static_lenb >= 0) { /* force static trees */
@@ -912,7 +912,7 @@ ulg zlib_tr_flush_block(
  * Save the match info and tally the frequency counts. Return true if
  * the current block must be flushed.
  */
-int zlib_tr_tally(
+int mz_zlib_tr_tally(
 	deflate_state *s,
 	unsigned dist,  /* distance of matched string */
 	unsigned lc     /* match length-MIN_MATCH or unmatched char (if dist==0) */
@@ -929,7 +929,7 @@ int zlib_tr_tally(
         dist--;             /* dist = match distance - 1 */
         Assert((ush)dist < (ush)MAX_DIST(s) &&
                (ush)lc <= (ush)(MAX_MATCH-MIN_MATCH) &&
-               (ush)d_code(dist) < (ush)D_CODES,  "zlib_tr_tally: bad match");
+               (ush)d_code(dist) < (ush)D_CODES,  "mz_zlib_tr_tally: bad match");
 
         s->dyn_ltree[length_code[lc]+LITERALS+1].Freq++;
         s->dyn_dtree[d_code(dist)].Freq++;

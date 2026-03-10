@@ -1,7 +1,7 @@
 #ifndef DEFUTIL_H
 #define DEFUTIL_H
 
-#include <linux/zutil.h>
+#include "zutil.h"
 
 #define Assert(err, str) 
 #define Trace(dummy) 
@@ -271,14 +271,14 @@ typedef struct deflate_state {
  */
 
         /* in trees.c */
-void zlib_tr_init         (deflate_state *s);
-int  zlib_tr_tally        (deflate_state *s, unsigned dist, unsigned lc);
-ulg  zlib_tr_flush_block  (deflate_state *s, char *buf, ulg stored_len,
+void mz_zlib_tr_init         (deflate_state *s);
+int  mz_zlib_tr_tally        (deflate_state *s, unsigned dist, unsigned lc);
+ulg  mz_zlib_tr_flush_block  (deflate_state *s, char *buf, ulg stored_len,
 			   int eof);
-void zlib_tr_align        (deflate_state *s);
-void zlib_tr_stored_block (deflate_state *s, char *buf, ulg stored_len,
+void mz_zlib_tr_align        (deflate_state *s);
+void mz_zlib_tr_stored_block (deflate_state *s, char *buf, ulg stored_len,
 			   int eof);
-void zlib_tr_stored_type_only (deflate_state *);
+void mz_zlib_tr_stored_type_only (deflate_state *);
 
 
 /* ===========================================================================

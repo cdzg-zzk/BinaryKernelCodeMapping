@@ -49,18 +49,14 @@
  */
 
  #include <linux/module.h>
- #include <linux/zutil.h>
+ #include "zutil.h"
  #include "defutil.h"
  
  /* architecture-specific bits */
- #ifdef CONFIG_ZLIB_DFLTCC
- #  include "../zlib_dfltcc/dfltcc.h"
- #else
  #define DEFLATE_RESET_HOOK(strm) do {} while (0)
  #define DEFLATE_HOOK(strm, flush, bstate) 0
  #define DEFLATE_NEED_CHECKSUM(strm) 1
  #define DEFLATE_DFLTCC_ENABLED() 0
- #endif
  
  /* ===========================================================================
   *  Function prototypes.
@@ -104,20 +100,20 @@
  typedef struct deflate_workspace {
      /* State memory for the deflator */
      deflate_state deflate_memory;
- #ifdef CONFIG_ZLIB_DFLTCC
-     /* State memory for s390 hardware deflate */
-     struct dfltcc_state dfltcc_memory;
- #endif
+//  #ifdef CONFIG_ZLIB_DFLTCC
+//      /* State memory for s390 hardware deflate */
+//      struct dfltcc_state dfltcc_memory;
+//  #endif
      Byte *window_memory;
      Pos *prev_memory;
      Pos *head_memory;
      char *overlay_memory;
  } deflate_workspace;
  
- #ifdef CONFIG_ZLIB_DFLTCC
- /* dfltcc_state must be doubleword aligned for DFLTCC call */
- static_assert(offsetof(struct deflate_workspace, dfltcc_memory) % 8 == 0);
- #endif
+//  #ifdef CONFIG_ZLIB_DFLTCC
+//  /* dfltcc_state must be doubleword aligned for DFLTCC call */
+//  static_assert(offsetof(struct deflate_workspace, dfltcc_memory) % 8 == 0);
+//  #endif
  
  /* Values for max_lazy_match, good_match and max_chain_length, depending on
   * the desired pack level (0..9). The values given below have been tuned to
@@ -132,7 +128,7 @@
     compress_func func;
  } config;
  
- static const config configuration_table[10] = {
+ static config configuration_table[10] __used = {
  /*      good lazy nice chain */
  /* 0 */ {0,    0,  0,    0, deflate_stored},  /* store only */
  /* 1 */ {4,    4,  8,    4, deflate_fast}, /* maximum speed, no lazy matches */
@@ -145,6 +141,22 @@
  /* 7 */ {8,   32, 128, 256, deflate_slow},
  /* 8 */ {32, 128, 258, 1024, deflate_slow},
  /* 9 */ {32, 258, 258, 4096, deflate_slow}}; /* maximum compression */
+
+ static __always_inline config *configuration_table_base(void)
+ {
+     config *base;
+
+     /*
+      * Force a standalone RIP-relative base load before indexed field access.
+      * This avoids the compiler folding table[index].field into a single
+      * absolute-address relocation in .text on x86_64.
+      */
+     asm volatile(
+         "lea configuration_table(%%rip), %0"
+         : "=r"(base)
+     );
+     return base;
+ }
  
  /* Note: the deflate() code requires max_lazy >= MIN_MATCH and max_chain >= 4
   * For deflate_fast() (levels <= 3) good is ignored and lazy has a different
@@ -185,7 +197,7 @@
      memset((char *)s->head, 0, (unsigned)(s->hash_size-1)*sizeof(*s->head));
  
  /* ========================================================================= */
- int zlib_deflateInit2(
+ int mz_zlib_deflateInit2(
      z_streamp strm,
      int  level,
      int  method,
@@ -228,15 +240,15 @@
       */
      next = (char *) mem;
      next += sizeof(*mem);
- #ifdef CONFIG_ZLIB_DFLTCC
-     /*
-      *  DFLTCC requires the window to be page aligned.
-      *  Thus, we overallocate and take the aligned portion of the buffer.
-      */
-     mem->window_memory = (Byte *) PTR_ALIGN(next, PAGE_SIZE);
- #else
+//  #ifdef CONFIG_ZLIB_DFLTCC
+//      /*
+//       *  DFLTCC requires the window to be page aligned.
+//       *  Thus, we overallocate and take the aligned portion of the buffer.
+//       */
+//      mem->window_memory = (Byte *) PTR_ALIGN(next, PAGE_SIZE);
+//  #else
      mem->window_memory = (Byte *) next;
- #endif
+//  #endif
      next += zlib_deflate_window_memsize(windowBits);
      mem->prev_memory = (Pos *) next;
      next += zlib_deflate_prev_memsize(windowBits);
@@ -275,11 +287,11 @@
      s->strategy = strategy;
      s->method = (Byte)method;
  
-     return zlib_deflateReset(strm);
+     return mz_zlib_deflateReset(strm);
  }
  
  /* ========================================================================= */
- int zlib_deflateReset(
+ int mz_zlib_deflateReset(
      z_streamp strm
  )
  {
@@ -303,7 +315,7 @@
      strm->adler = 1;
      s->last_flush = Z_NO_FLUSH;
  
-     zlib_tr_init(s);
+     mz_zlib_tr_init(s);
      lm_init(s);
  
      DEFLATE_RESET_HOOK(strm);
@@ -326,12 +338,13 @@
  }   
  
  /* ========================================================================= */
- int zlib_deflate(
+ int mz_zlib_deflate(
      z_streamp strm,
      int flush
  )
  {
      int old_flush; /* value of flush param for previous deflate call */
+     const config *cfg;
      deflate_state *s;
  
      if (strm == NULL || strm->state == NULL ||
@@ -405,9 +418,11 @@
      if (strm->avail_in != 0 || s->lookahead != 0 ||
          (flush != Z_NO_FLUSH && s->status != FINISH_STATE)) {
          block_state bstate;
+
+         cfg = &configuration_table_base()[s->level];
  
      bstate = DEFLATE_HOOK(strm, flush, &bstate) ? bstate :
-          (*(configuration_table[s->level].func))(s, flush);
+          (*(cfg->func))(s, flush);
  
          if (bstate == finish_started || bstate == finish_done) {
              s->status = FINISH_STATE;
@@ -427,13 +442,13 @@
      }
          if (bstate == block_done) {
              if (flush == Z_PARTIAL_FLUSH) {
-                 zlib_tr_align(s);
+                 mz_zlib_tr_align(s);
          } else if (flush == Z_PACKET_FLUSH) {
          /* Output just the 3-bit `stored' block type value,
             but not a zero length. */
-         zlib_tr_stored_type_only(s);
+         mz_zlib_tr_stored_type_only(s);
              } else { /* FULL_FLUSH or SYNC_FLUSH */
-                 zlib_tr_stored_block(s, (char*)0, 0L, 0);
+                 mz_zlib_tr_stored_block(s, (char*)0, 0L, 0);
                  /* For a full flush, this empty block will be recognized
                   * as a special marker by inflate_sync().
                   */
@@ -465,7 +480,7 @@
  }
  
  /* ========================================================================= */
- int zlib_deflateEnd(
+ int mz_zlib_deflateEnd(
      z_streamp strm
  )
  {
@@ -524,16 +539,19 @@
      deflate_state *s
  )
  {
+     const config *cfg;
+
      s->window_size = (ulg)2L*s->w_size;
  
      CLEAR_HASH(s);
  
      /* Set the default configuration parameters:
       */
-     s->max_lazy_match   = configuration_table[s->level].max_lazy;
-     s->good_match       = configuration_table[s->level].good_length;
-     s->nice_match       = configuration_table[s->level].nice_length;
-     s->max_chain_length = configuration_table[s->level].max_chain;
+     cfg = &configuration_table_base()[s->level];
+     s->max_lazy_match   = cfg->max_lazy;
+     s->good_match       = cfg->good_length;
+     s->nice_match       = cfg->nice_length;
+     s->max_chain_length = cfg->max_chain;
  
      s->strstart = 0;
      s->block_start = 0L;
@@ -829,7 +847,7 @@
   * IN assertion: strstart is set to the end of the current match.
   */
  #define FLUSH_BLOCK_ONLY(s, eof) { \
-    zlib_tr_flush_block(s, (s->block_start >= 0L ? \
+    mz_zlib_tr_flush_block(s, (s->block_start >= 0L ? \
                     (char *)&s->window[(unsigned)s->block_start] : \
                     NULL), \
          (ulg)((long)s->strstart - s->block_start), \
@@ -958,7 +976,7 @@
          if (s->match_length >= MIN_MATCH) {
              check_match(s, s->strstart, s->match_start, s->match_length);
  
-             bflush = zlib_tr_tally(s, s->strstart - s->match_start,
+             bflush = mz_zlib_tr_tally(s, s->strstart - s->match_start,
                                 s->match_length - MIN_MATCH);
  
              s->lookahead -= s->match_length;
@@ -992,7 +1010,7 @@
          } else {
              /* No match, output a literal byte */
              Tracevv((stderr,"%c", s->window[s->strstart]));
-             bflush = zlib_tr_tally (s, 0, s->window[s->strstart]);
+             bflush = mz_zlib_tr_tally (s, 0, s->window[s->strstart]);
              s->lookahead--;
              s->strstart++; 
          }
@@ -1072,7 +1090,7 @@
  
              check_match(s, s->strstart-1, s->prev_match, s->prev_length);
  
-             bflush = zlib_tr_tally(s, s->strstart -1 - s->prev_match,
+             bflush = mz_zlib_tr_tally(s, s->strstart -1 - s->prev_match,
                     s->prev_length - MIN_MATCH);
  
              /* Insert in hash table all strings up to the end of the match.
@@ -1099,7 +1117,7 @@
               * is longer, truncate the previous match to a single literal.
               */
              Tracevv((stderr,"%c", s->window[s->strstart-1]));
-             if (zlib_tr_tally (s, 0, s->window[s->strstart-1])) {
+             if (mz_zlib_tr_tally (s, 0, s->window[s->strstart-1])) {
                  FLUSH_BLOCK_ONLY(s, 0);
              }
              s->strstart++;
@@ -1117,14 +1135,14 @@
      Assert (flush != Z_NO_FLUSH, "no flush?");
      if (s->match_available) {
          Tracevv((stderr,"%c", s->window[s->strstart-1]));
-         zlib_tr_tally (s, 0, s->window[s->strstart-1]);
+         mz_zlib_tr_tally (s, 0, s->window[s->strstart-1]);
          s->match_available = 0;
      }
      FLUSH_BLOCK(s, flush == Z_FINISH);
      return flush == Z_FINISH ? finish_done : block_done;
  }
  
- int zlib_deflate_workspacesize(int windowBits, int memLevel)
+ int mz_zlib_deflate_workspacesize(int windowBits, int memLevel)
  {
      if (windowBits < 0) /* undocumented feature: suppress zlib header */
          windowBits = -windowBits;
@@ -1140,7 +1158,7 @@
          + zlib_deflate_overlay_memsize(memLevel);
  }
  
- int zlib_deflate_dfltcc_enabled(void)
+ int mz_zlib_deflate_dfltcc_enabled(void)
  {
      return DEFLATE_DFLTCC_ENABLED();
  }
