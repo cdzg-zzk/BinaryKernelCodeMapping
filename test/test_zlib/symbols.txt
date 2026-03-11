@@ -1,2 +1,5 @@
 mz_zlib_deflate
 mz_zlib_deflateInit2
+mz_zlib_deflate_workspacesize
+mz_zlib_deflateReset
+mz_zlib_deflateEnd

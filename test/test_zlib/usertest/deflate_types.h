@@ -40,3 +40,6 @@ typedef z_stream *z_streamp;
 /* --- API function declarations --- */
 int mz_zlib_deflate(z_streamp strm, int flush);
 int mz_zlib_deflateInit2(z_streamp strm, int level, int method, int windowBits, int memLevel, int strategy);
+int mz_zlib_deflate_workspacesize(int windowBits, int memLevel);
+int mz_zlib_deflateReset(z_streamp strm);
+int mz_zlib_deflateEnd(z_streamp strm);
