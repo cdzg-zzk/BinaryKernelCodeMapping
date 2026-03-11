@@ -12,7 +12,7 @@
 #define __bitrev8 __arch_bitrev8
 
 #else
-static const u8 byte_rev_table[256] = {
+static const u8 byte_rev_table[256] __used = {
 	0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0,
 	0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0,
 	0x08, 0x88, 0x48, 0xc8, 0x28, 0xa8, 0x68, 0xe8,
@@ -46,9 +46,25 @@ static const u8 byte_rev_table[256] = {
 	0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef,
 	0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff,
 };
+
+static inline const u8 *byte_rev_table_base(void)
+{
+	const u8 *base;
+
+	/*
+	 * Force a standalone RIP-relative base load before indexed access so the
+	 * compiler does not fold byte_rev_table[byte] into an absolute relocation.
+	 */
+	asm volatile(
+		"lea byte_rev_table(%%rip), %0"
+		: "=r"(base)
+	);
+	return base;
+}
+
 static inline u8 __bitrev8(u8 byte)
 {
-	return byte_rev_table[byte];
+	return byte_rev_table_base()[byte];
 }
 
 static inline u16 __bitrev16(u16 x)

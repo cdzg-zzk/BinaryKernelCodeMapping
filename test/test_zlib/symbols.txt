@@ -1,1 +1,2 @@
 mz_zlib_deflate
+mz_zlib_deflateInit2

@@ -61,16 +61,16 @@
 #define REPZ_11_138  18
 /* repeat a zero length 11-138 times  (7 bits of repeat count) */
 
-static const int extra_lbits[LENGTH_CODES] /* extra bits for each length code */
+static const int extra_lbits[LENGTH_CODES] __used /* extra bits for each length code */
    = {0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0};
 
-static const int extra_dbits[D_CODES] /* extra bits for each distance code */
+static const int extra_dbits[D_CODES] __used /* extra bits for each distance code */
    = {0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13};
 
 static const int extra_blbits[BL_CODES]/* extra bits for each bit length code */
    = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,3,7};
 
-static const uch bl_order[BL_CODES]
+static const uch bl_order[BL_CODES] __used
    = {16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15};
 /* The lengths of the bit length codes are sent in order of decreasing
  * probability, to avoid transmitting the lengths for unused bit length codes.
@@ -80,32 +80,164 @@ static const uch bl_order[BL_CODES]
  * Local data. These are initialized only once.
  */
 
-static ct_data static_ltree[L_CODES+2];
+static ct_data static_ltree[L_CODES+2] __used;
 /* The static literal tree. Since the bit lengths are imposed, there is no
  * need for the L_CODES extra codes used during heap construction. However
  * The codes 286 and 287 are needed to build a canonical tree (see mz_zlib_tr_init
  * below).
  */
 
-static ct_data static_dtree[D_CODES];
+static ct_data static_dtree[D_CODES] __used;
 /* The static distance tree. (Actually a trivial tree since all codes use
  * 5 bits.)
  */
 
-static uch dist_code[512];
+static uch dist_code[512] __used;
 /* distance codes. The first 256 values correspond to the distances
  * 3 .. 258, the last 256 values correspond to the top 8 bits of
  * the 15 bit distances.
  */
 
-static uch length_code[MAX_MATCH-MIN_MATCH+1];
+static uch length_code[MAX_MATCH-MIN_MATCH+1] __used;
 /* length code for each normalized match length (0 == MIN_MATCH) */
 
-static int base_length[LENGTH_CODES];
+static int base_length[LENGTH_CODES] __used;
 /* First normalized length for each code (0 = MIN_MATCH) */
 
-static int base_dist[D_CODES];
+static int base_dist[D_CODES] __used;
 /* First normalized distance for each code (0 = distance of 1) */
+
+static inline const int *extra_lbits_base(void)
+{
+    const int *base;
+
+    asm volatile(
+        "lea extra_lbits(%%rip), %0"
+        : "=r"(base)
+    );
+    return base;
+}
+
+static inline const int *extra_dbits_base(void)
+{
+    const int *base;
+
+    asm volatile(
+        "lea extra_dbits(%%rip), %0"
+        : "=r"(base)
+    );
+    return base;
+}
+
+static inline const uch *bl_order_base(void)
+{
+    const uch *base;
+
+    asm volatile(
+        "lea bl_order(%%rip), %0"
+        : "=r"(base)
+    );
+    return base;
+}
+
+static inline uch *length_code_base(void)
+{
+    uch *base;
+
+    asm volatile(
+        "lea length_code(%%rip), %0"
+        : "=r"(base)
+    );
+    return base;
+}
+
+static inline int *base_length_base(void)
+{
+    int *base;
+
+    asm volatile(
+        "lea base_length(%%rip), %0"
+        : "=r"(base)
+    );
+    return base;
+}
+
+static inline uch *dist_code_base(void)
+{
+    uch *base;
+
+    asm volatile(
+        "lea dist_code(%%rip), %0"
+        : "=r"(base)
+    );
+    return base;
+}
+
+static inline int *base_dist_base(void)
+{
+    int *base;
+
+    asm volatile(
+        "lea base_dist(%%rip), %0"
+        : "=r"(base)
+    );
+    return base;
+}
+
+static inline ct_data *static_ltree_base(void)
+{
+    ct_data *base;
+
+    asm volatile(
+        "lea static_ltree(%%rip), %0"
+        : "=r"(base)
+    );
+    return base;
+}
+
+static inline ct_data *static_dtree_base(void)
+{
+    ct_data *base;
+
+    asm volatile(
+        "lea static_dtree(%%rip), %0"
+        : "=r"(base)
+    );
+    return base;
+}
+
+static inline static_tree_desc *static_l_desc_base(void)
+{
+    static_tree_desc *base;
+
+    asm volatile(
+        "lea static_l_desc(%%rip), %0"
+        : "=r"(base)
+    );
+    return base;
+}
+
+static inline static_tree_desc *static_d_desc_base(void)
+{
+    static_tree_desc *base;
+
+    asm volatile(
+        "lea static_d_desc(%%rip), %0"
+        : "=r"(base)
+    );
+    return base;
+}
+
+static inline static_tree_desc *static_bl_desc_base(void)
+{
+    static_tree_desc *base;
+
+    asm volatile(
+        "lea static_bl_desc(%%rip), %0"
+        : "=r"(base)
+    );
+    return base;
+}
 
 struct static_tree_desc_s {
     const ct_data *static_tree;  /* static tree or NULL */
@@ -115,13 +247,13 @@ struct static_tree_desc_s {
     int     max_length;          /* max bit length for the codes */
 };
 
-static static_tree_desc  static_l_desc =
+static static_tree_desc  static_l_desc __used =
 {static_ltree, extra_lbits, LITERALS+1, L_CODES, MAX_BITS};
 
-static static_tree_desc  static_d_desc =
+static static_tree_desc  static_d_desc __used =
 {static_dtree, extra_dbits, 0,          D_CODES, MAX_BITS};
 
-static static_tree_desc  static_bl_desc =
+static static_tree_desc  static_bl_desc __used =
 {(const ct_data *)0, extra_blbits, 0,   BL_CODES, MAX_BL_BITS};
 
 /* ===========================================================================
@@ -157,11 +289,18 @@ static void copy_block     (deflate_state *s, char *buf, unsigned len,
 #endif
 
 #define d_code(dist) \
-   ((dist) < 256 ? dist_code[dist] : dist_code[256+((dist)>>7)])
+   d_code_lookup(dist)
 /* Mapping from a distance to a distance code. dist is the distance - 1 and
  * must not have side effects. dist_code[256] and dist_code[257] are never
  * used.
  */
+
+static inline uch d_code_lookup(unsigned dist)
+{
+    uch *dist_code_tbl = dist_code_base();
+
+    return dist < 256 ? dist_code_tbl[dist] : dist_code_tbl[256 + (dist >> 7)];
+}
 
 /* ===========================================================================
  * Initialize the various 'constant' tables. In a multi-threaded environment,
@@ -171,6 +310,14 @@ static void copy_block     (deflate_state *s, char *buf, unsigned len,
 static void tr_static_init(void)
 {
     static int static_init_done;
+    int *base_length_tbl;
+    uch *length_code_tbl;
+    int *base_dist_tbl;
+    uch *dist_code_tbl;
+    const int *extra_lbits_tbl;
+    const int *extra_dbits_tbl;
+    ct_data *static_ltree_tbl;
+    ct_data *static_dtree_tbl;
     int n;        /* iterates over tree elements */
     int bits;     /* bit counter */
     int length;   /* length value */
@@ -181,12 +328,21 @@ static void tr_static_init(void)
 
     if (static_init_done) return;
 
+    base_length_tbl = base_length_base();
+    length_code_tbl = length_code_base();
+    base_dist_tbl = base_dist_base();
+    dist_code_tbl = dist_code_base();
+    extra_lbits_tbl = extra_lbits_base();
+    extra_dbits_tbl = extra_dbits_base();
+    static_ltree_tbl = static_ltree_base();
+    static_dtree_tbl = static_dtree_base();
+
     /* Initialize the mapping length (0..255) -> length code (0..28) */
     length = 0;
     for (code = 0; code < LENGTH_CODES-1; code++) {
-        base_length[code] = length;
-        for (n = 0; n < (1<<extra_lbits[code]); n++) {
-            length_code[length++] = (uch)code;
+        base_length_tbl[code] = length;
+        for (n = 0; n < (1<<extra_lbits_tbl[code]); n++) {
+            length_code_tbl[length++] = (uch)code;
         }
     }
     Assert (length == 256, "tr_static_init: length != 256");
@@ -194,22 +350,22 @@ static void tr_static_init(void)
      * in two different ways: code 284 + 5 bits or code 285, so we
      * overwrite length_code[255] to use the best encoding:
      */
-    length_code[length-1] = (uch)code;
+    length_code_tbl[length-1] = (uch)code;
 
     /* Initialize the mapping dist (0..32K) -> dist code (0..29) */
     dist = 0;
     for (code = 0 ; code < 16; code++) {
-        base_dist[code] = dist;
-        for (n = 0; n < (1<<extra_dbits[code]); n++) {
-            dist_code[dist++] = (uch)code;
+        base_dist_tbl[code] = dist;
+        for (n = 0; n < (1<<extra_dbits_tbl[code]); n++) {
+            dist_code_tbl[dist++] = (uch)code;
         }
     }
     Assert (dist == 256, "tr_static_init: dist != 256");
     dist >>= 7; /* from now on, all distances are divided by 128 */
     for ( ; code < D_CODES; code++) {
-        base_dist[code] = dist << 7;
-        for (n = 0; n < (1<<(extra_dbits[code]-7)); n++) {
-            dist_code[256 + dist++] = (uch)code;
+        base_dist_tbl[code] = dist << 7;
+        for (n = 0; n < (1<<(extra_dbits_tbl[code]-7)); n++) {
+            dist_code_tbl[256 + dist++] = (uch)code;
         }
     }
     Assert (dist == 256, "tr_static_init: 256+dist != 512");
@@ -217,20 +373,20 @@ static void tr_static_init(void)
     /* Construct the codes of the static literal tree */
     for (bits = 0; bits <= MAX_BITS; bits++) bl_count[bits] = 0;
     n = 0;
-    while (n <= 143) static_ltree[n++].Len = 8, bl_count[8]++;
-    while (n <= 255) static_ltree[n++].Len = 9, bl_count[9]++;
-    while (n <= 279) static_ltree[n++].Len = 7, bl_count[7]++;
-    while (n <= 287) static_ltree[n++].Len = 8, bl_count[8]++;
+    while (n <= 143) static_ltree_tbl[n++].Len = 8, bl_count[8]++;
+    while (n <= 255) static_ltree_tbl[n++].Len = 9, bl_count[9]++;
+    while (n <= 279) static_ltree_tbl[n++].Len = 7, bl_count[7]++;
+    while (n <= 287) static_ltree_tbl[n++].Len = 8, bl_count[8]++;
     /* Codes 286 and 287 do not exist, but we must include them in the
      * tree construction to get a canonical Huffman tree (longest code
      * all ones)
      */
-    gen_codes((ct_data *)static_ltree, L_CODES+1, bl_count);
+    gen_codes(static_ltree_tbl, L_CODES+1, bl_count);
 
     /* The static distance tree is trivial: */
     for (n = 0; n < D_CODES; n++) {
-        static_dtree[n].Len = 5;
-        static_dtree[n].Code = bitrev32((u32)n) >> (32 - 5);
+        static_dtree_tbl[n].Len = 5;
+        static_dtree_tbl[n].Code = bitrev32((u32)n) >> (32 - 5);
     }
     static_init_done = 1;
 }
@@ -247,13 +403,13 @@ void mz_zlib_tr_init(
     s->compressed_len = 0L;
 
     s->l_desc.dyn_tree = s->dyn_ltree;
-    s->l_desc.stat_desc = &static_l_desc;
+    s->l_desc.stat_desc = static_l_desc_base();
 
     s->d_desc.dyn_tree = s->dyn_dtree;
-    s->d_desc.stat_desc = &static_d_desc;
+    s->d_desc.stat_desc = static_d_desc_base();
 
     s->bl_desc.dyn_tree = s->bl_tree;
-    s->bl_desc.stat_desc = &static_bl_desc;
+    s->bl_desc.stat_desc = static_bl_desc_base();
 
     s->bi_buf = 0;
     s->bi_valid = 0;
@@ -671,6 +827,7 @@ static int build_bl_tree(
 	deflate_state *s
 )
 {
+    const uch *bl_order_tbl = bl_order_base();
     int max_blindex;  /* index of last bit length code of non zero freq */
 
     /* Determine the bit length frequencies for literal and distance trees */
@@ -688,7 +845,7 @@ static int build_bl_tree(
      * 3 but the actual value used is 4.)
      */
     for (max_blindex = BL_CODES-1; max_blindex >= 3; max_blindex--) {
-        if (s->bl_tree[bl_order[max_blindex]].Len != 0) break;
+        if (s->bl_tree[bl_order_tbl[max_blindex]].Len != 0) break;
     }
     /* Update opt_len to include the bit length tree and counts */
     s->opt_len += 3*(max_blindex+1) + 5+5+4;
@@ -710,6 +867,7 @@ static void send_all_trees(
 	int blcodes  /* number of codes for each tree */
 )
 {
+    const uch *bl_order_tbl = bl_order_base();
     int rank;                    /* index in bl_order */
 
     Assert (lcodes >= 257 && dcodes >= 1 && blcodes >= 4, "not enough codes");
@@ -720,8 +878,8 @@ static void send_all_trees(
     send_bits(s, dcodes-1,   5);
     send_bits(s, blcodes-4,  4); /* not -3 as stated in appnote.txt */
     for (rank = 0; rank < blcodes; rank++) {
-        Tracev((stderr, "\nbl code %2d ", bl_order[rank]));
-        send_bits(s, s->bl_tree[bl_order[rank]].Len, 3);
+        Tracev((stderr, "\nbl code %2d ", bl_order_tbl[rank]));
+        send_bits(s, s->bl_tree[bl_order_tbl[rank]].Len, 3);
     }
     Tracev((stderr, "\nbl tree: sent %ld", s->bits_sent));
 
@@ -776,8 +934,10 @@ void mz_zlib_tr_align(
 	deflate_state *s
 )
 {
+    ct_data *static_ltree_tbl = static_ltree_base();
+
     send_bits(s, STATIC_TREES<<1, 3);
-    send_code(s, END_BLOCK, static_ltree);
+    send_code(s, END_BLOCK, static_ltree_tbl);
     s->compressed_len += 10L; /* 3 for block type, 7 for EOB */
     bi_flush(s);
     /* Of the 10 bits for the empty block, we have already sent
@@ -787,7 +947,7 @@ void mz_zlib_tr_align(
      */
     if (1 + s->last_eob_len + 10 - s->bi_valid < 9) {
         send_bits(s, STATIC_TREES<<1, 3);
-        send_code(s, END_BLOCK, static_ltree);
+        send_code(s, END_BLOCK, static_ltree_tbl);
         s->compressed_len += 10L;
         bi_flush(s);
     }
@@ -808,6 +968,8 @@ ulg mz_zlib_tr_flush_block(
 {
     ulg opt_lenb, static_lenb; /* opt_len and static_len in bytes */
     int max_blindex = 0;  /* index of last bit length code of non zero freq */
+    ct_data *static_ltree_tbl = static_ltree_base();
+    ct_data *static_dtree_tbl = static_dtree_base();
 
     /* Build the Huffman trees unless a stored block is forced */
     if (s->level > 0) {
@@ -886,7 +1048,7 @@ ulg mz_zlib_tr_flush_block(
     } else if (static_lenb == opt_lenb) {
 #endif
         send_bits(s, (STATIC_TREES<<1)+eof, 3);
-        compress_block(s, (ct_data *)static_ltree, (ct_data *)static_dtree);
+        compress_block(s, static_ltree_tbl, static_dtree_tbl);
         s->compressed_len += 3 + s->static_len;
     } else {
         send_bits(s, (DYN_TREES<<1)+eof, 3);
@@ -918,6 +1080,8 @@ int mz_zlib_tr_tally(
 	unsigned lc     /* match length-MIN_MATCH or unmatched char (if dist==0) */
 )
 {
+    uch *length_code_tbl = length_code_base();
+    const int *extra_dbits_tbl = extra_dbits_base();
     s->d_buf[s->last_lit] = (ush)dist;
     s->l_buf[s->last_lit++] = (uch)lc;
     if (dist == 0) {
@@ -931,7 +1095,7 @@ int mz_zlib_tr_tally(
                (ush)lc <= (ush)(MAX_MATCH-MIN_MATCH) &&
                (ush)d_code(dist) < (ush)D_CODES,  "mz_zlib_tr_tally: bad match");
 
-        s->dyn_ltree[length_code[lc]+LITERALS+1].Freq++;
+        s->dyn_ltree[length_code_tbl[lc]+LITERALS+1].Freq++;
         s->dyn_dtree[d_code(dist)].Freq++;
     }
 
@@ -943,7 +1107,7 @@ int mz_zlib_tr_tally(
         int dcode;
         for (dcode = 0; dcode < D_CODES; dcode++) {
             out_length += (ulg)s->dyn_dtree[dcode].Freq *
-                (5L+extra_dbits[dcode]);
+                (5L+extra_dbits_tbl[dcode]);
         }
         out_length >>= 3;
         Tracev((stderr,"\nlast_lit %u, in %ld, out ~%ld(%ld%%) ",
@@ -967,6 +1131,11 @@ static void compress_block(
 	ct_data *dtree  /* distance tree */
 )
 {
+    uch *length_code_tbl = length_code_base();
+    const int *extra_lbits_tbl = extra_lbits_base();
+    int *base_length_tbl = base_length_base();
+    const int *extra_dbits_tbl = extra_dbits_base();
+    int *base_dist_tbl = base_dist_base();
     unsigned dist;      /* distance of matched string */
     int lc;             /* match length or unmatched char (if dist == 0) */
     unsigned lx = 0;    /* running index in l_buf */
@@ -981,11 +1150,11 @@ static void compress_block(
             Tracecv(isgraph(lc), (stderr," '%c' ", lc));
         } else {
             /* Here, lc is the match length - MIN_MATCH */
-            code = length_code[lc];
+            code = length_code_tbl[lc];
             send_code(s, code+LITERALS+1, ltree); /* send the length code */
-            extra = extra_lbits[code];
+            extra = extra_lbits_tbl[code];
             if (extra != 0) {
-                lc -= base_length[code];
+                lc -= base_length_tbl[code];
                 send_bits(s, lc, extra);       /* send the extra length bits */
             }
             dist--; /* dist is now the match distance - 1 */
@@ -993,9 +1162,9 @@ static void compress_block(
             Assert (code < D_CODES, "bad d_code");
 
             send_code(s, code, dtree);       /* send the distance code */
-            extra = extra_dbits[code];
+            extra = extra_dbits_tbl[code];
             if (extra != 0) {
-                dist -= base_dist[code];
+                dist -= base_dist_tbl[code];
                 send_bits(s, dist, extra);   /* send the extra distance bits */
             }
         } /* literal or match pair ? */
