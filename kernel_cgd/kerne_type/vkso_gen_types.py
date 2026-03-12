@@ -503,6 +503,8 @@ def _group_decl_if_needed(decl):
     return decl
 
 def render_c_decl(src, tid, decl=""):
+    if tid == 0:
+        return f"void {decl}".strip()
     owner, obj = lookup_type(src, tid)
     if obj is None:
         return f"/* unresolved_btf_{tid} */ {decl}".strip()

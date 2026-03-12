@@ -4,6 +4,21 @@
 #include <stdint.h>
 
 /* --- BTF source: vmlinux (/sys/kernel/btf/vmlinux) --- */
+/* --- typedef __u32 --- */
+typedef unsigned int __u32;
+
+/* --- typedef u32 --- */
+typedef __u32 u32;
+
+/* --- typedef __kernel_ulong_t --- */
+typedef long unsigned int __kernel_ulong_t;
+
+/* --- typedef __kernel_size_t --- */
+typedef __kernel_ulong_t __kernel_size_t;
+
+/* --- typedef size_t --- */
+typedef __kernel_size_t size_t;
+
 /* --- typedef Byte --- */
 typedef unsigned char Byte;
 
@@ -43,3 +58,6 @@ int mz_zlib_deflateInit2(z_streamp strm, int level, int method, int windowBits, 
 int mz_zlib_deflate_workspacesize(int windowBits, int memLevel);
 int mz_zlib_deflateReset(z_streamp strm);
 int mz_zlib_deflateEnd(z_streamp strm);
+void mz_crc32init_le(void);
+u32 mz_crc32(u32 crc, const unsigned char *p, size_t len);
+const u32 *(mz_get_crc_table(void));

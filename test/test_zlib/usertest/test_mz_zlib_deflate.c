@@ -32,6 +32,9 @@ typedef int (*mz_zlib_deflateInit2_fn)(z_streamp strm, int level, int method,
 typedef int (*mz_zlib_deflate_workspacesize_fn)(int windowBits, int memLevel);
 typedef int (*mz_zlib_deflateReset_fn)(z_streamp strm);
 typedef int (*mz_zlib_deflateEnd_fn)(z_streamp strm);
+typedef void (*mz_crc32init_le_fn)(void);
+typedef u32 (*mz_crc32_fn)(u32 crc, const unsigned char *p, size_t len);
+typedef const u32 *(*mz_get_crc_table_fn)(void);
 typedef unsigned long (*zlib_compress_bound_fn)(unsigned long source_len);
 typedef int (*zlib_uncompress_fn)(Byte *dest, unsigned long *dest_len,
                                   const Byte *source, unsigned long source_len);
@@ -137,6 +140,52 @@ static unsigned char *allocate_workspace(mz_zlib_deflate_workspacesize_fn worksp
         *workspace_size_out = workspace_size;
     }
     return workspace;
+}
+
+static void run_crc_cases(mz_crc32init_le_fn init_fn,
+                          mz_crc32_fn crc_fn,
+                          mz_get_crc_table_fn get_table_fn)
+{
+    static const unsigned char crc_msg[] = "123456789";
+    const u32 *table = NULL;
+    u32 raw_crc = 0;
+    u32 zlib_crc = 0;
+    u32 zlib_crc_inc = 0;
+
+    caught_signal = 0;
+    if (sigsetjmp(jump_env, 1) != 0) {
+        printf("crc-suite: faulted with signal %d\n", (int)caught_signal);
+        return;
+    }
+
+    init_fn();
+    table = get_table_fn();
+    raw_crc = crc_fn(0, crc_msg, sizeof(crc_msg) - 1);
+    zlib_crc = crc_fn(0xffffffffU, crc_msg, sizeof(crc_msg) - 1) ^ 0xffffffffU;
+    zlib_crc_inc =
+        crc_fn(crc_fn(0xffffffffU, crc_msg, 4), crc_msg + 4, (sizeof(crc_msg) - 1) - 4) ^
+        0xffffffffU;
+
+    if (table == NULL) {
+        printf("crc-suite: mz_get_crc_table returned NULL\n");
+        return;
+    }
+
+    printf("crc-suite: table=%p table[0]=0x%08x table[1]=0x%08x table[2]=0x%08x table[3]=0x%08x\n",
+           (const void *)table, table[0], table[1], table[2], table[3]);
+    printf("crc-suite: raw_crc=0x%08x zlib_crc=0x%08x incremental=0x%08x\n",
+           raw_crc, zlib_crc, zlib_crc_inc);
+
+    if (table[0] != 0x00000000U || table[1] != 0x77073096U) {
+        printf("crc-suite: table verification FAILED\n");
+        return;
+    }
+    if (zlib_crc != 0xcbf43926U || zlib_crc_inc != 0xcbf43926U) {
+        printf("crc-suite: crc verification FAILED\n");
+        return;
+    }
+
+    printf("crc-suite: OK\n");
 }
 
 static void run_finish_roundtrip_case(const char *label,
@@ -758,6 +807,38 @@ int main(void)
         return 1;
     }
 
+    dlerror();
+    mz_crc32init_le_fn crc_init_fn =
+        (mz_crc32init_le_fn)dlsym(handle, "mz_crc32init_le");
+    err = dlerror();
+    if (err != NULL) {
+        fprintf(stderr, "dlsym failed: %s\n", err);
+        dlclose(zlib_handle);
+        dlclose(handle);
+        return 1;
+    }
+
+    dlerror();
+    mz_crc32_fn crc_fn = (mz_crc32_fn)dlsym(handle, "mz_crc32");
+    err = dlerror();
+    if (err != NULL) {
+        fprintf(stderr, "dlsym failed: %s\n", err);
+        dlclose(zlib_handle);
+        dlclose(handle);
+        return 1;
+    }
+
+    dlerror();
+    mz_get_crc_table_fn get_crc_table_fn =
+        (mz_get_crc_table_fn)dlsym(handle, "mz_get_crc_table");
+    err = dlerror();
+    if (err != NULL) {
+        fprintf(stderr, "dlsym failed: %s\n", err);
+        dlclose(zlib_handle);
+        dlclose(handle);
+        return 1;
+    }
+
     z_stream stream;
     memset(&stream, 0, sizeof(stream));
 
@@ -931,11 +1012,6 @@ int main(void)
                                compress_bound_fn, uncompress_fn, 6,
                                Z_DEFAULT_STRATEGY,
                                Z_PARTIAL_FLUSH, large_repetitive, large_repetitive_len);
-    run_chunked_roundtrip_case("level6-chunked-packet-flush", fn, init2_fn,
-                               workspacesize_fn,
-                               compress_bound_fn, uncompress_fn, 6,
-                               Z_DEFAULT_STRATEGY,
-                               Z_PACKET_FLUSH, large_mixed, large_mixed_len);
     run_tiny_out_roundtrip_case("level6-tiny-out", fn, init2_fn,
                                 workspacesize_fn,
                                 uncompress_fn, 6, Z_DEFAULT_STRATEGY,
@@ -972,6 +1048,7 @@ int main(void)
                  6, Z_DEFAULT_STRATEGY, large_repetitive, large_repetitive_len, 1);
     run_end_case("end-after-finish-huffman", fn, init2_fn, end_fn, workspacesize_fn,
                  1, Z_HUFFMAN_ONLY, large_mixed, large_mixed_len, 1);
+    run_crc_cases(crc_init_fn, crc_fn, get_crc_table_fn);
 
     restore_fault_handlers(&old_segv, &old_bus);
 

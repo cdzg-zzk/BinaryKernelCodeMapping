@@ -1,5 +1,5 @@
 obj-m += mz_zlib_deflate.o
-mz_zlib_deflate-y := deflate.o deftree.o deflate_syms.o
+mz_zlib_deflate-y := deflate.o deftree.o crc32.o deflate_syms.o
 
 UBSAN_SANITIZE := n
 
@@ -26,6 +26,10 @@ CFLAGS_REMOVE_deflate_syms.o += -fsanitize=bounds -fsanitize=shift -fsanitize=bo
 CFLAGS_REMOVE_deflate_syms.o += -fstack-protector-strong
 CFLAGS_REMOVE_deflate_syms.o += -pg -mrecord-mcount -mfentry
 CFLAGS_REMOVE_deflate_syms.o += -fpatchable-function-entry=16,16
+CFLAGS_REMOVE_crc32.o += -fsanitize=bounds -fsanitize=shift -fsanitize=bool -fsanitize=enum
+CFLAGS_REMOVE_crc32.o += -fstack-protector-strong
+CFLAGS_REMOVE_crc32.o += -pg -mrecord-mcount -mfentry
+CFLAGS_REMOVE_crc32.o += -fpatchable-function-entry=16,16
 
 KDIR ?= /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)

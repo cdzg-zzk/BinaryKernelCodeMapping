@@ -199,6 +199,8 @@ struct Builder {
     std::unordered_map<u64, std::vector<u32>> alias_by_start_;
     // 可分配节的区间表（按 start 升序），用于 ABS/RIP 指针定位
     std::vector<Range> alloc_secs_;
+    // ET_REL 可执行节中的重定位字段地址；反汇编阶段命中后应信任重定位，而不是裸机器码立即数
+    std::unordered_set<u64> exec_reloc_field_addrs_;
 
     // 边
     std::vector<std::vector<u32>> adj;       // code -> code
@@ -585,6 +587,7 @@ struct Builder {
         // 然后在 .rela.text* 里识别 RIP-relative 访问到该 slot 的指令，补齐 code->import 边。
         std::unordered_map<u64, u32> pseudo_got_import_slots;
         pseudo_got_import_slots.reserve(4096);
+        exec_reloc_field_addrs_.clear();
 
         for (u32 fi=0; fi<inputs.size(); ++fi){
             auto &in = inputs[fi];
@@ -707,6 +710,9 @@ struct Builder {
                     ELFIO::Elf64_Addr off=0; ELFIO::Elf_Word sym=0; unsigned type=0; ELFIO::Elf_Sxword addend=0;
                     rels.get_entry(i,off,sym,type,addend);
                     u64 at = secs[targ_idx].addr + off;
+                    if (in.is_relocatable && is_exec(secs[targ_idx].flags)) {
+                        exec_reloc_field_addrs_.insert(at);
+                    }
 
                     // owner by ranges
                     auto owner = target_func_by_addr(at);
@@ -833,9 +839,17 @@ struct Builder {
                 const cs_detail* d = insn->detail;
                 bool is_call = (insn->id==X86_INS_CALL);
                 bool is_jmp  = (insn->id==X86_INS_JMP);
+                const auto& enc = d->x86.encoding;
+                const bool imm_field_is_reloc =
+                    enc.imm_size != 0 && exec_reloc_field_addrs_.count(insn->address + enc.imm_offset) != 0;
+                const bool disp_field_is_reloc =
+                    enc.disp_size != 0 && exec_reloc_field_addrs_.count(insn->address + enc.disp_offset) != 0;
 
                 // CALL IMM：ABS→REL
                 if (is_call){
+                    if (imm_field_is_reloc) {
+                        if (want(u)) dlog("[CALL IMM] %s -> skipped (reloc-backed immediate)\n", syms[u].name.c_str());
+                    } else {
                     for (u8 oi=0; oi<d->x86.op_count; ++oi){
                         const auto &op = d->x86.operands[oi];
                         if (op.type!=X86_OP_IMM) { continue; }
@@ -858,6 +872,7 @@ struct Builder {
                         if (want(u)) dlog("[CALL IMM] %s -> %s (edge)\n", syms[u].name.c_str(), nm.c_str());
                         add_edge(u,v);
                     }
+                    }
                 }
 
                 // MEM：RIP+disp 或 ABS
@@ -877,6 +892,11 @@ struct Builder {
                         tag = "ABS";
                     } else {
                         if (want(u)) dlog("[%s MEM] %s -> [reg-base=%d] ignored\n", is_call?"CALL":"JMP", syms[u].name.c_str(), op.mem.base);
+                        continue;
+                    }
+                    if (disp_field_is_reloc){
+                        if (want(u)) dlog("[%s %sMEM] %s -> skipped (reloc-backed displacement)\n",
+                                          is_call?"CALL":"JMP", tag, syms[u].name.c_str());
                         continue;
                     }
 
@@ -915,6 +935,9 @@ struct Builder {
 
                 // JMP IMM：仅跨函数
                 if (is_jmp){
+                    if (imm_field_is_reloc) {
+                        if (want(u)) dlog("[JMP IMM] %s -> skipped (reloc-backed immediate)\n", syms[u].name.c_str());
+                    } else {
                     for (u8 oi=0; oi<d->x86.op_count; ++oi){
                         const auto &op = d->x86.operands[oi];
                         if (op.type!=X86_OP_IMM) { continue; }
@@ -937,6 +960,7 @@ struct Builder {
                         if (in_hard_bl(nm)) { if (want(u)) dlog("[JMP IMM] %s -> %s (hard-BL filtered)\n", syms[u].name.c_str(), nm.c_str()); continue; }
                         if (want(u)) dlog("[JMP IMM] %s -> %s (edge)\n", syms[u].name.c_str(), nm.c_str());
                         add_edge(u,v);
+                    }
                     }
                 }
             }
