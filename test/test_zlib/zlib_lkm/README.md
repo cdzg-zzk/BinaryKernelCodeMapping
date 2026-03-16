@@ -466,6 +466,8 @@ deflate_fast / deflate_slow / deflate_rle / deflate_huff
   - 这一步没有改 `zlibVersion()` 的返回语义，仍然返回同一个版本串，只是把“代码直接拿字符串地址”改成了“代码先读 `.data` 槽位，再由槽位指向字符串”
   - 为了防止编译器再把这个读取折叠回立即数，当前实现把该槽位保留为可写数据对象，并确保它在目标文件里形成 `.rela.data`
   - 这样对应的字符串地址关系会落在数据重定位里，而不是落成 `.text` 里的绝对地址寻址
+  - `get_crc_table()` 也按同一思路处理：新增 `crc32_pic_ctx`，把 CRC 表指针先收进 `.data` 槽位，再由导出函数返回该槽位中的指针
+  - 这样 `get_crc_table()` 不再直接把 `crc_table` 的地址嵌进 `.text`，而是经由 `.data` 中的伪 GOT 槽位间接返回
 - 将 `zcalloc()` 改为基于 `kvmalloc()` 的内核分配
 - 将 `zcfree()` 改为基于 `kvfree()` 的内核释放
 - `zcalloc()` 继续保留乘法溢出检查，同时不再使用 `vzalloc()` 的零填充语义，尽量贴近 upstream 在普通平台上 `malloc(items * size)` 的默认行为

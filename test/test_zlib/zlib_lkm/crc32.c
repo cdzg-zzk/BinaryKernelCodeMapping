@@ -182,6 +182,17 @@ local void write_table(out, table)
 #include "crc32.h"
 #endif /* DYNAMIC_CRC_TABLE */
 
+/*
+ * Keep exported table addresses behind writable data slots so callers can
+ * reach them through a pseudo-GOT style indirection instead of a fixed
+ * .rodata address embedded in .text.
+ */
+static struct {
+    const z_crc_t FAR *table;
+} crc32_pic_ctx __attribute__((section(".data"))) = {
+    .table = (const z_crc_t FAR *)crc_table,
+};
+
 /* =========================================================================
  * This function can be used by asm versions of crc32()
  */
@@ -191,7 +202,7 @@ const z_crc_t FAR * ZEXPORT get_crc_table()
     if (crc_table_empty)
         make_crc_table();
 #endif /* DYNAMIC_CRC_TABLE */
-    return (const z_crc_t FAR *)crc_table;
+    return crc32_pic_ctx.table;
 }
 
 /* ========================================================================= */
