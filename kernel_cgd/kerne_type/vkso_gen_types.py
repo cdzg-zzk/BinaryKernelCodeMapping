@@ -250,6 +250,29 @@ def dump_c_for_ids(bpftool, by_id, layout_ids, out, btf_path=None, vmlinux=None,
     """
     printed_txt = set()
     path = vmlinux if vmlinux else (btf_path or DEFAULT_VMLINUX_BTF)
+    allow_suffix_alias = bool(base_btf and path != base_btf)
+
+    def canonical_name(name, targets):
+        if name in targets:
+            return name
+        if allow_suffix_alias:
+            m = re.match(r"^(.*)___\d+$", name)
+            if m and m.group(1) in targets:
+                return m.group(1)
+        return None
+
+    def normalize_block_text(text, targets):
+        if not allow_suffix_alias:
+            return text
+        replacements = {}
+        for name in targets:
+            for m in re.finditer(r"\b" + re.escape(name) + r"___\d+\b", text):
+                replacements[m.group(0)] = name
+        if not replacements:
+            return text
+        for old, new in sorted(replacements.items(), key=lambda kv: len(kv[0]), reverse=True):
+            text = re.sub(r"\b" + re.escape(old) + r"\b", new, text)
+        return text
 
     # 1) Fast path: per-id dump (old/new syntaxes)
     all_ok = True
@@ -269,6 +292,11 @@ def dump_c_for_ids(bpftool, by_id, layout_ids, out, btf_path=None, vmlinux=None,
                 all_ok = False
                 break
             txt = txt2
+        if allow_suffix_alias:
+            o = by_id.get(tid)
+            name = o.get("name") if o else None
+            if name and name != "(anon)":
+                txt = normalize_block_text(txt, {name})
         if txt in printed_txt:
             continue
         printed_txt.add(txt)
@@ -308,6 +336,23 @@ def dump_c_for_ids(bpftool, by_id, layout_ids, out, btf_path=None, vmlinux=None,
         elif k == "UNION":  targets_union.add(nm)
         elif k in ("ENUM","ENUM64"): targets_enum.add(nm)
         elif k == "TYPEDEF": targets_typedef.add(nm)
+    all_targets = targets_struct | targets_union | targets_enum | targets_typedef
+    prefer_suffixed = set()
+    if allow_suffix_alias:
+        for name in all_targets:
+            if re.search(r"\b" + re.escape(name) + r"___\d+\b", full):
+                prefer_suffixed.add(name)
+
+    def canonical_name_for_dump(name, targets):
+        if name in targets:
+            if name in prefer_suffixed:
+                return None
+            return name
+        if allow_suffix_alias:
+            m = re.match(r"^(.*)___\d+$", name)
+            if m and m.group(1) in targets:
+                return m.group(1)
+        return None
 
     # helper: capture a balanced-brace block starting at line i that already contains an opening '{'
     def capture_braced_block(i):
@@ -356,6 +401,15 @@ def dump_c_for_ids(bpftool, by_id, layout_ids, out, btf_path=None, vmlinux=None,
             j += 1
         return block, j
 
+    def extract_typedef_name(block_text):
+        m = re.search(r"\(\s*\*\s*([A-Za-z_]\w*)\s*\)\s*\(", block_text, re.S)
+        if m:
+            return m.group(1)
+        m = re.search(r"\b([A-Za-z_]\w*)\s*(?:\[[^\]]+\])?\s*;\s*$", block_text, re.S)
+        if m:
+            return m.group(1)
+        return None
+
     # emit sets to avoid duplicates
     emitted_struct = set()
     emitted_union  = set()
@@ -374,12 +428,14 @@ def dump_c_for_ids(bpftool, by_id, layout_ids, out, btf_path=None, vmlinux=None,
 
         m = struct_pat.match(s)
         if m:
-            name = m.group(1)
-            if name in targets_struct and name not in emitted_struct:
+            raw_name = m.group(1)
+            name = canonical_name_for_dump(raw_name, targets_struct)
+            if name and name not in emitted_struct:
                 block, nxt = capture_braced_block(i)
+                block_text = normalize_block_text("".join(block), all_targets)
                 out.write(f"/* --- struct {name} --- */\n")
-                out.writelines(block)
-                if not block[-1].endswith("\n"): out.write("\n")
+                out.write(block_text)
+                if not block_text.endswith("\n"): out.write("\n")
                 out.write("\n")
                 emitted_struct.add(name)
                 i = nxt
@@ -387,12 +443,14 @@ def dump_c_for_ids(bpftool, by_id, layout_ids, out, btf_path=None, vmlinux=None,
 
         m = union_pat.match(s)
         if m:
-            name = m.group(1)
-            if name in targets_union and name not in emitted_union:
+            raw_name = m.group(1)
+            name = canonical_name_for_dump(raw_name, targets_union)
+            if name and name not in emitted_union:
                 block, nxt = capture_braced_block(i)
+                block_text = normalize_block_text("".join(block), all_targets)
                 out.write(f"/* --- union {name} --- */\n")
-                out.writelines(block)
-                if not block[-1].endswith("\n"): out.write("\n")
+                out.write(block_text)
+                if not block_text.endswith("\n"): out.write("\n")
                 out.write("\n")
                 emitted_union.add(name)
                 i = nxt
@@ -400,12 +458,14 @@ def dump_c_for_ids(bpftool, by_id, layout_ids, out, btf_path=None, vmlinux=None,
 
         m = enum_pat.match(s)
         if m:
-            name = m.group(1)
-            if name in targets_enum and name not in emitted_enum:
+            raw_name = m.group(1)
+            name = canonical_name_for_dump(raw_name, targets_enum)
+            if name and name not in emitted_enum:
                 block, nxt = capture_braced_block(i)
+                block_text = normalize_block_text("".join(block), all_targets)
                 out.write(f"/* --- enum {name} --- */\n")
-                out.writelines(block)
-                if not block[-1].endswith("\n"): out.write("\n")
+                out.write(block_text)
+                if not block_text.endswith("\n"): out.write("\n")
                 out.write("\n")
                 emitted_enum.add(name)
                 i = nxt
@@ -415,17 +475,15 @@ def dump_c_for_ids(bpftool, by_id, layout_ids, out, btf_path=None, vmlinux=None,
             block, nxt = capture_typedef(i)
             if targets_typedef:
                 block_text = "".join(block)
-                hits = []
-                for name in (targets_typedef - emitted_typedef):
-                    if re.search(r"\b" + re.escape(name) + r"\b", block_text):
-                        hits.append(name)
-                if hits:
-                    out.write(f"/* --- typedef {hits[0]} --- */\n")
-                    out.writelines(block)
-                    if not block[-1].endswith("\n"): out.write("\n")
+                typedef_name = extract_typedef_name(block_text)
+                canonical = canonical_name_for_dump(typedef_name, targets_typedef) if typedef_name else None
+                if canonical and canonical not in emitted_typedef:
+                    block_text = normalize_block_text(block_text, all_targets)
+                    out.write(f"/* --- typedef {canonical} --- */\n")
+                    out.write(block_text)
+                    if not block_text.endswith("\n"): out.write("\n")
                     out.write("\n")
-                    for name in hits:
-                        emitted_typedef.add(name)
+                    emitted_typedef.add(canonical)
                     i = nxt
                     continue
             i += 1
@@ -718,7 +776,8 @@ def main():
     out.write("/* Auto-generated by vkso-gen-types (safe funcs only). */\n")
     out.write("#pragma once\n#include <stddef.h>\n#include <stdint.h>\n\n")
     emitted = set()
-    for source_id in source_order:
+    emit_order = [sid for sid in source_order if sid != base_btf_path] + [base_btf_path]
+    for source_id in emit_order:
         src = sources_by_id[source_id]
         if not src.marked:
             continue
