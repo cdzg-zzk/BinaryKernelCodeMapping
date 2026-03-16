@@ -52,7 +52,18 @@ void* __kmalloc(size_t size, gfp_t flags) {
 }
 
 __attribute__((force_align_arg_pointer))
+void* kvmalloc(size_t size, gfp_t flags) {
+    (void)flags;
+    return malloc(size);
+}
+
+__attribute__((force_align_arg_pointer))
 void kfree(const void* ptr) {
+    free((void*)ptr);
+}
+
+__attribute__((force_align_arg_pointer))
+void kvfree(const void* ptr) {
     free((void*)ptr);
 }
 

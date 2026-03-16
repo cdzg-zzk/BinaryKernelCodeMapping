@@ -2,6 +2,11 @@ obj-m += zlib_lkm.o
 
 zlib_lkm-objs := zlib_lkm_module.o deflate.o trees.o crc32.o adler32.o zutil.o
 
+KDIR ?= /lib/modules/$(shell uname -r)/build
+PAHOLE ?= pahole
+VMLINUX_BTF ?= /sys/kernel/btf/vmlinux
+BTF_COMPAT_FLAGS ?= --skip_encoding_btf_enum64
+
 UBSAN_SANITIZE := n
 
 ccflags-y += -I$(src)
@@ -46,7 +51,8 @@ CFLAGS_REMOVE_zlib_lkm_module.o += -pg -mrecord-mcount -mfentry
 CFLAGS_REMOVE_zlib_lkm_module.o += -fpatchable-function-entry=16,16
 
 all:
-	$(MAKE) -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+	$(MAKE) -C $(KDIR) M=$(PWD) modules
+	$(PAHOLE) -J --btf_base=$(VMLINUX_BTF) $(BTF_COMPAT_FLAGS) $(PWD)/zlib_lkm.ko
 
 clean:
-	$(MAKE) -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+	$(MAKE) -C $(KDIR) M=$(PWD) clean

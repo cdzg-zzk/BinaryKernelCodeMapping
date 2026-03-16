@@ -565,6 +565,13 @@ deflate_fast / deflate_slow / deflate_rle / deflate_huff
   - 先 `lea crc_table(%rip), %rsi`
   - 后续 `t1/t2/t3` 直接用 `0x400/0x800/0xc00` 这样的寄存器偏移来访问
 - 这一步没有改 CRC 算法、CRC 表内容、表布局，也没有改对外语义；改的只是“运行时如何获得各张 CRC 表的基址”
+- 另外，`zcalloc()` / `zcfree()` 现在也不再直接写死调用 `kvmalloc()` / `kvfree()`
+  - 新增了一个很小的 `zutil_pic_ctx`
+  - 里面保留两个可改写表项：`kvmalloc`、`kvfree`
+  - `zcalloc()` 通过 `zutil_pic_ctx.kvmalloc(...)` 分配
+  - `zcfree()` 通过 `zutil_pic_ctx.kvfree(...)` 释放
+- 这层改动的目的不是改变 zlib 行为，而是给后续“映射到用户态后由伪 GOT 改写表项地址”留出落点
+  - 也就是除了处理 PIC，本地 allocator 内部依赖的 kernel-only 函数也能被替换成用户态 shim
 
 为了更适配 Kbuild 的告警策略，我还顺手把下面几个导出函数从 K&R 风格定义改成了标准 ANSI 原型定义：
 
@@ -583,6 +590,7 @@ deflate_fast / deflate_slow / deflate_rle / deflate_huff
 - `get_crc_table()`：已通过 `functions_checker.py`
 - `deflateInit2_()`：在把 `deflate_pic_ctx`、`trees_pic_ctx`、`crc_table_base()` 这三层接好之后，也已经通过 `functions_checker.py`
 - `deflate()`：在把 `deflate.h` / `trees.c` 中这批只读静态表访问改成 `*_base()` 之后，也已经通过 `functions_checker.py`
+- `zcalloc()`：单独检查时能够继续展开到 `kvmalloc` / `kvmalloc_node`，说明 allocator 路径不会再被“默认回调 + 间接调用”完全隐藏
 
 这次 `deflateInit2_()` 的通过，说明此前最集中的几类绝对地址问题已经被压下去了：
 

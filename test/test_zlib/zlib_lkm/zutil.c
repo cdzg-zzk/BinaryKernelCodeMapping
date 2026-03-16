@@ -29,6 +29,16 @@ static struct {
 	.version = ZLIB_VERSION,
 };
 
+struct zutil_pic_ctx_s {
+	void *(*kvmalloc)(size_t size, gfp_t flags);
+	void (*kvfree)(const void *ptr);
+};
+
+static struct zutil_pic_ctx_s zutil_pic_ctx __attribute__((section(".data"))) = {
+	.kvmalloc = kvmalloc,
+	.kvfree = kvfree,
+};
+
 const char * ZEXPORT zlibVersion(void)
 {
 	return zlib_pic_ctx.version;
@@ -182,20 +192,23 @@ voidpf ZLIB_INTERNAL zcalloc(opaque, items, size)
 	unsigned size;
 {
 	size_t bytes;
+	volatile struct zutil_pic_ctx_s *ctx = &zutil_pic_ctx;
 
 	(void)opaque;
 	if (check_mul_overflow((size_t)items, (size_t)size, &bytes))
 		return Z_NULL;
 	if (bytes == 0)
 		bytes = 1;
-	return kvmalloc(bytes, GFP_KERNEL);
+	return ctx->kvmalloc(bytes, GFP_KERNEL);
 }
 
 void ZLIB_INTERNAL zcfree(opaque, ptr)
 	voidpf opaque;
 	voidpf ptr;
 {
+	volatile struct zutil_pic_ctx_s *ctx = &zutil_pic_ctx;
+
 	(void)opaque;
-	kvfree(ptr);
+	ctx->kvfree(ptr);
 }
 #endif

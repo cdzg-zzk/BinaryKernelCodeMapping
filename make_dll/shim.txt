@@ -2,7 +2,9 @@
 # Update this list to match the functions implemented in shim.c.
 kmalloc
 __kmalloc
+kvmalloc
 kfree
+kvfree
 _printk
 printk
 vprintk
