@@ -19,9 +19,19 @@ z_const char * const z_errmsg[10] = {
 	(z_const char *)""
 };
 
+/*
+ * Keep the version-string pointer in writable data so the rodata reference is
+ * carried by a data relocation instead of being materialized in .text.
+ */
+static struct {
+	const char *version;
+} zlib_pic_ctx __attribute__((section(".data"))) = {
+	.version = ZLIB_VERSION,
+};
+
 const char * ZEXPORT zlibVersion(void)
 {
-	return ZLIB_VERSION;
+	return zlib_pic_ctx.version;
 }
 
 uLong ZEXPORT zlibCompileFlags(void)

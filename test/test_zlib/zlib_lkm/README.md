@@ -460,6 +460,12 @@ deflate_fast / deflate_slow / deflate_rle / deflate_huff
   - `z_errmsg`
   - `zcalloc()`
   - `zcfree()`
+- 目前已开始按“伪 GOT / `.data` 槽位”的方式做第一步收敛：
+  - `zlibVersion()` 不再直接在 `.text` 中物化 `ZLIB_VERSION` 的地址
+  - 而是改为从 `.data` 中的一个小型上下文槽位读取版本串指针
+  - 这一步没有改 `zlibVersion()` 的返回语义，仍然返回同一个版本串，只是把“代码直接拿字符串地址”改成了“代码先读 `.data` 槽位，再由槽位指向字符串”
+  - 为了防止编译器再把这个读取折叠回立即数，当前实现把该槽位保留为可写数据对象，并确保它在目标文件里形成 `.rela.data`
+  - 这样对应的字符串地址关系会落在数据重定位里，而不是落成 `.text` 里的绝对地址寻址
 - 将 `zcalloc()` 改为基于 `kvmalloc()` 的内核分配
 - 将 `zcfree()` 改为基于 `kvfree()` 的内核释放
 - `zcalloc()` 继续保留乘法溢出检查，同时不再使用 `vzalloc()` 的零填充语义，尽量贴近 upstream 在普通平台上 `malloc(items * size)` 的默认行为
