@@ -125,13 +125,18 @@ typedef struct config_s {
    compress_func func;
 } config;
 
+struct deflate_pic_ctx {
+    alloc_func zalloc;
+    free_func zfree;
+};
+
 #ifdef FASTEST
-local const config configuration_table[2] = {
+local config configuration_table[2] __used = {
 /*      good lazy nice chain */
 /* 0 */ {0,    0,  0,    0, deflate_stored},  /* store only */
 /* 1 */ {4,    4,  8,    4, deflate_fast}}; /* max speed, no lazy matches */
 #else
-local const config configuration_table[10] = {
+local config configuration_table[10] __used = {
 /*      good lazy nice chain */
 /* 0 */ {0,    0,  0,    0, deflate_stored},  /* store only */
 /* 1 */ {4,    4,  8,    4, deflate_fast}, /* max speed, no lazy matches */
@@ -145,6 +150,25 @@ local const config configuration_table[10] = {
 /* 8 */ {32, 128, 258, 1024, deflate_slow},
 /* 9 */ {32, 258, 258, 4096, deflate_slow}}; /* max compression */
 #endif
+
+static __always_inline config *configuration_table_base(void)
+{
+    config *base;
+
+    /*
+     * Force a standalone RIP-relative base load before indexed field access.
+     * This avoids folding configuration_table[index].field into a direct
+     * absolute-address relocation in .text on x86_64.
+     */
+    asm volatile("lea configuration_table(%%rip), %0" : "=r"(base));
+    return base;
+}
+
+static struct deflate_pic_ctx deflate_pic_ctx __used
+    __attribute__((section(".data"))) = {
+    .zalloc = zcalloc,
+    .zfree = zcfree,
+};
 
 /* Note: the deflate() code requires max_lazy >= MIN_MATCH and max_chain >= 4
  * For deflate_fast() (levels <= 3) good is ignored and lazy has a different
@@ -268,7 +292,7 @@ int ZEXPORT deflateInit2_(strm, level, method, windowBits, memLevel, strategy,
 #ifdef Z_SOLO
         return Z_STREAM_ERROR;
 #else
-        strm->zalloc = zcalloc;
+        strm->zalloc = deflate_pic_ctx.zalloc;
         strm->opaque = (voidpf)0;
 #endif
     }
@@ -276,7 +300,7 @@ int ZEXPORT deflateInit2_(strm, level, method, windowBits, memLevel, strategy,
 #ifdef Z_SOLO
         return Z_STREAM_ERROR;
 #else
-        strm->zfree = zcfree;
+        strm->zfree = deflate_pic_ctx.zfree;
 #endif
 
 #ifdef FASTEST
@@ -572,6 +596,7 @@ int ZEXPORT deflateParams(strm, level, strategy)
 {
     deflate_state *s;
     compress_func func;
+    config *config_table = configuration_table_base();
 
     if (deflateStateCheck(strm)) return Z_STREAM_ERROR;
     s = strm->state;
@@ -584,9 +609,9 @@ int ZEXPORT deflateParams(strm, level, strategy)
     if (level < 0 || level > 9 || strategy < 0 || strategy > Z_FIXED) {
         return Z_STREAM_ERROR;
     }
-    func = configuration_table[s->level].func;
+    func = config_table[s->level].func;
 
-    if ((strategy != s->strategy || func != configuration_table[level].func) &&
+    if ((strategy != s->strategy || func != config_table[level].func) &&
         s->high_water) {
         /* Flush the last buffer: */
         int err = deflate(strm, Z_BLOCK);
@@ -604,10 +629,10 @@ int ZEXPORT deflateParams(strm, level, strategy)
             s->matches = 0;
         }
         s->level = level;
-        s->max_lazy_match   = configuration_table[level].max_lazy;
-        s->good_match       = configuration_table[level].good_length;
-        s->nice_match       = configuration_table[level].nice_length;
-        s->max_chain_length = configuration_table[level].max_chain;
+        s->max_lazy_match   = config_table[level].max_lazy;
+        s->good_match       = config_table[level].good_length;
+        s->nice_match       = config_table[level].nice_length;
+        s->max_chain_length = config_table[level].max_chain;
     }
     s->strategy = strategy;
     return Z_OK;
@@ -766,6 +791,7 @@ int ZEXPORT deflate (strm, flush)
 {
     int old_flush; /* value of flush param for previous deflate call */
     deflate_state *s;
+    config *config_table = configuration_table_base();
 
     if (deflateStateCheck(strm) || flush > Z_BLOCK || flush < 0) {
         return Z_STREAM_ERROR;
@@ -1000,7 +1026,7 @@ int ZEXPORT deflate (strm, flush)
         bstate = s->level == 0 ? deflate_stored(s, flush) :
                  s->strategy == Z_HUFFMAN_ONLY ? deflate_huff(s, flush) :
                  s->strategy == Z_RLE ? deflate_rle(s, flush) :
-                 (*(configuration_table[s->level].func))(s, flush);
+                 (*(config_table[s->level].func))(s, flush);
 
         if (bstate == finish_started || bstate == finish_done) {
             s->status = FINISH_STATE;
@@ -1194,16 +1220,18 @@ local unsigned read_buf(strm, buf, size)
 local void lm_init (s)
     deflate_state *s;
 {
+    config *config_table = configuration_table_base();
+
     s->window_size = (ulg)2L*s->w_size;
 
     CLEAR_HASH(s);
 
     /* Set the default configuration parameters:
      */
-    s->max_lazy_match   = configuration_table[s->level].max_lazy;
-    s->good_match       = configuration_table[s->level].good_length;
-    s->nice_match       = configuration_table[s->level].nice_length;
-    s->max_chain_length = configuration_table[s->level].max_chain;
+    s->max_lazy_match   = config_table[s->level].max_lazy;
+    s->good_match       = config_table[s->level].good_length;
+    s->nice_match       = config_table[s->level].nice_length;
+    s->max_chain_length = config_table[s->level].max_chain;
 
     s->strstart = 0;
     s->block_start = 0L;

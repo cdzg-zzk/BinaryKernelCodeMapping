@@ -480,7 +480,77 @@ deflate_fast / deflate_slow / deflate_rle / deflate_huff
 - 让 deflate 状态分配能在内核里稳定工作
 - 在“必须换成内核分配器”的前提下，尽量保持和 upstream 默认分配语义接近
 
+#### 3.1 `deflate.c`
+
+- 为了避免 `deflateInit2_()`、`deflateParams()`、`deflate()`、`lm_init()` 直接把只读对象地址物化进 `.text`，这里新增了一个很小的 `deflate_pic_ctx`
+- `deflate_pic_ctx` 放在 `.data`，当前只收纳两类普通伪 GOT 槽位：
+  - 默认分配器 `zcalloc`
+  - 默认释放器 `zcfree`
+- `deflateInit2_()` 不再直接把 `zcalloc` / `zcfree` 写入 `strm->zalloc` / `strm->zfree`
+- `configuration_table` 没有再塞进 `deflate_pic_ctx`
+- 现在的处理方式是：
+  - 先把 `configuration_table` 改成非 `const` 的静态数组
+  - 再通过一个很小的 `configuration_table_base()`，显式执行 `lea configuration_table(%rip), reg`
+  - 后续再用 `&configuration_table_base()[level]` 或 `configuration_table_base()[level].func` 做索引访问
+
+这里要把两类场景分开看：
+
+- `zalloc` / `zfree` 这类普通伪 GOT 槽位，直接通过结构体读取就能稳定生成 `.text -> .data` 的 `R_X86_64_PC32`
+- `configuration_table` 则不一样：
+  - 它是静态数组
+  - 里面还带函数指针成员 `func`
+  - 这类“数组基址 + 变址访问”的路径，更适合显式先做一次 `lea`
+
+这里要特别说明一下：
+
+- `configuration_table` 的表项内容、布局、顺序都保持和 upstream 一致
+- 这里把它从 `const` 改成普通静态数组，不是为了改语义，而是因为表项里含有函数指针 `func`
+- 这样链接后这些函数地址关系会落到 `.rela.data`，而不是被压成 `.text` 里的固定地址
+- 这里没有把 `configuration_table` 回退到“完全不改”，原因是 `pigz` 的真实压缩路径确实会调用 `deflateParams()`
+- 对照 `pigz-2.8/pigz.c` 可以看到：
+  - worker 线程初始化压缩任务时会执行 `deflateReset()` 之后立刻调用 `deflateParams()`
+  - 单线程压缩路径也会在写头之后调用一次 `deflateParams()`
+- 重新查看当前 `deflate.o` 的反汇编后，这一层访问已经是：
+  - 先 `lea configuration_table(%rip), reg`
+  - 再在寄存器上完成表项索引
+- 同时 `readelf -r deflate.o` 里也已经能看到 `configuration_table[].func` 对应的 `.rela.data` 条目
+- 因此这块现在更符合“数组不进 ctx、函数指针进 `.rela.data`、访问显式 `lea`”这三个原则
+
+#### 3.2 `trees.c`
+
+- 为了避免 `_tr_init()` 直接把 `&static_l_desc`、`&static_d_desc`、`&static_bl_desc` 写进状态结构，又新增了一个很小的 `trees_pic_ctx`
+- `trees_pic_ctx` 也放在 `.data`，里面只保存这三个静态 tree descriptor 的指针
+- `_tr_init()` 现在直接从 `trees_pic_ctx` 读取对应 descriptor 指针，再写进 `s->l_desc.stat_desc`、`s->d_desc.stat_desc`、`s->bl_desc.stat_desc`
+
+这里同样遵守了“尽量不改原始只读对象本身”的原则：
+
+- `static_l_desc` / `static_d_desc` / `static_bl_desc` 的定义和内容没有被改写
+- 只调整了 `_tr_init()` 获取这些对象地址的方式
+
 #### 3.1 `crc32.c` / `adler32.c`
+
+- `get_crc_table()` 的第一步改造只是把 `crc_table[0]` 指针放进 `.data` 槽位，避免导出函数自己在 `.text` 中物化 CRC 表地址
+- 继续往下检查 `deflateInit2_()` 的闭包后，发现真正的热点问题在 `crc32_little()` / `crc32_big()`：
+  - 这两个函数会大量执行 `crc_table[k][idx]`
+  - 如果直接保留原始写法，编译器会把这些表基址继续固化成 `.text -> .rodata` 的绝对地址引用
+- 最终这层又继续收窄了一步：
+  - `crc_table` 本身继续保持 upstream 的 `static const` 定义
+  - 它不再进入任何 `.data` 上下文，也不再额外复制一份指针槽位
+  - 整张表继续留在 `.rodata`
+- 真正需要处理的问题，不是“让 `crc_table` 进 `.data`”，而是“避免数组索引时把 RIP 相对寻址折成坏的绝对地址”
+- 现在的办法是新增一个很小的 `crc_table_base()`：
+  - 里面显式执行 `lea crc_table(%rip), reg`
+  - 然后返回表基址
+- `get_crc_table()`、`crc32_z()`、`crc32_little()`、`crc32_big()` 现在都先拿这个 base
+- 后续再在寄存器上完成 `table[k][idx]` 的索引访问
+- 这一步的关键目标是：
+  - `crc_table` 继续只是 `.rodata` 里的常量表
+  - `.text` 里对它的引用保持为正常的 `R_X86_64_PC32` RIP-relative 访问
+  - 同时数组热路径不再退化成绝对地址寻址
+- 从当前 `crc32.o` 的反汇编可以看到，`crc32_little()` 入口已经变成：
+  - 先 `lea crc_table(%rip), %rsi`
+  - 后续 `t1/t2/t3` 直接用 `0x400/0x800/0xc00` 这样的寄存器偏移来访问
+- 这一步没有改 CRC 算法、CRC 表内容、表布局，也没有改对外语义；改的只是“运行时如何获得各张 CRC 表的基址”
 
 为了更适配 Kbuild 的告警策略，我还顺手把下面几个导出函数从 K&R 风格定义改成了标准 ANSI 原型定义：
 
@@ -490,6 +560,23 @@ deflate_fast / deflate_slow / deflate_rle / deflate_huff
 - `adler32_combine64()`
 
 这不是语义修改，只是为了避免内核编译时的 `-Wstrict-prototypes` 报错。
+
+#### 3.3 当前 PIC 检查结果
+
+围绕当前已经改造的伪 GOT 路径，现阶段至少可以确认下面几件事：
+
+- `zlibVersion()`：已通过 `functions_checker.py`
+- `get_crc_table()`：已通过 `functions_checker.py`
+- `deflateInit2_()`：在把 `deflate_pic_ctx`、`trees_pic_ctx`、`crc_table_base()` 这三层接好之后，也已经通过 `functions_checker.py`
+
+这次 `deflateInit2_()` 的通过，说明此前最集中的几类绝对地址问题已经被压下去了：
+
+- `zcalloc` / `zcfree` 默认函数指针
+- `configuration_table`
+- `_tr_init()` 中的 `static_*_desc`
+- `crc32_little()` 热路径里的 CRC 查表基址
+
+当前 checker 报告里这些点都已经表现为 `.text -> .data` 的可写数据引用，而不再是 `.text -> .rodata` 的绝对地址重定位。
 
 #### 4. `zlib_lkm_module.c`
 

@@ -131,6 +131,19 @@ local const static_tree_desc  static_d_desc =
 local const static_tree_desc  static_bl_desc =
 {(const ct_data *)0, extra_blbits, 0,   BL_CODES, MAX_BL_BITS};
 
+struct trees_pic_ctx {
+    const static_tree_desc *static_l_desc;
+    const static_tree_desc *static_d_desc;
+    const static_tree_desc *static_bl_desc;
+};
+
+static struct trees_pic_ctx trees_pic_ctx __used
+    __attribute__((section(".data"))) = {
+    .static_l_desc = &static_l_desc,
+    .static_d_desc = &static_d_desc,
+    .static_bl_desc = &static_bl_desc,
+};
+
 /* ===========================================================================
  * Local (static) routines in this file.
  */
@@ -382,13 +395,13 @@ void ZLIB_INTERNAL _tr_init(s)
     tr_static_init();
 
     s->l_desc.dyn_tree = s->dyn_ltree;
-    s->l_desc.stat_desc = &static_l_desc;
+    s->l_desc.stat_desc = trees_pic_ctx.static_l_desc;
 
     s->d_desc.dyn_tree = s->dyn_dtree;
-    s->d_desc.stat_desc = &static_d_desc;
+    s->d_desc.stat_desc = trees_pic_ctx.static_d_desc;
 
     s->bl_desc.dyn_tree = s->bl_tree;
-    s->bl_desc.stat_desc = &static_bl_desc;
+    s->bl_desc.stat_desc = trees_pic_ctx.static_bl_desc;
 
     s->bi_buf = 0;
     s->bi_valid = 0;

@@ -182,31 +182,36 @@ local void write_table(out, table)
 #include "crc32.h"
 #endif /* DYNAMIC_CRC_TABLE */
 
-/*
- * Keep exported table addresses behind writable data slots so callers can
- * reach them through a pseudo-GOT style indirection instead of a fixed
- * .rodata address embedded in .text.
- */
-static struct {
-    const z_crc_t FAR *table;
-} crc32_pic_ctx __attribute__((section(".data"))) = {
-    .table = (const z_crc_t FAR *)crc_table,
-};
+static __always_inline const z_crc_t (*crc_table_base(void))[256]
+{
+    const z_crc_t (*base)[256];
+
+    /*
+     * Force a standalone RIP-relative base load before indexed table access.
+     * This avoids folding crc_table[k][idx] into a direct absolute-address
+     * relocation in .text on x86_64.
+     */
+    asm volatile("lea %c1(%%rip), %0" : "=r"(base) : "i"(crc_table));
+    return base;
+}
 
 /* =========================================================================
  * This function can be used by asm versions of crc32()
  */
 const z_crc_t FAR * ZEXPORT get_crc_table()
 {
+    const z_crc_t (*table)[256];
+
 #ifdef DYNAMIC_CRC_TABLE
     if (crc_table_empty)
         make_crc_table();
 #endif /* DYNAMIC_CRC_TABLE */
-    return crc32_pic_ctx.table;
+    table = crc_table_base();
+    return table[0];
 }
 
 /* ========================================================================= */
-#define DO1 crc = crc_table[0][((int)crc ^ (*buf++)) & 0xff] ^ (crc >> 8)
+#define DO1 crc = t0[((int)crc ^ (*buf++)) & 0xff] ^ (crc >> 8)
 #define DO8 DO1; DO1; DO1; DO1; DO1; DO1; DO1; DO1
 
 /* ========================================================================= */
@@ -215,12 +220,18 @@ unsigned long ZEXPORT crc32_z(crc, buf, len)
     const unsigned char FAR *buf;
     z_size_t len;
 {
+    const z_crc_t (*table)[256];
+    const z_crc_t FAR *t0;
+
     if (buf == Z_NULL) return 0UL;
 
 #ifdef DYNAMIC_CRC_TABLE
     if (crc_table_empty)
         make_crc_table();
 #endif /* DYNAMIC_CRC_TABLE */
+
+    table = crc_table_base();
+    t0 = table[0];
 
 #ifdef BYFOUR
     if (sizeof(void *) == sizeof(ptrdiff_t)) {
@@ -269,8 +280,8 @@ unsigned long ZEXPORT crc32(crc, buf, len)
 
 /* ========================================================================= */
 #define DOLIT4 c ^= *buf4++; \
-        c = crc_table[3][c & 0xff] ^ crc_table[2][(c >> 8) & 0xff] ^ \
-            crc_table[1][(c >> 16) & 0xff] ^ crc_table[0][c >> 24]
+        c = t3[c & 0xff] ^ t2[(c >> 8) & 0xff] ^ \
+            t1[(c >> 16) & 0xff] ^ t0[c >> 24]
 #define DOLIT32 DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4
 
 /* ========================================================================= */
@@ -279,13 +290,24 @@ local unsigned long crc32_little(crc, buf, len)
     const unsigned char FAR *buf;
     z_size_t len;
 {
+    const z_crc_t (*table)[256];
     register z_crc_t c;
     register const z_crc_t FAR *buf4;
+    const z_crc_t FAR *t0;
+    const z_crc_t FAR *t1;
+    const z_crc_t FAR *t2;
+    const z_crc_t FAR *t3;
+
+    table = crc_table_base();
+    t0 = table[0];
+    t1 = table[1];
+    t2 = table[2];
+    t3 = table[3];
 
     c = (z_crc_t)crc;
     c = ~c;
     while (len && ((ptrdiff_t)buf & 3)) {
-        c = crc_table[0][(c ^ *buf++) & 0xff] ^ (c >> 8);
+        c = t0[(c ^ *buf++) & 0xff] ^ (c >> 8);
         len--;
     }
 
@@ -301,7 +323,7 @@ local unsigned long crc32_little(crc, buf, len)
     buf = (const unsigned char FAR *)buf4;
 
     if (len) do {
-        c = crc_table[0][(c ^ *buf++) & 0xff] ^ (c >> 8);
+        c = t0[(c ^ *buf++) & 0xff] ^ (c >> 8);
     } while (--len);
     c = ~c;
     return (unsigned long)c;
@@ -309,8 +331,8 @@ local unsigned long crc32_little(crc, buf, len)
 
 /* ========================================================================= */
 #define DOBIG4 c ^= *buf4++; \
-        c = crc_table[4][c & 0xff] ^ crc_table[5][(c >> 8) & 0xff] ^ \
-            crc_table[6][(c >> 16) & 0xff] ^ crc_table[7][c >> 24]
+        c = t4[c & 0xff] ^ t5[(c >> 8) & 0xff] ^ \
+            t6[(c >> 16) & 0xff] ^ t7[c >> 24]
 #define DOBIG32 DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4
 
 /* ========================================================================= */
@@ -319,13 +341,24 @@ local unsigned long crc32_big(crc, buf, len)
     const unsigned char FAR *buf;
     z_size_t len;
 {
+    const z_crc_t (*table)[256];
     register z_crc_t c;
     register const z_crc_t FAR *buf4;
+    const z_crc_t FAR *t4;
+    const z_crc_t FAR *t5;
+    const z_crc_t FAR *t6;
+    const z_crc_t FAR *t7;
+
+    table = crc_table_base();
+    t4 = table[4];
+    t5 = table[5];
+    t6 = table[6];
+    t7 = table[7];
 
     c = ZSWAP32((z_crc_t)crc);
     c = ~c;
     while (len && ((ptrdiff_t)buf & 3)) {
-        c = crc_table[4][(c >> 24) ^ *buf++] ^ (c << 8);
+        c = t4[(c >> 24) ^ *buf++] ^ (c << 8);
         len--;
     }
 
@@ -341,7 +374,7 @@ local unsigned long crc32_big(crc, buf, len)
     buf = (const unsigned char FAR *)buf4;
 
     if (len) do {
-        c = crc_table[4][(c >> 24) ^ *buf++] ^ (c << 8);
+        c = t4[(c >> 24) ^ *buf++] ^ (c << 8);
     } while (--len);
     c = ~c;
     return (unsigned long)(ZSWAP32(c));
