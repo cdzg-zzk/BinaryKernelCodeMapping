@@ -144,6 +144,62 @@ static struct trees_pic_ctx trees_pic_ctx __used
     .static_bl_desc = &static_bl_desc,
 };
 
+static __always_inline const int *extra_lbits_base(void)
+{
+    const int *base;
+
+    asm volatile("lea %c1(%%rip), %0" : "=r"(base) : "i"(extra_lbits));
+    return base;
+}
+
+static __always_inline const int *extra_dbits_base(void)
+{
+    const int *base;
+
+    asm volatile("lea %c1(%%rip), %0" : "=r"(base) : "i"(extra_dbits));
+    return base;
+}
+
+static __always_inline const uch *bl_order_base(void)
+{
+    const uch *base;
+
+    asm volatile("lea %c1(%%rip), %0" : "=r"(base) : "i"(bl_order));
+    return base;
+}
+
+static __always_inline const ct_data *static_ltree_base(void)
+{
+    const ct_data *base;
+
+    asm volatile("lea %c1(%%rip), %0" : "=r"(base) : "i"(static_ltree));
+    return base;
+}
+
+static __always_inline const ct_data *static_dtree_base(void)
+{
+    const ct_data *base;
+
+    asm volatile("lea %c1(%%rip), %0" : "=r"(base) : "i"(static_dtree));
+    return base;
+}
+
+static __always_inline const int *base_length_base(void)
+{
+    const int *base;
+
+    asm volatile("lea %c1(%%rip), %0" : "=r"(base) : "i"(base_length));
+    return base;
+}
+
+static __always_inline const int *base_dist_base(void)
+{
+    const int *base;
+
+    asm volatile("lea %c1(%%rip), %0" : "=r"(base) : "i"(base_dist));
+    return base;
+}
+
 /* ===========================================================================
  * Local (static) routines in this file.
  */
@@ -813,6 +869,7 @@ local int build_bl_tree(s)
     deflate_state *s;
 {
     int max_blindex;  /* index of last bit length code of non zero freq */
+    const uch *bl_order_table = bl_order_base();
 
     /* Determine the bit length frequencies for literal and distance trees */
     scan_tree(s, (ct_data *)s->dyn_ltree, s->l_desc.max_code);
@@ -829,7 +886,7 @@ local int build_bl_tree(s)
      * 3 but the actual value used is 4.)
      */
     for (max_blindex = BL_CODES-1; max_blindex >= 3; max_blindex--) {
-        if (s->bl_tree[bl_order[max_blindex]].Len != 0) break;
+        if (s->bl_tree[bl_order_table[max_blindex]].Len != 0) break;
     }
     /* Update opt_len to include the bit length tree and counts */
     s->opt_len += 3*((ulg)max_blindex+1) + 5+5+4;
@@ -849,6 +906,7 @@ local void send_all_trees(s, lcodes, dcodes, blcodes)
     int lcodes, dcodes, blcodes; /* number of codes for each tree */
 {
     int rank;                    /* index in bl_order */
+    const uch *bl_order_table = bl_order_base();
 
     Assert (lcodes >= 257 && dcodes >= 1 && blcodes >= 4, "not enough codes");
     Assert (lcodes <= L_CODES && dcodes <= D_CODES && blcodes <= BL_CODES,
@@ -858,8 +916,8 @@ local void send_all_trees(s, lcodes, dcodes, blcodes)
     send_bits(s, dcodes-1,   5);
     send_bits(s, blcodes-4,  4); /* not -3 as stated in appnote.txt */
     for (rank = 0; rank < blcodes; rank++) {
-        Tracev((stderr, "\nbl code %2d ", bl_order[rank]));
-        send_bits(s, s->bl_tree[bl_order[rank]].Len, 3);
+        Tracev((stderr, "\nbl code %2d ", bl_order_table[rank]));
+        send_bits(s, s->bl_tree[bl_order_table[rank]].Len, 3);
     }
     Tracev((stderr, "\nbl tree: sent %ld", s->bits_sent));
 
@@ -909,8 +967,10 @@ void ZLIB_INTERNAL _tr_flush_bits(s)
 void ZLIB_INTERNAL _tr_align(s)
     deflate_state *s;
 {
+    const ct_data *static_ltree_table = static_ltree_base();
+
     send_bits(s, STATIC_TREES<<1, 3);
-    send_code(s, END_BLOCK, static_ltree);
+    send_code(s, END_BLOCK, static_ltree_table);
 #ifdef ZLIB_DEBUG
     s->compressed_len += 10L; /* 3 for block type, 7 for EOB */
 #endif
@@ -929,6 +989,8 @@ void ZLIB_INTERNAL _tr_flush_block(s, buf, stored_len, last)
 {
     ulg opt_lenb, static_lenb; /* opt_len and static_len in bytes */
     int max_blindex = 0;  /* index of last bit length code of non zero freq */
+    const ct_data *static_ltree_table = static_ltree_base();
+    const ct_data *static_dtree_table = static_dtree_base();
 
     /* Build the Huffman trees unless a stored block is forced */
     if (s->level > 0) {
@@ -989,8 +1051,7 @@ void ZLIB_INTERNAL _tr_flush_block(s, buf, stored_len, last)
     } else if (s->strategy == Z_FIXED || static_lenb == opt_lenb) {
 #endif
         send_bits(s, (STATIC_TREES<<1)+last, 3);
-        compress_block(s, (const ct_data *)static_ltree,
-                       (const ct_data *)static_dtree);
+        compress_block(s, static_ltree_table, static_dtree_table);
 #ifdef ZLIB_DEBUG
         s->compressed_len += 3 + s->static_len;
 #endif
@@ -1029,6 +1090,8 @@ int ZLIB_INTERNAL _tr_tally (s, dist, lc)
     unsigned dist;  /* distance of matched string */
     unsigned lc;    /* match length-MIN_MATCH or unmatched char (if dist==0) */
 {
+    const uch *length_code_table = length_code_base();
+
     s->d_buf[s->last_lit] = (ush)dist;
     s->l_buf[s->last_lit++] = (uch)lc;
     if (dist == 0) {
@@ -1042,7 +1105,7 @@ int ZLIB_INTERNAL _tr_tally (s, dist, lc)
                (ush)lc <= (ush)(MAX_MATCH-MIN_MATCH) &&
                (ush)d_code(dist) < (ush)D_CODES,  "_tr_tally: bad match");
 
-        s->dyn_ltree[_length_code[lc]+LITERALS+1].Freq++;
+        s->dyn_ltree[length_code_table[lc]+LITERALS+1].Freq++;
         s->dyn_dtree[d_code(dist)].Freq++;
     }
 
@@ -1055,7 +1118,7 @@ int ZLIB_INTERNAL _tr_tally (s, dist, lc)
         int dcode;
         for (dcode = 0; dcode < D_CODES; dcode++) {
             out_length += (ulg)s->dyn_dtree[dcode].Freq *
-                (5L+extra_dbits[dcode]);
+                (5L+extra_dbits_table[dcode]);
         }
         out_length >>= 3;
         Tracev((stderr,"\nlast_lit %u, in %ld, out ~%ld(%ld%%) ",
@@ -1084,6 +1147,11 @@ local void compress_block(s, ltree, dtree)
     unsigned lx = 0;    /* running index in l_buf */
     unsigned code;      /* the code to send */
     int extra;          /* number of extra bits to send */
+    const uch *length_code_table = length_code_base();
+    const int *extra_lbits_table = extra_lbits_base();
+    const int *base_length_table = base_length_base();
+    const int *extra_dbits_table = extra_dbits_base();
+    const int *base_dist_table = base_dist_base();
 
     if (s->last_lit != 0) do {
         dist = s->d_buf[lx];
@@ -1093,11 +1161,11 @@ local void compress_block(s, ltree, dtree)
             Tracecv(isgraph(lc), (stderr," '%c' ", lc));
         } else {
             /* Here, lc is the match length - MIN_MATCH */
-            code = _length_code[lc];
+            code = length_code_table[lc];
             send_code(s, code+LITERALS+1, ltree); /* send the length code */
-            extra = extra_lbits[code];
+            extra = extra_lbits_table[code];
             if (extra != 0) {
-                lc -= base_length[code];
+                lc -= base_length_table[code];
                 send_bits(s, lc, extra);       /* send the extra length bits */
             }
             dist--; /* dist is now the match distance - 1 */
@@ -1105,9 +1173,9 @@ local void compress_block(s, ltree, dtree)
             Assert (code < D_CODES, "bad d_code");
 
             send_code(s, code, dtree);       /* send the distance code */
-            extra = extra_dbits[code];
+            extra = extra_dbits_table[code];
             if (extra != 0) {
-                dist -= (unsigned)base_dist[code];
+                dist -= (unsigned)base_dist_table[code];
                 send_bits(s, dist, extra);   /* send the extra distance bits */
             }
         } /* literal or match pair ? */

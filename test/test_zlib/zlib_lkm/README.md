@@ -466,8 +466,6 @@ deflate_fast / deflate_slow / deflate_rle / deflate_huff
   - 这一步没有改 `zlibVersion()` 的返回语义，仍然返回同一个版本串，只是把“代码直接拿字符串地址”改成了“代码先读 `.data` 槽位，再由槽位指向字符串”
   - 为了防止编译器再把这个读取折叠回立即数，当前实现把该槽位保留为可写数据对象，并确保它在目标文件里形成 `.rela.data`
   - 这样对应的字符串地址关系会落在数据重定位里，而不是落成 `.text` 里的绝对地址寻址
-  - `get_crc_table()` 也按同一思路处理：新增 `crc32_pic_ctx`，把 CRC 表指针先收进 `.data` 槽位，再由导出函数返回该槽位中的指针
-  - 这样 `get_crc_table()` 不再直接把 `crc_table` 的地址嵌进 `.text`，而是经由 `.data` 中的伪 GOT 槽位间接返回
 - 将 `zcalloc()` 改为基于 `kvmalloc()` 的内核分配
 - 将 `zcfree()` 改为基于 `kvfree()` 的内核释放
 - `zcalloc()` 继续保留乘法溢出检查，同时不再使用 `vzalloc()` 的零填充语义，尽量贴近 upstream 在普通平台上 `malloc(items * size)` 的默认行为
@@ -521,19 +519,35 @@ deflate_fast / deflate_slow / deflate_rle / deflate_huff
 - 为了避免 `_tr_init()` 直接把 `&static_l_desc`、`&static_d_desc`、`&static_bl_desc` 写进状态结构，又新增了一个很小的 `trees_pic_ctx`
 - `trees_pic_ctx` 也放在 `.data`，里面只保存这三个静态 tree descriptor 的指针
 - `_tr_init()` 现在直接从 `trees_pic_ctx` 读取对应 descriptor 指针，再写进 `s->l_desc.stat_desc`、`s->d_desc.stat_desc`、`s->bl_desc.stat_desc`
+- 对 `bl_order`、`static_ltree`、`static_dtree`、`extra_lbits`、`extra_dbits`、`base_length`、`base_dist` 这几张只读静态表，没有改成 `.data`
+- 这些表都继续保持 upstream 的 `static const` / `const` 定义，继续留在 `.rodata`
+- 真正的改动只在“怎么取基址”：
+  - 为每张会被索引访问的表新增一个很小的 `*_base()` helper
+  - helper 里面显式执行一次 `lea table(%rip), reg`
+  - 后续再在寄存器基址上完成 `base[idx]` 或传参
+- 这样做的原因和 `crc_table_base()` 一样：
+  - 这些对象本身只是只读常量表
+  - 不需要像 `configuration_table` 那样引入 `.rela.data`
+  - 但如果直接写数组索引，编译器可能把访问折成 `.text` 中的坏绝对地址
+- 目前已按这个模式改过的使用点包括：
+  - `build_bl_tree()`
+  - `send_all_trees()`
+  - `_tr_align()`
+  - `_tr_flush_block()`
+  - `_tr_tally()`
+  - `compress_block()`
 
 这里同样遵守了“尽量不改原始只读对象本身”的原则：
 
 - `static_l_desc` / `static_d_desc` / `static_bl_desc` 的定义和内容没有被改写
 - 只调整了 `_tr_init()` 获取这些对象地址的方式
 
-#### 3.1 `crc32.c` / `adler32.c`
+#### 3.3 `crc32.c` / `adler32.c`
 
-- `get_crc_table()` 的第一步改造只是把 `crc_table[0]` 指针放进 `.data` 槽位，避免导出函数自己在 `.text` 中物化 CRC 表地址
 - 继续往下检查 `deflateInit2_()` 的闭包后，发现真正的热点问题在 `crc32_little()` / `crc32_big()`：
   - 这两个函数会大量执行 `crc_table[k][idx]`
   - 如果直接保留原始写法，编译器会把这些表基址继续固化成 `.text -> .rodata` 的绝对地址引用
-- 最终这层又继续收窄了一步：
+- 这里最终采用的是和 `configuration_table` 不同、但和 `trees.c` 那些只读静态表一致的处理方式：
   - `crc_table` 本身继续保持 upstream 的 `static const` 定义
   - 它不再进入任何 `.data` 上下文，也不再额外复制一份指针槽位
   - 整张表继续留在 `.rodata`
@@ -568,6 +582,7 @@ deflate_fast / deflate_slow / deflate_rle / deflate_huff
 - `zlibVersion()`：已通过 `functions_checker.py`
 - `get_crc_table()`：已通过 `functions_checker.py`
 - `deflateInit2_()`：在把 `deflate_pic_ctx`、`trees_pic_ctx`、`crc_table_base()` 这三层接好之后，也已经通过 `functions_checker.py`
+- `deflate()`：在把 `deflate.h` / `trees.c` 中这批只读静态表访问改成 `*_base()` 之后，也已经通过 `functions_checker.py`
 
 这次 `deflateInit2_()` 的通过，说明此前最集中的几类绝对地址问题已经被压下去了：
 

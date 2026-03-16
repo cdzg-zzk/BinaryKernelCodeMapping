@@ -305,16 +305,6 @@ void ZLIB_INTERNAL _tr_align OF((deflate_state *s));
 void ZLIB_INTERNAL _tr_stored_block OF((deflate_state *s, charf *buf,
                         ulg stored_len, int last));
 
-#define d_code(dist) \
-   ((dist) < 256 ? _dist_code[dist] : _dist_code[256+((dist)>>7)])
-/* Mapping from a distance to a distance code. dist is the distance - 1 and
- * must not have side effects. _dist_code[256] and _dist_code[257] are never
- * used.
- */
-
-#ifndef ZLIB_DEBUG
-/* Inline versions of _tr_tally for speed: */
-
 #if defined(GEN_TREES_H) || !defined(STDC)
   extern uch ZLIB_INTERNAL _length_code[];
   extern uch ZLIB_INTERNAL _dist_code[];
@@ -322,6 +312,39 @@ void ZLIB_INTERNAL _tr_stored_block OF((deflate_state *s, charf *buf,
   extern const uch ZLIB_INTERNAL _length_code[];
   extern const uch ZLIB_INTERNAL _dist_code[];
 #endif
+
+static __always_inline const uch *length_code_base(void)
+{
+    const uch *base;
+
+    asm volatile("lea %c1(%%rip), %0" : "=r"(base) : "i"(_length_code));
+    return base;
+}
+
+static __always_inline const uch *dist_code_base(void)
+{
+    const uch *base;
+
+    asm volatile("lea %c1(%%rip), %0" : "=r"(base) : "i"(_dist_code));
+    return base;
+}
+
+static __always_inline uch zlib_d_code(unsigned dist)
+{
+    const uch *base = dist_code_base();
+
+    return dist < 256 ? base[dist] : base[256 + (dist >> 7)];
+}
+
+#define d_code(dist) \
+   zlib_d_code(dist)
+/* Mapping from a distance to a distance code. dist is the distance - 1 and
+ * must not have side effects. _dist_code[256] and _dist_code[257] are never
+ * used.
+ */
+
+#ifndef ZLIB_DEBUG
+/* Inline versions of _tr_tally for speed: */
 
 # define _tr_tally_lit(s, c, flush) \
   { uch cc = (c); \
@@ -333,11 +356,14 @@ void ZLIB_INTERNAL _tr_stored_block OF((deflate_state *s, charf *buf,
 # define _tr_tally_dist(s, distance, length, flush) \
   { uch len = (uch)(length); \
     ush dist = (ush)(distance); \
+    const uch *length_code__ = length_code_base(); \
+    const uch *dist_code__ = dist_code_base(); \
     s->d_buf[s->last_lit] = dist; \
     s->l_buf[s->last_lit++] = len; \
     dist--; \
-    s->dyn_ltree[_length_code[len]+LITERALS+1].Freq++; \
-    s->dyn_dtree[d_code(dist)].Freq++; \
+    s->dyn_ltree[length_code__[len]+LITERALS+1].Freq++; \
+    s->dyn_dtree[(dist) < 256 ? \
+        dist_code__[dist] : dist_code__[256+((dist)>>7)]].Freq++; \
     flush = (s->last_lit == s->lit_bufsize-1); \
   }
 #else
