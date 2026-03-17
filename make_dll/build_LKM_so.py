@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+
+# python3 /home/zzk/BinaryKernelCodeMapping/make_dll/build_LKM_so.py \
+#   --symbols /home/zzk/BinaryKernelCodeMapping/test/test_zlib/so/symbols.txt \
+#   --krg /home/zzk/BinaryKernelCodeMapping/test/test_zlib/so/out.krg \
+#   --shim /home/zzk/BinaryKernelCodeMapping/make_dll/shim.txt \
+#   --shim-lib /home/zzk/BinaryKernelCodeMapping/make_dll/libshim.so
+
 """
 LKM pseudo-GOT shared library builder.
 """
@@ -18,6 +25,8 @@ from build_PIC_so import (
 
 _NON_CORE_SECTION_PREFIXES = (
     ".modinfo",
+    ".return_sites",
+    ".retpoline_sites",
 )
 
 _C_RESET = "\033[0m"
@@ -83,6 +92,31 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
     if not ko_path.exists(): raise FileNotFoundError(f"{ko_path} not found")
     ko = KoFile(ko_path)
     layout = ko.compute_core_layout()
+
+    def lookup_exact_local_symbol(sec_idx: int, target_value: int) -> KoSymbol | None:
+        for sym in ko.symbols:
+            if sym.is_undef or sym.st_shndx != sec_idx or not sym.name:
+                continue
+            if sym.st_value != target_value:
+                continue
+            if sym.typ in (STT_FUNC, STT_OBJECT):
+                return sym
+        return None
+
+    def describe_reloc_target(reloc: object) -> Tuple[str, int, int, int, int]:
+        sec_idx = getattr(reloc, "sym_shndx", None)
+        target_value = getattr(reloc, "sym_value", 0) + getattr(reloc, "addend", 0)
+        if sec_idx is not None and 0 <= sec_idx < len(ko.sections):
+            matched = lookup_exact_local_symbol(sec_idx, target_value)
+            if matched is not None:
+                kind = 0 if matched.typ == STT_FUNC else 1
+                return matched.name, kind, matched.st_value, matched.st_size, target_value - matched.st_value
+            sec_name = ko.sections[sec_idx].name or ".internal"
+            kind = 0 if ko.sections[sec_idx].sh_flags & 0x4 else 1
+            return f"{sec_name}+0x{target_value:x}", kind, target_value, 0, 0
+        name = getattr(reloc, "symbol_name", "") or f".internal+0x{target_value:x}"
+        return name, 1, target_value, 0, 0
+
     core_ro_sections = [
         sec for sec in ko.sections
         if sec.is_alloc
@@ -93,6 +127,12 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
         and not sec.name.startswith(".exit")
     ]
     shim_reloc_targets: Set[str] = {r.symbol_name for r in layout.data_relocs if r.is_undef and r.symbol_name} & shim_symbols
+    for reloc in layout.data_relocs:
+        if reloc.is_undef:
+            continue
+        target_name, _target_kind, _target_value, _target_size, target_addend = describe_reloc_target(reloc)
+        if target_addend == 0 and target_name in shim_symbols:
+            shim_reloc_targets.add(target_name)
     stop_names = set(base_stop_names) | shim_reloc_targets
 
     modules_seen: Set[str] = set()
@@ -152,11 +192,11 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
             continue
         if not (sec.sh_flags & SHF_ALLOC): continue
         if (sec.sh_flags & SHF_WRITE) or (sec.sh_flags & SHF_EXECINSTR): continue
-        name = reloc.symbol_name or f".rodata+0x{reloc.sym_value:x}"
+        name, _kind, target_value, _target_size, _target_addend = describe_reloc_target(reloc)
         if name in resolved_nodes: continue
         sec_off = layout.section_offsets.get(sec_idx)
         if sec_off is None: continue
-        addr = module_core_base + sec_off + reloc.sym_value
+        addr = module_core_base + sec_off + target_value
         size = max(0, ro_kernel_end - addr)
         resolved_nodes[name] = (name, addr, size, 1, owner_module_path)
 
@@ -202,17 +242,15 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
     for reloc in layout.data_relocs:
         if reloc.r_type != R_X86_64_64:
             raise ValueError(f"{ko_path}: unsupported relocation type {reloc.r_type} (expect R_X86_64_64)")
-        
+
+        reloc_addend = reloc.addend
         sym_name = reloc.symbol_name
-        
-        # 内部匿名符号的强力修补
-        if not sym_name and not reloc.is_undef:
-            if reloc.sym_shndx is not None and reloc.sym_shndx < len(ko.sections):
-                sec_name = ko.sections[reloc.sym_shndx].name or ".internal"
-                sym_name = f"{sec_name}+0x{reloc.sym_value:x}"
-            else:
-                sym_name = f".internal+0x{reloc.sym_value:x}"
-                
+        target_kind_hint = 1
+        target_value = reloc.sym_value
+        target_size_hint = 0
+        if not reloc.is_undef:
+            sym_name, target_kind_hint, target_value, target_size_hint, reloc_addend = describe_reloc_target(reloc)
+
         if not sym_name:
             raise ValueError(f"{ko_path}: relocation with empty symbol name (idx={reloc.sym_idx})")
 
@@ -234,7 +272,13 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
                     export_order=len(resolved_syms), original_order=len(resolved_syms),
                     module_id=node.module_id, module_name=shim_label if is_shim_target else module_label(node.module_name),
                 )
-                resolved_nodes[node.name] = (node.name, node.address, node.size, node.kind, shim_label if is_shim_target else module_label(node.module_name))
+                resolved_nodes[node.name] = (
+                    node.name,
+                    0 if is_shim_target else node.address,
+                    node.size,
+                    node.kind,
+                    shim_label if is_shim_target else module_label(node.module_name),
+                )
             else:
                 sec_off = layout.section_offsets.get(reloc.sym_shndx)
                 if sec_off is None:
@@ -244,15 +288,14 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
                     if _is_non_core_section_name(ko.sections[reloc.sym_shndx].name):
                         skipped_relocs += 1
                         continue
-                
-                addr = module_core_base + sec_off + reloc.sym_value
-                st_type_extra = STT_OBJECT
-                if reloc.sym_shndx is not None and reloc.sym_shndx < len(ko.sections):
-                    if ko.sections[reloc.sym_shndx].sh_flags & SHF_EXECINSTR:
-                        st_type_extra = STT_FUNC
-                
+
+                addr = module_core_base + sec_off + target_value
+                st_type_extra = STT_FUNC if target_kind_hint == 0 else STT_OBJECT
+
                 size_extra = 0
-                if ".rodata" in sym_name: size_extra = max(0, ro_kernel_end - addr)
+                if target_size_hint > 0:
+                    size_extra = target_size_hint
+                elif ".rodata" in sym_name: size_extra = max(0, ro_kernel_end - addr)
                 elif ".data" in sym_name or ".bss" in sym_name:
                     data_kernel_end = module_core_base + layout.data_end
                     size_extra = max(0, data_kernel_end - addr)
@@ -261,12 +304,20 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
                     size_extra = max(0, text_kernel_end - addr)
 
                 target = ResolvedSymbol(
-                    name=sym_name, source=owner_lib, defined=True, exported=False,
-                    st_type=st_type_extra, size=size_extra, address=addr,
+                    name=sym_name, source=LIB_SHIM if is_shim_target else owner_lib,
+                    defined=not is_shim_target, exported=False,
+                    st_type=st_type_extra, size=size_extra,
+                    address=0 if is_shim_target else addr,
                     export_order=len(resolved_syms), original_order=len(resolved_syms),
-                    module_id=0, module_name=owner_module_path,
+                    module_id=0, module_name=shim_label if is_shim_target else owner_module_path,
                 )
-                resolved_nodes[target.name] = (target.name, addr, 0, 1, owner_module_path)
+                resolved_nodes[target.name] = (
+                    target.name,
+                    0 if is_shim_target else addr,
+                    size_extra,
+                    target_kind_hint,
+                    shim_label if is_shim_target else owner_module_path,
+                )
                 
             resolved_syms.append(target)
             by_name[target.name] = target
@@ -276,7 +327,7 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
             needed_libs.append(LIB_SHIM)
             
         data_relocs.append(
-            DataRelocation(offset=reloc.offset, symbol=target, addend=reloc.addend, r_type=R_X86_64_64)
+            DataRelocation(offset=reloc.offset, symbol=target, addend=reloc_addend, r_type=R_X86_64_64)
         )
 
     text_min_page = compute_text_min_page(resolved_syms, extra_text_ranges, data_kernel_start if layout.data_image else None)

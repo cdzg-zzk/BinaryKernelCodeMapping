@@ -381,6 +381,8 @@ class KoFile:
     _RELA = struct.Struct("<QQq")
     _NON_CORE_SECTION_PREFIXES = (
         ".modinfo",
+        ".return_sites",
+        ".retpoline_sites",
     )
 
     def __init__(self, path: Path) -> None:
