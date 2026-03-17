@@ -122,27 +122,38 @@ struct static_tree_desc_s {
     int     max_length;          /* max bit length for the codes */
 };
 
-local const static_tree_desc  static_l_desc =
+local static_tree_desc  static_l_desc __used =
 {static_ltree, extra_lbits, LITERALS+1, L_CODES, MAX_BITS};
 
-local const static_tree_desc  static_d_desc =
+local static_tree_desc  static_d_desc __used =
 {static_dtree, extra_dbits, 0,          D_CODES, MAX_BITS};
 
-local const static_tree_desc  static_bl_desc =
+local static_tree_desc  static_bl_desc __used =
 {(const ct_data *)0, extra_blbits, 0,   BL_CODES, MAX_BL_BITS};
 
-struct trees_pic_ctx {
-    const static_tree_desc *static_l_desc;
-    const static_tree_desc *static_d_desc;
-    const static_tree_desc *static_bl_desc;
-};
+static __always_inline static_tree_desc *static_l_desc_base(void)
+{
+    static_tree_desc *base;
 
-static struct trees_pic_ctx trees_pic_ctx __used
-    __attribute__((section(".data"))) = {
-    .static_l_desc = &static_l_desc,
-    .static_d_desc = &static_d_desc,
-    .static_bl_desc = &static_bl_desc,
-};
+    asm volatile("lea static_l_desc(%%rip), %0" : "=r"(base));
+    return base;
+}
+
+static __always_inline static_tree_desc *static_d_desc_base(void)
+{
+    static_tree_desc *base;
+
+    asm volatile("lea static_d_desc(%%rip), %0" : "=r"(base));
+    return base;
+}
+
+static __always_inline static_tree_desc *static_bl_desc_base(void)
+{
+    static_tree_desc *base;
+
+    asm volatile("lea static_bl_desc(%%rip), %0" : "=r"(base));
+    return base;
+}
 
 static __always_inline const int *extra_lbits_base(void)
 {
@@ -451,13 +462,13 @@ void ZLIB_INTERNAL _tr_init(s)
     tr_static_init();
 
     s->l_desc.dyn_tree = s->dyn_ltree;
-    s->l_desc.stat_desc = trees_pic_ctx.static_l_desc;
+    s->l_desc.stat_desc = static_l_desc_base();
 
     s->d_desc.dyn_tree = s->dyn_dtree;
-    s->d_desc.stat_desc = trees_pic_ctx.static_d_desc;
+    s->d_desc.stat_desc = static_d_desc_base();
 
     s->bl_desc.dyn_tree = s->bl_tree;
-    s->bl_desc.stat_desc = trees_pic_ctx.static_bl_desc;
+    s->bl_desc.stat_desc = static_bl_desc_base();
 
     s->bi_buf = 0;
     s->bi_valid = 0;

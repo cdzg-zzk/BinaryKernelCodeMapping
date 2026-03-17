@@ -516,9 +516,12 @@ deflate_fast / deflate_slow / deflate_rle / deflate_huff
 
 #### 3.2 `trees.c`
 
-- 为了避免 `_tr_init()` 直接把 `&static_l_desc`、`&static_d_desc`、`&static_bl_desc` 写进状态结构，又新增了一个很小的 `trees_pic_ctx`
-- `trees_pic_ctx` 也放在 `.data`，里面只保存这三个静态 tree descriptor 的指针
-- `_tr_init()` 现在直接从 `trees_pic_ctx` 读取对应 descriptor 指针，再写进 `s->l_desc.stat_desc`、`s->d_desc.stat_desc`、`s->bl_desc.stat_desc`
+- `static_l_desc`、`static_d_desc`、`static_bl_desc` 现在不再保留 `const`
+- 这样这三个 descriptor 会自然落进 `.data`
+- 它们内部的 `static_tree` / `extra_bits` 指针字段也会自然形成 `.rela.data`
+- `_tr_init()` 不再直接写 `&static_l_desc` 这类全局地址
+- 现在和 `configuration_table_base()` 一样，先通过一个很小的 `static_*_desc_base()` helper 显式执行 `lea symbol(%rip), reg`
+- 再把这个寄存器基址写进 `s->l_desc.stat_desc`、`s->d_desc.stat_desc`、`s->bl_desc.stat_desc`
 - 对 `bl_order`、`static_ltree`、`static_dtree`、`extra_lbits`、`extra_dbits`、`base_length`、`base_dist` 这几张只读静态表，没有改成 `.data`
 - 这些表都继续保持 upstream 的 `static const` / `const` 定义，继续留在 `.rodata`
 - 真正的改动只在“怎么取基址”：
@@ -537,10 +540,12 @@ deflate_fast / deflate_slow / deflate_rle / deflate_huff
   - `_tr_tally()`
   - `compress_block()`
 
-这里同样遵守了“尽量不改原始只读对象本身”的原则：
+这里和 `configuration_table` 的处理原则是一致的：
 
-- `static_l_desc` / `static_d_desc` / `static_bl_desc` 的定义和内容没有被改写
-- 只调整了 `_tr_init()` 获取这些对象地址的方式
+- 真正会被运行期解引用、并且内部还带指针字段的聚合对象，要进入 `.data`
+- 这样指针关系会进入 `.rela.data`，而不是在 manager 替换 `.rodata` 页后残留内核绝对地址
+- `static_l_desc` / `static_d_desc` / `static_bl_desc` 正是这一类对象
+- 同时，`_tr_init()` 这一层还必须避免把 `.data` 对象地址物化成立即数；否则编译器仍可能生成 `R_X86_64_32S`
 
 #### 3.3 `crc32.c` / `adler32.c`
 
