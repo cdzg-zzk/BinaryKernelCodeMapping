@@ -1,6 +1,9 @@
 obj-m += zlib_lkm.o
 
 zlib_lkm-objs := zlib_lkm_module.o deflate.o trees.o crc32.o adler32.o zutil.o
+COMMON_FLAGS_MK := $(if $(M),$(M),$(CURDIR))/../common_zlib_build_flags.mk
+
+include $(COMMON_FLAGS_MK)
 
 KDIR ?= /lib/modules/$(shell uname -r)/build
 PAHOLE ?= pahole
@@ -12,9 +15,8 @@ UBSAN_SANITIZE := n
 ccflags-y += -I$(src)
 # Keep the generated code readable and avoid kernel-side instrumentation that
 # would complicate later user-space mapping and binary analysis.
-ccflags-y += -O2 -fno-omit-frame-pointer -fno-inline -fno-optimize-sibling-calls
-ccflags-y += -fno-sanitize=all -fno-stack-protector
-ccflags-y += -fno-ipa-cp -fno-ipa-sra -fno-tree-ccp
+ccflags-y += $(ZLIB_BENCH_COMMON_CFLAGS)
+ccflags-y += -fno-sanitize=all
 ccflags-remove-y += -fsanitize=bounds -fsanitize=shift -fsanitize=bool -fsanitize=enum
 ccflags-remove-y += -fstack-protector-strong
 ccflags-remove-y += -pg -mrecord-mcount -mfentry
@@ -51,8 +53,8 @@ CFLAGS_REMOVE_zlib_lkm_module.o += -pg -mrecord-mcount -mfentry
 CFLAGS_REMOVE_zlib_lkm_module.o += -fpatchable-function-entry=16,16
 
 all:
-	$(MAKE) -C $(KDIR) M=$(PWD) modules
-	$(PAHOLE) -J --btf_base=$(VMLINUX_BTF) $(BTF_COMPAT_FLAGS) $(PWD)/zlib_lkm.ko
+	$(MAKE) -C $(KDIR) M=$(CURDIR) modules
+	$(PAHOLE) -J --btf_base=$(VMLINUX_BTF) $(BTF_COMPAT_FLAGS) $(CURDIR)/zlib_lkm.ko
 
 clean:
-	$(MAKE) -C $(KDIR) M=$(PWD) clean
+	$(MAKE) -C $(KDIR) M=$(CURDIR) clean

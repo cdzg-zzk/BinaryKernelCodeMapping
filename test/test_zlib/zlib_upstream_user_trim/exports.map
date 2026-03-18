@@ -1,0 +1,20 @@
+{
+  global:
+    adler32;
+    crc32;
+    deflate;
+    deflateEnd;
+    deflateInit2_;
+    deflateParams;
+    deflatePending;
+    deflatePrime;
+    deflateReset;
+    deflateSetDictionary;
+    get_crc_table;
+    inflateBack;
+    inflateBackEnd;
+    inflateBackInit_;
+    zlibVersion;
+  local:
+    *;
+};
