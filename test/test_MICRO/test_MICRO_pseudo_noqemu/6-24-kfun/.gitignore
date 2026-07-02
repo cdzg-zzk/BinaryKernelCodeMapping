@@ -1,0 +1,7 @@
+# Keep only the benchmark-family skeleton in Git.
+*
+!.gitignore
+!README.md
+!*/
+*/*
+!*/.gitkeep
