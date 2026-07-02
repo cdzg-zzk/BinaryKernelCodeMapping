@@ -9,6 +9,9 @@ _printk
 printk
 vprintk
 memcpy
+memset
+kernel_fpu_begin_mask
+kernel_fpu_end
 kstrdup
 ktime_get
 ktime_get_ns

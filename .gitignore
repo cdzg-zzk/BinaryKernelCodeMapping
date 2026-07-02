@@ -1,0 +1,103 @@
+# Local assistant/editor state
+/.claude/
+/.codex
+/LLM_ONBOARDING.md
+/claude_dsv4_start.sh
+/tmp.txt
+
+# Local archives and imported bundles
+/archive.tar.gz
+/micro-pgot.zip
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Generic build and kernel-module outputs
+*.o
+*.ko
+*.mod
+*.mod.c
+*.cmd
+*.d
+*.so
+*.a
+Module.symvers
+modules.order
+
+# Logs, traces, and generated analysis outputs
+*.log
+*.stdout
+*.krg
+*.out
+out.krg
+resolved_symbol_addresses.txt
+module_deps.txt
+
+# Local-only helper areas
+/tools/
+/user/
+
+# Generated disassembly outputs
+/disassemble/page_cache_replace_disassemble*.txt
+/disassemble/page_cache_replace_disassembly*.txt
+
+# kernel_cgd generated artifacts
+/kernel_cgd/function_checker/__pycache__/
+/kernel_cgd/kerne_type/__pycache__/
+/kernel_cgd/kerne_type/vkso_types.h
+/kernel_cgd/kerne_type/vkso_types_back.h
+/kernel_cgd/src/build.log
+/kernel_cgd/src/krg
+/kernel_cgd/src/krg.o
+/kernel_cgd/src/krg.cpp.back
+/kernel_cgd/src/out.krg
+
+# make_dll generated artifacts
+/make_dll/__pycache__/
+/make_dll/libgenerated_*.so
+/make_dll/liblkm_locate.so
+/make_dll/libshim.so
+/make_dll/symbols.txt
+
+# page_cache_replace generated artifacts
+/page_cache_replace/manager
+/page_cache_replace/page_cache_replace.ko
+/page_cache_replace/page_cache_replace.o
+/page_cache_replace/page_cache_replace.mod
+/page_cache_replace/page_cache_replace.mod.c
+/page_cache_replace/page_cache_replace.mod.o
+
+# test_first_call generated artifacts
+/test/test_first_call/importance_trace.out
+/test/test_first_call/module_deps.txt
+/test/test_first_call/out.krg
+/test/test_first_call/resolved_symbol_addresses.txt
+/test/test_first_call/matrix_bench/benchmark_first_touch
+/test/test_first_call/matrix_bench/benchmark_ftrace
+/test/test_first_call/matrix_bench/benchmark_pmc
+/test/test_first_call/matrix_bench/first_touch_results.csv
+/test/test_first_call/matrix_bench/ftrace_*.log
+/test/test_first_call/matrix_bench/pmc_*.txt
+/test/test_first_call/matrix_bench/pmc_results.csv
+/test/test_first_call/matrix_bench/pmc_logs/
+/test/test_first_call/so/clone_xxh32_user.o
+/test/test_first_call/so/libclone_xxh32.so
+/test/test_first_call/so/zzk_xxh32_*.o
+/test/test_first_call/so/zzk_xxh32_*.ko
+/test/test_first_call/so/zzk_xxh32_*.mod
+/test/test_first_call/so/zzk_xxh32_*.mod.c
+/test/test_first_call/tmp/
+
+# Other local test trees
+/test/test_MICRO/test_MICRO_pseudo_noqemu/6-24-kfun/
+/test/test_MICRO/test_MICRO_pseudo_noqemu/pgot_benchmarks/full_run_*.log
+/test/test_MICRO/test_MICRO_pseudo_noqemu/pgot_benchmarks/microtest.log
+/test/test_MICRO/test_MICRO_pseudo_noqemu/pgot_benchmarks/perf_validation_*.log
+/test/test_MICRO/test_MICRO_pseudo_noqemu/pgot_benchmarks/results/
+/test/test_MICRO/test_MICRO_pseudo_noqemu/pgot_benchmarks/**/bench
+/test/test_MICRO/test_MICRO_pseudo_noqemu/pgot_benchmarks/**/bench_noret
+/test/test_MICRO/test_MICRO_pseudo_noqemu/pgot_benchmarks/**/bench_retpoline
+
+# Explicitly ignored local note requested for deletion/cleanup
+/zzk-6-22-mico.md

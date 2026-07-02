@@ -1,1 +1,0 @@
-zzk_xxh32,0xffffffffc1599000,0x152,/home/zzk/BinaryKernelCodeMapping/test/test_first_call/so/zzk_xxh32_lkm.ko,export

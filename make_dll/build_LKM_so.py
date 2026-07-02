@@ -19,6 +19,7 @@ from typing import Dict, List, Sequence, Set, Tuple
 # Reuse heavy lifting from build_PIC_so
 from build_PIC_so import (
     DataRelocation, LIB_SHIM, ManualElfBuilder, PAGE_SIZE, R_X86_64_64,
+    SHT_RELA,
     SHN_UNDEF, STT_FUNC, STT_OBJECT, TEXT_BASE_VADDR, align_down,
     parse_symbol_requests, load_shim_symbols, KoFile, KrgGraph, ResolvedSymbol,
 )
@@ -33,6 +34,7 @@ _C_RESET = "\033[0m"
 _C_CYAN = "\033[36m"
 _C_YELLOW = "\033[33m"
 _C_GREEN = "\033[32m"
+_C_RED = "\033[31m"
 
 
 def _is_non_core_section_name(name: str) -> bool:
@@ -70,6 +72,7 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
     if not requested: raise ValueError("symbols.txt provided no symbols")
 
     shim_symbols = load_shim_symbols(shim_list_path)
+    forced_shim_symbols = shim_symbols - set(requested)
     shim_label = str(shim_lib_path.resolve())
     graph = KrgGraph(krg_path)
     base_stop_names: Set[str] = {
@@ -126,6 +129,33 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
         and not sec.name.startswith(".init")
         and not sec.name.startswith(".exit")
     ]
+    core_exec_indices = {
+        sec.index for sec in ko.sections
+        if sec.is_alloc
+        and sec.is_exec
+        and not _is_non_core_section_name(sec.name)
+        and not sec.name.startswith(".init")
+        and not sec.name.startswith(".exit")
+    }
+    exec_reloc_targets: Set[str] = set()
+    for sec in ko.sections:
+        if sec.sh_type != SHT_RELA or not sec.name.startswith(".rela."):
+            continue
+        if sec.sh_info not in core_exec_indices:
+            continue
+        if sec.sh_entsize != ko._RELA.size:
+            raise ValueError(f"{ko_path}: unexpected rela entsize in {sec.name}")
+        end = sec.sh_offset + sec.sh_size
+        if end > len(ko._blob):
+            raise ValueError(f"{ko_path}: truncated relocation section {sec.name}")
+        for entry_off in range(sec.sh_offset, end, sec.sh_entsize):
+            _r_offset, r_info, _r_addend = ko._RELA.unpack_from(ko._blob, entry_off)
+            sym_idx = (r_info >> 32) & 0xFFFFFFFF
+            if sym_idx >= len(ko.symbols):
+                continue
+            sym = ko.symbols[sym_idx]
+            if sym.is_undef and sym.name:
+                exec_reloc_targets.add(sym.name)
     shim_reloc_targets: Set[str] = {r.symbol_name for r in layout.data_relocs if r.is_undef and r.symbol_name} & shim_symbols
     for reloc in layout.data_relocs:
         if reloc.is_undef:
@@ -133,7 +163,9 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
         target_name, _target_kind, _target_value, _target_size, target_addend = describe_reloc_target(reloc)
         if target_addend == 0 and target_name in shim_symbols:
             shim_reloc_targets.add(target_name)
-    stop_names = set(base_stop_names) | shim_reloc_targets
+    exec_shim_conflicts = exec_reloc_targets & shim_symbols
+    shim_targets = (forced_shim_symbols | shim_reloc_targets) - exec_shim_conflicts
+    stop_names = set(base_stop_names) | shim_targets
 
     modules_seen: Set[str] = set()
     for root in requested:
@@ -169,7 +201,7 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
     resolved_ordered_raw = sorted(resolved_nodes.values(), key=lambda x: x[0])
     resolved_ordered = []
     for name, addr, size, kind, mod in resolved_ordered_raw:
-        use_shim = name in shim_reloc_targets
+        use_shim = name in shim_targets
         mod_out = shim_label if use_shim else module_label(mod)
         resolved_ordered.append((name, addr, size, kind, mod_out))
 
@@ -203,7 +235,7 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
     resolved_ordered_raw = sorted(resolved_nodes.values(), key=lambda x: x[0])
     resolved_ordered = []
     for name, addr, size, kind, mod in resolved_ordered_raw:
-        use_shim = name in shim_reloc_targets
+        use_shim = name in shim_targets
         mod_out = shim_label if use_shim else module_label(mod)
         resolved_ordered.append((name, addr, size, kind, mod_out))
 
@@ -221,7 +253,7 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
         return (flags & SHF_ALLOC) and not (flags & SHF_WRITE) and not (flags & SHF_EXECINSTR)
 
     for name, addr, size, kind, module_name in resolved_ordered:
-        is_shim = name in shim_reloc_targets
+        is_shim = name in shim_targets
         if is_shim and LIB_SHIM not in needed_libs: needed_libs.append(LIB_SHIM)
         st_type = STT_FUNC if kind == 0 else STT_OBJECT
         if kind == 1 and not is_ro_symbol(name): continue
@@ -254,7 +286,7 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
         if not sym_name:
             raise ValueError(f"{ko_path}: relocation with empty symbol name (idx={reloc.sym_idx})")
 
-        is_shim_target = sym_name in shim_reloc_targets
+        is_shim_target = sym_name in shim_targets
         target = by_name.get(sym_name)
         
         if target is None:
@@ -345,10 +377,13 @@ def build_lkm_so(symbols_path: Path, krg_path: Path, shim_list_path: Path, shim_
     for name, addr, size, kind, mod in sorted(resolved_nodes.values(), key=lambda x: x[0]):
         if kind == 1: size = size if size > 0 else max(0, ro_kernel_end - addr)
         if kind == 1 and not is_ro_symbol(name): continue
-        use_shim = name in shim_reloc_targets
+        use_shim = name in shim_targets
         mod_out = shim_label if use_shim else module_label(mod)
         resolved_out.append((name, addr, size, kind, mod_out))
     write_resolved_addresses(resolved_out, symbols_path.parent / "resolved_symbol_addresses.txt")
+    if exec_shim_conflicts:
+        names = ", ".join(sorted(exec_shim_conflicts))
+        print(f"{_C_RED}[lkm_so] shim disabled for exec-relocated symbols: {names}{_C_RESET}")
     print(f"{_C_CYAN}[lkm_so] core ro sections:{_C_RESET}")
     for sec in core_ro_sections:
         sec_off = layout.section_offsets.get(sec.index, -1)

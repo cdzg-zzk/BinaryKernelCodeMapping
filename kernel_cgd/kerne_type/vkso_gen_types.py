@@ -16,6 +16,14 @@ from typing import Optional
 
 DEFAULT_VMLINUX_BTF = "/sys/kernel/btf/vmlinux"
 MODULE_BTF_DIR = "/sys/kernel/btf"
+KALLSYMS_PATH = "/proc/kallsyms"
+GLOBAL_TEXT_SYMBOL_TYPES = ("T", "W")
+KSYMTAB_PREFIXES = (
+    "__ksymtab_",
+    "__ksymtab_gpl_",
+    "__ksymtab_unused_",
+    "__ksymtab_unused_gpl_",
+)
 
 def find_bpftool(explicit):
     if explicit: return explicit
@@ -97,6 +105,55 @@ def find_func_proto_id(by_id, name):
         if o.get("kind") == "FUNC" and o.get("name") == name:
             return o.get("type_id")  # FUNC_PROTO id
     return None
+
+def _kallsyms_owner(parts):
+    if len(parts) >= 4 and parts[3].startswith("[") and parts[3].endswith("]"):
+        return parts[3][1:-1]
+    return "vmlinux"
+
+def _remember_unique_owner(owners, duplicates, name, owner):
+    prev = owners.get(name)
+    if prev is None:
+        owners[name] = owner
+    elif prev != owner:
+        duplicates.add(name)
+
+def load_kallsyms_owner_hints(kallsyms_path=KALLSYMS_PATH):
+    global_text_owners = {}
+    exported_symbol_owners = {}
+    global_text_duplicates = set()
+    exported_symbol_duplicates = set()
+    if not os.path.exists(kallsyms_path):
+        return global_text_owners, exported_symbol_owners
+    try:
+        with open(kallsyms_path, encoding="utf-8") as f:
+            for raw in f:
+                parts = raw.split()
+                if len(parts) < 3:
+                    continue
+                sym_type = parts[1]
+                sym = parts[2]
+                owner = _kallsyms_owner(parts)
+                if sym_type in GLOBAL_TEXT_SYMBOL_TYPES:
+                    _remember_unique_owner(
+                        global_text_owners, global_text_duplicates, sym, owner
+                    )
+                prefix = next((p for p in KSYMTAB_PREFIXES if sym.startswith(p)), None)
+                if prefix is None:
+                    continue
+                exported = sym[len(prefix):]
+                if not exported:
+                    continue
+                _remember_unique_owner(
+                    exported_symbol_owners, exported_symbol_duplicates, exported, owner
+                )
+        for sym in global_text_duplicates:
+            global_text_owners.pop(sym, None)
+        for exported in exported_symbol_duplicates:
+            exported_symbol_owners.pop(exported, None)
+    except OSError as e:
+        sys.stderr.write(f"WARN: failed to read {kallsyms_path}: {e}\n")
+    return global_text_owners, exported_symbol_owners
 
 def _strip_ko_ext(name):
     for ext in (".ko.xz", ".ko.gz", ".ko.zst", ".ko"):
@@ -546,6 +603,16 @@ def discover_sources_for_func(fn, bpftool, sources_by_id, source_order, base_sou
             matches.append(src)
     return matches
 
+def filter_matches_by_owner_hints(fn, matches, global_text_owners, exported_symbol_owners):
+    for owners in (global_text_owners, exported_symbol_owners):
+        owner = owners.get(fn)
+        if owner is None:
+            continue
+        filtered = [src for src in matches if src.label == owner]
+        if filtered:
+            return filtered
+    return matches
+
 def lookup_type(src, tid):
     cur = src
     while cur is not None:
@@ -694,6 +761,7 @@ def main():
     )
     sources_by_id = {base_btf_path: base_source}
     source_order = [base_btf_path]
+    global_text_owners, exported_symbol_owners = load_kallsyms_owner_hints()
     matched = {base_btf_path: []}
     missing_required = []
     matched_count = 0
@@ -728,6 +796,9 @@ def main():
 
         matches = discover_sources_for_func(
             req.name, bpftool, sources_by_id, source_order, base_source, base_btf_path, module_candidates
+        )
+        matches = filter_matches_by_owner_hints(
+            req.name, matches, global_text_owners, exported_symbol_owners
         )
         if not matches:
             level = "ERROR" if req.required else "WARN"

@@ -1,0 +1,9 @@
+function,result_dir,native_cycles,micro_cycles,native_instr,micro_instr,native_branches,micro_branches,native_cpi,micro_cpi
+sha256_transform,test/test_MICRO/test_MICRO_pseudo_noqemu/sha256_transform/results/20260603T132032Z_host,906.502,892.562,3351.649,3362.649,21.128,20.128,0.269,0.264
+crc32_le,test/test_MICRO/test_MICRO_pseudo_noqemu/crc32_le/results/20260603T075119Z_host,8110.362,8005.228,14378.204,14379.203,521.421,521.420,0.562,0.554
+errname,test/test_MICRO/test_MICRO_pseudo_noqemu/errname/results/20260603T081308Z_host,18.184,18.041,66.890,64.388,16.556,16.190,0.275,0.283
+strscpy_pad,test/test_MICRO/test_MICRO_pseudo_noqemu/strscpy_pad/results/20260604T011650Z_host,455.927,454.032,1322.340,1326.340,171.569,171.569,0.343,0.341
+string_get_size,test/test_MICRO/test_MICRO_pseudo_noqemu/string_get_size/results/20260603T141605Z_host,451.310,449.513,1409.193,1418.014,336.336,335.336,0.319,0.316
+strlcat,test/test_MICRO/test_MICRO_pseudo_noqemu/strlcat/results/20260604T011606Z_host,4870.078,4866.515,9475.083,9483.773,3143.803,3143.745,0.512,0.511
+strlcpy,test/test_MICRO/test_MICRO_pseudo_noqemu/strlcpy/results/20260604T011627Z_host,6303.199,6304.608,12366.893,12370.894,4109.362,4109.362,0.507,0.507
+hex_dump_to_buffer,test/test_MICRO/test_MICRO_pseudo_noqemu/hex_dump_to_buffer_compare/results/20260603T130750Z_host,650.081,657.599,2509.021,2528.249,579.635,579.655,0.258,0.259

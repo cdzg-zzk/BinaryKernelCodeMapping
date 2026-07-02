@@ -97,6 +97,7 @@ clone_xxh32:
     shr    $0x10, %eax
     xor    %edx, %eax
     ret
+    int3
 
 .L330:
     add    $0x165667b1, %edx

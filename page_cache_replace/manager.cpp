@@ -1,15 +1,20 @@
 // compile: g++ -o manager -std=c++17 -g manager.cpp
-// run: sudo ./manager
+// run:
+//   sudo ./manager replace <stub-so> <resolved-symbol-addresses> --hold
+//   sudo ./manager restore <stub-so> <resolved-symbol-addresses>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/socket.h>
 #include <linux/netlink.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <limits.h>
+#include <time.h>
 #include <algorithm>
 #include <map>
 #include <vector>
@@ -17,13 +22,17 @@
 
 #define NETLINK_MODIFY 30  // 自定义 Netlink 协议号
 #define NETLINK_RESTORE 29  // 恢复操作的 Netlink 协议号
-#define MAX_PAGES_PER_OPERATION 100  // 每次操作的最大页面数
+#define MAX_PAGES_PER_OPERATION 256  // 每次操作的最大页面数（需与内核模块保持一致）
 
 // #define PAGE_SIZE 4096
 #define PAGE_SIZE 4096
 // #define REL_FILEPATH "../make_dll/libgenerated_parse_library.so"
-#define REL_FILEPATH "../make_dll/liblkm_locate.so"
-#define REL_SYMBOL_ADDR_FILE "../make_dll/resolved_symbol_addresses.txt"
+// #define REL_FILEPATH "../make_dll/liblkm_locate.so"
+// #define REL_FILEPATH "../test/test_disk_memory/disk_test/disk_test_1/libdisk_test_1.so"
+#define REL_FILEPATH "../test/test_first_call/tmp/libzzk_xxh32_lkm.so"
+// #define REL_SYMBOL_ADDR_FILE "../make_dll/resolved_symbol_addresses.txt"
+// #define REL_SYMBOL_ADDR_FILE "../test/test_disk_memory/disk_test/disk_test_1/resolved_symbol_addresses.txt"
+#define REL_SYMBOL_ADDR_FILE "../test/test_first_call/tmp/resolved_symbol_addresses.txt"
 
 // Netlink 消息格式 - 支持多页面
 struct nl_msg {
@@ -52,6 +61,12 @@ struct SymbolAddressEntry {
 
 using SymbolAddressList = std::vector<SymbolAddressEntry>;
 
+static volatile sig_atomic_t g_restore_requested = 0;
+
+static void signal_handler(int) {
+    g_restore_requested = 1;
+}
+
 static std::string join_path(const std::string &base, const char *suffix) {
     if (base.empty()) {
         return std::string(suffix);
@@ -73,6 +88,85 @@ static std::string source_dir() {
 
 static std::string default_path(const char *relative_path) {
     return join_path(source_dir(), relative_path);
+}
+
+static std::string dirname_of(const std::string &path) {
+    size_t pos = path.find_last_of('/');
+    if (pos == std::string::npos) {
+        return ".";
+    }
+    if (pos == 0) {
+        return "/";
+    }
+    return path.substr(0, pos);
+}
+
+static std::string executable_dir(const char *argv0) {
+    char resolved[PATH_MAX];
+    if (realpath(argv0, resolved)) {
+        return dirname_of(resolved);
+    }
+    return source_dir();
+}
+
+static std::string runtime_dir_for(const char *argv0) {
+    return join_path(executable_dir(argv0), "runtime");
+}
+
+static std::string state_path_for(const char *argv0) {
+    return join_path(runtime_dir_for(argv0), "manager.state");
+}
+
+static std::string pid_path_for(const char *argv0) {
+    return join_path(runtime_dir_for(argv0), "manager.pid");
+}
+
+static bool ensure_runtime_dir(const char *argv0) {
+    std::string dir = runtime_dir_for(argv0);
+    if (mkdir(dir.c_str(), 0755) != 0 && errno != EEXIST) {
+        perror("mkdir runtime");
+        return false;
+    }
+    return true;
+}
+
+static bool write_manager_state(const char *argv0,
+                                const char *filepath,
+                                const char *symbol_addr_file) {
+    if (!ensure_runtime_dir(argv0)) {
+        return false;
+    }
+
+    std::string state_path = state_path_for(argv0);
+    std::string pid_path = pid_path_for(argv0);
+    FILE *state = fopen(state_path.c_str(), "w");
+    if (!state) {
+        perror("fopen manager.state");
+        return false;
+    }
+
+    time_t now = time(NULL);
+    fprintf(state, "manager_pid=%ld\n", (long)getpid());
+    fprintf(state, "stub_so=%s\n", filepath);
+    fprintf(state, "resolved=%s\n", symbol_addr_file);
+    fprintf(state, "created_at=%ld\n", (long)now);
+    fclose(state);
+
+    FILE *pid = fopen(pid_path.c_str(), "w");
+    if (pid) {
+        fprintf(pid, "%ld\n", (long)getpid());
+        fclose(pid);
+    }
+
+    printf("Wrote manager state: %s\n", state_path.c_str());
+    return true;
+}
+
+static void remove_manager_state(const char *argv0) {
+    std::string state_path = state_path_for(argv0);
+    std::string pid_path = pid_path_for(argv0);
+    unlink(state_path.c_str());
+    unlink(pid_path.c_str());
 }
 
 void dump_page_mappings(const loff_t *offsets,
@@ -477,9 +571,59 @@ int replace_elf_sections_by_page_info(const char *filepath,
     // 等待一下让内核处理
     printf("Waiting for kernel to process replace request...\n");
     sleep(2);
-    printf("Press Enter to continue...\n");
-    getchar();
-    
+    printf("SUCCESS: ELF section replace completed\n");
+    return 0;
+}
+
+int restore_elf_sections_by_page_info(const char *filepath,
+                                      const SymbolAddressList &symbol_addresses) {
+    if (symbol_addresses.empty()) {
+        fprintf(stderr, "No symbol addresses available for building restore plan\n");
+        return -1;
+    }
+
+    printf("\n=== Building restore plan from resolved symbols ===\n");
+    printf("Target file: %s\n", filepath);
+    printf("Resolved symbols: %zu\n", symbol_addresses.size());
+
+    std::vector<page_plan_entry> plan;
+    if (!build_page_replacement_plan(symbol_addresses, plan)) {
+        fprintf(stderr, "Failed to construct page restore plan\n");
+        return -1;
+    }
+
+    std::vector<loff_t> page_offsets;
+    std::vector<unsigned long> kernel_vaddrs;
+    page_offsets.reserve(plan.size());
+    kernel_vaddrs.reserve(plan.size());
+
+    for (size_t idx = 0; idx < plan.size(); ++idx) {
+        const auto &entry = plan[idx];
+        page_offsets.push_back(entry.file_offset);
+        kernel_vaddrs.push_back(entry.kernel_vaddr);
+
+        printf("  [%03zu] file_offset=0x%llx kernel_vaddr=0x%lx symbols:",
+               idx,
+               (unsigned long long)entry.file_offset,
+               entry.kernel_vaddr);
+        if (entry.symbols.empty()) {
+            printf(" <none>\n");
+        } else {
+            for (size_t s = 0; s < entry.symbols.size(); ++s) {
+                printf(" %s%s",
+                       entry.symbols[s].c_str(),
+                       (s + 1 == entry.symbols.size()) ? "" : ",");
+            }
+            printf("\n");
+        }
+    }
+
+    printf("Total unique pages to restore: %zu\n", plan.size());
+    dump_page_mappings(page_offsets.data(),
+                       kernel_vaddrs.data(),
+                       static_cast<int>(plan.size()),
+                       "Planned restore mappings");
+
     printf("\n=== Sending restore batches ===\n");
     if (send_restore_batches(filepath, page_offsets, kernel_vaddrs) < 0) {
         printf("Failed to send restore batches\n");
@@ -490,35 +634,59 @@ int replace_elf_sections_by_page_info(const char *filepath,
     printf("Waiting for kernel to process restore request...\n");
     sleep(2);
     
-    printf("SUCCESS: ELF section replace completed\n");
+    printf("SUCCESS: ELF section restore completed\n");
     return 0;
+}
+
+static void usage(const char *prog) {
+    fprintf(stderr,
+            "Usage:\n"
+            "  %s replace <stub-so> <resolved-symbol-addresses> [--hold]\n"
+            "  %s restore <stub-so> <resolved-symbol-addresses>\n"
+            "\n"
+            "replace sends page-cache replacement requests. With --hold, the\n"
+            "manager stays alive and restores automatically on SIGTERM/SIGINT/SIGHUP.\n"
+            "restore sends restore requests and exits.\n",
+            prog, prog);
 }
 
 int main(int argc, char **argv) {
     int fd;
     struct stat st;
-    void *mapped_addr;
+    void *mapped_addr = MAP_FAILED;
     std::string default_filepath = default_path(REL_FILEPATH);
     std::string default_symbol_addr = default_path(REL_SYMBOL_ADDR_FILE);
-    const char *filepath = default_filepath.c_str();
-    const char *symbol_addr_file = default_symbol_addr.c_str();
+    const char *command = NULL;
+    const char *filepath = NULL;
+    const char *symbol_addr_file = NULL;
+    bool hold = false;
 
+    if (argc < 4) {
+        usage(argv[0]);
+        return 1;
+    }
+
+    command = argv[1];
+    filepath = argv[2];
+    symbol_addr_file = argv[3];
+    for (int i = 4; i < argc; ++i) {
+        if (strcmp(argv[i], "--hold") == 0) {
+            hold = true;
+        } else {
+            fprintf(stderr, "Unknown argument: %s\n", argv[i]);
+            usage(argv[0]);
+            return 1;
+        }
+    }
+
+    if (strcmp(command, "replace") != 0 && strcmp(command, "restore") != 0) {
+        fprintf(stderr, "Unknown command: %s\n", command);
+        usage(argv[0]);
+        return 1;
+    }
+    
     printf("=== ELF Section Replace Tool ===\n");
-    printf("Usage: %s [filepath] [symbol_addr_file]\n", argv[0]);
-    printf("  filepath: target .so file (default: %s)\n", default_filepath.c_str());
-    printf("  symbol_addr_file: resolved address file (optional, default: %s)\n",
-           default_symbol_addr.c_str());
-    printf("Example: %s /path/to/lib.so /path/to/resolved_addresses.txt\n",
-           argv[0]);
-    
-    // 解析命令行参数
-    if (argc >= 2) {
-        filepath = argv[1];
-    }
-    if (argc >= 3) {
-        symbol_addr_file = argv[2];
-    }
-    
+    printf("Command: %s%s\n", command, hold ? " --hold" : "");
     printf("\nTarget file: %s\n", filepath);
     printf("Symbol address file: %s\n", symbol_addr_file);
 
@@ -526,6 +694,14 @@ int main(int argc, char **argv) {
     if (!load_symbol_addresses(symbol_addr_file, symbol_addresses)) {
         fprintf(stderr, "Failed to load symbol addresses, aborting.\n");
         return -1;
+    }
+
+    if (strcmp(command, "restore") == 0) {
+        int restore_ret = restore_elf_sections_by_page_info(filepath, symbol_addresses);
+        if (restore_ret == 0) {
+            remove_manager_state(argv[0]);
+        }
+        return restore_ret;
     }
 
     // 1. 打开文件
@@ -564,8 +740,33 @@ int main(int argc, char **argv) {
 
     printf("\n=== ELF section replace completed successfully ===\n");
 
+    if (hold) {
+        if (!write_manager_state(argv[0], filepath, symbol_addr_file)) {
+            printf("Failed to write manager state; restoring before exit\n");
+            restore_elf_sections_by_page_info(filepath, symbol_addresses);
+            goto cleanup;
+        }
+
+        signal(SIGTERM, signal_handler);
+        signal(SIGINT, signal_handler);
+        signal(SIGHUP, signal_handler);
+
+        printf("Holding active replacement session. Send SIGTERM/SIGINT/SIGHUP to restore.\n");
+        fflush(stdout);
+        while (!g_restore_requested) {
+            pause();
+        }
+
+        printf("Restore signal received; restoring active replacement session...\n");
+        restore_elf_sections_by_page_info(filepath, symbol_addresses);
+        remove_manager_state(argv[0]);
+        printf("Manager hold session restored and exiting.\n");
+    }
+
 cleanup:
-    munmap(mapped_addr, st.st_size);
+    if (mapped_addr != MAP_FAILED) {
+        munmap(mapped_addr, st.st_size);
+    }
     close(fd);
     return 0;
 }

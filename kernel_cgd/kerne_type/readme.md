@@ -225,7 +225,11 @@ python3 /home/zzk/BinaryKernelCodeMapping/kernel_cgd/kerne_type/vkso_gen_types.p
 
 ### 3. 同名函数可能出现在多个 BTF 源
 
-如果某个函数在 `vmlinux` 和某个模块里同名，脚本会认为来源存在歧义并报错，而不是擅自选择。
+如果某个函数在 `vmlinux` 和某个模块里同名，脚本会先尝试读取 `/proc/kallsyms` 里的运行时符号归属。
+
+- 如果能定位到唯一的全局函数定义来源（例如 `T/W symbol`），就优先选择那个来源；
+- 否则再退回到 `__ksymtab_*` 的 `EXPORT_SYMBOL` 归属；
+- 如果没有导出信息，或者导出来源和当前 BTF 候选对不上，才会继续按“来源存在歧义”报错，而不是擅自选择。
 
 这是为了避免把错误的 ABI 头导出来。
 

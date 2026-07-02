@@ -96,9 +96,33 @@ int vprintk(const char* fmt, va_list ap) {
     return vprintf(fmt, ap);
 }
 
+__attribute__((force_align_arg_pointer))
 void* memcpy(void* dst, const void* src, size_t n) {
     return __builtin_memcpy(dst, src, n);
 }
+
+__attribute__((force_align_arg_pointer))
+void* memset(void* dst, int c, size_t n) {
+    return __builtin_memset(dst, c, n);
+}
+
+void kernel_fpu_begin_mask(unsigned int kfpu_mask);
+void kernel_fpu_end(void);
+
+__asm__(
+    ".globl kernel_fpu_begin_mask\n"
+    ".type kernel_fpu_begin_mask, @function\n"
+    "kernel_fpu_begin_mask:\n"
+    "endbr64\n"
+    "ret\n"
+    ".size kernel_fpu_begin_mask, .-kernel_fpu_begin_mask\n"
+    ".globl kernel_fpu_end\n"
+    ".type kernel_fpu_end, @function\n"
+    "kernel_fpu_end:\n"
+    "endbr64\n"
+    "ret\n"
+    ".size kernel_fpu_end, .-kernel_fpu_end\n"
+);
 
 __attribute__((force_align_arg_pointer))
 int64_t ktime_get(void) {

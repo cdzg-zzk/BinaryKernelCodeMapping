@@ -22,7 +22,9 @@
 #include <iostream>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -175,6 +177,53 @@ static std::optional<u64> read_kallsyms_addr(const std::string& name){
     return std::nullopt;
 }
 
+static std::unordered_map<std::string, std::string> read_exported_symbol_owners(){
+    std::unordered_map<std::string, std::string> owners;
+    std::unordered_set<std::string> dup;
+    std::ifstream in("/proc/kallsyms");
+    if (!in) return owners;
+
+    const std::string_view prefixes[] = {
+        "__ksymtab_",
+        "__ksymtab_gpl_",
+        "__ksymtab_unused_",
+        "__ksymtab_unused_gpl_",
+    };
+
+    std::string addr, type, name, owner_tok;
+    std::string line;
+    while (std::getline(in, line)){
+        if (line.empty()) continue;
+        std::istringstream iss(line);
+        addr.clear(); type.clear(); name.clear(); owner_tok.clear();
+        if (!(iss >> addr >> type >> name)) continue;
+        std::string exported;
+        for (const auto& prefix : prefixes){
+            if (name.rfind(prefix.data(), 0) == 0){
+                exported = name.substr(prefix.size());
+                break;
+            }
+        }
+        if (exported.empty()) continue;
+        std::string owner = "kernel";
+        if (iss >> owner_tok){
+            if (owner_tok.size() >= 2 && owner_tok.front() == '[' && owner_tok.back() == ']'){
+                owner = owner_tok.substr(1, owner_tok.size() - 2);
+            }
+        }
+        auto it = owners.find(exported);
+        if (it == owners.end()){
+            owners.emplace(std::move(exported), std::move(owner));
+        } else if (it->second != owner){
+            dup.insert(it->first);
+        }
+    }
+    for (const auto& name_dup : dup){
+        owners.erase(name_dup);
+    }
+    return owners;
+}
+
 struct Builder {
     // 基本
     struct InputFile {
@@ -188,6 +237,8 @@ struct Builder {
     std::vector<SectionInfo> secs;                 // 所有节
     std::vector<BuildSym>    syms;                 // 所有符号
     std::unordered_map<std::string,u32> name2id;
+    std::vector<std::string> input_owner_names;
+    std::unordered_map<std::string, std::string> exported_symbol_owners;
 
     // 仅“主函数入口”的节内表（按地址排序）
     std::vector<std::vector<u32>> sec_primary_funcs;
@@ -265,6 +316,47 @@ struct Builder {
         return in.base + v;
     }
 
+    void init_symbol_resolution_context(){
+        input_owner_names.assign(inputs.size(), "kernel");
+        if (!inputs.empty()) input_owner_names[0] = "kernel";
+        for (u32 fi = 1; fi < inputs.size(); ++fi){
+            input_owner_names[fi] = module_sys_name(inputs[fi].path, *inputs[fi].reader);
+            if (input_owner_names[fi].empty()) input_owner_names[fi] = basename_noext(inputs[fi].path);
+        }
+        exported_symbol_owners = read_exported_symbol_owners();
+    }
+
+    const std::string& owner_name_for_origin(u32 origin) const {
+        static const std::string kernel_owner = "kernel";
+        if (origin < input_owner_names.size() && !input_owner_names[origin].empty()) return input_owner_names[origin];
+        return kernel_owner;
+    }
+
+    bool should_replace_symbol(const BuildSym& cur, const BuildSym& cand) const {
+        if (!cur.defined && cand.defined) return true;
+        if (cur.defined && !cand.defined) return false;
+
+        auto it = exported_symbol_owners.find(cand.name);
+        if (it != exported_symbol_owners.end()){
+            const bool cur_match = owner_name_for_origin(cur.origin) == it->second;
+            const bool cand_match = owner_name_for_origin(cand.origin) == it->second;
+            if (cur_match != cand_match) return cand_match;
+        }
+
+        if (cur.n.kind != cand.n.kind){
+            if (cur.n.kind == 1 && cand.n.kind == 0) return true;
+            if (cur.n.kind == 0 && cand.n.kind == 1) return false;
+        }
+
+        const bool cur_is_kernel = (cur.origin == 0);
+        const bool cand_is_kernel = (cand.origin == 0);
+        if (cur_is_kernel != cand_is_kernel && cand.defined && cur.defined){
+            return !cand_is_kernel;
+        }
+
+        return false;
+    }
+
     void collect_sections(){
         secs.clear(); sec_primary_funcs.clear(); alloc_secs_.clear();
         size_t total = 0;
@@ -337,13 +429,14 @@ struct Builder {
             return id;
         }else{
             auto &cur=syms[it->second];
-            if(!cur.defined && bs.defined) cur=std::move(bs);
+            if(should_replace_symbol(cur, bs)) cur=std::move(bs);
             if (was_new) *was_new = false;
             return it->second;
         }
     }
 
     void collect_symbols(){
+        init_symbol_resolution_context();
         // 收集所有符号
         for (u32 fi=0; fi<inputs.size(); ++fi){
             auto &in = inputs[fi];

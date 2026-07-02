@@ -1,3 +1,0 @@
-test_MICRO_pseudo/qemu/work
-test_MICRO_pseudo/results/**
-!test_MICRO_pseudo/results/README.md
