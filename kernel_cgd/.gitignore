@@ -1,0 +1,8 @@
+function_checker/__pycache__/
+kerne_type/__pycache__/
+kerne_type/*.h
+src/build.log
+src/krg
+src/krg.o
+src/krg.cpp.back
+src/out.krg

@@ -1,0 +1,9 @@
+.*.cmd
+Module.symvers
+modules.order
+manager
+page_cache_replace.ko
+page_cache_replace.o
+page_cache_replace.mod
+page_cache_replace.mod.c
+page_cache_replace.mod.o
