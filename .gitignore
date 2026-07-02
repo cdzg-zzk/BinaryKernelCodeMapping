@@ -90,7 +90,11 @@ module_deps.txt
 /test/test_first_call/tmp/
 
 # Other local test trees
-/test/test_MICRO/test_MICRO_pseudo_noqemu/6-24-kfun/
+/test/test_MICRO/test_MICRO_pseudo_noqemu/6-24-kfun/*
+!/test/test_MICRO/test_MICRO_pseudo_noqemu/6-24-kfun/README.md
+!/test/test_MICRO/test_MICRO_pseudo_noqemu/6-24-kfun/*/
+/test/test_MICRO/test_MICRO_pseudo_noqemu/6-24-kfun/*/*
+!/test/test_MICRO/test_MICRO_pseudo_noqemu/6-24-kfun/*/.gitkeep
 /test/test_MICRO/test_MICRO_pseudo_noqemu/pgot_benchmarks/full_run_*.log
 /test/test_MICRO/test_MICRO_pseudo_noqemu/pgot_benchmarks/microtest.log
 /test/test_MICRO/test_MICRO_pseudo_noqemu/pgot_benchmarks/perf_validation_*.log
