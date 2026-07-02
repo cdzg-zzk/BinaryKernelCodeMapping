@@ -10,6 +10,7 @@
 /micro-pgot.zip
 
 # Local-only helper areas
+/disassemble/
 /tools/
 /user/
 
