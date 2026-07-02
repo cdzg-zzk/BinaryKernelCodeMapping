@@ -1,7 +1,2 @@
 __pycache__/
-libgenerated_*.so
-liblkm_locate.so
 libshim.so
-module_deps.txt
-resolved_symbol_addresses.txt
-symbols.txt
