@@ -1,6 +1,6 @@
 # Pseudo-GOT Microbenchmarks
 
-Target machine recorded from the request:
+One reference machine used during development:
 
 ```text
 Linux intelnuczzk 5.15.0-119-generic #129-Ubuntu SMP Fri Aug 2 19:25:20 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux
@@ -9,9 +9,45 @@ Linux intelnuczzk 5.15.0-119-generic #129-Ubuntu SMP Fri Aug 2 19:25:20 UTC 2024
 This package implements the first two layers of the pseudo-GOT performance methodology:
 
 1. Layer 1 measures the primitive cost bounds of pgot-data and pgot-func.
-2. Layer 2 measures how pgot event density is diluted by ordinary function work.
+2. Layer 2 measures how visible overhead changes with event placement under
+   fixed ordinary work.
 
 The code is intentionally synthetic and controlled. The goal is not to mimic a complete kernel function, but to isolate variables that explain the later real-function benchmarks.
+
+## Portability
+
+The benchmarks are intended to run on another Linux x86-64 machine, but the
+absolute cycle numbers are machine-dependent. When moving to a new machine,
+rebuild from source and record the new environment metadata.
+
+Required for the main cycle benchmarks:
+
+1. Linux on x86-64 with `rdtscp` support.
+2. `make`, `gcc`, `bash`, and `python3`.
+3. GCC support for the retpoline flags used by the retpoline builds:
+   `-mindirect-branch=thunk-inline`, `-mindirect-branch-register`, and
+   `-fcf-protection=none`.
+
+Optional:
+
+1. `perf` is only needed when `RUN_PERF=1`.
+2. `sudo` or relaxed `kernel.perf_event_paranoid` may be needed for hardware
+   counters.
+3. CPU isolation, fixed governor, and turbo control are not required to execute
+   the code, but they are recommended for paper-quality measurements.
+
+Quick check on a new machine:
+
+```bash
+cd pgot_benchmarks
+make clean
+make
+./run_experiment.sh list
+CPU=0 ITERATIONS=1000 REPEATS=3 OUTER_RUNS=1 ./run_experiment.sh layer1-data-independent
+```
+
+If the CPU number is not known, omit `CPU=...`; the run will be unpinned and
+the output metadata will record that.
 
 ## Directory Layout
 
@@ -30,9 +66,15 @@ pgot_benchmarks/
   layer2/
     01_density_data/        base work vs pgot-data event density
     02_density_func/        base work vs pgot-func event density
+  run_experiment.sh         select and run one experiment group
+  run_all.sh                wrapper for ./run_experiment.sh all
+  collect_env.sh            environment snapshot helper
   scripts/
-    run_all.sh              build and run all cycle benchmarks
-    perf_func_cases.sh      optional perf stat collection for pgot-func cases
+    process_layer1_data_independent.py
+                            data processing only
+  results/
+    layer1/<experiment>/    Layer 1 outputs grouped by experiment
+    layer2/<experiment>/    Layer 2 outputs grouped by experiment
 ```
 
 ## Build And Run
@@ -40,28 +82,43 @@ pgot_benchmarks/
 ```bash
 cd pgot_benchmarks
 make
-ITERATIONS=1000000 REPEATS=31 CPU=2 ./scripts/run_all.sh
+ITERATIONS=1000000 REPEATS=31 CPU=2 ./run_experiment.sh layer2-data-placement
 ```
 
-The main CSV is written to:
+List available experiments with:
+
+```bash
+./run_experiment.sh list
+```
+
+Run everything with:
+
+```bash
+CPU=2 ITERATIONS=1000000 REPEATS=31 ./run_all.sh
+```
+
+Results are grouped by experiment. For example:
 
 ```text
-results/all_results.csv
+results/layer2/data_placement/
+  main/results.csv
+  raw/
+  perf/                    only when RUN_PERF=1
+
+results/layer2/func_placement/
+  main/results.csv
+  raw/
+  validation/
+  perf/                    only when RUN_PERF=1
+
+results/layer1/data_independent/
+  main/run_summaries.csv
+  raw/samples.csv
+  processed/summary.csv
+  processed/paper_table.csv
 ```
 
-Layer 2 raw repeat samples are written to:
-
-```text
-results/raw/
-```
-
-Layer 2 pgot-func validation artifacts are written to:
-
-```text
-results/validation/
-```
-
-This includes `objdump_layer2_func_retpoline.txt` and `perf stat` CSV files for selected retpoline cases.
+Layer 2 pgot-func validation includes objdump output and selected distributed-placement checks under the same experiment directory.
 
 If CPU isolation is already configured on the machine, pass the isolated CPU through `CPU=...`. Otherwise omit it. The output CSV records the requested CPU, kernel command line, isolated CPU mask, governor, turbo/boost state, SMT state, Spectre v2 mitigation, CPU model, topology, and compiler.
 
@@ -69,7 +126,7 @@ For paper-quality runs, record and report the same settings in the paper:
 
 ```bash
 cd pgot_benchmarks
-CPU=2 ITERATIONS=1000000 REPEATS=31 ./scripts/run_all.sh
+CPU=2 ITERATIONS=1000000 REPEATS=31 ./run_experiment.sh layer2-func-placement
 ```
 
 Recommended run conditions:
@@ -80,22 +137,17 @@ Recommended run conditions:
 4. Report whether turbo/boost is enabled or disabled.
 5. Report the repeat count and IQR columns, not only the median.
 
-Optional hardware-event collection for function-call cases:
+Optional hardware-event collection is enabled per experiment:
 
 ```bash
-ITERATIONS=5000000 REPEATS=7 CPU=2 ./scripts/perf_func_cases.sh
+RUN_PERF=1 PERF_ITERATIONS=5000000 PERF_REPEATS=7 CPU=2 \
+  ./run_experiment.sh layer2-func-placement
 ```
 
-This writes one `perf stat -x,` CSV per case under:
+This writes `perf stat -x,` CSV files under that experiment's `perf/` directory, for example:
 
 ```text
-results/perf/
-```
-
-The perf environment snapshot is written to:
-
-```text
-results/perf/environment.txt
+results/layer2/func_placement/perf/
 ```
 
 Perf events may require adjusting `kernel.perf_event_paranoid`.
@@ -140,7 +192,7 @@ Independent loads can be overlapped by out-of-order execution. Therefore, a near
 CSV fields:
 
 ```text
-experiment,variant,events,iterations,repeats,cycles_per_iter,cycles_per_event,iqr_cycles_per_iter
+experiment,events,iterations,repeats,direct_cycles_per_iter,pgot_cycles_per_iter,delta_cycles_per_iter,delta_cycles_per_event,direct_cycles_per_event,pgot_cycles_per_event,delta_iqr_cycles_per_iter,direct_iqr_cycles_per_iter,pgot_iqr_cycles_per_iter
 ```
 
 ### 02_data_dependent
@@ -161,7 +213,7 @@ The next step depends on the previous loaded value, so the extra pgot slot load 
 CSV fields:
 
 ```text
-experiment,variant,chain_steps,iterations,repeats,cycles_per_iter,cycles_per_step,iqr_cycles_per_iter
+experiment,chain_steps,iterations,repeats,direct_cycles_per_iter,pgot_cycles_per_iter,delta_cycles_per_iter,delta_cycles_per_step,direct_cycles_per_step,pgot_cycles_per_step,delta_iqr_cycles_per_iter,direct_iqr_cycles_per_iter,pgot_iqr_cycles_per_iter
 ```
 
 ### 03_func_stable
@@ -194,7 +246,7 @@ pointer.
 CSV fields:
 
 ```text
-experiment,variant,pgot_events,target_count,iterations,repeats,cycles_per_iter,cycles_per_event,iqr_cycles_per_iter
+experiment,pgot_events,target_count,iterations,repeats,direct_cycles_per_iter,pgot_cycles_per_iter,delta_cycles_per_iter,delta_cycles_per_event,direct_cycles_per_event,pgot_cycles_per_event,delta_iqr_cycles_per_iter,direct_iqr_cycles_per_iter,pgot_iqr_cycles_per_iter
 ```
 
 For per-variant perf collection:
@@ -240,55 +292,56 @@ PGOT_TARGET_COUNT=8 ./layer1/04_func_entropy/bench_noret
 
 Layer 2 asks:
 
-> Once pgot events are placed into a function body, how do absolute and relative overhead change as ordinary work increases?
+> Under the same total work, does visible pgot overhead depend only on the
+> number of pgot events, or also on local placement density?
 
-Layer 2 deliberately does not include dependent loads, random target traces, or register-pressure experiments. Those variables belong either to Layer 1 bounds or to later real-function analysis.
+Layer 2 deliberately does not include dependent loads, random target traces, or
+register-pressure experiments. Those variables belong either to Layer 1 bounds
+or to later real-function analysis.
 
 ### 01_density_data
 
-Measures pgot-data event density with independent loads. The benchmark expands
-`base_work` and data-load events directly inside the timed loop; it does not
-call a generated body function once per iteration. This keeps the Layer 2
-data-pgot result focused on statement-level density/dilution rather than
-per-iteration call/return and body-function layout effects.
+Measures pgot-data placement sensitivity with independent loads. The benchmark
+keeps total ordinary work fixed at `base_work=64` and changes where the data
+events appear in the statement stream.
 
 Variables:
 
 | Variable | Values |
 |---|---|
-| base work | `0, 16, 64, 256, 512` |
-| pgot events | `0, 1, 2, 4, 8, 16` |
-| sample order | `separate`, `interleave` for targeted validation |
+| base work | fixed `64` |
+| access pattern | independent |
+| pgot events | `0, 1, 2, 4, 8, 16, 32` |
+| placement | `dist1`, `dist2`, `dist4`, `dist8` |
+| sample order | runner default `interleave` |
 
-The default sample order is `separate`. `interleave` is intended for targeted
-validation when checking whether small direct-vs-pgot deltas are caused by
-sampling-phase drift.
+Placement means how many event groups are available. `dist1` clusters all data
+events into one group; `dist8` distributes them across eight groups while
+keeping the same total ordinary work.
 
 ### 02_density_func
 
-Measures pgot-func event density with stable targets. Like `01_density_data`,
-the benchmark expands `base_work` and call events directly inside the timed
-loop. The no-retpoline build measures the low-cost predictable indirect-call
-case; the retpoline build measures the protected indirect-call case.
+Measures stable-target pgot-func placement sensitivity. The no-retpoline build
+measures the low-cost predictable indirect-call case; the retpoline build
+measures the protected indirect-call case.
 
 Variables:
 
 | Variable | Values |
 |---|---|
-| base work | `0, 16, 64, 256, 512` |
+| base work | `32, 64, 128` |
 | pgot events | `0, 1, 2, 4, 8, 16` |
+| placement | `dist1`, `dist2`, `dist4`, `dist8` |
+| target pattern | stable target |
 | build | no-retpoline, retpoline |
-| placement controls | `post`, `pre`, `split`, `post_fenced`, `distributed`, `dist2`, `dist4`, `dist8` |
 
 Layer 2 binaries also support single-case mode:
 
 ```bash
-./layer2/02_density_func/bench_retpoline --base-work 64 --pgot-events 1 --iterations 5000000 --repeats 31 --cpu 2
+./layer2/02_density_func/bench_retpoline \
+  --base-work 64 --placement dist8 --pgot-events 16 \
+  --sample-order interleave --iterations 5000000 --repeats 31 --cpu 2
 ```
-
-`distributed` is a compatibility alias for `dist4`. The `dist2`, `dist4`, and
-`dist8` placements split `base_work=64` into 2, 4, or 8 chunks and distribute
-the requested pgot events across those chunks.
 
 When `PGOT_RAW_DIR` is set, Layer 2 writes one raw CSV per case:
 
@@ -299,14 +352,14 @@ repeat,direct_cycles,pgot_cycles,delta_cycles
 Layer 2 CSV fields:
 
 ```text
-experiment,base_work,pgot_events,iterations,repeats,direct_cycles_per_call,pgot_cycles_per_call,delta_cycles_per_call,overhead_percent,delta_cycles_per_event,direct_iqr_cycles_per_call,pgot_iqr_cycles_per_call
+experiment,...,base_work,placement,placement_groups,pgot_events,avg_events_per_group,max_events_per_group,iterations,repeats,direct_cycles_per_iter,pgot_cycles_per_iter,delta_cycles_per_iter,overhead_percent,delta_cycles_per_event,delta_iqr_cycles_per_iter,direct_iqr_cycles_per_iter,pgot_iqr_cycles_per_iter
 ```
 
 Interpretation:
 
 | Metric | Meaning |
 |---|---|
-| `delta_cycles_per_call` | absolute extra cycles introduced by pgot |
+| `delta_cycles_per_iter` | absolute extra cycles introduced by pgot per benchmark iteration |
 | `overhead_percent` | how much that extra work matters relative to the whole function |
 | `delta_cycles_per_event` | whether the extra cost scales with the number of pgot events |
 
@@ -322,9 +375,14 @@ Use Layer 1 for primitive bounds:
 
 Use Layer 2 for density:
 
-1. Heatmap of `overhead_percent` with `base_work` on one axis and `pgot_events` on the other.
-2. Line plot of `delta_cycles_per_call` versus `pgot_events`.
-3. Optional line plot of `delta_cycles_per_event`; if it is stable, the absolute cost is mostly event-count driven.
+1. For pgot-data, table or line plot of `delta_cycles_per_iter` versus
+   `pgot_events`, separated by `placement`; use `base_work=64`.
+2. For pgot-func, show `base_work=64` as the main result and use
+   `base_work=32/128` as sensitivity checks.
+3. For retpoline pgot-func, include objdump validation and optional perf
+   evidence from the same `results/layer2/func_placement/` directory.
+4. Report `delta_cycles_per_iter`, `overhead_percent`,
+   `delta_cycles_per_event`, and IQR together; they answer different questions.
 
 ## Notes For Integrating With The Real System
 

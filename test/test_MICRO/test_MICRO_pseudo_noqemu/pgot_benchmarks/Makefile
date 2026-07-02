@@ -13,7 +13,7 @@ all:
 	done
 
 run:
-	./scripts/run_all.sh
+	./run_experiment.sh all
 
 clean:
 	@for d in $(SUBDIRS); do \

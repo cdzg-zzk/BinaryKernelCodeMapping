@@ -1,0 +1,25 @@
+# Experiment outputs
+/results/
+
+# Built benchmark binaries
+/layer1/*/bench
+/layer1/*/bench_noret
+/layer1/*/bench_retpoline
+/layer2/*/bench
+/layer2/*/bench_noret
+/layer2/*/bench_retpoline
+
+# Local logs and captured validation dumps
+*.log
+*.perf.csv
+objdump_*.txt
+
+# Python/runtime cache
+__pycache__/
+*.py[cod]
+
+# Editor and OS noise
+*~
+*.swp
+*.swo
+.DS_Store
