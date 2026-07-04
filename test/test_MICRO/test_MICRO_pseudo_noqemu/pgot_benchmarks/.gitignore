@@ -9,6 +9,16 @@
 /layer2/*/bench_noret
 /layer2/*/bench_retpoline
 
+# Kernel module build products
+*.ko
+*.o
+*.mod
+*.mod.c
+*.cmd
+.tmp_versions/
+Module.symvers
+modules.order
+
 # Local logs and captured validation dumps
 *.log
 *.perf.csv
