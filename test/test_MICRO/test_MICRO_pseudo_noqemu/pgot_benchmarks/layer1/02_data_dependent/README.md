@@ -138,7 +138,7 @@ SUDO_PASSWORD='...' CPU=2 ITERATIONS=100000 REPEATS=31 OUTER_RUNS=100 ./run.sh
 Outputs are written to:
 
 ```text
-results/layer1/02_data_dependent/kmod/
+results/layer1/02_data_dependent/
   metadata.txt       experiment config and machine environment
   raw.csv            raw empty/direct/pgot paired samples
   processed.csv      processed statistics after outlier filtering

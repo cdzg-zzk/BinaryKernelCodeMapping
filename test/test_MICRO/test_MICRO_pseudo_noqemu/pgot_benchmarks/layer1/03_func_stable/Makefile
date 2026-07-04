@@ -1,21 +1,13 @@
-include ../../common/common.mk
+obj-m += bench_kmod.o
 
-BIN_NORET := bench_noret
-BIN_RET := bench_retpoline
+KDIR ?= /lib/modules/$(shell uname -r)/build
+PWD := $(shell pwd)
 
-all: $(BIN_NORET) $(BIN_RET)
-
-$(BIN_NORET): bench.c ../../common/bench_common.h ../../common/targets.h
-	$(CC) $(CFLAGS_COMMON) -o $@ bench.c $(LDFLAGS_COMMON)
-
-$(BIN_RET): bench.c ../../common/bench_common.h ../../common/targets.h
-	$(CC) $(CFLAGS_COMMON) $(RETPOLINE_CFLAGS) -o $@ bench.c $(LDFLAGS_COMMON)
-
-run: all
-	./$(BIN_NORET)
-	./$(BIN_RET)
+all:
+	$(MAKE) -C $(KDIR) M=$(PWD) modules
 
 clean:
-	rm -f $(BIN_NORET) $(BIN_RET) *.csv perf-*.txt
+	$(MAKE) -C $(KDIR) M=$(PWD) clean
+	rm -f Module.symvers modules.order bench_kmod_noret.ko bench_kmod_retpoline.ko
 
-.PHONY: all run clean
+.PHONY: all clean

@@ -137,7 +137,7 @@ SUDO_PASSWORD='...' CPU=2 ITERATIONS=1000000 REPEATS=31 OUTER_RUNS=10 ./run.sh
 The formal run writes:
 
 ```text
-results/layer1/03_func_stable/kmod/
+results/layer1/03_func_stable/
   metadata.txt
   raw.csv
   processed.csv

@@ -1,16 +1,13 @@
-include ../../common/common.mk
+obj-m += bench_kmod.o
 
-BIN := bench
+KDIR ?= /lib/modules/$(shell uname -r)/build
+PWD := $(shell pwd)
 
-all: $(BIN)
-
-$(BIN): bench.c ../../common/bench_common.h ../../common/data_tables.h
-	$(CC) $(CFLAGS_COMMON) -o $@ bench.c $(LDFLAGS_COMMON)
-
-run: all
-	./$(BIN)
+all:
+	$(MAKE) -C $(KDIR) M=$(PWD) modules
 
 clean:
-	rm -f $(BIN) *.csv perf-*.txt
+	$(MAKE) -C $(KDIR) M=$(PWD) clean
+	rm -f Module.symvers modules.order
 
-.PHONY: all run clean
+.PHONY: all clean

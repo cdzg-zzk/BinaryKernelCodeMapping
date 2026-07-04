@@ -1,10 +1,11 @@
 # Experiment outputs
-/results/
+/results/**
+!/results/**/
+!/results/**/SUMMARY.md
 
-# Built benchmark binaries
-/layer1/*/bench
-/layer1/*/bench_noret
-/layer1/*/bench_retpoline
+# User-space benchmark binaries for experiments that still use them
+/layer1/04_func_entropy/bench_noret
+/layer1/04_func_entropy/bench_retpoline
 /layer2/*/bench
 /layer2/*/bench_noret
 /layer2/*/bench_retpoline

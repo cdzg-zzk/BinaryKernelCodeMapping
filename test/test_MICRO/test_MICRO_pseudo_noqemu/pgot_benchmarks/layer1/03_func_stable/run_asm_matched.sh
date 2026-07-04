@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PGOT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+PGOT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 OUT_DIR="${OUT_DIR:-${PGOT_ROOT}/results/layer1/03_func_stable/kmod_diag_asm_matched}"
 ITERATIONS="${ITERATIONS:-1000000}"
 REPEATS="${REPEATS:-31}"

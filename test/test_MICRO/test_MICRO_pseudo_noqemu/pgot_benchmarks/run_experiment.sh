@@ -39,7 +39,7 @@ Common environment variables:
   CPU=2
   ITERATIONS=1000000
   REPEATS=31
-  OUTER_RUNS=100                 only used by layer1-data-independent
+  OUTER_RUNS=100                 used by layer1 kernel-module runs
   SAMPLE_ORDER=interleave        layer2 placement experiments
   RUN_VALIDATION=1               objdump/distributed validation where available
   RUN_PERF=0                     set to 1 to collect perf auxiliary evidence
@@ -107,69 +107,21 @@ run_perf_stat() {
 }
 
 run_layer1_data_independent() {
-  local exp_dir="${RESULTS_DIR}/layer1/data_independent"
+  local exp_dir="${RESULTS_DIR}/layer1/01_data_independent"
   local bench_dir="${ROOT_DIR}/layer1/01_data_independent"
-  prepare_exp_dir "${exp_dir}"
-  mkdir -p "${exp_dir}/raw" "${exp_dir}/processed"
-  write_environment "${exp_dir}/environment.txt" "layer1-data-independent"
-
-  {
-    echo "experiment=layer1_data_independent"
-    echo "iterations=${ITERATIONS}"
-    echo "repeats=${REPEATS}"
-    echo "outer_runs=${OUTER_RUNS}"
-    echo "sample_order=interleave"
-    echo "raw_delta=pgot_cycles-direct_cycles"
-    echo "outlier_filter=per-event IQR rule: [Q1-1.5*IQR, Q3+1.5*IQR]"
-  } > "${exp_dir}/config.txt"
-
-  make -C "${bench_dir}" all
-  local raw="${exp_dir}/raw/samples.csv"
-  local summaries="${exp_dir}/main/run_summaries.csv"
-  : > "${summaries}"
-
-  for ((run_id = 0; run_id < OUTER_RUNS; run_id++)); do
-    echo "==> layer1 data independent run ${run_id}" >&2
-    PGOT_RUN_ID="${run_id}" PGOT_RAW_FILE="${raw}" \
-      "${bench_dir}/bench" -n "${ITERATIONS}" -r "${REPEATS}" "${CPU_ARG[@]}" \
-      >> "${summaries}"
-  done
-
-  python3 "${ROOT_DIR}/scripts/process_layer1_data_independent.py" \
-    --raw "${raw}" \
-    --processed "${exp_dir}/processed/samples_with_outliers.csv" \
-    --summary "${exp_dir}/processed/summary.csv" \
-    --paper-table "${exp_dir}/processed/paper_table.csv"
-
-  echo "wrote ${exp_dir}" >&2
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
 }
 
 run_layer1_data_dependent() {
-  local exp_dir="${RESULTS_DIR}/layer1/data_dependent"
+  local exp_dir="${RESULTS_DIR}/layer1/02_data_dependent"
   local bench_dir="${ROOT_DIR}/layer1/02_data_dependent"
-  prepare_exp_dir "${exp_dir}"
-  write_environment "${exp_dir}/environment.txt" "layer1-data-dependent"
-  make -C "${bench_dir}" all
-  run_bench_to_csv "layer1 data dependent" "${bench_dir}/bench" "${exp_dir}/main/results.csv"
-  echo "wrote ${exp_dir}" >&2
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
 }
 
 run_layer1_func_stable() {
-  local exp_dir="${RESULTS_DIR}/layer1/func_stable"
+  local exp_dir="${RESULTS_DIR}/layer1/03_func_stable"
   local bench_dir="${ROOT_DIR}/layer1/03_func_stable"
-  prepare_exp_dir "${exp_dir}"
-  mkdir -p "${exp_dir}/validation"
-  write_environment "${exp_dir}/environment.txt" "layer1-func-stable"
-  make -C "${bench_dir}" all
-  run_bench_to_csv "layer1 func stable no-ret" "${bench_dir}/bench_noret" "${exp_dir}/main/results.csv"
-  run_bench_to_csv "layer1 func stable retpoline" "${bench_dir}/bench_retpoline" "${exp_dir}/main/results.csv"
-
-  if [[ "${RUN_VALIDATION}" == "1" ]]; then
-    objdump -d "${bench_dir}/bench_retpoline" \
-      > "${exp_dir}/validation/objdump_func_stable_retpoline.txt"
-  fi
-
-  echo "wrote ${exp_dir}" >&2
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
 }
 
 run_layer1_func_entropy() {

@@ -2,8 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PGOT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
-OUT_DIR="${OUT_DIR:-${PGOT_ROOT}/results/layer1/01_data_independent/kmod}"
+PGOT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+OUT_DIR="${OUT_DIR:-${PGOT_ROOT}/results/layer1/02_data_dependent}"
 ITERATIONS="${ITERATIONS:-1000000}"
 REPEATS="${REPEATS:-31}"
 OUTER_RUNS="${OUTER_RUNS:-100}"
@@ -32,8 +32,8 @@ rm -f \
 rm -f "${OUT_DIR}"/.run_*.log
 
 {
-  echo "experiment=layer1_data_independent_kmod"
-  echo "source_semantics=layer1/01_data_independent kernel-module benchmark"
+  echo "experiment=layer1_data_dependent_kmod"
+  echo "source_semantics=layer1/02_data_dependent kernel-module benchmark"
   echo "iterations=${ITERATIONS}"
   echo "repeats=${REPEATS}"
   echo "outer_runs=${OUTER_RUNS}"
@@ -63,7 +63,7 @@ RAW="${OUT_DIR}/raw.csv"
 } > "${RAW}"
 
 for ((run_id = 0; run_id < OUTER_RUNS; run_id++)); do
-  echo "==> kmod layer1 data independent run ${run_id}" >&2
+  echo "==> kmod layer1 data dependent run ${run_id}" >&2
   sudo_cmd dmesg -C
 
   args=("iterations=${ITERATIONS}" "repeats=${REPEATS}" "run_id=${run_id}")
@@ -79,12 +79,12 @@ for ((run_id = 0; run_id < OUTER_RUNS; run_id++)); do
   run_log="${OUT_DIR}/.run_${run_id}.log"
   sudo_cmd dmesg > "${run_log}"
 
-  awk -F'PGOT_L1DI_RAW,' '/PGOT_L1DI_RAW,/ {print $2}' \
+  awk -F'PGOT_L1DD_RAW,' '/PGOT_L1DD_RAW,/ {print $2}' \
     "${run_log}" >> "${RAW}"
   rm -f "${run_log}"
 done
 
-python3 "${PGOT_ROOT}/scripts/process_layer1_data_independent.py" \
+python3 "${PGOT_ROOT}/scripts/process_layer1_data_dependent.py" \
   --raw "${RAW}" \
   --processed "${OUT_DIR}/.samples_with_outliers.csv" \
   --summary "${OUT_DIR}/processed.csv" \

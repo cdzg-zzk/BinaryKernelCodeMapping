@@ -59,9 +59,9 @@ pgot_benchmarks/
     targets.h               target functions and pseudo-GOT function slots
     common.mk               shared compiler flags
   layer1/
-    01_data_independent/    pgot-data throughput-style loads
-    02_data_dependent/      pgot-data dependent pointer-chasing loads
-    03_func_stable/         fixed-target pgot-func, ret/no-ret builds
+    01_data_independent/    pgot-data kernel-module throughput-style loads
+    02_data_dependent/      pgot-data kernel-module pointer-chasing loads
+    03_func_stable/         fixed-target pgot-func kernel-module builds
     04_func_entropy/        high-entropy target trace, ret/no-ret builds
   layer2/
     01_density_data/        base work vs pgot-data event density
@@ -111,11 +111,12 @@ results/layer2/func_placement/
   validation/
   perf/                    only when RUN_PERF=1
 
-results/layer1/data_independent/
-  main/run_summaries.csv
-  raw/samples.csv
-  processed/summary.csv
-  processed/paper_table.csv
+results/layer1/01_data_independent/
+  metadata.txt
+  raw.csv
+  processed.csv
+  paper_table.csv
+  SUMMARY.md
 ```
 
 Layer 2 pgot-func validation includes objdump output and selected distributed-placement checks under the same experiment directory.
@@ -218,14 +219,14 @@ experiment,chain_steps,iterations,repeats,direct_cycles_per_iter,pgot_cycles_per
 
 ### 03_func_stable
 
-Measures fixed-target pgot-func while varying event count.
+Measures fixed-target pgot-func in a kernel module while varying event count.
 
-Builds:
+Module builds:
 
-| Binary | Meaning |
+| Build | Meaning |
 |---|---|
-| `bench_noret` | ordinary indirect call build |
-| `bench_retpoline` | retpoline-protected indirect call build |
+| `no_retpoline` | ordinary indirect call build |
+| `retpoline` | retpoline-protected indirect call build |
 
 Variables:
 
@@ -249,11 +250,11 @@ CSV fields:
 experiment,pgot_events,target_count,iterations,repeats,direct_cycles_per_iter,pgot_cycles_per_iter,delta_cycles_per_iter,delta_cycles_per_event,direct_cycles_per_event,pgot_cycles_per_event,delta_iqr_cycles_per_iter,direct_iqr_cycles_per_iter,pgot_iqr_cycles_per_iter
 ```
 
-For per-variant perf collection:
+For a targeted kernel-module run:
 
 ```bash
-PGOT_VARIANT=pgot ./layer1/03_func_stable/bench_noret
-PGOT_EVENTS=4 PGOT_VARIANT=pgot ./layer1/03_func_stable/bench_noret
+SUDO_PASSWORD='...' CPU=2 ITERATIONS=1000000 REPEATS=31 OUTER_RUNS=10 ./layer1/03_func_stable/run.sh
+BUILDS=no_retpoline SUDO_PASSWORD='...' ./layer1/03_func_stable/run.sh
 ```
 
 ### 04_func_entropy
