@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PGOT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 OUT_DIR="${OUT_DIR:-${PGOT_ROOT}/results/layer1/02_data_dependent}"
-ITERATIONS="${ITERATIONS:-1000000}"
+ITERATIONS="${ITERATIONS:-100000}"
 REPEATS="${REPEATS:-31}"
 OUTER_RUNS="${OUTER_RUNS:-100}"
 CPU="${CPU:-2}"
