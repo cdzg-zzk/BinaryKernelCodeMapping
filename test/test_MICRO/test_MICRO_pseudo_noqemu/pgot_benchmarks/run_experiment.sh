@@ -32,17 +32,29 @@ Experiments:
   layer1-data-dependent
   layer1-func-stable
   layer1-func-entropy
-  layer2-data-placement
   layer2-func-placement
+  layer2-func-fence-diagnostics
+  layer3-sha256-transform
+  layer3-bch-encode
+  layer3-zlib-deflate
+  layer3-zstd-decompress
+  layer3-crc32-le
+  layer3-lz4-compress-fast
+  layer3-aes-encrypt
+  layer3-lz4-decompress-safe
+  layer3-hex-dump-to-buffer
+  layer3-string-escape-mem
 
 Common environment variables:
   CPU=2
   ITERATIONS=1000000
   REPEATS=31
   OUTER_RUNS=100                 used by layer1 kernel-module runs
-  SAMPLE_ORDER=interleave        layer2 placement experiments
-  RUN_VALIDATION=1               objdump/distributed validation where available
-  RUN_PERF=0                     set to 1 to collect perf auxiliary evidence
+  ITERATIONS_LIST='64 128 256'   layer3 batch-size sweep, if supported
+  IRQ_OFF=1                      layer3: disable local IRQs inside timed window
+  SAMPLE_ORDER=interleave        user-space placement experiments, if available
+  RUN_VALIDATION=1               validation where available
+  RUN_PERF=0                     set to 1 to collect perf auxiliary evidence, if available
   CLEAR_RESULTS=1                clear this experiment's old result directory first
 EOF
 }
@@ -53,8 +65,18 @@ list_experiments() {
     layer1-data-dependent \
     layer1-func-stable \
     layer1-func-entropy \
-    layer2-data-placement \
-    layer2-func-placement
+    layer2-func-placement \
+    layer2-func-fence-diagnostics \
+    layer3-sha256-transform \
+    layer3-bch-encode \
+    layer3-zlib-deflate \
+    layer3-zstd-decompress \
+    layer3-crc32-le \
+    layer3-lz4-compress-fast \
+    layer3-aes-encrypt \
+    layer3-lz4-decompress-safe \
+    layer3-hex-dump-to-buffer \
+    layer3-string-escape-mem
 }
 
 prepare_exp_dir() {
@@ -135,139 +157,93 @@ run_layer1_func_entropy() {
   echo "wrote ${exp_dir}" >&2
 }
 
-run_layer2_data_perf() {
-  local exp_dir="$1"
-  local bench="${ROOT_DIR}/layer2/01_density_data/bench"
-  mkdir -p "${exp_dir}/perf"
-  {
-    echo "# generated_by=run_experiment.sh"
-    echo "# experiment=layer2-data-placement"
-    echo "# perf_iterations=${PERF_ITERATIONS}"
-    echo "# perf_repeats=${PERF_REPEATS}"
-    echo "# perf_events=${PERF_EVENTS}"
-    bash "${ROOT_DIR}/collect_env.sh"
-  } > "${exp_dir}/perf/environment.txt"
-
-  local specs=("dist1:16" "dist8:16" "dist1:32" "dist8:32")
-  for spec in "${specs[@]}"; do
-    local placement="${spec%:*}"
-    local ev="${spec#*:}"
-    local name="bw64_${placement}_ev${ev}"
-    echo "==> perf layer2 data ${name}" >&2
-    run_perf_stat "${exp_dir}/perf/${name}.perf.csv" \
-      env -u PGOT_RAW_DIR "${bench}" --base-work 64 --placement "${placement}" \
-      --pgot-events "${ev}" --sample-order "${SAMPLE_ORDER}" \
-      -n "${PERF_ITERATIONS}" -r 1 "${CPU_ARG[@]}"
-  done
-}
-
-run_layer2_data_placement() {
-  local exp_dir="${RESULTS_DIR}/layer2/data_placement"
-  local bench_dir="${ROOT_DIR}/layer2/01_density_data"
-  prepare_exp_dir "${exp_dir}"
-  mkdir -p "${exp_dir}/raw"
-  write_environment "${exp_dir}/environment.txt" "layer2-data-placement"
-  make -C "${bench_dir}" all
-  PGOT_RAW_DIR="${exp_dir}/raw" \
-    run_bench_to_csv "layer2 data placement" "${bench_dir}/bench" "${exp_dir}/main/results.csv" \
-      --sample-order "${SAMPLE_ORDER}"
-
-  if [[ "${RUN_PERF}" == "1" ]]; then
-    run_layer2_data_perf "${exp_dir}"
-  fi
-
-  echo "wrote ${exp_dir}" >&2
-}
-
-run_layer2_func_distributed_validation() {
-  local exp_dir="$1"
-  local bin="${ROOT_DIR}/layer2/02_density_func/bench_retpoline"
-  local dist_dir="${exp_dir}/validation/distributed"
-  mkdir -p "${dist_dir}"
-  local specs=(
-    "dist1:1" "dist1:2" "dist1:4" "dist1:8" "dist1:16"
-    "dist2:2" "dist2:4" "dist2:8" "dist2:16"
-    "dist4:4" "dist4:8" "dist4:16"
-    "dist8:8" "dist8:16"
-  )
-  for spec in "${specs[@]}"; do
-    local placement="${spec%:*}"
-    local ev="${spec#*:}"
-    echo "==> distributed validation ${placement} ev${ev}" >&2
-    env -u PGOT_RAW_DIR "${bin}" \
-      --base-work 64 --placement "${placement}" --pgot-events "${ev}" \
-      --sample-order "${SAMPLE_ORDER}" \
-      -n "${ITERATIONS}" -r "${REPEATS}" "${CPU_ARG[@]}" \
-      > "${dist_dir}/${placement}_ev${ev}.txt"
-  done
-}
-
-run_layer2_func_perf() {
-  local exp_dir="$1"
-  local bin="${ROOT_DIR}/layer2/02_density_func/bench_retpoline"
-  mkdir -p "${exp_dir}/perf"
-  {
-    echo "# generated_by=run_experiment.sh"
-    echo "# experiment=layer2-func-placement"
-    echo "# perf_iterations=${PERF_ITERATIONS}"
-    echo "# perf_repeats=${PERF_REPEATS}"
-    echo "# perf_events=${PERF_EVENTS}"
-    bash "${ROOT_DIR}/collect_env.sh"
-  } > "${exp_dir}/perf/environment.txt"
-
-  local specs=(
-    "64:dist1:1" "64:dist8:1"
-    "64:dist1:16" "64:dist8:16"
-    "32:dist1:16" "128:dist1:16"
-  )
-  for spec in "${specs[@]}"; do
-    local bw="${spec%%:*}"
-    local rest="${spec#*:}"
-    local placement="${rest%:*}"
-    local ev="${rest#*:}"
-    local name="retpoline_bw${bw}_${placement}_ev${ev}"
-    echo "==> perf layer2 func ${name}" >&2
-    run_perf_stat "${exp_dir}/perf/${name}.perf.csv" \
-      env -u PGOT_RAW_DIR "${bin}" --base-work "${bw}" --placement "${placement}" \
-      --pgot-events "${ev}" --sample-order "${SAMPLE_ORDER}" \
-      -n "${PERF_ITERATIONS}" -r 1 "${CPU_ARG[@]}"
-  done
-}
-
 run_layer2_func_placement() {
-  local exp_dir="${RESULTS_DIR}/layer2/func_placement"
-  local bench_dir="${ROOT_DIR}/layer2/02_density_func"
-  prepare_exp_dir "${exp_dir}"
-  mkdir -p "${exp_dir}/raw"
-  write_environment "${exp_dir}/environment.txt" "layer2-func-placement"
-  make -C "${bench_dir}" all
-  PGOT_RAW_DIR="${exp_dir}/raw" \
-    run_bench_to_csv "layer2 func placement no-ret" "${bench_dir}/bench_noret" "${exp_dir}/main/results.csv" \
-      --sample-order "${SAMPLE_ORDER}"
-  PGOT_RAW_DIR="${exp_dir}/raw" \
-    run_bench_to_csv "layer2 func placement retpoline" "${bench_dir}/bench_retpoline" "${exp_dir}/main/results.csv" \
-      --sample-order "${SAMPLE_ORDER}"
+  local exp_dir="${RESULTS_DIR}/layer2/01_func_placement"
+  local bench_dir="${ROOT_DIR}/layer2/01_func_placement"
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
+}
 
-  if [[ "${RUN_VALIDATION}" == "1" ]]; then
-    mkdir -p "${exp_dir}/validation"
-    objdump -d "${bench_dir}/bench_retpoline" \
-      > "${exp_dir}/validation/objdump_func_placement_retpoline.txt"
-    run_layer2_func_distributed_validation "${exp_dir}"
-  fi
+run_layer2_func_fence_diagnostics() {
+  local exp_dir="${RESULTS_DIR}/layer2/01_func_placement"
+  local bench_dir="${ROOT_DIR}/layer2/01_func_placement"
+  OUT_DIR="${exp_dir}" "${bench_dir}/run_fence_diagnostics.sh"
+}
 
-  if [[ "${RUN_PERF}" == "1" ]]; then
-    run_layer2_func_perf "${exp_dir}"
-  fi
+run_layer3_sha256_transform() {
+  local exp_dir="${RESULTS_DIR}/layer3/01_sha256_transform"
+  local bench_dir="${ROOT_DIR}/layer3/01_sha256_transform"
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
+}
 
-  echo "wrote ${exp_dir}" >&2
+run_layer3_bch_encode() {
+  local exp_dir="${RESULTS_DIR}/layer3/02_bch_encode"
+  local bench_dir="${ROOT_DIR}/layer3/02_bch_encode"
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
+}
+
+run_layer3_zlib_deflate() {
+  local exp_dir="${RESULTS_DIR}/layer3/03_zlib_deflate"
+  local bench_dir="${ROOT_DIR}/layer3/03_zlib_deflate"
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
+}
+
+run_layer3_zstd_decompress() {
+  local exp_dir="${RESULTS_DIR}/layer3/04_zstd_decompress"
+  local bench_dir="${ROOT_DIR}/layer3/04_zstd_decompress"
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
+}
+
+run_layer3_crc32_le() {
+  local exp_dir="${RESULTS_DIR}/layer3/05_crc32_le"
+  local bench_dir="${ROOT_DIR}/layer3/05_crc32_le"
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
+}
+
+run_layer3_lz4_compress_fast() {
+  local exp_dir="${RESULTS_DIR}/layer3/06_lz4_compress_fast"
+  local bench_dir="${ROOT_DIR}/layer3/06_lz4_compress_fast"
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
+}
+
+run_layer3_aes_encrypt() {
+  local exp_dir="${RESULTS_DIR}/layer3/07_aes_encrypt"
+  local bench_dir="${ROOT_DIR}/layer3/07_aes_encrypt"
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
+}
+
+run_layer3_lz4_decompress_safe() {
+  local exp_dir="${RESULTS_DIR}/layer3/08_lz4_decompress_safe"
+  local bench_dir="${ROOT_DIR}/layer3/08_lz4_decompress_safe"
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
+}
+
+run_layer3_hex_dump_to_buffer() {
+  local exp_dir="${RESULTS_DIR}/layer3/09_hex_dump_to_buffer"
+  local bench_dir="${ROOT_DIR}/layer3/09_hex_dump_to_buffer"
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
+}
+
+run_layer3_string_escape_mem() {
+  local exp_dir="${RESULTS_DIR}/layer3/10_string_escape_mem"
+  local bench_dir="${ROOT_DIR}/layer3/10_string_escape_mem"
+  OUT_DIR="${exp_dir}" "${bench_dir}/run.sh"
 }
 
 run_all() {
   run_layer1_data_independent
   run_layer1_data_dependent
   run_layer1_func_stable
-  run_layer2_data_placement
   run_layer2_func_placement
+  run_layer3_sha256_transform
+  run_layer3_bch_encode
+  run_layer3_zlib_deflate
+  run_layer3_zstd_decompress
+  run_layer3_crc32_le
+  run_layer3_lz4_compress_fast
+  run_layer3_aes_encrypt
+  run_layer3_lz4_decompress_safe
+  run_layer3_hex_dump_to_buffer
+  run_layer3_string_escape_mem
 }
 
 case "${1:-}" in
@@ -289,11 +265,41 @@ case "${1:-}" in
   layer1-func-entropy)
     run_layer1_func_entropy
     ;;
-  layer2-data-placement)
-    run_layer2_data_placement
-    ;;
   layer2-func-placement)
     run_layer2_func_placement
+    ;;
+  layer2-func-fence-diagnostics)
+    run_layer2_func_fence_diagnostics
+    ;;
+  layer3-sha256-transform)
+    run_layer3_sha256_transform
+    ;;
+  layer3-bch-encode)
+    run_layer3_bch_encode
+    ;;
+  layer3-zlib-deflate)
+    run_layer3_zlib_deflate
+    ;;
+  layer3-zstd-decompress)
+    run_layer3_zstd_decompress
+    ;;
+  layer3-crc32-le)
+    run_layer3_crc32_le
+    ;;
+  layer3-lz4-compress-fast)
+    run_layer3_lz4_compress_fast
+    ;;
+  layer3-aes-encrypt)
+    run_layer3_aes_encrypt
+    ;;
+  layer3-lz4-decompress-safe)
+    run_layer3_lz4_decompress_safe
+    ;;
+  layer3-hex-dump-to-buffer)
+    run_layer3_hex_dump_to_buffer
+    ;;
+  layer3-string-escape-mem)
+    run_layer3_string_escape_mem
     ;;
   -h|--help|"")
     usage

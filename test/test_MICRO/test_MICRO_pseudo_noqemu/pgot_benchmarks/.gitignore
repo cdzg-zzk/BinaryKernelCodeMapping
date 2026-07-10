@@ -2,6 +2,7 @@
 /results/**
 !/results/**/
 !/results/**/SUMMARY.md
+!/results/**/*.md
 
 # User-space benchmark binaries for experiments that still use them
 /layer1/04_func_entropy/bench_noret

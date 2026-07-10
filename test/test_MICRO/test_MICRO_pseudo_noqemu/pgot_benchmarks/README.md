@@ -6,11 +6,13 @@ One reference machine used during development:
 Linux intelnuczzk 5.15.0-119-generic #129-Ubuntu SMP Fri Aug 2 19:25:20 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux
 ```
 
-This package implements the first two layers of the pseudo-GOT performance methodology:
+This package implements the pseudo-GOT performance methodology:
 
 1. Layer 1 measures the primitive cost bounds of pgot-data and pgot-func.
-2. Layer 2 measures how visible overhead changes with event placement under
-   fixed ordinary work.
+2. Layer 2 measures how visible func-pgot overhead changes when the same
+   workload is placed before the call, inside the target, or after the call.
+3. Layer 3 measures copied kernel-function closures with origin and PGOT
+   variants.
 
 The code is intentionally synthetic and controlled. The goal is not to mimic a complete kernel function, but to isolate variables that explain the later real-function benchmarks.
 
@@ -64,8 +66,18 @@ pgot_benchmarks/
     03_func_stable/         fixed-target pgot-func kernel-module builds
     04_func_entropy/        high-entropy target trace, ret/no-ret builds
   layer2/
-    01_density_data/        base work vs pgot-data event density
-    02_density_func/        base work vs pgot-func event density
+    01_func_placement/      pgot-func unfenced placement/workload LKM
+  layer3/
+    01_sha256_transform/    SHA-256 transform copied closure LKM
+    02_bch_encode/          BCH encode copied closure LKM
+    03_zlib_deflate/        zlib deflate copied closure LKM
+    04_zstd_decompress/     zstd decompress copied closure LKM
+    05_crc32_le/            CRC32_LE copied closure LKM
+    06_lz4_compress_fast/   LZ4_compress_fast copied closure LKM
+    07_aes_encrypt/         aes_encrypt copied closure LKM
+    08_lz4_decompress_safe/ LZ4_decompress_safe copied closure LKM
+    09_hex_dump_to_buffer/  hex_dump_to_buffer copied closure LKM
+    10_string_escape_mem/   string_escape_mem copied closure LKM
   run_experiment.sh         select and run one experiment group
   run_all.sh                wrapper for ./run_experiment.sh all
   collect_env.sh            environment snapshot helper
@@ -75,6 +87,7 @@ pgot_benchmarks/
   results/
     layer1/<experiment>/    Layer 1 outputs grouped by experiment
     layer2/<experiment>/    Layer 2 outputs grouped by experiment
+    layer3/<experiment>/    Layer 3 outputs grouped by experiment
 ```
 
 ## Build And Run
@@ -82,7 +95,7 @@ pgot_benchmarks/
 ```bash
 cd pgot_benchmarks
 make
-ITERATIONS=1000000 REPEATS=31 CPU=2 ./run_experiment.sh layer2-data-placement
+SUDO_PASSWORD='...' ITERATIONS=1000000 REPEATS=31 CPU=2 ./run_experiment.sh layer2-func-placement
 ```
 
 List available experiments with:
@@ -100,16 +113,17 @@ CPU=2 ITERATIONS=1000000 REPEATS=31 ./run_all.sh
 Results are grouped by experiment. For example:
 
 ```text
-results/layer2/data_placement/
-  main/results.csv
-  raw/
-  perf/                    only when RUN_PERF=1
-
-results/layer2/func_placement/
-  main/results.csv
-  raw/
-  validation/
-  perf/                    only when RUN_PERF=1
+results/layer2/01_func_placement/
+  metadata.txt
+  raw.csv
+  processed.csv
+  paper_table.csv
+  summary.md
+  static/
+    nm_no_retpoline.txt
+    nm_retpoline.txt
+    objdump_no_retpoline.txt
+    objdump_retpoline.txt
 
 results/layer1/01_data_independent/
   metadata.txt
@@ -119,7 +133,51 @@ results/layer1/01_data_independent/
   SUMMARY.md
 ```
 
-Layer 2 pgot-func validation includes objdump output and selected distributed-placement checks under the same experiment directory.
+Layer 2 pgot-func validation includes objdump output, symbol-size evidence,
+and stability summaries under the same experiment directory.
+
+Layer 3 uses copied-closure experiments:
+
+1. `01_sha256_transform` copies a SHA-256 transform closure and reports
+   `all_pgot`. For this function, all applicable PGOT is data-PGOT only,
+   because the transform has no honest closure-external helper call to convert
+   into func-PGOT.
+2. `02_bch_encode` copies the BCH encode closure and reports `all_pgot`.
+   Internal BCH helpers remain direct; the func-PGOT part covers
+   closure-external `memcpy`.
+3. `03_zlib_deflate` copies the zlib deflate closure from `deflate.c` and
+   `deftree.c`. Data-PGOT covers configuration and tree tables; func-PGOT
+   covers closure-external `memcpy` and `memset`.
+4. `04_zstd_decompress` copies the zstd decompression closure from
+   `decompress.c`, `huf_decompress.c`, `fse_decompress.c`,
+   `entropy_common.c`, and `zstd_common.c`. Data-PGOT covers default
+   decompression tables used by the benchmarked path; func-PGOT covers
+   closure-external `memcpy`, `memset`, and `memmove`.
+5. `05_crc32_le` copies the CRC32 little-endian table-driven computation into
+   the LKM. The applicable all-PGOT transform is data-PGOT: the CRC table base
+   is loaded from `pgot_crc32table_le[0]`.
+6. `06_lz4_compress_fast` copies the `LZ4_compress_fast` implementation
+   closure into the LKM. Data-PGOT covers actual static data references such as
+   `LZ4_minLength` and `LZ4_64Klimit`; func-PGOT covers real `memcpy`,
+   `memset`, and `memmove` callsites left in the copied closure.
+7. `07_aes_encrypt` copies the generic AES closure. Data-PGOT covers the AES
+   S-box tables reached by `aes_encrypt` and key setup; func-PGOT is a no-op
+   for the timed encrypt path because there is no internal mem* callsite.
+8. `08_lz4_decompress_safe` copies the LZ4 safe decompressor closure.
+   Data-PGOT covers the decode helper tables `inc32table` and `dec64table`;
+   func-PGOT covers closure-internal `LZ4_memcpy`, `LZ4_memmove`, and raw
+   `memmove` callsites.
+9. `09_hex_dump_to_buffer` copies the one-line hex dump formatter. Data-PGOT
+   covers the `hex_asc` table used by `hex_asc_hi/lo`; func-PGOT is a no-op
+   for the measured path because there is no internal mem* callsite.
+10. `10_string_escape_mem` copies the string escaping closure. Data-PGOT
+    covers the `hex_asc` table used by `escape_hex`; func-PGOT is a no-op
+    because the closure has no `memcpy`, `memset`, or `memmove` callsite.
+
+For Layer 3, the benchmark modules validate correctness before timing:
+origin and PGOT variants run on the same input, and the module compares return
+code, output length, and output bytes. Static validation artifacts are stored
+beside each result under `results/layer3/<experiment>/static/`.
 
 If CPU isolation is already configured on the machine, pass the isolated CPU through `CPU=...`. Otherwise omit it. The output CSV records the requested CPU, kernel command line, isolated CPU mask, governor, turbo/boost state, SMT state, Spectre v2 mitigation, CPU model, topology, and compiler.
 
@@ -127,7 +185,7 @@ For paper-quality runs, record and report the same settings in the paper:
 
 ```bash
 cd pgot_benchmarks
-CPU=2 ITERATIONS=1000000 REPEATS=31 ./run_experiment.sh layer2-func-placement
+SUDO_PASSWORD='...' CPU=2 ITERATIONS=1000000 REPEATS=31 ./run_experiment.sh layer2-func-placement
 ```
 
 Recommended run conditions:
@@ -138,20 +196,9 @@ Recommended run conditions:
 4. Report whether turbo/boost is enabled or disabled.
 5. Report the repeat count and IQR columns, not only the median.
 
-Optional hardware-event collection is enabled per experiment:
-
-```bash
-RUN_PERF=1 PERF_ITERATIONS=5000000 PERF_REPEATS=7 CPU=2 \
-  ./run_experiment.sh layer2-func-placement
-```
-
-This writes `perf stat -x,` CSV files under that experiment's `perf/` directory, for example:
-
-```text
-results/layer2/func_placement/perf/
-```
-
-Perf events may require adjusting `kernel.perf_event_paranoid`.
+Optional hardware-event collection is not part of the current Layer 2 LKM
+entry point. Use the generated `static/objdump_*.txt` and `static/nm_*.txt`
+files as the default code-generation validation evidence.
 
 ## Timing Method
 
@@ -289,82 +336,188 @@ For per-target perf collection:
 PGOT_TARGET_COUNT=8 ./layer1/04_func_entropy/bench_noret
 ```
 
-## Layer 2: Density And Dilution
+## Layer 2: Func Placement And Workload
 
 Layer 2 asks:
 
-> Under the same total work, does visible pgot overhead depend only on the
-> number of pgot events, or also on local placement density?
+> In an unfenced practical code stream, does the same amount of ordinary work
+> hide or dilute retpoline func-pgot overhead differently when it appears before
+> the call, inside the target, or after the call?
 
-Layer 2 deliberately does not include dependent loads, random target traces, or
-register-pressure experiments. Those variables belong either to Layer 1 bounds
-or to later real-function analysis.
+### 01_func_placement
 
-### 01_density_data
-
-Measures pgot-data placement sensitivity with independent loads. The benchmark
-keeps total ordinary work fixed at `base_work=64` and changes where the data
-events appear in the statement stream.
+Keeps function-event density fixed at one call per iteration and changes the
+position of the same workload. It also includes a no-call `work_only` baseline
+to measure the ordinary work stream by itself.
 
 Variables:
 
 | Variable | Values |
 |---|---|
-| base work | fixed `64` |
-| access pattern | independent |
-| pgot events | `0, 1, 2, 4, 8, 16, 32` |
-| placement | `dist1`, `dist2`, `dist4`, `dist8` |
-| sample order | runner default `interleave` |
-
-Placement means how many event groups are available. `dist1` clusters all data
-events into one group; `dist8` distributes them across eight groups while
-keeping the same total ordinary work.
-
-### 02_density_func
-
-Measures stable-target pgot-func placement sensitivity. The no-retpoline build
-measures the low-cost predictable indirect-call case; the retpoline build
-measures the protected indirect-call case.
-
-Variables:
-
-| Variable | Values |
-|---|---|
-| base work | `32, 64, 128` |
-| pgot events | `0, 1, 2, 4, 8, 16` |
-| placement | `dist1`, `dist2`, `dist4`, `dist8` |
+| event count | fixed `1` |
+| placement | `none`, `work_only`, `before`, `inside`, `after` |
+| workload | `0, 1, 2, 3, 4, 5, 6, 8, 16, 32, 64` |
 | target pattern | stable target |
 | build | no-retpoline, retpoline |
+| fence mode | unfenced |
 
-Layer 2 binaries also support single-case mode:
+Run:
 
 ```bash
-./layer2/02_density_func/bench_retpoline \
-  --base-work 64 --placement dist8 --pgot-events 16 \
-  --sample-order interleave --iterations 5000000 --repeats 31 --cpu 2
+SUDO_PASSWORD='...' CPU=2 ITERATIONS=1000000 REPEATS=31 OUTER_RUNS=10 \
+  ./run_experiment.sh layer2-func-placement
 ```
 
-When `PGOT_RAW_DIR` is set, Layer 2 writes one raw CSV per case:
+Retpoline fence diagnostics:
 
-```text
-repeat,direct_cycles,pgot_cycles,delta_cycles
+```bash
+SUDO_PASSWORD='...' CPU=2 ITERATIONS=100000 REPEATS=15 OUTER_RUNS=3 \
+  ./run_experiment.sh layer2-func-fence-diagnostics
 ```
 
-Layer 2 CSV fields:
+This auxiliary run writes
+`results/layer2/01_func_placement/diagnostics/fence_modes/` and refreshes the
+fence-diagnostics section in `results/layer2/01_func_placement/summary.md`.
+
+Output fields:
 
 ```text
-experiment,...,base_work,placement,placement_groups,pgot_events,avg_events_per_group,max_events_per_group,iterations,repeats,direct_cycles_per_iter,pgot_cycles_per_iter,delta_cycles_per_iter,overhead_percent,delta_cycles_per_event,delta_iqr_cycles_per_iter,direct_iqr_cycles_per_iter,pgot_iqr_cycles_per_iter
+build,fence,placement,workload,n_raw,direct_cycles,pgot_cycles,delta_cycles,delta_iqr,overhead_percent
 ```
 
 Interpretation:
 
 | Metric | Meaning |
 |---|---|
-| `delta_cycles_per_iter` | absolute extra cycles introduced by pgot per benchmark iteration |
-| `overhead_percent` | how much that extra work matters relative to the whole function |
-| `delta_cycles_per_event` | whether the extra cost scales with the number of pgot events |
+| `direct_cycles` | median cycles/iteration for direct call |
+| `pgot_cycles` | median cycles/iteration for slot-load + function-pointer call |
+| `delta_cycles` | median paired delta, `pgot - direct` |
+| `delta_iqr` | IQR of the paired delta samples |
+| `overhead_percent` | `delta_cycles / direct_cycles * 100` |
 
-Do not report only one of these. Absolute overhead and relative overhead answer different questions.
+For `work_only`, both measured sides run the same no-call body. Use its
+`direct_cycles` column as the workload-only baseline; its delta is expected to
+stay near measurement noise.
+
+## Layer 3: Kernel-Function Benchmarks
+
+### 01_sha256_transform
+
+This experiment copies a SHA-256 block-transform closure into a kernel module
+and compares the original implementation against a data-PGOT transformed
+variant. It intentionally does not report func-PGOT for SHA-256, because the
+message-word loading, message schedule, and round logic are part of the copied
+closure rather than honest closure-external helpers.
+
+| variant | meaning |
+|---|---|
+| `all_pgot` | SHA-256 K table address is loaded through a data slot |
+
+Run:
+
+```bash
+SUDO_PASSWORD='...' CPU=2 ITERATIONS=100000 REPEATS=31 OUTER_RUNS=3 \
+  ./run_experiment.sh layer3-sha256-transform
+```
+
+Results are written to `results/layer3/01_sha256_transform/`.
+
+### 02_bch_encode
+
+This experiment copies the BCH encode closure into the LKM. Internal helpers
+such as `swap_bits`, `load_ecc8`, `store_ecc8`, and
+`bch_encode_unaligned` are copied as part of the closure and remain direct
+calls.
+
+| variant | meaning |
+|---|---|
+| `origin` | copied encode closure, direct `swap_bits_table`, direct `memcpy` |
+| `all_pgot` | `data_pgot + func_pgot` |
+
+The module validates that all PGOT variants produce the same ECC bytes as
+`origin` before collecting performance samples.
+
+Run:
+
+```bash
+SUDO_PASSWORD='...' CPU=2 ./run_experiment.sh layer3-bch-encode
+```
+
+Results are written to `results/layer3/02_bch_encode/`.
+
+### 03_zlib_deflate
+
+This experiment copies the kernel zlib deflate closure from `deflate.c` and
+`deftree.c` into the LKM. It reports `all_pgot`: selected deflate tables are
+loaded through data slots, and closure-external `memcpy`/`memset` callsites are
+loaded through function slots.
+
+Run:
+
+```bash
+SUDO_PASSWORD='...' CPU=2 ./run_experiment.sh layer3-zlib-deflate
+```
+
+Results are written to `results/layer3/03_zlib_deflate/`.
+
+### 04_zstd_decompress
+
+This experiment copies the kernel zstd decompression closure into the LKM. It
+reports `all_pgot`: selected default decompression tables are loaded through
+data slots, and closure-external `memcpy`/`memset`/`memmove` callsites are
+loaded through function slots.
+
+Run:
+
+```bash
+SUDO_PASSWORD='...' CPU=2 ./run_experiment.sh layer3-zstd-decompress
+```
+
+Results are written to `results/layer3/04_zstd_decompress/`.
+
+### 05_crc32_le
+
+This experiment copies a CRC32 little-endian table-driven closure into the LKM
+and compares direct table access with an all-PGOT variant. In this function,
+all applicable PGOT means the CRC table base is loaded through a data slot; the
+closure has no required helper call rewrite.
+
+| variant | meaning |
+|---|---|
+| `origin` | copied CRC32_LE closure, direct CRC table reference |
+| `all_pgot` | CRC table base loaded through `pgot_crc32table_le[0]` |
+
+Run:
+
+```bash
+SUDO_PASSWORD='...' CPU=2 ./run_experiment.sh layer3-crc32-le
+```
+
+Results are written to `results/layer3/05_crc32_le/`.
+
+### 06_lz4_compress_fast
+
+This experiment copies the kernel `LZ4_compress_fast` implementation closure
+into the LKM. The origin path calls the copied implementation directly. The
+PGOT paths rewrite only closure-internal references that are visible in the
+generated code: static data addresses become data-PGOT slots, and real
+`memcpy`/`memset`/`memmove` callsites become func-PGOT slots. The LZ4 input
+length and acceleration are runtime module parameters.
+
+| variant | meaning |
+|---|---|
+| `origin` | copied `LZ4_compress_fast` closure, direct internal data and mem helpers |
+| `data_pgot` | `LZ4_minLength` / `LZ4_64Klimit` loaded through data slots |
+| `func_pgot` | copied closure with real mem helper calls routed through function slots |
+| `all_pgot` | data-PGOT + func-PGOT |
+
+Run:
+
+```bash
+SUDO_PASSWORD='...' CPU=2 ./run_experiment.sh layer3-lz4-compress-fast
+```
+
+Results are written to `results/layer3/06_lz4_compress_fast/`.
 
 ## Recommended Paper Figures
 
@@ -374,16 +527,18 @@ Use Layer 1 for primitive bounds:
 2. pgot-func stable target: direct vs pgot, no-ret vs retpoline.
 3. pgot-func high-entropy trace: `cycles_per_call` and `branch-misses` versus target count.
 
-Use Layer 2 for density:
+Use Layer 2 for practical retpoline visible-overhead sensitivity:
 
-1. For pgot-data, table or line plot of `delta_cycles_per_iter` versus
-   `pgot_events`, separated by `placement`; use `base_work=64`.
-2. For pgot-func, show `base_work=64` as the main result and use
-   `base_work=32/128` as sensitivity checks.
-3. For retpoline pgot-func, include objdump validation and optional perf
-   evidence from the same `results/layer2/func_placement/` directory.
-4. Report `delta_cycles_per_iter`, `overhead_percent`,
-   `delta_cycles_per_event`, and IQR together; they answer different questions.
+1. Show retpoline `delta_cycles` versus workload for `before`, `inside`, and
+   `after`.
+2. Show `work_only` cycles to indicate how large the ordinary work stream is
+   when retpoline visible overhead becomes small.
+3. Use no-retpoline as a control showing stable indirect call overhead is near
+   zero.
+4. Include `summary.md`, `static/nm_*.txt`, `static/objdump_*.txt`, and
+   `stability/` as validation evidence.
+5. Report absolute delta, relative overhead, and IQR together; they answer
+   different questions.
 
 ## Notes For Integrating With The Real System
 
