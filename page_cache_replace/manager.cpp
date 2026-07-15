@@ -652,6 +652,7 @@ static void usage(const char *prog) {
 
 int main(int argc, char **argv) {
     int fd;
+    int result = 0;
     struct stat st;
     void *mapped_addr = MAP_FAILED;
     std::string default_filepath = default_path(REL_FILEPATH);
@@ -735,6 +736,7 @@ int main(int argc, char **argv) {
     if (replace_elf_sections_by_page_info(
             filepath, mapped_addr, symbol_addresses) < 0) {
         printf("ELF section replace failed\n");
+        result = -1;
         goto cleanup;
     }
 
@@ -744,6 +746,7 @@ int main(int argc, char **argv) {
         if (!write_manager_state(argv[0], filepath, symbol_addr_file)) {
             printf("Failed to write manager state; restoring before exit\n");
             restore_elf_sections_by_page_info(filepath, symbol_addresses);
+            result = -1;
             goto cleanup;
         }
 
@@ -768,5 +771,5 @@ cleanup:
         munmap(mapped_addr, st.st_size);
     }
     close(fd);
-    return 0;
+    return result;
 }

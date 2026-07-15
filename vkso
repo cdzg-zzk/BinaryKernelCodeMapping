@@ -1,0 +1,790 @@
+#!/usr/bin/env bash
+
+# ==============================================================================
+# vkso 中文使用手册
+# ==============================================================================
+#
+# 一、脚本用途
+#
+# vkso 根据工作目录中的 vkso/symbols.txt 生成：
+#
+#   <work-dir>/vkso/include/vkso_types.h
+#   <work-dir>/vkso/lib/libkernel.so
+#   <work-dir>/vkso/lib/libshim.so                 （仅在 ELF 需要 shim 时）
+#   <work-dir>/vkso/metadata/out.krg
+#   <work-dir>/vkso/metadata/resolved_symbol_addresses.txt
+#
+# 随后通过 page_cache_replace 内核模块，将 libkernel.so 对应的文件页临时
+# 替换为内核函数代码，使普通用户态程序可以链接并调用 symbols.txt 中列出的
+# 内核 API。
+#
+# 推荐的常规流程是：
+#
+#   准备环境 -> init -> 编辑 symbols.txt -> build -> 编译应用 -> exec
+#
+# exec 会在应用结束、应用返回错误或者脚本收到退出信号时自动恢复页面。
+#
+#
+# 二、前置条件
+#
+# 1. 需要与当前运行内核完全匹配的调试 vmlinux：
+#
+#      /usr/lib/debug/boot/vmlinux-$(uname -r)
+#
+# 2. 需要当前内核的 BTF：
+#
+#      /sys/kernel/btf/vmlinux
+#
+# 3. 构建 page_cache_replace.ko 时需要当前内核的构建目录：
+#
+#      /lib/modules/$(uname -r)/build
+#
+# 4. 需要以下命令：
+#
+#      bash make gcc readelf nm bpftool python3 sudo realpath sha256sum
+#
+# 5. Python 需要 capstone 和 pyelftools：
+#
+#      python3 -c 'import capstone, elftools'
+#
+# 6. 生成 KRG 运行时地址、加载/卸载内核模块以及页面替换/恢复需要 root
+#    权限。脚本会在需要时调用 sudo，不要把 sudo 密码写入脚本或命令行。
+#
+#
+# 三、初始化工作目录
+#
+# 在项目根目录执行：
+#
+#   cd /home/zzk/BinaryKernelCodeMapping
+#   ./vkso init user/test_work
+#
+# init 创建以下结构：
+#
+#   user/test_work/vkso/
+#   |-- symbols.txt
+#   |-- include/
+#   |-- lib/
+#   `-- metadata/
+#
+# 如果 symbols.txt 已经存在，init 不会覆盖它。
+#
+#
+# 四、配置内核 API
+#
+# symbols.txt 每行填写一个需要调用的内核函数，例如：
+#
+#   # Hash API
+#   xxh32
+#
+# 空行和 # 注释会被忽略，重复函数会自动去重。
+#
+# 如果函数属于一个内核模块，build、replace 和 exec 时需要传入模块：
+#
+#   --module /path/to/module.ko --owner-ko /path/to/module.ko
+#
+# --module 可以重复使用。只有一个 --module 且没有显式给出 --owner-ko 时，
+# 该模块会自动成为 owner-ko。
+#
+#
+# 五、构建 vkso 产物
+#
+# 对内核本体中的函数：
+#
+#   ./vkso build user/test_work
+#
+# 对内核模块中的函数：
+#
+#   ./vkso build user/test_work \
+#     --module /path/to/module.ko \
+#     --owner-ko /path/to/module.ko
+#
+# build 会执行依赖闭包检查、生成最小头文件和稀疏共享库，并验证共享库是否
+# 导出了全部目标函数。只有生成的共享库包含 DT_NEEDED: libshim.so 时，才会
+# 构建并安装用户态 shim。除非正在排查检查器本身，否则不建议使用
+# --skip-check。
+#
+# out.krg 会缓存在 metadata/ 中。只要内核启动 ID、vmlinux 和相关模块没有
+# 变化，后续构建会复用它。
+#
+#
+# 六、编写并编译应用
+#
+# 应用包含自动生成的头文件，例如：
+#
+#   #include "vkso_types.h"
+#
+#   int main(void)
+#   {
+#       const char input[] = "BinaryKernelCodeMapping";
+#       uint32_t value = xxh32(input, sizeof(input) - 1, 0);
+#       return value == 0;
+#   }
+#
+# 编译 user/test_work/main.c 的推荐命令：
+#
+#   gcc -O2 -Wall -Wextra \
+#     -Iuser/test_work/vkso/include \
+#     user/test_work/main.c \
+#     -Luser/test_work/vkso/lib \
+#     -lkernel \
+#     -Wl,-rpath,'$ORIGIN/vkso/lib' \
+#     -o user/test_work/main
+#
+# 应用通常只需链接 -lkernel。$ORIGIN 表示可执行程序所在目录，因此上面的
+# RUNPATH 会定位到 user/test_work/vkso/lib。
+#
+#
+# 七、推荐运行方式：exec
+#
+#   ./vkso exec user/test_work -- ./user/test_work/main
+#
+# exec 的实际流程是：
+#
+#   1. 重新检查并构建工作区产物；
+#   2. 构建 manager/page_cache_replace.ko（仅在需要时）；
+#   3. 加载 page_cache_replace；
+#   4. 以 --hold 模式建立受保护的页面替换；
+#   5. 将工作区 lib/ 加入 LD_LIBRARY_PATH 后运行应用；
+#   6. 应用结束或脚本退出时恢复原页面；
+#   7. 如果模块由本次 exec 加载，则在恢复后将其卸载。
+#
+# 不建议在没有活动页面替换时直接运行生成的 main。
+#
+# exec 内部会再次执行 build，而且命令选项不会从上一次 build 自动继承。
+# 使用模块或自定义输入时，必须在 exec 上重复相同选项：
+#
+#   ./vkso exec user/test_work \
+#     --module /path/to/module.ko \
+#     --owner-ko /path/to/module.ko \
+#     -- ./user/test_work/main arg1 arg2
+#
+#
+# 八、需要连续运行多个程序时：replace/restore
+#
+# 如果希望替换一次后运行多个程序：
+#
+#   ./vkso replace user/test_work
+#   ./user/test_work/main
+#   ./user/test_work/another_program
+#   ./vkso restore user/test_work --unload-module
+#
+# 没有设置 RUNPATH 的程序需要显式指定共享库目录：
+#
+#   LD_LIBRARY_PATH=user/test_work/vkso/lib ./user/test_work/main
+#
+# replace 返回后页面替换仍然有效，不会自动恢复。即使测试程序退出或崩溃，
+# 也必须执行 restore。因此日常单程序开发优先使用 exec。
+#
+# restore 默认只恢复页面：
+#
+#   ./vkso restore user/test_work
+#
+# 同时卸载 page_cache_replace：
+#
+#   ./vkso restore user/test_work --unload-module
+#
+#
+# 九、查看状态
+#
+#   ./vkso status user/test_work
+#
+# status 显示工作区、共享库、生成头文件、地址映射以及内核模块加载状态；
+# 它不会执行构建、页面替换或清理最终产物。
+#
+#
+# 十、清理规则
+#
+# 1. build 使用 /tmp/vkso-build.XXXXXX 作为临时目录，成功、失败或脚本被
+#    中断时都会尝试删除。
+# 2. exec 在退出时自动恢复页面，并清理 manager.pid/manager.state。
+# 3. replace 不自动恢复，必须手动执行 restore。
+# 4. restore 只有带 --unload-module 时才卸载 page_cache_replace。
+# 5. 如果新生成的共享库不再依赖 libshim.so，build 会删除上一次构建遗留的
+#    lib/libshim.so。
+# 6. include/、lib/、metadata/ 和 symbols.txt 是持久工作区产物，不会在脚本
+#    退出时删除。当前脚本没有 clean 命令。
+#
+#
+# 十一、最常用的完整示例
+#
+#   cd /home/zzk/BinaryKernelCodeMapping
+#   ./vkso init user/test_work
+#   # 编辑 user/test_work/vkso/symbols.txt
+#   ./vkso build user/test_work
+#
+#   gcc -O2 -Wall -Wextra \
+#     -Iuser/test_work/vkso/include \
+#     user/test_work/main.c \
+#     -Luser/test_work/vkso/lib \
+#     -lkernel \
+#     -Wl,-rpath,'$ORIGIN/vkso/lib' \
+#     -o user/test_work/main
+#
+#   ./vkso exec user/test_work -- ./user/test_work/main
+#
+# 查看简要命令帮助：
+#
+#   ./vkso help
+#
+# ==============================================================================
+
+set -Eeuo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CALLER_UID="$(id -u)"
+CALLER_GID="$(id -g)"
+
+COMMAND=""
+WORK_DIR=""
+SYMBOLS_PATH=""
+VMLINUX_PATH="/usr/lib/debug/boot/vmlinux-$(uname -r)"
+BTF_PATH="/sys/kernel/btf/vmlinux"
+SHIM_LIST="$REPO_ROOT/make_dll/shim.txt"
+EXPLICIT_KRG=""
+OWNER_KO=""
+SKIP_CHECK=0
+UNLOAD_MODULE=0
+MODULES=()
+EXEC_CMD=()
+
+VKSO_DIR=""
+INCLUDE_DIR=""
+LIB_DIR=""
+METADATA_DIR=""
+KRG_PATH=""
+KRG_BIN="$REPO_ROOT/kernel_cgd/src/krg"
+MANAGER_BIN="$REPO_ROOT/page_cache_replace/manager"
+KMOD_PATH="$REPO_ROOT/page_cache_replace/page_cache_replace.ko"
+CURRENT_SCRATCH=""
+
+HOLD_ACTIVE=0
+HOLD_WRAPPER_PID=""
+HOLD_PID_FILE=""
+HOLD_STATE_FILE=""
+PAGE_MODULE_LOADED_BY_US=0
+
+usage() {
+    cat <<'EOF'
+Usage:
+  ./vkso init    <work-dir>
+  ./vkso build   <work-dir> [options]
+  ./vkso replace <work-dir> [options]
+  ./vkso exec    <work-dir> [options] -- <program> [args...]
+  ./vkso restore <work-dir> [--unload-module]
+  ./vkso status  <work-dir>
+
+The default input is <work-dir>/vkso/symbols.txt. Generated files are placed in:
+  <work-dir>/vkso/include/    generated C header
+  <work-dir>/vkso/lib/        generated sparse DSO and optional libshim.so
+  <work-dir>/vkso/metadata/   KRG, address map, checks, logs, and output manifest
+
+Options:
+  --symbols <file>      Override vkso/symbols.txt.
+  --vmlinux <file>      Debug vmlinux used by KRG and the checker.
+  --btf <file>          Base BTF used for header generation.
+  --krg <file>          Use an existing KRG instead of building/caching one.
+  --module <file>       Add a module to the KRG/checker/header search (repeatable).
+  --owner-ko <file>     Module that owns the exported APIs; enables .data relocation handling.
+  --shim-list <file>    Override make_dll/shim.txt.
+  --skip-check          Skip functions_checker.py (not recommended).
+  --unload-module       With restore, unload page_cache_replace after restoring.
+
+Examples:
+  ./vkso build /test_work
+  ./vkso build /test_work --module /path/to/xxhash.ko --owner-ko /path/to/xxhash.ko
+  ./vkso exec /test_work -- /test_work/main
+  ./vkso restore /test_work --unload-module
+EOF
+}
+
+log() {
+    printf '[vkso] %s\n' "$*"
+}
+
+die() {
+    printf '[vkso] ERROR: %s\n' "$*" >&2
+    exit 1
+}
+
+require_cmd() {
+    command -v "$1" >/dev/null 2>&1 || die "required command not found: $1"
+}
+
+as_root() {
+    if (( EUID == 0 )); then
+        "$@"
+    else
+        require_cmd sudo
+        sudo "$@"
+    fi
+}
+
+cleanup_session() {
+    local saved_status="$1"
+    trap - EXIT
+    set +e
+
+    if (( HOLD_ACTIVE )); then
+        if [[ -f "$HOLD_PID_FILE" ]]; then
+            local manager_pid
+            manager_pid="$(sed -n '1p' "$HOLD_PID_FILE")"
+            if [[ "$manager_pid" =~ ^[0-9]+$ ]]; then
+                as_root kill -TERM "$manager_pid" >/dev/null 2>&1
+            fi
+        fi
+        if [[ -n "$HOLD_WRAPPER_PID" ]]; then
+            wait "$HOLD_WRAPPER_PID" >/dev/null 2>&1
+        elif [[ -f "$HOLD_STATE_FILE" ]]; then
+            # `sudo -b` returns before its child finishes the signal-driven
+            # restore. Give manager time to remove its state before deciding
+            # that the explicit fallback restore is needed.
+            local attempt
+            for attempt in $(seq 1 60); do
+                [[ ! -f "$HOLD_STATE_FILE" ]] && break
+                sleep 0.1
+            done
+        fi
+        if [[ -f "$HOLD_STATE_FILE" ]]; then
+            local library resolved
+            library="$(metadata_value library)"
+            resolved="$(metadata_value resolved_symbols)"
+            if [[ -n "$library" && -n "$resolved" ]]; then
+                as_root "$MANAGER_BIN" restore "$library" "$resolved" \
+                    >>"$METADATA_DIR/page_replace.log" 2>&1
+            fi
+        fi
+        if (( PAGE_MODULE_LOADED_BY_US )); then
+            as_root rmmod page_cache_replace >/dev/null 2>&1
+        fi
+    fi
+
+    if [[ -n "$CURRENT_SCRATCH" && -d "$CURRENT_SCRATCH" ]]; then
+        rm -rf "$CURRENT_SCRATCH"
+    fi
+    exit "$saved_status"
+}
+
+trap 'cleanup_session $?' EXIT
+
+parse_args() {
+    if (( $# == 1 )) && [[ "$1" == "-h" || "$1" == "--help" || "$1" == "help" ]]; then
+        usage
+        exit 0
+    fi
+    (( $# >= 2 )) || { usage; exit 1; }
+    COMMAND="$1"
+    WORK_DIR="$2"
+    shift 2
+
+    case "$COMMAND" in
+        init|build|replace|exec|restore|status) ;;
+        -h|--help|help) usage; exit 0 ;;
+        *) die "unknown command: $COMMAND" ;;
+    esac
+
+    while (( $# )); do
+        case "$1" in
+            --symbols) (( $# >= 2 )) || die "--symbols requires a file"; SYMBOLS_PATH="$2"; shift 2 ;;
+            --vmlinux) (( $# >= 2 )) || die "--vmlinux requires a file"; VMLINUX_PATH="$2"; shift 2 ;;
+            --btf) (( $# >= 2 )) || die "--btf requires a file"; BTF_PATH="$2"; shift 2 ;;
+            --krg) (( $# >= 2 )) || die "--krg requires a file"; EXPLICIT_KRG="$2"; shift 2 ;;
+            --module) (( $# >= 2 )) || die "--module requires a file"; MODULES+=("$2"); shift 2 ;;
+            --owner-ko) (( $# >= 2 )) || die "--owner-ko requires a file"; OWNER_KO="$2"; shift 2 ;;
+            --shim-list) (( $# >= 2 )) || die "--shim-list requires a file"; SHIM_LIST="$2"; shift 2 ;;
+            --skip-check) SKIP_CHECK=1; shift ;;
+            --unload-module) UNLOAD_MODULE=1; shift ;;
+            --) shift; EXEC_CMD=("$@"); break ;;
+            -h|--help) usage; exit 0 ;;
+            *) die "unknown option: $1" ;;
+        esac
+    done
+}
+
+configure_paths() {
+    require_cmd realpath
+    WORK_DIR="$(realpath -m "$WORK_DIR")"
+    VKSO_DIR="$WORK_DIR/vkso"
+    INCLUDE_DIR="$VKSO_DIR/include"
+    LIB_DIR="$VKSO_DIR/lib"
+    METADATA_DIR="$VKSO_DIR/metadata"
+    SYMBOLS_PATH="${SYMBOLS_PATH:-$VKSO_DIR/symbols.txt}"
+    SYMBOLS_PATH="$(realpath -m "$SYMBOLS_PATH")"
+    VMLINUX_PATH="$(realpath -m "$VMLINUX_PATH")"
+    BTF_PATH="$(realpath -m "$BTF_PATH")"
+    SHIM_LIST="$(realpath -m "$SHIM_LIST")"
+    [[ -z "$EXPLICIT_KRG" ]] || EXPLICIT_KRG="$(realpath -m "$EXPLICIT_KRG")"
+    [[ -z "$OWNER_KO" ]] || OWNER_KO="$(realpath -m "$OWNER_KO")"
+
+    local i
+    for i in "${!MODULES[@]}"; do
+        MODULES[$i]="$(realpath -m "${MODULES[$i]}")"
+    done
+
+    mkdir -p "$INCLUDE_DIR" "$LIB_DIR" "$METADATA_DIR"
+}
+
+init_workspace() {
+    if [[ ! -e "$SYMBOLS_PATH" ]]; then
+        printf '# One exported kernel API per line\nxxh32\n' >"$SYMBOLS_PATH"
+        log "created $SYMBOLS_PATH"
+    else
+        log "kept existing $SYMBOLS_PATH"
+    fi
+    log "workspace initialized at $VKSO_DIR"
+}
+
+validate_inputs() {
+    [[ -f "$SYMBOLS_PATH" ]] || die "missing symbol list: $SYMBOLS_PATH (run './vkso init $WORK_DIR')"
+    [[ -s "$SYMBOLS_PATH" ]] || die "symbol list is empty: $SYMBOLS_PATH"
+    [[ -f "$VMLINUX_PATH" ]] || die "vmlinux not found: $VMLINUX_PATH"
+    [[ -f "$BTF_PATH" ]] || die "BTF not found: $BTF_PATH"
+    [[ -f "$SHIM_LIST" ]] || die "shim list not found: $SHIM_LIST"
+    [[ -z "$OWNER_KO" || -f "$OWNER_KO" ]] || die "owner module not found: $OWNER_KO"
+    local module
+    for module in "${MODULES[@]}"; do
+        [[ -f "$module" ]] || die "module not found: $module"
+    done
+    if [[ -z "$OWNER_KO" && ${#MODULES[@]} -eq 1 ]]; then
+        OWNER_KO="${MODULES[0]}"
+        log "using the sole --module as --owner-ko: $OWNER_KO"
+    fi
+}
+
+symbol_names() {
+    awk '{ sub(/#.*/, ""); if (NF) print $1 }' "$SYMBOLS_PATH" | awk '!seen[$0]++'
+}
+
+compile_krg() {
+    require_cmd make
+    if [[ ! -x "$KRG_BIN" || "$REPO_ROOT/kernel_cgd/src/krg.cpp" -nt "$KRG_BIN" ]]; then
+        log "building project KRG tool"
+        make -C "$REPO_ROOT/kernel_cgd/src" krg
+    fi
+}
+
+krg_fingerprint() {
+    {
+        printf 'boot_id='; sed -n '1p' /proc/sys/kernel/random/boot_id
+        stat -Lc '%n|%s|%Y' "$VMLINUX_PATH"
+        local module
+        for module in "${MODULES[@]}"; do
+            stat -Lc '%n|%s|%Y' "$module"
+        done
+    } | sha256sum | awk '{print $1}'
+}
+
+prepare_krg() {
+    if [[ -n "$EXPLICIT_KRG" ]]; then
+        [[ -f "$EXPLICIT_KRG" ]] || die "KRG not found: $EXPLICIT_KRG"
+        KRG_PATH="$EXPLICIT_KRG"
+        log "using explicit KRG: $KRG_PATH"
+        return
+    fi
+
+    require_cmd sha256sum
+    local fingerprint manifest new_krg
+    fingerprint="$(krg_fingerprint)"
+    KRG_PATH="$METADATA_DIR/out.krg"
+    manifest="$METADATA_DIR/out.krg.inputs"
+    if [[ -f "$KRG_PATH" && -f "$manifest" && "$(sed -n '1p' "$manifest")" == "$fingerprint" ]]; then
+        log "reusing KRG cache: $KRG_PATH"
+        return
+    fi
+
+    compile_krg
+    new_krg="$METADATA_DIR/out.krg.new.$$"
+    local args=("$KRG_BIN" build "$VMLINUX_PATH" -o "$new_krg")
+    local module
+    for module in "${MODULES[@]}"; do
+        args+=(--module "$module")
+    done
+    log "building KRG (sudo is used to resolve runtime kernel addresses)"
+    as_root "${args[@]}"
+    as_root chown "$CALLER_UID:$CALLER_GID" "$new_krg"
+    mv -f "$new_krg" "$KRG_PATH"
+    printf '%s\n' "$fingerprint" >"$manifest"
+}
+
+run_function_checks() {
+    (( SKIP_CHECK )) && { log "static closure checks skipped by request"; return; }
+    require_cmd python3
+    python3 -c 'import capstone, elftools' >/dev/null 2>&1 || \
+        die "Python dependencies missing; install capstone and pyelftools"
+
+    mkdir -p "$CURRENT_SCRATCH/checks"
+    local symbol log_path
+    while IFS= read -r symbol; do
+        [[ -n "$symbol" ]] || continue
+        log_path="$CURRENT_SCRATCH/checks/$symbol.log"
+        local args=(python3 "$REPO_ROOT/kernel_cgd/function_checker/functions_checker.py"
+                    -t "$symbol" -v "$VMLINUX_PATH" -s "$SHIM_LIST")
+        if (( ${#MODULES[@]} )); then
+            args+=(-m "${MODULES[@]}")
+        fi
+        log "checking dependency closure for $symbol"
+        if ! "${args[@]}" 2>&1 | tee "$log_path"; then
+            die "static checker rejected $symbol (see $log_path)"
+        fi
+    done < <(symbol_names)
+}
+
+build_workspace() {
+    validate_inputs
+    require_cmd python3
+    require_cmd readelf
+    require_cmd nm
+    require_cmd bpftool
+    require_cmd mktemp
+    prepare_krg
+
+    CURRENT_SCRATCH="$(mktemp -d "${TMPDIR:-/tmp}/vkso-build.XXXXXX")"
+    symbol_names >"$CURRENT_SCRATCH/symbols.txt"
+    [[ -s "$CURRENT_SCRATCH/symbols.txt" ]] || die "no symbols found in $SYMBOLS_PATH"
+
+    run_function_checks
+
+    log "generating minimal API header"
+    local header_args=(python3 "$REPO_ROOT/kernel_cgd/kerne_type/vkso_gen_types.py"
+                       --funcs-file "$CURRENT_SCRATCH/symbols.txt"
+                       --btf "$BTF_PATH"
+                       --out "$CURRENT_SCRATCH/vkso_types.h")
+    local module
+    for module in "${MODULES[@]}"; do
+        header_args+=(--module "$module")
+    done
+    "${header_args[@]}"
+
+    log "building sparse shared object"
+    local so_args=(python3 "$REPO_ROOT/make_dll/build_PIC_so.py"
+                   --symbols "$CURRENT_SCRATCH/symbols.txt"
+                   --krg "$KRG_PATH"
+                   --shim-list "$SHIM_LIST"
+                   --symbol-addresses "$CURRENT_SCRATCH/resolved_symbol_addresses.txt")
+    [[ -z "$OWNER_KO" ]] || so_args+=(--ko "$OWNER_KO")
+    (
+        cd "$CURRENT_SCRATCH"
+        "${so_args[@]}"
+    )
+
+    local candidates=() candidate library
+    shopt -s nullglob
+    for candidate in "$CURRENT_SCRATCH"/lib*.so; do
+        [[ "$(basename "$candidate")" == "libshim.so" ]] || candidates+=("$candidate")
+    done
+    shopt -u nullglob
+    (( ${#candidates[@]} == 1 )) || die "expected one generated kernel DSO, found ${#candidates[@]}"
+    library="${candidates[0]}"
+
+    readelf -hW "$library" >/dev/null
+    local shim_required=0
+    if readelf -dW "$library" | grep -Eq '\(NEEDED\).*\[libshim\.so\]'; then
+        shim_required=1
+        require_cmd gcc
+        log "libshim.so is required by the generated DSO; building it"
+        gcc -shared -fPIC -O2 -Wall -Wextra "$REPO_ROOT/make_dll/shim.c" \
+            -o "$CURRENT_SCRATCH/libshim.so"
+        readelf -hW "$CURRENT_SCRATCH/libshim.so" >/dev/null
+    else
+        log "libshim.so is not required by the generated DSO"
+    fi
+
+    local dynamic_symbols="$CURRENT_SCRATCH/dynamic_symbols.txt"
+    nm -D --defined-only "$library" | awk 'NF >= 3 {print $3}' >"$dynamic_symbols"
+    local symbol
+    while IFS= read -r symbol; do
+        grep -Fxq "$symbol" "$dynamic_symbols" || die "generated DSO does not export $symbol"
+    done <"$CURRENT_SCRATCH/symbols.txt"
+
+    install -m 0644 "$CURRENT_SCRATCH/vkso_types.h" "$INCLUDE_DIR/vkso_types.h"
+    install -m 0755 "$library" "$LIB_DIR/$(basename "$library")"
+    local installed_shim=""
+    if (( shim_required )); then
+        installed_shim="$LIB_DIR/libshim.so"
+        install -m 0755 "$CURRENT_SCRATCH/libshim.so" "$installed_shim"
+    else
+        # Do not leave a stale shim behind after changing to an API closure that
+        # no longer has DT_NEEDED: libshim.so.
+        rm -f "$LIB_DIR/libshim.so"
+    fi
+    install -m 0644 "$CURRENT_SCRATCH/resolved_symbol_addresses.txt" \
+        "$METADATA_DIR/resolved_symbol_addresses.txt"
+    install -m 0644 "$CURRENT_SCRATCH/module_deps.txt" "$METADATA_DIR/module_deps.txt"
+    rm -rf "$METADATA_DIR/checks"
+    if [[ -d "$CURRENT_SCRATCH/checks" ]]; then
+        cp -a "$CURRENT_SCRATCH/checks" "$METADATA_DIR/checks"
+    fi
+
+    local installed_library="$LIB_DIR/$(basename "$library")"
+    {
+        printf 'library=%s\n' "$installed_library"
+        printf 'shim_required=%s\n' "$shim_required"
+        printf 'shim_library=%s\n' "$installed_shim"
+        printf 'header=%s\n' "$INCLUDE_DIR/vkso_types.h"
+        printf 'resolved_symbols=%s\n' "$METADATA_DIR/resolved_symbol_addresses.txt"
+        printf 'krg=%s\n' "$KRG_PATH"
+        printf 'built_at_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    } >"$METADATA_DIR/outputs.env"
+
+    log "build complete"
+    log "  library: $installed_library"
+    if (( shim_required )); then
+        log "  shim:    $installed_shim"
+    else
+        log "  shim:    not required"
+    fi
+    log "  header:  $INCLUDE_DIR/vkso_types.h"
+    log "  metadata: $METADATA_DIR"
+
+    rm -rf "$CURRENT_SCRATCH"
+    CURRENT_SCRATCH=""
+}
+
+metadata_value() {
+    local key="$1" manifest="$METADATA_DIR/outputs.env"
+    [[ -f "$manifest" ]] || return 0
+    awk -F= -v key="$key" '$1 == key { sub(/^[^=]*=/, ""); print; exit }' "$manifest"
+}
+
+compile_manager() {
+    require_cmd make
+    if [[ ! -x "$MANAGER_BIN" || "$REPO_ROOT/page_cache_replace/manager.cpp" -nt "$MANAGER_BIN" ]]; then
+        log "building project page-cache manager"
+        make -C "$REPO_ROOT/page_cache_replace" manager
+    fi
+}
+
+build_page_module() {
+    require_cmd make
+    local kernel_build="/lib/modules/$(uname -r)/build"
+    [[ -d "$kernel_build" ]] || die "kernel build directory not found: $kernel_build"
+    log "building project page_cache_replace kernel module"
+    make -C "$REPO_ROOT/page_cache_replace" module
+    [[ -f "$KMOD_PATH" ]] || die "kernel module build did not produce $KMOD_PATH"
+}
+
+page_module_loaded() {
+    lsmod | awk '$1 == "page_cache_replace" { found=1 } END { exit !found }'
+}
+
+ensure_page_module() {
+    if page_module_loaded; then
+        log "page_cache_replace is already loaded"
+        return
+    fi
+    build_page_module
+    log "loading page_cache_replace"
+    as_root insmod "$KMOD_PATH"
+    PAGE_MODULE_LOADED_BY_US=1
+}
+
+require_build_outputs() {
+    local library resolved
+    library="$(metadata_value library)"
+    resolved="$(metadata_value resolved_symbols)"
+    [[ -n "$library" && -f "$library" ]] || die "built library missing; run './vkso build $WORK_DIR'"
+    [[ -n "$resolved" && -f "$resolved" ]] || die "resolved symbol map missing; run './vkso build $WORK_DIR'"
+}
+
+replace_pages() {
+    require_build_outputs
+    compile_manager
+    ensure_page_module
+    local library resolved
+    library="$(metadata_value library)"
+    resolved="$(metadata_value resolved_symbols)"
+    log "replacing page-cache pages"
+    as_root "$MANAGER_BIN" replace "$library" "$resolved" | tee "$METADATA_DIR/page_replace.log"
+    log "replacement is active; run './vkso restore $WORK_DIR' when finished"
+}
+
+restore_pages() {
+    require_build_outputs
+    compile_manager
+    page_module_loaded || die "page_cache_replace is not loaded"
+    local library resolved
+    library="$(metadata_value library)"
+    resolved="$(metadata_value resolved_symbols)"
+    log "restoring original page-cache pages"
+    as_root "$MANAGER_BIN" restore "$library" "$resolved" | tee -a "$METADATA_DIR/page_replace.log"
+    if (( UNLOAD_MODULE )); then
+        log "unloading page_cache_replace"
+        as_root rmmod page_cache_replace
+    fi
+}
+
+exec_with_replacement() {
+    (( ${#EXEC_CMD[@]} )) || die "exec requires a program after --"
+    require_build_outputs
+    compile_manager
+    ensure_page_module
+    local library resolved runtime_dir
+    library="$(metadata_value library)"
+    resolved="$(metadata_value resolved_symbols)"
+    runtime_dir="$(dirname "$MANAGER_BIN")/runtime"
+    HOLD_PID_FILE="$runtime_dir/manager.pid"
+    HOLD_STATE_FILE="$runtime_dir/manager.state"
+    as_root mkdir -p "$runtime_dir"
+    as_root rm -f "$HOLD_PID_FILE" "$HOLD_STATE_FILE"
+    as_root true
+
+    log "starting guarded page replacement"
+    if (( EUID == 0 )); then
+        "$MANAGER_BIN" replace "$library" "$resolved" --hold \
+            >>"$METADATA_DIR/page_replace.log" 2>&1 &
+        HOLD_WRAPPER_PID="$!"
+    else
+        # `sudo command &` can lose a non-TTY sudo credential because the shell
+        # launches sudo from a background subshell. Let sudo perform the
+        # backgrounding so authentication stays in this foreground session.
+        sudo -b "$MANAGER_BIN" replace "$library" "$resolved" --hold \
+            >>"$METADATA_DIR/page_replace.log" 2>&1
+        HOLD_WRAPPER_PID=""
+    fi
+    HOLD_ACTIVE=1
+
+    local attempt
+    for attempt in $(seq 1 40); do
+        [[ -f "$HOLD_PID_FILE" ]] && break
+        if [[ -n "$HOLD_WRAPPER_PID" ]]; then
+            kill -0 "$HOLD_WRAPPER_PID" >/dev/null 2>&1 || \
+                die "page-cache manager exited early; see $METADATA_DIR/page_replace.log"
+        fi
+        sleep 0.25
+    done
+    [[ -f "$HOLD_PID_FILE" ]] || die "page-cache manager did not become ready"
+
+    log "running: ${EXEC_CMD[*]}"
+    LD_LIBRARY_PATH="$LIB_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "${EXEC_CMD[@]}"
+    log "program finished; restoring pages"
+}
+
+show_status() {
+    local library header resolved
+    library="$(metadata_value library)"
+    header="$(metadata_value header)"
+    resolved="$(metadata_value resolved_symbols)"
+    printf 'workspace: %s\n' "$VKSO_DIR"
+    printf 'library:   %s\n' "${library:-<not built>}"
+    printf 'header:    %s\n' "${header:-<not built>}"
+    printf 'symbols:   %s\n' "${resolved:-<not built>}"
+    if page_module_loaded; then
+        printf 'module:    loaded\n'
+    else
+        printf 'module:    not loaded\n'
+    fi
+}
+
+main() {
+    parse_args "$@"
+    configure_paths
+    case "$COMMAND" in
+        init) init_workspace ;;
+        build) build_workspace ;;
+        replace) build_workspace; replace_pages ;;
+        exec) build_workspace; exec_with_replacement ;;
+        restore) restore_pages ;;
+        status) show_status ;;
+    esac
+}
+
+main "$@"

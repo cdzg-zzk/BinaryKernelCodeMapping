@@ -1,18 +1,29 @@
 obj-m += page_cache_replace.o
 
-all:
-	make -C  /lib/modules/$(shell uname -r)/build M=$(PWD) modules CFLAGS="-fno-inline -g"
+KDIR ?= /lib/modules/$(shell uname -r)/build
+CXX ?= g++
+CXXFLAGS ?= -O2 -std=c++17 -Wall -Wextra
+
+.PHONY: all module clean update
+
+all: module manager
+
+module:
+	$(MAKE) -C $(KDIR) M=$(CURDIR) modules EXTRA_CFLAGS="-fno-inline -g"
+
+manager: manager.cpp
+	$(CXX) $(CXXFLAGS) $< -o $@
+
 clean:
-	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
-#!/bin/bash
-update:
+	$(MAKE) -C $(KDIR) M=$(CURDIR) clean
+	$(RM) manager
+
+update: module
 	@echo "Checking if 'page_cache_replace' module is loaded..."
 	@if sudo lsmod | grep -q page_cache_replace; then \
 		echo "Module 'page_cache_replace' is loaded, removing page_cache_replace..."; \
 		sudo rmmod page_cache_replace; \
 	fi
-	@echo "Running make..."
-	make
 	@echo "Inserting page_cache_replace module..."
 	sudo insmod page_cache_replace.ko
 	sudo ../disassemble/gdb_disasseble.sh page_cache_replace

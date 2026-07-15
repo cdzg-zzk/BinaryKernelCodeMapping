@@ -16,3 +16,14 @@
 
 # Explicitly ignored local note requested for deletion/cleanup
 /zzk-6-22-mico.md
+
+# codex
+.agents/
+AGENTS.md
+
+# codegraph
+.codegraph/
+
+# ai-chat
+ai_prompt.md
+ai_output.md
