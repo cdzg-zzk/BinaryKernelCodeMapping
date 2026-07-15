@@ -1,4 +1,5 @@
-# Shim symbols: kernel-only APIs that have user-space stand-ins and should be linked via libshim.so.
+# Shim symbols: dependency APIs that have user-space stand-ins and should be linked via libshim.so.
+# A symbol explicitly requested as a DSO export remains the native kernel implementation.
 # Update this list to match the functions implemented in shim.c.
 kmalloc
 __kmalloc

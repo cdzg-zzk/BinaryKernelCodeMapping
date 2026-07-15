@@ -62,6 +62,8 @@ Shim 的目标不是“重写所有内核行为”，而是把最基础、最容
 
 在 [build_LKM_so.py](/home/zzk/BinaryKernelCodeMapping/make_dll/build_LKM_so.py) 中，`shim.txt` 会先被解析为一个 shim 符号集合。随后，builder 会从 `.ko` 的数据重定位中提取出命中的 shim 目标，并用它们构造 `shim_reloc_targets`。
 
+`shim.txt` 只定义依赖闭包的替代边界。如果某个同名符号被 `symbols.txt` 显式列为顶层导出，它仍使用真实内核实现；只有作为非顶层依赖出现时才由 Shim 接管。
+
 这组目标同时承担两个作用：
 
 1. **依赖闭包停止边界**

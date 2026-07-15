@@ -77,6 +77,8 @@
 #   xxh32
 #
 # 空行和 # 注释会被忽略，重复函数会自动去重。
+# symbols.txt 中显式列出的 API 始终导出真实内核实现；shim.txt 只用于替代
+# 这些 API 依赖闭包中的非顶层符号。
 #
 # 如果函数属于一个内核模块，build、replace 和 exec 时需要传入模块：
 #
@@ -505,6 +507,23 @@ prepare_krg() {
     printf '%s\n' "$fingerprint" >"$manifest"
 }
 
+write_effective_shim_list() {
+    local effective_shim_list="$CURRENT_SCRATCH/effective_shim.txt"
+    # Explicit exports are native APIs.  Remove them from the shim boundary for
+    # both the checker and DSO builder so a combined export set has one meaning.
+    awk '
+        NR == FNR { native[$1] = 1; next }
+        {
+            raw = $0
+            token = $0
+            sub(/#.*/, "", token)
+            if (token ~ /^[[:space:]]*$/) { print raw; next }
+            split(token, fields)
+            if (!(fields[1] in native)) print raw
+        }
+    ' "$CURRENT_SCRATCH/symbols.txt" "$SHIM_LIST" >"$effective_shim_list"
+}
+
 run_function_checks() {
     (( SKIP_CHECK )) && { log "static closure checks skipped by request"; return; }
     require_cmd python3
@@ -512,12 +531,13 @@ run_function_checks() {
         die "Python dependencies missing; install capstone and pyelftools"
 
     mkdir -p "$CURRENT_SCRATCH/checks"
+    local effective_shim_list="$CURRENT_SCRATCH/effective_shim.txt"
     local symbol log_path
     while IFS= read -r symbol; do
         [[ -n "$symbol" ]] || continue
         log_path="$CURRENT_SCRATCH/checks/$symbol.log"
         local args=(python3 "$REPO_ROOT/kernel_cgd/function_checker/functions_checker.py"
-                    -t "$symbol" -v "$VMLINUX_PATH" -s "$SHIM_LIST")
+                    -t "$symbol" -v "$VMLINUX_PATH" -s "$effective_shim_list")
         if (( ${#MODULES[@]} )); then
             args+=(-m "${MODULES[@]}")
         fi
@@ -541,7 +561,10 @@ build_workspace() {
     symbol_names >"$CURRENT_SCRATCH/symbols.txt"
     [[ -s "$CURRENT_SCRATCH/symbols.txt" ]] || die "no symbols found in $SYMBOLS_PATH"
 
+    write_effective_shim_list
     run_function_checks
+
+    local effective_shim_list="$CURRENT_SCRATCH/effective_shim.txt"
 
     log "generating minimal API header"
     local header_args=(python3 "$REPO_ROOT/kernel_cgd/kerne_type/vkso_gen_types.py"
@@ -558,7 +581,7 @@ build_workspace() {
     local so_args=(python3 "$REPO_ROOT/make_dll/build_PIC_so.py"
                    --symbols "$CURRENT_SCRATCH/symbols.txt"
                    --krg "$KRG_PATH"
-                   --shim-list "$SHIM_LIST"
+                   --shim-list "$effective_shim_list"
                    --symbol-addresses "$CURRENT_SCRATCH/resolved_symbol_addresses.txt")
     [[ -z "$OWNER_KO" ]] || so_args+=(--ko "$OWNER_KO")
     (

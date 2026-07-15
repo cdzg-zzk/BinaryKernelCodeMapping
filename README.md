@@ -110,7 +110,7 @@ gcc -O2 /test_work/main.c \
 - `--krg PATH`：复用显式指定的 KRG。未指定时，脚本会按 boot ID、vmlinux 和模块元数据安全缓存 KRG。
 - `--module PATH`：追加参与闭包分析的模块，可重复。
 - `--owner-ko PATH`：向 DSO 构建器提供 owner 模块布局和 `.data` 重定位。
-- `--shim-list PATH`：覆盖 `make_dll/shim.txt`。
+- `--shim-list PATH`：覆盖 `make_dll/shim.txt`；显式导出的顶层 API 始终保留真实内核实现，Shim 只替代其依赖。
 - `--skip-check`：跳过静态准入检查，仅用于明确知道风险的调试场景。
 
 完整帮助可运行 `./vkso help` 查看。
@@ -163,4 +163,4 @@ python3 -m pip install --user capstone pyelftools
 - `replace` 为手工实验保留替换状态。结束后必须运行 `restore`，不要在替换期间覆盖、截断或删除目标 DSO。
 - 如果终端异常退出，可在同一工作区运行 `./vkso restore WORKDIR`。manager 的短期进程状态位于项目级 `page_cache_replace/runtime/`，操作日志位于应用的 `vkso/metadata/page_replace.log`。
 - 如果静态 checker 返回 `FAIL` 或 `INCOMPLETE`，构建默认停止。不要把 `--skip-check` 当作通过安全审计的替代品。
-- `libshim.so` 只对 `shim.txt` 中明确实现的内核 API 提供近似用户态语义；新增条目时必须同步实现并验证 ABI/语义。
+- `libshim.so` 只对 `shim.txt` 中明确实现的依赖 API 提供近似用户态语义；`symbols.txt` 显式导出的同名顶层 API 仍使用真实内核实现。新增条目时必须同步实现并验证 ABI/语义。

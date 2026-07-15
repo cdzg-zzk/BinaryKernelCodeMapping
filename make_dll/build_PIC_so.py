@@ -639,6 +639,9 @@ def resolve_requested_symbols(
         raise ValueError("at least one symbol is required")
 
     export_order = {name: idx for idx, name in enumerate(requested_names)}
+    # An explicitly requested API is a native export even when the same name is
+    # listed as a user-space replacement for dependency closure traversal.
+    dependency_shim_symbols = shim_symbols - set(export_order)
     resolved: Dict[str, ResolvedSymbol] = {}
     ordered: List[ResolvedSymbol] = []
     missing: List[str] = []
@@ -656,7 +659,7 @@ def resolve_requested_symbols(
         return f"lib{base}.so"
 
     def module_for_entry(entry: KrgResolvedSymbol) -> str:
-        if entry.name in shim_symbols: return "shim"
+        if entry.name in dependency_shim_symbols: return "shim"
         return entry.module_name or "kernel"
 
     first_lookup = graph.lookup(requested_names[0])
@@ -1249,6 +1252,9 @@ def build_shared_object(
     graph = KrgGraph(krg_path)
     shim_symbols = load_shim_symbols(shim_list_path)
     requested = parse_symbol_requests(symbols_path)
+    # shim.txt defines dependency boundaries, not replacements for APIs the
+    # user explicitly asked this DSO to export.
+    shim_symbols.difference_update(requested)
     resolved, needed_libs, owner_module, owner_lib, dep_modules = resolve_requested_symbols(requested, graph, shim_symbols)
 
     extra_text_ranges: List[tuple[int, int]] = []
