@@ -87,6 +87,23 @@ Shim 的目标不是“重写所有内核行为”，而是把最基础、最容
 
 这样，当 `ld.so` 加载 stub DSO 时，就会从 `libshim.so` 中解析出对应实现，并把实际地址写回 `.data` 中的伪 GOT 槽位。后续 LKM 代码执行间接调用时，跳转目标就自然落入 shim，而不是内核原始 API。
 
+### 3.4 Retpoline thunk 的内置替换
+
+`__x86_indirect_thunk_*` 是特殊的 shim。内核函数中的调用通常已经编码为固定的 `call rel32`，没有可供动态链接器改写的 GOT/PLT 重定位，因此不能只把它声明成 `libshim.so` 导入。
+
+当这类符号出现在 `shim.txt` 并进入依赖闭包时，`build_PIC_so.py` 会在原 thunk 相对虚拟地址生成内置机器码：
+
+```asm
+__x86_indirect_thunk_rax:
+    jmp *%rax
+```
+
+外层 `call thunk` 已经保存了真实返回地址，所以 thunk 使用尾跳转，而不是再增加一层 `call/ret`。构造器同时处理 `__x86_indirect_thunk_array` 到 RAX 的别名，并在同一合成页中把需要的 `__x86_return_thunk` 生成为 `ret`。
+
+合成页会在 `resolved_symbol_addresses.txt` 中标记为 `builtin_thunk,synthetic`。页面替换管理器会保留该文件页，只替换真实 kernel/LKM 页。这样既维持原来的 `rel32` 地址关系，也不需要因为 retpoline thunk 引入 `DT_NEEDED: libshim.so`。
+
+当前支持 RAX、RCX、RDX、RBX、RBP、RSI、RDI 和 R8-R15。RSP thunk 不启用，因为进入 call thunk 后 RSP 已经变化，不能使用相同的直接跳转实现。
+
 ## 4. `.ko` 到 stub DSO 的构建流程
 
 当前实现的构建流程可以概括为以下八步。

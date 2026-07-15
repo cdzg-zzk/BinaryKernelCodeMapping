@@ -1,6 +1,8 @@
-# Shim symbols: dependency APIs that have user-space stand-ins and should be linked via libshim.so.
+# Shim symbols: dependency APIs that have user-space stand-ins.
 # A symbol explicitly requested as a DSO export remains the native kernel implementation.
 # Update this list to match the functions implemented in shim.c.
+# __x86_indirect_thunk_* entries are special built-in shims: make_dll emits a
+# direct-jump thunk at the original virtual address instead of linking libshim.so.
 kmalloc
 __kmalloc
 kvmalloc
@@ -18,3 +20,19 @@ ktime_get
 ktime_get_ns
 ktime_get_real_ts64
 do_gettimeofday
+__x86_indirect_thunk_array
+__x86_indirect_thunk_rax
+__x86_indirect_thunk_rcx
+__x86_indirect_thunk_rdx
+__x86_indirect_thunk_rbx
+__x86_indirect_thunk_rbp
+__x86_indirect_thunk_rsi
+__x86_indirect_thunk_rdi
+__x86_indirect_thunk_r8
+__x86_indirect_thunk_r9
+__x86_indirect_thunk_r10
+__x86_indirect_thunk_r11
+__x86_indirect_thunk_r12
+__x86_indirect_thunk_r13
+__x86_indirect_thunk_r14
+__x86_indirect_thunk_r15

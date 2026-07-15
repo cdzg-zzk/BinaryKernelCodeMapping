@@ -313,6 +313,7 @@ struct page_plan_entry {
     loff_t file_offset;
     unsigned long kernel_vaddr;
     std::vector<std::string> symbols;
+    bool synthetic = false;
 };
 
 bool build_page_replacement_plan(const SymbolAddressList &symbol_addresses,
@@ -320,7 +321,7 @@ bool build_page_replacement_plan(const SymbolAddressList &symbol_addresses,
     std::map<unsigned long, page_plan_entry> page_map;
 
     for (const auto &entry : symbol_addresses) {
-        // Skip shim-provided symbols; only replace kernel/LKM pages.
+        // Dynamic imports have no file-backed kernel page.
         if (entry.module.find("libshim.so") != std::string::npos) {
             continue;
         }
@@ -335,6 +336,9 @@ bool build_page_replacement_plan(const SymbolAddressList &symbol_addresses,
             auto &slot = page_map[page_addr];
             slot.kernel_vaddr = page_addr;
             slot.symbols.push_back(entry.name);
+            if (entry.module.find("builtin_thunk") != std::string::npos) {
+                slot.synthetic = true;
+            }
             if (page_addr > end - PAGE_SIZE) {
                 break;
             }
@@ -355,8 +359,19 @@ bool build_page_replacement_plan(const SymbolAddressList &symbol_addresses,
         // 构建的ELF将页面按内核地址排序写入，因此文件偏移按照顺序映射
         // 因为so的磁盘文件不会有空洞，所以可以直接从[1, ] 开始计算偏移，然后也是按照相对地址，所以for()循环的顺序跟so中symbol出现顺序一致
         kv.second.file_offset = (loff_t)(idx + 1) * PAGE_SIZE;
-        plan.push_back(kv.second);
+        if (!kv.second.synthetic) {
+            plan.push_back(kv.second);
+        } else {
+            printf("Keeping synthetic page: file_offset=0x%llx kernel_vaddr=0x%lx\n",
+                   (unsigned long long)kv.second.file_offset,
+                   kv.second.kernel_vaddr);
+        }
         ++idx;
+    }
+
+    if (plan.empty()) {
+        fprintf(stderr, "No kernel/LKM pages remain after synthetic-page filtering\n");
+        return false;
     }
 
     printf("Constructed replacement plan for %zu unique pages\n", plan.size());

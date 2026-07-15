@@ -8,8 +8,10 @@
 
 /*
  * User-space shim implementations for kernel-only APIs.
- * Functions listed in shim.txt are provided here so that build_PIC_so.py
- * can link dependent modules against libshim.so instead of kernel space.
+ * Most functions listed in shim.txt are provided here so build_PIC_so.py can
+ * link dependent modules against libshim.so instead of kernel space.  The
+ * __x86_indirect_thunk_* entries are special: the builder emits those direct-
+ * jump thunks inside libkernel.so at their original relative addresses.
  * This is a pragmatic stand-in: semantics are matched approximately using
  * libc/syscall equivalents; avoid putting privileged-only or unshimmable
  * symbols here.

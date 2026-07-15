@@ -38,7 +38,7 @@
   ### 3.2 其他输入
 
   - out.krg：由 krg.cpp 生成的 SAFE 图（v2，包含 module 信息）。
-  - shim.txt（可选）：列出需要由用户态 shim 提供的依赖符号；symbols.txt 显式导出的同名顶层符号仍使用真实内核实现（对应 libshim.so，必须自行编译提供）。
+  - shim.txt（可选）：列出需要由用户态 shim 提供的依赖符号；symbols.txt 显式导出的同名顶层符号仍使用真实内核实现。普通 shim 由 libshim.so 提供；`__x86_indirect_thunk_*` 由构造器在 libkernel.so 原相对地址生成 direct-jump 内置 thunk。
 
   ### 3.2 输出文件：generated_library.so
 

@@ -77,6 +77,33 @@ TEXT_BASE_OFFSET = 0x1000
 DEFAULT_EXPORT_STUB_SIZE = 0x10
 
 LIB_SHIM = "libshim.so"
+BUILTIN_THUNK_MODULE = "builtin_thunk"
+
+INDIRECT_THUNK_PREFIX = "__x86_indirect_thunk_"
+INDIRECT_THUNK_ARRAY = "__x86_indirect_thunk_array"
+RETURN_THUNK_PREFIX = "__x86_return_thunk"
+
+# The outer kernel call already pushed the real return address, so these
+# built-in user-space thunks tail-jump to the register target.  RSP is omitted:
+# entering a thunk with CALL has already changed RSP, so it cannot use the same
+# two-byte implementation as the other general-purpose registers.
+DIRECT_THUNK_ENCODINGS: Dict[str, bytes] = {
+    "rax": b"\xff\xe0",
+    "rcx": b"\xff\xe1",
+    "rdx": b"\xff\xe2",
+    "rbx": b"\xff\xe3",
+    "rbp": b"\xff\xe5",
+    "rsi": b"\xff\xe6",
+    "rdi": b"\xff\xe7",
+    "r8": b"\x41\xff\xe0",
+    "r9": b"\x41\xff\xe1",
+    "r10": b"\x41\xff\xe2",
+    "r11": b"\x41\xff\xe3",
+    "r12": b"\x41\xff\xe4",
+    "r13": b"\x41\xff\xe5",
+    "r14": b"\x41\xff\xe6",
+    "r15": b"\x41\xff\xe7",
+}
 
 # -----------------------------------------------------------------------------
 # Helpers
@@ -110,6 +137,18 @@ def load_shim_symbols(path: Path | None) -> Set[str]:
     if path is None or not path.exists():
         return set()
     return set(parse_symbol_requests(path))
+
+def indirect_thunk_register(name: str) -> str | None:
+    if name == INDIRECT_THUNK_ARRAY:
+        return "rax"
+    if not name.startswith(INDIRECT_THUNK_PREFIX):
+        return None
+    register = name[len(INDIRECT_THUNK_PREFIX):]
+    return register if register in DIRECT_THUNK_ENCODINGS else None
+
+def split_builtin_thunk_shims(shim_symbols: Set[str]) -> tuple[Set[str], Set[str]]:
+    builtin = {name for name in shim_symbols if indirect_thunk_register(name) is not None}
+    return shim_symbols - builtin, builtin
 
 def gnu_hash(name: str) -> int:
     h = 5381
@@ -622,15 +661,71 @@ class ResolvedSymbol:
     got_offset: int = 0
     gnu_hash_value: int = 0
     gnu_bucket: int = 0
+    replace_from_kernel: bool = True
 
     @property
     def is_import(self) -> bool:
         return not self.defined
 
 def role_for_symbol(sym: ResolvedSymbol, owner_module: str) -> str:
+    if not sym.replace_from_kernel:
+        return "synthetic"
     if not sym.defined:
         return "import"
     return "export" if sym.exported else "internal"
+
+def build_builtin_thunk_pages(
+    symbols: Sequence[ResolvedSymbol], configured_thunks: Set[str]
+) -> Dict[int, bytes]:
+    """Build direct-jump thunk pages selected through shim.txt.
+
+    Kernel callers contain fixed rel32 calls to the thunk virtual addresses, so
+    the generated code must remain at those same relative addresses.  The whole
+    page becomes synthetic because page-cache replacement operates per page.
+    """
+    configured_registers = {
+        register
+        for name in configured_thunks
+        if (register := indirect_thunk_register(name)) is not None
+    }
+    selected = [
+        sym for sym in symbols
+        if sym.defined and indirect_thunk_register(sym.name) in configured_registers
+    ]
+    if not selected:
+        return {}
+
+    synthetic_page_addrs = {align_down(sym.address, PAGE_SIZE) for sym in selected}
+    pages = {page: bytearray(b"\xcc" * PAGE_SIZE) for page in synthetic_page_addrs}
+
+    for sym in symbols:
+        page = align_down(sym.address, PAGE_SIZE) if sym.defined and sym.address else None
+        if page not in synthetic_page_addrs:
+            continue
+
+        register = indirect_thunk_register(sym.name)
+        is_return_thunk = sym.name.startswith(RETURN_THUNK_PREFIX)
+        if register is None and not is_return_thunk:
+            raise ValueError(
+                f"cannot synthesize thunk page 0x{page:x}: "
+                f"non-thunk dependency {sym.name} shares the page"
+            )
+        if register is not None and register not in configured_registers:
+            raise ValueError(
+                f"cannot synthesize thunk page 0x{page:x}: "
+                f"{sym.name} is required but is not enabled in shim.txt"
+            )
+
+        offset = sym.address - page
+        code = b"\xc3" if is_return_thunk else DIRECT_THUNK_ENCODINGS[register]
+        if offset + len(code) > PAGE_SIZE:
+            raise ValueError(f"{sym.name}: synthetic thunk crosses a page boundary")
+        pages[page][offset:offset + len(code)] = code
+        sym.module_name = BUILTIN_THUNK_MODULE
+        sym.source = BUILTIN_THUNK_MODULE
+        sym.replace_from_kernel = False
+
+    return {page: bytes(data) for page, data in pages.items()}
 
 def resolve_requested_symbols(
     requested_names: Sequence[str], graph: KrgGraph, shim_symbols: Set[str]
@@ -786,6 +881,7 @@ class ManualElfBuilder:
         rw_base_vaddr: int | None = None, extra_text_ranges: List[tuple[int, int]] | None = None,
         extra_ro_ranges: List[tuple[int, int]] | None = None, owner_module_name: str | None = None,
         include_data: bool = True, text_min_override: int | None = None,
+        synthetic_text_pages: Dict[int, bytes] | None = None,
     ) -> None:
         self.symbols = symbols
         self.defined_symbols = [sym for sym in symbols if sym.defined]
@@ -802,6 +898,12 @@ class ManualElfBuilder:
         self.owner_module_name = owner_module_name
         self.include_data = include_data
         self.text_min_override = text_min_override
+        self.synthetic_text_pages = dict(synthetic_text_pages or {})
+        for page, data in self.synthetic_text_pages.items():
+            if page % PAGE_SIZE:
+                raise ValueError(f"synthetic text page 0x{page:x} is not page-aligned")
+            if len(data) != PAGE_SIZE:
+                raise ValueError(f"synthetic text page 0x{page:x} is not {PAGE_SIZE} bytes")
         self.sections: Dict[str, SectionDef] = {}
         self.section_order: List[str] = []
         self.section_indices: Dict[str, int] = {}
@@ -975,7 +1077,20 @@ class ManualElfBuilder:
 
     def _build_content_sections(self) -> None:
         for region in self.text_regions:
-            self.sections[region.name] = SectionDef(name=region.name, sh_type=SHT_PROGBITS, sh_flags=SHF_ALLOC | SHF_EXECINSTR, align=PAGE_SIZE, data=b"", size=region.size)
+            region_data: bytearray | None = None
+            for page, data in self.synthetic_text_pages.items():
+                if not (region.start <= page and page + PAGE_SIZE <= region.end):
+                    continue
+                if region_data is None:
+                    region_data = bytearray(region.size)
+                offset = page - region.start
+                region_data[offset:offset + PAGE_SIZE] = data
+            self.sections[region.name] = SectionDef(
+                name=region.name, sh_type=SHT_PROGBITS,
+                sh_flags=SHF_ALLOC | SHF_EXECINSTR, align=PAGE_SIZE,
+                data=bytes(region_data) if region_data is not None else b"",
+                size=region.size,
+            )
         for region in self.ro_regions:
             self.sections[region.name] = SectionDef(name=region.name, sh_type=SHT_PROGBITS, sh_flags=SHF_ALLOC, align=PAGE_SIZE, data=b"", size=region.size)
         if self.include_data:
@@ -1255,6 +1370,10 @@ def build_shared_object(
     # shim.txt defines dependency boundaries, not replacements for APIs the
     # user explicitly asked this DSO to export.
     shim_symbols.difference_update(requested)
+    if INDIRECT_THUNK_ARRAY in requested or f"{INDIRECT_THUNK_PREFIX}rax" in requested:
+        shim_symbols.discard(INDIRECT_THUNK_ARRAY)
+        shim_symbols.discard(f"{INDIRECT_THUNK_PREFIX}rax")
+    shim_symbols, builtin_thunk_shims = split_builtin_thunk_shims(shim_symbols)
     resolved, needed_libs, owner_module, owner_lib, dep_modules = resolve_requested_symbols(requested, graph, shim_symbols)
 
     extra_text_ranges: List[tuple[int, int]] = []
@@ -1382,6 +1501,8 @@ def build_shared_object(
             target = by_name[name]
             data_relocations.append(DataRelocation(offset=reloc.offset, symbol=target, addend=reloc.addend, r_type=R_X86_64_64))
 
+    synthetic_text_pages = build_builtin_thunk_pages(resolved, builtin_thunk_shims)
+
     dep_modules = ["shim"] if LIB_SHIM in needed_libs else []
     module_deps_path = symbols_path.parent / "module_deps.txt"
     module_deps_path.write_text("".join(format_module_deps(owner_module, dep_modules, resolved)))
@@ -1392,6 +1513,7 @@ def build_shared_object(
         symbols=resolved, needed_libraries=needed_libs, export_stub_size=export_stub_size,
         data_bytes=data_bytes, data_relocations=data_relocations, rw_base_vaddr=rw_base_vaddr,
         extra_text_ranges=extra_text_ranges, extra_ro_ranges=extra_ro_ranges,
+        synthetic_text_pages=synthetic_text_pages,
     )
     builder.write(Path(owner_lib))
 

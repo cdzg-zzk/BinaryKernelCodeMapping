@@ -105,6 +105,10 @@
 # 构建并安装用户态 shim。除非正在排查检查器本身，否则不建议使用
 # --skip-check。
 #
+# make_dll/shim.txt 中的 __x86_indirect_thunk_* 属于内置 shim。命中这些依赖
+# 时，构造器会在 libkernel.so 的原 thunk 相对地址生成 jmp *%reg，并将该页
+# 标记为 synthetic；它不会因此单独生成或依赖 libshim.so。
+#
 # out.krg 会缓存在 metadata/ 中。只要内核启动 ID、vmlinux 和相关模块没有
 # 变化，后续构建会复用它。
 #
