@@ -100,7 +100,22 @@ __x86_indirect_thunk_rax:
 
 外层 `call thunk` 已经保存了真实返回地址，所以 thunk 使用尾跳转，而不是再增加一层 `call/ret`。构造器同时处理 `__x86_indirect_thunk_array` 到 RAX 的别名，并在同一合成页中把需要的 `__x86_return_thunk` 生成为 `ret`。
 
-合成页会在 `resolved_symbol_addresses.txt` 中标记为 `builtin_thunk,synthetic`。页面替换管理器会保留该文件页，只替换真实 kernel/LKM 页。这样既维持原来的 `rel32` 地址关系，也不需要因为 retpoline thunk 引入 `DT_NEEDED: libshim.so`。
+合成页会在 `resolved_symbol_addresses.txt` 中标记为 `builtin_thunk,synthetic`，但不会进入构建器生成的 `page_mappings.txt`。页面替换管理器只读取这份显式逐页映射，因此保留合成页的文件内容，只替换真实 kernel/LKM 页。这样既维持原来的 `rel32` 地址关系，也不需要因为 retpoline thunk 引入 `DT_NEEDED: libshim.so`。
+
+### 3.5 显式 reusable page map
+
+Stub DSO 完成 section offset 和 PT_LOAD 布局后，构建器会同时生成
+`page_mappings.txt`。每一行直接记录：
+
+```text
+DSO file offset,runtime kernel virtual address,text/rodata,ELF section
+```
+
+该文件只包含闭包实际覆盖的 reusable `.text/.rodata` 页；用户态私有
+`.data`、ELF metadata 和内置 thunk 合成页都不进入映射。Runtime manager
+不再根据 `resolved_symbol_addresses.txt` 中的符号数量猜测文件页序号，而是
+严格校验并执行这份构建器输出的映射。因此，不连续闭包页可以在文件中紧凑
+排列，同时仍由 PT_LOAD 虚拟地址保持原始地址拓扑，也不再需要页面锚点。
 
 当前支持 RAX、RCX、RDX、RBX、RBP、RSI、RDI 和 R8-R15。RSP thunk 不启用，因为进入 call thunk 后 RSP 已经变化，不能使用相同的直接跳转实现。
 

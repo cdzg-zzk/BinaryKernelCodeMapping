@@ -1,7 +1,7 @@
 // compile: g++ -o manager -std=c++17 -g manager.cpp
 // run:
-//   sudo ./manager replace <stub-so> <resolved-symbol-addresses> --hold
-//   sudo ./manager restore <stub-so> <resolved-symbol-addresses>
+//   sudo ./manager replace <stub-so> <page-map> --hold
+//   sudo ./manager restore <stub-so> <page-map>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,14 +26,6 @@
 
 // #define PAGE_SIZE 4096
 #define PAGE_SIZE 4096
-// #define REL_FILEPATH "../make_dll/libgenerated_parse_library.so"
-// #define REL_FILEPATH "../make_dll/liblkm_locate.so"
-// #define REL_FILEPATH "../test/test_disk_memory/disk_test/disk_test_1/libdisk_test_1.so"
-#define REL_FILEPATH "../test/test_first_call/tmp/libzzk_xxh32_lkm.so"
-// #define REL_SYMBOL_ADDR_FILE "../make_dll/resolved_symbol_addresses.txt"
-// #define REL_SYMBOL_ADDR_FILE "../test/test_disk_memory/disk_test/disk_test_1/resolved_symbol_addresses.txt"
-#define REL_SYMBOL_ADDR_FILE "../test/test_first_call/tmp/resolved_symbol_addresses.txt"
-
 // Netlink 消息格式 - 支持多页面
 struct nl_msg {
     char filepath[256];
@@ -52,14 +44,14 @@ struct restore_msg {
     loff_t page_offsets[MAX_PAGES_PER_OPERATION];  // 每个页面的偏移量
 };
 
-struct SymbolAddressEntry {
-    std::string name;
-    unsigned long address;
-    unsigned long size;
-    std::string module;
+struct page_plan_entry {
+    loff_t file_offset;
+    unsigned long kernel_vaddr;
+    std::string kind;
+    std::string section;
 };
 
-using SymbolAddressList = std::vector<SymbolAddressEntry>;
+using PageMappingList = std::vector<page_plan_entry>;
 
 static volatile sig_atomic_t g_restore_requested = 0;
 
@@ -84,10 +76,6 @@ static std::string source_dir() {
         return ".";
     }
     return path.substr(0, pos);
-}
-
-static std::string default_path(const char *relative_path) {
-    return join_path(source_dir(), relative_path);
 }
 
 static std::string dirname_of(const std::string &path) {
@@ -132,7 +120,7 @@ static bool ensure_runtime_dir(const char *argv0) {
 
 static bool write_manager_state(const char *argv0,
                                 const char *filepath,
-                                const char *symbol_addr_file) {
+                                const char *page_map_file) {
     if (!ensure_runtime_dir(argv0)) {
         return false;
     }
@@ -148,7 +136,7 @@ static bool write_manager_state(const char *argv0,
     time_t now = time(NULL);
     fprintf(state, "manager_pid=%ld\n", (long)getpid());
     fprintf(state, "stub_so=%s\n", filepath);
-    fprintf(state, "resolved=%s\n", symbol_addr_file);
+    fprintf(state, "page_map=%s\n", page_map_file);
     fprintf(state, "created_at=%ld\n", (long)now);
     fclose(state);
 
@@ -197,184 +185,132 @@ static const char *trim_whitespace(char *text) {
     return text;
 }
 
-bool load_symbol_addresses(const char *filename, SymbolAddressList &symbol_addresses) {
+static bool parse_u64(const char *text,
+                      unsigned long long *value,
+                      const char *field,
+                      size_t line_number,
+                      const char *filename) {
+    if (text[0] == '-') {
+        fprintf(stderr, "Invalid %s '%s' on line %zu in %s\n",
+                field, text, line_number, filename);
+        return false;
+    }
+    errno = 0;
+    char *end = nullptr;
+    unsigned long long parsed = strtoull(text, &end, 0);
+    if (errno != 0 || end == text || *trim_whitespace(end) != '\0') {
+        fprintf(stderr, "Invalid %s '%s' on line %zu in %s\n",
+                field, text, line_number, filename);
+        return false;
+    }
+    *value = parsed;
+    return true;
+}
+
+bool load_page_mappings(const char *filename, PageMappingList &mappings) {
     FILE *fp = fopen(filename, "r");
     char line[512];
     size_t line_number = 0;
+    std::map<loff_t, size_t> seen_offsets;
+    std::map<unsigned long, size_t> seen_kernel_pages;
 
     if (!fp) {
-        perror("fopen symbol address file");
+        perror("fopen page map");
         return false;
     }
 
-    symbol_addresses.clear();
-
+    mappings.clear();
     while (fgets(line, sizeof(line), fp)) {
         line_number++;
         line[strcspn(line, "\r\n")] = '\0';
-        if (line[0] == '\0') {
+        const char *trimmed = trim_whitespace(line);
+        if (trimmed[0] == '\0' || trimmed[0] == '#') {
             continue;
         }
 
         char *comma1 = strchr(line, ',');
-        if (!comma1) {
-            fprintf(stderr,
-                    "Skipping malformed line %zu in %s: %s\n",
-                    line_number,
-                    filename,
-                    line);
-            continue;
+        char *comma2 = comma1 ? strchr(comma1 + 1, ',') : nullptr;
+        char *comma3 = comma2 ? strchr(comma2 + 1, ',') : nullptr;
+        if (!comma1 || !comma2 || !comma3) {
+            fprintf(stderr, "Malformed page-map line %zu in %s\n",
+                    line_number, filename);
+            fclose(fp);
+            return false;
         }
-
         *comma1 = '\0';
-        const char *symbol_name = trim_whitespace(line);
-        char *rest = comma1 + 1;
-
-        char *comma2 = strchr(rest, ',');
-        if (!comma2) {
-            fprintf(stderr,
-                    "Skipping malformed line %zu in %s: %s\n",
-                    line_number,
-                    filename,
-                    line);
-            continue;
-        }
         *comma2 = '\0';
-        const char *addr_text = trim_whitespace(rest);
+        *comma3 = '\0';
+        const char *file_offset_text = trim_whitespace(line);
+        const char *kernel_vaddr_text = trim_whitespace(comma1 + 1);
+        const char *kind = trim_whitespace(comma2 + 1);
+        const char *section = trim_whitespace(comma3 + 1);
 
-        char *rest2 = comma2 + 1;
-        char *comma3 = strchr(rest2, ',');
-        const char *size_text = "";
-        const char *module_text = "";
-        if (comma3) {
-            *comma3 = '\0';
-            size_text = trim_whitespace(rest2);
-            module_text = trim_whitespace(comma3 + 1);
-        } else {
-            size_text = trim_whitespace(rest2);
+        if (strchr(section, ',') != nullptr) {
+            fprintf(stderr, "Too many fields on page-map line %zu in %s\n",
+                    line_number, filename);
+            fclose(fp);
+            return false;
         }
 
-        if (symbol_name[0] == '\0' || addr_text[0] == '\0') {
-            fprintf(stderr,
-                    "Skipping incomplete line %zu in %s\n",
-                    line_number,
-                    filename);
-            continue;
+        unsigned long long file_offset = 0;
+        unsigned long long kernel_vaddr = 0;
+        if (!parse_u64(file_offset_text, &file_offset, "file offset",
+                       line_number, filename) ||
+            !parse_u64(kernel_vaddr_text, &kernel_vaddr, "kernel address",
+                       line_number, filename)) {
+            fclose(fp);
+            return false;
+        }
+        if (file_offset == 0 || file_offset % PAGE_SIZE != 0 ||
+            kernel_vaddr == 0 || kernel_vaddr % PAGE_SIZE != 0) {
+            fprintf(stderr, "Unaligned or zero page mapping on line %zu in %s\n",
+                    line_number, filename);
+            fclose(fp);
+            return false;
+        }
+        if (file_offset > static_cast<unsigned long long>(LLONG_MAX) ||
+            kernel_vaddr > static_cast<unsigned long long>(ULONG_MAX)) {
+            fprintf(stderr, "Page mapping value is out of range on line %zu in %s\n",
+                    line_number, filename);
+            fclose(fp);
+            return false;
+        }
+        if ((strcmp(kind, "text") != 0 && strcmp(kind, "rodata") != 0) ||
+            section[0] == '\0') {
+            fprintf(stderr, "Invalid reusable page kind/section on line %zu in %s\n",
+                    line_number, filename);
+            fclose(fp);
+            return false;
+        }
+        if (seen_offsets.count((loff_t)file_offset) ||
+            seen_kernel_pages.count((unsigned long)kernel_vaddr)) {
+            fprintf(stderr, "Duplicate file or kernel page on line %zu in %s\n",
+                    line_number, filename);
+            fclose(fp);
+            return false;
         }
 
-        errno = 0;
-        unsigned long long addr = strtoull(addr_text, nullptr, 16);
-        if (errno != 0) {
-            fprintf(stderr,
-                    "Invalid address '%s' on line %zu in %s\n",
-                    addr_text,
-                    line_number,
-                    filename);
-            continue;
-        }
-
-        unsigned long long size = 0;
-        if (size_text && size_text[0] != '\0') {
-            errno = 0;
-            size = strtoull(size_text, nullptr, 16);
-            if (errno != 0) {
-                fprintf(stderr,
-                        "Invalid size '%s' on line %zu in %s\n",
-                        size_text,
-                        line_number,
-                        filename);
-                continue;
-            }
-        }
-
-        SymbolAddressEntry entry;
-        entry.name = symbol_name;
-        entry.address = (unsigned long)addr;
-        entry.size = (unsigned long)size;
-        entry.module = module_text ? module_text : "";
-        symbol_addresses.push_back(entry);
+        seen_offsets[(loff_t)file_offset] = line_number;
+        seen_kernel_pages[(unsigned long)kernel_vaddr] = line_number;
+        mappings.push_back({
+            (loff_t)file_offset,
+            (unsigned long)kernel_vaddr,
+            kind,
+            section,
+        });
     }
-
     fclose(fp);
 
-    if (symbol_addresses.empty()) {
-        fprintf(stderr, "No symbol addresses loaded from %s\n", filename);
+    if (mappings.empty()) {
+        fprintf(stderr, "No reusable page mappings loaded from %s\n", filename);
         return false;
     }
-
-    printf("Loaded %zu symbol addresses from %s\n",
-           symbol_addresses.size(),
-           filename);
-    return true;
-}
-
-// 替换计划条目
-struct page_plan_entry {
-    loff_t file_offset;
-    unsigned long kernel_vaddr;
-    std::vector<std::string> symbols;
-    bool synthetic = false;
-};
-
-bool build_page_replacement_plan(const SymbolAddressList &symbol_addresses,
-                                 std::vector<page_plan_entry> &plan) {
-    std::map<unsigned long, page_plan_entry> page_map;
-
-    for (const auto &entry : symbol_addresses) {
-        // Dynamic imports have no file-backed kernel page.
-        if (entry.module.find("libshim.so") != std::string::npos) {
-            continue;
-        }
-        if (entry.address == 0) {
-            continue;
-        }
-
-        unsigned long symbol_size = entry.size ? entry.size : 1;
-        unsigned long start = entry.address & ~(PAGE_SIZE - 1);
-        unsigned long end = (entry.address + symbol_size - 1) & ~(PAGE_SIZE - 1);
-        for (unsigned long page_addr = start; page_addr <= end; ) {
-            auto &slot = page_map[page_addr];
-            slot.kernel_vaddr = page_addr;
-            slot.symbols.push_back(entry.name);
-            if (entry.module.find("builtin_thunk") != std::string::npos) {
-                slot.synthetic = true;
-            }
-            if (page_addr > end - PAGE_SIZE) {
-                break;
-            }
-            page_addr += PAGE_SIZE;
-        }
-    }
-
-    if (page_map.empty()) {
-        fprintf(stderr, "No unique kernel pages found in symbol address file\n");
-        return false;
-    }
-
-    plan.clear();
-    plan.reserve(page_map.size());
-
-    size_t idx = 0;
-    for (auto &kv : page_map) {
-        // 构建的ELF将页面按内核地址排序写入，因此文件偏移按照顺序映射
-        // 因为so的磁盘文件不会有空洞，所以可以直接从[1, ] 开始计算偏移，然后也是按照相对地址，所以for()循环的顺序跟so中symbol出现顺序一致
-        kv.second.file_offset = (loff_t)(idx + 1) * PAGE_SIZE;
-        if (!kv.second.synthetic) {
-            plan.push_back(kv.second);
-        } else {
-            printf("Keeping synthetic page: file_offset=0x%llx kernel_vaddr=0x%lx\n",
-                   (unsigned long long)kv.second.file_offset,
-                   kv.second.kernel_vaddr);
-        }
-        ++idx;
-    }
-
-    if (plan.empty()) {
-        fprintf(stderr, "No kernel/LKM pages remain after synthetic-page filtering\n");
-        return false;
-    }
-
-    printf("Constructed replacement plan for %zu unique pages\n", plan.size());
+    std::sort(mappings.begin(), mappings.end(),
+              [](const page_plan_entry &a, const page_plan_entry &b) {
+                  return a.file_offset < b.file_offset;
+              });
+    printf("Loaded %zu explicit reusable page mappings from %s\n",
+           mappings.size(), filename);
     return true;
 }
 
@@ -526,24 +462,38 @@ int send_restore_batches(const char *filepath,
     return 0;
 }
 
-// 替换基于符号地址的ELF段
+static bool validate_page_mappings_for_file(const char *filepath,
+                                            const PageMappingList &mappings) {
+    struct stat st;
+    if (stat(filepath, &st) != 0) {
+        perror("stat stub DSO");
+        return false;
+    }
+    for (const auto &entry : mappings) {
+        if (entry.file_offset < 0 ||
+            entry.file_offset > st.st_size - PAGE_SIZE) {
+            fprintf(stderr,
+                    "Page mapping file offset 0x%llx is outside %s (size 0x%llx)\n",
+                    (unsigned long long)entry.file_offset,
+                    filepath,
+                    (unsigned long long)st.st_size);
+            return false;
+        }
+    }
+    return true;
+}
+
 int replace_elf_sections_by_page_info(const char *filepath,
                                       void *mapped_addr,
-                                      const SymbolAddressList &symbol_addresses) {
-    if (symbol_addresses.empty()) {
-        fprintf(stderr, "No symbol addresses available for building replacement plan\n");
+                                      const PageMappingList &plan) {
+    if (plan.empty()) {
+        fprintf(stderr, "No explicit page mappings available for replacement\n");
         return -1;
     }
 
-    printf("\n=== Building replacement plan from resolved symbols ===\n");
+    printf("\n=== Using builder-generated replacement plan ===\n");
     printf("Target file: %s\n", filepath);
-    printf("Resolved symbols: %zu\n", symbol_addresses.size());
-
-    std::vector<page_plan_entry> plan;
-    if (!build_page_replacement_plan(symbol_addresses, plan)) {
-        fprintf(stderr, "Failed to construct page replacement plan\n");
-        return -1;
-    }
+    printf("Reusable pages: %zu\n", plan.size());
 
     std::vector<loff_t> page_offsets;
     std::vector<unsigned long> kernel_vaddrs;
@@ -555,20 +505,12 @@ int replace_elf_sections_by_page_info(const char *filepath,
         page_offsets.push_back(entry.file_offset);
         kernel_vaddrs.push_back(entry.kernel_vaddr);
 
-        printf("  [%03zu] file_offset=0x%llx kernel_vaddr=0x%lx symbols:",
+        printf("  [%03zu] file_offset=0x%llx kernel_vaddr=0x%lx kind=%s section=%s\n",
                idx,
                (unsigned long long)entry.file_offset,
-               entry.kernel_vaddr);
-        if (entry.symbols.empty()) {
-            printf(" <none>\n");
-        } else {
-            for (size_t s = 0; s < entry.symbols.size(); ++s) {
-                printf(" %s%s",
-                       entry.symbols[s].c_str(),
-                       (s + 1 == entry.symbols.size()) ? "" : ",");
-            }
-            printf("\n");
-        }
+               entry.kernel_vaddr,
+               entry.kind.c_str(),
+               entry.section.c_str());
     }
 
     printf("Total unique pages to replace: %zu\n", plan.size());
@@ -591,21 +533,15 @@ int replace_elf_sections_by_page_info(const char *filepath,
 }
 
 int restore_elf_sections_by_page_info(const char *filepath,
-                                      const SymbolAddressList &symbol_addresses) {
-    if (symbol_addresses.empty()) {
-        fprintf(stderr, "No symbol addresses available for building restore plan\n");
+                                      const PageMappingList &plan) {
+    if (plan.empty()) {
+        fprintf(stderr, "No explicit page mappings available for restore\n");
         return -1;
     }
 
-    printf("\n=== Building restore plan from resolved symbols ===\n");
+    printf("\n=== Using builder-generated restore plan ===\n");
     printf("Target file: %s\n", filepath);
-    printf("Resolved symbols: %zu\n", symbol_addresses.size());
-
-    std::vector<page_plan_entry> plan;
-    if (!build_page_replacement_plan(symbol_addresses, plan)) {
-        fprintf(stderr, "Failed to construct page restore plan\n");
-        return -1;
-    }
+    printf("Reusable pages: %zu\n", plan.size());
 
     std::vector<loff_t> page_offsets;
     std::vector<unsigned long> kernel_vaddrs;
@@ -617,20 +553,12 @@ int restore_elf_sections_by_page_info(const char *filepath,
         page_offsets.push_back(entry.file_offset);
         kernel_vaddrs.push_back(entry.kernel_vaddr);
 
-        printf("  [%03zu] file_offset=0x%llx kernel_vaddr=0x%lx symbols:",
+        printf("  [%03zu] file_offset=0x%llx kernel_vaddr=0x%lx kind=%s section=%s\n",
                idx,
                (unsigned long long)entry.file_offset,
-               entry.kernel_vaddr);
-        if (entry.symbols.empty()) {
-            printf(" <none>\n");
-        } else {
-            for (size_t s = 0; s < entry.symbols.size(); ++s) {
-                printf(" %s%s",
-                       entry.symbols[s].c_str(),
-                       (s + 1 == entry.symbols.size()) ? "" : ",");
-            }
-            printf("\n");
-        }
+               entry.kernel_vaddr,
+               entry.kind.c_str(),
+               entry.section.c_str());
     }
 
     printf("Total unique pages to restore: %zu\n", plan.size());
@@ -656,13 +584,16 @@ int restore_elf_sections_by_page_info(const char *filepath,
 static void usage(const char *prog) {
     fprintf(stderr,
             "Usage:\n"
-            "  %s replace <stub-so> <resolved-symbol-addresses> [--hold]\n"
-            "  %s restore <stub-so> <resolved-symbol-addresses>\n"
+            "  %s validate <stub-so> <page-map>\n"
+            "  %s replace <stub-so> <page-map> [--hold]\n"
+            "  %s restore <stub-so> <page-map>\n"
             "\n"
+            "The page map is generated by make_dll and contains exact DSO file\n"
+            "offset to runtime kernel virtual page mappings.\n"
             "replace sends page-cache replacement requests. With --hold, the\n"
             "manager stays alive and restores automatically on SIGTERM/SIGINT/SIGHUP.\n"
             "restore sends restore requests and exits.\n",
-            prog, prog);
+            prog, prog, prog);
 }
 
 int main(int argc, char **argv) {
@@ -670,11 +601,9 @@ int main(int argc, char **argv) {
     int result = 0;
     struct stat st;
     void *mapped_addr = MAP_FAILED;
-    std::string default_filepath = default_path(REL_FILEPATH);
-    std::string default_symbol_addr = default_path(REL_SYMBOL_ADDR_FILE);
     const char *command = NULL;
     const char *filepath = NULL;
-    const char *symbol_addr_file = NULL;
+    const char *page_map_file = NULL;
     bool hold = false;
 
     if (argc < 4) {
@@ -684,7 +613,7 @@ int main(int argc, char **argv) {
 
     command = argv[1];
     filepath = argv[2];
-    symbol_addr_file = argv[3];
+    page_map_file = argv[3];
     for (int i = 4; i < argc; ++i) {
         if (strcmp(argv[i], "--hold") == 0) {
             hold = true;
@@ -695,8 +624,15 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (strcmp(command, "replace") != 0 && strcmp(command, "restore") != 0) {
+    if (strcmp(command, "validate") != 0 &&
+        strcmp(command, "replace") != 0 &&
+        strcmp(command, "restore") != 0) {
         fprintf(stderr, "Unknown command: %s\n", command);
+        usage(argv[0]);
+        return 1;
+    }
+    if (hold && strcmp(command, "replace") != 0) {
+        fprintf(stderr, "--hold is only valid with the replace command.\n");
         usage(argv[0]);
         return 1;
     }
@@ -704,16 +640,30 @@ int main(int argc, char **argv) {
     printf("=== ELF Section Replace Tool ===\n");
     printf("Command: %s%s\n", command, hold ? " --hold" : "");
     printf("\nTarget file: %s\n", filepath);
-    printf("Symbol address file: %s\n", symbol_addr_file);
+    printf("Page map: %s\n", page_map_file);
 
-    SymbolAddressList symbol_addresses;
-    if (!load_symbol_addresses(symbol_addr_file, symbol_addresses)) {
-        fprintf(stderr, "Failed to load symbol addresses, aborting.\n");
+    PageMappingList page_mappings;
+    if (!load_page_mappings(page_map_file, page_mappings)) {
+        fprintf(stderr, "Failed to load explicit page mappings, aborting.\n");
+        return -1;
+    }
+    if (!validate_page_mappings_for_file(filepath, page_mappings)) {
+        fprintf(stderr, "Page map does not match the generated DSO, aborting.\n");
         return -1;
     }
 
+    if (strcmp(command, "validate") == 0) {
+        printf("SUCCESS: page map is valid for the generated DSO\n");
+        return 0;
+    }
+    if (strlen(filepath) >= sizeof(((struct nl_msg *)nullptr)->filepath)) {
+        fprintf(stderr, "Target path is too long for the kernel message: %s\n",
+                filepath);
+        return 1;
+    }
+
     if (strcmp(command, "restore") == 0) {
-        int restore_ret = restore_elf_sections_by_page_info(filepath, symbol_addresses);
+        int restore_ret = restore_elf_sections_by_page_info(filepath, page_mappings);
         if (restore_ret == 0) {
             remove_manager_state(argv[0]);
         }
@@ -749,7 +699,7 @@ int main(int argc, char **argv) {
     // 3. 替换ELF段
     // 使用页面信息文件
     if (replace_elf_sections_by_page_info(
-            filepath, mapped_addr, symbol_addresses) < 0) {
+            filepath, mapped_addr, page_mappings) < 0) {
         printf("ELF section replace failed\n");
         result = -1;
         goto cleanup;
@@ -758,9 +708,9 @@ int main(int argc, char **argv) {
     printf("\n=== ELF section replace completed successfully ===\n");
 
     if (hold) {
-        if (!write_manager_state(argv[0], filepath, symbol_addr_file)) {
+        if (!write_manager_state(argv[0], filepath, page_map_file)) {
             printf("Failed to write manager state; restoring before exit\n");
-            restore_elf_sections_by_page_info(filepath, symbol_addresses);
+            restore_elf_sections_by_page_info(filepath, page_mappings);
             result = -1;
             goto cleanup;
         }
@@ -776,7 +726,7 @@ int main(int argc, char **argv) {
         }
 
         printf("Restore signal received; restoring active replacement session...\n");
-        restore_elf_sections_by_page_info(filepath, symbol_addresses);
+        restore_elf_sections_by_page_info(filepath, page_mappings);
         remove_manager_state(argv[0]);
         printf("Manager hold session restored and exiting.\n");
     }

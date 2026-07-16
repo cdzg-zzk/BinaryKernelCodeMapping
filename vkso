@@ -13,6 +13,7 @@
 #   <work-dir>/vkso/lib/libshim.so                 （仅在 ELF 需要 shim 时）
 #   <work-dir>/vkso/metadata/out.krg
 #   <work-dir>/vkso/metadata/resolved_symbol_addresses.txt
+#   <work-dir>/vkso/metadata/page_mappings.txt
 #
 # 随后通过 page_cache_replace 内核模块，将 libkernel.so 对应的文件页临时
 # 替换为内核函数代码，使普通用户态程序可以链接并调用 symbols.txt 中列出的
@@ -351,11 +352,11 @@ cleanup_session() {
             done
         fi
         if [[ -f "$HOLD_STATE_FILE" ]]; then
-            local library resolved
+            local library page_map
             library="$(metadata_value library)"
-            resolved="$(metadata_value resolved_symbols)"
-            if [[ -n "$library" && -n "$resolved" ]]; then
-                as_root "$MANAGER_BIN" restore "$library" "$resolved" \
+            page_map="$(metadata_value page_map)"
+            if [[ -n "$library" && -n "$page_map" ]]; then
+                as_root "$MANAGER_BIN" restore "$library" "$page_map" \
                     >>"$METADATA_DIR/page_replace.log" 2>&1
             fi
         fi
@@ -586,7 +587,8 @@ build_workspace() {
                    --symbols "$CURRENT_SCRATCH/symbols.txt"
                    --krg "$KRG_PATH"
                    --shim-list "$effective_shim_list"
-                   --symbol-addresses "$CURRENT_SCRATCH/resolved_symbol_addresses.txt")
+                   --symbol-addresses "$CURRENT_SCRATCH/resolved_symbol_addresses.txt"
+                   --page-map "$CURRENT_SCRATCH/page_mappings.txt")
     [[ -z "$OWNER_KO" ]] || so_args+=(--ko "$OWNER_KO")
     (
         cd "$CURRENT_SCRATCH"
@@ -635,6 +637,8 @@ build_workspace() {
     fi
     install -m 0644 "$CURRENT_SCRATCH/resolved_symbol_addresses.txt" \
         "$METADATA_DIR/resolved_symbol_addresses.txt"
+    install -m 0644 "$CURRENT_SCRATCH/page_mappings.txt" \
+        "$METADATA_DIR/page_mappings.txt"
     install -m 0644 "$CURRENT_SCRATCH/module_deps.txt" "$METADATA_DIR/module_deps.txt"
     rm -rf "$METADATA_DIR/checks"
     if [[ -d "$CURRENT_SCRATCH/checks" ]]; then
@@ -648,6 +652,7 @@ build_workspace() {
         printf 'shim_library=%s\n' "$installed_shim"
         printf 'header=%s\n' "$INCLUDE_DIR/vkso_types.h"
         printf 'resolved_symbols=%s\n' "$METADATA_DIR/resolved_symbol_addresses.txt"
+        printf 'page_map=%s\n' "$METADATA_DIR/page_mappings.txt"
         printf 'krg=%s\n' "$KRG_PATH"
         printf 'built_at_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     } >"$METADATA_DIR/outputs.env"
@@ -705,22 +710,24 @@ ensure_page_module() {
 }
 
 require_build_outputs() {
-    local library resolved
+    local library resolved page_map
     library="$(metadata_value library)"
     resolved="$(metadata_value resolved_symbols)"
+    page_map="$(metadata_value page_map)"
     [[ -n "$library" && -f "$library" ]] || die "built library missing; run './vkso build $WORK_DIR'"
     [[ -n "$resolved" && -f "$resolved" ]] || die "resolved symbol map missing; run './vkso build $WORK_DIR'"
+    [[ -n "$page_map" && -f "$page_map" ]] || die "reusable page map missing; run './vkso build $WORK_DIR'"
 }
 
 replace_pages() {
     require_build_outputs
     compile_manager
     ensure_page_module
-    local library resolved
+    local library page_map
     library="$(metadata_value library)"
-    resolved="$(metadata_value resolved_symbols)"
+    page_map="$(metadata_value page_map)"
     log "replacing page-cache pages"
-    as_root "$MANAGER_BIN" replace "$library" "$resolved" | tee "$METADATA_DIR/page_replace.log"
+    as_root "$MANAGER_BIN" replace "$library" "$page_map" | tee "$METADATA_DIR/page_replace.log"
     log "replacement is active; run './vkso restore $WORK_DIR' when finished"
 }
 
@@ -728,11 +735,11 @@ restore_pages() {
     require_build_outputs
     compile_manager
     page_module_loaded || die "page_cache_replace is not loaded"
-    local library resolved
+    local library page_map
     library="$(metadata_value library)"
-    resolved="$(metadata_value resolved_symbols)"
+    page_map="$(metadata_value page_map)"
     log "restoring original page-cache pages"
-    as_root "$MANAGER_BIN" restore "$library" "$resolved" | tee -a "$METADATA_DIR/page_replace.log"
+    as_root "$MANAGER_BIN" restore "$library" "$page_map" | tee -a "$METADATA_DIR/page_replace.log"
     if (( UNLOAD_MODULE )); then
         log "unloading page_cache_replace"
         as_root rmmod page_cache_replace
@@ -744,9 +751,9 @@ exec_with_replacement() {
     require_build_outputs
     compile_manager
     ensure_page_module
-    local library resolved runtime_dir
+    local library page_map runtime_dir
     library="$(metadata_value library)"
-    resolved="$(metadata_value resolved_symbols)"
+    page_map="$(metadata_value page_map)"
     runtime_dir="$(dirname "$MANAGER_BIN")/runtime"
     HOLD_PID_FILE="$runtime_dir/manager.pid"
     HOLD_STATE_FILE="$runtime_dir/manager.state"
@@ -756,14 +763,14 @@ exec_with_replacement() {
 
     log "starting guarded page replacement"
     if (( EUID == 0 )); then
-        "$MANAGER_BIN" replace "$library" "$resolved" --hold \
+        "$MANAGER_BIN" replace "$library" "$page_map" --hold \
             >>"$METADATA_DIR/page_replace.log" 2>&1 &
         HOLD_WRAPPER_PID="$!"
     else
         # `sudo command &` can lose a non-TTY sudo credential because the shell
         # launches sudo from a background subshell. Let sudo perform the
         # backgrounding so authentication stays in this foreground session.
-        sudo -b "$MANAGER_BIN" replace "$library" "$resolved" --hold \
+        sudo -b "$MANAGER_BIN" replace "$library" "$page_map" --hold \
             >>"$METADATA_DIR/page_replace.log" 2>&1
         HOLD_WRAPPER_PID=""
     fi
@@ -786,14 +793,16 @@ exec_with_replacement() {
 }
 
 show_status() {
-    local library header resolved
+    local library header resolved page_map
     library="$(metadata_value library)"
     header="$(metadata_value header)"
     resolved="$(metadata_value resolved_symbols)"
+    page_map="$(metadata_value page_map)"
     printf 'workspace: %s\n' "$VKSO_DIR"
     printf 'library:   %s\n' "${library:-<not built>}"
     printf 'header:    %s\n' "${header:-<not built>}"
     printf 'symbols:   %s\n' "${resolved:-<not built>}"
+    printf 'page map:  %s\n' "${page_map:-<not built>}"
     if page_module_loaded; then
         printf 'module:    loaded\n'
     else

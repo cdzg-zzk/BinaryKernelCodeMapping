@@ -662,6 +662,7 @@ class ResolvedSymbol:
     gnu_hash_value: int = 0
     gnu_bucket: int = 0
     replace_from_kernel: bool = True
+    reuse_kind: str | None = None
 
     @property
     def is_import(self) -> bool:
@@ -938,7 +939,7 @@ class ManualElfBuilder:
         self.rw_segment_mem_end = 0
         self.text_min_page = TEXT_BASE_VADDR
 
-    def write(self, output_path: Path) -> None:
+    def write(self, output_path: Path, page_map_path: Path | None = None) -> None:
         self._prepare_symbol_virtual_addresses()
         self._derive_section_order()
         self._reorder_symbols_for_hash()
@@ -972,6 +973,50 @@ class ManualElfBuilder:
                 f.write(shdr)
             total_size = self.section_headers_offset + (len(self.section_order) + 1) * 64
             f.truncate(total_size)
+        if page_map_path is not None:
+            self.write_reusable_page_map(page_map_path)
+
+    def reusable_page_mappings(self) -> List[tuple[int, int, str, str]]:
+        """Return exact DSO-file-page to runtime-kernel-page mappings.
+
+        Only sparse reusable text/rodata pages belong here.  Synthetic text
+        pages contain real file payload, and writable/private ELF sections are
+        owned by the user-space DSO, so neither may be replaced.
+        """
+        mappings: List[tuple[int, int, str, str]] = []
+        seen_offsets: Set[int] = set()
+        seen_kernel_pages: Set[int] = set()
+        for kind, names in (("text", self.text_section_names),
+                            ("rodata", self.ro_section_names)):
+            for name in names:
+                section = self.sections[name]
+                region = self.region_by_name[name]
+                if section.offset is None:
+                    raise ValueError(f"{name}: section offset has not been assigned")
+                for relative in range(0, region.size, PAGE_SIZE):
+                    file_offset = section.offset + relative
+                    kernel_vaddr = region.start + relative
+                    if kernel_vaddr in self.synthetic_text_pages:
+                        continue
+                    if file_offset in seen_offsets:
+                        raise ValueError(f"duplicate reusable file page 0x{file_offset:x}")
+                    if kernel_vaddr in seen_kernel_pages:
+                        raise ValueError(f"duplicate reusable kernel page 0x{kernel_vaddr:x}")
+                    seen_offsets.add(file_offset)
+                    seen_kernel_pages.add(kernel_vaddr)
+                    mappings.append((file_offset, kernel_vaddr, kind, name))
+        return mappings
+
+    def write_reusable_page_map(self, output_path: Path) -> None:
+        mappings = self.reusable_page_mappings()
+        if not mappings:
+            raise ValueError("generated DSO has no reusable kernel pages")
+        lines = ["# file_offset,kernel_vaddr,kind,section\n"]
+        lines.extend(
+            f"0x{file_offset:x},0x{kernel_vaddr:x},{kind},{section}\n"
+            for file_offset, kernel_vaddr, kind, section in mappings
+        )
+        output_path.write_text("".join(lines))
 
     def _prepare_symbol_virtual_addresses(self) -> None:
         def keep(sym: ResolvedSymbol) -> bool:
@@ -979,7 +1024,11 @@ class ManualElfBuilder:
             return sym.module_name == self.owner_module_name
 
         code_symbols = [sym for sym in self.defined_symbols if sym.st_type == STT_FUNC and keep(sym)]
-        ro_symbols = [sym for sym in self.defined_symbols if sym.st_type == STT_OBJECT and keep(sym) and sym.name.startswith(".rodata")]
+        ro_symbols = [
+            sym for sym in self.defined_symbols
+            if sym.st_type == STT_OBJECT and keep(sym)
+            and (sym.reuse_kind == "rodata" or sym.name.startswith(".rodata"))
+        ]
         data_symbols = [sym for sym in self.defined_symbols if sym.st_type == STT_OBJECT and keep(sym) and sym not in ro_symbols]
 
         cursor = TEXT_BASE_VADDR
@@ -1362,7 +1411,8 @@ def infer_default_krg_path() -> Path | None:
 
 def build_shared_object(
     symbols_path: Path, krg_path: Path, export_stub_size: int = DEFAULT_EXPORT_STUB_SIZE,
-    symbol_dump_path: Path | None = None, shim_list_path: Path | None = None, ko_path: Path | None = None,
+    symbol_dump_path: Path | None = None, shim_list_path: Path | None = None,
+    ko_path: Path | None = None, page_map_path: Path | None = None,
 ) -> None:
     graph = KrgGraph(krg_path)
     shim_symbols = load_shim_symbols(shim_list_path)
@@ -1376,15 +1426,12 @@ def build_shared_object(
     shim_symbols, builtin_thunk_shims = split_builtin_thunk_shims(shim_symbols)
     resolved, needed_libs, owner_module, owner_lib, dep_modules = resolve_requested_symbols(requested, graph, shim_symbols)
 
-    extra_text_ranges: List[tuple[int, int]] = []
-    extra_ro_ranges: List[tuple[int, int]] = []
     data_bytes = b""
     data_relocations: List[DataRelocation] = []
     rw_base_vaddr: int | None = None
 
-    def compute_text_min_page(symbols: Sequence[ResolvedSymbol], text_ranges: Sequence[tuple[int, int]]) -> int:
+    def compute_text_min_page(symbols: Sequence[ResolvedSymbol]) -> int:
         addrs = [sym.address for sym in symbols if sym.defined and sym.st_type == STT_FUNC and sym.address]
-        if text_ranges: addrs.append(min(start for start, _ in text_ranges))
         if not addrs: addrs = [sym.address for sym in symbols if sym.defined and sym.address]
         if not addrs: return TEXT_BASE_VADDR
         return align_down(min(addrs), PAGE_SIZE)
@@ -1407,13 +1454,10 @@ def build_shared_object(
             raise ValueError(f"{ko_path}: unable to anchor module layout to out.krg; no common symbol found")
 
         module_core_base_kernel = infer_module_core_base_kernel()
-        text_kernel_start = module_core_base_kernel + layout.text_start
-        text_kernel_end = module_core_base_kernel + layout.text_end
-        if text_kernel_end > text_kernel_start: extra_text_ranges.append((text_kernel_start, text_kernel_end))
         ro_kernel_start = module_core_base_kernel + layout.ro_start
         ro_kernel_end = module_core_base_kernel + layout.ro_end
-        if ro_kernel_end > ro_kernel_start: extra_ro_ranges.append((ro_kernel_start, ro_kernel_end))
         data_kernel_start = module_core_base_kernel + layout.data_start
+        data_kernel_end = module_core_base_kernel + layout.data_end
         data_bytes = layout.data_image
         export_order = {name: idx for idx, name in enumerate(requested)}
         by_name: Dict[str, ResolvedSymbol] = {sym.name: sym for sym in resolved}
@@ -1485,7 +1529,17 @@ def build_shared_object(
                     resolved.append(sym)
                     by_name[name] = sym
 
-        text_min_page = compute_text_min_page(resolved, extra_text_ranges)
+        for sym in resolved:
+            if not sym.defined or sym.module_name != owner_module:
+                continue
+            if sym.st_type == STT_FUNC:
+                sym.reuse_kind = "text"
+            elif ro_kernel_start <= sym.address < ro_kernel_end:
+                sym.reuse_kind = "rodata"
+            elif data_kernel_start <= sym.address < data_kernel_end:
+                sym.reuse_kind = "data"
+
+        text_min_page = compute_text_min_page(resolved)
         rw_base_vaddr = TEXT_BASE_VADDR + (data_kernel_start - text_min_page)
 
         # 核心修复 3：生成 .so 重定位，将内部/外部目标全部无差别写入 .rela.dyn
@@ -1512,15 +1566,15 @@ def build_shared_object(
     builder = ManualElfBuilder(
         symbols=resolved, needed_libraries=needed_libs, export_stub_size=export_stub_size,
         data_bytes=data_bytes, data_relocations=data_relocations, rw_base_vaddr=rw_base_vaddr,
-        extra_text_ranges=extra_text_ranges, extra_ro_ranges=extra_ro_ranges,
         synthetic_text_pages=synthetic_text_pages,
     )
-    builder.write(Path(owner_lib))
+    builder.write(Path(owner_lib), page_map_path=page_map_path)
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build a sparse kernel-mapped .so")
     parser.add_argument("--symbols", type=Path, default=Path("symbols.txt"))
     parser.add_argument("--symbol-addresses", type=Path, default=Path("resolved_symbol_addresses.txt"))
+    parser.add_argument("--page-map", type=Path, default=Path("page_mappings.txt"))
     parser.add_argument("--skip-symbol-addresses", action="store_true")
     parser.add_argument("--krg", type=Path, default=None)
     parser.add_argument("--export-stub-size", type=lambda x: int(x, 0), default=DEFAULT_EXPORT_STUB_SIZE)
@@ -1533,7 +1587,15 @@ def main() -> None:
         if krg_path is None: parser.error("Unable to locate out.krg automatically; provide --krg")
     if not krg_path.exists(): parser.error(f"{krg_path} does not exist")
     symbol_dump_path = None if args.skip_symbol_addresses else args.symbol_addresses
-    build_shared_object(symbols_path=args.symbols, krg_path=krg_path, export_stub_size=args.export_stub_size, symbol_dump_path=symbol_dump_path, shim_list_path=args.shim_list, ko_path=args.ko)
+    build_shared_object(
+        symbols_path=args.symbols,
+        krg_path=krg_path,
+        export_stub_size=args.export_stub_size,
+        symbol_dump_path=symbol_dump_path,
+        shim_list_path=args.shim_list,
+        ko_path=args.ko,
+        page_map_path=args.page_map,
+    )
 
 if __name__ == "__main__":
     main()
