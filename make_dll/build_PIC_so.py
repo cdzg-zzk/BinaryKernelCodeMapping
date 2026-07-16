@@ -771,7 +771,7 @@ def resolve_requested_symbols(
 
     for name in requested_names:
         try:
-            closure = graph.closure(name)
+            closure = graph.closure(name, stop_names=dependency_shim_symbols)
         except KeyError as exc:
             missing.append(name)
             print(str(exc), file=sys.stderr)
@@ -1463,7 +1463,7 @@ def build_shared_object(
         by_name: Dict[str, ResolvedSymbol] = {sym.name: sym for sym in resolved}
 
         def add_krg_closure(root_name: str) -> None:
-            try: closure = graph.closure(root_name)
+            try: closure = graph.closure(root_name, stop_names=shim_symbols)
             except KeyError as exc: raise ValueError(f"{ko_path}: relocation references {root_name} but out.krg has no such symbol") from exc
             for entry in closure:
                 module_name = "shim" if entry.name in shim_symbols else (entry.module_name or "kernel")
