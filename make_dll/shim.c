@@ -104,6 +104,11 @@ void* memcpy(void* dst, const void* src, size_t n) {
 }
 
 __attribute__((force_align_arg_pointer))
+void* memmove(void* dst, const void* src, size_t n) {
+    return __builtin_memmove(dst, src, n);
+}
+
+__attribute__((force_align_arg_pointer))
 void* memset(void* dst, int c, size_t n) {
     return __builtin_memset(dst, c, n);
 }

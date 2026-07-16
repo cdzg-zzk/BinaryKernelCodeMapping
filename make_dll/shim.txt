@@ -12,6 +12,7 @@ _printk
 printk
 vprintk
 memcpy
+memmove
 memset
 kernel_fpu_begin_mask
 kernel_fpu_end
