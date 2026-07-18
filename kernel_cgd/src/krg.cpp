@@ -31,6 +31,8 @@
 
 using u8 = uint8_t; using u16 = uint16_t; using u32 = uint32_t; using u64 = uint64_t; using i32 = int32_t; using i64 = long long;
 
+static std::string g_kallsyms_path = "/proc/kallsyms";
+
 struct Node { u64 addr; u32 size; u16 module; u8 kind; u8 pad{0}; };   // kind: 0=code, 1=data; module: 0=kernel, >0=modules
 struct BuildSym { std::string name; Node n{}; u16 sec_idx{0}; bool defined{false}; u8 is_primary{0}; u32 origin{0}; };
 struct SectionInfo { ELFIO::section* sec{nullptr}; std::string name; u64 addr{0}, size{0}, offset{0}, flags{0}; u32 idx{0}; };
@@ -160,7 +162,7 @@ static std::optional<u64> read_hex_file(const std::string& path){
 }
 
 static std::optional<u64> read_kallsyms_addr(const std::string& name){
-    std::ifstream in("/proc/kallsyms");
+    std::ifstream in(g_kallsyms_path);
     if(!in) return std::nullopt;
     std::string line;
     while(std::getline(in,line)){
@@ -180,7 +182,7 @@ static std::optional<u64> read_kallsyms_addr(const std::string& name){
 static std::unordered_map<std::string, std::string> read_exported_symbol_owners(){
     std::unordered_map<std::string, std::string> owners;
     std::unordered_set<std::string> dup;
-    std::ifstream in("/proc/kallsyms");
+    std::ifstream in(g_kallsyms_path);
     if (!in) return owners;
 
     const std::string_view prefixes[] = {
@@ -1481,7 +1483,7 @@ struct Graph {
 static void usage(){
     std::fprintf(stderr,
         "Usage:\n"
-        "  krg build vmlinux -o out.krg [-m module.ko ...] [--debug] [--dbg-sym=<name>]\n"
+        "  krg build vmlinux -o out.krg [-m module.ko ...] [--kallsyms file] [--debug] [--dbg-sym=<name>]\n"
         "  krg query out.krg <symbol>\n");
 }
 
@@ -1498,6 +1500,8 @@ int main(int argc, char** argv){
             if(a=="-o" && i+1<argc){ out=argv[++i]; }
             else if(a=="--debug"){ dbg=true; }
             else if(a.rfind("--dbg-sym=",0)==0){ dbg_sym=a.substr(10); }
+            else if(a=="--kallsyms" && i+1<argc){ g_kallsyms_path=argv[++i]; }
+            else if(a.rfind("--kallsyms=",0)==0){ g_kallsyms_path=a.substr(11); }
             else if((a=="-m" || a=="--module") && i+1<argc){ mods.push_back(argv[++i]); }
             else if(a.rfind("--module=",0)==0){ mods.push_back(a.substr(9)); }
         }
