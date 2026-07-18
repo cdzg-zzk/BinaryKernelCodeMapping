@@ -9,10 +9,13 @@
 #include <signal.h>
 #include <sys/socket.h>
 #include <linux/netlink.h>
+#include <linux/fs.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <fstream>
 #include <limits.h>
 #include <time.h>
 #include <algorithm>
@@ -120,7 +123,9 @@ static bool ensure_runtime_dir(const char *argv0) {
 
 static bool write_manager_state(const char *argv0,
                                 const char *filepath,
-                                const char *page_map_file) {
+                                const char *page_map_file,
+                                bool hold,
+                                bool immutable_added) {
     if (!ensure_runtime_dir(argv0)) {
         return false;
     }
@@ -134,16 +139,19 @@ static bool write_manager_state(const char *argv0,
     }
 
     time_t now = time(NULL);
-    fprintf(state, "manager_pid=%ld\n", (long)getpid());
+    fprintf(state, "manager_pid=%ld\n", hold ? (long)getpid() : 0L);
     fprintf(state, "stub_so=%s\n", filepath);
     fprintf(state, "page_map=%s\n", page_map_file);
+    fprintf(state, "immutable_added=%d\n", immutable_added ? 1 : 0);
     fprintf(state, "created_at=%ld\n", (long)now);
     fclose(state);
 
-    FILE *pid = fopen(pid_path.c_str(), "w");
-    if (pid) {
-        fprintf(pid, "%ld\n", (long)getpid());
-        fclose(pid);
+    if (hold) {
+        FILE *pid = fopen(pid_path.c_str(), "w");
+        if (pid) {
+            fprintf(pid, "%ld\n", (long)getpid());
+            fclose(pid);
+        }
     }
 
     printf("Wrote manager state: %s\n", state_path.c_str());
@@ -155,6 +163,87 @@ static void remove_manager_state(const char *argv0) {
     std::string pid_path = pid_path_for(argv0);
     unlink(state_path.c_str());
     unlink(pid_path.c_str());
+}
+
+static bool protect_file_immutable(const char *filepath, bool *added) {
+    int fd = open(filepath, O_RDONLY | O_CLOEXEC);
+    int flags = 0;
+
+    *added = false;
+
+    if (fd < 0) {
+        perror("open immutable target");
+        return false;
+    }
+    if (ioctl(fd, FS_IOC_GETFLAGS, &flags) != 0) {
+        perror("FS_IOC_GETFLAGS");
+        close(fd);
+        return false;
+    }
+
+    if (flags & FS_IMMUTABLE_FL) {
+        close(fd);
+        printf("Immutable flag was already set on %s\n", filepath);
+        return true;
+    }
+    int new_flags = flags | FS_IMMUTABLE_FL;
+    if (ioctl(fd, FS_IOC_SETFLAGS, &new_flags) != 0) {
+        perror("set immutable");
+        close(fd);
+        return false;
+    }
+
+    close(fd);
+    *added = true;
+    printf("Set immutable flag on %s\n", filepath);
+    return true;
+}
+
+static bool clear_managed_immutable(const char *filepath, bool immutable_added) {
+    if (!immutable_added) {
+        printf("Preserving pre-existing immutable state on %s\n", filepath);
+        return true;
+    }
+
+    int fd = open(filepath, O_RDONLY | O_CLOEXEC);
+    int flags = 0;
+    if (fd < 0) {
+        perror("open immutable target");
+        return false;
+    }
+    if (ioctl(fd, FS_IOC_GETFLAGS, &flags) != 0) {
+        perror("FS_IOC_GETFLAGS");
+        close(fd);
+        return false;
+    }
+    int new_flags = flags & ~FS_IMMUTABLE_FL;
+    if (new_flags != flags && ioctl(fd, FS_IOC_SETFLAGS, &new_flags) != 0) {
+        perror("clear immutable");
+        close(fd);
+        return false;
+    }
+    close(fd);
+    printf("Cleared manager-added immutable flag on %s\n", filepath);
+    return true;
+}
+
+static bool load_managed_immutable_state(const char *argv0,
+                                         const char *filepath,
+                                         bool *immutable_added) {
+    std::ifstream state(state_path_for(argv0));
+    std::string line;
+    std::string state_filepath;
+    bool found = false;
+
+    while (std::getline(state, line)) {
+        if (line.rfind("stub_so=", 0) == 0) {
+            state_filepath = line.substr(strlen("stub_so="));
+        } else if (line.rfind("immutable_added=", 0) == 0) {
+            *immutable_added = line.substr(strlen("immutable_added=")) == "1";
+            found = true;
+        }
+    }
+    return found && state_filepath == filepath;
 }
 
 void dump_page_mappings(const loff_t *offsets,
@@ -605,6 +694,7 @@ int main(int argc, char **argv) {
     const char *filepath = NULL;
     const char *page_map_file = NULL;
     bool hold = false;
+    bool immutable_added = false;
 
     if (argc < 4) {
         usage(argv[0]);
@@ -665,6 +755,14 @@ int main(int argc, char **argv) {
     if (strcmp(command, "restore") == 0) {
         int restore_ret = restore_elf_sections_by_page_info(filepath, page_mappings);
         if (restore_ret == 0) {
+            bool managed_immutable = false;
+            if (load_managed_immutable_state(argv[0], filepath,
+                                             &managed_immutable)) {
+                clear_managed_immutable(filepath, managed_immutable);
+            } else {
+                printf("No matching immutable state; preserving file flags on %s\n",
+                       filepath);
+            }
             remove_manager_state(argv[0]);
         }
         return restore_ret;
@@ -707,14 +805,24 @@ int main(int argc, char **argv) {
 
     printf("\n=== ELF section replace completed successfully ===\n");
 
-    if (hold) {
-        if (!write_manager_state(argv[0], filepath, page_map_file)) {
-            printf("Failed to write manager state; restoring before exit\n");
-            restore_elf_sections_by_page_info(filepath, page_mappings);
-            result = -1;
-            goto cleanup;
-        }
+    if (!protect_file_immutable(filepath, &immutable_added)) {
+        printf("Failed to protect replaced file; restoring before exit\n");
+        restore_elf_sections_by_page_info(filepath, page_mappings);
+        result = -1;
+        goto cleanup;
+    }
 
+    if (!write_manager_state(argv[0], filepath, page_map_file,
+                             hold, immutable_added)) {
+        printf("Failed to write manager state; restoring before exit\n");
+        if (restore_elf_sections_by_page_info(filepath, page_mappings) == 0) {
+            clear_managed_immutable(filepath, immutable_added);
+        }
+        result = -1;
+        goto cleanup;
+    }
+
+    if (hold) {
         signal(SIGTERM, signal_handler);
         signal(SIGINT, signal_handler);
         signal(SIGHUP, signal_handler);
@@ -726,8 +834,10 @@ int main(int argc, char **argv) {
         }
 
         printf("Restore signal received; restoring active replacement session...\n");
-        restore_elf_sections_by_page_info(filepath, page_mappings);
-        remove_manager_state(argv[0]);
+        if (restore_elf_sections_by_page_info(filepath, page_mappings) == 0) {
+            clear_managed_immutable(filepath, immutable_added);
+            remove_manager_state(argv[0]);
+        }
         printf("Manager hold session restored and exiting.\n");
     }
 
