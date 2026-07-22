@@ -1,0 +1,14 @@
+/build/
+/kmod/*.ko
+/kmod/*.mod
+/kmod/*.mod.c
+/kmod/*.o
+/kmod/.*.cmd
+/kmod/.*.o.d
+/kmod/Module.symvers
+/kmod/modules.order
+/work/
+/vkso/
+/scripts/__pycache__/
+/linux-5.15.198-no-vdso/
+/linux-5.15.198-vkso/
