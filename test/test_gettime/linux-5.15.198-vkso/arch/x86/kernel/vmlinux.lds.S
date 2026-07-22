@@ -125,6 +125,14 @@ SECTIONS
 	.text :  AT(ADDR(.text) - LOAD_OFFSET) {
 		_text = .;
 		_stext = .;
+#ifdef CONFIG_VKSO_TIME
+		. = ALIGN(PAGE_SIZE);
+		__vkso_text_start = .;
+		KEEP(*(.vkso.text))
+		KEEP(*(.vkso.text.*))
+		. = ALIGN(PAGE_SIZE);
+		__vkso_text_end = .;
+#endif
 		/* bootstrapping code */
 		HEAD_TEXT
 		TEXT_TEXT
@@ -174,6 +182,15 @@ SECTIONS
 	.data : AT(ADDR(.data) - LOAD_OFFSET) {
 		/* Start of data section */
 		_sdata = .;
+
+#ifdef CONFIG_VKSO_TIME
+		. = ALIGN(PAGE_SIZE);
+		__vkso_shared_data_start = .;
+		KEEP(*(.vkso.shared_data))
+		KEEP(*(.vkso.shared_data.*))
+		. = ALIGN(PAGE_SIZE);
+		__vkso_shared_data_end = .;
+#endif
 
 		/* init_task */
 		INIT_TASK_DATA(THREAD_SIZE)

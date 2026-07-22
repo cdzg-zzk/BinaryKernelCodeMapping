@@ -34,6 +34,17 @@ config X86_64
 	select ARCH_HAS_ELFCORE_COMPAT
 	select ZONE_DMA32
 
+config VKSO_TIME
+	bool "VKSO shared kernel/user time implementation"
+	depends on X86_64
+	help
+	  Build the common VKSO time core that is intended to execute from the
+	  same code pages in kernel and user contexts.  Data publication,
+	  process-context mappings and time interfaces are added independently;
+	  enabling this option alone does not replace any system call.
+
+	  This option is experimental.  If unsure, say N.
+
 config FORCE_DYNAMIC_FTRACE
 	def_bool y
 	depends on X86_32
