@@ -364,7 +364,8 @@ bool load_page_mappings(const char *filename, PageMappingList &mappings) {
             fclose(fp);
             return false;
         }
-        if ((strcmp(kind, "text") != 0 && strcmp(kind, "rodata") != 0) ||
+        if ((strcmp(kind, "text") != 0 && strcmp(kind, "rodata") != 0 &&
+             strcmp(kind, "shared_data") != 0) ||
             section[0] == '\0') {
             fprintf(stderr, "Invalid reusable page kind/section on line %zu in %s\n",
                     line_number, filename);

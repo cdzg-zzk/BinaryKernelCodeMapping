@@ -102,7 +102,7 @@ void test_page_lru(struct page *page)
     else
         pr_info("LRU: on inactive LRU\n");
 }
-int pmd_huge(pmd_t pmd)
+static int vkso_pmd_huge(pmd_t pmd)
 {
     return !pmd_none(pmd) && 
             (pmd_val(pmd) & (_PAGE_PRESENT|_PAGE_PSE)) != _PAGE_PRESENT;
@@ -173,7 +173,7 @@ int get_page_table(unsigned long addr)
         return 5;
     }
     printk(KERN_INFO "PMD found at %p, value: 0x%lx\n", pmd, pmd_val(*pmd));
-    if(pmd_huge(*pmd)) {
+    if(vkso_pmd_huge(*pmd)) {
         printk(KERN_INFO "This is a huge page mapping at PMD level\n");
         printk(KERN_INFO "PMD flags: %s %s %s\n", (pmd_val(*pmd) & _PAGE_USER) ? "USER " : "",
                                                     (pmd_val(*pmd) & _PAGE_RW) ? "RW " : "RO ",

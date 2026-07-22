@@ -3,6 +3,7 @@ obj-m += page_cache_replace.o
 KDIR ?= /lib/modules/$(shell uname -r)/build
 CXX ?= g++
 CXXFLAGS ?= -O2 -std=c++17 -Wall -Wextra
+MANAGER_LDFLAGS ?= -static -static-libstdc++ -static-libgcc
 
 .PHONY: all module clean update
 
@@ -12,7 +13,7 @@ module:
 	$(MAKE) -C $(KDIR) M=$(CURDIR) modules EXTRA_CFLAGS="-fno-inline -g"
 
 manager: manager.cpp
-	$(CXX) $(CXXFLAGS) $< -o $@
+	$(CXX) $(CXXFLAGS) $< $(MANAGER_LDFLAGS) -o $@
 
 clean:
 	$(MAKE) -C $(KDIR) M=$(CURDIR) clean

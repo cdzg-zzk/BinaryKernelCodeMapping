@@ -21,6 +21,8 @@ ELFCLASS64 = 2
 ELFDATA2LSB = 1
 EV_CURRENT = 1
 
+ET_REL = 1
+ET_EXEC = 2
 ET_DYN = 3
 EM_X86_64 = 62
 
@@ -134,6 +136,12 @@ def parse_symbol_requests(path: Path) -> List[str]:
     return names
 
 def load_shim_symbols(path: Path | None) -> Set[str]:
+    if path is None or not path.exists():
+        return set()
+    return set(parse_symbol_requests(path))
+
+def load_shared_data_symbols(path: Path | None) -> Set[str]:
+    """Load the explicit allow-list of writable kernel pages safe to share RO."""
     if path is None or not path.exists():
         return set()
     return set(parse_symbol_requests(path))
@@ -441,7 +449,7 @@ class KoFile:
          _e_ehsize, _e_phentsize, _e_phnum, e_shentsize, e_shnum, e_shstrndx) = self._EHDR.unpack_from(blob, 0)
         if e_ident[0:4] != b"\x7fELF" or e_ident[4] != ELFCLASS64:
             raise ValueError(f"{self.path}: not an ELF64 file")
-        if e_type != 1:
+        if e_type != ET_REL:
             raise ValueError(f"{self.path}: expected ET_REL (.ko), got e_type={e_type}")
         if e_machine != EM_X86_64:
             raise ValueError(f"{self.path}: expected EM_X86_64, got e_machine={e_machine}")
@@ -520,6 +528,75 @@ class KoFile:
         if idx is None:
             return None
         return idx, self.symbols[idx]
+
+
+class KernelElfSymbols:
+    """Minimal ELF64 symbol reader for built-in objects omitted from a KRG."""
+
+    _EHDR = struct.Struct("<16sHHIQQQIHHHHHH")
+    _SHDR = struct.Struct("<IIQQQQIIQQ")
+    _SYMENT = struct.Struct("<IBBHQQ")
+
+    def __init__(self, path: Path) -> None:
+        self.path = path
+        self._symbols: Dict[str, KoSymbol] = {}
+        self._load(memoryview(path.read_bytes()))
+
+    def _load(self, blob: memoryview) -> None:
+        if len(blob) < self._EHDR.size:
+            raise ValueError(f"{self.path}: file too small for ELF header")
+        (e_ident, e_type, e_machine, _e_version, _e_entry, _e_phoff, e_shoff,
+         _e_flags, _e_ehsize, _e_phentsize, _e_phnum, e_shentsize, e_shnum,
+         _e_shstrndx) = self._EHDR.unpack_from(blob, 0)
+        if (e_ident[0:4] != b"\x7fELF" or e_ident[4] != ELFCLASS64 or
+                e_ident[5] != ELFDATA2LSB):
+            raise ValueError(f"{self.path}: expected little-endian ELF64")
+        if e_type not in (ET_EXEC, ET_DYN):
+            raise ValueError(f"{self.path}: expected ET_EXEC/ET_DYN vmlinux, got e_type={e_type}")
+        if e_machine != EM_X86_64:
+            raise ValueError(f"{self.path}: expected EM_X86_64, got e_machine={e_machine}")
+        if e_shentsize != self._SHDR.size or e_shoff == 0 or e_shnum == 0:
+            raise ValueError(f"{self.path}: missing or unsupported section table")
+
+        sections = []
+        for idx in range(e_shnum):
+            offset = e_shoff + idx * e_shentsize
+            if offset + self._SHDR.size > len(blob):
+                raise ValueError(f"{self.path}: truncated section table")
+            sections.append(self._SHDR.unpack_from(blob, offset))
+
+        symtabs = [section for section in sections if section[1] == SHT_SYMTAB]
+        if not symtabs:
+            raise ValueError(f"{self.path}: .symtab is required")
+        for symtab in symtabs:
+            _name, _type, _flags, _addr, offset, size, link, _info, _align, entsize = symtab
+            if entsize != self._SYMENT.size or link >= len(sections):
+                raise ValueError(f"{self.path}: unsupported symbol table")
+            strtab = sections[link]
+            str_offset, str_size = strtab[4], strtab[5]
+            if offset + size > len(blob) or str_offset + str_size > len(blob):
+                raise ValueError(f"{self.path}: truncated symbol/string table")
+            strings = bytes(blob[str_offset:str_offset + str_size])
+            for entry_offset in range(offset, offset + size, entsize):
+                st_name, st_info, st_other, st_shndx, st_value, st_size = \
+                    self._SYMENT.unpack_from(blob, entry_offset)
+                if st_name >= len(strings) or st_shndx == SHN_UNDEF:
+                    continue
+                end = strings.find(b"\x00", st_name)
+                if end < 0:
+                    continue
+                name = strings[st_name:end].decode("utf-8", errors="ignore")
+                if not name:
+                    continue
+                candidate = KoSymbol(name, st_info, st_other, st_shndx, st_value, st_size)
+                current = self._symbols.get(name)
+                # Prefer a global definition, then the definition with useful size.
+                if current is None or (candidate.bind, bool(candidate.st_size)) > \
+                        (current.bind, bool(current.st_size)):
+                    self._symbols[name] = candidate
+
+    def find_symbol(self, name: str) -> KoSymbol | None:
+        return self._symbols.get(name)
 
     @staticmethod
     def _is_core_section(name: str) -> bool:
@@ -880,7 +957,9 @@ class ManualElfBuilder:
         export_stub_size: int = DEFAULT_EXPORT_STUB_SIZE, ro_bytes: bytes = b"",
         data_bytes: bytes = b"", data_relocations: List[DataRelocation] | None = None,
         rw_base_vaddr: int | None = None, extra_text_ranges: List[tuple[int, int]] | None = None,
-        extra_ro_ranges: List[tuple[int, int]] | None = None, owner_module_name: str | None = None,
+        extra_ro_ranges: List[tuple[int, int]] | None = None,
+        extra_shared_data_ranges: List[tuple[int, int]] | None = None,
+        owner_module_name: str | None = None,
         include_data: bool = True, text_min_override: int | None = None,
         synthetic_text_pages: Dict[int, bytes] | None = None,
     ) -> None:
@@ -896,6 +975,7 @@ class ManualElfBuilder:
         self.rw_base_vaddr = rw_base_vaddr
         self.extra_text_ranges = extra_text_ranges or []
         self.extra_ro_ranges = extra_ro_ranges or []
+        self.extra_shared_data_ranges = extra_shared_data_ranges or []
         self.owner_module_name = owner_module_name
         self.include_data = include_data
         self.text_min_override = text_min_override
@@ -932,6 +1012,8 @@ class ManualElfBuilder:
         self.text_section_names: List[str] = []
         self.ro_regions: List[Region] = []
         self.ro_section_names: List[str] = []
+        self.shared_data_regions: List[Region] = []
+        self.shared_data_section_names: List[str] = []
         self.region_by_name: Dict[str, Region] = {}
         self.rw_segment_start_offset = 0
         self.rw_segment_start_addr = 0
@@ -979,15 +1061,18 @@ class ManualElfBuilder:
     def reusable_page_mappings(self) -> List[tuple[int, int, str, str]]:
         """Return exact DSO-file-page to runtime-kernel-page mappings.
 
-        Only sparse reusable text/rodata pages belong here.  Synthetic text
-        pages contain real file payload, and writable/private ELF sections are
-        owned by the user-space DSO, so neither may be replaced.
+        Only sparse reusable text/rodata/shared-data pages belong here.
+        Synthetic text pages contain real file payload, and writable/private
+        ELF sections are owned by the user-space DSO, so neither may be
+        replaced.  A shared-data kernel page is writable in the kernel but is
+        deliberately emitted in a read-only, non-executable user segment.
         """
         mappings: List[tuple[int, int, str, str]] = []
         seen_offsets: Set[int] = set()
         seen_kernel_pages: Set[int] = set()
         for kind, names in (("text", self.text_section_names),
-                            ("rodata", self.ro_section_names)):
+                            ("rodata", self.ro_section_names),
+                            ("shared_data", self.shared_data_section_names)):
             for name in names:
                 section = self.sections[name]
                 region = self.region_by_name[name]
@@ -1029,7 +1114,36 @@ class ManualElfBuilder:
             if sym.st_type == STT_OBJECT and keep(sym)
             and (sym.reuse_kind == "rodata" or sym.name.startswith(".rodata"))
         ]
-        data_symbols = [sym for sym in self.defined_symbols if sym.st_type == STT_OBJECT and keep(sym) and sym not in ro_symbols]
+        shared_data_symbols = [
+            sym for sym in self.defined_symbols
+            if sym.st_type == STT_OBJECT and keep(sym)
+            and sym.reuse_kind == "shared_data"
+        ]
+        data_symbols = [
+            sym for sym in self.defined_symbols
+            if sym.st_type == STT_OBJECT and keep(sym)
+            and sym not in ro_symbols and sym not in shared_data_symbols
+        ]
+        shared_pages: Set[int] = set()
+        for sym in shared_data_symbols:
+            if (not sym.address or sym.address % PAGE_SIZE or
+                    sym.size < PAGE_SIZE or sym.size % PAGE_SIZE):
+                raise ValueError(
+                    f"{sym.name}: shared_data must be page-aligned and occupy "
+                    f"whole pages (address=0x{sym.address:x}, size=0x{sym.size:x})"
+                )
+            shared_pages.update(
+                range(sym.address, sym.address + sym.size, PAGE_SIZE)
+            )
+        for sym in data_symbols:
+            size = max(sym.size, 1)
+            first_page = align_down(sym.address, PAGE_SIZE)
+            last_page = align_down(sym.address + size - 1, PAGE_SIZE)
+            if any(page in shared_pages
+                   for page in range(first_page, last_page + PAGE_SIZE, PAGE_SIZE)):
+                raise ValueError(
+                    f"{sym.name}: ordinary writable object overlaps a shared_data page"
+                )
 
         cursor = TEXT_BASE_VADDR
         for sym in self.defined_symbols:
@@ -1055,12 +1169,19 @@ class ManualElfBuilder:
         self.region_by_name.clear()
         self.text_regions = self._build_regions(code_symbols, ".text", self.extra_text_ranges)
         self.ro_regions = self._build_regions(ro_symbols, ".rodata", self.extra_ro_ranges)
-        for region in self.text_regions + self.ro_regions:
+        self.shared_data_regions = self._build_regions(
+            shared_data_symbols, ".shared_data", self.extra_shared_data_ranges
+        )
+        for region in self.text_regions + self.ro_regions + self.shared_data_regions:
             self.region_by_name[region.name] = region
         self.text_section_names = [region.name for region in self.text_regions]
         self.ro_section_names = [region.name for region in self.ro_regions]
+        self.shared_data_section_names = [
+            region.name for region in self.shared_data_regions
+        ]
         self._assign_symbol_sections(code_symbols, self.text_regions)
         self._assign_symbol_sections(ro_symbols, self.ro_regions)
+        self._assign_symbol_sections(shared_data_symbols, self.shared_data_regions)
         for sym in data_symbols: sym.section_name = ".data"
 
     def _build_regions(self, symbols: List[ResolvedSymbol], base_name: str, extra_ranges: List[tuple[int, int]] | None = None) -> List[Region]:
@@ -1110,6 +1231,7 @@ class ManualElfBuilder:
         order: List[str] = []
         order.extend(self.text_section_names)
         order.extend(self.ro_section_names)
+        order.extend(self.shared_data_section_names)
         if self.include_data: order.append(".data")
         order.extend([".dynstr", ".dynsym", ".gnu.hash"])
         if self.include_data and self.data_relocations: order.append(".rela.dyn")
@@ -1142,6 +1264,11 @@ class ManualElfBuilder:
             )
         for region in self.ro_regions:
             self.sections[region.name] = SectionDef(name=region.name, sh_type=SHT_PROGBITS, sh_flags=SHF_ALLOC, align=PAGE_SIZE, data=b"", size=region.size)
+        for region in self.shared_data_regions:
+            self.sections[region.name] = SectionDef(
+                name=region.name, sh_type=SHT_PROGBITS,
+                sh_flags=SHF_ALLOC, align=PAGE_SIZE, data=b"", size=region.size
+            )
         if self.include_data:
             self.sections[".data"] = SectionDef(name=".data", sh_type=SHT_PROGBITS, sh_flags=SHF_ALLOC | SHF_WRITE, align=8, data=self.data_bytes, size=len(self.data_bytes))
         dynstr = self._build_dynstr()
@@ -1268,9 +1395,28 @@ class ManualElfBuilder:
             current_offset += section.content_size
             ro_end_addr = max(ro_end_addr, section.addr + section.content_size)
 
-        last_alloc_addr = ro_end_addr if self.ro_section_names else text_end_addr
+        shared_data_end_addr = ro_end_addr
+        for name in self.shared_data_section_names:
+            section = self.sections[name]
+            current_offset = align(current_offset, PAGE_SIZE)
+            section.offset = current_offset
+            region = self.region_by_name[name]
+            section.addr = TEXT_BASE_VADDR + (region.start - self.text_min_page)
+            current_offset += section.content_size
+            shared_data_end_addr = max(
+                shared_data_end_addr, section.addr + section.content_size
+            )
 
-        rw_sections = [name for name in self.section_order if self.sections[name].is_alloc and name not in self.text_section_names and name not in self.ro_section_names]
+        last_alloc_addr = shared_data_end_addr
+
+        reusable_sections = set(
+            self.text_section_names + self.ro_section_names +
+            self.shared_data_section_names
+        )
+        rw_sections = [
+            name for name in self.section_order
+            if self.sections[name].is_alloc and name not in reusable_sections
+        ]
 
         cursor_offset = align(current_offset, PAGE_SIZE)
         cursor_addr_default = align(last_alloc_addr, PAGE_SIZE)
@@ -1365,6 +1511,13 @@ class ManualElfBuilder:
         for name in self.ro_section_names:
             section = self.sections[name]
             entries.append(self._make_ph_load(offset=section.offset or 0, addr=section.addr or 0, file_size=section.content_size, mem_size=section.content_size, flags=PF_R))
+        for name in self.shared_data_section_names:
+            section = self.sections[name]
+            entries.append(self._make_ph_load(
+                offset=section.offset or 0, addr=section.addr or 0,
+                file_size=section.content_size, mem_size=section.content_size,
+                flags=PF_R
+            ))
         if self.rw_segment_file_end > self.rw_segment_start_offset:
             file_size = max(0, self.rw_segment_file_end - self.rw_segment_start_offset)
             mem_size = self.rw_segment_mem_end - self.rw_segment_start_addr
@@ -1413,10 +1566,20 @@ def build_shared_object(
     symbols_path: Path, krg_path: Path, export_stub_size: int = DEFAULT_EXPORT_STUB_SIZE,
     symbol_dump_path: Path | None = None, shim_list_path: Path | None = None,
     ko_path: Path | None = None, page_map_path: Path | None = None,
+    shared_data_list_path: Path | None = None, vmlinux_path: Path | None = None,
 ) -> None:
     graph = KrgGraph(krg_path)
     shim_symbols = load_shim_symbols(shim_list_path)
     requested = parse_symbol_requests(symbols_path)
+    shared_data_names = load_shared_data_symbols(shared_data_list_path)
+    # KRG intentionally describes executable dependency closure and may omit a
+    # page-sized data object.  Resolve such explicitly allowed exports below.
+    graph_requested = [
+        name for name in requested
+        if name not in shared_data_names or graph.lookup(name) is not None
+    ]
+    if not graph_requested:
+        raise ValueError("at least one KRG-resolved code symbol is required")
     # shim.txt defines dependency boundaries, not replacements for APIs the
     # user explicitly asked this DSO to export.
     shim_symbols.difference_update(requested)
@@ -1424,7 +1587,9 @@ def build_shared_object(
         shim_symbols.discard(INDIRECT_THUNK_ARRAY)
         shim_symbols.discard(f"{INDIRECT_THUNK_PREFIX}rax")
     shim_symbols, builtin_thunk_shims = split_builtin_thunk_shims(shim_symbols)
-    resolved, needed_libs, owner_module, owner_lib, dep_modules = resolve_requested_symbols(requested, graph, shim_symbols)
+    resolved, needed_libs, owner_module, owner_lib, dep_modules = resolve_requested_symbols(
+        graph_requested, graph, shim_symbols
+    )
 
     data_bytes = b""
     data_relocations: List[DataRelocation] = []
@@ -1555,6 +1720,58 @@ def build_shared_object(
             target = by_name[name]
             data_relocations.append(DataRelocation(offset=reloc.offset, symbol=target, addend=reloc.addend, r_type=R_X86_64_64))
 
+    if shared_data_names:
+        by_name = {sym.name: sym for sym in resolved}
+        missing_shared = sorted(shared_data_names - set(by_name))
+        if missing_shared:
+            if owner_module != "kernel":
+                raise ValueError("vmlinux shared_data is only valid for the built-in kernel DSO")
+            if vmlinux_path is None:
+                raise ValueError(
+                    "shared-data symbols omitted by KRG require --vmlinux: "
+                    + ", ".join(missing_shared)
+                )
+            kernel_symbols = KernelElfSymbols(vmlinux_path)
+            slide: int | None = None
+            for anchor_name in graph_requested:
+                graph_anchor = graph.lookup(anchor_name)
+                elf_anchor = kernel_symbols.find_symbol(anchor_name)
+                if graph_anchor is not None and elf_anchor is not None:
+                    slide = graph_anchor.address - elf_anchor.st_value
+                    break
+            if slide is None:
+                raise ValueError(f"{vmlinux_path}: cannot determine runtime KASLR slide")
+            export_order = {name: idx for idx, name in enumerate(requested)}
+            for name in missing_shared:
+                elf_sym = kernel_symbols.find_symbol(name)
+                if elf_sym is None:
+                    raise ValueError(f"{name}: symbol not found in {vmlinux_path}")
+                sym = ResolvedSymbol(
+                    name=name, source=owner_lib, defined=True,
+                    exported=name in export_order, st_type=elf_sym.typ,
+                    size=elf_sym.st_size, address=elf_sym.st_value + slide,
+                    export_order=export_order.get(name, len(resolved)),
+                    original_order=len(resolved), module_name=owner_module,
+                )
+                resolved.append(sym)
+                by_name[name] = sym
+        for name in sorted(shared_data_names):
+            sym = by_name[name]
+            if name in requested:
+                sym.exported = True
+                sym.export_order = requested.index(name)
+            if (not sym.defined or sym.module_name != owner_module or
+                    sym.st_type != STT_OBJECT):
+                raise ValueError(
+                    f"{name}: shared_data must be a defined object owned by {owner_module}"
+                )
+            if sym.address % PAGE_SIZE or sym.size < PAGE_SIZE or sym.size % PAGE_SIZE:
+                raise ValueError(
+                    f"{name}: shared_data must be page-aligned and occupy whole pages "
+                    f"(address=0x{sym.address:x}, size=0x{sym.size:x})"
+                )
+            sym.reuse_kind = "shared_data"
+
     synthetic_text_pages = build_builtin_thunk_pages(resolved, builtin_thunk_shims)
 
     dep_modules = ["shim"] if LIB_SHIM in needed_libs else []
@@ -1580,6 +1797,14 @@ def main() -> None:
     parser.add_argument("--export-stub-size", type=lambda x: int(x, 0), default=DEFAULT_EXPORT_STUB_SIZE)
     parser.add_argument("--shim-list", type=Path, default=Path("shim.txt"))
     parser.add_argument("--ko", type=Path, default=None)
+    parser.add_argument(
+        "--shared-data-list", type=Path, default=Path("shared_data.txt"),
+        help="explicit allow-list of page-aligned kernel objects mapped user R--/NX",
+    )
+    parser.add_argument(
+        "--vmlinux", type=Path, default=None,
+        help="matching vmlinux used to resolve explicit shared_data omitted by KRG",
+    )
     args = parser.parse_args()
     krg_path = args.krg
     if krg_path is None:
@@ -1595,6 +1820,8 @@ def main() -> None:
         shim_list_path=args.shim_list,
         ko_path=args.ko,
         page_map_path=args.page_map,
+        shared_data_list_path=args.shared_data_list,
+        vmlinux_path=args.vmlinux,
     )
 
 if __name__ == "__main__":

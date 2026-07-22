@@ -244,6 +244,7 @@ CALLER_GID="$(id -g)"
 COMMAND=""
 WORK_DIR=""
 SYMBOLS_PATH=""
+SHARED_DATA_PATH=""
 VMLINUX_PATH="/usr/lib/debug/boot/vmlinux-$(uname -r)"
 BTF_PATH="/sys/kernel/btf/vmlinux"
 SHIM_LIST="$REPO_ROOT/make_dll/shim.txt"
@@ -287,6 +288,7 @@ The default input is <work-dir>/vkso/symbols.txt. Generated files are placed in:
 
 Options:
   --symbols <file>      Override vkso/symbols.txt.
+  --shared-data <file>  Page-aligned kernel objects exported user R--/NX.
   --vmlinux <file>      Debug vmlinux used by KRG and the checker.
   --btf <file>          Base BTF used for header generation.
   --krg <file>          Use an existing KRG instead of building/caching one.
@@ -392,6 +394,7 @@ parse_args() {
     while (( $# )); do
         case "$1" in
             --symbols) (( $# >= 2 )) || die "--symbols requires a file"; SYMBOLS_PATH="$2"; shift 2 ;;
+            --shared-data) (( $# >= 2 )) || die "--shared-data requires a file"; SHARED_DATA_PATH="$2"; shift 2 ;;
             --vmlinux) (( $# >= 2 )) || die "--vmlinux requires a file"; VMLINUX_PATH="$2"; shift 2 ;;
             --btf) (( $# >= 2 )) || die "--btf requires a file"; BTF_PATH="$2"; shift 2 ;;
             --krg) (( $# >= 2 )) || die "--krg requires a file"; EXPLICIT_KRG="$2"; shift 2 ;;
@@ -415,7 +418,9 @@ configure_paths() {
     LIB_DIR="$VKSO_DIR/lib"
     METADATA_DIR="$VKSO_DIR/metadata"
     SYMBOLS_PATH="${SYMBOLS_PATH:-$VKSO_DIR/symbols.txt}"
+    SHARED_DATA_PATH="${SHARED_DATA_PATH:-$VKSO_DIR/shared_data.txt}"
     SYMBOLS_PATH="$(realpath -m "$SYMBOLS_PATH")"
+    SHARED_DATA_PATH="$(realpath -m "$SHARED_DATA_PATH")"
     VMLINUX_PATH="$(realpath -m "$VMLINUX_PATH")"
     BTF_PATH="$(realpath -m "$BTF_PATH")"
     SHIM_LIST="$(realpath -m "$SHIM_LIST")"
@@ -437,6 +442,12 @@ init_workspace() {
     else
         log "kept existing $SYMBOLS_PATH"
     fi
+    if [[ ! -e "$SHARED_DATA_PATH" ]]; then
+        printf '# One page-aligned shared kernel object per line\n' >"$SHARED_DATA_PATH"
+        log "created $SHARED_DATA_PATH"
+    else
+        log "kept existing $SHARED_DATA_PATH"
+    fi
     log "workspace initialized at $VKSO_DIR"
 }
 
@@ -446,6 +457,7 @@ validate_inputs() {
     [[ -f "$VMLINUX_PATH" ]] || die "vmlinux not found: $VMLINUX_PATH"
     [[ -f "$BTF_PATH" ]] || die "BTF not found: $BTF_PATH"
     [[ -f "$SHIM_LIST" ]] || die "shim list not found: $SHIM_LIST"
+    [[ -f "$SHARED_DATA_PATH" ]] || die "shared-data list not found: $SHARED_DATA_PATH"
     [[ -z "$OWNER_KO" || -f "$OWNER_KO" ]] || die "owner module not found: $OWNER_KO"
     local module
     for module in "${MODULES[@]}"; do
@@ -588,7 +600,9 @@ build_workspace() {
                    --krg "$KRG_PATH"
                    --shim-list "$effective_shim_list"
                    --symbol-addresses "$CURRENT_SCRATCH/resolved_symbol_addresses.txt"
-                   --page-map "$CURRENT_SCRATCH/page_mappings.txt")
+                   --page-map "$CURRENT_SCRATCH/page_mappings.txt"
+                   --shared-data-list "$SHARED_DATA_PATH"
+                   --vmlinux "$VMLINUX_PATH")
     [[ -z "$OWNER_KO" ]] || so_args+=(--ko "$OWNER_KO")
     (
         cd "$CURRENT_SCRATCH"
