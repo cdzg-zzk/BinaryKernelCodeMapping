@@ -11,6 +11,7 @@
 #include <linux/vkso_time.h>
 
 #include <vdso/clocksource.h>
+#include <vdso/ktime.h>
 #include <vdso/math64.h>
 
 /* Keep the binary contract explicit before executable interfaces are added. */
@@ -304,16 +305,30 @@ int __vkso_clock_getres(int clock_id, struct vkso_time_value *value)
 	const u32 hres_clocks = (1U << CLOCK_REALTIME) |
 		(1U << CLOCK_MONOTONIC) | (1U << CLOCK_MONOTONIC_RAW) |
 		(1U << CLOCK_BOOTTIME) | (1U << CLOCK_TAI);
+	const u32 coarse_clocks = (1U << CLOCK_REALTIME_COARSE) |
+		(1U << CLOCK_MONOTONIC_COARSE);
 	const struct vkso_shared_data *shared;
 	u32 id = clock_id;
+	u32 mask;
+	u32 resolution;
 
-	if (!value || id > CLOCK_TAI || !(hres_clocks & (1U << id)))
+	if (id > CLOCK_TAI)
 		return VKSO_TIME_FALLBACK;
-	shared = vkso_shared_data();
-	if (unlikely(READ_ONCE(shared->abi_version) !=
-		     VKSO_TIME_ABI_VERSION))
+	mask = 1U << id;
+	if (mask & hres_clocks) {
+		shared = vkso_shared_data();
+		if (unlikely(READ_ONCE(shared->abi_version) !=
+			     VKSO_TIME_ABI_VERSION))
+			return VKSO_TIME_FALLBACK;
+		resolution = READ_ONCE(shared->hrtimer_resolution);
+	} else if (mask & coarse_clocks) {
+		resolution = LOW_RES_NSEC;
+	} else {
 		return VKSO_TIME_FALLBACK;
-	value->sec = 0;
-	value->nsec = READ_ONCE(shared->hrtimer_resolution);
+	}
+	if (value) {
+		value->sec = 0;
+		value->nsec = resolution;
+	}
 	return VKSO_TIME_OK;
 }

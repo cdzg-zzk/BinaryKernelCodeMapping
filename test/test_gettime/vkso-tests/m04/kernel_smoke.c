@@ -68,11 +68,72 @@ static int check_hres_resolution(void)
 	return 0;
 }
 
+static int check_coarse_resolution(void)
+{
+	struct timespec realtime, monotonic;
+
+	if (syscall(SYS_clock_getres, CLOCK_REALTIME_COARSE, &realtime) ||
+	    syscall(SYS_clock_getres, CLOCK_MONOTONIC_COARSE, &monotonic) ||
+	    realtime.tv_sec || realtime.tv_nsec <= 0 ||
+	    realtime.tv_sec != monotonic.tv_sec ||
+	    realtime.tv_nsec != monotonic.tv_nsec)
+		return 1;
+	printf("kernel_clock_getres_coarse=pass clocks=2 resolution=%ld\n",
+	       realtime.tv_nsec);
+	return 0;
+}
+
+static int check_clock_getres_null(void)
+{
+	static const clockid_t clocks[] = {
+		CLOCK_REALTIME, CLOCK_MONOTONIC, CLOCK_MONOTONIC_RAW,
+		CLOCK_REALTIME_COARSE, CLOCK_MONOTONIC_COARSE,
+		CLOCK_BOOTTIME, CLOCK_TAI, CLOCK_PROCESS_CPUTIME_ID,
+	};
+	unsigned int clock;
+
+	for (clock = 0; clock < sizeof(clocks) / sizeof(clocks[0]); ++clock)
+		if (syscall(SYS_clock_getres, clocks[clock], NULL))
+			return 1;
+	puts("kernel_clock_getres_null=pass");
+	return 0;
+}
+
+static int check_clock_getres_fallback(void)
+{
+	static const clockid_t clocks[] = {
+		CLOCK_PROCESS_CPUTIME_ID, CLOCK_THREAD_CPUTIME_ID,
+		CLOCK_REALTIME_ALARM, CLOCK_BOOTTIME_ALARM,
+	};
+	struct timespec value;
+	unsigned int clock;
+
+	for (clock = 0; clock < sizeof(clocks) / sizeof(clocks[0]); ++clock) {
+		errno = 0;
+		if (syscall(SYS_clock_getres, clocks[clock], &value) &&
+		    errno != EINVAL)
+			return 1;
+	}
+	errno = 0;
+	if (syscall(SYS_clock_getres, 12345, &value) != -1 ||
+	    errno != EINVAL)
+		return 1;
+	errno = 0;
+	if (syscall(SYS_clock_getres, -1, &value) != -1 || errno != EINVAL)
+		return 1;
+	puts("kernel_clock_getres_fallback=pass");
+	puts("kernel_clock_getres_invalid=pass errno=EINVAL");
+	return 0;
+}
+
 int main(void)
 {
 	int status;
 
 	if (check_hres_resolution())
+		return 1;
+	if (check_coarse_resolution() || check_clock_getres_null() ||
+	    check_clock_getres_fallback())
 		return 1;
 	if (check_clock(CLOCK_REALTIME))
 		return 1;

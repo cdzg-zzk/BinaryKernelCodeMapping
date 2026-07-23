@@ -248,7 +248,8 @@ static int posix_get_monotonic_coarse(clockid_t which_clock,
 
 static int posix_get_coarse_res(const clockid_t which_clock, struct timespec64 *tp)
 {
-	*tp = ktime_to_timespec64(KTIME_LOW_RES);
+	if (vkso_time_getres(which_clock, tp))
+		*tp = ktime_to_timespec64(KTIME_LOW_RES);
 	return 0;
 }
 

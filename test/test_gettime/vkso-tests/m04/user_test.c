@@ -189,6 +189,108 @@ static void check_hres_resolution(vkso_clock_getres_fn clock_getres)
 	       sizeof(clocks) / sizeof(clocks[0]), SAMPLES);
 }
 
+static int vkso_clock_getres_with_fallback(
+	vkso_clock_getres_fn clock_getres, clockid_t clock_id,
+	struct timespec *tp)
+{
+	long ret;
+
+	if (clock_getres(clock_id, (struct vkso_time_value *)tp) ==
+	    VKSO_TIME_OK)
+		return 0;
+	asm("syscall" : "=a" (ret), "=m" (*tp) :
+	    "0" (SYS_clock_getres), "D" (clock_id), "S" (tp) :
+	    "rcx", "r11");
+	return ret;
+}
+
+static void check_coarse_resolution(vkso_clock_getres_fn clock_getres)
+{
+	static const clockid_t clocks[] = {
+		CLOCK_REALTIME_COARSE, CLOCK_MONOTONIC_COARSE,
+	};
+	unsigned int i, clock;
+
+	for (clock = 0; clock < sizeof(clocks) / sizeof(clocks[0]); ++clock) {
+		for (i = 0; i < SAMPLES; ++i) {
+			struct vkso_time_value value;
+			struct timespec expected;
+
+			if (syscall(SYS_clock_getres, clocks[clock], &expected) ||
+			    clock_getres(clocks[clock], &value) ||
+			    value.sec != expected.tv_sec ||
+			    value.nsec != (uint64_t)expected.tv_nsec)
+				fail("coarse clock_getres");
+		}
+	}
+	printf("user_clock_getres_coarse=pass clocks=%zu samples=%u\n",
+	       sizeof(clocks) / sizeof(clocks[0]), SAMPLES);
+}
+
+static void check_clock_getres_null(vkso_clock_getres_fn clock_getres)
+{
+	static const clockid_t clocks[] = {
+		CLOCK_REALTIME, CLOCK_MONOTONIC, CLOCK_MONOTONIC_RAW,
+		CLOCK_REALTIME_COARSE, CLOCK_MONOTONIC_COARSE,
+		CLOCK_BOOTTIME, CLOCK_TAI,
+	};
+	unsigned int clock;
+
+	for (clock = 0; clock < sizeof(clocks) / sizeof(clocks[0]); ++clock) {
+		if (clock_getres(clocks[clock], NULL) ||
+		    vkso_clock_getres_with_fallback(clock_getres,
+						    clocks[clock], NULL))
+			fail("clock_getres NULL");
+	}
+	if (vkso_clock_getres_with_fallback(clock_getres,
+					    CLOCK_PROCESS_CPUTIME_ID, NULL))
+		fail("clock_getres fallback NULL");
+	puts("user_clock_getres_null=pass");
+}
+
+static void check_clock_getres_fallback(
+	vkso_clock_getres_fn clock_getres, clockid_t clock_id)
+{
+	struct vkso_time_value core_value;
+	struct timespec expected, value;
+
+	if (clock_getres(clock_id, &core_value) != VKSO_TIME_FALLBACK)
+		fail("unsupported clock_getres accepted by core");
+	errno = 0;
+	if (!syscall(SYS_clock_getres, clock_id, &expected)) {
+		if (vkso_clock_getres_with_fallback(clock_getres, clock_id,
+						    &value) ||
+		    value.tv_sec != expected.tv_sec ||
+		    value.tv_nsec != expected.tv_nsec)
+			fail("clock_getres fallback value");
+		return;
+	}
+	{
+		int expected_errno = errno;
+
+		errno = 0;
+		if (vkso_clock_getres_with_fallback(clock_getres, clock_id,
+						    &value) !=
+		    -expected_errno || errno)
+			fail("clock_getres fallback error");
+	}
+}
+
+static void check_invalid_clock_getres(
+	vkso_clock_getres_fn clock_getres, clockid_t clock_id)
+{
+	struct vkso_time_value core_value;
+	struct timespec value;
+
+	if (clock_getres(clock_id, &core_value) != VKSO_TIME_FALLBACK)
+		fail("invalid clock_getres accepted by core");
+	errno = 0;
+	if (vkso_clock_getres_with_fallback(clock_getres, clock_id,
+					    &value) != -EINVAL ||
+	    errno)
+		fail("invalid clock_getres fallback");
+}
+
 static int vkso_clock_gettime_with_fallback(
 	vkso_clock_gettime_fn clock_gettime,
 	const struct vkso_mm_data *mm_data, clockid_t clock_id,
@@ -674,6 +776,18 @@ int main(void)
 	    shared->monotonic_coarse.nsec >= UINT64_C(1000000000))
 		fail("shared data layout");
 	check_hres_resolution(vkso_clock_getres);
+	check_coarse_resolution(vkso_clock_getres);
+	check_clock_getres_null(vkso_clock_getres);
+	check_clock_getres_fallback(vkso_clock_getres,
+				    CLOCK_PROCESS_CPUTIME_ID);
+	check_clock_getres_fallback(vkso_clock_getres,
+				    CLOCK_THREAD_CPUTIME_ID);
+	check_clock_getres_fallback(vkso_clock_getres, CLOCK_REALTIME_ALARM);
+	check_clock_getres_fallback(vkso_clock_getres, CLOCK_BOOTTIME_ALARM);
+	check_invalid_clock_getres(vkso_clock_getres, 12345);
+	check_invalid_clock_getres(vkso_clock_getres, -1);
+	puts("user_clock_getres_fallback=pass");
+	puts("user_clock_getres_invalid=pass errno=EINVAL");
 	set_tai_offset();
 	check_realtime(vkso_clock_gettime);
 	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_MONOTONIC);
