@@ -7,6 +7,7 @@
 #include <linux/string.h>
 #include <linux/time.h>
 #include <linux/time64.h>
+#include <linux/time_namespace.h>
 #include <linux/timekeeper_internal.h>
 #include <linux/vkso_time.h>
 
@@ -134,9 +135,12 @@ void vkso_time_update_timezone(void)
 
 notrace int vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp)
 {
-	const struct vkso_mm_data *mm_data =
-		READ_ONCE(current->mm->context.vkso_mm_kdata);
+	const struct vkso_mm_data *mm_data = NULL;
 
+#ifdef CONFIG_TIME_NS
+	if (unlikely(current->nsproxy->time_ns != &init_time_ns))
+		mm_data = READ_ONCE(current->mm->context.vkso_mm_kdata);
+#endif
 	return __vkso_clock_gettime(mm_data, clock_id,
 				   (struct vkso_time_value *)tp);
 }

@@ -656,30 +656,23 @@ static void check_namespace_application(
 	vkso_clock_gettime_fn clock_gettime,
 	const struct vkso_mm_data *mm_data, clockid_t clock_id)
 {
-	struct vkso_mm_data root_mm = *mm_data;
-	struct vkso_time_value *root_offset;
 	const struct vkso_time_value *offset;
 	struct vkso_time_value before_value, after_value;
 	struct timespec before, current, after;
 	int64_t offset_ns;
 
-	if (clock_id == CLOCK_BOOTTIME) {
-		root_offset = &root_mm.boottime_offset;
+	if (clock_id == CLOCK_BOOTTIME)
 		offset = &mm_data->boottime_offset;
-	} else {
-		root_offset = &root_mm.monotonic_offset;
+	else
 		offset = &mm_data->monotonic_offset;
-	}
 	offset_ns = offset->sec * INT64_C(1000000000) + offset->nsec;
-	root_offset->sec = 0;
-	root_offset->nsec = 0;
-	if (clock_gettime(&root_mm, clock_id, &before_value))
+	if (clock_gettime(NULL, clock_id, &before_value))
 		fail("root clock before namespace oracle");
 	before.tv_sec = before_value.sec;
 	before.tv_nsec = (long)before_value.nsec;
 	if (syscall(SYS_clock_gettime, clock_id, &current))
 		fail("namespace clock syscall");
-	if (clock_gettime(&root_mm, clock_id, &after_value))
+	if (clock_gettime(NULL, clock_id, &after_value))
 		fail("root clock after namespace oracle");
 	after.tv_sec = after_value.sec;
 	after.tv_nsec = (long)after_value.nsec;
@@ -692,13 +685,7 @@ static void check_tai_namespace_independence(
 	vkso_clock_gettime_fn clock_gettime,
 	const struct vkso_mm_data *mm_data)
 {
-	struct vkso_mm_data root_mm = *mm_data;
-
-	root_mm.monotonic_offset.sec = 0;
-	root_mm.monotonic_offset.nsec = 0;
-	root_mm.boottime_offset.sec = 0;
-	root_mm.boottime_offset.nsec = 0;
-	check_hres_clock(clock_gettime, &root_mm, CLOCK_TAI);
+	check_hres_clock(clock_gettime, NULL, CLOCK_TAI);
 	check_hres_clock(clock_gettime, mm_data, CLOCK_TAI);
 }
 
@@ -717,8 +704,6 @@ static void *seq_writer(void *argument)
 			__atomic_store_n(&test->ready, 1, __ATOMIC_RELEASE);
 			sched_yield();
 		}
-		__atomic_store_n(&test->shared.abi_version,
-				 VKSO_TIME_ABI_VERSION, __ATOMIC_RELAXED);
 		__atomic_store_n(&test->shared.hres.cycles.clock_mode, 1,
 				 __ATOMIC_RELAXED);
 		__atomic_store_n(&test->shared.hres.cycles.cycle_last, generation,
@@ -942,15 +927,16 @@ int main(void)
 	puts("user_clock_getres_invalid=pass errno=EINVAL");
 	set_tai_offset();
 	check_realtime(vkso_clock_gettime);
-	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_MONOTONIC);
+	check_hres_clock(vkso_clock_gettime, NULL, CLOCK_MONOTONIC);
 	printf("user_monotonic=pass samples=%u\n", SAMPLES);
-	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_MONOTONIC_RAW);
+	check_hres_clock(vkso_clock_gettime, NULL, CLOCK_MONOTONIC_RAW);
 	printf("user_monotonic_raw=pass samples=%u\n", SAMPLES);
-	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_BOOTTIME);
+	check_hres_clock(vkso_clock_gettime, NULL, CLOCK_BOOTTIME);
 	printf("user_boottime=pass samples=%u\n", SAMPLES);
-	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_TAI);
+	check_hres_clock(vkso_clock_gettime, NULL, CLOCK_TAI);
 	printf("user_tai=pass samples=%u\n", SAMPLES);
-	check_tai_offset(vkso_clock_gettime, mm_data);
+	check_tai_offset(vkso_clock_gettime, NULL);
+	puts("root_namespace_null_context=pass");
 	check_tsc_cycles_shim(vkso_hres_cycle_probe_at, shared);
 	check_seq_retry(vkso_hres_cycle_probe_at);
 
@@ -959,7 +945,7 @@ int main(void)
 		struct vkso_time_value value;
 
 		if (syscall(SYS_clock_gettime, CLOCK_REALTIME_COARSE, &before) ||
-		    vkso_clock_gettime(mm_data, CLOCK_REALTIME_COARSE, &value) ||
+		    vkso_clock_gettime(NULL, CLOCK_REALTIME_COARSE, &value) ||
 		    syscall(SYS_clock_gettime, CLOCK_REALTIME_COARSE, &after))
 			fail("clock call");
 		current.tv_sec = value.sec;
@@ -974,22 +960,22 @@ int main(void)
 			fail("clock bracket");
 		previous = current;
 	}
-	check_monotonic_coarse(vkso_clock_gettime, mm_data);
+	check_monotonic_coarse(vkso_clock_gettime, NULL);
 
-	check_fallback_clock(vkso_clock_gettime, mm_data,
+	check_fallback_clock(vkso_clock_gettime, NULL,
 			     CLOCK_PROCESS_CPUTIME_ID,
 			     "user_process_cputime_fallback");
-	check_fallback_clock(vkso_clock_gettime, mm_data,
+	check_fallback_clock(vkso_clock_gettime, NULL,
 			     CLOCK_THREAD_CPUTIME_ID,
 			     "user_thread_cputime_fallback");
-	check_fallback_clock(vkso_clock_gettime, mm_data,
+	check_fallback_clock(vkso_clock_gettime, NULL,
 			     CLOCK_REALTIME_ALARM,
 			     "user_realtime_alarm_fallback");
-	check_fallback_clock(vkso_clock_gettime, mm_data,
+	check_fallback_clock(vkso_clock_gettime, NULL,
 			     CLOCK_BOOTTIME_ALARM,
 			     "user_boottime_alarm_fallback");
-	check_invalid_clock_fallback(vkso_clock_gettime, mm_data, 12345);
-	check_invalid_clock_fallback(vkso_clock_gettime, mm_data, -1);
+	check_invalid_clock_fallback(vkso_clock_gettime, NULL, 12345);
+	check_invalid_clock_fallback(vkso_clock_gettime, NULL, -1);
 
 	printf("user_realtime_coarse=pass samples=%u\n", SAMPLES);
 	printf("user_monotonic_coarse=pass samples=%u\n", SAMPLES);

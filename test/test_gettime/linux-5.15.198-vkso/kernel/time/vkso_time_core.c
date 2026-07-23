@@ -150,9 +150,6 @@ static __always_inline int vkso_read_hres(
 #endif
 	for (;;) {
 		seq = vkso_read_begin(shared, &next);
-		if (unlikely(READ_ONCE(shared->abi_version) !=
-			     VKSO_TIME_ABI_VERSION))
-			return VKSO_TIME_FALLBACK;
 		clock_mode = READ_ONCE(cycle_data->clock_mode);
 		if (unlikely(!vkso_read_cycles(clock_mode, &next.cycles)))
 			return VKSO_TIME_FALLBACK;
@@ -187,9 +184,6 @@ static __always_inline int vkso_read_coarse(
 
 	for (;;) {
 		seq = vkso_read_begin(shared, NULL);
-		if (unlikely(READ_ONCE(shared->abi_version) !=
-			     VKSO_TIME_ABI_VERSION))
-			return VKSO_TIME_FALLBACK;
 		next.sec = READ_ONCE(base->sec);
 		next.nsec = READ_ONCE(base->nsec);
 		if (!vkso_read_retry(shared, seq))
@@ -298,13 +292,9 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 			mm_offset = offsetof(struct vkso_mm_data,
 					     monotonic_offset);
 	}
-	if (mm_offset) {
+	if (mm_offset && mm_data) {
 		const struct vkso_time_value *offset;
 
-		if (unlikely(!mm_data ||
-			     READ_ONCE(mm_data->abi_version) !=
-			     VKSO_MM_DATA_ABI_VERSION))
-			return VKSO_TIME_FALLBACK;
 		offset = (const void *)((const u8 *)mm_data + mm_offset);
 		offset_sec = READ_ONCE(offset->sec);
 		offset_nsec = READ_ONCE(offset->nsec);
@@ -348,9 +338,6 @@ int __vkso_clock_getres(int clock_id, struct vkso_time_value *value)
 	mask = 1U << id;
 	if (mask & hres_clocks) {
 		shared = vkso_shared_data();
-		if (unlikely(READ_ONCE(shared->abi_version) !=
-			     VKSO_TIME_ABI_VERSION))
-			return VKSO_TIME_FALLBACK;
 		resolution = READ_ONCE(shared->hrtimer_resolution);
 	} else if (mask & coarse_clocks) {
 		resolution = LOW_RES_NSEC;
@@ -382,9 +369,6 @@ int __vkso_gettimeofday(struct vkso_timeval *tv, struct vkso_timezone *tz)
 		vkso_hres_from_snapshot(&snapshot, 0, 0, &now);
 		tv->sec = now.sec;
 		tv->usec = now.nsec / NSEC_PER_USEC;
-	} else if (tz && unlikely(READ_ONCE(shared->abi_version) !=
-				  VKSO_TIME_ABI_VERSION)) {
-		return VKSO_TIME_FALLBACK;
 	}
 	if (unlikely(tz)) {
 		tz->minuteswest = READ_ONCE(shared->timezone.minuteswest);
