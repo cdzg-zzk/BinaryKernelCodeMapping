@@ -62,6 +62,7 @@ static int vkso_install_mm_mapping(struct mm_struct *mm, unsigned long addr,
 	if (IS_ERR(vma))
 		return PTR_ERR(vma);
 	mm->context.vkso_mm_page = page;
+	mm->context.vkso_mm_kdata = page_address(page);
 	mm->context.vkso_mm_data = (void __user *)addr;
 	return 0;
 }
@@ -69,6 +70,7 @@ static int vkso_install_mm_mapping(struct mm_struct *mm, unsigned long addr,
 void vkso_init_context(struct mm_struct *mm)
 {
 	mm->context.vkso_mm_page = NULL;
+	mm->context.vkso_mm_kdata = NULL;
 	mm->context.vkso_mm_data = NULL;
 }
 
@@ -95,19 +97,10 @@ void vkso_destroy_context(struct mm_struct *mm)
 	struct page *page = mm->context.vkso_mm_page;
 
 	mm->context.vkso_mm_page = NULL;
+	mm->context.vkso_mm_kdata = NULL;
 	mm->context.vkso_mm_data = NULL;
 	if (page)
 		put_page(page);
-}
-
-const struct vkso_mm_data *vkso_time_mm_data(struct mm_struct *mm)
-{
-	struct page *page;
-
-	if (!mm)
-		return NULL;
-	page = READ_ONCE(mm->context.vkso_mm_page);
-	return page ? page_address(page) : NULL;
 }
 
 void vkso_time_update_mm_data(struct task_struct *task,
@@ -115,14 +108,12 @@ void vkso_time_update_mm_data(struct task_struct *task,
 {
 	struct mm_struct *mm = task->mm;
 	union vkso_mm_page *data;
-	struct page *page;
 
 	if (!mm)
 		return;
-	page = READ_ONCE(mm->context.vkso_mm_page);
-	if (!page)
+	data = READ_ONCE(mm->context.vkso_mm_kdata);
+	if (!data)
 		return;
-	data = page_address(page);
 	WRITE_ONCE(data->data.monotonic_offset.sec,
 		   offsets->monotonic.tv_sec);
 	WRITE_ONCE(data->data.monotonic_offset.nsec,

@@ -49,6 +49,7 @@ typedef struct {
 	struct mutex lock;
 #ifdef CONFIG_VKSO_TIME
 	struct page *vkso_mm_page;
+	void *vkso_mm_kdata;
 	void __user *vkso_mm_data;
 #endif
 	atomic_t perf_rdpmc_allowed;	/* nonzero if rdpmc is allowed */

@@ -11,6 +11,12 @@
 
 #include <vdso/clocksource.h>
 
+static_assert(sizeof(struct timespec64) == sizeof(struct vkso_time_value) &&
+	      offsetof(struct timespec64, tv_sec) ==
+	      offsetof(struct vkso_time_value, sec) &&
+	      offsetof(struct timespec64, tv_nsec) ==
+	      offsetof(struct vkso_time_value, nsec));
+
 union vkso_shared_page vkso_shared_page
 	__aligned(VKSO_SHARED_PAGE_SIZE) __vkso_shared_data;
 
@@ -92,25 +98,17 @@ void vkso_time_publish(struct timekeeper *tk)
 	WRITE_ONCE(shared->seq, seq + 2);
 }
 
-static __always_inline bool
-vkso_time_get_at(const struct vkso_mm_data *mm_data, clockid_t clock_id,
-		 struct timespec64 *tp)
+int vkso_time_get_global(clockid_t clock_id, struct timespec64 *tp)
 {
-	struct vkso_time_value value;
-
-	if (__vkso_clock_gettime(mm_data, clock_id, &value) != VKSO_TIME_OK)
-		return false;
-	tp->tv_sec = value.sec;
-	tp->tv_nsec = value.nsec;
-	return true;
+	return __vkso_clock_gettime(NULL, clock_id,
+				   (struct vkso_time_value *)tp);
 }
 
-bool vkso_time_get_global(clockid_t clock_id, struct timespec64 *tp)
+int vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp)
 {
-	return vkso_time_get_at(NULL, clock_id, tp);
-}
+	const struct vkso_mm_data *mm_data =
+		READ_ONCE(current->mm->context.vkso_mm_kdata);
 
-bool vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp)
-{
-	return vkso_time_get_at(vkso_time_mm_data(current->mm), clock_id, tp);
+	return __vkso_clock_gettime(mm_data, clock_id,
+				   (struct vkso_time_value *)tp);
 }

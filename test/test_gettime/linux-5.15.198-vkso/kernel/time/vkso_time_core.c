@@ -121,7 +121,6 @@ static __always_inline int vkso_read_snapshot(
 		(const void *)((const u8 *)shared + cycle_offset);
 	struct vkso_read_snapshot next;
 	u32 seq;
-	u32 abi_version;
 	s32 clock_mode;
 	bool have_cycles = true;
 
@@ -136,7 +135,9 @@ static __always_inline int vkso_read_snapshot(
 			continue;
 		}
 		smp_rmb();
-		abi_version = READ_ONCE(shared->abi_version);
+		if (unlikely(READ_ONCE(shared->abi_version) !=
+			     VKSO_TIME_ABI_VERSION))
+			return VKSO_TIME_FALLBACK;
 		if (high_resolution) {
 			clock_mode = READ_ONCE(cycle_data->clock_mode);
 			have_cycles = vkso_read_cycles(clock_mode, &next.cycles);
@@ -160,9 +161,7 @@ static __always_inline int vkso_read_snapshot(
 		vkso_count_retry(&next);
 	}
 
-	if (unlikely(abi_version != VKSO_TIME_ABI_VERSION || !have_cycles ||
-		     (!high_resolution &&
-		      next.base.coarse.nsec >= NSEC_PER_SEC)))
+	if (unlikely(!have_cycles))
 		return VKSO_TIME_FALLBACK;
 #ifdef CONFIG_VKSO_TIME_TEST
 	next.seq = seq;
@@ -230,8 +229,6 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 	u64 offset_nsec = 0;
 	bool high_resolution;
 
-	if (!value)
-		return VKSO_TIME_FALLBACK;
 	if (likely(id <= CLOCK_MONOTONIC)) {
 		value_offset = offsetof(struct vkso_shared_data,
 					 hres.realtime_base) +
@@ -281,8 +278,6 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 		offset = (const void *)((const u8 *)mm_data + mm_offset);
 		offset_sec = READ_ONCE(offset->sec);
 		offset_nsec = READ_ONCE(offset->nsec);
-		if (unlikely(offset_nsec >= NSEC_PER_SEC))
-			return VKSO_TIME_FALLBACK;
 	}
 	if (vkso_read_snapshot(vkso_shared_data(), value_offset, cycle_offset,
 			       high_resolution, &snapshot) != VKSO_TIME_OK)

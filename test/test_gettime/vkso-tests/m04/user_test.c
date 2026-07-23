@@ -7,6 +7,7 @@
 #include <link.h>
 #include <pthread.h>
 #include <sched.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +38,7 @@
 struct vkso_time_value {
 	int64_t sec;
 	uint64_t nsec;
-};
+} __attribute__((__may_alias__));
 
 struct vkso_hres_base {
 	int64_t sec;
@@ -100,6 +101,13 @@ typedef int (*vkso_clock_gettime_fn)(const struct vkso_mm_data *, int,
 typedef int (*vkso_hres_cycle_probe_at_fn)(
 	const struct vkso_shared_data *, struct vkso_hres_cycle_sample *);
 
+_Static_assert(sizeof(struct timespec) == sizeof(struct vkso_time_value) &&
+	       offsetof(struct timespec, tv_sec) ==
+	       offsetof(struct vkso_time_value, sec) &&
+	       offsetof(struct timespec, tv_nsec) ==
+	       offsetof(struct vkso_time_value, nsec),
+	       "timespec and VKSO result layouts differ");
+
 struct retry_test {
 	struct vkso_shared_data shared;
 	int ready;
@@ -159,14 +167,16 @@ static int vkso_clock_gettime_with_fallback(
 	const struct vkso_mm_data *mm_data, clockid_t clock_id,
 	struct timespec *tp)
 {
-	struct vkso_time_value value;
+	long ret;
 
-	if (clock_gettime(mm_data, clock_id, &value) == VKSO_TIME_OK) {
-		tp->tv_sec = value.sec;
-		tp->tv_nsec = (long)value.nsec;
+	if (clock_gettime(mm_data, clock_id,
+			  (struct vkso_time_value *)tp) == VKSO_TIME_OK)
 		return 0;
-	}
-	return syscall(SYS_clock_gettime, clock_id, tp);
+	/* Match the x86 vDSO ABI: return the raw negative syscall error. */
+	asm("syscall" : "=a" (ret), "=m" (*tp) :
+	    "0" (SYS_clock_gettime), "D" (clock_id), "S" (tp) :
+	    "rcx", "r11");
+	return ret;
 }
 
 static void check_fallback_clock(vkso_clock_gettime_fn clock_gettime,
@@ -186,8 +196,8 @@ static void check_fallback_clock(vkso_clock_gettime_fn clock_gettime,
 
 		errno = 0;
 		if (vkso_clock_gettime_with_fallback(clock_gettime, mm_data,
-						     clock_id, &probe) != -1 ||
-		    errno != expected_errno)
+						     clock_id, &probe) !=
+		    -expected_errno || errno)
 			fail("fallback error mismatch");
 		printf("%s=pass errno=%d\n", marker, expected_errno);
 		return;
@@ -224,8 +234,8 @@ static void check_invalid_clock_fallback(
 		fail("invalid clock syscall semantics");
 	errno = 0;
 	if (vkso_clock_gettime_with_fallback(clock_gettime, mm_data,
-					     clock_id, &value) != -1 ||
-	    errno != EINVAL)
+					     clock_id, &value) != -EINVAL ||
+	    errno)
 		fail("invalid clock fallback semantics");
 }
 

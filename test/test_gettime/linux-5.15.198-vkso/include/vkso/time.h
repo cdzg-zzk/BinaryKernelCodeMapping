@@ -17,7 +17,7 @@ enum vkso_time_status {
 struct vkso_time_value {
 	s64 sec;
 	u64 nsec;
-};
+} __attribute__((__may_alias__));
 
 /* Nanoseconds remain shifted until the reader adds elapsed cycles. */
 struct vkso_hres_base {

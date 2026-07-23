@@ -176,7 +176,7 @@ static inline void unlock_timer(struct k_itimer *timr, unsigned long flags)
 /* Get clock_realtime */
 static int posix_get_realtime_timespec(clockid_t which_clock, struct timespec64 *tp)
 {
-	if (!vkso_time_get_global(which_clock, tp))
+	if (vkso_time_get_global(which_clock, tp))
 		ktime_get_real_ts64(tp);
 	return 0;
 }
@@ -204,7 +204,7 @@ static int posix_clock_realtime_adj(const clockid_t which_clock,
  */
 static int posix_get_monotonic_timespec(clockid_t which_clock, struct timespec64 *tp)
 {
-	if (!vkso_time_get_context(which_clock, tp)) {
+	if (vkso_time_get_context(which_clock, tp)) {
 		ktime_get_ts64(tp);
 		timens_add_monotonic(tp);
 	}
@@ -221,7 +221,7 @@ static ktime_t posix_get_monotonic_ktime(clockid_t which_clock)
  */
 static int posix_get_monotonic_raw(clockid_t which_clock, struct timespec64 *tp)
 {
-	if (!vkso_time_get_context(which_clock, tp)) {
+	if (vkso_time_get_context(which_clock, tp)) {
 		ktime_get_raw_ts64(tp);
 		timens_add_monotonic(tp);
 	}
@@ -231,7 +231,7 @@ static int posix_get_monotonic_raw(clockid_t which_clock, struct timespec64 *tp)
 
 static int posix_get_realtime_coarse(clockid_t which_clock, struct timespec64 *tp)
 {
-	if (!vkso_time_get_global(which_clock, tp))
+	if (vkso_time_get_global(which_clock, tp))
 		ktime_get_coarse_real_ts64(tp);
 	return 0;
 }
@@ -239,7 +239,7 @@ static int posix_get_realtime_coarse(clockid_t which_clock, struct timespec64 *t
 static int posix_get_monotonic_coarse(clockid_t which_clock,
 						struct timespec64 *tp)
 {
-	if (!vkso_time_get_context(which_clock, tp)) {
+	if (vkso_time_get_context(which_clock, tp)) {
 		ktime_get_coarse_ts64(tp);
 		timens_add_monotonic(tp);
 	}
@@ -254,7 +254,7 @@ static int posix_get_coarse_res(const clockid_t which_clock, struct timespec64 *
 
 static int posix_get_boottime_timespec(const clockid_t which_clock, struct timespec64 *tp)
 {
-	if (!vkso_time_get_context(which_clock, tp)) {
+	if (vkso_time_get_context(which_clock, tp)) {
 		ktime_get_boottime_ts64(tp);
 		timens_add_boottime(tp);
 	}
@@ -268,7 +268,7 @@ static ktime_t posix_get_boottime_ktime(const clockid_t which_clock)
 
 static int posix_get_tai_timespec(clockid_t which_clock, struct timespec64 *tp)
 {
-	if (!vkso_time_get_global(which_clock, tp))
+	if (vkso_time_get_global(which_clock, tp))
 		ktime_get_clocktai_ts64(tp);
 	return 0;
 }
