@@ -26,11 +26,22 @@ extern char __vkso_shared_data_end[];
 extern union vkso_shared_page vkso_shared_page;
 
 void vkso_time_publish(struct timekeeper *tk);
-int vkso_time_get_global(clockid_t clock_id, struct timespec64 *tp);
 int vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp);
-int vkso_time_getres(clockid_t clock_id, struct timespec64 *tp);
 void vkso_time_update_mm_data(struct task_struct *task,
 			      const struct timens_offsets *offsets);
+
+static __always_inline int
+vkso_time_get_global(clockid_t clock_id, struct timespec64 *tp)
+{
+	return __vkso_clock_gettime(NULL, clock_id,
+				   (struct vkso_time_value *)tp);
+}
+
+static __always_inline int
+vkso_time_getres(clockid_t clock_id, struct timespec64 *tp)
+{
+	return __vkso_clock_getres(clock_id, (struct vkso_time_value *)tp);
+}
 #else
 static inline void vkso_time_publish(struct timekeeper *tk)
 {

@@ -22,12 +22,8 @@ union vkso_shared_page vkso_shared_page
 	__aligned(VKSO_SHARED_PAGE_SIZE) __vkso_shared_data;
 
 static __always_inline void vkso_time_prepare_cycles(
-	struct vkso_cycle_data *next, const struct tk_read_base *tkr,
-	s32 clock_mode)
+	struct vkso_cycle_data *next, const struct tk_read_base *tkr)
 {
-	next->clock_mode = clock_mode;
-	if (clock_mode == VDSO_CLOCKMODE_NONE)
-		return;
 	next->cycle_last = tkr->cycle_last;
 	next->mask = tkr->mask;
 	next->mult = tkr->mult;
@@ -64,12 +60,12 @@ static void vkso_time_prepare(struct vkso_shared_data *next,
 	next->monotonic_coarse.sec = monotonic_sec;
 	next->monotonic_coarse.nsec =
 		monotonic_shifted_nsec >> tk->tkr_mono.shift;
-	vkso_time_prepare_cycles(&next->hres.cycles, &tk->tkr_mono,
-				 clock_mode);
-	vkso_time_prepare_cycles(&next->raw.cycles, &tk->tkr_raw,
-				 clock_mode);
+	next->hres.cycles.clock_mode = clock_mode;
+	next->raw.cycles.clock_mode = clock_mode;
 	if (clock_mode == VDSO_CLOCKMODE_NONE)
 		return;
+	vkso_time_prepare_cycles(&next->hres.cycles, &tk->tkr_mono);
+	vkso_time_prepare_cycles(&next->raw.cycles, &tk->tkr_raw);
 	next->hres.realtime_base.sec = tk->xtime_sec;
 	next->hres.realtime_base.shifted_nsec = tk->tkr_mono.xtime_nsec;
 	next->hres.monotonic_base.sec = monotonic_sec;
@@ -100,22 +96,11 @@ void vkso_time_publish(struct timekeeper *tk)
 	WRITE_ONCE(shared->seq, seq + 2);
 }
 
-int vkso_time_get_global(clockid_t clock_id, struct timespec64 *tp)
-{
-	return __vkso_clock_gettime(NULL, clock_id,
-				   (struct vkso_time_value *)tp);
-}
-
-int vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp)
+notrace int vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp)
 {
 	const struct vkso_mm_data *mm_data =
 		READ_ONCE(current->mm->context.vkso_mm_kdata);
 
 	return __vkso_clock_gettime(mm_data, clock_id,
 				   (struct vkso_time_value *)tp);
-}
-
-int vkso_time_getres(clockid_t clock_id, struct timespec64 *tp)
-{
-	return __vkso_clock_getres(clock_id, (struct vkso_time_value *)tp);
 }
