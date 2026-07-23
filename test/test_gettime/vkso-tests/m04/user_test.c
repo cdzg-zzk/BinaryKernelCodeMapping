@@ -22,7 +22,7 @@
 #include <unistd.h>
 
 #define SAMPLES 10000U
-#define VKSO_TIME_ABI_VERSION 8U
+#define VKSO_TIME_ABI_VERSION 9U
 #define VKSO_MM_DATA_ABI_VERSION 2U
 #define VKSO_TIME_OK 0
 #define VKSO_TIME_FALLBACK (-1)
@@ -97,9 +97,9 @@ struct vkso_shared_data {
 	uint32_t seq;
 	uint32_t abi_version;
 	struct vkso_hres_data hres;
-	struct vkso_raw_data raw;
 	struct vkso_time_value realtime_coarse;
 	struct vkso_time_value monotonic_coarse;
+	struct vkso_raw_data raw;
 	uint32_t hrtimer_resolution;
 	uint32_t reserved;
 	struct vkso_timezone timezone;
@@ -112,6 +112,11 @@ _Static_assert(offsetof(struct vkso_shared_data, hres.monotonic_base) == 48,
 _Static_assert(offsetof(struct vkso_shared_data, hres.monotonic_base) +
 		       sizeof(struct vkso_hres_base) == 64,
 	       "common high-resolution data must fit one cache line");
+_Static_assert(offsetof(struct vkso_shared_data, raw) == 128,
+	       "raw counter data must start on a cache-line boundary");
+_Static_assert(offsetof(struct vkso_shared_data, raw.monotonic_raw_base) +
+		       sizeof(struct vkso_hres_base) <= 192,
+	       "raw counter and base must fit one cache line");
 
 struct vkso_mm_data {
 	uint32_t abi_version;
@@ -793,6 +798,23 @@ static void check_tsc_cycles_shim(vkso_hres_cycle_probe_at_fn probe_at,
 	printf("tsc_cycles_shim=pass samples=%u\n", SAMPLES);
 }
 
+static void check_counter_fallback(vkso_hres_cycle_probe_at_fn probe_at)
+{
+	static const int32_t unsupported_modes[] = { 0, -1, INT32_MAX };
+	struct vkso_hres_cycle_sample sample;
+	struct vkso_shared_data shared = { 0 };
+	size_t index;
+
+	for (index = 0;
+	     index < sizeof(unsupported_modes) / sizeof(unsupported_modes[0]);
+	     ++index) {
+		shared.hres.cycles.clock_mode = unsupported_modes[index];
+		if (probe_at(&shared, &sample) != VKSO_TIME_FALLBACK)
+			fail("unsupported counter did not request fallback");
+	}
+	puts("invalid_disabled_counter_fallback=pass modes=3");
+}
+
 static void check_seq_retry(vkso_hres_cycle_probe_at_fn probe_at)
 {
 	struct retry_test test = { 0 };
@@ -1181,6 +1203,7 @@ int main(int argc, char **argv)
 	check_tai_offset(vkso_clock_gettime, NULL);
 	puts("root_namespace_null_context=pass");
 	check_tsc_cycles_shim(vkso_hres_cycle_probe_at, shared);
+	check_counter_fallback(vkso_hres_cycle_probe_at);
 	check_seq_retry(vkso_hres_cycle_probe_at);
 
 	for (i = 0; i < SAMPLES; ++i) {
