@@ -20,7 +20,7 @@ static_assert(offsetof(struct vkso_time_value, nsec) == 8);
 static_assert(offsetof(struct vkso_shared_data, realtime_coarse) == 8);
 static_assert(offsetof(struct vkso_shared_data, monotonic_coarse) == 24);
 static_assert(offsetof(struct vkso_shared_data, hres) == 40);
-static_assert(offsetof(struct vkso_shared_data, raw) == 120);
+static_assert(offsetof(struct vkso_shared_data, raw) == 136);
 static_assert(offsetof(struct vkso_cycle_data, cycle_last) == 8);
 static_assert(offsetof(struct vkso_cycle_data, mask) == 16);
 static_assert(offsetof(struct vkso_cycle_data, mult) == 24);
@@ -28,6 +28,7 @@ static_assert(offsetof(struct vkso_cycle_data, shift) == 28);
 static_assert(offsetof(struct vkso_hres_data, realtime_base) == 32);
 static_assert(offsetof(struct vkso_hres_data, monotonic_base) == 48);
 static_assert(offsetof(struct vkso_hres_data, boottime_base) == 64);
+static_assert(offsetof(struct vkso_hres_data, tai_base) == 80);
 static_assert(offsetof(struct vkso_raw_data, monotonic_raw_base) == 32);
 static_assert(CLOCK_REALTIME == 0);
 static_assert(CLOCK_MONOTONIC == CLOCK_REALTIME + 1);
@@ -252,6 +253,10 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 		cycle_offset = offsetof(struct vkso_shared_data, hres.cycles);
 		high_resolution = true;
 		mm_offset = offsetof(struct vkso_mm_data, boottime_offset);
+	} else if (id == CLOCK_TAI) {
+		value_offset = offsetof(struct vkso_shared_data, hres.tai_base);
+		cycle_offset = offsetof(struct vkso_shared_data, hres.cycles);
+		high_resolution = true;
 	} else {
 		u32 coarse_index = id - CLOCK_REALTIME_COARSE;
 

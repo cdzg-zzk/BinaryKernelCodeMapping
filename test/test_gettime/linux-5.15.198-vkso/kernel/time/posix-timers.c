@@ -268,7 +268,8 @@ static ktime_t posix_get_boottime_ktime(const clockid_t which_clock)
 
 static int posix_get_tai_timespec(clockid_t which_clock, struct timespec64 *tp)
 {
-	ktime_get_clocktai_ts64(tp);
+	if (!vkso_time_get_global(which_clock, tp))
+		ktime_get_clocktai_ts64(tp);
 	return 0;
 }
 

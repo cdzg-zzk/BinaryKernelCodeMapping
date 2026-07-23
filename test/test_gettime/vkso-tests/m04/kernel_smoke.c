@@ -50,5 +50,8 @@ int main(void)
 	if (check_clock(CLOCK_BOOTTIME))
 		return 1;
 	printf("kernel_boottime=pass samples=%u\n", SAMPLES);
+	if (check_clock(CLOCK_TAI))
+		return 1;
+	printf("kernel_tai=pass samples=%u\n", SAMPLES);
 	return 0;
 }

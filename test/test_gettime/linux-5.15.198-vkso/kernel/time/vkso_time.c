@@ -68,6 +68,8 @@ static void vkso_time_prepare(struct vkso_shared_data *next,
 	next->hres.monotonic_base.shifted_nsec = monotonic_shifted_nsec;
 	next->hres.boottime_base.sec = boottime_sec;
 	next->hres.boottime_base.shifted_nsec = boottime_shifted_nsec;
+	next->hres.tai_base.sec = tk->xtime_sec + tk->tai_offset;
+	next->hres.tai_base.shifted_nsec = tk->tkr_mono.xtime_nsec;
 	next->raw.monotonic_raw_base.sec = tk->raw_sec;
 	next->raw.monotonic_raw_base.shifted_nsec = tk->tkr_raw.xtime_nsec;
 }

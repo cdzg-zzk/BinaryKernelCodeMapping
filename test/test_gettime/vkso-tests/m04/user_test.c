@@ -12,12 +12,13 @@
 #include <string.h>
 #include <sys/auxv.h>
 #include <sys/syscall.h>
+#include <sys/timex.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
 
 #define SAMPLES 10000U
-#define VKSO_TIME_ABI_VERSION 4U
+#define VKSO_TIME_ABI_VERSION 5U
 #define VKSO_MM_DATA_ABI_VERSION 2U
 #define VKSO_TIME_FALLBACK (-1)
 #define AT_VKSO_MM_DATA 52
@@ -29,6 +30,7 @@
 #define MONOTONIC_OFFSET_NSEC 123456789U
 #define BOOTTIME_OFFSET_SEC 11
 #define BOOTTIME_OFFSET_NSEC 234567890U
+#define TAI_OFFSET_SEC 37
 
 struct vkso_time_value {
 	int64_t sec;
@@ -54,6 +56,7 @@ struct vkso_hres_data {
 	struct vkso_hres_base realtime_base;
 	struct vkso_hres_base monotonic_base;
 	struct vkso_hres_base boottime_base;
+	struct vkso_hres_base tai_base;
 };
 
 struct vkso_raw_data {
@@ -221,6 +224,50 @@ static void check_realtime(vkso_clock_gettime_fn clock_gettime)
 	printf("user_realtime=pass samples=%u\n", SAMPLES);
 }
 
+static void set_tai_offset(void)
+{
+	struct timex tx = {
+		.modes = ADJ_TAI,
+		.constant = TAI_OFFSET_SEC,
+	};
+
+	if (syscall(SYS_adjtimex, &tx) < 0)
+		fail("set TAI offset");
+	memset(&tx, 0, sizeof(tx));
+	if (syscall(SYS_adjtimex, &tx) < 0 || tx.tai != TAI_OFFSET_SEC)
+		fail("read TAI offset");
+}
+
+static void check_tai_offset(vkso_clock_gettime_fn clock_gettime,
+			     const struct vkso_mm_data *mm_data)
+{
+	struct timespec previous = { 0 };
+	unsigned int i;
+
+	for (i = 0; i < SAMPLES; ++i) {
+		struct vkso_time_value before_value, tai_value, after_value;
+		struct timespec before, tai, after;
+
+		if (clock_gettime(NULL, CLOCK_REALTIME, &before_value) ||
+		    clock_gettime(mm_data, CLOCK_TAI, &tai_value) ||
+		    clock_gettime(NULL, CLOCK_REALTIME, &after_value))
+			fail("TAI offset clock call");
+		before.tv_sec = before_value.sec;
+		before.tv_nsec = (long)before_value.nsec;
+		tai.tv_sec = tai_value.sec - TAI_OFFSET_SEC;
+		tai.tv_nsec = (long)tai_value.nsec;
+		after.tv_sec = after_value.sec;
+		after.tv_nsec = (long)after_value.nsec;
+		if (to_ns(&tai) < to_ns(&before) ||
+		    to_ns(&tai) > to_ns(&after) ||
+		    (i && to_ns(&tai) < to_ns(&previous)))
+			fail("TAI offset relation");
+		previous = tai;
+	}
+	printf("tai_offset=pass seconds=%d samples=%u\n",
+	       TAI_OFFSET_SEC, SAMPLES);
+}
+
 static void check_hres_clock(vkso_clock_gettime_fn clock_gettime,
 			     const struct vkso_mm_data *mm_data,
 			     clockid_t clock_id)
@@ -281,6 +328,20 @@ static void check_namespace_application(
 	if (to_ns(&current) < to_ns(&before) + offset_ns ||
 	    to_ns(&current) > to_ns(&after) + offset_ns)
 		fail("namespace offset application");
+}
+
+static void check_tai_namespace_independence(
+	vkso_clock_gettime_fn clock_gettime,
+	const struct vkso_mm_data *mm_data)
+{
+	struct vkso_mm_data root_mm = *mm_data;
+
+	root_mm.monotonic_offset.sec = 0;
+	root_mm.monotonic_offset.nsec = 0;
+	root_mm.boottime_offset.sec = 0;
+	root_mm.boottime_offset.nsec = 0;
+	check_hres_clock(clock_gettime, &root_mm, CLOCK_TAI);
+	check_hres_clock(clock_gettime, mm_data, CLOCK_TAI);
 }
 
 static void *seq_writer(void *argument)
@@ -438,10 +499,12 @@ static void check_time_namespace(vkso_clock_gettime_fn clock_gettime)
 		check_hres_clock(clock_gettime, mm_data, CLOCK_BOOTTIME);
 		check_namespace_application(clock_gettime, mm_data,
 					    CLOCK_BOOTTIME);
+		check_tai_namespace_independence(clock_gettime, mm_data);
 		puts("monotonic_raw_hres_namespace_offset=pass");
 		puts("monotonic_hres_namespace_offset=pass");
 		puts("monotonic_namespace_offset=pass");
 		puts("boottime_namespace_offset=pass");
+		puts("tai_namespace_independent=pass");
 		fflush(stdout);
 		_exit(0);
 	}
@@ -490,6 +553,7 @@ int main(void)
 	    shared->realtime_coarse.nsec >= UINT64_C(1000000000) ||
 	    shared->monotonic_coarse.nsec >= UINT64_C(1000000000))
 		fail("shared data layout");
+	set_tai_offset();
 	check_realtime(vkso_clock_gettime);
 	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_MONOTONIC);
 	printf("user_monotonic=pass samples=%u\n", SAMPLES);
@@ -497,6 +561,9 @@ int main(void)
 	printf("user_monotonic_raw=pass samples=%u\n", SAMPLES);
 	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_BOOTTIME);
 	printf("user_boottime=pass samples=%u\n", SAMPLES);
+	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_TAI);
+	printf("user_tai=pass samples=%u\n", SAMPLES);
+	check_tai_offset(vkso_clock_gettime, mm_data);
 	check_tsc_cycles_shim(vkso_hres_cycle_probe_at, shared);
 	check_seq_retry(vkso_hres_cycle_probe_at);
 

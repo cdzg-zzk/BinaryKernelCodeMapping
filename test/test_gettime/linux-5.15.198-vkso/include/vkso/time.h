@@ -4,7 +4,7 @@
 
 #include <linux/types.h>
 
-#define VKSO_TIME_ABI_VERSION	4U
+#define VKSO_TIME_ABI_VERSION	5U
 #define VKSO_SHARED_PAGE_SIZE	4096U
 #define VKSO_MM_DATA_ABI_VERSION	2U
 
@@ -39,6 +39,7 @@ struct vkso_hres_data {
 	struct vkso_hres_base realtime_base;
 	struct vkso_hres_base monotonic_base;
 	struct vkso_hres_base boottime_base;
+	struct vkso_hres_base tai_base;
 };
 
 struct vkso_raw_data {
