@@ -29,7 +29,7 @@ assert_call_order()
 	fi
 }
 
-assert_call_order __x64_sys_clock_gettime vkso_time_get_context
+assert_call_order __x64_sys_clock_gettime __vkso_clock_gettime
 assert_call_order __x64_sys_clock_getres __vkso_clock_getres
 
 for symbol in \

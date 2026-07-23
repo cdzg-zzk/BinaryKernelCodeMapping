@@ -57,6 +57,23 @@ static const struct k_clock * const posix_clocks[];
 static const struct k_clock *clockid_to_kclock(const clockid_t id);
 static const struct k_clock clock_realtime, clock_monotonic;
 
+static __always_inline const struct vkso_mm_data *
+vkso_current_mm_data(clockid_t clock_id)
+{
+#if defined(CONFIG_VKSO_TIME) && defined(CONFIG_TIME_NS)
+	const u32 namespace_clocks = (1U << CLOCK_MONOTONIC) |
+		(1U << CLOCK_MONOTONIC_RAW) |
+		(1U << CLOCK_MONOTONIC_COARSE) |
+		(1U << CLOCK_BOOTTIME);
+	u32 id = clock_id;
+
+	if (id <= CLOCK_BOOTTIME && (namespace_clocks & (1U << id)) &&
+	    unlikely(current->nsproxy->time_ns != &init_time_ns))
+		return READ_ONCE(current->mm->context.vkso_mm_kdata);
+#endif
+	return NULL;
+}
+
 /*
  * we assume that the new SIGEV_THREAD_ID shares no bits with the other
  * SIGEV values.  Here we put out an error if this assumption fails.
@@ -1133,7 +1150,8 @@ SYSCALL_DEFINE2(clock_gettime, const clockid_t, which_clock,
 	struct timespec64 kernel_tp;
 	int error;
 
-	error = vkso_time_get_context(which_clock, &kernel_tp);
+	error = vkso_time_get(vkso_current_mm_data(which_clock), which_clock,
+			      &kernel_tp);
 	if (unlikely(error == VKSO_TIME_FALLBACK)) {
 		kc = clockid_to_kclock(which_clock);
 		if (!kc)

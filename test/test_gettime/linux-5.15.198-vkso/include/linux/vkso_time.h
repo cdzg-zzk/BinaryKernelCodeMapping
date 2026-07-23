@@ -27,9 +27,16 @@ extern union vkso_shared_page vkso_shared_page;
 
 void vkso_time_publish(struct timekeeper *tk);
 void vkso_time_update_timezone(void);
-int vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp);
 void vkso_time_update_mm_data(struct task_struct *task,
 			      const struct timens_offsets *offsets);
+
+static __always_inline int
+vkso_time_get(const struct vkso_mm_data *mm_data, clockid_t clock_id,
+	      struct timespec64 *tp)
+{
+	return __vkso_clock_gettime(mm_data, clock_id,
+				   (struct vkso_time_value *)tp);
+}
 
 static __always_inline int
 vkso_time_getres(clockid_t clock_id, struct timespec64 *tp)
@@ -59,7 +66,8 @@ static inline void vkso_time_update_timezone(void)
 }
 
 static inline int
-vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp)
+vkso_time_get(const struct vkso_mm_data *mm_data, clockid_t clock_id,
+	      struct timespec64 *tp)
 {
 	return VKSO_TIME_FALLBACK;
 }
