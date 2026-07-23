@@ -1,0 +1,62 @@
+#!/bin/busybox sh
+# SPDX-License-Identifier: GPL-2.0
+
+/bin/busybox --install -s /bin
+mkdir -p /proc /sys /dev /tmp /work
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mount -t ext4 /dev/sda /work
+
+status=0
+replaced=0
+module_loaded=0
+backend=$(cat /work/backend)
+
+{
+	echo "=== BARE-METAL PACKAGE QEMU PREFLIGHT: $backend ==="
+	uname -a
+	zcat /proc/config.gz >/tmp/running.config || status=$?
+	if [ "$status" -eq 0 ]; then
+		cmp "/work/$backend.config" /tmp/running.config || status=$?
+	fi
+	if [ "$status" -eq 0 ] && [ "$backend" = vkso ]; then
+		insmod /work/page_cache_replace.ko &&
+			module_loaded=1 || status=$?
+	fi
+	if [ "$status" -eq 0 ] && [ "$backend" = vkso ]; then
+		/work/manager validate /work/libkernel.so \
+			/work/page_mappings.txt || status=$?
+	fi
+	if [ "$status" -eq 0 ] && [ "$backend" = vkso ]; then
+		/work/manager replace /work/libkernel.so \
+			/work/page_mappings.txt &&
+			replaced=1 || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		LD_LIBRARY_PATH=/work /work/vkso-time-bench --probe ||
+			status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		LD_LIBRARY_PATH=/work /work/abi-matrix || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		LD_LIBRARY_PATH=/work /work/vkso-time-bench \
+			--backend "$backend" --mode perf --cpu 0 \
+			--iterations 1000 --repeats 1 --warmup 100 \
+			--pmu 0 >/tmp/perf.csv || status=$?
+	fi
+	if [ "$replaced" -eq 1 ]; then
+		/work/manager restore /work/libkernel.so \
+			/work/page_mappings.txt || status=$?
+		replaced=0
+	fi
+	if [ "$module_loaded" -eq 1 ]; then
+		rmmod page_cache_replace || status=$?
+		module_loaded=0
+	fi
+	echo "guest_status=$status"
+} 2>&1
+
+sync
+reboot -f
