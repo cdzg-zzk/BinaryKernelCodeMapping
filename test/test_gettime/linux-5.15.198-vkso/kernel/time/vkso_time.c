@@ -17,6 +17,7 @@ static_assert(sizeof(struct timespec64) == sizeof(struct vkso_time_value) &&
 	      offsetof(struct vkso_time_value, sec) &&
 	      offsetof(struct timespec64, tv_nsec) ==
 	      offsetof(struct vkso_time_value, nsec));
+static_assert(sizeof(__kernel_old_time_t) == sizeof(s64));
 static_assert(sizeof(struct __kernel_old_timeval) ==
 	      sizeof(struct vkso_timeval) &&
 	      offsetof(struct __kernel_old_timeval, tv_sec) ==
@@ -71,13 +72,17 @@ static void vkso_time_prepare(struct vkso_shared_data *next,
 	next->monotonic_coarse.sec = monotonic_sec;
 	next->monotonic_coarse.nsec =
 		monotonic_shifted_nsec >> tk->tkr_mono.shift;
+	/*
+	 * time() reads only this naturally atomic field and remains available
+	 * even when the clocksource cannot serve high-resolution VKSO reads.
+	 */
+	next->hres.realtime_base.sec = tk->xtime_sec;
 	next->hres.cycles.clock_mode = clock_mode;
 	next->raw.cycles.clock_mode = clock_mode;
 	if (clock_mode == VDSO_CLOCKMODE_NONE)
 		return;
 	vkso_time_prepare_cycles(&next->hres.cycles, &tk->tkr_mono);
 	vkso_time_prepare_cycles(&next->raw.cycles, &tk->tkr_raw);
-	next->hres.realtime_base.sec = tk->xtime_sec;
 	next->hres.realtime_base.shifted_nsec = tk->tkr_mono.xtime_nsec;
 	next->hres.monotonic_base.sec = monotonic_sec;
 	next->hres.monotonic_base.shifted_nsec = monotonic_shifted_nsec;

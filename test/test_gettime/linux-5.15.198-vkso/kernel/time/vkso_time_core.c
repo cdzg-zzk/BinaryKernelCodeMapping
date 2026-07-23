@@ -394,3 +394,14 @@ int __vkso_gettimeofday(struct vkso_timeval *tv, struct vkso_timezone *tz)
 	}
 	return VKSO_TIME_OK;
 }
+
+__visible noinline notrace __vkso_text
+s64 __vkso_time(s64 *tloc)
+{
+	const struct vkso_shared_data *shared = vkso_shared_data();
+	s64 seconds = READ_ONCE(shared->hres.realtime_base.sec);
+
+	if (tloc)
+		*tloc = seconds;
+	return seconds;
+}

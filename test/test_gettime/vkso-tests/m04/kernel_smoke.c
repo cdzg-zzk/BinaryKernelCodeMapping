@@ -56,6 +56,35 @@ static int check_gettimeofday_timezone(void)
 	return 0;
 }
 
+static int check_time(void)
+{
+	time_t previous = 0;
+	unsigned int i;
+
+	for (i = 0; i < SAMPLES; ++i) {
+		long current;
+
+		errno = 0;
+		current = syscall(SYS_time, NULL);
+		if ((current == -1 && errno) || (i && current < previous))
+			return 1;
+		previous = current;
+	}
+	printf("kernel_time_null=pass samples=%u\n", SAMPLES);
+
+	for (i = 0; i < SAMPLES; ++i) {
+		time_t stored = (time_t)-1;
+		long current;
+
+		errno = 0;
+		current = syscall(SYS_time, &stored);
+		if ((current == -1 && errno) || current != stored)
+			return 1;
+	}
+	printf("kernel_time_pointer=pass samples=%u\n", SAMPLES);
+	return 0;
+}
+
 static int check_clock(clockid_t clock_id)
 {
 	struct timespec previous = { 0 };
@@ -177,6 +206,8 @@ int main(void)
 	if (check_gettimeofday_timeval())
 		return 1;
 	if (check_gettimeofday_timezone())
+		return 1;
+	if (check_time())
 		return 1;
 	if (check_coarse_resolution() || check_clock_getres_null() ||
 	    check_clock_getres_fallback())

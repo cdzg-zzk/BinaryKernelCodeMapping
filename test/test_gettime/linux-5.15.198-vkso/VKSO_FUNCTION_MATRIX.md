@@ -72,8 +72,8 @@ from user context.
 | G02 | `tv == NULL, tz != NULL` | timezone matches syscall/raw vDSO semantics | TODO |
 | G03 | both outputs non-NULL | both values correct from one coherent read | TODO |
 | G04 | both outputs NULL | succeeds without an output write | TODO |
-| T01 | `time(NULL)` | returned seconds match syscall bracket | TODO |
-| T02 | `time(&value)` | return value and stored value are identical | TODO |
+| T01 | `time(NULL)` | returned seconds match syscall bracket | PASS |
+| T02 | `time(&value)` | return value and stored value are identical | PASS |
 
 ## `getcpu`
 
