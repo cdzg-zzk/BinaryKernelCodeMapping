@@ -20,6 +20,7 @@
 #define VKSO_MM_DATA_ABI_VERSION 1U
 #define VKSO_TIME_FALLBACK (-1)
 #define AT_VKSO_MM_DATA 52
+#define READ_ONCE(value) __atomic_load_n(&(value), __ATOMIC_RELAXED)
 #ifndef CLONE_NEWTIME
 #define CLONE_NEWTIME 0x00000080
 #endif
@@ -31,11 +32,27 @@ struct vkso_time_value {
 	uint64_t nsec;
 };
 
+struct vkso_hres_base {
+	int64_t sec;
+	uint64_t shifted_nsec;
+};
+
+struct vkso_hres_data {
+	int32_t clock_mode;
+	uint32_t reserved;
+	uint64_t cycle_last;
+	uint64_t mask;
+	uint32_t mult;
+	uint32_t shift;
+	struct vkso_hres_base realtime_base;
+};
+
 struct vkso_shared_data {
 	uint32_t seq;
 	uint32_t abi_version;
 	struct vkso_time_value realtime_coarse;
 	struct vkso_time_value monotonic_coarse;
+	struct vkso_hres_data hres;
 };
 
 struct vkso_mm_data {
@@ -89,6 +106,15 @@ static int64_t to_ns(const struct timespec *ts)
 	return (int64_t)ts->tv_sec * INT64_C(1000000000) + ts->tv_nsec;
 }
 
+static uint64_t read_tsc_ordered(void)
+{
+	uint32_t low, high;
+
+	__asm__ volatile("lfence\n\trdtsc"
+			 : "=a" (low), "=d" (high) : : "memory");
+	return ((uint64_t)high << 32) | low;
+}
+
 static void fail(const char *message)
 {
 	fprintf(stderr, "failure=%s\n", message);
@@ -140,6 +166,54 @@ static void check_monotonic_coarse(vkso_clock_gettime_fn clock_gettime,
 			fail("monotonic coarse bracket");
 		previous = current;
 	}
+}
+
+static void check_hres_snapshot(const struct vkso_shared_data *shared)
+{
+	struct timespec previous = { 0 };
+	unsigned int i;
+
+	for (i = 0; i < SAMPLES; ++i) {
+		uint64_t cycle_last, mask, shifted_nsec, cycles, delta, ns;
+		uint32_t seq, mult, shift;
+		int32_t clock_mode;
+		int64_t base_sec;
+		struct timespec before, after, current;
+
+		if (syscall(SYS_clock_gettime, CLOCK_REALTIME, &before))
+			fail("hres before oracle");
+		do {
+			do {
+				seq = READ_ONCE(shared->seq);
+			} while (seq & 1U);
+			__atomic_thread_fence(__ATOMIC_ACQUIRE);
+			clock_mode = READ_ONCE(shared->hres.clock_mode);
+			cycles = read_tsc_ordered();
+			cycle_last = READ_ONCE(shared->hres.cycle_last);
+			mask = READ_ONCE(shared->hres.mask);
+			mult = READ_ONCE(shared->hres.mult);
+			shift = READ_ONCE(shared->hres.shift);
+			base_sec = READ_ONCE(shared->hres.realtime_base.sec);
+			shifted_nsec =
+				READ_ONCE(shared->hres.realtime_base.shifted_nsec);
+			__atomic_thread_fence(__ATOMIC_ACQUIRE);
+		} while (seq != READ_ONCE(shared->seq));
+		if (clock_mode != 1 || !cycle_last || mask != UINT64_MAX ||
+		    !mult || shift >= 32)
+			fail("hres conversion metadata");
+		delta = cycles > cycle_last ? cycles - cycle_last : 0;
+		ns = (shifted_nsec + delta * mult) >> shift;
+		current.tv_sec = base_sec + (int64_t)(ns / UINT64_C(1000000000));
+		current.tv_nsec = (long)(ns % UINT64_C(1000000000));
+		if (syscall(SYS_clock_gettime, CLOCK_REALTIME, &after))
+			fail("hres after oracle");
+		if (to_ns(&current) < to_ns(&before) ||
+		    to_ns(&current) > to_ns(&after) ||
+		    (i && to_ns(&current) < to_ns(&previous)))
+			fail("hres snapshot bracket");
+		previous = current;
+	}
+	printf("hres_snapshot=pass samples=%u\n", SAMPLES);
 }
 
 static void check_monotonic_namespace(vkso_clock_gettime_fn clock_gettime)
@@ -209,6 +283,7 @@ int main(void)
 	    shared->realtime_coarse.nsec >= UINT64_C(1000000000) ||
 	    shared->monotonic_coarse.nsec >= UINT64_C(1000000000))
 		fail("shared data layout");
+	check_hres_snapshot(shared);
 
 	for (i = 0; i < SAMPLES; ++i) {
 		struct timespec before, after, current, realtime;

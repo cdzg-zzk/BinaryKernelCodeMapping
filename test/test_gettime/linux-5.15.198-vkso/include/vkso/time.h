@@ -19,11 +19,28 @@ struct vkso_time_value {
 	u64 nsec;
 };
 
+/* Nanoseconds remain shifted until the reader adds elapsed cycles. */
+struct vkso_hres_base {
+	s64 sec;
+	u64 shifted_nsec;
+};
+
+struct vkso_hres_data {
+	s32 clock_mode;
+	u32 reserved;
+	u64 cycle_last;
+	u64 mask;
+	u32 mult;
+	u32 shift;
+	struct vkso_hres_base realtime_base;
+};
+
 struct vkso_shared_data {
 	u32 seq;
 	u32 abi_version;
 	struct vkso_time_value realtime_coarse;
 	struct vkso_time_value monotonic_coarse;
+	struct vkso_hres_data hres;
 };
 
 union vkso_shared_page {

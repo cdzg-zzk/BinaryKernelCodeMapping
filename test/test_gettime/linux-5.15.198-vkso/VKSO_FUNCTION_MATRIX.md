@@ -113,6 +113,7 @@ raw x86 implementation.
 | X04 | PVClock implementation | raw-compatible reader and data mapping compile into the cold path | STATIC |
 | X05 | Hyper-V implementation | raw-compatible reader and TSC page mapping compile into the cold path | STATIC |
 | X06 | timezone update | shared timezone is updated coherently without rewriting unrelated MM data | TODO |
+| X07 | high-resolution snapshot | mode, cycle conversion and realtime base share one seq generation | PASS |
 
 ## Completion rule
 
