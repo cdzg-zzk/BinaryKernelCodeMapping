@@ -17,7 +17,7 @@
 #include <unistd.h>
 
 #define SAMPLES 10000U
-#define VKSO_TIME_ABI_VERSION 2U
+#define VKSO_TIME_ABI_VERSION 3U
 #define VKSO_MM_DATA_ABI_VERSION 1U
 #define VKSO_TIME_FALLBACK (-1)
 #define AT_VKSO_MM_DATA 52
@@ -38,15 +38,24 @@ struct vkso_hres_base {
 	uint64_t shifted_nsec;
 };
 
-struct vkso_hres_data {
+struct vkso_cycle_data {
 	int32_t clock_mode;
 	uint32_t reserved;
 	uint64_t cycle_last;
 	uint64_t mask;
 	uint32_t mult;
 	uint32_t shift;
+};
+
+struct vkso_hres_data {
+	struct vkso_cycle_data cycles;
 	struct vkso_hres_base realtime_base;
 	struct vkso_hres_base monotonic_base;
+};
+
+struct vkso_raw_data {
+	struct vkso_cycle_data cycles;
+	struct vkso_hres_base monotonic_raw_base;
 };
 
 struct vkso_hres_cycle_sample {
@@ -68,6 +77,7 @@ struct vkso_shared_data {
 	struct vkso_time_value realtime_coarse;
 	struct vkso_time_value monotonic_coarse;
 	struct vkso_hres_data hres;
+	struct vkso_raw_data raw;
 };
 
 struct vkso_mm_data {
@@ -207,8 +217,9 @@ static void check_realtime(vkso_clock_gettime_fn clock_gettime)
 	printf("user_realtime=pass samples=%u\n", SAMPLES);
 }
 
-static void check_monotonic(vkso_clock_gettime_fn clock_gettime,
-			    const struct vkso_mm_data *mm_data)
+static void check_hres_clock(vkso_clock_gettime_fn clock_gettime,
+			     const struct vkso_mm_data *mm_data,
+			     clockid_t clock_id)
 {
 	struct timespec previous = { 0 };
 	unsigned int i;
@@ -217,25 +228,24 @@ static void check_monotonic(vkso_clock_gettime_fn clock_gettime,
 		struct timespec before, after, current;
 		struct vkso_time_value value;
 
-		if (syscall(SYS_clock_gettime, CLOCK_MONOTONIC, &before) ||
-		    clock_gettime(mm_data, CLOCK_MONOTONIC, &value) ||
-		    syscall(SYS_clock_gettime, CLOCK_MONOTONIC, &after))
-			fail("monotonic call");
+		if (syscall(SYS_clock_gettime, clock_id, &before) ||
+		    clock_gettime(mm_data, clock_id, &value) ||
+		    syscall(SYS_clock_gettime, clock_id, &after))
+			fail("high-resolution clock call");
 		current.tv_sec = value.sec;
 		current.tv_nsec = (long)value.nsec;
 		if (current.tv_nsec < 0 || current.tv_nsec >= 1000000000L ||
 		    to_ns(&current) < to_ns(&before) ||
 		    to_ns(&current) > to_ns(&after) ||
 		    (i && to_ns(&current) < to_ns(&previous)))
-			fail("monotonic bracket");
+			fail("high-resolution clock bracket");
 		previous = current;
 	}
-	printf("user_monotonic=pass samples=%u\n", SAMPLES);
 }
 
 static void check_monotonic_namespace_application(
 	vkso_clock_gettime_fn clock_gettime,
-	const struct vkso_mm_data *mm_data)
+	const struct vkso_mm_data *mm_data, clockid_t clock_id)
 {
 	const int64_t offset_ns =
 		(int64_t)MONOTONIC_OFFSET_SEC * INT64_C(1000000000) +
@@ -246,19 +256,19 @@ static void check_monotonic_namespace_application(
 
 	root_mm.monotonic_offset.sec = 0;
 	root_mm.monotonic_offset.nsec = 0;
-	if (clock_gettime(&root_mm, CLOCK_MONOTONIC, &before_value))
-		fail("root monotonic before namespace oracle");
+	if (clock_gettime(&root_mm, clock_id, &before_value))
+		fail("root clock before namespace oracle");
 	before.tv_sec = before_value.sec;
 	before.tv_nsec = (long)before_value.nsec;
-	if (syscall(SYS_clock_gettime, CLOCK_MONOTONIC, &current))
-		fail("namespace monotonic syscall");
-	if (clock_gettime(&root_mm, CLOCK_MONOTONIC, &after_value))
-		fail("root monotonic after namespace oracle");
+	if (syscall(SYS_clock_gettime, clock_id, &current))
+		fail("namespace clock syscall");
+	if (clock_gettime(&root_mm, clock_id, &after_value))
+		fail("root clock after namespace oracle");
 	after.tv_sec = after_value.sec;
 	after.tv_nsec = (long)after_value.nsec;
 	if (to_ns(&current) < to_ns(&before) + offset_ns ||
 	    to_ns(&current) > to_ns(&after) + offset_ns)
-		fail("monotonic namespace offset application");
+		fail("namespace offset application");
 }
 
 static void *seq_writer(void *argument)
@@ -278,15 +288,15 @@ static void *seq_writer(void *argument)
 		}
 		__atomic_store_n(&test->shared.abi_version,
 				 VKSO_TIME_ABI_VERSION, __ATOMIC_RELAXED);
-		__atomic_store_n(&test->shared.hres.clock_mode, 1,
+		__atomic_store_n(&test->shared.hres.cycles.clock_mode, 1,
 				 __ATOMIC_RELAXED);
-		__atomic_store_n(&test->shared.hres.cycle_last, generation,
+		__atomic_store_n(&test->shared.hres.cycles.cycle_last, generation,
 				 __ATOMIC_RELAXED);
-		__atomic_store_n(&test->shared.hres.mask, ~generation,
+		__atomic_store_n(&test->shared.hres.cycles.mask, ~generation,
 				 __ATOMIC_RELAXED);
-		__atomic_store_n(&test->shared.hres.mult,
+		__atomic_store_n(&test->shared.hres.cycles.mult,
 				 (uint32_t)generation | 1U, __ATOMIC_RELAXED);
-		__atomic_store_n(&test->shared.hres.shift,
+		__atomic_store_n(&test->shared.hres.cycles.shift,
 				 (uint32_t)(generation % 31), __ATOMIC_RELAXED);
 		__atomic_store_n(&test->shared.hres.realtime_base.sec,
 				 (int64_t)generation, __ATOMIC_RELAXED);
@@ -401,9 +411,14 @@ static void check_monotonic_namespace(vkso_clock_gettime_fn clock_gettime)
 		    mm_data->monotonic_offset.sec != MONOTONIC_OFFSET_SEC ||
 		    mm_data->monotonic_offset.nsec != MONOTONIC_OFFSET_NSEC)
 			_exit(2);
-		check_monotonic(clock_gettime, mm_data);
-		check_monotonic_namespace_application(clock_gettime, mm_data);
+		check_hres_clock(clock_gettime, mm_data, CLOCK_MONOTONIC);
+		check_monotonic_namespace_application(clock_gettime, mm_data,
+						      CLOCK_MONOTONIC);
+		check_hres_clock(clock_gettime, mm_data, CLOCK_MONOTONIC_RAW);
+		check_monotonic_namespace_application(clock_gettime, mm_data,
+						      CLOCK_MONOTONIC_RAW);
 		check_monotonic_coarse(clock_gettime, mm_data);
+		puts("monotonic_raw_hres_namespace_offset=pass");
 		puts("monotonic_hres_namespace_offset=pass");
 		puts("monotonic_namespace_offset=pass");
 		fflush(stdout);
@@ -454,7 +469,10 @@ int main(void)
 	    shared->monotonic_coarse.nsec >= UINT64_C(1000000000))
 		fail("shared data layout");
 	check_realtime(vkso_clock_gettime);
-	check_monotonic(vkso_clock_gettime, mm_data);
+	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_MONOTONIC);
+	printf("user_monotonic=pass samples=%u\n", SAMPLES);
+	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_MONOTONIC_RAW);
+	printf("user_monotonic_raw=pass samples=%u\n", SAMPLES);
 	check_tsc_cycles_shim(vkso_hres_cycle_probe_at, shared);
 	check_seq_retry(vkso_hres_cycle_probe_at);
 
@@ -483,7 +501,7 @@ int main(void)
 	{
 		struct vkso_time_value value;
 
-		if (vkso_clock_gettime(mm_data, CLOCK_MONOTONIC_RAW, &value) !=
+		if (vkso_clock_gettime(mm_data, CLOCK_BOOTTIME, &value) !=
 		    VKSO_TIME_FALLBACK)
 			fail("unsupported clock did not fallback");
 	}

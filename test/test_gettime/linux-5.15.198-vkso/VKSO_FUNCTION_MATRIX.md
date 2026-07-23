@@ -45,7 +45,7 @@ from user context.
 |---|---|---|---|---|
 | C01 | `CLOCK_REALTIME` | VKSO fast core | VKSO fast core | PASS |
 | C02 | `CLOCK_MONOTONIC` | VKSO fast core | VKSO fast core | PASS |
-| C03 | `CLOCK_MONOTONIC_RAW` | VKSO fast core | VKSO fast core | TODO |
+| C03 | `CLOCK_MONOTONIC_RAW` | VKSO fast core | VKSO fast core | PASS |
 | C04 | `CLOCK_BOOTTIME` | VKSO fast core | VKSO fast core | TODO |
 | C05 | `CLOCK_TAI` | VKSO fast core | VKSO fast core | TODO |
 | C06 | `CLOCK_REALTIME_COARSE` | VKSO coarse core, no cycle read | same core | PASS |

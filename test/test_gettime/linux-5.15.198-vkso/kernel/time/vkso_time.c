@@ -14,6 +14,19 @@
 union vkso_shared_page vkso_shared_page
 	__aligned(VKSO_SHARED_PAGE_SIZE) __vkso_shared_data;
 
+static __always_inline void vkso_time_prepare_cycles(
+	struct vkso_cycle_data *next, const struct tk_read_base *tkr,
+	s32 clock_mode)
+{
+	next->clock_mode = clock_mode;
+	if (clock_mode == VDSO_CLOCKMODE_NONE)
+		return;
+	next->cycle_last = tkr->cycle_last;
+	next->mask = tkr->mask;
+	next->mult = tkr->mult;
+	next->shift = tkr->shift;
+}
+
 static void vkso_time_prepare(struct vkso_shared_data *next,
 			      const struct timekeeper *tk)
 {
@@ -35,13 +48,12 @@ static void vkso_time_prepare(struct vkso_shared_data *next,
 	next->realtime_coarse.nsec = realtime_nsec;
 	next->monotonic_coarse.sec = monotonic_sec;
 	next->monotonic_coarse.nsec = monotonic_nsec;
-	next->hres.clock_mode = clock_mode;
+	vkso_time_prepare_cycles(&next->hres.cycles, &tk->tkr_mono,
+				 clock_mode);
+	vkso_time_prepare_cycles(&next->raw.cycles, &tk->tkr_raw,
+				 clock_mode);
 	if (clock_mode == VDSO_CLOCKMODE_NONE)
 		return;
-	next->hres.cycle_last = tk->tkr_mono.cycle_last;
-	next->hres.mask = tk->tkr_mono.mask;
-	next->hres.mult = tk->tkr_mono.mult;
-	next->hres.shift = tk->tkr_mono.shift;
 	next->hres.realtime_base.sec = tk->xtime_sec;
 	next->hres.realtime_base.shifted_nsec = tk->tkr_mono.xtime_nsec;
 	next->hres.monotonic_base.sec =
@@ -51,6 +63,8 @@ static void vkso_time_prepare(struct vkso_shared_data *next,
 		next->hres.monotonic_base.sec++;
 	}
 	next->hres.monotonic_base.shifted_nsec = monotonic_shifted_nsec;
+	next->raw.monotonic_raw_base.sec = tk->raw_sec;
+	next->raw.monotonic_raw_base.shifted_nsec = tk->tkr_raw.xtime_nsec;
 }
 
 void vkso_time_publish(struct timekeeper *tk)
@@ -90,6 +104,19 @@ bool vkso_time_get_monotonic(struct timespec64 *tp)
 	const struct vkso_mm_data *mm_data = vkso_time_mm_data(current->mm);
 
 	if (__vkso_clock_gettime(mm_data, CLOCK_MONOTONIC, &value) !=
+	    VKSO_TIME_OK)
+		return false;
+	tp->tv_sec = value.sec;
+	tp->tv_nsec = value.nsec;
+	return true;
+}
+
+bool vkso_time_get_monotonic_raw(struct timespec64 *tp)
+{
+	struct vkso_time_value value;
+	const struct vkso_mm_data *mm_data = vkso_time_mm_data(current->mm);
+
+	if (__vkso_clock_gettime(mm_data, CLOCK_MONOTONIC_RAW, &value) !=
 	    VKSO_TIME_OK)
 		return false;
 	tp->tv_sec = value.sec;

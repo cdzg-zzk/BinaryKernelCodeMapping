@@ -41,6 +41,9 @@ int main(void)
 	if (check_clock(CLOCK_MONOTONIC))
 		return 1;
 	printf("kernel_monotonic=pass samples=%u\n", SAMPLES);
+	if (check_clock(CLOCK_MONOTONIC_RAW))
+		return 1;
+	printf("kernel_monotonic_raw=pass samples=%u\n", SAMPLES);
 	if (check_clock(CLOCK_MONOTONIC_COARSE))
 		return 1;
 	printf("kernel_monotonic_coarse=pass samples=%u\n", SAMPLES);

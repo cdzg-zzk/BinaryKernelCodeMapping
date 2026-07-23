@@ -221,8 +221,10 @@ static ktime_t posix_get_monotonic_ktime(clockid_t which_clock)
  */
 static int posix_get_monotonic_raw(clockid_t which_clock, struct timespec64 *tp)
 {
-	ktime_get_raw_ts64(tp);
-	timens_add_monotonic(tp);
+	if (!vkso_time_get_monotonic_raw(tp)) {
+		ktime_get_raw_ts64(tp);
+		timens_add_monotonic(tp);
+	}
 	return 0;
 }
 
