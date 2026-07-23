@@ -25,11 +25,8 @@ extern char __vkso_shared_data_end[];
 extern union vkso_shared_page vkso_shared_page;
 
 void vkso_time_publish(struct timekeeper *tk);
-bool vkso_time_get_realtime(struct timespec64 *tp);
-bool vkso_time_get_monotonic(struct timespec64 *tp);
-bool vkso_time_get_monotonic_raw(struct timespec64 *tp);
-bool vkso_time_get_realtime_coarse(struct timespec64 *tp);
-bool vkso_time_get_monotonic_coarse(struct timespec64 *tp);
+bool vkso_time_get_global(clockid_t clock_id, struct timespec64 *tp);
+bool vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp);
 const struct vkso_mm_data *vkso_time_mm_data(struct mm_struct *mm);
 void vkso_time_update_mm_data(struct task_struct *task,
 			      const struct timespec64 *monotonic_offset);
@@ -38,27 +35,14 @@ static inline void vkso_time_publish(struct timekeeper *tk)
 {
 }
 
-static inline bool vkso_time_get_realtime_coarse(struct timespec64 *tp)
+static inline bool
+vkso_time_get_global(clockid_t clock_id, struct timespec64 *tp)
 {
 	return false;
 }
 
-static inline bool vkso_time_get_realtime(struct timespec64 *tp)
-{
-	return false;
-}
-
-static inline bool vkso_time_get_monotonic(struct timespec64 *tp)
-{
-	return false;
-}
-
-static inline bool vkso_time_get_monotonic_raw(struct timespec64 *tp)
-{
-	return false;
-}
-
-static inline bool vkso_time_get_monotonic_coarse(struct timespec64 *tp)
+static inline bool
+vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp)
 {
 	return false;
 }

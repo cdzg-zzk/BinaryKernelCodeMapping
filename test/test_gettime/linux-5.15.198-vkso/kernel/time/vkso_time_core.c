@@ -44,27 +44,33 @@ static_assert(offsetof(struct vkso_mm_data, monotonic_offset) == 8);
 static_assert(sizeof(union vkso_shared_page) == VKSO_SHARED_PAGE_SIZE);
 static_assert(sizeof(union vkso_mm_page) == VKSO_SHARED_PAGE_SIZE);
 
-#define VKSO_READ_HRES	1U
-
 struct vkso_read_snapshot {
+#ifdef CONFIG_VKSO_TIME_TEST
 	u32 seq;
 	u32 retries;
-	u32 abi_version;
-	struct vkso_time_value coarse;
 	s32 clock_mode;
-	u64 cycle_last;
 	u64 mask;
+#endif
+	union {
+		struct vkso_time_value coarse;
+		struct vkso_hres_base hres;
+	} base;
+	u64 cycle_last;
 	u32 mult;
 	u32 shift;
-	struct vkso_hres_base hres_base;
 	u64 cycles;
 };
 
-static __always_inline void vkso_count_retry(u32 *retries)
+#ifdef CONFIG_VKSO_TIME_TEST
+static __always_inline void
+vkso_count_retry(struct vkso_read_snapshot *snapshot)
 {
-	if (*retries != (u32)-1)
-		(*retries)++;
+	if (snapshot->retries != (u32)-1)
+		snapshot->retries++;
 }
+#else
+#define vkso_count_retry(snapshot) do { } while (0)
+#endif
 
 /*
  * The native counter backend is deliberately inlined into the common reader:
@@ -72,7 +78,7 @@ static __always_inline void vkso_count_retry(u32 *retries)
  */
 static __always_inline bool vkso_read_cycles(s32 clock_mode, u64 *cycles)
 {
-	if (clock_mode != VDSO_CLOCKMODE_TSC)
+	if (unlikely(clock_mode != VDSO_CLOCKMODE_TSC))
 		return false;
 	*cycles = rdtsc_ordered();
 	return (s64)*cycles >= 0;
@@ -84,14 +90,14 @@ static __always_inline void vkso_hres_from_snapshot(
 {
 	u64 cycles = snapshot->cycles;
 	u64 last = snapshot->cycle_last;
-	u64 ns = snapshot->hres_base.shifted_nsec;
+	u64 ns = snapshot->base.hres.shifted_nsec;
 
 	/* Match the x86 vDSO rule: clamp a slightly backward TSC to the base. */
 	if (cycles > last)
 		ns += (cycles - last) * snapshot->mult;
 	ns >>= snapshot->shift;
 	ns += offset_nsec;
-	value->sec = snapshot->hres_base.sec + offset_sec +
+	value->sec = snapshot->base.hres.sec + offset_sec +
 		__iter_div_u64_rem(ns, NSEC_PER_SEC, &ns);
 	value->nsec = ns;
 }
@@ -102,7 +108,8 @@ static __always_inline void vkso_hres_from_snapshot(
  */
 static __always_inline int vkso_read_snapshot(
 	const struct vkso_shared_data *shared, size_t value_offset,
-	size_t cycle_offset, u32 flags, struct vkso_read_snapshot *snapshot)
+	size_t cycle_offset, bool high_resolution,
+	struct vkso_read_snapshot *snapshot)
 {
 	const void *selected = (const u8 *)shared + value_offset;
 	const struct vkso_time_value *coarse = selected;
@@ -110,43 +117,53 @@ static __always_inline int vkso_read_snapshot(
 	const struct vkso_cycle_data *cycle_data =
 		(const void *)((const u8 *)shared + cycle_offset);
 	struct vkso_read_snapshot next;
-	u32 retries = 0;
+	u32 seq;
+	u32 abi_version;
+	s32 clock_mode;
 	bool have_cycles = true;
 
+#ifdef CONFIG_VKSO_TIME_TEST
+	next.retries = 0;
+#endif
 	for (;;) {
-		next.seq = READ_ONCE(shared->seq);
-		if (next.seq & 1) {
-			vkso_count_retry(&retries);
+		seq = READ_ONCE(shared->seq);
+		if (unlikely(seq & 1)) {
+			vkso_count_retry(&next);
 			cpu_relax();
 			continue;
 		}
 		smp_rmb();
-		next.abi_version = READ_ONCE(shared->abi_version);
-		if (flags & VKSO_READ_HRES) {
-			next.clock_mode = READ_ONCE(cycle_data->clock_mode);
-			have_cycles = vkso_read_cycles(next.clock_mode,
-						       &next.cycles);
+		abi_version = READ_ONCE(shared->abi_version);
+		if (high_resolution) {
+			clock_mode = READ_ONCE(cycle_data->clock_mode);
+			have_cycles = vkso_read_cycles(clock_mode, &next.cycles);
 			next.cycle_last = READ_ONCE(cycle_data->cycle_last);
+#ifdef CONFIG_VKSO_TIME_TEST
+			next.clock_mode = clock_mode;
 			next.mask = READ_ONCE(cycle_data->mask);
+#endif
 			next.mult = READ_ONCE(cycle_data->mult);
 			next.shift = READ_ONCE(cycle_data->shift);
-			next.hres_base.sec = READ_ONCE(hres_base->sec);
-			next.hres_base.shifted_nsec =
+			next.base.hres.sec = READ_ONCE(hres_base->sec);
+			next.base.hres.shifted_nsec =
 				READ_ONCE(hres_base->shifted_nsec);
 		} else {
-			next.coarse.sec = READ_ONCE(coarse->sec);
-			next.coarse.nsec = READ_ONCE(coarse->nsec);
+			next.base.coarse.sec = READ_ONCE(coarse->sec);
+			next.base.coarse.nsec = READ_ONCE(coarse->nsec);
 		}
 		smp_rmb();
-		if (next.seq == READ_ONCE(shared->seq))
+		if (likely(seq == READ_ONCE(shared->seq)))
 			break;
-		vkso_count_retry(&retries);
+		vkso_count_retry(&next);
 	}
 
-	if (next.abi_version != VKSO_TIME_ABI_VERSION || !have_cycles ||
-	    (!(flags & VKSO_READ_HRES) && next.coarse.nsec >= NSEC_PER_SEC))
+	if (unlikely(abi_version != VKSO_TIME_ABI_VERSION || !have_cycles ||
+		     (!high_resolution &&
+		      next.base.coarse.nsec >= NSEC_PER_SEC)))
 		return VKSO_TIME_FALLBACK;
-	next.retries = retries;
+#ifdef CONFIG_VKSO_TIME_TEST
+	next.seq = seq;
+#endif
 	*snapshot = next;
 	return VKSO_TIME_OK;
 }
@@ -172,7 +189,7 @@ static __always_inline int vkso_hres_sample(
 	status = vkso_read_snapshot(shared,
 		offsetof(struct vkso_shared_data, hres.realtime_base),
 		offsetof(struct vkso_shared_data, hres.cycles),
-		VKSO_READ_HRES, &snapshot);
+		true, &snapshot);
 	if (status != VKSO_TIME_OK)
 		return status;
 	sample->seq = snapshot.seq;
@@ -184,7 +201,7 @@ static __always_inline int vkso_hres_sample(
 	sample->mask = snapshot.mask;
 	sample->mult = snapshot.mult;
 	sample->reserved = 0;
-	sample->realtime_base = snapshot.hres_base;
+	sample->realtime_base = snapshot.base.hres;
 	return VKSO_TIME_OK;
 }
 
@@ -204,26 +221,26 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 	struct vkso_read_snapshot snapshot;
 	size_t value_offset;
 	size_t cycle_offset = 0;
-	u32 read_flags;
 	u32 id = clock_id;
 	s64 offset_sec = 0;
 	u64 offset_nsec = 0;
+	bool high_resolution;
 	bool use_mm_data;
 
 	if (!value)
 		return VKSO_TIME_FALLBACK;
-	if (id <= CLOCK_MONOTONIC) {
+	if (likely(id <= CLOCK_MONOTONIC)) {
 		value_offset = offsetof(struct vkso_shared_data,
 					 hres.realtime_base) +
 			id * sizeof(struct vkso_hres_base);
 		cycle_offset = offsetof(struct vkso_shared_data, hres.cycles);
-		read_flags = VKSO_READ_HRES;
+		high_resolution = true;
 		use_mm_data = id == CLOCK_MONOTONIC;
 	} else if (id == CLOCK_MONOTONIC_RAW) {
 		value_offset = offsetof(struct vkso_shared_data,
 					 raw.monotonic_raw_base);
 		cycle_offset = offsetof(struct vkso_shared_data, raw.cycles);
-		read_flags = VKSO_READ_HRES;
+		high_resolution = true;
 		use_mm_data = true;
 	} else {
 		u32 coarse_index = id - CLOCK_REALTIME_COARSE;
@@ -234,33 +251,33 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 		value_offset = offsetof(struct vkso_shared_data,
 					 realtime_coarse) +
 			coarse_index * sizeof(struct vkso_time_value);
-		read_flags = 0;
+		high_resolution = false;
 		use_mm_data = coarse_index != 0;
 	}
 	if (use_mm_data) {
-		if (!mm_data ||
-		    READ_ONCE(mm_data->abi_version) !=
-			    VKSO_MM_DATA_ABI_VERSION)
+		if (unlikely(!mm_data ||
+			     READ_ONCE(mm_data->abi_version) !=
+			     VKSO_MM_DATA_ABI_VERSION))
 			return VKSO_TIME_FALLBACK;
 		offset_sec = READ_ONCE(mm_data->monotonic_offset.sec);
 		offset_nsec = READ_ONCE(mm_data->monotonic_offset.nsec);
-		if (offset_nsec >= NSEC_PER_SEC)
+		if (unlikely(offset_nsec >= NSEC_PER_SEC))
 			return VKSO_TIME_FALLBACK;
 	}
 	if (vkso_read_snapshot(vkso_shared_data(), value_offset, cycle_offset,
-			       read_flags, &snapshot) != VKSO_TIME_OK)
+			       high_resolution, &snapshot) != VKSO_TIME_OK)
 		return VKSO_TIME_FALLBACK;
-	if (read_flags & VKSO_READ_HRES) {
+	if (high_resolution) {
 		vkso_hres_from_snapshot(&snapshot, offset_sec, offset_nsec,
 					value);
 		return VKSO_TIME_OK;
 	}
-	snapshot.coarse.nsec += offset_nsec;
-	snapshot.coarse.sec += offset_sec;
-	if (snapshot.coarse.nsec >= NSEC_PER_SEC) {
-		snapshot.coarse.nsec -= NSEC_PER_SEC;
-		snapshot.coarse.sec++;
+	snapshot.base.coarse.nsec += offset_nsec;
+	snapshot.base.coarse.sec += offset_sec;
+	if (snapshot.base.coarse.nsec >= NSEC_PER_SEC) {
+		snapshot.base.coarse.nsec -= NSEC_PER_SEC;
+		snapshot.base.coarse.sec++;
 	}
-	*value = snapshot.coarse;
+	*value = snapshot.base.coarse;
 	return VKSO_TIME_OK;
 }

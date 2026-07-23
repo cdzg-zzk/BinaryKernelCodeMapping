@@ -82,7 +82,7 @@ struct vkso_shared_data {
 
 struct vkso_mm_data {
 	uint32_t abi_version;
-	uint32_t flags;
+	uint32_t reserved;
 	struct vkso_time_value monotonic_offset;
 };
 

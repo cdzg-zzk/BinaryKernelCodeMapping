@@ -17,7 +17,7 @@
 
 struct vkso_mm_data {
 	uint32_t abi_version;
-	uint32_t flags;
+	uint32_t reserved;
 	struct {
 		int64_t sec;
 		uint64_t nsec;
@@ -87,7 +87,7 @@ int main(void)
 		fail("auxv address");
 	if (getauxval(AT_SYSINFO_EHDR))
 		fail("legacy vdso auxv present");
-	if (mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION || mm_data->flags ||
+	if (mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION || mm_data->reserved ||
 	    mm_data->monotonic_offset.sec || mm_data->monotonic_offset.nsec)
 		fail("mm data contents");
 	check_mapping(mm_data);
@@ -109,7 +109,7 @@ int main(void)
 		    sizeof(child_pfn))
 			_exit(3);
 		close(pipefd[1]);
-		*(volatile uint32_t *)&mm_data->flags = 1;
+		*(volatile uint32_t *)&mm_data->reserved = 1;
 		_exit(4);
 	}
 	close(pipefd[1]);

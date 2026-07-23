@@ -78,7 +78,7 @@ union vkso_shared_page {
 /* Stable while the mm remains in one time namespace. */
 struct vkso_mm_data {
 	u32 abi_version;
-	u32 flags;
+	u32 reserved;
 	struct vkso_time_value monotonic_offset;
 };
 
