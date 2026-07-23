@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/syscall.h>
+#include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -12,6 +13,29 @@
 static int64_t to_ns(const struct timespec *ts)
 {
 	return (int64_t)ts->tv_sec * INT64_C(1000000000) + ts->tv_nsec;
+}
+
+static int64_t timeval_to_us(const struct timeval *tv)
+{
+	return (int64_t)tv->tv_sec * INT64_C(1000000) + tv->tv_usec;
+}
+
+static int check_gettimeofday_timeval(void)
+{
+	struct timeval previous = { 0 };
+	unsigned int i;
+
+	for (i = 0; i < SAMPLES; ++i) {
+		struct timeval current;
+
+		if (syscall(SYS_gettimeofday, &current, NULL) ||
+		    current.tv_usec < 0 || current.tv_usec >= 1000000 ||
+		    (i && timeval_to_us(&current) < timeval_to_us(&previous)))
+			return 1;
+		previous = current;
+	}
+	printf("kernel_gettimeofday_timeval=pass samples=%u\n", SAMPLES);
+	return 0;
 }
 
 static int check_clock(clockid_t clock_id)
@@ -131,6 +155,8 @@ int main(void)
 	int status;
 
 	if (check_hres_resolution())
+		return 1;
+	if (check_gettimeofday_timeval())
 		return 1;
 	if (check_coarse_resolution() || check_clock_getres_null() ||
 	    check_clock_getres_fallback())

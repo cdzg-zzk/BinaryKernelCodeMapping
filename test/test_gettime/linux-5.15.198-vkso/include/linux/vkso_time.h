@@ -42,6 +42,13 @@ vkso_time_getres(clockid_t clock_id, struct timespec64 *tp)
 {
 	return __vkso_clock_getres(clock_id, (struct vkso_time_value *)tp);
 }
+
+static __always_inline int
+vkso_time_gettimeofday(struct __kernel_old_timeval *tv, struct timezone *tz)
+{
+	return __vkso_gettimeofday((struct vkso_timeval *)tv,
+				   (struct vkso_timezone *)tz);
+}
 #else
 static inline void vkso_time_publish(struct timekeeper *tk)
 {
@@ -61,6 +68,12 @@ vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp)
 
 static inline int
 vkso_time_getres(clockid_t clock_id, struct timespec64 *tp)
+{
+	return VKSO_TIME_FALLBACK;
+}
+
+static inline int
+vkso_time_gettimeofday(struct __kernel_old_timeval *tv, struct timezone *tz)
 {
 	return VKSO_TIME_FALLBACK;
 }

@@ -14,6 +14,7 @@
 #include <string.h>
 #include <sys/auxv.h>
 #include <sys/syscall.h>
+#include <sys/time.h>
 #include <sys/timex.h>
 #include <sys/wait.h>
 #include <time.h>
@@ -38,6 +39,16 @@
 struct vkso_time_value {
 	int64_t sec;
 	uint64_t nsec;
+} __attribute__((__may_alias__));
+
+struct vkso_timeval {
+	int64_t sec;
+	int64_t usec;
+} __attribute__((__may_alias__));
+
+struct vkso_timezone {
+	int32_t minuteswest;
+	int32_t dsttime;
 } __attribute__((__may_alias__));
 
 struct vkso_hres_base {
@@ -101,6 +112,8 @@ struct vkso_mm_data {
 typedef int (*vkso_clock_gettime_fn)(const struct vkso_mm_data *, int,
 				    struct vkso_time_value *);
 typedef int (*vkso_clock_getres_fn)(int, struct vkso_time_value *);
+typedef int (*vkso_gettimeofday_fn)(struct vkso_timeval *,
+				    struct vkso_timezone *);
 typedef int (*vkso_hres_cycle_probe_at_fn)(
 	const struct vkso_shared_data *, struct vkso_hres_cycle_sample *);
 
@@ -159,10 +172,40 @@ static int64_t to_ns(const struct timespec *ts)
 	return (int64_t)ts->tv_sec * INT64_C(1000000000) + ts->tv_nsec;
 }
 
+static int64_t timeval_to_us(const struct timeval *tv)
+{
+	return (int64_t)tv->tv_sec * INT64_C(1000000) + tv->tv_usec;
+}
+
 static void fail(const char *message)
 {
 	fprintf(stderr, "failure=%s\n", message);
 	exit(1);
+}
+
+static void check_gettimeofday_timeval(vkso_gettimeofday_fn gettimeofday)
+{
+	int64_t previous = 0;
+	unsigned int i;
+
+	for (i = 0; i < SAMPLES; ++i) {
+		struct timeval before, after;
+		struct vkso_timeval current;
+		int64_t current_us;
+
+		if (syscall(SYS_gettimeofday, &before, NULL) ||
+		    gettimeofday(&current, NULL) ||
+		    syscall(SYS_gettimeofday, &after, NULL))
+			fail("gettimeofday timeval");
+		current_us = current.sec * INT64_C(1000000) + current.usec;
+		if (current.usec < 0 || current.usec >= 1000000 ||
+		    current_us < timeval_to_us(&before) ||
+		    current_us > timeval_to_us(&after) ||
+		    (i && current_us < previous))
+			fail("gettimeofday timeval value");
+		previous = current_us;
+	}
+	printf("user_gettimeofday_timeval=pass samples=%u\n", SAMPLES);
 }
 
 static void check_hres_resolution(vkso_clock_getres_fn clock_getres)
@@ -733,6 +776,7 @@ int main(void)
 {
 	vkso_clock_gettime_fn vkso_clock_gettime;
 	vkso_clock_getres_fn vkso_clock_getres;
+	vkso_gettimeofday_fn vkso_gettimeofday;
 	vkso_hres_cycle_probe_at_fn vkso_hres_cycle_probe_at;
 	struct shared_lookup lookup = { 0 };
 	struct vkso_shared_data *shared;
@@ -750,6 +794,10 @@ int main(void)
 	memcpy(&vkso_clock_getres, &symbol, sizeof(vkso_clock_getres));
 	if (!vkso_clock_getres)
 		fail("resolve clock_getres");
+	symbol = dlsym(RTLD_DEFAULT, "__vkso_gettimeofday");
+	memcpy(&vkso_gettimeofday, &symbol, sizeof(vkso_gettimeofday));
+	if (!vkso_gettimeofday)
+		fail("resolve gettimeofday");
 	mm_data = (const void *)getauxval(AT_VKSO_MM_DATA);
 	if (!mm_data || mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION)
 		fail("resolve mm data");
@@ -776,6 +824,7 @@ int main(void)
 	    shared->monotonic_coarse.nsec >= UINT64_C(1000000000))
 		fail("shared data layout");
 	check_hres_resolution(vkso_clock_getres);
+	check_gettimeofday_timeval(vkso_gettimeofday);
 	check_coarse_resolution(vkso_clock_getres);
 	check_clock_getres_null(vkso_clock_getres);
 	check_clock_getres_fallback(vkso_clock_getres,

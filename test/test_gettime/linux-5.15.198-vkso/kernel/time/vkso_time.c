@@ -17,6 +17,12 @@ static_assert(sizeof(struct timespec64) == sizeof(struct vkso_time_value) &&
 	      offsetof(struct vkso_time_value, sec) &&
 	      offsetof(struct timespec64, tv_nsec) ==
 	      offsetof(struct vkso_time_value, nsec));
+static_assert(sizeof(struct __kernel_old_timeval) ==
+	      sizeof(struct vkso_timeval) &&
+	      offsetof(struct __kernel_old_timeval, tv_sec) ==
+	      offsetof(struct vkso_timeval, sec) &&
+	      offsetof(struct __kernel_old_timeval, tv_usec) ==
+	      offsetof(struct vkso_timeval, usec));
 
 union vkso_shared_page vkso_shared_page
 	__aligned(VKSO_SHARED_PAGE_SIZE) __vkso_shared_data;

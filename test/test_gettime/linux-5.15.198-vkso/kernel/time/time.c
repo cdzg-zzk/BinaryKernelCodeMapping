@@ -35,6 +35,7 @@
 #include <linux/fs.h>
 #include <linux/math64.h>
 #include <linux/ptrace.h>
+#include <linux/vkso_time.h>
 
 #include <linux/uaccess.h>
 #include <linux/compat.h>
@@ -141,11 +142,16 @@ SYSCALL_DEFINE2(gettimeofday, struct __kernel_old_timeval __user *, tv,
 		struct timezone __user *, tz)
 {
 	if (likely(tv != NULL)) {
+		struct __kernel_old_timeval value;
 		struct timespec64 ts;
 
-		ktime_get_real_ts64(&ts);
-		if (put_user(ts.tv_sec, &tv->tv_sec) ||
-		    put_user(ts.tv_nsec / 1000, &tv->tv_usec))
+		if (vkso_time_gettimeofday(&value, NULL)) {
+			ktime_get_real_ts64(&ts);
+			value.tv_sec = ts.tv_sec;
+			value.tv_usec = ts.tv_nsec / NSEC_PER_USEC;
+		}
+		if (put_user(value.tv_sec, &tv->tv_sec) ||
+		    put_user(value.tv_usec, &tv->tv_usec))
 			return -EFAULT;
 	}
 	if (unlikely(tz != NULL)) {

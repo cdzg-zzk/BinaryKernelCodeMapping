@@ -19,6 +19,16 @@ struct vkso_time_value {
 	u64 nsec;
 } __attribute__((__may_alias__));
 
+struct vkso_timeval {
+	s64 sec;
+	s64 usec;
+} __attribute__((__may_alias__));
+
+struct vkso_timezone {
+	s32 minuteswest;
+	s32 dsttime;
+} __attribute__((__may_alias__));
+
 /* Nanoseconds remain shifted until the reader adds elapsed cycles. */
 struct vkso_hres_base {
 	s64 sec;
@@ -99,6 +109,7 @@ union vkso_mm_page {
 int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 			 struct vkso_time_value *value);
 int __vkso_clock_getres(int clock_id, struct vkso_time_value *value);
+int __vkso_gettimeofday(struct vkso_timeval *tv, struct vkso_timezone *tz);
 #ifdef CONFIG_VKSO_TIME_TEST
 int __vkso_test_hres_cycle_probe_at(
 	const struct vkso_shared_data *shared,
