@@ -1,8 +1,12 @@
 #define _GNU_SOURCE
 
+#include <dirent.h>
 #include <errno.h>
+#include <sched.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/syscall.h>
 #include <sys/time.h>
 #include <time.h>
@@ -197,10 +201,112 @@ static int check_clock_getres_fallback(void)
 	return 0;
 }
 
-int main(void)
+static int cpu_node_from_sysfs(unsigned int cpu, unsigned int *node)
+{
+	char path[128];
+	struct dirent *entry;
+	DIR *directory;
+
+	if (snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%u", cpu) >=
+	    (int)sizeof(path))
+		return -1;
+	directory = opendir(path);
+	if (!directory)
+		return -1;
+	while ((entry = readdir(directory))) {
+		char *end;
+		unsigned long value;
+
+		if (strncmp(entry->d_name, "node", 4))
+			continue;
+		errno = 0;
+		value = strtoul(entry->d_name + 4, &end, 10);
+		if (!errno && end != entry->d_name + 4 && !*end &&
+		    value <= UINT32_MAX) {
+			closedir(directory);
+			*node = (unsigned int)value;
+			return 0;
+		}
+	}
+	closedir(directory);
+	return -1;
+}
+
+static int check_getcpu(void)
+{
+	unsigned int cpus[CPU_SETSIZE];
+	unsigned int nodes[CPU_SETSIZE];
+	cpu_set_t original, allowed, affinity;
+	unsigned int cpu_count = 0, node_count = 0;
+	unsigned int cpu, cpu_index;
+
+	if (sched_getaffinity(0, sizeof(original), &original))
+		return 1;
+	allowed = original;
+	for (cpu = 0; cpu < CPU_SETSIZE; ++cpu)
+		if (CPU_ISSET(cpu, &allowed))
+			cpus[cpu_count++] = cpu;
+	if (!cpu_count)
+		return 1;
+
+	for (cpu_index = 0; cpu_index < cpu_count; ++cpu_index) {
+		unsigned int expected_node, node_index, i;
+
+		if (cpu_node_from_sysfs(cpus[cpu_index], &expected_node))
+			return 1;
+		for (node_index = 0; node_index < node_count; ++node_index)
+			if (nodes[node_index] == expected_node)
+				break;
+		if (node_index == node_count)
+			nodes[node_count++] = expected_node;
+		CPU_ZERO(&affinity);
+		CPU_SET(cpus[cpu_index], &affinity);
+		if (sched_setaffinity(0, sizeof(affinity), &affinity))
+			return 1;
+		for (i = 0; i < SAMPLES; ++i) {
+			unsigned int actual_cpu, actual_node;
+
+			if (syscall(SYS_getcpu, &actual_cpu, &actual_node, NULL) ||
+			    actual_cpu != cpus[cpu_index] ||
+			    actual_node != expected_node)
+				return 1;
+		}
+	}
+
+	CPU_ZERO(&affinity);
+	CPU_SET(cpus[0], &affinity);
+	if (sched_setaffinity(0, sizeof(affinity), &affinity))
+		return 1;
+	{
+		unsigned int actual_cpu, actual_node;
+
+		if (syscall(SYS_getcpu, &actual_cpu, &actual_node, NULL) ||
+		    actual_cpu != cpus[0] ||
+		    syscall(SYS_getcpu, &actual_cpu, NULL, NULL) ||
+		    actual_cpu != cpus[0] ||
+		    syscall(SYS_getcpu, NULL, &actual_node, NULL) ||
+		    actual_node != nodes[0] ||
+		    syscall(SYS_getcpu, NULL, NULL, NULL))
+			return 1;
+	}
+	if (sched_setaffinity(0, sizeof(original), &original))
+		return 1;
+
+	printf("kernel_getcpu_cpu=pass samples_per_cpu=%u\n", SAMPLES);
+	printf("kernel_getcpu_node=pass nodes=%u samples_per_cpu=%u\n",
+	       node_count, SAMPLES);
+	puts("kernel_getcpu_null=pass combinations=4");
+	printf("kernel_getcpu_multi_cpu=pass cpus=%u samples_per_cpu=%u\n",
+	       cpu_count, SAMPLES);
+	return 0;
+}
+
+int main(int argc, char **argv)
 {
 	int status;
 
+	if (argc == 2 && !strcmp(argv[1], "--getcpu-only"))
+		return check_getcpu();
 	if (check_hres_resolution())
 		return 1;
 	if (check_gettimeofday_timeval())
@@ -208,6 +314,8 @@ int main(void)
 	if (check_gettimeofday_timezone())
 		return 1;
 	if (check_time())
+		return 1;
+	if (check_getcpu())
 		return 1;
 	if (check_coarse_resolution() || check_clock_getres_null() ||
 	    check_clock_getres_fallback())

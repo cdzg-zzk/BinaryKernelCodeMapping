@@ -35,13 +35,13 @@ config X86_64
 	select ZONE_DMA32
 
 config VKSO_TIME
-	bool "VKSO shared kernel/user time implementation"
+	bool "VKSO shared kernel/user time and getcpu implementation"
 	depends on X86_64
 	help
-	  Build the common VKSO time core that is intended to execute from the
-	  same code pages in kernel and user contexts.  Data publication,
-	  process-context mappings and time interfaces are added independently;
-	  enabling this option alone does not replace any system call.
+	  Build the common VKSO core that executes from the same code pages in
+	  kernel and user contexts.  It provides time and getcpu interfaces
+	  together with the data publication and process-context mechanisms
+	  required by those interfaces.
 
 	  This option is experimental.  If unsure, say N.
 

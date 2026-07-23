@@ -50,6 +50,13 @@ KCOV_INSTRUMENT		:= n
 
 CFLAGS_head$(BITS).o	+= -fno-stack-protector
 CFLAGS_cc_platform.o	+= -fno-stack-protector
+CFLAGS_vkso_getcpu.o	:= -fno-stack-protector
+CFLAGS_REMOVE_vkso_getcpu.o := $(CC_FLAGS_FTRACE)
+GCOV_PROFILE_vkso_getcpu.o := n
+KCOV_INSTRUMENT_vkso_getcpu.o := n
+KASAN_SANITIZE_vkso_getcpu.o := n
+KCSAN_SANITIZE_vkso_getcpu.o := n
+UBSAN_SANITIZE_vkso_getcpu.o := n
 
 CFLAGS_irq.o := -I $(srctree)/$(src)/../include/asm/trace
 
@@ -57,7 +64,7 @@ obj-y			:= process_$(BITS).o signal.o
 obj-$(CONFIG_COMPAT)	+= signal_compat.o
 obj-y			+= traps.o idt.o irq.o irq_$(BITS).o dumpstack_$(BITS).o
 obj-y			+= time.o ioport.o dumpstack.o nmi.o
-obj-$(CONFIG_VKSO_TIME) += vkso.o
+obj-$(CONFIG_VKSO_TIME) += vkso.o vkso_getcpu.o
 obj-$(CONFIG_MODIFY_LDT_SYSCALL)	+= ldt.o
 obj-y			+= setup.o x86_init.o i8259.o irqinit.o
 obj-$(CONFIG_JUMP_LABEL)	+= jump_label.o

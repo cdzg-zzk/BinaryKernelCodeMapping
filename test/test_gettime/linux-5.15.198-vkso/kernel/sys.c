@@ -49,6 +49,7 @@
 #include <linux/user_namespace.h>
 #include <linux/time_namespace.h>
 #include <linux/binfmts.h>
+#include <linux/vkso_getcpu.h>
 
 #include <linux/sched.h>
 #include <linux/sched/autogroup.h>
@@ -2575,12 +2576,17 @@ SYSCALL_DEFINE3(getcpu, unsigned __user *, cpup, unsigned __user *, nodep,
 		struct getcpu_cache __user *, unused)
 {
 	int err = 0;
-	int cpu = raw_smp_processor_id();
+	unsigned int cpu;
+	unsigned int node;
 
+	if (vkso_getcpu(cpup ? &cpu : NULL, nodep ? &node : NULL)) {
+		cpu = raw_smp_processor_id();
+		node = cpu_to_node(cpu);
+	}
 	if (cpup)
 		err |= put_user(cpu, cpup);
 	if (nodep)
-		err |= put_user(cpu_to_node(cpu), nodep);
+		err |= put_user(node, nodep);
 	return err ? -EFAULT : 0;
 }
 

@@ -2,25 +2,14 @@
 #ifndef _LINUX_VKSO_TIME_H
 #define _LINUX_VKSO_TIME_H
 
-#include <linux/compiler_types.h>
 #include <linux/time64.h>
+#include <linux/vkso.h>
 #include <vkso/time.h>
 
 struct mm_struct;
 struct task_struct;
 struct timekeeper;
 struct timens_offsets;
-
-#define VKSO_TEXT_SECTION		".vkso.text"
-#define VKSO_SHARED_DATA_SECTION	".vkso.shared_data"
-
-#define __vkso_text		__section(VKSO_TEXT_SECTION)
-#define __vkso_shared_data	__section(VKSO_SHARED_DATA_SECTION)
-
-extern char __vkso_text_start[];
-extern char __vkso_text_end[];
-extern char __vkso_shared_data_start[];
-extern char __vkso_shared_data_end[];
 
 #ifdef CONFIG_VKSO_TIME
 extern union vkso_shared_page vkso_shared_page;

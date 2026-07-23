@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 
+#include <dirent.h>
 #include <errno.h>
 #include <dlfcn.h>
 #include <elf.h>
@@ -125,6 +126,7 @@ typedef int (*vkso_clock_getres_fn)(int, struct vkso_time_value *);
 typedef int (*vkso_gettimeofday_fn)(struct vkso_timeval *,
 				    struct vkso_timezone *);
 typedef int64_t (*vkso_time_fn)(int64_t *);
+typedef int (*vkso_getcpu_fn)(unsigned int *, unsigned int *, void *);
 typedef int (*vkso_hres_cycle_probe_at_fn)(
 	const struct vkso_shared_data *, struct vkso_hres_cycle_sample *);
 
@@ -852,12 +854,204 @@ static void check_time_namespace(vkso_clock_gettime_fn clock_gettime)
 		fail("time namespace child");
 }
 
-int main(void)
+static unsigned int cpu_node_from_sysfs(unsigned int cpu)
+{
+	char path[128];
+	struct dirent *entry;
+	DIR *directory;
+
+	if (snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%u", cpu) >=
+	    (int)sizeof(path))
+		fail("format CPU sysfs path");
+	directory = opendir(path);
+	if (!directory)
+		fail("open CPU sysfs directory");
+	while ((entry = readdir(directory))) {
+		char *end;
+		unsigned long node;
+
+		if (strncmp(entry->d_name, "node", 4))
+			continue;
+		errno = 0;
+		node = strtoul(entry->d_name + 4, &end, 10);
+		if (!errno && end != entry->d_name + 4 && !*end &&
+		    node <= UINT32_MAX) {
+			closedir(directory);
+			return (unsigned int)node;
+		}
+	}
+	closedir(directory);
+	fail("resolve CPU NUMA node");
+	return 0;
+}
+
+static unsigned int collect_allowed_cpus(unsigned int *cpus,
+					 unsigned int capacity)
+{
+	cpu_set_t allowed;
+	unsigned int count = 0;
+	unsigned int cpu;
+
+	if (sched_getaffinity(0, sizeof(allowed), &allowed))
+		fail("get CPU affinity");
+	for (cpu = 0; cpu < CPU_SETSIZE; ++cpu) {
+		if (!CPU_ISSET(cpu, &allowed))
+			continue;
+		if (count == capacity)
+			fail("CPU affinity capacity");
+		cpus[count++] = cpu;
+	}
+	if (!count)
+		fail("empty CPU affinity");
+	return count;
+}
+
+static void pin_to_cpu(unsigned int cpu)
+{
+	cpu_set_t affinity;
+
+	CPU_ZERO(&affinity);
+	CPU_SET(cpu, &affinity);
+	if (sched_setaffinity(0, sizeof(affinity), &affinity))
+		fail("set CPU affinity");
+}
+
+struct getcpu_thread_test {
+	vkso_getcpu_fn getcpu;
+	unsigned int cpu;
+	unsigned int node;
+	volatile int *start;
+	volatile int *failed;
+};
+
+static void *getcpu_thread(void *argument)
+{
+	struct getcpu_thread_test *test = argument;
+	unsigned int i;
+
+	pin_to_cpu(test->cpu);
+	while (!__atomic_load_n(test->start, __ATOMIC_ACQUIRE))
+		sched_yield();
+	for (i = 0; i < SAMPLES; ++i) {
+		unsigned int vkso_cpu, vkso_node, syscall_cpu, syscall_node;
+
+		if (test->getcpu(&vkso_cpu, &vkso_node, NULL) ||
+		    syscall(SYS_getcpu, &syscall_cpu, &syscall_node, NULL) ||
+		    vkso_cpu != test->cpu || syscall_cpu != test->cpu ||
+		    vkso_node != test->node || syscall_node != test->node) {
+			__atomic_store_n(test->failed, 1, __ATOMIC_RELEASE);
+			break;
+		}
+	}
+	return NULL;
+}
+
+static void check_getcpu(vkso_getcpu_fn getcpu)
+{
+	unsigned int cpus[CPU_SETSIZE];
+	unsigned int nodes[CPU_SETSIZE];
+	struct getcpu_thread_test *tests;
+	pthread_t *threads;
+	cpu_set_t original;
+	volatile int start = 0;
+	volatile int failed = 0;
+	unsigned int cpu_count, node_count = 0;
+	unsigned int cpu_index;
+
+	if (sched_getaffinity(0, sizeof(original), &original))
+		fail("save CPU affinity");
+	cpu_count = collect_allowed_cpus(cpus, CPU_SETSIZE);
+	for (cpu_index = 0; cpu_index < cpu_count; ++cpu_index) {
+		unsigned int expected_node = cpu_node_from_sysfs(cpus[cpu_index]);
+		unsigned int node_index;
+		unsigned int i;
+
+		for (node_index = 0; node_index < node_count; ++node_index)
+			if (nodes[node_index] == expected_node)
+				break;
+		if (node_index == node_count)
+			nodes[node_count++] = expected_node;
+		pin_to_cpu(cpus[cpu_index]);
+		for (i = 0; i < SAMPLES; ++i) {
+			unsigned int vkso_cpu, vkso_node;
+			unsigned int syscall_cpu, syscall_node;
+
+			if (getcpu(&vkso_cpu, &vkso_node, NULL) ||
+			    syscall(SYS_getcpu, &syscall_cpu, &syscall_node,
+				    NULL) ||
+			    vkso_cpu != cpus[cpu_index] ||
+			    syscall_cpu != cpus[cpu_index] ||
+			    vkso_node != expected_node ||
+			    syscall_node != expected_node)
+				fail("getcpu CPU or node");
+		}
+	}
+	if (sched_setaffinity(0, sizeof(original), &original))
+		fail("restore CPU affinity");
+
+	{
+		unsigned int cpu = UINT32_MAX;
+		unsigned int node = UINT32_MAX;
+
+		pin_to_cpu(cpus[0]);
+		if (getcpu(&cpu, &node, NULL) || cpu != cpus[0] ||
+		    node != cpu_node_from_sysfs(cpus[0]))
+			fail("getcpu CPU/node combination");
+		node = UINT32_MAX;
+		if (getcpu(&cpu, NULL, NULL) || cpu != cpus[0] ||
+		    node != UINT32_MAX)
+			fail("getcpu CPU/NULL combination");
+		cpu = UINT32_MAX;
+		if (getcpu(NULL, &node, NULL) ||
+		    node != cpu_node_from_sysfs(cpus[0]) ||
+		    cpu != UINT32_MAX)
+			fail("getcpu NULL/node combination");
+		if (getcpu(NULL, NULL, NULL))
+			fail("getcpu NULL/NULL combination");
+		if (sched_setaffinity(0, sizeof(original), &original))
+			fail("restore CPU affinity after NULL combinations");
+	}
+
+	threads = calloc(cpu_count, sizeof(*threads));
+	tests = calloc(cpu_count, sizeof(*tests));
+	if (!threads || !tests)
+		fail("allocate getcpu thread tests");
+	for (cpu_index = 0; cpu_index < cpu_count; ++cpu_index) {
+		tests[cpu_index].getcpu = getcpu;
+		tests[cpu_index].cpu = cpus[cpu_index];
+		tests[cpu_index].node = cpu_node_from_sysfs(cpus[cpu_index]);
+		tests[cpu_index].start = &start;
+		tests[cpu_index].failed = &failed;
+		if (pthread_create(&threads[cpu_index], NULL, getcpu_thread,
+				   &tests[cpu_index]))
+			fail("create getcpu thread");
+	}
+	__atomic_store_n(&start, 1, __ATOMIC_RELEASE);
+	for (cpu_index = 0; cpu_index < cpu_count; ++cpu_index)
+		if (pthread_join(threads[cpu_index], NULL))
+			fail("join getcpu thread");
+	free(tests);
+	free(threads);
+	if (__atomic_load_n(&failed, __ATOMIC_ACQUIRE))
+		fail("getcpu multithread");
+
+	printf("user_getcpu_cpu=pass samples_per_cpu=%u\n", SAMPLES);
+	printf("user_getcpu_node=pass nodes=%u samples_per_cpu=%u\n",
+	       node_count, SAMPLES);
+	puts("user_getcpu_null=pass combinations=4");
+	printf("user_getcpu_multi_cpu=pass cpus=%u samples_per_cpu=%u\n",
+	       cpu_count, SAMPLES);
+	printf("user_getcpu_multithread=pass threads=%u samples_per_thread=%u\n",
+	       cpu_count, SAMPLES);
+}
+
+int main(int argc, char **argv)
 {
 	vkso_clock_gettime_fn vkso_clock_gettime;
 	vkso_clock_getres_fn vkso_clock_getres;
 	vkso_gettimeofday_fn vkso_gettimeofday;
 	vkso_time_fn vkso_time;
+	vkso_getcpu_fn vkso_getcpu;
 	vkso_hres_cycle_probe_at_fn vkso_hres_cycle_probe_at;
 	struct shared_lookup lookup = { 0 };
 	struct vkso_shared_data *shared;
@@ -867,6 +1061,15 @@ int main(void)
 	void *symbol;
 	unsigned int i;
 
+	if (argc == 2 && !strcmp(argv[1], "--getcpu-only")) {
+		symbol = dlsym(RTLD_DEFAULT, "__vkso_getcpu");
+		memcpy(&vkso_getcpu, &symbol, sizeof(vkso_getcpu));
+		if (!vkso_getcpu)
+			fail("resolve getcpu-only");
+		require_mapping(symbol, 1);
+		check_getcpu(vkso_getcpu);
+		return 0;
+	}
 	symbol = dlsym(RTLD_DEFAULT, "__vkso_clock_gettime");
 	memcpy(&vkso_clock_gettime, &symbol, sizeof(vkso_clock_gettime));
 	if (!vkso_clock_gettime || !dladdr(symbol, &info))
@@ -883,6 +1086,11 @@ int main(void)
 	memcpy(&vkso_time, &symbol, sizeof(vkso_time));
 	if (!vkso_time)
 		fail("resolve time");
+	symbol = dlsym(RTLD_DEFAULT, "__vkso_getcpu");
+	memcpy(&vkso_getcpu, &symbol, sizeof(vkso_getcpu));
+	if (!vkso_getcpu)
+		fail("resolve getcpu");
+	require_mapping(symbol, 1);
 	mm_data = (const void *)getauxval(AT_VKSO_MM_DATA);
 	if (!mm_data || mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION)
 		fail("resolve mm data");
@@ -913,6 +1121,7 @@ int main(void)
 	check_gettimeofday_timeval(vkso_gettimeofday);
 	check_gettimeofday_timezone(vkso_gettimeofday);
 	check_time(vkso_time);
+	check_getcpu(vkso_getcpu);
 	check_coarse_resolution(vkso_clock_getres);
 	check_clock_getres_null(vkso_clock_getres);
 	check_clock_getres_fallback(vkso_clock_getres,

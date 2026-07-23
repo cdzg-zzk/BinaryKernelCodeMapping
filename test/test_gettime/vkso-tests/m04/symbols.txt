@@ -2,4 +2,5 @@ __vkso_clock_gettime
 __vkso_clock_getres
 __vkso_gettimeofday
 __vkso_time
+__vkso_getcpu
 __vkso_test_hres_cycle_probe_at

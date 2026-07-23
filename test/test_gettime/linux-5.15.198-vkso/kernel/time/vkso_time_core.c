@@ -2,7 +2,6 @@
 
 #include <asm/clocksource.h>
 #include <asm/msr.h>
-#include <asm/processor.h>
 
 #include <linux/build_bug.h>
 #include <linux/compiler.h>

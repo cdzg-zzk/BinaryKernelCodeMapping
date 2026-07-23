@@ -8,6 +8,9 @@ KERNEL="$ROOT/test/test_gettime/linux-5.15.198-vkso"
 BUILD=${BUILD:-/tmp/vkso-m04-build}
 WORK=${WORK:-/tmp/vkso-m04-run}
 JOBS=${JOBS:-$(nproc)}
+QEMU_SMP=${QEMU_SMP:-1}
+QEMU_TCG_THREAD=${QEMU_TCG_THREAD:-single}
+read -r -a QEMU_EXTRA <<<"${QEMU_EXTRA_ARGS:-}"
 RESULT="$WORK/qemu.log"
 
 mkdir -p "$BUILD" "$WORK"
@@ -81,17 +84,21 @@ mkdir -p "$PAYLOAD"
 cp "$MODULE/page_cache_replace.ko" "$MODULE/manager" "$PAYLOAD/"
 cp "$DSO/libkernel.so" "$DSO/page_mappings.txt" "$PAYLOAD/"
 cp "$WORK/m04-kernel-smoke" "$WORK/m04-user-test" "$PAYLOAD/"
+if [ "${GETCPU_ONLY:-0}" -eq 1 ]; then
+	touch "$PAYLOAD/getcpu-only"
+fi
 truncate -s 32M "$WORK/payload.ext4"
 mkfs.ext4 -q -F -d "$PAYLOAD" "$WORK/payload.ext4"
 
 set +e
 timeout 180 qemu-system-x86_64 \
-	-accel tcg,thread=single -cpu max -m 512M -smp 1 \
+	-accel "tcg,thread=$QEMU_TCG_THREAD" -cpu max -m 512M \
+	-smp "$QEMU_SMP" \
 	-kernel "$BUILD/arch/x86/boot/bzImage" \
 	-initrd "$WORK/initramfs.cpio.gz" \
 	-drive "file=$WORK/payload.ext4,if=virtio,format=raw" \
 	-append "console=ttyS0 init=/init panic=-1 oops=panic nokaslr" \
-	-nographic -no-reboot 2>&1 | tee "$RESULT"
+	"${QEMU_EXTRA[@]}" -nographic -no-reboot 2>&1 | tee "$RESULT"
 qemu_status=${PIPESTATUS[0]}
 set -e
 
@@ -100,12 +107,23 @@ if [ "$qemu_status" -ne 0 ] && [ "$qemu_status" -ne 124 ]; then
 	exit "$qemu_status"
 fi
 
-for marker in \
-	"kernel_realtime_coarse=pass" \
-	"user_realtime_coarse=pass" \
-	"mapping_permissions=pass" \
-	"rip_relative_shared_read=pass" \
-	"status=0"; do
+if [ "${GETCPU_ONLY:-0}" -eq 1 ]; then
+	required_markers=(
+		"kernel_getcpu_cpu=pass"
+		"user_getcpu_cpu=pass"
+		"user_getcpu_multithread=pass"
+		"status=0"
+	)
+else
+	required_markers=(
+		"kernel_realtime_coarse=pass"
+		"user_realtime_coarse=pass"
+		"mapping_permissions=pass"
+		"rip_relative_shared_read=pass"
+		"status=0"
+	)
+fi
+for marker in "${required_markers[@]}"; do
 	grep -Fq "$marker" "$RESULT" || {
 		echo "missing QEMU marker: $marker" >&2
 		exit 1
