@@ -120,15 +120,45 @@ struct vkso_mm_data {
 	struct vkso_time_value boottime_offset;
 };
 
+struct vkso_cycle_context {
+	const void *pvclock_page;
+	const void *hvclock_page;
+};
+
+typedef int (*vkso_clock_gettime_core_fn)(
+	const struct vkso_mm_data *, int, struct vkso_time_value *,
+	const struct vkso_cycle_context *);
 typedef int (*vkso_clock_gettime_fn)(const struct vkso_mm_data *, int,
 				    struct vkso_time_value *);
 typedef int (*vkso_clock_getres_fn)(int, struct vkso_time_value *);
+typedef int (*vkso_gettimeofday_core_fn)(
+	struct vkso_timeval *, struct vkso_timezone *,
+	const struct vkso_cycle_context *);
 typedef int (*vkso_gettimeofday_fn)(struct vkso_timeval *,
 				    struct vkso_timezone *);
 typedef int64_t (*vkso_time_fn)(int64_t *);
 typedef int (*vkso_getcpu_fn)(unsigned int *, unsigned int *, void *);
 typedef int (*vkso_hres_cycle_probe_at_fn)(
 	const struct vkso_shared_data *, struct vkso_hres_cycle_sample *);
+
+static vkso_clock_gettime_core_fn bound_clock_gettime_core;
+static vkso_gettimeofday_core_fn bound_gettimeofday_core;
+static struct vkso_cycle_context user_cycle_context;
+
+/* Temporary user wrapper: final wrapper generation belongs to make_dll. */
+static int user_clock_gettime_wrapper(const struct vkso_mm_data *mm_data,
+				      int clock_id,
+				      struct vkso_time_value *value)
+{
+	return bound_clock_gettime_core(mm_data, clock_id, value,
+				       &user_cycle_context);
+}
+
+static int user_gettimeofday_wrapper(struct vkso_timeval *tv,
+				     struct vkso_timezone *tz)
+{
+	return bound_gettimeofday_core(tv, tz, &user_cycle_context);
+}
 
 _Static_assert(sizeof(struct timespec) == sizeof(struct vkso_time_value) &&
 	       offsetof(struct timespec, tv_sec) ==
@@ -1070,18 +1100,22 @@ int main(int argc, char **argv)
 		check_getcpu(vkso_getcpu);
 		return 0;
 	}
-	symbol = dlsym(RTLD_DEFAULT, "__vkso_clock_gettime");
-	memcpy(&vkso_clock_gettime, &symbol, sizeof(vkso_clock_gettime));
-	if (!vkso_clock_gettime || !dladdr(symbol, &info))
+	symbol = dlsym(RTLD_DEFAULT, "vkso_clock_gettime_core");
+	memcpy(&bound_clock_gettime_core, &symbol,
+	       sizeof(bound_clock_gettime_core));
+	if (!bound_clock_gettime_core || !dladdr(symbol, &info))
 		fail("resolve symbols");
+	vkso_clock_gettime = user_clock_gettime_wrapper;
 	symbol = dlsym(RTLD_DEFAULT, "__vkso_clock_getres");
 	memcpy(&vkso_clock_getres, &symbol, sizeof(vkso_clock_getres));
 	if (!vkso_clock_getres)
 		fail("resolve clock_getres");
-	symbol = dlsym(RTLD_DEFAULT, "__vkso_gettimeofday");
-	memcpy(&vkso_gettimeofday, &symbol, sizeof(vkso_gettimeofday));
-	if (!vkso_gettimeofday)
+	symbol = dlsym(RTLD_DEFAULT, "vkso_gettimeofday_core");
+	memcpy(&bound_gettimeofday_core, &symbol,
+	       sizeof(bound_gettimeofday_core));
+	if (!bound_gettimeofday_core)
 		fail("resolve gettimeofday");
+	vkso_gettimeofday = user_gettimeofday_wrapper;
 	symbol = dlsym(RTLD_DEFAULT, "__vkso_time");
 	memcpy(&vkso_time, &symbol, sizeof(vkso_time));
 	if (!vkso_time)

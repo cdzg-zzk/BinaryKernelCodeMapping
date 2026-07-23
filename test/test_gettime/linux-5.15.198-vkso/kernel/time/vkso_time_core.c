@@ -1,17 +1,25 @@
 // SPDX-License-Identifier: GPL-2.0
 
+#include <linux/time.h>
+
 #include <asm/clocksource.h>
 #include <asm/msr.h>
+#ifdef CONFIG_PARAVIRT_CLOCK
+#include <asm/pvclock.h>
+#endif
 
 #include <linux/build_bug.h>
 #include <linux/compiler.h>
 #include <linux/stddef.h>
-#include <linux/time.h>
 #include <linux/vkso_time.h>
 
 #include <vdso/clocksource.h>
 #include <vdso/ktime.h>
 #include <vdso/math64.h>
+
+#ifdef CONFIG_HYPERV_TIMER
+#include <clocksource/hyperv_timer.h>
+#endif
 
 /* Keep the binary contract explicit before executable interfaces are added. */
 static_assert(sizeof(struct vkso_time_value) == 16);
@@ -53,6 +61,7 @@ static_assert(offsetof(struct vkso_mm_data, monotonic_offset) == 8);
 static_assert(offsetof(struct vkso_mm_data, boottime_offset) == 24);
 static_assert(sizeof(union vkso_shared_page) == VKSO_SHARED_PAGE_SIZE);
 static_assert(sizeof(union vkso_mm_page) == VKSO_SHARED_PAGE_SIZE);
+static_assert(sizeof(struct vkso_cycle_context) == 2 * sizeof(void *));
 
 struct vkso_hres_snapshot {
 #ifdef CONFIG_VKSO_TIME_TEST
@@ -102,16 +111,72 @@ static __always_inline bool vkso_read_retry(
 	return unlikely(seq != READ_ONCE(shared->seq));
 }
 
-/*
- * The native counter backend is deliberately inlined into the common reader:
- * there is no callback or indirect branch between the two seq observations.
- */
-static __always_inline bool vkso_read_cycles(s32 clock_mode, u64 *cycles)
+#ifdef CONFIG_PARAVIRT_CLOCK
+static noinline notrace __vkso_text bool
+vkso_read_pvclock_cycles(const void *page, u64 *cycles)
 {
-	if (unlikely(clock_mode != VDSO_CLOCKMODE_TSC))
+	const struct pvclock_vcpu_time_info *pvti;
+	u32 version;
+	u64 value;
+
+	if (unlikely(!page))
 		return false;
-	*cycles = rdtsc_ordered();
-	return (s64)*cycles >= 0;
+	pvti = &((const struct pvclock_vsyscall_time_info *)page)->pvti;
+	do {
+		version = pvclock_read_begin(pvti);
+		if (unlikely(!(pvti->flags & PVCLOCK_TSC_STABLE_BIT)))
+			return false;
+		value = __pvclock_read_cycles(pvti, rdtsc_ordered());
+	} while (pvclock_read_retry(pvti, version));
+
+	*cycles = value;
+	return (s64)value >= 0;
+}
+#endif
+
+#ifdef CONFIG_HYPERV_TIMER
+static noinline notrace __vkso_text bool
+vkso_read_hvclock_cycles(const void *page, u64 *cycles)
+{
+	u64 value;
+
+	if (unlikely(!page))
+		return false;
+	value = hv_read_tsc_page(page);
+	*cycles = value;
+	return (s64)value >= 0;
+}
+#endif
+
+/*
+ * TSC stays inline and does not touch cycle_context. PV/HV are deliberately
+ * out-of-line cold paths, with direct calls that remain inside .vkso.text.
+ */
+static __always_inline bool
+vkso_read_cycles(const struct vkso_cycle_context *cycle_context,
+		 s32 clock_mode, u64 *cycles)
+{
+	if (likely(clock_mode == VDSO_CLOCKMODE_TSC)) {
+		*cycles = rdtsc_ordered();
+		return (s64)*cycles >= 0;
+	}
+#ifdef CONFIG_PARAVIRT_CLOCK
+	if (clock_mode == VDSO_CLOCKMODE_PVCLOCK) {
+		barrier();
+		return cycle_context &&
+			vkso_read_pvclock_cycles(cycle_context->pvclock_page,
+						cycles);
+	}
+#endif
+#ifdef CONFIG_HYPERV_TIMER
+	if (clock_mode == VDSO_CLOCKMODE_HVCLOCK) {
+		barrier();
+		return cycle_context &&
+			vkso_read_hvclock_cycles(cycle_context->hvclock_page,
+						cycles);
+	}
+#endif
+	return false;
 }
 
 static __always_inline void vkso_hres_from_snapshot(
@@ -134,7 +199,8 @@ static __always_inline void vkso_hres_from_snapshot(
 
 static __always_inline int vkso_read_hres(
 	const struct vkso_shared_data *shared, size_t value_offset,
-	size_t cycle_offset, struct vkso_hres_snapshot *snapshot)
+	size_t cycle_offset, const struct vkso_cycle_context *cycle_context,
+	struct vkso_hres_snapshot *snapshot)
 {
 	const struct vkso_hres_base *base =
 		(const void *)((const u8 *)shared + value_offset);
@@ -150,7 +216,8 @@ static __always_inline int vkso_read_hres(
 	for (;;) {
 		seq = vkso_read_begin(shared, &next);
 		clock_mode = READ_ONCE(cycle_data->clock_mode);
-		if (unlikely(!vkso_read_cycles(clock_mode, &next.cycles)))
+		if (unlikely(!vkso_read_cycles(cycle_context, clock_mode,
+					      &next.cycles)))
 			return VKSO_TIME_FALLBACK;
 		next.cycle_last = READ_ONCE(cycle_data->cycle_last);
 #ifdef CONFIG_VKSO_TIME_TEST
@@ -213,6 +280,7 @@ static __always_inline int vkso_hres_sample(
 	status = vkso_read_hres(shared,
 		offsetof(struct vkso_shared_data, hres.realtime_base),
 		offsetof(struct vkso_shared_data, hres.cycles),
+		NULL,
 		&snapshot);
 	if (status != VKSO_TIME_OK)
 		return status;
@@ -238,8 +306,10 @@ int __vkso_test_hres_cycle_probe_at(
 #endif
 
 __visible noinline notrace __vkso_text
-int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
-			 struct vkso_time_value *value)
+int vkso_clock_gettime_core(
+	const struct vkso_mm_data *mm_data, int clock_id,
+	struct vkso_time_value *value,
+	const struct vkso_cycle_context *cycle_context)
 {
 	const struct vkso_shared_data *shared;
 	struct vkso_hres_snapshot snapshot;
@@ -301,6 +371,7 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 	shared = vkso_shared_data();
 	if (high_resolution) {
 		if (vkso_read_hres(shared, value_offset, cycle_offset,
+				   cycle_context,
 				   &snapshot) != VKSO_TIME_OK)
 			return VKSO_TIME_FALLBACK;
 		vkso_hres_from_snapshot(&snapshot, offset_sec, offset_nsec,
@@ -351,7 +422,9 @@ int __vkso_clock_getres(int clock_id, struct vkso_time_value *value)
 }
 
 __visible noinline notrace __vkso_text
-int __vkso_gettimeofday(struct vkso_timeval *tv, struct vkso_timezone *tz)
+int vkso_gettimeofday_core(
+	struct vkso_timeval *tv, struct vkso_timezone *tz,
+	const struct vkso_cycle_context *cycle_context)
 {
 	const struct vkso_shared_data *shared = vkso_shared_data();
 	struct vkso_hres_snapshot snapshot;
@@ -363,6 +436,7 @@ int __vkso_gettimeofday(struct vkso_timeval *tv, struct vkso_timezone *tz)
 					    hres.realtime_base),
 				   offsetof(struct vkso_shared_data,
 					    hres.cycles),
+				   cycle_context,
 				   &snapshot) != VKSO_TIME_OK)
 			return VKSO_TIME_FALLBACK;
 		vkso_hres_from_snapshot(&snapshot, 0, 0, &now);

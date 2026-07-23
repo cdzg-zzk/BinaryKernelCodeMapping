@@ -21,6 +21,7 @@
 #include <linux/interrupt.h>
 #include <linux/irq.h>
 #include <linux/acpi.h>
+#include <linux/vkso_time.h>
 #include <clocksource/hyperv_timer.h>
 #include <asm/hyperv-tlfs.h>
 #include <asm/mshyperv.h>
@@ -537,6 +538,7 @@ static bool __init hv_init_tsc_clocksource(void)
 	tsc_msr &= GENMASK_ULL(11, 0);
 	tsc_msr = tsc_msr | 0x1 | (u64)phys_addr;
 	hv_set_register(HV_REGISTER_REFERENCE_TSC, tsc_msr);
+	vkso_time_set_hvclock_page(hv_get_tsc_page());
 
 	clocksource_register_hz(&hyperv_cs_tsc, NSEC_PER_SEC/100);
 

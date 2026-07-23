@@ -10,13 +10,8 @@ RESULT="$WORK/qemu.log"
 
 BUILD="$BUILD" WORK="$WORK" "$SCRIPT_DIR/../m16/run.sh"
 
-disassembly=$(objdump -d --disassemble=__vkso_gettimeofday \
-	"$BUILD/vmlinux")
-if grep -Eq '[[:space:]]call[q]?[[:space:]]|[[:space:]]jmp[q]?[[:space:]]+\*' \
-	<<<"$disassembly"; then
-	echo "M17 gettimeofday contains a call or indirect jump" >&2
-	exit 1
-fi
+"$SCRIPT_DIR/../m04/check_cycles_disassembly.sh" "$BUILD" \
+	vkso_gettimeofday_core M17
 
 for marker in \
 	"kernel_gettimeofday_timeval=pass samples=10000" \
@@ -27,5 +22,5 @@ for marker in \
 	}
 done
 
-echo "M17 static PASS: no call/indirect jump"
+echo "M17 static PASS: inline TSC; only direct PV/HV cold calls allowed"
 echo "M17 PASS: $RESULT"

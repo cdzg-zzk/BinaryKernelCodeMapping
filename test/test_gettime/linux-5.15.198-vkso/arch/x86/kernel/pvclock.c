@@ -11,6 +11,7 @@
 #include <linux/gfp.h>
 #include <linux/memblock.h>
 #include <linux/nmi.h>
+#include <linux/vkso_time.h>
 
 #include <asm/fixmap.h>
 #include <asm/pvclock.h>
@@ -145,6 +146,7 @@ void pvclock_read_wallclock(struct pvclock_wall_clock *wall_clock,
 void pvclock_set_pvti_cpu0_va(struct pvclock_vsyscall_time_info *pvti)
 {
 	pvti_cpu0_va = pvti;
+	vkso_time_set_pvclock_page(pvti);
 }
 
 struct pvclock_vsyscall_time_info *pvclock_get_pvti_cpu0_va(void)

@@ -32,6 +32,18 @@ static_assert(sizeof(struct timezone) == sizeof(struct vkso_timezone) &&
 union vkso_shared_page vkso_shared_page
 	__aligned(VKSO_SHARED_PAGE_SIZE) __vkso_shared_data;
 
+struct vkso_cycle_context vkso_kernel_cycle_context;
+
+void vkso_time_set_pvclock_page(const void *page)
+{
+	WRITE_ONCE(vkso_kernel_cycle_context.pvclock_page, page);
+}
+
+void vkso_time_set_hvclock_page(const void *page)
+{
+	WRITE_ONCE(vkso_kernel_cycle_context.hvclock_page, page);
+}
+
 static __always_inline void vkso_time_prepare_cycles(
 	struct vkso_cycle_data *next, const struct tk_read_base *tkr)
 {

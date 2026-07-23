@@ -44,6 +44,14 @@ The native API target is:
 - `__vkso_time`
 - `__vkso_getcpu`
 
+These are stable wrapper entry points.  Address-space-specific dependencies
+are not added to their signatures.  The mapped implementation uses internal
+`vkso_clock_gettime_core` and `vkso_gettimeofday_core` entry points; the
+kernel wrapper supplies kernel-valid PV/HV page aliases, while the user
+wrapper supplies user-valid aliases.  During incremental testing the test
+executable acts as the user wrapper; final wrapper generation belongs to
+`make_dll`.
+
 Functionality must be at least the native x86-64 raw-vDSO functionality under
 the same configuration.  QEMU is used only for correctness; it is not a
 performance environment.

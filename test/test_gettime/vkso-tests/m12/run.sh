@@ -10,17 +10,8 @@ RESULT="$WORK/qemu.log"
 
 BUILD="$BUILD" WORK="$WORK" "$SCRIPT_DIR/../m11/run.sh"
 
-disassembly=$(objdump -d --disassemble=__vkso_clock_gettime \
-	"$BUILD/vmlinux")
-grep -Eq '[[:space:]]rdtsc(p)?[[:space:]]*$' <<<"$disassembly" || {
-	echo "M12 TSC instruction missing from CLOCK_BOOTTIME path" >&2
-	exit 1
-}
-if grep -Eq '[[:space:]]call[q]?[[:space:]]|[[:space:]]jmp[q]?[[:space:]]+\*' \
-	<<<"$disassembly"; then
-	echo "M12 CLOCK_BOOTTIME path contains a call or indirect jump" >&2
-	exit 1
-fi
+"$SCRIPT_DIR/../m04/check_cycles_disassembly.sh" "$BUILD" \
+	vkso_clock_gettime_core M12
 
 for marker in \
 	"kernel_boottime=pass" \
@@ -32,5 +23,5 @@ for marker in \
 	}
 done
 
-echo "M12 static PASS: inline TSC, no call/indirect jump"
+echo "M12 static PASS: inline TSC; only direct PV/HV cold calls allowed"
 echo "M12 PASS: $RESULT"

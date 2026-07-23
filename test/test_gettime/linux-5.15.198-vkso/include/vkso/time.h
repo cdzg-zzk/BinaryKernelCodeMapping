@@ -102,13 +102,29 @@ union vkso_mm_page {
 };
 
 /*
- * VKSO_TIME_FALLBACK asks the environment adapter to use its native handler:
- * the clock_gettime syscall in userspace or the POSIX clock handler in-kernel.
+ * Environment-specific aliases of hypervisor-owned counter pages. Kernel
+ * and user wrappers provide addresses valid in their own address spaces.
  */
-int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
-			 struct vkso_time_value *value);
+struct vkso_cycle_context {
+	const void *pvclock_page;
+	const void *hvclock_page;
+};
+
+/*
+ * Internal shared-core entry points. They are not the user ABI: kernel and
+ * user wrappers inject address-space-specific dependencies here.
+ *
+ * VKSO_TIME_FALLBACK asks the wrapper to use its native handler: the
+ * clock_gettime syscall in userspace or the POSIX clock handler in-kernel.
+ */
+int vkso_clock_gettime_core(
+	const struct vkso_mm_data *mm_data, int clock_id,
+	struct vkso_time_value *value,
+	const struct vkso_cycle_context *cycle_context);
 int __vkso_clock_getres(int clock_id, struct vkso_time_value *value);
-int __vkso_gettimeofday(struct vkso_timeval *tv, struct vkso_timezone *tz);
+int vkso_gettimeofday_core(
+	struct vkso_timeval *tv, struct vkso_timezone *tz,
+	const struct vkso_cycle_context *cycle_context);
 s64 __vkso_time(s64 *tloc);
 #ifdef CONFIG_VKSO_TIME_TEST
 int __vkso_test_hres_cycle_probe_at(

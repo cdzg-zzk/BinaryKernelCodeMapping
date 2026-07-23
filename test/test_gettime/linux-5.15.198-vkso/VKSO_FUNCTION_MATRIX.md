@@ -11,6 +11,13 @@ may differ for address-space access and fallback.
 Canonical user symbols are `__vkso_clock_gettime`, `__vkso_clock_getres`,
 `__vkso_gettimeofday`, `__vkso_time` and `__vkso_getcpu`.
 
+The canonical symbols are stable wrappers, not the shared machine-code ABI.
+The mapped `vkso_clock_gettime_core` and `vkso_gettimeofday_core` functions
+take an internal cycle-source context so the kernel and user wrappers can
+supply address-space-valid PVClock/Hyper-V page aliases.  The extra context is
+not visible in the canonical API.  Until `make_dll` generates these wrappers,
+the QEMU user test supplies them locally.
+
 Status values:
 
 - `PASS`: verified in the current QEMU baseline.
