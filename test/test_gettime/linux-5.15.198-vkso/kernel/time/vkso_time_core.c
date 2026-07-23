@@ -27,6 +27,7 @@ static_assert(offsetof(struct vkso_shared_data, monotonic_coarse) == 24);
 static_assert(offsetof(struct vkso_shared_data, hres) == 40);
 static_assert(offsetof(struct vkso_shared_data, raw) == 136);
 static_assert(offsetof(struct vkso_shared_data, hrtimer_resolution) == 184);
+static_assert(offsetof(struct vkso_shared_data, timezone) == 192);
 static_assert(offsetof(struct vkso_cycle_data, cycle_last) == 8);
 static_assert(offsetof(struct vkso_cycle_data, mask) == 16);
 static_assert(offsetof(struct vkso_cycle_data, mult) == 24);
@@ -368,21 +369,28 @@ int __vkso_clock_getres(int clock_id, struct vkso_time_value *value)
 __visible noinline notrace __vkso_text
 int __vkso_gettimeofday(struct vkso_timeval *tv, struct vkso_timezone *tz)
 {
-	const struct vkso_shared_data *shared;
+	const struct vkso_shared_data *shared = vkso_shared_data();
 	struct vkso_hres_snapshot snapshot;
 	struct vkso_time_value now;
 
-	if (unlikely(!tv || tz))
+	if (likely(tv)) {
+		if (vkso_read_hres(shared,
+				   offsetof(struct vkso_shared_data,
+					    hres.realtime_base),
+				   offsetof(struct vkso_shared_data,
+					    hres.cycles),
+				   &snapshot) != VKSO_TIME_OK)
+			return VKSO_TIME_FALLBACK;
+		vkso_hres_from_snapshot(&snapshot, 0, 0, &now);
+		tv->sec = now.sec;
+		tv->usec = now.nsec / NSEC_PER_USEC;
+	} else if (tz && unlikely(READ_ONCE(shared->abi_version) !=
+				  VKSO_TIME_ABI_VERSION)) {
 		return VKSO_TIME_FALLBACK;
-	shared = vkso_shared_data();
-	if (vkso_read_hres(shared,
-			   offsetof(struct vkso_shared_data,
-				    hres.realtime_base),
-			   offsetof(struct vkso_shared_data, hres.cycles),
-			   &snapshot) != VKSO_TIME_OK)
-		return VKSO_TIME_FALLBACK;
-	vkso_hres_from_snapshot(&snapshot, 0, 0, &now);
-	tv->sec = now.sec;
-	tv->usec = now.nsec / NSEC_PER_USEC;
+	}
+	if (unlikely(tz)) {
+		tz->minuteswest = READ_ONCE(shared->timezone.minuteswest);
+		tz->dsttime = READ_ONCE(shared->timezone.dsttime);
+	}
 	return VKSO_TIME_OK;
 }

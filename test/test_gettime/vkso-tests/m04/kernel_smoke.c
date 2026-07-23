@@ -38,6 +38,24 @@ static int check_gettimeofday_timeval(void)
 	return 0;
 }
 
+static int check_gettimeofday_timezone(void)
+{
+	struct timeval timeval;
+	struct timezone timezone, combined_timezone;
+
+	if (syscall(SYS_gettimeofday, NULL, &timezone) ||
+	    syscall(SYS_gettimeofday, &timeval, &combined_timezone) ||
+	    syscall(SYS_gettimeofday, &timeval, NULL) ||
+	    syscall(SYS_gettimeofday, NULL, NULL) ||
+	    timezone.tz_minuteswest != combined_timezone.tz_minuteswest ||
+	    timezone.tz_dsttime != combined_timezone.tz_dsttime ||
+	    timeval.tv_usec < 0 || timeval.tv_usec >= 1000000)
+		return 1;
+	puts("kernel_gettimeofday_timezone=pass");
+	puts("kernel_gettimeofday_null_combinations=pass combinations=4");
+	return 0;
+}
+
 static int check_clock(clockid_t clock_id)
 {
 	struct timespec previous = { 0 };
@@ -157,6 +175,8 @@ int main(void)
 	if (check_hres_resolution())
 		return 1;
 	if (check_gettimeofday_timeval())
+		return 1;
+	if (check_gettimeofday_timezone())
 		return 1;
 	if (check_coarse_resolution() || check_clock_getres_null() ||
 	    check_clock_getres_fallback())

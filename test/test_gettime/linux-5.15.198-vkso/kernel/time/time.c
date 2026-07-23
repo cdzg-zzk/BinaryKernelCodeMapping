@@ -141,21 +141,29 @@ SYSCALL_DEFINE1(stime32, old_time32_t __user *, tptr)
 SYSCALL_DEFINE2(gettimeofday, struct __kernel_old_timeval __user *, tv,
 		struct timezone __user *, tz)
 {
-	if (likely(tv != NULL)) {
-		struct __kernel_old_timeval value;
-		struct timespec64 ts;
+	struct __kernel_old_timeval value;
+	struct timezone zone;
 
-		if (vkso_time_gettimeofday(&value, NULL)) {
+	if (unlikely(!tv && !tz))
+		return 0;
+	if (vkso_time_gettimeofday(tv ? &value : NULL, tz ? &zone : NULL)) {
+		if (tv) {
+			struct timespec64 ts;
+
 			ktime_get_real_ts64(&ts);
 			value.tv_sec = ts.tv_sec;
 			value.tv_usec = ts.tv_nsec / NSEC_PER_USEC;
 		}
+		if (tz)
+			zone = sys_tz;
+	}
+	if (likely(tv != NULL)) {
 		if (put_user(value.tv_sec, &tv->tv_sec) ||
 		    put_user(value.tv_usec, &tv->tv_usec))
 			return -EFAULT;
 	}
 	if (unlikely(tz != NULL)) {
-		if (copy_to_user(tz, &sys_tz, sizeof(sys_tz)))
+		if (copy_to_user(tz, &zone, sizeof(zone)))
 			return -EFAULT;
 	}
 	return 0;
@@ -190,6 +198,7 @@ int do_sys_settimeofday64(const struct timespec64 *tv, const struct timezone *tz
 			return -EINVAL;
 
 		sys_tz = *tz;
+		vkso_time_update_timezone();
 		if (firsttime) {
 			firsttime = 0;
 			if (!tv)

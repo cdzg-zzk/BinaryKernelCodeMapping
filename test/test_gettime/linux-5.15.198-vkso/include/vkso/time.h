@@ -4,7 +4,7 @@
 
 #include <linux/types.h>
 
-#define VKSO_TIME_ABI_VERSION	6U
+#define VKSO_TIME_ABI_VERSION	7U
 #define VKSO_SHARED_PAGE_SIZE	4096U
 #define VKSO_MM_DATA_ABI_VERSION	2U
 
@@ -82,6 +82,7 @@ struct vkso_shared_data {
 	struct vkso_raw_data raw;
 	u32 hrtimer_resolution;
 	u32 reserved;
+	struct vkso_timezone timezone;
 };
 
 union vkso_shared_page {

@@ -26,6 +26,7 @@ extern char __vkso_shared_data_end[];
 extern union vkso_shared_page vkso_shared_page;
 
 void vkso_time_publish(struct timekeeper *tk);
+void vkso_time_update_timezone(void);
 int vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp);
 void vkso_time_update_mm_data(struct task_struct *task,
 			      const struct timens_offsets *offsets);
@@ -51,6 +52,10 @@ vkso_time_gettimeofday(struct __kernel_old_timeval *tv, struct timezone *tz)
 }
 #else
 static inline void vkso_time_publish(struct timekeeper *tk)
+{
+}
+
+static inline void vkso_time_update_timezone(void)
 {
 }
 

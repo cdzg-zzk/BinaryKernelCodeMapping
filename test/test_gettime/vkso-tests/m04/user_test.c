@@ -21,7 +21,7 @@
 #include <unistd.h>
 
 #define SAMPLES 10000U
-#define VKSO_TIME_ABI_VERSION 6U
+#define VKSO_TIME_ABI_VERSION 7U
 #define VKSO_MM_DATA_ABI_VERSION 2U
 #define VKSO_TIME_OK 0
 #define VKSO_TIME_FALLBACK (-1)
@@ -100,6 +100,7 @@ struct vkso_shared_data {
 	struct vkso_raw_data raw;
 	uint32_t hrtimer_resolution;
 	uint32_t reserved;
+	struct vkso_timezone timezone;
 };
 
 struct vkso_mm_data {
@@ -206,6 +207,54 @@ static void check_gettimeofday_timeval(vkso_gettimeofday_fn gettimeofday)
 		previous = current_us;
 	}
 	printf("user_gettimeofday_timeval=pass samples=%u\n", SAMPLES);
+}
+
+static void check_gettimeofday_timezone(vkso_gettimeofday_fn gettimeofday)
+{
+	struct timezone expected;
+	struct timezone probe;
+	struct vkso_timezone timezone, combined_timezone;
+	struct vkso_timezone updated;
+	struct vkso_timeval timeval;
+	struct timeval before, after;
+	int64_t value_us;
+	int update_ok;
+
+	if (syscall(SYS_gettimeofday, NULL, &expected) ||
+	    gettimeofday(NULL, &timezone) ||
+	    timezone.minuteswest != expected.tz_minuteswest ||
+	    timezone.dsttime != expected.tz_dsttime)
+		fail("gettimeofday timezone");
+	if (syscall(SYS_gettimeofday, &before, NULL) ||
+	    gettimeofday(&timeval, &combined_timezone) ||
+	    syscall(SYS_gettimeofday, &after, NULL))
+		fail("gettimeofday combined");
+	value_us = timeval.sec * INT64_C(1000000) + timeval.usec;
+	if (timeval.usec < 0 || timeval.usec >= 1000000 ||
+	    value_us < timeval_to_us(&before) ||
+	    value_us > timeval_to_us(&after) ||
+	    combined_timezone.minuteswest != expected.tz_minuteswest ||
+	    combined_timezone.dsttime != expected.tz_dsttime)
+		fail("gettimeofday combined value");
+	if (gettimeofday(&timeval, NULL) ||
+	    gettimeofday(NULL, &timezone) ||
+	    gettimeofday(NULL, NULL))
+		fail("gettimeofday NULL combinations");
+	probe.tz_minuteswest = expected.tz_minuteswest == 60 ? 120 : 60;
+	probe.tz_dsttime = expected.tz_dsttime + 1;
+	if (syscall(SYS_settimeofday, NULL, &expected) ||
+	    syscall(SYS_settimeofday, NULL, &probe))
+		fail("settimeofday timezone");
+	update_ok = !gettimeofday(NULL, &updated) &&
+		updated.minuteswest == probe.tz_minuteswest &&
+		updated.dsttime == probe.tz_dsttime;
+	if (syscall(SYS_settimeofday, NULL, &expected))
+		fail("restore timezone");
+	if (!update_ok)
+		fail("gettimeofday timezone update");
+	puts("user_gettimeofday_timezone=pass");
+	puts("user_gettimeofday_timezone_update=pass");
+	puts("user_gettimeofday_null_combinations=pass combinations=4");
 }
 
 static void check_hres_resolution(vkso_clock_getres_fn clock_getres)
@@ -825,6 +874,7 @@ int main(void)
 		fail("shared data layout");
 	check_hres_resolution(vkso_clock_getres);
 	check_gettimeofday_timeval(vkso_gettimeofday);
+	check_gettimeofday_timezone(vkso_gettimeofday);
 	check_coarse_resolution(vkso_clock_getres);
 	check_clock_getres_null(vkso_clock_getres);
 	check_clock_getres_fallback(vkso_clock_getres,

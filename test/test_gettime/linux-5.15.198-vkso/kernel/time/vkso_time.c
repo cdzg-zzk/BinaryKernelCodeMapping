@@ -23,6 +23,11 @@ static_assert(sizeof(struct __kernel_old_timeval) ==
 	      offsetof(struct vkso_timeval, sec) &&
 	      offsetof(struct __kernel_old_timeval, tv_usec) ==
 	      offsetof(struct vkso_timeval, usec));
+static_assert(sizeof(struct timezone) == sizeof(struct vkso_timezone) &&
+	      offsetof(struct timezone, tz_minuteswest) ==
+	      offsetof(struct vkso_timezone, minuteswest) &&
+	      offsetof(struct timezone, tz_dsttime) ==
+	      offsetof(struct vkso_timezone, dsttime));
 
 union vkso_shared_page vkso_shared_page
 	__aligned(VKSO_SHARED_PAGE_SIZE) __vkso_shared_data;
@@ -97,9 +102,17 @@ void vkso_time_publish(struct timekeeper *tk)
 	WRITE_ONCE(shared->seq, seq + 1);
 	smp_wmb();
 	memcpy((u8 *)shared + payload_offset, (u8 *)&next + payload_offset,
-	       sizeof(*shared) - payload_offset);
+	       offsetof(struct vkso_shared_data, timezone) - payload_offset);
 	smp_wmb();
 	WRITE_ONCE(shared->seq, seq + 2);
+}
+
+void vkso_time_update_timezone(void)
+{
+	struct vkso_timezone *timezone = &vkso_shared_page.data.timezone;
+
+	WRITE_ONCE(timezone->minuteswest, sys_tz.tz_minuteswest);
+	WRITE_ONCE(timezone->dsttime, sys_tz.tz_dsttime);
 }
 
 notrace int vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp)
