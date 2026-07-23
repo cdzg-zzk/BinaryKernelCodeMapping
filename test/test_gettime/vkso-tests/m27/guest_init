@@ -1,0 +1,44 @@
+#!/bin/busybox sh
+# SPDX-License-Identifier: GPL-2.0
+
+/bin/busybox --install -s /bin
+mkdir -p /proc /sys /dev /tmp /work
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mount -t ext4 /dev/vda /work
+
+status=0
+replaced=0
+backend=$(cat /work/backend)
+test_args=
+if [ -e /work/multicpu-only ]; then
+	test_args=--multicpu-only
+fi
+{
+	echo "=== ABI/PATH MATRIX: $backend ==="
+	uname -a
+	if [ "$backend" = vkso ]; then
+		insmod /work/page_cache_replace.ko || status=$?
+		if [ "$status" -eq 0 ]; then
+			/work/manager validate /work/libkernel.so \
+				/work/page_mappings.txt || status=$?
+		fi
+		if [ "$status" -eq 0 ]; then
+			/work/manager replace /work/libkernel.so \
+				/work/page_mappings.txt &&
+				replaced=1 || status=$?
+		fi
+	fi
+	if [ "$status" -eq 0 ]; then
+		LD_LIBRARY_PATH=/work /work/abi-matrix $test_args || status=$?
+	fi
+	if [ "$replaced" -eq 1 ]; then
+		/work/manager restore /work/libkernel.so \
+			/work/page_mappings.txt || status=$?
+	fi
+	echo "guest_status=$status"
+} 2>&1
+
+sync
+reboot -f
