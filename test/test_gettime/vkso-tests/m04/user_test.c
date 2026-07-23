@@ -20,7 +20,7 @@
 #include <unistd.h>
 
 #define SAMPLES 10000U
-#define VKSO_TIME_ABI_VERSION 5U
+#define VKSO_TIME_ABI_VERSION 6U
 #define VKSO_MM_DATA_ABI_VERSION 2U
 #define VKSO_TIME_OK 0
 #define VKSO_TIME_FALLBACK (-1)
@@ -87,6 +87,8 @@ struct vkso_shared_data {
 	struct vkso_time_value monotonic_coarse;
 	struct vkso_hres_data hres;
 	struct vkso_raw_data raw;
+	uint32_t hrtimer_resolution;
+	uint32_t reserved;
 };
 
 struct vkso_mm_data {
@@ -98,6 +100,7 @@ struct vkso_mm_data {
 
 typedef int (*vkso_clock_gettime_fn)(const struct vkso_mm_data *, int,
 				    struct vkso_time_value *);
+typedef int (*vkso_clock_getres_fn)(int, struct vkso_time_value *);
 typedef int (*vkso_hres_cycle_probe_at_fn)(
 	const struct vkso_shared_data *, struct vkso_hres_cycle_sample *);
 
@@ -160,6 +163,30 @@ static void fail(const char *message)
 {
 	fprintf(stderr, "failure=%s\n", message);
 	exit(1);
+}
+
+static void check_hres_resolution(vkso_clock_getres_fn clock_getres)
+{
+	static const clockid_t clocks[] = {
+		CLOCK_REALTIME, CLOCK_MONOTONIC, CLOCK_MONOTONIC_RAW,
+		CLOCK_BOOTTIME, CLOCK_TAI,
+	};
+	unsigned int i, clock;
+
+	for (clock = 0; clock < sizeof(clocks) / sizeof(clocks[0]); ++clock) {
+		for (i = 0; i < SAMPLES; ++i) {
+			struct vkso_time_value value;
+			struct timespec expected;
+
+			if (syscall(SYS_clock_getres, clocks[clock], &expected) ||
+			    clock_getres(clocks[clock], &value) ||
+			    value.sec != expected.tv_sec ||
+			    value.nsec != (uint64_t)expected.tv_nsec)
+				fail("high-resolution clock_getres");
+		}
+	}
+	printf("user_clock_getres_hres=pass clocks=%zu samples=%u\n",
+	       sizeof(clocks) / sizeof(clocks[0]), SAMPLES);
 }
 
 static int vkso_clock_gettime_with_fallback(
@@ -603,6 +630,7 @@ static void check_time_namespace(vkso_clock_gettime_fn clock_gettime)
 int main(void)
 {
 	vkso_clock_gettime_fn vkso_clock_gettime;
+	vkso_clock_getres_fn vkso_clock_getres;
 	vkso_hres_cycle_probe_at_fn vkso_hres_cycle_probe_at;
 	struct shared_lookup lookup = { 0 };
 	struct vkso_shared_data *shared;
@@ -616,6 +644,10 @@ int main(void)
 	memcpy(&vkso_clock_gettime, &symbol, sizeof(vkso_clock_gettime));
 	if (!vkso_clock_gettime || !dladdr(symbol, &info))
 		fail("resolve symbols");
+	symbol = dlsym(RTLD_DEFAULT, "__vkso_clock_getres");
+	memcpy(&vkso_clock_getres, &symbol, sizeof(vkso_clock_getres));
+	if (!vkso_clock_getres)
+		fail("resolve clock_getres");
 	mm_data = (const void *)getauxval(AT_VKSO_MM_DATA);
 	if (!mm_data || mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION)
 		fail("resolve mm data");
@@ -637,9 +669,11 @@ int main(void)
 	require_mapping(shared, 0);
 	if (shared->abi_version != VKSO_TIME_ABI_VERSION ||
 	    (shared->seq & 1) ||
+	    !shared->hrtimer_resolution ||
 	    shared->realtime_coarse.nsec >= UINT64_C(1000000000) ||
 	    shared->monotonic_coarse.nsec >= UINT64_C(1000000000))
 		fail("shared data layout");
+	check_hres_resolution(vkso_clock_getres);
 	set_tai_offset();
 	check_realtime(vkso_clock_gettime);
 	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_MONOTONIC);

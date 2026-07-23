@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include <linux/compiler.h>
+#include <linux/hrtimer.h>
 #include <linux/sched.h>
 #include <linux/stddef.h>
 #include <linux/string.h>
@@ -56,6 +57,7 @@ static void vkso_time_prepare(struct vkso_shared_data *next,
 		boottime_sec++;
 	}
 	next->abi_version = VKSO_TIME_ABI_VERSION;
+	next->hrtimer_resolution = hrtimer_resolution;
 	next->realtime_coarse.sec = tk->xtime_sec;
 	next->realtime_coarse.nsec =
 		tk->tkr_mono.xtime_nsec >> tk->tkr_mono.shift;
@@ -111,4 +113,9 @@ int vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp)
 
 	return __vkso_clock_gettime(mm_data, clock_id,
 				   (struct vkso_time_value *)tp);
+}
+
+int vkso_time_getres(clockid_t clock_id, struct timespec64 *tp)
+{
+	return __vkso_clock_getres(clock_id, (struct vkso_time_value *)tp);
 }

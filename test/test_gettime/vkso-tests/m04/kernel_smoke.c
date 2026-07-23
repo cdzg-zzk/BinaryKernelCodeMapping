@@ -41,10 +41,39 @@ static int check_optional_clock(clockid_t clock_id)
 	return errno == EINVAL ? 0 : -1;
 }
 
+static int check_hres_resolution(void)
+{
+	static const clockid_t clocks[] = {
+		CLOCK_REALTIME, CLOCK_MONOTONIC, CLOCK_MONOTONIC_RAW,
+		CLOCK_BOOTTIME, CLOCK_TAI,
+	};
+	struct timespec first;
+	unsigned int i, clock;
+
+	if (syscall(SYS_clock_getres, clocks[0], &first) ||
+	    first.tv_sec || first.tv_nsec <= 0)
+		return 1;
+	for (clock = 0; clock < sizeof(clocks) / sizeof(clocks[0]); ++clock) {
+		for (i = 0; i < SAMPLES; ++i) {
+			struct timespec value;
+
+			if (syscall(SYS_clock_getres, clocks[clock], &value) ||
+			    value.tv_sec != first.tv_sec ||
+			    value.tv_nsec != first.tv_nsec)
+				return 1;
+		}
+	}
+	printf("kernel_clock_getres_hres=pass clocks=%zu samples=%u resolution=%ld\n",
+	       sizeof(clocks) / sizeof(clocks[0]), SAMPLES, first.tv_nsec);
+	return 0;
+}
+
 int main(void)
 {
 	int status;
 
+	if (check_hres_resolution())
+		return 1;
 	if (check_clock(CLOCK_REALTIME))
 		return 1;
 	printf("kernel_realtime=pass samples=%u\n", SAMPLES);

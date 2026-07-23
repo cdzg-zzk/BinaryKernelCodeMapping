@@ -21,6 +21,7 @@ static_assert(offsetof(struct vkso_shared_data, realtime_coarse) == 8);
 static_assert(offsetof(struct vkso_shared_data, monotonic_coarse) == 24);
 static_assert(offsetof(struct vkso_shared_data, hres) == 40);
 static_assert(offsetof(struct vkso_shared_data, raw) == 136);
+static_assert(offsetof(struct vkso_shared_data, hrtimer_resolution) == 184);
 static_assert(offsetof(struct vkso_cycle_data, cycle_last) == 8);
 static_assert(offsetof(struct vkso_cycle_data, mask) == 16);
 static_assert(offsetof(struct vkso_cycle_data, mult) == 24);
@@ -294,5 +295,25 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 		snapshot.base.coarse.sec++;
 	}
 	*value = snapshot.base.coarse;
+	return VKSO_TIME_OK;
+}
+
+__visible noinline notrace __vkso_text
+int __vkso_clock_getres(int clock_id, struct vkso_time_value *value)
+{
+	const u32 hres_clocks = (1U << CLOCK_REALTIME) |
+		(1U << CLOCK_MONOTONIC) | (1U << CLOCK_MONOTONIC_RAW) |
+		(1U << CLOCK_BOOTTIME) | (1U << CLOCK_TAI);
+	const struct vkso_shared_data *shared;
+	u32 id = clock_id;
+
+	if (!value || id > CLOCK_TAI || !(hres_clocks & (1U << id)))
+		return VKSO_TIME_FALLBACK;
+	shared = vkso_shared_data();
+	if (unlikely(READ_ONCE(shared->abi_version) !=
+		     VKSO_TIME_ABI_VERSION))
+		return VKSO_TIME_FALLBACK;
+	value->sec = 0;
+	value->nsec = READ_ONCE(shared->hrtimer_resolution);
 	return VKSO_TIME_OK;
 }
