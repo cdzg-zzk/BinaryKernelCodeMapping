@@ -46,7 +46,7 @@ from user context.
 | C01 | `CLOCK_REALTIME` | VKSO fast core | VKSO fast core | PASS |
 | C02 | `CLOCK_MONOTONIC` | VKSO fast core | VKSO fast core | PASS |
 | C03 | `CLOCK_MONOTONIC_RAW` | VKSO fast core | VKSO fast core | PASS |
-| C04 | `CLOCK_BOOTTIME` | VKSO fast core | VKSO fast core | TODO |
+| C04 | `CLOCK_BOOTTIME` | VKSO fast core | VKSO fast core | PASS |
 | C05 | `CLOCK_TAI` | VKSO fast core | VKSO fast core | TODO |
 | C06 | `CLOCK_REALTIME_COARSE` | VKSO coarse core, no cycle read | same core | PASS |
 | C07 | `CLOCK_MONOTONIC_COARSE` | VKSO coarse core, no cycle read | same core | PASS |
@@ -94,9 +94,9 @@ raw x86 implementation.
 
 | ID | Scenario | Required result | Status |
 |---|---|---|---|
-| N01 | root namespace | MM flags indicate zero offsets | PASS |
+| N01 | root namespace | MM data contains zero offsets | PASS |
 | N02 | monotonic-coarse offset | `CLOCK_MONOTONIC_COARSE` includes the configured offset | PASS |
-| N03 | boottime offset | boottime includes the configured offset | TODO |
+| N03 | boottime offset | boottime includes the configured offset | PASS |
 | N04 | unaffected clocks | realtime, raw and TAI remain namespace-independent | TODO |
 | N05 | fork into child namespace | child receives the correct MM page | PASS |
 | N06 | exec in namespace | auxv and MM mapping retain namespace semantics | TODO |

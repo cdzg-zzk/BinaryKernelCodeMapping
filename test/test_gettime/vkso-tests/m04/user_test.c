@@ -17,8 +17,8 @@
 #include <unistd.h>
 
 #define SAMPLES 10000U
-#define VKSO_TIME_ABI_VERSION 3U
-#define VKSO_MM_DATA_ABI_VERSION 1U
+#define VKSO_TIME_ABI_VERSION 4U
+#define VKSO_MM_DATA_ABI_VERSION 2U
 #define VKSO_TIME_FALLBACK (-1)
 #define AT_VKSO_MM_DATA 52
 #define READ_ONCE(value) __atomic_load_n(&(value), __ATOMIC_RELAXED)
@@ -27,6 +27,8 @@
 #endif
 #define MONOTONIC_OFFSET_SEC 7
 #define MONOTONIC_OFFSET_NSEC 123456789U
+#define BOOTTIME_OFFSET_SEC 11
+#define BOOTTIME_OFFSET_NSEC 234567890U
 
 struct vkso_time_value {
 	int64_t sec;
@@ -51,6 +53,7 @@ struct vkso_hres_data {
 	struct vkso_cycle_data cycles;
 	struct vkso_hres_base realtime_base;
 	struct vkso_hres_base monotonic_base;
+	struct vkso_hres_base boottime_base;
 };
 
 struct vkso_raw_data {
@@ -84,6 +87,7 @@ struct vkso_mm_data {
 	uint32_t abi_version;
 	uint32_t reserved;
 	struct vkso_time_value monotonic_offset;
+	struct vkso_time_value boottime_offset;
 };
 
 typedef int (*vkso_clock_gettime_fn)(const struct vkso_mm_data *, int,
@@ -243,19 +247,27 @@ static void check_hres_clock(vkso_clock_gettime_fn clock_gettime,
 	}
 }
 
-static void check_monotonic_namespace_application(
+static void check_namespace_application(
 	vkso_clock_gettime_fn clock_gettime,
 	const struct vkso_mm_data *mm_data, clockid_t clock_id)
 {
-	const int64_t offset_ns =
-		(int64_t)MONOTONIC_OFFSET_SEC * INT64_C(1000000000) +
-		MONOTONIC_OFFSET_NSEC;
 	struct vkso_mm_data root_mm = *mm_data;
+	struct vkso_time_value *root_offset;
+	const struct vkso_time_value *offset;
 	struct vkso_time_value before_value, after_value;
 	struct timespec before, current, after;
+	int64_t offset_ns;
 
-	root_mm.monotonic_offset.sec = 0;
-	root_mm.monotonic_offset.nsec = 0;
+	if (clock_id == CLOCK_BOOTTIME) {
+		root_offset = &root_mm.boottime_offset;
+		offset = &mm_data->boottime_offset;
+	} else {
+		root_offset = &root_mm.monotonic_offset;
+		offset = &mm_data->monotonic_offset;
+	}
+	offset_ns = offset->sec * INT64_C(1000000000) + offset->nsec;
+	root_offset->sec = 0;
+	root_offset->nsec = 0;
 	if (clock_gettime(&root_mm, clock_id, &before_value))
 		fail("root clock before namespace oracle");
 	before.tv_sec = before_value.sec;
@@ -387,17 +399,20 @@ static void check_seq_retry(vkso_hres_cycle_probe_at_fn probe_at)
 	       SAMPLES, (unsigned long long)total_retries);
 }
 
-static void check_monotonic_namespace(vkso_clock_gettime_fn clock_gettime)
+static void check_time_namespace(vkso_clock_gettime_fn clock_gettime)
 {
-	static const char offset[] = "monotonic 7 123456789\n";
+	static const char offsets[] =
+		"monotonic 7 123456789\n"
+		"boottime 11 234567890\n";
 	int fd, status;
 	pid_t child;
 
 	if (unshare(CLONE_NEWTIME))
 		fail("unshare time namespace");
 	fd = open("/proc/self/timens_offsets", O_WRONLY | O_CLOEXEC);
-	if (fd < 0 || write(fd, offset, sizeof(offset) - 1) != sizeof(offset) - 1)
-		fail("set monotonic namespace offset");
+	if (fd < 0 ||
+	    write(fd, offsets, sizeof(offsets) - 1) != sizeof(offsets) - 1)
+		fail("set time namespace offsets");
 	close(fd);
 	fflush(NULL);
 	child = fork();
@@ -409,18 +424,24 @@ static void check_monotonic_namespace(vkso_clock_gettime_fn clock_gettime)
 
 		if (!mm_data ||
 		    mm_data->monotonic_offset.sec != MONOTONIC_OFFSET_SEC ||
-		    mm_data->monotonic_offset.nsec != MONOTONIC_OFFSET_NSEC)
+		    mm_data->monotonic_offset.nsec != MONOTONIC_OFFSET_NSEC ||
+		    mm_data->boottime_offset.sec != BOOTTIME_OFFSET_SEC ||
+		    mm_data->boottime_offset.nsec != BOOTTIME_OFFSET_NSEC)
 			_exit(2);
 		check_hres_clock(clock_gettime, mm_data, CLOCK_MONOTONIC);
-		check_monotonic_namespace_application(clock_gettime, mm_data,
-						      CLOCK_MONOTONIC);
+		check_namespace_application(clock_gettime, mm_data,
+					    CLOCK_MONOTONIC);
 		check_hres_clock(clock_gettime, mm_data, CLOCK_MONOTONIC_RAW);
-		check_monotonic_namespace_application(clock_gettime, mm_data,
-						      CLOCK_MONOTONIC_RAW);
+		check_namespace_application(clock_gettime, mm_data,
+					    CLOCK_MONOTONIC_RAW);
 		check_monotonic_coarse(clock_gettime, mm_data);
+		check_hres_clock(clock_gettime, mm_data, CLOCK_BOOTTIME);
+		check_namespace_application(clock_gettime, mm_data,
+					    CLOCK_BOOTTIME);
 		puts("monotonic_raw_hres_namespace_offset=pass");
 		puts("monotonic_hres_namespace_offset=pass");
 		puts("monotonic_namespace_offset=pass");
+		puts("boottime_namespace_offset=pass");
 		fflush(stdout);
 		_exit(0);
 	}
@@ -448,7 +469,8 @@ int main(void)
 	mm_data = (const void *)getauxval(AT_VKSO_MM_DATA);
 	if (!mm_data || mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION)
 		fail("resolve mm data");
-	if (mm_data->monotonic_offset.sec || mm_data->monotonic_offset.nsec)
+	if (mm_data->monotonic_offset.sec || mm_data->monotonic_offset.nsec ||
+	    mm_data->boottime_offset.sec || mm_data->boottime_offset.nsec)
 		fail("root namespace offset");
 	lookup.text_symbol = (uintptr_t)symbol;
 	dl_iterate_phdr(find_shared_load, &lookup);
@@ -473,6 +495,8 @@ int main(void)
 	printf("user_monotonic=pass samples=%u\n", SAMPLES);
 	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_MONOTONIC_RAW);
 	printf("user_monotonic_raw=pass samples=%u\n", SAMPLES);
+	check_hres_clock(vkso_clock_gettime, mm_data, CLOCK_BOOTTIME);
+	printf("user_boottime=pass samples=%u\n", SAMPLES);
 	check_tsc_cycles_shim(vkso_hres_cycle_probe_at, shared);
 	check_seq_retry(vkso_hres_cycle_probe_at);
 
@@ -501,7 +525,7 @@ int main(void)
 	{
 		struct vkso_time_value value;
 
-		if (vkso_clock_gettime(mm_data, CLOCK_BOOTTIME, &value) !=
+		if (vkso_clock_gettime(mm_data, 12345, &value) !=
 		    VKSO_TIME_FALLBACK)
 			fail("unsupported clock did not fallback");
 	}
@@ -509,7 +533,7 @@ int main(void)
 	printf("user_realtime_coarse=pass samples=%u\n", SAMPLES);
 	printf("user_monotonic_coarse=pass samples=%u\n", SAMPLES);
 	puts("unsupported_clock_fallback=pass");
-	check_monotonic_namespace(vkso_clock_gettime);
+	check_time_namespace(vkso_clock_gettime);
 	printf("text=%p shared_data=%p delta=%td\n", symbol, shared,
 	       (char *)shared - (char *)symbol);
 	puts("mapping_permissions=pass");

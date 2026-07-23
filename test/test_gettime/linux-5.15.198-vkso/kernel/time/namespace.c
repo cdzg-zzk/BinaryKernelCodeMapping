@@ -205,7 +205,7 @@ static void timens_put(struct ns_common *ns)
 void timens_commit(struct task_struct *tsk, struct time_namespace *ns)
 {
 	timens_freeze_offsets(ns);
-	vkso_time_update_mm_data(tsk, &ns->offsets.monotonic);
+	vkso_time_update_mm_data(tsk, &ns->offsets);
 }
 
 static int timens_install(struct nsset *nsset, struct ns_common *new)

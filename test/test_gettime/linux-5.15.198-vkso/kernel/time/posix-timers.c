@@ -254,8 +254,10 @@ static int posix_get_coarse_res(const clockid_t which_clock, struct timespec64 *
 
 static int posix_get_boottime_timespec(const clockid_t which_clock, struct timespec64 *tp)
 {
-	ktime_get_boottime_ts64(tp);
-	timens_add_boottime(tp);
+	if (!vkso_time_get_context(which_clock, tp)) {
+		ktime_get_boottime_ts64(tp);
+		timens_add_boottime(tp);
+	}
 	return 0;
 }
 

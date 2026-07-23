@@ -4,9 +4,9 @@
 
 #include <linux/types.h>
 
-#define VKSO_TIME_ABI_VERSION	3U
+#define VKSO_TIME_ABI_VERSION	4U
 #define VKSO_SHARED_PAGE_SIZE	4096U
-#define VKSO_MM_DATA_ABI_VERSION	1U
+#define VKSO_MM_DATA_ABI_VERSION	2U
 
 enum vkso_time_status {
 	VKSO_TIME_OK = 0,
@@ -38,6 +38,7 @@ struct vkso_hres_data {
 	struct vkso_cycle_data cycles;
 	struct vkso_hres_base realtime_base;
 	struct vkso_hres_base monotonic_base;
+	struct vkso_hres_base boottime_base;
 };
 
 struct vkso_raw_data {
@@ -80,6 +81,7 @@ struct vkso_mm_data {
 	u32 abi_version;
 	u32 reserved;
 	struct vkso_time_value monotonic_offset;
+	struct vkso_time_value boottime_offset;
 };
 
 union vkso_mm_page {

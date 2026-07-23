@@ -20,13 +20,14 @@ static_assert(offsetof(struct vkso_time_value, nsec) == 8);
 static_assert(offsetof(struct vkso_shared_data, realtime_coarse) == 8);
 static_assert(offsetof(struct vkso_shared_data, monotonic_coarse) == 24);
 static_assert(offsetof(struct vkso_shared_data, hres) == 40);
-static_assert(offsetof(struct vkso_shared_data, raw) == 104);
+static_assert(offsetof(struct vkso_shared_data, raw) == 120);
 static_assert(offsetof(struct vkso_cycle_data, cycle_last) == 8);
 static_assert(offsetof(struct vkso_cycle_data, mask) == 16);
 static_assert(offsetof(struct vkso_cycle_data, mult) == 24);
 static_assert(offsetof(struct vkso_cycle_data, shift) == 28);
 static_assert(offsetof(struct vkso_hres_data, realtime_base) == 32);
 static_assert(offsetof(struct vkso_hres_data, monotonic_base) == 48);
+static_assert(offsetof(struct vkso_hres_data, boottime_base) == 64);
 static_assert(offsetof(struct vkso_raw_data, monotonic_raw_base) == 32);
 static_assert(CLOCK_REALTIME == 0);
 static_assert(CLOCK_MONOTONIC == CLOCK_REALTIME + 1);
@@ -41,6 +42,7 @@ static_assert(offsetof(struct vkso_shared_data, monotonic_coarse) ==
 static_assert(sizeof(struct vkso_hres_cycle_sample) == 64);
 #endif
 static_assert(offsetof(struct vkso_mm_data, monotonic_offset) == 8);
+static_assert(offsetof(struct vkso_mm_data, boottime_offset) == 24);
 static_assert(sizeof(union vkso_shared_page) == VKSO_SHARED_PAGE_SIZE);
 static_assert(sizeof(union vkso_mm_page) == VKSO_SHARED_PAGE_SIZE);
 
@@ -221,11 +223,11 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 	struct vkso_read_snapshot snapshot;
 	size_t value_offset;
 	size_t cycle_offset = 0;
+	size_t mm_offset = 0;
 	u32 id = clock_id;
 	s64 offset_sec = 0;
 	u64 offset_nsec = 0;
 	bool high_resolution;
-	bool use_mm_data;
 
 	if (!value)
 		return VKSO_TIME_FALLBACK;
@@ -235,13 +237,21 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 			id * sizeof(struct vkso_hres_base);
 		cycle_offset = offsetof(struct vkso_shared_data, hres.cycles);
 		high_resolution = true;
-		use_mm_data = id == CLOCK_MONOTONIC;
+		if (id == CLOCK_MONOTONIC)
+			mm_offset = offsetof(struct vkso_mm_data,
+					     monotonic_offset);
 	} else if (id == CLOCK_MONOTONIC_RAW) {
 		value_offset = offsetof(struct vkso_shared_data,
 					 raw.monotonic_raw_base);
 		cycle_offset = offsetof(struct vkso_shared_data, raw.cycles);
 		high_resolution = true;
-		use_mm_data = true;
+		mm_offset = offsetof(struct vkso_mm_data, monotonic_offset);
+	} else if (id == CLOCK_BOOTTIME) {
+		value_offset = offsetof(struct vkso_shared_data,
+					hres.boottime_base);
+		cycle_offset = offsetof(struct vkso_shared_data, hres.cycles);
+		high_resolution = true;
+		mm_offset = offsetof(struct vkso_mm_data, boottime_offset);
 	} else {
 		u32 coarse_index = id - CLOCK_REALTIME_COARSE;
 
@@ -252,15 +262,20 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 					 realtime_coarse) +
 			coarse_index * sizeof(struct vkso_time_value);
 		high_resolution = false;
-		use_mm_data = coarse_index != 0;
+		if (coarse_index)
+			mm_offset = offsetof(struct vkso_mm_data,
+					     monotonic_offset);
 	}
-	if (use_mm_data) {
+	if (mm_offset) {
+		const struct vkso_time_value *offset;
+
 		if (unlikely(!mm_data ||
 			     READ_ONCE(mm_data->abi_version) !=
 			     VKSO_MM_DATA_ABI_VERSION))
 			return VKSO_TIME_FALLBACK;
-		offset_sec = READ_ONCE(mm_data->monotonic_offset.sec);
-		offset_nsec = READ_ONCE(mm_data->monotonic_offset.nsec);
+		offset = (const void *)((const u8 *)mm_data + mm_offset);
+		offset_sec = READ_ONCE(offset->sec);
+		offset_nsec = READ_ONCE(offset->nsec);
 		if (unlikely(offset_nsec >= NSEC_PER_SEC))
 			return VKSO_TIME_FALLBACK;
 	}

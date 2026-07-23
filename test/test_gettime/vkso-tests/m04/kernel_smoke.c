@@ -47,5 +47,8 @@ int main(void)
 	if (check_clock(CLOCK_MONOTONIC_COARSE))
 		return 1;
 	printf("kernel_monotonic_coarse=pass samples=%u\n", SAMPLES);
+	if (check_clock(CLOCK_BOOTTIME))
+		return 1;
+	printf("kernel_boottime=pass samples=%u\n", SAMPLES);
 	return 0;
 }

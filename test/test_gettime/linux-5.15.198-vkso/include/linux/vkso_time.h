@@ -9,6 +9,7 @@
 struct mm_struct;
 struct task_struct;
 struct timekeeper;
+struct timens_offsets;
 
 #define VKSO_TEXT_SECTION		".vkso.text"
 #define VKSO_SHARED_DATA_SECTION	".vkso.shared_data"
@@ -29,7 +30,7 @@ bool vkso_time_get_global(clockid_t clock_id, struct timespec64 *tp);
 bool vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp);
 const struct vkso_mm_data *vkso_time_mm_data(struct mm_struct *mm);
 void vkso_time_update_mm_data(struct task_struct *task,
-			      const struct timespec64 *monotonic_offset);
+			      const struct timens_offsets *offsets);
 #else
 static inline void vkso_time_publish(struct timekeeper *tk)
 {
@@ -49,7 +50,7 @@ vkso_time_get_context(clockid_t clock_id, struct timespec64 *tp)
 
 static inline void
 vkso_time_update_mm_data(struct task_struct *task,
-			 const struct timespec64 *monotonic_offset)
+			 const struct timens_offsets *offsets)
 {
 }
 #endif

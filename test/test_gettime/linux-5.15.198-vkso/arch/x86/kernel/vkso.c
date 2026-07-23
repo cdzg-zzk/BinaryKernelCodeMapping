@@ -111,7 +111,7 @@ const struct vkso_mm_data *vkso_time_mm_data(struct mm_struct *mm)
 }
 
 void vkso_time_update_mm_data(struct task_struct *task,
-			      const struct timespec64 *monotonic_offset)
+			      const struct timens_offsets *offsets)
 {
 	struct mm_struct *mm = task->mm;
 	union vkso_mm_page *data;
@@ -123,8 +123,12 @@ void vkso_time_update_mm_data(struct task_struct *task,
 	if (!page)
 		return;
 	data = page_address(page);
-	WRITE_ONCE(data->data.monotonic_offset.sec, monotonic_offset->tv_sec);
-	WRITE_ONCE(data->data.monotonic_offset.nsec, monotonic_offset->tv_nsec);
+	WRITE_ONCE(data->data.monotonic_offset.sec,
+		   offsets->monotonic.tv_sec);
+	WRITE_ONCE(data->data.monotonic_offset.nsec,
+		   offsets->monotonic.tv_nsec);
+	WRITE_ONCE(data->data.boottime_offset.sec, offsets->boottime.tv_sec);
+	WRITE_ONCE(data->data.boottime_offset.nsec, offsets->boottime.tv_nsec);
 }
 
 int arch_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)
@@ -157,7 +161,7 @@ out:
 	}
 #ifdef CONFIG_TIME_NS
 	vkso_time_update_mm_data(current,
-		&current->nsproxy->time_ns->offsets.monotonic);
+				&current->nsproxy->time_ns->offsets);
 #endif
 	return 0;
 }

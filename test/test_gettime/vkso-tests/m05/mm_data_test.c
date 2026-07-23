@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 #define AT_VKSO_MM_DATA 52
-#define VKSO_MM_DATA_ABI_VERSION 1U
+#define VKSO_MM_DATA_ABI_VERSION 2U
 
 struct vkso_mm_data {
 	uint32_t abi_version;
@@ -22,6 +22,10 @@ struct vkso_mm_data {
 		int64_t sec;
 		uint64_t nsec;
 	} monotonic_offset;
+	struct {
+		int64_t sec;
+		uint64_t nsec;
+	} boottime_offset;
 };
 
 static void fail(const char *message)
@@ -88,7 +92,8 @@ int main(void)
 	if (getauxval(AT_SYSINFO_EHDR))
 		fail("legacy vdso auxv present");
 	if (mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION || mm_data->reserved ||
-	    mm_data->monotonic_offset.sec || mm_data->monotonic_offset.nsec)
+	    mm_data->monotonic_offset.sec || mm_data->monotonic_offset.nsec ||
+	    mm_data->boottime_offset.sec || mm_data->boottime_offset.nsec)
 		fail("mm data contents");
 	check_mapping(mm_data);
 	parent_pfn = mapping_pfn(mm_data);

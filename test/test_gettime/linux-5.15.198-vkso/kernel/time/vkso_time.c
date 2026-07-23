@@ -33,12 +33,21 @@ static void vkso_time_prepare(struct vkso_shared_data *next,
 	s64 monotonic_sec = tk->xtime_sec + tk->wall_to_monotonic.tv_sec;
 	u64 monotonic_shifted_nsec = tk->tkr_mono.xtime_nsec +
 		((u64)tk->wall_to_monotonic.tv_nsec << tk->tkr_mono.shift);
+	s64 boottime_sec;
+	u64 boottime_shifted_nsec;
 	u64 shifted_second = (u64)NSEC_PER_SEC << tk->tkr_mono.shift;
 	s32 clock_mode = tk->tkr_mono.clock->vdso_clock_mode;
 
 	if (monotonic_shifted_nsec >= shifted_second) {
 		monotonic_shifted_nsec -= shifted_second;
 		monotonic_sec++;
+	}
+	boottime_sec = monotonic_sec + tk->monotonic_to_boot.tv_sec;
+	boottime_shifted_nsec = monotonic_shifted_nsec +
+		((u64)tk->monotonic_to_boot.tv_nsec << tk->tkr_mono.shift);
+	if (boottime_shifted_nsec >= shifted_second) {
+		boottime_shifted_nsec -= shifted_second;
+		boottime_sec++;
 	}
 	next->abi_version = VKSO_TIME_ABI_VERSION;
 	next->realtime_coarse.sec = tk->xtime_sec;
@@ -57,6 +66,8 @@ static void vkso_time_prepare(struct vkso_shared_data *next,
 	next->hres.realtime_base.shifted_nsec = tk->tkr_mono.xtime_nsec;
 	next->hres.monotonic_base.sec = monotonic_sec;
 	next->hres.monotonic_base.shifted_nsec = monotonic_shifted_nsec;
+	next->hres.boottime_base.sec = boottime_sec;
+	next->hres.boottime_base.shifted_nsec = boottime_shifted_nsec;
 	next->raw.monotonic_raw_base.sec = tk->raw_sec;
 	next->raw.monotonic_raw_base.shifted_nsec = tk->tkr_raw.xtime_nsec;
 }
