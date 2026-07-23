@@ -176,7 +176,8 @@ static inline void unlock_timer(struct k_itimer *timr, unsigned long flags)
 /* Get clock_realtime */
 static int posix_get_realtime_timespec(clockid_t which_clock, struct timespec64 *tp)
 {
-	ktime_get_real_ts64(tp);
+	if (!vkso_time_get_realtime(tp))
+		ktime_get_real_ts64(tp);
 	return 0;
 }
 

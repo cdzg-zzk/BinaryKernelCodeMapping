@@ -181,6 +181,31 @@ static void check_monotonic_coarse(vkso_clock_gettime_fn clock_gettime,
 	}
 }
 
+static void check_realtime(vkso_clock_gettime_fn clock_gettime)
+{
+	struct timespec previous = { 0 };
+	unsigned int i;
+
+	for (i = 0; i < SAMPLES; ++i) {
+		struct timespec before, after, current;
+		struct vkso_time_value value;
+
+		if (syscall(SYS_clock_gettime, CLOCK_REALTIME, &before) ||
+		    clock_gettime(NULL, CLOCK_REALTIME, &value) ||
+		    syscall(SYS_clock_gettime, CLOCK_REALTIME, &after))
+			fail("realtime call");
+		current.tv_sec = value.sec;
+		current.tv_nsec = (long)value.nsec;
+		if (current.tv_nsec < 0 || current.tv_nsec >= 1000000000L ||
+		    to_ns(&current) < to_ns(&before) ||
+		    to_ns(&current) > to_ns(&after) ||
+		    (i && to_ns(&current) < to_ns(&previous)))
+			fail("realtime bracket");
+		previous = current;
+	}
+	printf("user_realtime=pass samples=%u\n", SAMPLES);
+}
+
 static void *seq_writer(void *argument)
 {
 	struct retry_test *test = argument;
@@ -239,7 +264,8 @@ static void check_tsc_cycles_shim(vkso_hres_cycle_probe_at_fn probe_at,
 		    sample.mask != UINT64_MAX || sample.shift >= 32 ||
 		    (sample.seq & 1U))
 			fail("TSC cycles shim");
-		delta = (sample.cycles - sample.cycle_last) & sample.mask;
+		delta = sample.cycles > sample.cycle_last ?
+			sample.cycles - sample.cycle_last : 0;
 		ns = (sample.realtime_base.shifted_nsec + delta * sample.mult) >>
 		     sample.shift;
 		current.tv_sec = sample.realtime_base.sec +
@@ -369,6 +395,7 @@ int main(void)
 	    shared->realtime_coarse.nsec >= UINT64_C(1000000000) ||
 	    shared->monotonic_coarse.nsec >= UINT64_C(1000000000))
 		fail("shared data layout");
+	check_realtime(vkso_clock_gettime);
 	check_tsc_cycles_shim(vkso_hres_cycle_probe_at, shared);
 	check_seq_retry(vkso_hres_cycle_probe_at);
 

@@ -32,6 +32,9 @@ static int check_clock(clockid_t clock_id)
 
 int main(void)
 {
+	if (check_clock(CLOCK_REALTIME))
+		return 1;
+	printf("kernel_realtime=pass samples=%u\n", SAMPLES);
 	if (check_clock(CLOCK_REALTIME_COARSE))
 		return 1;
 	printf("kernel_realtime_coarse=pass samples=%u\n", SAMPLES);

@@ -25,6 +25,7 @@ extern char __vkso_shared_data_end[];
 extern union vkso_shared_page vkso_shared_page;
 
 void vkso_time_publish(struct timekeeper *tk);
+bool vkso_time_get_realtime(struct timespec64 *tp);
 bool vkso_time_get_realtime_coarse(struct timespec64 *tp);
 bool vkso_time_get_monotonic_coarse(struct timespec64 *tp);
 const struct vkso_mm_data *vkso_time_mm_data(struct mm_struct *mm);
@@ -36,6 +37,11 @@ static inline void vkso_time_publish(struct timekeeper *tk)
 }
 
 static inline bool vkso_time_get_realtime_coarse(struct timespec64 *tp)
+{
+	return false;
+}
+
+static inline bool vkso_time_get_realtime(struct timespec64 *tp)
 {
 	return false;
 }

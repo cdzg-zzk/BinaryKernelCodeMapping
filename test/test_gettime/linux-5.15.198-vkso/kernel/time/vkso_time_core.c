@@ -11,6 +11,7 @@
 #include <linux/vkso_time.h>
 
 #include <vdso/clocksource.h>
+#include <vdso/math64.h>
 
 /* Keep the binary contract explicit before executable interfaces are added. */
 static_assert(sizeof(struct vkso_time_value) == 16);
@@ -57,7 +58,24 @@ static __always_inline bool vkso_read_cycles(s32 clock_mode, u64 *cycles)
 	if (clock_mode != VDSO_CLOCKMODE_TSC)
 		return false;
 	*cycles = rdtsc_ordered();
-	return true;
+	return (s64)*cycles >= 0;
+}
+
+static __always_inline void
+vkso_realtime_from_snapshot(const struct vkso_read_snapshot *snapshot,
+			    struct vkso_time_value *value)
+{
+	u64 cycles = snapshot->cycles;
+	u64 last = snapshot->hres.cycle_last;
+	u64 ns = snapshot->hres.realtime_base.shifted_nsec;
+
+	/* Match the x86 vDSO rule: clamp a slightly backward TSC to the base. */
+	if (cycles > last)
+		ns += (cycles - last) * snapshot->hres.mult;
+	ns >>= snapshot->hres.shift;
+	value->sec = snapshot->hres.realtime_base.sec +
+		__iter_div_u64_rem(ns, NSEC_PER_SEC, &ns);
+	value->nsec = ns;
 }
 
 /*
@@ -165,6 +183,7 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 {
 	struct vkso_read_snapshot snapshot;
 	size_t coarse_offset;
+	u32 read_flags;
 	s64 offset_sec = 0;
 	u64 offset_nsec = 0;
 	bool use_mm_data;
@@ -172,14 +191,21 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 	if (!value)
 		return VKSO_TIME_FALLBACK;
 	switch (clock_id) {
+	case CLOCK_REALTIME:
+		coarse_offset = 0;
+		read_flags = VKSO_READ_HRES;
+		use_mm_data = false;
+		break;
 	case CLOCK_REALTIME_COARSE:
 		coarse_offset = offsetof(struct vkso_shared_data,
 					 realtime_coarse);
+		read_flags = 0;
 		use_mm_data = false;
 		break;
 	case CLOCK_MONOTONIC_COARSE:
 		coarse_offset = offsetof(struct vkso_shared_data,
 					 monotonic_coarse);
+		read_flags = 0;
 		use_mm_data = true;
 		break;
 	default:
@@ -195,9 +221,13 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 		if (offset_nsec >= NSEC_PER_SEC)
 			return VKSO_TIME_FALLBACK;
 	}
-	if (vkso_read_snapshot(vkso_shared_data(), coarse_offset, 0,
+	if (vkso_read_snapshot(vkso_shared_data(), coarse_offset, read_flags,
 			       &snapshot) != VKSO_TIME_OK)
 		return VKSO_TIME_FALLBACK;
+	if (read_flags & VKSO_READ_HRES) {
+		vkso_realtime_from_snapshot(&snapshot, value);
+		return VKSO_TIME_OK;
+	}
 	snapshot.coarse.nsec += offset_nsec;
 	snapshot.coarse.sec += offset_sec;
 	if (snapshot.coarse.nsec >= NSEC_PER_SEC) {
