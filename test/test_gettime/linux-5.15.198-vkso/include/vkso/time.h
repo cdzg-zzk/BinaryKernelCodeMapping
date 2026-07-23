@@ -23,6 +23,7 @@ struct vkso_shared_data {
 	u32 seq;
 	u32 abi_version;
 	struct vkso_time_value realtime_coarse;
+	struct vkso_time_value monotonic_coarse;
 };
 
 union vkso_shared_page {
@@ -30,10 +31,11 @@ union vkso_shared_page {
 	u8 page[VKSO_SHARED_PAGE_SIZE];
 };
 
-/* Immutable context selected once for each mm. */
+/* Stable while the mm remains in one time namespace. */
 struct vkso_mm_data {
 	u32 abi_version;
 	u32 flags;
+	struct vkso_time_value monotonic_offset;
 };
 
 union vkso_mm_page {

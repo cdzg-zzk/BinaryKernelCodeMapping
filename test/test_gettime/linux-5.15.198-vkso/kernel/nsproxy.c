@@ -179,7 +179,7 @@ int copy_namespaces(unsigned long flags, struct task_struct *tsk)
 	if (IS_ERR(new_ns))
 		return  PTR_ERR(new_ns);
 
-	timens_on_fork(new_ns);
+	timens_on_fork(new_ns, tsk);
 
 	tsk->nsproxy = new_ns;
 	return 0;
@@ -516,7 +516,7 @@ static void commit_nsset(struct nsset *nsset)
 
 #ifdef CONFIG_TIME_NS
 	if (flags & CLONE_NEWTIME)
-		timens_commit(nsset->nsproxy->time_ns);
+		timens_commit(me, nsset->nsproxy->time_ns);
 #endif
 
 	/* transfer ownership */

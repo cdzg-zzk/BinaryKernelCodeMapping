@@ -13,6 +13,7 @@
 #include <linux/proc_ns.h>
 #include <linux/export.h>
 #include <linux/time.h>
+#include <linux/vkso_time.h>
 #include <linux/slab.h>
 #include <linux/cred.h>
 #include <linux/err.h>
@@ -201,9 +202,10 @@ static void timens_put(struct ns_common *ns)
 	put_time_ns(to_time_ns(ns));
 }
 
-void timens_commit(struct time_namespace *ns)
+void timens_commit(struct task_struct *tsk, struct time_namespace *ns)
 {
 	timens_freeze_offsets(ns);
+	vkso_time_update_mm_data(tsk, &ns->offsets.monotonic);
 }
 
 static int timens_install(struct nsset *nsset, struct ns_common *new)
@@ -228,7 +230,7 @@ static int timens_install(struct nsset *nsset, struct ns_common *new)
 	return 0;
 }
 
-void timens_on_fork(struct nsproxy *nsproxy)
+void timens_on_fork(struct nsproxy *nsproxy, struct task_struct *tsk)
 {
 	struct ns_common *nsc = &nsproxy->time_ns_for_children->ns;
 	struct time_namespace *ns = to_time_ns(nsc);
@@ -241,7 +243,7 @@ void timens_on_fork(struct nsproxy *nsproxy)
 	put_time_ns(nsproxy->time_ns);
 	nsproxy->time_ns = ns;
 
-	timens_commit(ns);
+	timens_commit(tsk, ns);
 }
 
 static struct user_namespace *timens_owner(struct ns_common *ns)

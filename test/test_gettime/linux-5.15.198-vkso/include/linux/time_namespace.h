@@ -28,7 +28,7 @@ struct time_namespace {
 extern struct time_namespace init_time_ns;
 
 #ifdef CONFIG_TIME_NS
-extern void timens_commit(struct time_namespace *ns);
+extern void timens_commit(struct task_struct *tsk, struct time_namespace *ns);
 
 static inline struct time_namespace *get_time_ns(struct time_namespace *ns)
 {
@@ -40,7 +40,7 @@ struct time_namespace *copy_time_ns(unsigned long flags,
 				    struct user_namespace *user_ns,
 				    struct time_namespace *old_ns);
 void free_time_ns(struct time_namespace *ns);
-void timens_on_fork(struct nsproxy *nsproxy);
+void timens_on_fork(struct nsproxy *nsproxy, struct task_struct *tsk);
 
 static inline void put_time_ns(struct time_namespace *ns)
 {
@@ -100,7 +100,8 @@ static inline ktime_t timens_ktime_to_host(clockid_t clockid, ktime_t tim)
 }
 
 #else
-static inline void timens_commit(struct time_namespace *ns)
+static inline void timens_commit(struct task_struct *tsk,
+				 struct time_namespace *ns)
 {
 }
 
@@ -124,7 +125,8 @@ struct time_namespace *copy_time_ns(unsigned long flags,
 	return old_ns;
 }
 
-static inline void timens_on_fork(struct nsproxy *nsproxy)
+static inline void timens_on_fork(struct nsproxy *nsproxy,
+				  struct task_struct *tsk)
 {
 	return;
 }

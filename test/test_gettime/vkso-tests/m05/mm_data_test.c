@@ -18,6 +18,10 @@
 struct vkso_mm_data {
 	uint32_t abi_version;
 	uint32_t flags;
+	struct {
+		int64_t sec;
+		uint64_t nsec;
+	} monotonic_offset;
 };
 
 static void fail(const char *message)
@@ -83,7 +87,8 @@ int main(void)
 		fail("auxv address");
 	if (getauxval(AT_SYSINFO_EHDR))
 		fail("legacy vdso auxv present");
-	if (mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION || mm_data->flags)
+	if (mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION || mm_data->flags ||
+	    mm_data->monotonic_offset.sec || mm_data->monotonic_offset.nsec)
 		fail("mm data contents");
 	check_mapping(mm_data);
 	parent_pfn = mapping_pfn(mm_data);

@@ -2,13 +2,16 @@
 
 #include <dlfcn.h>
 #include <elf.h>
+#include <fcntl.h>
 #include <link.h>
+#include <sched.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/auxv.h>
 #include <sys/syscall.h>
+#include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -17,6 +20,11 @@
 #define VKSO_MM_DATA_ABI_VERSION 1U
 #define VKSO_TIME_FALLBACK (-1)
 #define AT_VKSO_MM_DATA 52
+#ifndef CLONE_NEWTIME
+#define CLONE_NEWTIME 0x00000080
+#endif
+#define MONOTONIC_OFFSET_SEC 7
+#define MONOTONIC_OFFSET_NSEC 123456789U
 
 struct vkso_time_value {
 	int64_t sec;
@@ -27,11 +35,13 @@ struct vkso_shared_data {
 	uint32_t seq;
 	uint32_t abi_version;
 	struct vkso_time_value realtime_coarse;
+	struct vkso_time_value monotonic_coarse;
 };
 
 struct vkso_mm_data {
 	uint32_t abi_version;
 	uint32_t flags;
+	struct vkso_time_value monotonic_offset;
 };
 
 typedef int (*vkso_clock_gettime_fn)(const struct vkso_mm_data *, int,
@@ -108,6 +118,64 @@ static void require_mapping(const void *address, int executable)
 	fail("mapping not found");
 }
 
+static void check_monotonic_coarse(vkso_clock_gettime_fn clock_gettime,
+				   const struct vkso_mm_data *mm_data)
+{
+	struct timespec previous = { 0 };
+	unsigned int i;
+
+	for (i = 0; i < SAMPLES; ++i) {
+		struct timespec before, after, current;
+		struct vkso_time_value value;
+
+		if (syscall(SYS_clock_gettime, CLOCK_MONOTONIC_COARSE, &before) ||
+		    clock_gettime(mm_data, CLOCK_MONOTONIC_COARSE, &value) ||
+		    syscall(SYS_clock_gettime, CLOCK_MONOTONIC_COARSE, &after))
+			fail("monotonic coarse call");
+		current.tv_sec = value.sec;
+		current.tv_nsec = (long)value.nsec;
+		if (to_ns(&current) < to_ns(&before) ||
+		    to_ns(&current) > to_ns(&after) ||
+		    (i && to_ns(&current) < to_ns(&previous)))
+			fail("monotonic coarse bracket");
+		previous = current;
+	}
+}
+
+static void check_monotonic_namespace(vkso_clock_gettime_fn clock_gettime)
+{
+	static const char offset[] = "monotonic 7 123456789\n";
+	int fd, status;
+	pid_t child;
+
+	if (unshare(CLONE_NEWTIME))
+		fail("unshare time namespace");
+	fd = open("/proc/self/timens_offsets", O_WRONLY | O_CLOEXEC);
+	if (fd < 0 || write(fd, offset, sizeof(offset) - 1) != sizeof(offset) - 1)
+		fail("set monotonic namespace offset");
+	close(fd);
+	fflush(NULL);
+	child = fork();
+	if (child < 0)
+		fail("fork time namespace child");
+	if (!child) {
+		const struct vkso_mm_data *mm_data =
+			(const void *)getauxval(AT_VKSO_MM_DATA);
+
+		if (!mm_data ||
+		    mm_data->monotonic_offset.sec != MONOTONIC_OFFSET_SEC ||
+		    mm_data->monotonic_offset.nsec != MONOTONIC_OFFSET_NSEC)
+			_exit(2);
+		check_monotonic_coarse(clock_gettime, mm_data);
+		puts("monotonic_namespace_offset=pass");
+		fflush(stdout);
+		_exit(0);
+	}
+	if (waitpid(child, &status, 0) != child || !WIFEXITED(status) ||
+	    WEXITSTATUS(status))
+		fail("time namespace child");
+}
+
 int main(void)
 {
 	vkso_clock_gettime_fn vkso_clock_gettime;
@@ -126,6 +194,8 @@ int main(void)
 	mm_data = (const void *)getauxval(AT_VKSO_MM_DATA);
 	if (!mm_data || mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION)
 		fail("resolve mm data");
+	if (mm_data->monotonic_offset.sec || mm_data->monotonic_offset.nsec)
+		fail("root namespace offset");
 	lookup.text_symbol = (uintptr_t)symbol;
 	dl_iterate_phdr(find_shared_load, &lookup);
 	shared = lookup.shared;
@@ -136,7 +206,8 @@ int main(void)
 	require_mapping(shared, 0);
 	if (shared->abi_version != VKSO_TIME_ABI_VERSION ||
 	    (shared->seq & 1) ||
-	    shared->realtime_coarse.nsec >= UINT64_C(1000000000))
+	    shared->realtime_coarse.nsec >= UINT64_C(1000000000) ||
+	    shared->monotonic_coarse.nsec >= UINT64_C(1000000000))
 		fail("shared data layout");
 
 	for (i = 0; i < SAMPLES; ++i) {
@@ -159,6 +230,7 @@ int main(void)
 			fail("clock bracket");
 		previous = current;
 	}
+	check_monotonic_coarse(vkso_clock_gettime, mm_data);
 
 	{
 		struct vkso_time_value value;
@@ -169,6 +241,8 @@ int main(void)
 	}
 
 	printf("user_realtime_coarse=pass samples=%u\n", SAMPLES);
+	printf("user_monotonic_coarse=pass samples=%u\n", SAMPLES);
+	check_monotonic_namespace(vkso_clock_gettime);
 	printf("text=%p shared_data=%p delta=%td\n", symbol, shared,
 	       (char *)shared - (char *)symbol);
 	puts("mapping_permissions=pass");

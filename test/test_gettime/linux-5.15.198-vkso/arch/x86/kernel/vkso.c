@@ -5,6 +5,7 @@
 #include <linux/gfp.h>
 #include <linux/mm.h>
 #include <linux/string.h>
+#include <linux/time_namespace.h>
 #include <linux/vkso_time.h>
 
 #include <asm/mmu.h>
@@ -99,6 +100,33 @@ void vkso_destroy_context(struct mm_struct *mm)
 		put_page(page);
 }
 
+const struct vkso_mm_data *vkso_time_mm_data(struct mm_struct *mm)
+{
+	struct page *page;
+
+	if (!mm)
+		return NULL;
+	page = READ_ONCE(mm->context.vkso_mm_page);
+	return page ? page_address(page) : NULL;
+}
+
+void vkso_time_update_mm_data(struct task_struct *task,
+			      const struct timespec64 *monotonic_offset)
+{
+	struct mm_struct *mm = task->mm;
+	union vkso_mm_page *data;
+	struct page *page;
+
+	if (!mm)
+		return;
+	page = READ_ONCE(mm->context.vkso_mm_page);
+	if (!page)
+		return;
+	data = page_address(page);
+	WRITE_ONCE(data->data.monotonic_offset.sec, monotonic_offset->tv_sec);
+	WRITE_ONCE(data->data.monotonic_offset.nsec, monotonic_offset->tv_nsec);
+}
+
 int arch_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)
 {
 	struct mm_struct *mm = current->mm;
@@ -123,7 +151,13 @@ int arch_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)
 	ret = vkso_install_mm_mapping(mm, addr, page);
 out:
 	mmap_write_unlock(mm);
-	if (ret)
+	if (ret) {
 		put_page(page);
-	return ret;
+		return ret;
+	}
+#ifdef CONFIG_TIME_NS
+	vkso_time_update_mm_data(current,
+		&current->nsproxy->time_ns->offsets.monotonic);
+#endif
+	return 0;
 }

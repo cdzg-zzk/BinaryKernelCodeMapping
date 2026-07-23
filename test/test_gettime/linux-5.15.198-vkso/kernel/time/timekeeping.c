@@ -751,9 +751,21 @@ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 	update_pvclock_gtod(tk, action & TK_CLOCK_WAS_SET);
 
 	tk->tkr_mono.base_real = tk->tkr_mono.base + tk->offs_real;
-	vkso_time_publish_realtime_coarse(
-		tk->xtime_sec,
-		tk->tkr_mono.xtime_nsec >> tk->tkr_mono.shift);
+	{
+		u64 realtime_nsec =
+			tk->tkr_mono.xtime_nsec >> tk->tkr_mono.shift;
+		s64 monotonic_sec =
+			tk->xtime_sec + tk->wall_to_monotonic.tv_sec;
+		u64 monotonic_nsec =
+			realtime_nsec + tk->wall_to_monotonic.tv_nsec;
+
+		if (monotonic_nsec >= NSEC_PER_SEC) {
+			monotonic_nsec -= NSEC_PER_SEC;
+			monotonic_sec++;
+		}
+		vkso_time_publish_coarse(tk->xtime_sec, realtime_nsec,
+					 monotonic_sec, monotonic_nsec);
+	}
 	update_fast_timekeeper(&tk->tkr_mono, &tk_fast_mono);
 	update_fast_timekeeper(&tk->tkr_raw,  &tk_fast_raw);
 

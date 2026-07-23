@@ -49,7 +49,7 @@ from user context.
 | C04 | `CLOCK_BOOTTIME` | VKSO fast core | VKSO fast core | TODO |
 | C05 | `CLOCK_TAI` | VKSO fast core | VKSO fast core | TODO |
 | C06 | `CLOCK_REALTIME_COARSE` | VKSO coarse core, no cycle read | same core | PASS |
-| C07 | `CLOCK_MONOTONIC_COARSE` | VKSO coarse core, no cycle read | same core | TODO |
+| C07 | `CLOCK_MONOTONIC_COARSE` | VKSO coarse core, no cycle read | same core | PASS |
 | C08 | process/thread CPU clocks | existing POSIX clock handler | syscall fallback | TODO |
 | C09 | alarm clocks | existing POSIX clock handler | syscall fallback | TODO |
 | C10 | invalid clock ID | `-EINVAL` | syscall-equivalent failure | TODO |
@@ -94,13 +94,13 @@ raw x86 implementation.
 
 | ID | Scenario | Required result | Status |
 |---|---|---|---|
-| N01 | root namespace | MM flags indicate zero offsets | TODO |
-| N02 | monotonic offset | monotonic and monotonic-coarse include the configured offset | TODO |
+| N01 | root namespace | MM flags indicate zero offsets | PASS |
+| N02 | monotonic-coarse offset | `CLOCK_MONOTONIC_COARSE` includes the configured offset | PASS |
 | N03 | boottime offset | boottime includes the configured offset | TODO |
 | N04 | unaffected clocks | realtime, raw and TAI remain namespace-independent | TODO |
-| N05 | fork into child namespace | child receives the correct MM page | TODO |
+| N05 | fork into child namespace | child receives the correct MM page | PASS |
 | N06 | exec in namespace | auxv and MM mapping retain namespace semantics | TODO |
-| N07 | `setns`/commit | old MM PTE is invalidated and refaults the new page | TODO |
+| N07 | `setns`/commit | existing MM data changes to the new frozen offset without stale reads | TODO |
 | N08 | frozen offsets | offsets cannot change after a task joins | TODO |
 
 ## Counter modes, publication and fallback

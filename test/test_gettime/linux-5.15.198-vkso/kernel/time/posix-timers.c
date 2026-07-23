@@ -234,8 +234,10 @@ static int posix_get_realtime_coarse(clockid_t which_clock, struct timespec64 *t
 static int posix_get_monotonic_coarse(clockid_t which_clock,
 						struct timespec64 *tp)
 {
-	ktime_get_coarse_ts64(tp);
-	timens_add_monotonic(tp);
+	if (!vkso_time_get_monotonic_coarse(tp)) {
+		ktime_get_coarse_ts64(tp);
+		timens_add_monotonic(tp);
+	}
 	return 0;
 }
 
