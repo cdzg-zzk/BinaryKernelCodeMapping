@@ -55,7 +55,7 @@ gcc -O2 -Wall -Wextra -static -o "$WORK/m04-kernel-smoke" \
 	"$SCRIPT_DIR/kernel_smoke.c"
 gcc -O2 -Wall -Wextra -o "$WORK/m04-user-test" \
 	"$SCRIPT_DIR/user_test.c" -L"$DSO" -Wl,--no-as-needed -lkernel \
-	-ldl -Wl,-rpath,/work
+	-ldl -pthread -Wl,-rpath,/work
 
 INITRAMFS="$WORK/initramfs"
 rm -rf "$INITRAMFS"

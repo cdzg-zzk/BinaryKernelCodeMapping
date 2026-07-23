@@ -107,8 +107,8 @@ raw x86 implementation.
 
 | ID | Scenario | Required result | Status |
 |---|---|---|---|
-| X01 | TSC mode | ordered TSC fast path; no callback/indirect call | TODO |
-| X02 | concurrent publisher | seq retry prevents mixed snapshots and backward time | TODO |
+| X01 | TSC mode | ordered TSC fast path; no callback/indirect call | PASS |
+| X02 | concurrent publisher | seq retry prevents mixed snapshots and backward time | PASS |
 | X03 | invalid/disabled counter | both contexts select their non-recursive fallback | TODO |
 | X04 | PVClock implementation | raw-compatible reader and data mapping compile into the cold path | STATIC |
 | X05 | Hyper-V implementation | raw-compatible reader and TSC page mapping compile into the cold path | STATIC |

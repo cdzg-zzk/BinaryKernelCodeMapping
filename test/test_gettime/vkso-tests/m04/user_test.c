@@ -4,6 +4,7 @@
 #include <elf.h>
 #include <fcntl.h>
 #include <link.h>
+#include <pthread.h>
 #include <sched.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -47,6 +48,19 @@ struct vkso_hres_data {
 	struct vkso_hres_base realtime_base;
 };
 
+struct vkso_hres_cycle_sample {
+	uint32_t seq;
+	uint32_t retries;
+	int32_t clock_mode;
+	uint32_t shift;
+	uint64_t cycles;
+	uint64_t cycle_last;
+	uint64_t mask;
+	uint32_t mult;
+	uint32_t reserved;
+	struct vkso_hres_base realtime_base;
+};
+
 struct vkso_shared_data {
 	uint32_t seq;
 	uint32_t abi_version;
@@ -63,6 +77,15 @@ struct vkso_mm_data {
 
 typedef int (*vkso_clock_gettime_fn)(const struct vkso_mm_data *, int,
 				    struct vkso_time_value *);
+typedef int (*vkso_hres_cycle_probe_fn)(struct vkso_hres_cycle_sample *);
+typedef int (*vkso_hres_cycle_probe_at_fn)(
+	const struct vkso_shared_data *, struct vkso_hres_cycle_sample *);
+
+struct retry_test {
+	struct vkso_shared_data shared;
+	int ready;
+	int stop;
+};
 
 struct shared_lookup {
 	uintptr_t text_symbol;
@@ -216,6 +239,100 @@ static void check_hres_snapshot(const struct vkso_shared_data *shared)
 	printf("hres_snapshot=pass samples=%u\n", SAMPLES);
 }
 
+static void *seq_writer(void *argument)
+{
+	struct retry_test *test = argument;
+	uint64_t generation = 1;
+
+	while (!__atomic_load_n(&test->stop, __ATOMIC_ACQUIRE)) {
+		uint32_t seq = READ_ONCE(test->shared.seq);
+		unsigned int spin;
+
+		__atomic_store_n(&test->shared.seq, seq + 1, __ATOMIC_RELEASE);
+		if (generation == 1) {
+			/* Hand the single QEMU CPU to a reader while seq is odd. */
+			__atomic_store_n(&test->ready, 1, __ATOMIC_RELEASE);
+			sched_yield();
+		}
+		__atomic_store_n(&test->shared.abi_version,
+				 VKSO_TIME_ABI_VERSION, __ATOMIC_RELAXED);
+		__atomic_store_n(&test->shared.hres.clock_mode, 1,
+				 __ATOMIC_RELAXED);
+		__atomic_store_n(&test->shared.hres.cycle_last, generation,
+				 __ATOMIC_RELAXED);
+		__atomic_store_n(&test->shared.hres.mask, ~generation,
+				 __ATOMIC_RELAXED);
+		__atomic_store_n(&test->shared.hres.mult,
+				 (uint32_t)generation | 1U, __ATOMIC_RELAXED);
+		__atomic_store_n(&test->shared.hres.shift,
+				 (uint32_t)(generation % 31), __ATOMIC_RELAXED);
+		__atomic_store_n(&test->shared.hres.realtime_base.sec,
+				 (int64_t)generation, __ATOMIC_RELAXED);
+		__atomic_store_n(&test->shared.hres.realtime_base.shifted_nsec,
+				 generation * 17, __ATOMIC_RELAXED);
+		for (spin = 0; spin < 256; ++spin)
+			__asm__ volatile("pause");
+		__atomic_store_n(&test->shared.seq, seq + 2, __ATOMIC_RELEASE);
+		generation++;
+		sched_yield();
+	}
+	return NULL;
+}
+
+static void check_tsc_cycles_shim(vkso_hres_cycle_probe_fn probe)
+{
+	struct vkso_hres_cycle_sample sample;
+	unsigned int i;
+
+	for (i = 0; i < SAMPLES; ++i) {
+		if (probe(&sample) != 0 || sample.clock_mode != 1 ||
+		    !sample.cycles || !sample.cycle_last || !sample.mult ||
+		    sample.mask != UINT64_MAX || sample.shift >= 32 ||
+		    (sample.seq & 1U))
+			fail("TSC cycles shim");
+	}
+	printf("tsc_cycles_shim=pass samples=%u\n", SAMPLES);
+}
+
+static void check_seq_retry(vkso_hres_cycle_probe_at_fn probe_at)
+{
+	struct retry_test test = { 0 };
+	pthread_t writer;
+	uint64_t total_retries = 0;
+	uint64_t previous_generation = 0;
+	unsigned int i;
+
+	if (pthread_create(&writer, NULL, seq_writer, &test))
+		fail("create seq writer");
+	while (!__atomic_load_n(&test.ready, __ATOMIC_ACQUIRE))
+		sched_yield();
+	for (i = 0; i < SAMPLES; ++i) {
+		struct vkso_hres_cycle_sample sample;
+		uint64_t generation;
+
+		if (probe_at(&test.shared, &sample) != 0)
+			fail("concurrent seq probe");
+		generation = (uint64_t)sample.realtime_base.sec;
+		if (!generation || sample.clock_mode != 1 || !sample.cycles ||
+		    sample.cycle_last != generation ||
+		    sample.mask != ~generation ||
+		    sample.mult != ((uint32_t)generation | 1U) ||
+		    sample.shift != generation % 31 ||
+		    sample.realtime_base.shifted_nsec != generation * 17 ||
+		    generation < previous_generation || (sample.seq & 1U))
+			fail("mixed seq generation");
+		previous_generation = generation;
+		total_retries += sample.retries;
+	}
+	__atomic_store_n(&test.stop, 1, __ATOMIC_RELEASE);
+	if (pthread_join(writer, NULL))
+		fail("join seq writer");
+	if (!total_retries)
+		fail("seq retry not observed");
+	printf("seq_retry_concurrency=pass samples=%u retries=%llu\n",
+	       SAMPLES, (unsigned long long)total_retries);
+}
+
 static void check_monotonic_namespace(vkso_clock_gettime_fn clock_gettime)
 {
 	static const char offset[] = "monotonic 7 123456789\n";
@@ -253,6 +370,8 @@ static void check_monotonic_namespace(vkso_clock_gettime_fn clock_gettime)
 int main(void)
 {
 	vkso_clock_gettime_fn vkso_clock_gettime;
+	vkso_hres_cycle_probe_fn vkso_hres_cycle_probe;
+	vkso_hres_cycle_probe_at_fn vkso_hres_cycle_probe_at;
 	struct shared_lookup lookup = { 0 };
 	struct vkso_shared_data *shared;
 	const struct vkso_mm_data *mm_data;
@@ -275,6 +394,14 @@ int main(void)
 	shared = lookup.shared;
 	if (!shared)
 		fail("resolve shared load");
+	symbol = dlsym(RTLD_DEFAULT, "__vkso_hres_cycle_probe");
+	memcpy(&vkso_hres_cycle_probe, &symbol,
+	       sizeof(vkso_hres_cycle_probe));
+	symbol = dlsym(RTLD_DEFAULT, "__vkso_test_hres_cycle_probe_at");
+	memcpy(&vkso_hres_cycle_probe_at, &symbol,
+	       sizeof(vkso_hres_cycle_probe_at));
+	if (!vkso_hres_cycle_probe || !vkso_hres_cycle_probe_at)
+		fail("resolve M08 symbols");
 
 	require_mapping(symbol, 1);
 	require_mapping(shared, 0);
@@ -284,6 +411,8 @@ int main(void)
 	    shared->monotonic_coarse.nsec >= UINT64_C(1000000000))
 		fail("shared data layout");
 	check_hres_snapshot(shared);
+	check_tsc_cycles_shim(vkso_hres_cycle_probe);
+	check_seq_retry(vkso_hres_cycle_probe_at);
 
 	for (i = 0; i < SAMPLES; ++i) {
 		struct timespec before, after, current, realtime;
