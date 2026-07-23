@@ -22,21 +22,20 @@ static_assert(sizeof(struct vkso_timeval) == 16);
 static_assert(offsetof(struct vkso_timeval, sec) == 0);
 static_assert(offsetof(struct vkso_timeval, usec) == 8);
 static_assert(sizeof(struct vkso_timezone) == 8);
-static_assert(offsetof(struct vkso_shared_data, realtime_coarse) == 8);
-static_assert(offsetof(struct vkso_shared_data, monotonic_coarse) == 24);
-static_assert(offsetof(struct vkso_shared_data, hres) == 40);
-static_assert(offsetof(struct vkso_shared_data, raw) == 136);
-static_assert(offsetof(struct vkso_shared_data, hrtimer_resolution) == 184);
-static_assert(offsetof(struct vkso_shared_data, timezone) == 192);
+static_assert(offsetof(struct vkso_shared_data, hres) == 8);
+static_assert(offsetof(struct vkso_shared_data, raw) == 96);
+static_assert(offsetof(struct vkso_shared_data, realtime_coarse) == 136);
+static_assert(offsetof(struct vkso_shared_data, monotonic_coarse) == 152);
+static_assert(offsetof(struct vkso_shared_data, hrtimer_resolution) == 168);
+static_assert(offsetof(struct vkso_shared_data, timezone) == 176);
 static_assert(offsetof(struct vkso_cycle_data, cycle_last) == 8);
-static_assert(offsetof(struct vkso_cycle_data, mask) == 16);
-static_assert(offsetof(struct vkso_cycle_data, mult) == 24);
-static_assert(offsetof(struct vkso_cycle_data, shift) == 28);
-static_assert(offsetof(struct vkso_hres_data, realtime_base) == 32);
-static_assert(offsetof(struct vkso_hres_data, monotonic_base) == 48);
-static_assert(offsetof(struct vkso_hres_data, boottime_base) == 64);
-static_assert(offsetof(struct vkso_hres_data, tai_base) == 80);
-static_assert(offsetof(struct vkso_raw_data, monotonic_raw_base) == 32);
+static_assert(offsetof(struct vkso_cycle_data, mult) == 16);
+static_assert(offsetof(struct vkso_cycle_data, shift) == 20);
+static_assert(offsetof(struct vkso_hres_data, realtime_base) == 24);
+static_assert(offsetof(struct vkso_hres_data, monotonic_base) == 40);
+static_assert(offsetof(struct vkso_hres_data, boottime_base) == 56);
+static_assert(offsetof(struct vkso_hres_data, tai_base) == 72);
+static_assert(offsetof(struct vkso_raw_data, monotonic_raw_base) == 24);
 static_assert(CLOCK_REALTIME == 0);
 static_assert(CLOCK_MONOTONIC == CLOCK_REALTIME + 1);
 static_assert(CLOCK_MONOTONIC_COARSE == CLOCK_REALTIME_COARSE + 1);
@@ -46,8 +45,10 @@ static_assert(offsetof(struct vkso_hres_data, monotonic_base) ==
 static_assert(offsetof(struct vkso_shared_data, monotonic_coarse) ==
 	      offsetof(struct vkso_shared_data, realtime_coarse) +
 	      sizeof(struct vkso_time_value));
+static_assert(offsetof(struct vkso_shared_data, hres.monotonic_base) +
+	      sizeof(struct vkso_hres_base) == 64);
 #ifdef CONFIG_VKSO_TIME_TEST
-static_assert(sizeof(struct vkso_hres_cycle_sample) == 64);
+static_assert(sizeof(struct vkso_hres_cycle_sample) == 56);
 #endif
 static_assert(offsetof(struct vkso_mm_data, monotonic_offset) == 8);
 static_assert(offsetof(struct vkso_mm_data, boottime_offset) == 24);
@@ -59,7 +60,6 @@ struct vkso_hres_snapshot {
 	u32 seq;
 	u32 retries;
 	s32 clock_mode;
-	u64 mask;
 #endif
 	struct vkso_hres_base base;
 	u64 cycle_last;
@@ -159,7 +159,6 @@ static __always_inline int vkso_read_hres(
 		next.cycle_last = READ_ONCE(cycle_data->cycle_last);
 #ifdef CONFIG_VKSO_TIME_TEST
 		next.clock_mode = clock_mode;
-		next.mask = READ_ONCE(cycle_data->mask);
 #endif
 		next.mult = READ_ONCE(cycle_data->mult);
 		next.shift = READ_ONCE(cycle_data->shift);
@@ -230,7 +229,6 @@ static __always_inline int vkso_hres_sample(
 	sample->shift = snapshot.shift;
 	sample->cycles = snapshot.cycles;
 	sample->cycle_last = snapshot.cycle_last;
-	sample->mask = snapshot.mask;
 	sample->mult = snapshot.mult;
 	sample->reserved = 0;
 	sample->realtime_base = snapshot.base;

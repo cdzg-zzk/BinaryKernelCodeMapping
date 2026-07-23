@@ -21,7 +21,7 @@
 #include <unistd.h>
 
 #define SAMPLES 10000U
-#define VKSO_TIME_ABI_VERSION 7U
+#define VKSO_TIME_ABI_VERSION 8U
 #define VKSO_MM_DATA_ABI_VERSION 2U
 #define VKSO_TIME_OK 0
 #define VKSO_TIME_FALLBACK (-1)
@@ -63,7 +63,6 @@ struct vkso_cycle_data {
 	int32_t clock_mode;
 	uint32_t reserved;
 	uint64_t cycle_last;
-	uint64_t mask;
 	uint32_t mult;
 	uint32_t shift;
 };
@@ -88,7 +87,6 @@ struct vkso_hres_cycle_sample {
 	uint32_t shift;
 	uint64_t cycles;
 	uint64_t cycle_last;
-	uint64_t mask;
 	uint32_t mult;
 	uint32_t reserved;
 	struct vkso_hres_base realtime_base;
@@ -97,14 +95,22 @@ struct vkso_hres_cycle_sample {
 struct vkso_shared_data {
 	uint32_t seq;
 	uint32_t abi_version;
-	struct vkso_time_value realtime_coarse;
-	struct vkso_time_value monotonic_coarse;
 	struct vkso_hres_data hres;
 	struct vkso_raw_data raw;
+	struct vkso_time_value realtime_coarse;
+	struct vkso_time_value monotonic_coarse;
 	uint32_t hrtimer_resolution;
 	uint32_t reserved;
 	struct vkso_timezone timezone;
 };
+
+_Static_assert(offsetof(struct vkso_shared_data, hres.realtime_base) == 32,
+	       "realtime base must remain in the first cache line");
+_Static_assert(offsetof(struct vkso_shared_data, hres.monotonic_base) == 48,
+	       "monotonic base must remain in the first cache line");
+_Static_assert(offsetof(struct vkso_shared_data, hres.monotonic_base) +
+		       sizeof(struct vkso_hres_base) == 64,
+	       "common high-resolution data must fit one cache line");
 
 struct vkso_mm_data {
 	uint32_t abi_version;
@@ -717,8 +723,6 @@ static void *seq_writer(void *argument)
 				 __ATOMIC_RELAXED);
 		__atomic_store_n(&test->shared.hres.cycles.cycle_last, generation,
 				 __ATOMIC_RELAXED);
-		__atomic_store_n(&test->shared.hres.cycles.mask, ~generation,
-				 __ATOMIC_RELAXED);
 		__atomic_store_n(&test->shared.hres.cycles.mult,
 				 (uint32_t)generation | 1U, __ATOMIC_RELAXED);
 		__atomic_store_n(&test->shared.hres.cycles.shift,
@@ -751,8 +755,7 @@ static void check_tsc_cycles_shim(vkso_hres_cycle_probe_at_fn probe_at,
 			fail("hres before oracle");
 		if (probe_at(shared, &sample) != 0 || sample.clock_mode != 1 ||
 		    !sample.cycles || !sample.cycle_last || !sample.mult ||
-		    sample.mask != UINT64_MAX || sample.shift >= 32 ||
-		    (sample.seq & 1U))
+		    sample.shift >= 32 || (sample.seq & 1U))
 			fail("TSC cycles shim");
 		delta = sample.cycles > sample.cycle_last ?
 			sample.cycles - sample.cycle_last : 0;
@@ -794,7 +797,6 @@ static void check_seq_retry(vkso_hres_cycle_probe_at_fn probe_at)
 		generation = (uint64_t)sample.realtime_base.sec;
 		if (!generation || sample.clock_mode != 1 || !sample.cycles ||
 		    sample.cycle_last != generation ||
-		    sample.mask != ~generation ||
 		    sample.mult != ((uint32_t)generation | 1U) ||
 		    sample.shift != generation % 31 ||
 		    sample.realtime_base.shifted_nsec != generation * 17 ||
@@ -921,6 +923,7 @@ int main(void)
 	    shared->realtime_coarse.nsec >= UINT64_C(1000000000) ||
 	    shared->monotonic_coarse.nsec >= UINT64_C(1000000000))
 		fail("shared data layout");
+	puts("shared_hot_cacheline=pass bytes=64");
 	check_hres_resolution(vkso_clock_getres);
 	check_gettimeofday_timeval(vkso_gettimeofday);
 	check_gettimeofday_timezone(vkso_gettimeofday);

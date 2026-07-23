@@ -4,7 +4,7 @@
 
 #include <linux/types.h>
 
-#define VKSO_TIME_ABI_VERSION	7U
+#define VKSO_TIME_ABI_VERSION	8U
 #define VKSO_SHARED_PAGE_SIZE	4096U
 #define VKSO_MM_DATA_ABI_VERSION	2U
 
@@ -39,7 +39,6 @@ struct vkso_cycle_data {
 	s32 clock_mode;
 	u32 reserved;
 	u64 cycle_last;
-	u64 mask;
 	u32 mult;
 	u32 shift;
 };
@@ -66,7 +65,6 @@ struct vkso_hres_cycle_sample {
 	u32 shift;
 	u64 cycles;
 	u64 cycle_last;
-	u64 mask;
 	u32 mult;
 	u32 reserved;
 	struct vkso_hres_base realtime_base;
@@ -76,10 +74,10 @@ struct vkso_hres_cycle_sample {
 struct vkso_shared_data {
 	u32 seq;
 	u32 abi_version;
-	struct vkso_time_value realtime_coarse;
-	struct vkso_time_value monotonic_coarse;
 	struct vkso_hres_data hres;
 	struct vkso_raw_data raw;
+	struct vkso_time_value realtime_coarse;
+	struct vkso_time_value monotonic_coarse;
 	u32 hrtimer_resolution;
 	u32 reserved;
 	struct vkso_timezone timezone;

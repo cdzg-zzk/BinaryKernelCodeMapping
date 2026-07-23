@@ -37,7 +37,6 @@ static __always_inline void vkso_time_prepare_cycles(
 	struct vkso_cycle_data *next, const struct tk_read_base *tkr)
 {
 	next->cycle_last = tkr->cycle_last;
-	next->mask = tkr->mask;
 	next->mult = tkr->mult;
 	next->shift = tkr->shift;
 }
@@ -99,6 +98,11 @@ void vkso_time_publish(struct timekeeper *tk)
 	struct vkso_shared_data next = { 0 };
 	struct vkso_shared_data *shared = &vkso_shared_page.data;
 	size_t payload_offset = offsetof(struct vkso_shared_data, abi_version);
+	size_t seconds_offset =
+		offsetof(struct vkso_shared_data, hres.realtime_base.sec);
+	size_t after_seconds = seconds_offset +
+		sizeof(shared->hres.realtime_base.sec);
+	size_t payload_end = offsetof(struct vkso_shared_data, timezone);
 	u32 seq;
 
 	/* Derive first so the reader-visible odd interval only copies data. */
@@ -107,7 +111,15 @@ void vkso_time_publish(struct timekeeper *tk)
 	WRITE_ONCE(shared->seq, seq + 1);
 	smp_wmb();
 	memcpy((u8 *)shared + payload_offset, (u8 *)&next + payload_offset,
-	       offsetof(struct vkso_shared_data, timezone) - payload_offset);
+	       seconds_offset - payload_offset);
+	/*
+	 * time() deliberately ignores seq, so its 64-bit source must be
+	 * published by one aligned store rather than a potentially split copy.
+	 */
+	WRITE_ONCE(shared->hres.realtime_base.sec,
+		   next.hres.realtime_base.sec);
+	memcpy((u8 *)shared + after_seconds, (u8 *)&next + after_seconds,
+	       payload_end - after_seconds);
 	smp_wmb();
 	WRITE_ONCE(shared->seq, seq + 2);
 }
