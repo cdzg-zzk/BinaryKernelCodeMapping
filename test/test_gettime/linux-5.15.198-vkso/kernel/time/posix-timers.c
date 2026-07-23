@@ -176,8 +176,7 @@ static inline void unlock_timer(struct k_itimer *timr, unsigned long flags)
 /* Get clock_realtime */
 static int posix_get_realtime_timespec(clockid_t which_clock, struct timespec64 *tp)
 {
-	if (vkso_time_get_global(which_clock, tp))
-		ktime_get_real_ts64(tp);
+	ktime_get_real_ts64(tp);
 	return 0;
 }
 
@@ -204,10 +203,8 @@ static int posix_clock_realtime_adj(const clockid_t which_clock,
  */
 static int posix_get_monotonic_timespec(clockid_t which_clock, struct timespec64 *tp)
 {
-	if (vkso_time_get_context(which_clock, tp)) {
-		ktime_get_ts64(tp);
-		timens_add_monotonic(tp);
-	}
+	ktime_get_ts64(tp);
+	timens_add_monotonic(tp);
 	return 0;
 }
 
@@ -221,44 +218,36 @@ static ktime_t posix_get_monotonic_ktime(clockid_t which_clock)
  */
 static int posix_get_monotonic_raw(clockid_t which_clock, struct timespec64 *tp)
 {
-	if (vkso_time_get_context(which_clock, tp)) {
-		ktime_get_raw_ts64(tp);
-		timens_add_monotonic(tp);
-	}
+	ktime_get_raw_ts64(tp);
+	timens_add_monotonic(tp);
 	return 0;
 }
 
 
 static int posix_get_realtime_coarse(clockid_t which_clock, struct timespec64 *tp)
 {
-	if (vkso_time_get_global(which_clock, tp))
-		ktime_get_coarse_real_ts64(tp);
+	ktime_get_coarse_real_ts64(tp);
 	return 0;
 }
 
 static int posix_get_monotonic_coarse(clockid_t which_clock,
 						struct timespec64 *tp)
 {
-	if (vkso_time_get_context(which_clock, tp)) {
-		ktime_get_coarse_ts64(tp);
-		timens_add_monotonic(tp);
-	}
+	ktime_get_coarse_ts64(tp);
+	timens_add_monotonic(tp);
 	return 0;
 }
 
 static int posix_get_coarse_res(const clockid_t which_clock, struct timespec64 *tp)
 {
-	if (vkso_time_getres(which_clock, tp))
-		*tp = ktime_to_timespec64(KTIME_LOW_RES);
+	*tp = ktime_to_timespec64(KTIME_LOW_RES);
 	return 0;
 }
 
 static int posix_get_boottime_timespec(const clockid_t which_clock, struct timespec64 *tp)
 {
-	if (vkso_time_get_context(which_clock, tp)) {
-		ktime_get_boottime_ts64(tp);
-		timens_add_boottime(tp);
-	}
+	ktime_get_boottime_ts64(tp);
+	timens_add_boottime(tp);
 	return 0;
 }
 
@@ -269,8 +258,7 @@ static ktime_t posix_get_boottime_ktime(const clockid_t which_clock)
 
 static int posix_get_tai_timespec(clockid_t which_clock, struct timespec64 *tp)
 {
-	if (vkso_time_get_global(which_clock, tp))
-		ktime_get_clocktai_ts64(tp);
+	ktime_get_clocktai_ts64(tp);
 	return 0;
 }
 
@@ -281,10 +269,8 @@ static ktime_t posix_get_tai_ktime(clockid_t which_clock)
 
 static int posix_get_hrtimer_res(clockid_t which_clock, struct timespec64 *tp)
 {
-	if (vkso_time_getres(which_clock, tp)) {
-		tp->tv_sec = 0;
-		tp->tv_nsec = hrtimer_resolution;
-	}
+	tp->tv_sec = 0;
+	tp->tv_nsec = hrtimer_resolution;
 	return 0;
 }
 
@@ -1143,14 +1129,17 @@ SYSCALL_DEFINE2(clock_settime, const clockid_t, which_clock,
 SYSCALL_DEFINE2(clock_gettime, const clockid_t, which_clock,
 		struct __kernel_timespec __user *, tp)
 {
-	const struct k_clock *kc = clockid_to_kclock(which_clock);
+	const struct k_clock *kc;
 	struct timespec64 kernel_tp;
 	int error;
 
-	if (!kc)
-		return -EINVAL;
-
-	error = kc->clock_get_timespec(which_clock, &kernel_tp);
+	error = vkso_time_get_context(which_clock, &kernel_tp);
+	if (unlikely(error == VKSO_TIME_FALLBACK)) {
+		kc = clockid_to_kclock(which_clock);
+		if (!kc)
+			return -EINVAL;
+		error = kc->clock_get_timespec(which_clock, &kernel_tp);
+	}
 
 	if (!error && put_timespec64(&kernel_tp, tp))
 		error = -EFAULT;
@@ -1190,14 +1179,17 @@ SYSCALL_DEFINE2(clock_adjtime, const clockid_t, which_clock,
 SYSCALL_DEFINE2(clock_getres, const clockid_t, which_clock,
 		struct __kernel_timespec __user *, tp)
 {
-	const struct k_clock *kc = clockid_to_kclock(which_clock);
+	const struct k_clock *kc;
 	struct timespec64 rtn_tp;
 	int error;
 
-	if (!kc)
-		return -EINVAL;
-
-	error = kc->clock_getres(which_clock, &rtn_tp);
+	error = vkso_time_getres(which_clock, &rtn_tp);
+	if (unlikely(error == VKSO_TIME_FALLBACK)) {
+		kc = clockid_to_kclock(which_clock);
+		if (!kc)
+			return -EINVAL;
+		error = kc->clock_getres(which_clock, &rtn_tp);
+	}
 
 	if (!error && tp && put_timespec64(&rtn_tp, tp))
 		error = -EFAULT;
