@@ -77,7 +77,6 @@ struct vkso_mm_data {
 
 typedef int (*vkso_clock_gettime_fn)(const struct vkso_mm_data *, int,
 				    struct vkso_time_value *);
-typedef int (*vkso_hres_cycle_probe_fn)(struct vkso_hres_cycle_sample *);
 typedef int (*vkso_hres_cycle_probe_at_fn)(
 	const struct vkso_shared_data *, struct vkso_hres_cycle_sample *);
 
@@ -127,15 +126,6 @@ static int find_shared_load(struct dl_phdr_info *info, size_t size, void *data)
 static int64_t to_ns(const struct timespec *ts)
 {
 	return (int64_t)ts->tv_sec * INT64_C(1000000000) + ts->tv_nsec;
-}
-
-static uint64_t read_tsc_ordered(void)
-{
-	uint32_t low, high;
-
-	__asm__ volatile("lfence\n\trdtsc"
-			 : "=a" (low), "=d" (high) : : "memory");
-	return ((uint64_t)high << 32) | low;
 }
 
 static void fail(const char *message)
@@ -191,54 +181,6 @@ static void check_monotonic_coarse(vkso_clock_gettime_fn clock_gettime,
 	}
 }
 
-static void check_hres_snapshot(const struct vkso_shared_data *shared)
-{
-	struct timespec previous = { 0 };
-	unsigned int i;
-
-	for (i = 0; i < SAMPLES; ++i) {
-		uint64_t cycle_last, mask, shifted_nsec, cycles, delta, ns;
-		uint32_t seq, mult, shift;
-		int32_t clock_mode;
-		int64_t base_sec;
-		struct timespec before, after, current;
-
-		if (syscall(SYS_clock_gettime, CLOCK_REALTIME, &before))
-			fail("hres before oracle");
-		do {
-			do {
-				seq = READ_ONCE(shared->seq);
-			} while (seq & 1U);
-			__atomic_thread_fence(__ATOMIC_ACQUIRE);
-			clock_mode = READ_ONCE(shared->hres.clock_mode);
-			cycles = read_tsc_ordered();
-			cycle_last = READ_ONCE(shared->hres.cycle_last);
-			mask = READ_ONCE(shared->hres.mask);
-			mult = READ_ONCE(shared->hres.mult);
-			shift = READ_ONCE(shared->hres.shift);
-			base_sec = READ_ONCE(shared->hres.realtime_base.sec);
-			shifted_nsec =
-				READ_ONCE(shared->hres.realtime_base.shifted_nsec);
-			__atomic_thread_fence(__ATOMIC_ACQUIRE);
-		} while (seq != READ_ONCE(shared->seq));
-		if (clock_mode != 1 || !cycle_last || mask != UINT64_MAX ||
-		    !mult || shift >= 32)
-			fail("hres conversion metadata");
-		delta = cycles > cycle_last ? cycles - cycle_last : 0;
-		ns = (shifted_nsec + delta * mult) >> shift;
-		current.tv_sec = base_sec + (int64_t)(ns / UINT64_C(1000000000));
-		current.tv_nsec = (long)(ns % UINT64_C(1000000000));
-		if (syscall(SYS_clock_gettime, CLOCK_REALTIME, &after))
-			fail("hres after oracle");
-		if (to_ns(&current) < to_ns(&before) ||
-		    to_ns(&current) > to_ns(&after) ||
-		    (i && to_ns(&current) < to_ns(&previous)))
-			fail("hres snapshot bracket");
-		previous = current;
-	}
-	printf("hres_snapshot=pass samples=%u\n", SAMPLES);
-}
-
 static void *seq_writer(void *argument)
 {
 	struct retry_test *test = argument;
@@ -279,18 +221,39 @@ static void *seq_writer(void *argument)
 	return NULL;
 }
 
-static void check_tsc_cycles_shim(vkso_hres_cycle_probe_fn probe)
+static void check_tsc_cycles_shim(vkso_hres_cycle_probe_at_fn probe_at,
+				  const struct vkso_shared_data *shared)
 {
+	struct timespec previous = { 0 };
 	struct vkso_hres_cycle_sample sample;
 	unsigned int i;
 
 	for (i = 0; i < SAMPLES; ++i) {
-		if (probe(&sample) != 0 || sample.clock_mode != 1 ||
+		uint64_t delta, ns;
+		struct timespec before, after, current;
+
+		if (syscall(SYS_clock_gettime, CLOCK_REALTIME, &before))
+			fail("hres before oracle");
+		if (probe_at(shared, &sample) != 0 || sample.clock_mode != 1 ||
 		    !sample.cycles || !sample.cycle_last || !sample.mult ||
 		    sample.mask != UINT64_MAX || sample.shift >= 32 ||
 		    (sample.seq & 1U))
 			fail("TSC cycles shim");
+		delta = (sample.cycles - sample.cycle_last) & sample.mask;
+		ns = (sample.realtime_base.shifted_nsec + delta * sample.mult) >>
+		     sample.shift;
+		current.tv_sec = sample.realtime_base.sec +
+			(int64_t)(ns / UINT64_C(1000000000));
+		current.tv_nsec = (long)(ns % UINT64_C(1000000000));
+		if (syscall(SYS_clock_gettime, CLOCK_REALTIME, &after))
+			fail("hres after oracle");
+		if (to_ns(&current) < to_ns(&before) ||
+		    to_ns(&current) > to_ns(&after) ||
+		    (i && to_ns(&current) < to_ns(&previous)))
+			fail("hres snapshot bracket");
+		previous = current;
 	}
+	printf("hres_snapshot=pass samples=%u\n", SAMPLES);
 	printf("tsc_cycles_shim=pass samples=%u\n", SAMPLES);
 }
 
@@ -370,7 +333,6 @@ static void check_monotonic_namespace(vkso_clock_gettime_fn clock_gettime)
 int main(void)
 {
 	vkso_clock_gettime_fn vkso_clock_gettime;
-	vkso_hres_cycle_probe_fn vkso_hres_cycle_probe;
 	vkso_hres_cycle_probe_at_fn vkso_hres_cycle_probe_at;
 	struct shared_lookup lookup = { 0 };
 	struct vkso_shared_data *shared;
@@ -394,13 +356,10 @@ int main(void)
 	shared = lookup.shared;
 	if (!shared)
 		fail("resolve shared load");
-	symbol = dlsym(RTLD_DEFAULT, "__vkso_hres_cycle_probe");
-	memcpy(&vkso_hres_cycle_probe, &symbol,
-	       sizeof(vkso_hres_cycle_probe));
 	symbol = dlsym(RTLD_DEFAULT, "__vkso_test_hres_cycle_probe_at");
 	memcpy(&vkso_hres_cycle_probe_at, &symbol,
 	       sizeof(vkso_hres_cycle_probe_at));
-	if (!vkso_hres_cycle_probe || !vkso_hres_cycle_probe_at)
+	if (!vkso_hres_cycle_probe_at)
 		fail("resolve M08 symbols");
 
 	require_mapping(symbol, 1);
@@ -410,8 +369,7 @@ int main(void)
 	    shared->realtime_coarse.nsec >= UINT64_C(1000000000) ||
 	    shared->monotonic_coarse.nsec >= UINT64_C(1000000000))
 		fail("shared data layout");
-	check_hres_snapshot(shared);
-	check_tsc_cycles_shim(vkso_hres_cycle_probe);
+	check_tsc_cycles_shim(vkso_hres_cycle_probe_at, shared);
 	check_seq_retry(vkso_hres_cycle_probe_at);
 
 	for (i = 0; i < SAMPLES; ++i) {

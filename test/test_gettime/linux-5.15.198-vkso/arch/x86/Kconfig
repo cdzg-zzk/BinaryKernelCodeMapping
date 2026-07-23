@@ -45,6 +45,14 @@ config VKSO_TIME
 
 	  This option is experimental.  If unsure, say N.
 
+config VKSO_TIME_TEST
+	bool "VKSO time internal test entry points"
+	depends on VKSO_TIME
+	help
+	  Build test-only entry points that drive the common snapshot reader
+	  against synthetic shared data.  Production kernels should leave this
+	  disabled.
+
 config FORCE_DYNAMIC_FTRACE
 	def_bool y
 	depends on X86_32

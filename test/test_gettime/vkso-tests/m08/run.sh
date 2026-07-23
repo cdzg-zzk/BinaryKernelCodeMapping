@@ -10,7 +10,7 @@ RESULT="$WORK/qemu.log"
 
 BUILD="$BUILD" WORK="$WORK" "$SCRIPT_DIR/../m04/run.sh"
 
-disassembly=$(objdump -d --disassemble=__vkso_hres_cycle_probe \
+disassembly=$(objdump -d --disassemble=__vkso_test_hres_cycle_probe_at \
 	"$BUILD/vmlinux")
 grep -Eq '[[:space:]]rdtsc(p)?[[:space:]]*$' <<<"$disassembly" || {
 	echo "M08 TSC instruction missing from common core" >&2

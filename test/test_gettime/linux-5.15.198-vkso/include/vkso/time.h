@@ -35,7 +35,8 @@ struct vkso_hres_data {
 	struct vkso_hres_base realtime_base;
 };
 
-/* Internal M08 result: one counter and conversion-metadata generation. */
+#ifdef CONFIG_VKSO_TIME_TEST
+/* Test-only result: one counter and conversion-metadata generation. */
 struct vkso_hres_cycle_sample {
 	u32 seq;
 	u32 retries;
@@ -48,6 +49,7 @@ struct vkso_hres_cycle_sample {
 	u32 reserved;
 	struct vkso_hres_base realtime_base;
 };
+#endif
 
 struct vkso_shared_data {
 	u32 seq;
@@ -76,9 +78,10 @@ union vkso_mm_page {
 
 int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 			 struct vkso_time_value *value);
-int __vkso_hres_cycle_probe(struct vkso_hres_cycle_sample *sample);
+#ifdef CONFIG_VKSO_TIME_TEST
 int __vkso_test_hres_cycle_probe_at(
 	const struct vkso_shared_data *shared,
 	struct vkso_hres_cycle_sample *sample);
+#endif
 
 #endif /* _VKSO_TIME_H */
