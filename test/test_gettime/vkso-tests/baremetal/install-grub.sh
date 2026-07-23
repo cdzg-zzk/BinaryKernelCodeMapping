@@ -39,8 +39,15 @@ for target in \
 	fi
 done
 if [[ -e "$GRUB_SCRIPT" ]]; then
-	cp -a "$GRUB_SCRIPT" "$GRUB_SCRIPT.bak.$STAMP"
+	grub_backup=$GRUB_SCRIPT.bak.$STAMP
+	cp -a "$GRUB_SCRIPT" "$grub_backup"
+	chmod a-x "$grub_backup"
 fi
+# update-grub executes every executable file in /etc/grub.d, including an old
+# backup with an otherwise harmless suffix.  Keep all backups as data only.
+for grub_backup in "$GRUB_SCRIPT".bak.*; do
+	[[ -e "$grub_backup" ]] && chmod a-x "$grub_backup"
+done
 
 install -m 0644 "$PACKAGE/raw-bzImage" \
 	/boot/vkso-time-raw-5.15.198.bzImage
