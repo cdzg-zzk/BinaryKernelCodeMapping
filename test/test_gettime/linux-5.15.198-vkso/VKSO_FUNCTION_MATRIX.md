@@ -50,9 +50,9 @@ from user context.
 | C05 | `CLOCK_TAI` | VKSO fast core | VKSO fast core | PASS |
 | C06 | `CLOCK_REALTIME_COARSE` | VKSO coarse core, no cycle read | same core | PASS |
 | C07 | `CLOCK_MONOTONIC_COARSE` | VKSO coarse core, no cycle read | same core | PASS |
-| C08 | process/thread CPU clocks | existing POSIX clock handler | syscall fallback | TODO |
-| C09 | alarm clocks | existing POSIX clock handler | syscall fallback | TODO |
-| C10 | invalid clock ID | `-EINVAL` | syscall-equivalent failure | TODO |
+| C08 | process/thread CPU clocks | existing POSIX clock handler | syscall fallback | PASS |
+| C09 | alarm clocks | existing POSIX clock handler | syscall fallback | PASS |
+| C10 | invalid clock ID | `-EINVAL` | syscall-equivalent failure | PASS |
 | C11 | monotonicity | no backward value under repeated reads | same | TODO |
 
 ## `clock_getres`

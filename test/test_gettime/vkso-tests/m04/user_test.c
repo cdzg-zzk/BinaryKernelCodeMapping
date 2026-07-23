@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 
+#include <errno.h>
 #include <dlfcn.h>
 #include <elf.h>
 #include <fcntl.h>
@@ -20,6 +21,7 @@
 #define SAMPLES 10000U
 #define VKSO_TIME_ABI_VERSION 5U
 #define VKSO_MM_DATA_ABI_VERSION 2U
+#define VKSO_TIME_OK 0
 #define VKSO_TIME_FALLBACK (-1)
 #define AT_VKSO_MM_DATA 52
 #define READ_ONCE(value) __atomic_load_n(&(value), __ATOMIC_RELAXED)
@@ -150,6 +152,81 @@ static void fail(const char *message)
 {
 	fprintf(stderr, "failure=%s\n", message);
 	exit(1);
+}
+
+static int vkso_clock_gettime_with_fallback(
+	vkso_clock_gettime_fn clock_gettime,
+	const struct vkso_mm_data *mm_data, clockid_t clock_id,
+	struct timespec *tp)
+{
+	struct vkso_time_value value;
+
+	if (clock_gettime(mm_data, clock_id, &value) == VKSO_TIME_OK) {
+		tp->tv_sec = value.sec;
+		tp->tv_nsec = (long)value.nsec;
+		return 0;
+	}
+	return syscall(SYS_clock_gettime, clock_id, tp);
+}
+
+static void check_fallback_clock(vkso_clock_gettime_fn clock_gettime,
+				 const struct vkso_mm_data *mm_data,
+				 clockid_t clock_id, const char *marker)
+{
+	struct vkso_time_value core_value;
+	struct timespec probe;
+	unsigned int i;
+
+	if (clock_gettime(mm_data, clock_id, &core_value) !=
+	    VKSO_TIME_FALLBACK)
+		fail("unsupported clock accepted by core");
+	errno = 0;
+	if (syscall(SYS_clock_gettime, clock_id, &probe)) {
+		int expected_errno = errno;
+
+		errno = 0;
+		if (vkso_clock_gettime_with_fallback(clock_gettime, mm_data,
+						     clock_id, &probe) != -1 ||
+		    errno != expected_errno)
+			fail("fallback error mismatch");
+		printf("%s=pass errno=%d\n", marker, expected_errno);
+		return;
+	}
+	for (i = 0; i < SAMPLES; ++i) {
+		struct timespec before, current, after;
+
+		if (syscall(SYS_clock_gettime, clock_id, &before) ||
+		    vkso_clock_gettime_with_fallback(clock_gettime, mm_data,
+						     clock_id, &current) ||
+		    syscall(SYS_clock_gettime, clock_id, &after))
+			fail("fallback clock call");
+		if (current.tv_nsec < 0 || current.tv_nsec >= 1000000000L ||
+		    to_ns(&current) < to_ns(&before) ||
+		    to_ns(&current) > to_ns(&after))
+			fail("fallback clock bracket");
+	}
+	printf("%s=pass samples=%u\n", marker, SAMPLES);
+}
+
+static void check_invalid_clock_fallback(
+	vkso_clock_gettime_fn clock_gettime,
+	const struct vkso_mm_data *mm_data, clockid_t clock_id)
+{
+	struct vkso_time_value core_value;
+	struct timespec value;
+
+	if (clock_gettime(mm_data, clock_id, &core_value) !=
+	    VKSO_TIME_FALLBACK)
+		fail("invalid clock accepted by core");
+	errno = 0;
+	if (syscall(SYS_clock_gettime, clock_id, &value) != -1 ||
+	    errno != EINVAL)
+		fail("invalid clock syscall semantics");
+	errno = 0;
+	if (vkso_clock_gettime_with_fallback(clock_gettime, mm_data,
+					     clock_id, &value) != -1 ||
+	    errno != EINVAL)
+		fail("invalid clock fallback semantics");
 }
 
 static void require_mapping(const void *address, int executable)
@@ -589,17 +666,25 @@ int main(void)
 	}
 	check_monotonic_coarse(vkso_clock_gettime, mm_data);
 
-	{
-		struct vkso_time_value value;
-
-		if (vkso_clock_gettime(mm_data, 12345, &value) !=
-		    VKSO_TIME_FALLBACK)
-			fail("unsupported clock did not fallback");
-	}
+	check_fallback_clock(vkso_clock_gettime, mm_data,
+			     CLOCK_PROCESS_CPUTIME_ID,
+			     "user_process_cputime_fallback");
+	check_fallback_clock(vkso_clock_gettime, mm_data,
+			     CLOCK_THREAD_CPUTIME_ID,
+			     "user_thread_cputime_fallback");
+	check_fallback_clock(vkso_clock_gettime, mm_data,
+			     CLOCK_REALTIME_ALARM,
+			     "user_realtime_alarm_fallback");
+	check_fallback_clock(vkso_clock_gettime, mm_data,
+			     CLOCK_BOOTTIME_ALARM,
+			     "user_boottime_alarm_fallback");
+	check_invalid_clock_fallback(vkso_clock_gettime, mm_data, 12345);
+	check_invalid_clock_fallback(vkso_clock_gettime, mm_data, -1);
 
 	printf("user_realtime_coarse=pass samples=%u\n", SAMPLES);
 	printf("user_monotonic_coarse=pass samples=%u\n", SAMPLES);
 	puts("unsupported_clock_fallback=pass");
+	puts("user_invalid_clock_fallback=pass errno=EINVAL");
 	check_time_namespace(vkso_clock_gettime);
 	printf("text=%p shared_data=%p delta=%td\n", symbol, shared,
 	       (char *)shared - (char *)symbol);

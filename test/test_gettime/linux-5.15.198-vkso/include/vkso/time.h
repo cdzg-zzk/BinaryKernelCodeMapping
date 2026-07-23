@@ -90,6 +90,10 @@ union vkso_mm_page {
 	u8 page[VKSO_SHARED_PAGE_SIZE];
 };
 
+/*
+ * VKSO_TIME_FALLBACK asks the environment adapter to use its native handler:
+ * the clock_gettime syscall in userspace or the POSIX clock handler in-kernel.
+ */
 int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 			 struct vkso_time_value *value);
 #ifdef CONFIG_VKSO_TIME_TEST
