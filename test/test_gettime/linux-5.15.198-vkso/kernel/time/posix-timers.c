@@ -204,8 +204,10 @@ static int posix_clock_realtime_adj(const clockid_t which_clock,
  */
 static int posix_get_monotonic_timespec(clockid_t which_clock, struct timespec64 *tp)
 {
-	ktime_get_ts64(tp);
-	timens_add_monotonic(tp);
+	if (!vkso_time_get_monotonic(tp)) {
+		ktime_get_ts64(tp);
+		timens_add_monotonic(tp);
+	}
 	return 0;
 }
 

@@ -44,7 +44,7 @@ from user context.
 | ID | Clock/scenario | Kernel path | User path | Status |
 |---|---|---|---|---|
 | C01 | `CLOCK_REALTIME` | VKSO fast core | VKSO fast core | PASS |
-| C02 | `CLOCK_MONOTONIC` | VKSO fast core | VKSO fast core | TODO |
+| C02 | `CLOCK_MONOTONIC` | VKSO fast core | VKSO fast core | PASS |
 | C03 | `CLOCK_MONOTONIC_RAW` | VKSO fast core | VKSO fast core | TODO |
 | C04 | `CLOCK_BOOTTIME` | VKSO fast core | VKSO fast core | TODO |
 | C05 | `CLOCK_TAI` | VKSO fast core | VKSO fast core | TODO |

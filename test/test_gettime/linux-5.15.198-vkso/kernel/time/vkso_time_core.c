@@ -25,6 +25,7 @@ static_assert(offsetof(struct vkso_hres_data, mask) == 16);
 static_assert(offsetof(struct vkso_hres_data, mult) == 24);
 static_assert(offsetof(struct vkso_hres_data, shift) == 28);
 static_assert(offsetof(struct vkso_hres_data, realtime_base) == 32);
+static_assert(offsetof(struct vkso_hres_data, monotonic_base) == 48);
 #ifdef CONFIG_VKSO_TIME_TEST
 static_assert(sizeof(struct vkso_hres_cycle_sample) == 64);
 #endif
@@ -39,7 +40,12 @@ struct vkso_read_snapshot {
 	u32 retries;
 	u32 abi_version;
 	struct vkso_time_value coarse;
-	struct vkso_hres_data hres;
+	s32 clock_mode;
+	u64 cycle_last;
+	u64 mask;
+	u32 mult;
+	u32 shift;
+	struct vkso_hres_base hres_base;
 	u64 cycles;
 };
 
@@ -61,19 +67,20 @@ static __always_inline bool vkso_read_cycles(s32 clock_mode, u64 *cycles)
 	return (s64)*cycles >= 0;
 }
 
-static __always_inline void
-vkso_realtime_from_snapshot(const struct vkso_read_snapshot *snapshot,
-			    struct vkso_time_value *value)
+static __always_inline void vkso_hres_from_snapshot(
+	const struct vkso_read_snapshot *snapshot, s64 offset_sec,
+	u64 offset_nsec, struct vkso_time_value *value)
 {
 	u64 cycles = snapshot->cycles;
-	u64 last = snapshot->hres.cycle_last;
-	u64 ns = snapshot->hres.realtime_base.shifted_nsec;
+	u64 last = snapshot->cycle_last;
+	u64 ns = snapshot->hres_base.shifted_nsec;
 
 	/* Match the x86 vDSO rule: clamp a slightly backward TSC to the base. */
 	if (cycles > last)
-		ns += (cycles - last) * snapshot->hres.mult;
-	ns >>= snapshot->hres.shift;
-	value->sec = snapshot->hres.realtime_base.sec +
+		ns += (cycles - last) * snapshot->mult;
+	ns >>= snapshot->shift;
+	ns += offset_nsec;
+	value->sec = snapshot->hres_base.sec + offset_sec +
 		__iter_div_u64_rem(ns, NSEC_PER_SEC, &ns);
 	value->nsec = ns;
 }
@@ -83,11 +90,12 @@ vkso_realtime_from_snapshot(const struct vkso_read_snapshot *snapshot,
  * coarse value by offset or the high-resolution conversion snapshot.
  */
 static __always_inline int vkso_read_snapshot(
-	const struct vkso_shared_data *shared, size_t coarse_offset, u32 flags,
+	const struct vkso_shared_data *shared, size_t value_offset, u32 flags,
 	struct vkso_read_snapshot *snapshot)
 {
-	const struct vkso_time_value *coarse =
-		(const void *)((const u8 *)shared + coarse_offset);
+	const void *selected = (const u8 *)shared + value_offset;
+	const struct vkso_time_value *coarse = selected;
+	const struct vkso_hres_base *hres_base = selected;
 	struct vkso_read_snapshot next;
 	u32 retries = 0;
 	bool have_cycles = true;
@@ -102,20 +110,17 @@ static __always_inline int vkso_read_snapshot(
 		smp_rmb();
 		next.abi_version = READ_ONCE(shared->abi_version);
 		if (flags & VKSO_READ_HRES) {
-			next.hres.clock_mode =
-				READ_ONCE(shared->hres.clock_mode);
-			have_cycles = vkso_read_cycles(next.hres.clock_mode,
+			next.clock_mode = READ_ONCE(shared->hres.clock_mode);
+			have_cycles = vkso_read_cycles(next.clock_mode,
 						       &next.cycles);
-			next.hres.cycle_last =
+			next.cycle_last =
 				READ_ONCE(shared->hres.cycle_last);
-			next.hres.mask = READ_ONCE(shared->hres.mask);
-			next.hres.mult = READ_ONCE(shared->hres.mult);
-			next.hres.shift = READ_ONCE(shared->hres.shift);
-			next.hres.realtime_base.sec =
-				READ_ONCE(shared->hres.realtime_base.sec);
-			next.hres.realtime_base.shifted_nsec =
-				READ_ONCE(
-					shared->hres.realtime_base.shifted_nsec);
+			next.mask = READ_ONCE(shared->hres.mask);
+			next.mult = READ_ONCE(shared->hres.mult);
+			next.shift = READ_ONCE(shared->hres.shift);
+			next.hres_base.sec = READ_ONCE(hres_base->sec);
+			next.hres_base.shifted_nsec =
+				READ_ONCE(hres_base->shifted_nsec);
 		} else {
 			next.coarse.sec = READ_ONCE(coarse->sec);
 			next.coarse.nsec = READ_ONCE(coarse->nsec);
@@ -152,19 +157,21 @@ static __always_inline int vkso_hres_sample(
 
 	if (!shared || !sample)
 		return VKSO_TIME_FALLBACK;
-	status = vkso_read_snapshot(shared, 0, VKSO_READ_HRES, &snapshot);
+	status = vkso_read_snapshot(shared,
+		offsetof(struct vkso_shared_data, hres.realtime_base),
+		VKSO_READ_HRES, &snapshot);
 	if (status != VKSO_TIME_OK)
 		return status;
 	sample->seq = snapshot.seq;
 	sample->retries = snapshot.retries;
-	sample->clock_mode = snapshot.hres.clock_mode;
-	sample->shift = snapshot.hres.shift;
+	sample->clock_mode = snapshot.clock_mode;
+	sample->shift = snapshot.shift;
 	sample->cycles = snapshot.cycles;
-	sample->cycle_last = snapshot.hres.cycle_last;
-	sample->mask = snapshot.hres.mask;
-	sample->mult = snapshot.hres.mult;
+	sample->cycle_last = snapshot.cycle_last;
+	sample->mask = snapshot.mask;
+	sample->mult = snapshot.mult;
 	sample->reserved = 0;
-	sample->realtime_base = snapshot.hres.realtime_base;
+	sample->realtime_base = snapshot.hres_base;
 	return VKSO_TIME_OK;
 }
 
@@ -182,7 +189,7 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 			 struct vkso_time_value *value)
 {
 	struct vkso_read_snapshot snapshot;
-	size_t coarse_offset;
+	size_t value_offset;
 	u32 read_flags;
 	s64 offset_sec = 0;
 	u64 offset_nsec = 0;
@@ -192,18 +199,25 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 		return VKSO_TIME_FALLBACK;
 	switch (clock_id) {
 	case CLOCK_REALTIME:
-		coarse_offset = 0;
+		value_offset = offsetof(struct vkso_shared_data,
+					 hres.realtime_base);
 		read_flags = VKSO_READ_HRES;
 		use_mm_data = false;
 		break;
+	case CLOCK_MONOTONIC:
+		value_offset = offsetof(struct vkso_shared_data,
+					 hres.monotonic_base);
+		read_flags = VKSO_READ_HRES;
+		use_mm_data = true;
+		break;
 	case CLOCK_REALTIME_COARSE:
-		coarse_offset = offsetof(struct vkso_shared_data,
+		value_offset = offsetof(struct vkso_shared_data,
 					 realtime_coarse);
 		read_flags = 0;
 		use_mm_data = false;
 		break;
 	case CLOCK_MONOTONIC_COARSE:
-		coarse_offset = offsetof(struct vkso_shared_data,
+		value_offset = offsetof(struct vkso_shared_data,
 					 monotonic_coarse);
 		read_flags = 0;
 		use_mm_data = true;
@@ -221,11 +235,12 @@ int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
 		if (offset_nsec >= NSEC_PER_SEC)
 			return VKSO_TIME_FALLBACK;
 	}
-	if (vkso_read_snapshot(vkso_shared_data(), coarse_offset, read_flags,
+	if (vkso_read_snapshot(vkso_shared_data(), value_offset, read_flags,
 			       &snapshot) != VKSO_TIME_OK)
 		return VKSO_TIME_FALLBACK;
 	if (read_flags & VKSO_READ_HRES) {
-		vkso_realtime_from_snapshot(&snapshot, value);
+		vkso_hres_from_snapshot(&snapshot, offset_sec, offset_nsec,
+					value);
 		return VKSO_TIME_OK;
 	}
 	snapshot.coarse.nsec += offset_nsec;
