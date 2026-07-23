@@ -31,6 +31,7 @@
 #include <linux/compat.h>
 #include <linux/nospec.h>
 #include <linux/time_namespace.h>
+#include <linux/vkso_time.h>
 
 #include "timekeeping.h"
 #include "posix-timers.h"
@@ -225,7 +226,8 @@ static int posix_get_monotonic_raw(clockid_t which_clock, struct timespec64 *tp)
 
 static int posix_get_realtime_coarse(clockid_t which_clock, struct timespec64 *tp)
 {
-	ktime_get_coarse_real_ts64(tp);
+	if (!vkso_time_get_realtime_coarse(tp))
+		ktime_get_coarse_real_ts64(tp);
 	return 0;
 }
 

@@ -1,0 +1,38 @@
+#!/bin/busybox sh
+
+/bin/busybox --install -s /bin
+mkdir -p /proc /sys /dev /tmp
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mount -t ext4 /dev/vda /work
+
+status=0
+replaced=0
+{
+	echo "=== VKSO M04 ==="
+	uname -a
+	/work/m04-kernel-smoke || status=$?
+	if [ "$status" -eq 0 ]; then
+		insmod /work/page_cache_replace.ko || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		/work/manager validate /work/libkernel.so \
+			/work/page_mappings.txt || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		/work/manager replace /work/libkernel.so \
+			/work/page_mappings.txt && replaced=1 || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		LD_LIBRARY_PATH=/work /work/m04-user-test || status=$?
+	fi
+	if [ "$replaced" -eq 1 ]; then
+		/work/manager restore /work/libkernel.so \
+			/work/page_mappings.txt || status=$?
+	fi
+	echo "status=$status"
+} 2>&1
+
+sync
+reboot -f

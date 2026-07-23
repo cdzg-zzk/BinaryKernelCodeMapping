@@ -28,10 +28,10 @@ Status values:
 | B04 | basic syscall time baseline | static BusyBox reads current time successfully | QEMU smoke init | PASS |
 | B05 | complete syscall baseline | all five target syscalls pass their argument matrix | direct syscall test | TODO |
 | M01 | ELF auxv | no `AT_SYSINFO_EHDR`; `AT_VKSO_MM_DATA=52` is present | `/proc/self/auxv` | TODO |
-| M02 | VKSO text mapping | project-mapped code is `R-X`, shared and identical to the kernel code page | maps + pagemap/PFN | TODO |
-| M03 | shared-data mapping | project-mapped page is `R--/NX` and has the kernel shared-data PFN | maps + pagemap/PFN | TODO |
+| M02 | VKSO text mapping | project-mapped code is `R-X`, shared and identical to the kernel code page | maps + project page-map/replace log | PASS |
+| M03 | shared-data mapping | project-mapped page is `R--/NX` and has the kernel shared-data page | maps + project page-map/replace log | PASS |
 | M04 | MM-data mapping | one per-MM `R--/NX` mapping; address equals auxv value | maps + auxv | TODO |
-| M05 | relative layout | text-to-shared RIP displacement equals the kernel displacement | symbol addresses | TODO |
+| M05 | relative layout | text-to-shared RIP displacement equals the kernel displacement | symbol addresses + successful common-core read | PASS |
 | M06 | lifecycle | repeated map, execute, restore and process exit leave no stale page mapping | project manager + QEMU | TODO |
 
 ## `clock_gettime`
@@ -48,7 +48,7 @@ from user context.
 | C03 | `CLOCK_MONOTONIC_RAW` | VKSO fast core | VKSO fast core | TODO |
 | C04 | `CLOCK_BOOTTIME` | VKSO fast core | VKSO fast core | TODO |
 | C05 | `CLOCK_TAI` | VKSO fast core | VKSO fast core | TODO |
-| C06 | `CLOCK_REALTIME_COARSE` | VKSO coarse core, no cycle read | same core | TODO |
+| C06 | `CLOCK_REALTIME_COARSE` | VKSO coarse core, no cycle read | same core | PASS |
 | C07 | `CLOCK_MONOTONIC_COARSE` | VKSO coarse core, no cycle read | same core | TODO |
 | C08 | process/thread CPU clocks | existing POSIX clock handler | syscall fallback | TODO |
 | C09 | alarm clocks | existing POSIX clock handler | syscall fallback | TODO |

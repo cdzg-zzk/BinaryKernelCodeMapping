@@ -125,6 +125,8 @@ SECTIONS
 	.text :  AT(ADDR(.text) - LOAD_OFFSET) {
 		_text = .;
 		_stext = .;
+		/* bootstrapping code must remain at the fixed x86 entry address */
+		HEAD_TEXT
 #ifdef CONFIG_VKSO_TIME
 		. = ALIGN(PAGE_SIZE);
 		__vkso_text_start = .;
@@ -133,8 +135,6 @@ SECTIONS
 		. = ALIGN(PAGE_SIZE);
 		__vkso_text_end = .;
 #endif
-		/* bootstrapping code */
-		HEAD_TEXT
 		TEXT_TEXT
 		SCHED_TEXT
 		CPUIDLE_TEXT

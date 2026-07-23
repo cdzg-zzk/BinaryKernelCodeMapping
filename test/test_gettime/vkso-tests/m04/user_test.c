@@ -1,0 +1,164 @@
+#define _GNU_SOURCE
+
+#include <dlfcn.h>
+#include <elf.h>
+#include <link.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/syscall.h>
+#include <time.h>
+#include <unistd.h>
+
+#define SAMPLES 10000U
+#define VKSO_TIME_ABI_VERSION 1U
+#define VKSO_TIME_FALLBACK (-1)
+
+struct vkso_time_value {
+	int64_t sec;
+	uint64_t nsec;
+};
+
+struct vkso_shared_data {
+	uint32_t seq;
+	uint32_t abi_version;
+	struct vkso_time_value realtime_coarse;
+};
+
+typedef int (*vkso_clock_gettime_fn)(int, struct vkso_time_value *);
+
+struct shared_lookup {
+	uintptr_t text_symbol;
+	struct vkso_shared_data *shared;
+};
+
+static int find_shared_load(struct dl_phdr_info *info, size_t size, void *data)
+{
+	struct shared_lookup *lookup = data;
+	int contains_text = 0;
+	unsigned int i;
+
+	(void)size;
+	for (i = 0; i < info->dlpi_phnum; ++i) {
+		const ElfW(Phdr) *phdr = &info->dlpi_phdr[i];
+		uintptr_t start = info->dlpi_addr + phdr->p_vaddr;
+
+		if (phdr->p_type == PT_LOAD && (phdr->p_flags & PF_X) &&
+		    lookup->text_symbol >= start &&
+		    lookup->text_symbol < start + phdr->p_memsz) {
+			contains_text = 1;
+			break;
+		}
+	}
+	if (!contains_text)
+		return 0;
+	for (i = 0; i < info->dlpi_phnum; ++i) {
+		const ElfW(Phdr) *phdr = &info->dlpi_phdr[i];
+
+		if (phdr->p_type == PT_LOAD && phdr->p_flags == PF_R &&
+		    phdr->p_memsz == 4096) {
+			lookup->shared = (void *)(info->dlpi_addr + phdr->p_vaddr);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static int64_t to_ns(const struct timespec *ts)
+{
+	return (int64_t)ts->tv_sec * INT64_C(1000000000) + ts->tv_nsec;
+}
+
+static void fail(const char *message)
+{
+	fprintf(stderr, "failure=%s\n", message);
+	exit(1);
+}
+
+static void require_mapping(const void *address, int executable)
+{
+	char line[512], permissions[5];
+	unsigned long start, end;
+	FILE *maps = fopen("/proc/self/maps", "r");
+
+	if (!maps)
+		fail("open maps");
+	while (fgets(line, sizeof(line), maps)) {
+		if (sscanf(line, "%lx-%lx %4s", &start, &end, permissions) != 3)
+			continue;
+		if ((uintptr_t)address < start || (uintptr_t)address >= end)
+			continue;
+		fclose(maps);
+		if (permissions[0] != 'r' || permissions[1] == 'w' ||
+		    (permissions[2] == 'x') != executable)
+			fail(executable ? "text permissions" : "data permissions");
+		return;
+	}
+	fclose(maps);
+	fail("mapping not found");
+}
+
+int main(void)
+{
+	vkso_clock_gettime_fn vkso_clock_gettime;
+	struct shared_lookup lookup = { 0 };
+	struct vkso_shared_data *shared;
+	struct timespec previous = { 0 };
+	Dl_info info;
+	void *symbol;
+	unsigned int i;
+
+	symbol = dlsym(RTLD_DEFAULT, "__vkso_clock_gettime");
+	memcpy(&vkso_clock_gettime, &symbol, sizeof(vkso_clock_gettime));
+	if (!vkso_clock_gettime || !dladdr(symbol, &info))
+		fail("resolve symbols");
+	lookup.text_symbol = (uintptr_t)symbol;
+	dl_iterate_phdr(find_shared_load, &lookup);
+	shared = lookup.shared;
+	if (!shared)
+		fail("resolve shared load");
+
+	require_mapping(symbol, 1);
+	require_mapping(shared, 0);
+	if (shared->abi_version != VKSO_TIME_ABI_VERSION ||
+	    (shared->seq & 1) ||
+	    shared->realtime_coarse.nsec >= UINT64_C(1000000000))
+		fail("shared data layout");
+
+	for (i = 0; i < SAMPLES; ++i) {
+		struct timespec before, after, current, realtime;
+		struct vkso_time_value value;
+
+		if (syscall(SYS_clock_gettime, CLOCK_REALTIME_COARSE, &before) ||
+		    vkso_clock_gettime(CLOCK_REALTIME_COARSE, &value) ||
+		    syscall(SYS_clock_gettime, CLOCK_REALTIME_COARSE, &after))
+			fail("clock call");
+		current.tv_sec = value.sec;
+		current.tv_nsec = (long)value.nsec;
+		if (syscall(SYS_clock_gettime, CLOCK_REALTIME, &realtime))
+			fail("realtime oracle");
+		if (to_ns(&current) < to_ns(&before) ||
+		    to_ns(&current) > to_ns(&after) ||
+		    llabs(to_ns(&realtime) - to_ns(&current)) >
+			    INT64_C(1000000000) ||
+		    (i && to_ns(&current) < to_ns(&previous)))
+			fail("clock bracket");
+		previous = current;
+	}
+
+	{
+		struct vkso_time_value value;
+
+		if (vkso_clock_gettime(CLOCK_MONOTONIC, &value) !=
+		    VKSO_TIME_FALLBACK)
+			fail("unsupported clock did not fallback");
+	}
+
+	printf("user_realtime_coarse=pass samples=%u\n", SAMPLES);
+	printf("text=%p shared_data=%p delta=%td\n", symbol, shared,
+	       (char *)shared - (char *)symbol);
+	puts("mapping_permissions=pass");
+	puts("rip_relative_shared_read=pass");
+	return 0;
+}

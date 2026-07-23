@@ -21,6 +21,7 @@
 #include <linux/tick.h>
 #include <linux/stop_machine.h>
 #include <linux/pvclock_gtod.h>
+#include <linux/vkso_time.h>
 #include <linux/compiler.h>
 #include <linux/audit.h>
 #include <linux/random.h>
@@ -750,6 +751,9 @@ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 	update_pvclock_gtod(tk, action & TK_CLOCK_WAS_SET);
 
 	tk->tkr_mono.base_real = tk->tkr_mono.base + tk->offs_real;
+	vkso_time_publish_realtime_coarse(
+		tk->xtime_sec,
+		tk->tkr_mono.xtime_nsec >> tk->tkr_mono.shift);
 	update_fast_timekeeper(&tk->tkr_mono, &tk_fast_mono);
 	update_fast_timekeeper(&tk->tkr_raw,  &tk_fast_raw);
 

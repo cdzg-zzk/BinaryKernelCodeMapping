@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0
 obj-y += time.o timer.o hrtimer.o
-obj-$(CONFIG_VKSO_TIME) += vkso_time_core.o
+obj-$(CONFIG_VKSO_TIME) += vkso_time_core.o vkso_time.o
 
 # This object is mapped into user space as well as called by the kernel.  Do
 # not let the compiler add instrumentation that requires kernel-only state.
