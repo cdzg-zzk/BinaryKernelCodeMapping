@@ -3,6 +3,7 @@
 
 #include <dlfcn.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <linux/filter.h>
 #include <linux/seccomp.h>
 #include <pthread.h>
@@ -13,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/auxv.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
 #include <sys/time.h>
@@ -21,6 +23,7 @@
 #include <unistd.h>
 
 #ifdef VKSO_BACKEND
+#include "vkso_abi.h"
 #include "vkso_user_wrapper.h"
 #endif
 
@@ -33,11 +36,16 @@
 #ifndef CLOCK_TAI
 #define CLOCK_TAI 11
 #endif
+#ifndef CLONE_NEWTIME
+#define CLONE_NEWTIME 0x00000080
+#endif
 
 #define PATH_ERRNO 222
 #define REPEAT_SAMPLES 1000
 #define THREAD_SAMPLES 2000
 #define MAX_TEST_THREADS 4
+#define NS_MONOTONIC_OFFSET_NS INT64_C(7123456789)
+#define NS_BOOTTIME_OFFSET_NS INT64_C(11234567890)
 
 typedef int (*clock_gettime_fn)(clockid_t, struct timespec *);
 typedef int (*clock_getres_fn)(clockid_t, struct timespec *);
@@ -615,13 +623,385 @@ static void check_paths(int getcpu_only)
 	}
 }
 
+enum namespace_clock_index {
+	NS_MONOTONIC,
+	NS_MONOTONIC_RAW,
+	NS_MONOTONIC_COARSE,
+	NS_BOOTTIME,
+	NS_TAI,
+	NS_CLOCK_COUNT,
+};
+
+static const struct {
+	clockid_t id;
+	int64_t offset_ns;
+} namespace_clocks[NS_CLOCK_COUNT] = {
+	[NS_MONOTONIC] = { CLOCK_MONOTONIC, NS_MONOTONIC_OFFSET_NS },
+	[NS_MONOTONIC_RAW] = {
+		CLOCK_MONOTONIC_RAW, NS_MONOTONIC_OFFSET_NS
+	},
+	[NS_MONOTONIC_COARSE] = {
+		CLOCK_MONOTONIC_COARSE, NS_MONOTONIC_OFFSET_NS
+	},
+	[NS_BOOTTIME] = { CLOCK_BOOTTIME, NS_BOOTTIME_OFFSET_NS },
+	[NS_TAI] = { CLOCK_TAI, 0 },
+};
+
+struct namespace_sample {
+	struct timespec value[NS_CLOCK_COUNT];
+};
+
+static void write_full(int fd, const void *buffer, size_t size)
+{
+	const char *cursor = buffer;
+
+	while (size) {
+		ssize_t written = write(fd, cursor, size);
+
+		if (written < 0) {
+			if (errno == EINTR)
+				continue;
+			fail("write namespace pipe");
+		}
+		if (!written)
+			fail("short namespace pipe write");
+		cursor += written;
+		size -= written;
+	}
+}
+
+static void read_full(int fd, void *buffer, size_t size)
+{
+	char *cursor = buffer;
+
+	while (size) {
+		ssize_t received = read(fd, cursor, size);
+
+		if (received < 0) {
+			if (errno == EINTR)
+				continue;
+			fail("read namespace pipe");
+		}
+		if (!received)
+			fail("short namespace pipe read");
+		cursor += received;
+		size -= received;
+	}
+}
+
+static void syscall_namespace_sample(struct namespace_sample *sample)
+{
+	size_t index;
+
+	for (index = 0; index < NS_CLOCK_COUNT; ++index) {
+		if (syscall(SYS_clock_gettime, namespace_clocks[index].id,
+			    &sample->value[index]))
+			fail("namespace syscall sample");
+	}
+}
+
+static void backend_namespace_sample(struct namespace_sample *sample)
+{
+	size_t index;
+
+	for (index = 0; index < NS_CLOCK_COUNT; ++index) {
+		struct timespec before, after;
+
+		if (syscall(SYS_clock_gettime, namespace_clocks[index].id,
+			    &before) ||
+		    backend.clock_gettime(namespace_clocks[index].id,
+					  &sample->value[index]) ||
+		    syscall(SYS_clock_gettime, namespace_clocks[index].id,
+			    &after) ||
+		    timespec_ns(&sample->value[index]) < timespec_ns(&before) ||
+		    timespec_ns(&sample->value[index]) > timespec_ns(&after))
+			fail("namespace backend/syscall bracket");
+	}
+}
+
+static void check_namespace_bracket(const struct namespace_sample *before,
+				    const struct namespace_sample *current,
+				    const struct namespace_sample *after)
+{
+	size_t index;
+
+	for (index = 0; index < NS_CLOCK_COUNT; ++index) {
+		int64_t value = timespec_ns(&current->value[index]);
+		int64_t lower = timespec_ns(&before->value[index]) +
+			namespace_clocks[index].offset_ns;
+		int64_t upper = timespec_ns(&after->value[index]) +
+			namespace_clocks[index].offset_ns;
+
+		if (value < lower || value > upper)
+			fail("namespace root/offset bracket");
+	}
+}
+
+static void check_namespace_context(void)
+{
+#ifdef VKSO_BACKEND
+	const struct vkso_mm_data *mm_data;
+
+	errno = 0;
+	mm_data = (const void *)getauxval(AT_VKSO_MM_DATA);
+	if (!mm_data || errno ||
+	    mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION ||
+	    mm_data->reserved ||
+	    mm_data->monotonic_offset.sec != 7 ||
+	    mm_data->monotonic_offset.nsec != 123456789 ||
+	    mm_data->boottime_offset.sec != 11 ||
+	    mm_data->boottime_offset.nsec != 234567890)
+		fail("VKSO namespace MM_data");
+#endif
+}
+
+static void configure_time_namespace(void)
+{
+	static const char offsets[] =
+		"monotonic 7 123456789\n"
+		"boottime 11 234567890\n";
+	int fd;
+
+	if (unshare(CLONE_NEWTIME))
+		fail("unshare time namespace");
+	fd = open("/proc/self/timens_offsets", O_WRONLY | O_CLOEXEC);
+	if (fd < 0)
+		fail("open time namespace offsets");
+	write_full(fd, offsets, sizeof(offsets) - 1);
+	if (close(fd))
+		fail("close time namespace offsets");
+}
+
+static void check_namespace_fast_paths(void)
+{
+	size_t index;
+
+	for (index = 0; index < NS_CLOCK_COUNT; ++index) {
+		pid_t child = fork();
+		int status;
+
+		if (child < 0)
+			fail("fork namespace fast path");
+		if (!child) {
+			struct timespec value;
+
+			if (install_syscall_errno_filter(SYS_clock_gettime))
+				_exit(90);
+			_exit(backend.clock_gettime(namespace_clocks[index].id,
+						    &value) ? 91 : 0);
+		}
+		if (waitpid(child, &status, 0) != child ||
+		    !WIFEXITED(status) || WEXITSTATUS(status))
+			fail("namespace clock_gettime fast path");
+	}
+	puts("namespace.fast_paths=pass clocks=5");
+}
+
+static void check_frozen_time_namespace(void)
+{
+	static const char update[] = "monotonic 1 0\n";
+	int fd;
+
+	fd = open("/proc/self/timens_offsets", O_WRONLY | O_CLOEXEC);
+	if (fd < 0)
+		fail("open frozen time namespace offsets");
+	errno = 0;
+	if (write(fd, update, sizeof(update) - 1) != -1 || errno != EACCES)
+		fail("time namespace offsets not frozen");
+	if (close(fd))
+		fail("close frozen time namespace offsets");
+	puts("namespace.offsets_frozen=pass errno=EACCES");
+}
+
+static int namespace_exec_child(int result_fd)
+{
+	struct namespace_sample sample;
+
+	check_namespace_context();
+	backend_namespace_sample(&sample);
+	check_namespace_fast_paths();
+	write_full(result_fd, &sample, sizeof(sample));
+	if (close(result_fd))
+		fail("close namespace exec result");
+	puts("namespace.exec.child=pass");
+	fflush(NULL);
+	return 0;
+}
+
+static void check_namespace_exec(void)
+{
+	struct namespace_sample before, current, after;
+	int result_pipe[2], status;
+	pid_t child;
+
+	configure_time_namespace();
+	if (pipe(result_pipe))
+		fail("create namespace exec pipe");
+	syscall_namespace_sample(&before);
+	fflush(NULL);
+	child = fork();
+	if (child < 0)
+		fail("fork namespace exec child");
+	if (!child) {
+		char fd_argument[32];
+
+		close(result_pipe[0]);
+		if (snprintf(fd_argument, sizeof(fd_argument), "%d",
+			     result_pipe[1]) >= (int)sizeof(fd_argument))
+			_exit(92);
+		execl("/proc/self/exe", "/proc/self/exe",
+		      "--namespace-exec-child", fd_argument, NULL);
+		_exit(93);
+	}
+	close(result_pipe[1]);
+	read_full(result_pipe[0], &current, sizeof(current));
+	if (close(result_pipe[0]))
+		fail("close namespace exec pipe");
+	syscall_namespace_sample(&after);
+	if (waitpid(child, &status, 0) != child ||
+	    !WIFEXITED(status) || WEXITSTATUS(status))
+		fail("namespace exec child");
+	check_namespace_bracket(&before, &current, &after);
+	puts("namespace.exec.lifecycle=pass");
+}
+
+static void root_oracle(int request_fd, int response_fd)
+{
+	struct namespace_sample sample;
+	char request;
+	int count;
+
+	for (count = 0; count < 2; ++count) {
+		read_full(request_fd, &request, sizeof(request));
+		syscall_namespace_sample(&sample);
+		write_full(response_fd, &sample, sizeof(sample));
+	}
+	close(request_fd);
+	close(response_fd);
+	_exit(0);
+}
+
+static void request_root_sample(int request_fd, int response_fd,
+				struct namespace_sample *sample)
+{
+	const char request = 1;
+
+	write_full(request_fd, &request, sizeof(request));
+	read_full(response_fd, sample, sizeof(*sample));
+}
+
+static void check_namespace_setns(void)
+{
+	struct namespace_sample before, current, after;
+	int request_pipe[2], response_pipe[2], namespace_fd, status;
+	pid_t helper;
+
+	if (pipe(request_pipe) || pipe(response_pipe))
+		fail("create namespace oracle pipes");
+	fflush(NULL);
+	helper = fork();
+	if (helper < 0)
+		fail("fork namespace oracle");
+	if (!helper) {
+		close(request_pipe[1]);
+		close(response_pipe[0]);
+		root_oracle(request_pipe[0], response_pipe[1]);
+	}
+	close(request_pipe[0]);
+	close(response_pipe[1]);
+	configure_time_namespace();
+	namespace_fd = open("/proc/self/ns/time_for_children",
+			    O_RDONLY | O_CLOEXEC);
+	if (namespace_fd < 0)
+		fail("open time namespace descriptor");
+	request_root_sample(request_pipe[1], response_pipe[0], &before);
+	if (setns(namespace_fd, CLONE_NEWTIME))
+		fail("setns time namespace");
+	if (close(namespace_fd))
+		fail("close time namespace descriptor");
+	check_namespace_context();
+	backend_namespace_sample(&current);
+	request_root_sample(request_pipe[1], response_pipe[0], &after);
+	if (close(request_pipe[1]) || close(response_pipe[0]))
+		fail("close namespace oracle pipes");
+	if (waitpid(helper, &status, 0) != helper ||
+	    !WIFEXITED(status) || WEXITSTATUS(status))
+		fail("namespace oracle");
+	check_namespace_bracket(&before, &current, &after);
+	check_namespace_fast_paths();
+	check_frozen_time_namespace();
+	puts("namespace.setns.commit=pass");
+}
+
+static void run_namespace_controller(void (*test)(void), const char *message)
+{
+	pid_t child;
+	int status;
+
+	fflush(NULL);
+	child = fork();
+	if (child < 0)
+		fail("fork namespace controller");
+	if (!child) {
+		test();
+		fflush(NULL);
+		_exit(0);
+	}
+	if (waitpid(child, &status, 0) != child ||
+	    !WIFEXITED(status) || WEXITSTATUS(status))
+		fail(message);
+}
+
+static void check_namespace_lifecycle(void)
+{
+	run_namespace_controller(check_namespace_exec,
+				 "namespace exec controller");
+	run_namespace_controller(check_namespace_setns,
+				 "namespace setns controller");
+	puts("namespace.lifecycle_status=pass");
+}
+
+static int run_lifecycle_smoke(void)
+{
+	struct timespec time_value, resolution;
+	struct timeval timeval;
+	struct timezone timezone;
+	time_t seconds, stored;
+	unsigned int cpu, node;
+
+	if (backend.clock_gettime(CLOCK_MONOTONIC, &time_value) ||
+	    backend.clock_getres(CLOCK_MONOTONIC, &resolution) ||
+	    backend.gettimeofday(&timeval, &timezone) ||
+	    (seconds = backend.time(&stored)) != stored ||
+	    seconds <= 0 ||
+	    backend.getcpu(&cpu, &node, NULL))
+		fail("lifecycle execution smoke");
+	puts("lifecycle.execution=pass");
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	int multicpu_only = argc == 2 && !strcmp(argv[1], "--multicpu-only");
+	int lifecycle_smoke = argc == 2 &&
+		!strcmp(argv[1], "--lifecycle-smoke");
+	int namespace_child = argc == 3 &&
+		!strcmp(argv[1], "--namespace-exec-child");
+	char *end;
+	long result_fd;
 
-	if (argc > 2 || (argc == 2 && !multicpu_only))
-		fail("usage: abi-matrix [--multicpu-only]");
+	if (!multicpu_only && !lifecycle_smoke && !namespace_child && argc != 1)
+		fail("usage: abi-matrix [--multicpu-only|--lifecycle-smoke]");
 	init_backend();
+	if (namespace_child) {
+		errno = 0;
+		result_fd = strtol(argv[2], &end, 10);
+		if (errno || *end || result_fd < 0 || result_fd > INT32_MAX)
+			fail("namespace result descriptor");
+		return namespace_exec_child((int)result_fd);
+	}
+	if (lifecycle_smoke)
+		return run_lifecycle_smoke();
 	printf("backend=%s\n", backend.name);
 	if (multicpu_only) {
 		check_getcpu();
@@ -638,6 +1018,7 @@ int main(int argc, char **argv)
 	check_getcpu();
 	check_multicpu_threads();
 	check_paths(0);
+	check_namespace_lifecycle();
 	puts("abi_matrix_status=pass");
 	return 0;
 }

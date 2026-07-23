@@ -10,6 +10,7 @@ mount -t ext4 /dev/vda /work
 
 status=0
 replaced=0
+repeat_replaced=0
 backend=$(cat /work/backend)
 test_args=
 if [ -e /work/multicpu-only ]; then
@@ -36,6 +37,23 @@ fi
 	if [ "$replaced" -eq 1 ]; then
 		/work/manager restore /work/libkernel.so \
 			/work/page_mappings.txt || status=$?
+	fi
+	if [ "$status" -eq 0 ] && [ "$backend" = vkso ] &&
+	   [ -z "$test_args" ]; then
+		/work/manager replace /work/libkernel.so \
+			/work/page_mappings.txt &&
+			repeat_replaced=1 || status=$?
+		if [ "$status" -eq 0 ]; then
+			LD_LIBRARY_PATH=/work /work/abi-matrix \
+				--lifecycle-smoke || status=$?
+		fi
+		if [ "$repeat_replaced" -eq 1 ]; then
+			/work/manager restore /work/libkernel.so \
+				/work/page_mappings.txt || status=$?
+		fi
+		if [ "$status" -eq 0 ]; then
+			echo "lifecycle.repeat_restore=pass cycles=2"
+		fi
 	fi
 	echo "guest_status=$status"
 } 2>&1

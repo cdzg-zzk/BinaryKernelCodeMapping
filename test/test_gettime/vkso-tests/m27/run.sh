@@ -174,13 +174,15 @@ run_qemu()
 		echo "kernel failure marker in $log" >&2
 		exit 1
 	fi
-	grep -E '^(semantics|path)\.' "$log" >"$WORK/$label.matrix"
+	grep -E '^(semantics|path|namespace)\.' "$log" \
+		>"$WORK/$label.matrix"
 }
 
 make_payload raw
 make_payload vkso
 run_qemu raw "$RAW_BUILD"
 run_qemu vkso "$VKSO_BUILD"
+grep -Fq 'lifecycle.repeat_restore=pass cycles=2' "$WORK/vkso.log"
 
 if ! diff -u "$WORK/raw.matrix" "$WORK/vkso.matrix" \
 		   >"$WORK/raw-vkso-matrix.diff"; then
