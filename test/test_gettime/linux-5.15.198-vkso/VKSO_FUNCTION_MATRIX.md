@@ -27,10 +27,10 @@ Status values:
 | B03 | removed mappings | no `[vdso]`, `[vvar]` or `[vvar_vclock]` | `/proc/self/maps` | PASS |
 | B04 | basic syscall time baseline | static BusyBox reads current time successfully | QEMU smoke init | PASS |
 | B05 | complete syscall baseline | all five target syscalls pass their argument matrix | direct syscall test | TODO |
-| M01 | ELF auxv | no `AT_SYSINFO_EHDR`; `AT_VKSO_MM_DATA=52` is present | `/proc/self/auxv` | TODO |
+| M01 | ELF auxv | no `AT_SYSINFO_EHDR`; `AT_VKSO_MM_DATA=52` is present | `/proc/self/auxv` | PASS |
 | M02 | VKSO text mapping | project-mapped code is `R-X`, shared and identical to the kernel code page | maps + project page-map/replace log | PASS |
 | M03 | shared-data mapping | project-mapped page is `R--/NX` and has the kernel shared-data page | maps + project page-map/replace log | PASS |
-| M04 | MM-data mapping | one per-MM `R--/NX` mapping; address equals auxv value | maps + auxv | TODO |
+| M04 | MM-data mapping | one per-MM `R--/NX` mapping; address equals auxv value | maps + auxv | PASS |
 | M05 | relative layout | text-to-shared RIP displacement equals the kernel displacement | symbol addresses + successful common-core read | PASS |
 | M06 | lifecycle | repeated map, execute, restore and process exit leave no stale page mapping | project manager + QEMU | TODO |
 

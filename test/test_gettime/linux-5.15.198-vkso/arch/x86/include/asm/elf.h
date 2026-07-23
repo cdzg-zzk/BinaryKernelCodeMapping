@@ -333,10 +333,19 @@ extern unsigned long get_sigframe_size(void);
 #define __STACK_RND_MASK(is32bit) ((is32bit) ? 0x7ff : 0x3fffff)
 #define STACK_RND_MASK __STACK_RND_MASK(mmap_is_ia32())
 
+#ifdef CONFIG_VKSO_TIME
+#define ARCH_DLINFO							\
+do {									\
+	NEW_AUX_ENT(AT_VKSO_MM_DATA,					\
+		    (unsigned long __force)current->mm->context.vkso_mm_data); \
+	NEW_AUX_ENT(AT_MINSIGSTKSZ, get_sigframe_size());		\
+} while (0)
+#else
 #define ARCH_DLINFO							\
 do {									\
 	NEW_AUX_ENT(AT_MINSIGSTKSZ, get_sigframe_size());		\
 } while (0)
+#endif
 
 #define ARCH_DLINFO_X32							\
 do {									\
@@ -354,6 +363,12 @@ else if (IS_ENABLED(CONFIG_IA32_EMULATION))				\
 #endif /* !CONFIG_X86_32 */
 
 struct linux_binprm;
+
+#if defined(CONFIG_X86_64) && defined(CONFIG_VKSO_TIME)
+#define ARCH_HAS_SETUP_ADDITIONAL_PAGES 1
+extern int arch_setup_additional_pages(struct linux_binprm *bprm,
+				       int uses_interp);
+#endif
 
 /* Do not change the values. See get_align_mask() */
 enum align_flags {

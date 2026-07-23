@@ -13,6 +13,8 @@
 /* vsyscall page is accessible on this MM */
 #define MM_CONTEXT_HAS_VSYSCALL	BIT(1)
 
+struct page;
+
 /*
  * x86 has arch-specific MMU state beyond what lives in mm_struct.
  */
@@ -45,6 +47,10 @@ typedef struct {
 #endif
 
 	struct mutex lock;
+#ifdef CONFIG_VKSO_TIME
+	struct page *vkso_mm_page;
+	void __user *vkso_mm_data;
+#endif
 	atomic_t perf_rdpmc_allowed;	/* nonzero if rdpmc is allowed */
 #ifdef CONFIG_X86_INTEL_MEMORY_PROTECTION_KEYS
 	/*

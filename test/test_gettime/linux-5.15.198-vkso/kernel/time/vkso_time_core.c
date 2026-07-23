@@ -11,15 +11,18 @@ static_assert(sizeof(struct vkso_time_value) == 16);
 static_assert(offsetof(struct vkso_time_value, sec) == 0);
 static_assert(offsetof(struct vkso_time_value, nsec) == 8);
 static_assert(sizeof(union vkso_shared_page) == VKSO_SHARED_PAGE_SIZE);
+static_assert(sizeof(union vkso_mm_page) == VKSO_SHARED_PAGE_SIZE);
 
 __visible noinline notrace __vkso_text
-int __vkso_clock_gettime(int clock_id, struct vkso_time_value *value)
+int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
+			 struct vkso_time_value *value)
 {
 	const struct vkso_shared_data *shared = &vkso_shared_page.data;
 	u32 seq, abi_version;
 	s64 sec;
 	u64 nsec;
 
+	(void)mm_data;
 	if (clock_id != CLOCK_REALTIME_COARSE || !value)
 		return VKSO_TIME_FALLBACK;
 

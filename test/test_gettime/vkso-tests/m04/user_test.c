@@ -7,13 +7,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/auxv.h>
 #include <sys/syscall.h>
 #include <time.h>
 #include <unistd.h>
 
 #define SAMPLES 10000U
 #define VKSO_TIME_ABI_VERSION 1U
+#define VKSO_MM_DATA_ABI_VERSION 1U
 #define VKSO_TIME_FALLBACK (-1)
+#define AT_VKSO_MM_DATA 52
 
 struct vkso_time_value {
 	int64_t sec;
@@ -26,7 +29,13 @@ struct vkso_shared_data {
 	struct vkso_time_value realtime_coarse;
 };
 
-typedef int (*vkso_clock_gettime_fn)(int, struct vkso_time_value *);
+struct vkso_mm_data {
+	uint32_t abi_version;
+	uint32_t flags;
+};
+
+typedef int (*vkso_clock_gettime_fn)(const struct vkso_mm_data *, int,
+				    struct vkso_time_value *);
 
 struct shared_lookup {
 	uintptr_t text_symbol;
@@ -104,6 +113,7 @@ int main(void)
 	vkso_clock_gettime_fn vkso_clock_gettime;
 	struct shared_lookup lookup = { 0 };
 	struct vkso_shared_data *shared;
+	const struct vkso_mm_data *mm_data;
 	struct timespec previous = { 0 };
 	Dl_info info;
 	void *symbol;
@@ -113,6 +123,9 @@ int main(void)
 	memcpy(&vkso_clock_gettime, &symbol, sizeof(vkso_clock_gettime));
 	if (!vkso_clock_gettime || !dladdr(symbol, &info))
 		fail("resolve symbols");
+	mm_data = (const void *)getauxval(AT_VKSO_MM_DATA);
+	if (!mm_data || mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION)
+		fail("resolve mm data");
 	lookup.text_symbol = (uintptr_t)symbol;
 	dl_iterate_phdr(find_shared_load, &lookup);
 	shared = lookup.shared;
@@ -131,7 +144,7 @@ int main(void)
 		struct vkso_time_value value;
 
 		if (syscall(SYS_clock_gettime, CLOCK_REALTIME_COARSE, &before) ||
-		    vkso_clock_gettime(CLOCK_REALTIME_COARSE, &value) ||
+		    vkso_clock_gettime(mm_data, CLOCK_REALTIME_COARSE, &value) ||
 		    syscall(SYS_clock_gettime, CLOCK_REALTIME_COARSE, &after))
 			fail("clock call");
 		current.tv_sec = value.sec;
@@ -150,7 +163,7 @@ int main(void)
 	{
 		struct vkso_time_value value;
 
-		if (vkso_clock_gettime(CLOCK_MONOTONIC, &value) !=
+		if (vkso_clock_gettime(mm_data, CLOCK_MONOTONIC, &value) !=
 		    VKSO_TIME_FALLBACK)
 			fail("unsupported clock did not fallback");
 	}

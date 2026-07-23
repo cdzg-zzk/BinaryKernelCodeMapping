@@ -26,7 +26,8 @@ bool vkso_time_get_realtime_coarse(struct timespec64 *tp)
 {
 	struct vkso_time_value value;
 
-	if (__vkso_clock_gettime(CLOCK_REALTIME_COARSE, &value) != VKSO_TIME_OK)
+	if (__vkso_clock_gettime(NULL, CLOCK_REALTIME_COARSE, &value) !=
+	    VKSO_TIME_OK)
 		return false;
 	tp->tv_sec = value.sec;
 	tp->tv_nsec = value.nsec;

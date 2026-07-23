@@ -37,13 +37,14 @@ fi
 DSO="$WORK/dso"
 mkdir -p "$DSO"
 if [ ! -f "$DSO/libkernel.so" ] || [ "$KRG" -nt "$DSO/libkernel.so" ]; then
+	cp "$SCRIPT_DIR/symbols.txt" "$SCRIPT_DIR/shared_data.txt" "$DSO/"
 	(
 		cd "$DSO"
 		python3 "$ROOT/make_dll/build_PIC_so.py" \
-			--symbols "$SCRIPT_DIR/symbols.txt" \
+			--symbols symbols.txt \
 			--krg "$KRG" \
 			--shim-list "$ROOT/make_dll/shim.txt" \
-			--shared-data-list "$SCRIPT_DIR/shared_data.txt" \
+			--shared-data-list shared_data.txt \
 			--vmlinux "$BUILD/vmlinux" \
 			--symbol-addresses resolved_symbol_addresses.txt \
 			--page-map page_mappings.txt

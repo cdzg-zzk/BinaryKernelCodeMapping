@@ -6,6 +6,7 @@
 
 #define VKSO_TIME_ABI_VERSION	1U
 #define VKSO_SHARED_PAGE_SIZE	4096U
+#define VKSO_MM_DATA_ABI_VERSION	1U
 
 enum vkso_time_status {
 	VKSO_TIME_OK = 0,
@@ -29,8 +30,18 @@ union vkso_shared_page {
 	u8 page[VKSO_SHARED_PAGE_SIZE];
 };
 
-struct vkso_mm_data;
+/* Immutable context selected once for each mm. */
+struct vkso_mm_data {
+	u32 abi_version;
+	u32 flags;
+};
 
-int __vkso_clock_gettime(int clock_id, struct vkso_time_value *value);
+union vkso_mm_page {
+	struct vkso_mm_data data;
+	u8 page[VKSO_SHARED_PAGE_SIZE];
+};
+
+int __vkso_clock_gettime(const struct vkso_mm_data *mm_data, int clock_id,
+			 struct vkso_time_value *value);
 
 #endif /* _VKSO_TIME_H */

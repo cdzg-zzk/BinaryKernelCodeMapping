@@ -1,0 +1,19 @@
+#!/bin/busybox sh
+
+/bin/busybox --install -s /bin
+mkdir -p /proc /sys /dev /tmp
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+
+status=0
+{
+	echo "=== VKSO M05 ==="
+	uname -a
+	/bin/m05-mm-data-test || status=$?
+	/bin/m04-kernel-smoke || status=$?
+	echo "status=$status"
+} 2>&1
+
+sync
+reboot -f
