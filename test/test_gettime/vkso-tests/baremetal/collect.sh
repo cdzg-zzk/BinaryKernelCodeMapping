@@ -109,17 +109,32 @@ if [[ -r /sys/devices/system/cpu/smt/active ]]; then
 	}
 fi
 
-if [[ -w /sys/devices/system/cpu/intel_pstate/no_turbo ]]; then
-	echo 1 >/sys/devices/system/cpu/intel_pstate/no_turbo
-fi
-if [[ -w /sys/devices/system/cpu/intel_pstate/min_perf_pct ]]; then
-	echo 100 >/sys/devices/system/cpu/intel_pstate/min_perf_pct
-fi
-if [[ -w /sys/devices/system/cpu/intel_pstate/max_perf_pct ]]; then
-	echo 100 >/sys/devices/system/cpu/intel_pstate/max_perf_pct
-fi
+set_sysfs_value()
+{
+	local path=$1
+	local expected=$2
+	local current
+
+	[[ -r "$path" ]] || return 0
+	current=$(cat "$path")
+	[[ "$current" == "$expected" ]] && return 0
+	if ! printf '%s\n' "$expected" >"$path"; then
+		current=$(cat "$path")
+		echo "cannot set $path=$expected (current=$current)" >&2
+		return 1
+	fi
+	current=$(cat "$path")
+	[[ "$current" == "$expected" ]] || {
+		echo "$path rejected $expected (current=$current)" >&2
+		return 1
+	}
+}
+
+set_sysfs_value /sys/devices/system/cpu/intel_pstate/no_turbo 1
+set_sysfs_value /sys/devices/system/cpu/intel_pstate/min_perf_pct 100
+set_sysfs_value /sys/devices/system/cpu/intel_pstate/max_perf_pct 100
 for governor in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
-	[[ -e "$governor" ]] && echo performance >"$governor"
+	[[ -e "$governor" ]] && set_sysfs_value "$governor" performance
 done
 
 result_root=$RESULTS_DIR/$run_id
