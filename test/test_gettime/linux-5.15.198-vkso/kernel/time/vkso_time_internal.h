@@ -13,18 +13,25 @@
 #include <vdso/ktime.h>
 #include <vdso/math64.h>
 
-struct vkso_hres_snapshot {
 #ifdef CONFIG_VKSO_TIME_TEST
+struct vkso_hres_snapshot {
 	u32 seq;
 	u32 retries;
 	s32 clock_mode;
-#endif
 	struct vkso_hres_base base;
 	u64 cycle_last;
 	u32 mult;
 	u32 shift;
 	u64 cycles;
 };
+
+static __always_inline void
+vkso_count_retry(struct vkso_hres_snapshot *snapshot)
+{
+	if (snapshot->retries != (u32)-1)
+		snapshot->retries++;
+}
+#endif
 
 #ifdef CONFIG_PARAVIRT_CLOCK
 bool vkso_read_pvclock_cycles(const void *page, u64 *cycles);
@@ -33,26 +40,12 @@ bool vkso_read_pvclock_cycles(const void *page, u64 *cycles);
 bool vkso_read_hvclock_cycles(const void *page, u64 *cycles);
 #endif
 
-#ifdef CONFIG_VKSO_TIME_TEST
-static __always_inline void
-vkso_count_retry(struct vkso_hres_snapshot *snapshot)
-{
-	if (snapshot->retries != (u32)-1)
-		snapshot->retries++;
-}
-#else
-#define vkso_count_retry(snapshot) do { } while (0)
-#endif
-
-static __always_inline u32 vkso_read_begin(
-	const struct vkso_shared_data *shared,
-	struct vkso_hres_snapshot *snapshot)
+static __always_inline u32
+vkso_read_begin(const struct vkso_shared_data *shared)
 {
 	u32 seq;
 
 	while (unlikely((seq = READ_ONCE(shared->seq)) & 1)) {
-		if (snapshot)
-			vkso_count_retry(snapshot);
 		cpu_relax();
 	}
 	/* Keep payload loads between the two seq observations. */
@@ -99,50 +92,85 @@ vkso_read_cycles(const struct vkso_cycle_context *cycle_context,
 	return false;
 }
 
-static __always_inline void vkso_hres_from_snapshot(
-	const struct vkso_hres_snapshot *snapshot, s64 offset_sec,
-	u64 offset_nsec, struct vkso_time_value *value)
-{
-	u64 cycles = snapshot->cycles;
-	u64 last = snapshot->cycle_last;
-	u64 ns = snapshot->base.shifted_nsec;
-
-	/* Match the x86 vDSO rule: clamp a slightly backward TSC to the base. */
-	if (cycles > last)
-		ns += (cycles - last) * snapshot->mult;
-	ns >>= snapshot->shift;
-	ns += offset_nsec;
-	value->sec = snapshot->base.sec + offset_sec +
-		__iter_div_u64_rem(ns, NSEC_PER_SEC, &ns);
-	value->nsec = ns;
-}
-
-static __always_inline int vkso_read_hres(
-	const struct vkso_shared_data *shared, size_t value_offset,
-	size_t cycle_offset, const struct vkso_cycle_context *cycle_context,
-	struct vkso_hres_snapshot *snapshot)
+/*
+ * Read and convert in one inlined operation.  Keeping an intermediate
+ * snapshot forced the production build to spill every field to the stack
+ * and reload it after the seq check.
+ */
+static __always_inline int
+vkso_read_hres_time(const struct vkso_shared_data *shared, size_t value_offset,
+		    size_t cycle_offset,
+		    const struct vkso_cycle_context *cycle_context,
+		    const struct vkso_time_value *offset,
+		    struct vkso_time_value *value)
 {
 	const struct vkso_hres_base *base =
 		(const void *)((const u8 *)shared + value_offset);
 	const struct vkso_cycle_data *cycle_data =
 		(const void *)((const u8 *)shared + cycle_offset);
-	struct vkso_hres_snapshot next;
+	u64 cycles, cycle_last, ns;
+	s64 sec, offset_sec = 0;
+	u64 offset_nsec = 0;
+	u32 mult, shift;
 	u32 seq;
 	s32 clock_mode;
 
-#ifdef CONFIG_VKSO_TIME_TEST
-	next.retries = 0;
-#endif
 	for (;;) {
-		seq = vkso_read_begin(shared, &next);
+		seq = vkso_read_begin(shared);
 		clock_mode = READ_ONCE(cycle_data->clock_mode);
 		if (unlikely(!vkso_read_cycles(cycle_context, clock_mode,
-					      &next.cycles)))
+					       &cycles)))
+			return VKSO_TIME_FALLBACK;
+		cycle_last = READ_ONCE(cycle_data->cycle_last);
+		mult = READ_ONCE(cycle_data->mult);
+		shift = READ_ONCE(cycle_data->shift);
+		sec = READ_ONCE(base->sec);
+		ns = READ_ONCE(base->shifted_nsec);
+		if (!vkso_read_retry(shared, seq))
+			break;
+	}
+
+	/* Match the x86 vDSO rule: clamp a slightly backward TSC to the base. */
+	if (cycles > cycle_last)
+		ns += (cycles - cycle_last) * mult;
+	ns >>= shift;
+	if (offset) {
+		offset_sec = READ_ONCE(offset->sec);
+		offset_nsec = READ_ONCE(offset->nsec);
+	}
+	ns += offset_nsec;
+	value->sec = sec + offset_sec +
+		__iter_div_u64_rem(ns, NSEC_PER_SEC, &ns);
+	value->nsec = ns;
+	return VKSO_TIME_OK;
+}
+
+#ifdef CONFIG_VKSO_TIME_TEST
+static __always_inline int
+vkso_read_hres_sample(const struct vkso_shared_data *shared,
+		      size_t value_offset, size_t cycle_offset,
+		      const struct vkso_cycle_context *cycle_context,
+		      struct vkso_hres_snapshot *snapshot)
+{
+	const struct vkso_hres_base *base =
+		(const void *)((const u8 *)shared + value_offset);
+	const struct vkso_cycle_data *cycle_data =
+		(const void *)((const u8 *)shared + cycle_offset);
+	struct vkso_hres_snapshot next = { .retries = 0 };
+	u32 seq;
+
+	for (;;) {
+		while (unlikely((seq = READ_ONCE(shared->seq)) & 1)) {
+			vkso_count_retry(&next);
+			cpu_relax();
+		}
+		/* Keep payload loads between the two seq observations. */
+		smp_rmb();
+		next.clock_mode = READ_ONCE(cycle_data->clock_mode);
+		if (unlikely(!vkso_read_cycles(cycle_context, next.clock_mode,
+					       &next.cycles)))
 			return VKSO_TIME_FALLBACK;
 		next.cycle_last = READ_ONCE(cycle_data->cycle_last);
-#ifdef CONFIG_VKSO_TIME_TEST
-		next.clock_mode = clock_mode;
-#endif
 		next.mult = READ_ONCE(cycle_data->mult);
 		next.shift = READ_ONCE(cycle_data->shift);
 		next.base.sec = READ_ONCE(base->sec);
@@ -151,17 +179,16 @@ static __always_inline int vkso_read_hres(
 			break;
 		vkso_count_retry(&next);
 	}
-
-#ifdef CONFIG_VKSO_TIME_TEST
 	next.seq = seq;
-#endif
 	*snapshot = next;
 	return VKSO_TIME_OK;
 }
+#endif
 
-static __always_inline int vkso_read_coarse(
-	const struct vkso_shared_data *shared, size_t value_offset,
-	struct vkso_time_value *value)
+static __always_inline void
+vkso_read_coarse(const struct vkso_shared_data *shared, size_t value_offset,
+		 const struct vkso_time_value *offset,
+		 struct vkso_time_value *value)
 {
 	const struct vkso_time_value *base =
 		(const void *)((const u8 *)shared + value_offset);
@@ -169,14 +196,21 @@ static __always_inline int vkso_read_coarse(
 	u32 seq;
 
 	for (;;) {
-		seq = vkso_read_begin(shared, NULL);
+		seq = vkso_read_begin(shared);
 		next.sec = READ_ONCE(base->sec);
 		next.nsec = READ_ONCE(base->nsec);
 		if (!vkso_read_retry(shared, seq))
 			break;
 	}
+	if (offset) {
+		next.sec += READ_ONCE(offset->sec);
+		next.nsec += READ_ONCE(offset->nsec);
+		if (next.nsec >= NSEC_PER_SEC) {
+			next.nsec -= NSEC_PER_SEC;
+			next.sec++;
+		}
+	}
 	*value = next;
-	return VKSO_TIME_OK;
 }
 
 static __always_inline const struct vkso_shared_data *vkso_shared_data(void)

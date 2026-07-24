@@ -12,15 +12,16 @@ static __always_inline int vkso_hres_sample(
 	struct vkso_hres_cycle_sample *sample)
 {
 	struct vkso_hres_snapshot snapshot;
+	const size_t base_offset =
+		offsetof(struct vkso_shared_data, hres.realtime_base);
+	const size_t cycle_offset =
+		offsetof(struct vkso_shared_data, hres.cycles);
 	int status;
 
 	if (!shared || !sample)
 		return VKSO_TIME_FALLBACK;
-	status = vkso_read_hres(shared,
-		offsetof(struct vkso_shared_data, hres.realtime_base),
-		offsetof(struct vkso_shared_data, hres.cycles),
-		NULL,
-		&snapshot);
+	status = vkso_read_hres_sample(shared, base_offset, cycle_offset,
+				       NULL, &snapshot);
 	if (status != VKSO_TIME_OK)
 		return status;
 	sample->seq = snapshot.seq;

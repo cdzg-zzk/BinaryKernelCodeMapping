@@ -58,14 +58,11 @@ int vkso_clock_gettime_core(
 	const struct vkso_cycle_context *cycle_context)
 {
 	const struct vkso_shared_data *shared;
-	struct vkso_hres_snapshot snapshot;
-	struct vkso_time_value coarse;
+	const struct vkso_time_value *offset = NULL;
 	size_t value_offset;
 	size_t cycle_offset = 0;
 	size_t mm_offset = 0;
 	u32 id = clock_id;
-	s64 offset_sec = 0;
-	u64 offset_nsec = 0;
 	bool high_resolution;
 
 	if (likely(id <= CLOCK_MONOTONIC)) {
@@ -108,31 +105,13 @@ int vkso_clock_gettime_core(
 					     monotonic_offset);
 	}
 	if (mm_offset && mm_data) {
-		const struct vkso_time_value *offset;
-
 		offset = (const void *)((const u8 *)mm_data + mm_offset);
-		offset_sec = READ_ONCE(offset->sec);
-		offset_nsec = READ_ONCE(offset->nsec);
 	}
 	shared = vkso_shared_data();
-	if (high_resolution) {
-		if (vkso_read_hres(shared, value_offset, cycle_offset,
-				   cycle_context,
-				   &snapshot) != VKSO_TIME_OK)
-			return VKSO_TIME_FALLBACK;
-		vkso_hres_from_snapshot(&snapshot, offset_sec, offset_nsec,
-					value);
-		return VKSO_TIME_OK;
-	}
-	if (vkso_read_coarse(shared, value_offset, &coarse) != VKSO_TIME_OK)
-		return VKSO_TIME_FALLBACK;
-	coarse.nsec += offset_nsec;
-	coarse.sec += offset_sec;
-	if (coarse.nsec >= NSEC_PER_SEC) {
-		coarse.nsec -= NSEC_PER_SEC;
-		coarse.sec++;
-	}
-	*value = coarse;
+	if (high_resolution)
+		return vkso_read_hres_time(shared, value_offset, cycle_offset,
+					   cycle_context, offset, value);
+	vkso_read_coarse(shared, value_offset, offset, value);
 	return VKSO_TIME_OK;
 }
 
@@ -173,19 +152,17 @@ int vkso_gettimeofday_core(
 	const struct vkso_cycle_context *cycle_context)
 {
 	const struct vkso_shared_data *shared = vkso_shared_data();
-	struct vkso_hres_snapshot snapshot;
+	const size_t base_offset =
+		offsetof(struct vkso_shared_data, hres.realtime_base);
+	const size_t cycle_offset =
+		offsetof(struct vkso_shared_data, hres.cycles);
 	struct vkso_time_value now;
 
 	if (likely(tv)) {
-		if (vkso_read_hres(shared,
-				   offsetof(struct vkso_shared_data,
-					    hres.realtime_base),
-				   offsetof(struct vkso_shared_data,
-					    hres.cycles),
-				   cycle_context,
-				   &snapshot) != VKSO_TIME_OK)
+		if (vkso_read_hres_time(shared, base_offset, cycle_offset,
+					cycle_context, NULL,
+					&now) != VKSO_TIME_OK)
 			return VKSO_TIME_FALLBACK;
-		vkso_hres_from_snapshot(&snapshot, 0, 0, &now);
 		tv->sec = now.sec;
 		tv->usec = now.nsec / NSEC_PER_USEC;
 	}

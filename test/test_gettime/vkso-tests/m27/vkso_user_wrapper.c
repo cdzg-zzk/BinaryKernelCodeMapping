@@ -62,12 +62,9 @@ int vkso_user_wrapper_init(void)
 
 int vkso_user_clock_gettime(clockid_t clock_id, struct timespec *value)
 {
-	int status;
-
-	status = vkso_clock_gettime_core(
-		vkso_mm_data, clock_id, (struct vkso_time_value *)value,
-		&vkso_user_cycle_context);
-	if (status == VKSO_TIME_OK)
+	if (vkso_clock_gettime_core(
+		    vkso_mm_data, clock_id, (struct vkso_time_value *)value,
+		    &vkso_user_cycle_context) == VKSO_TIME_OK)
 		return 0;
 	return vkso_raw_syscall2(SYS_clock_gettime, clock_id,
 				 (long)value);
@@ -75,23 +72,17 @@ int vkso_user_clock_gettime(clockid_t clock_id, struct timespec *value)
 
 int vkso_user_clock_getres(clockid_t clock_id, struct timespec *value)
 {
-	int status;
-
-	status = __vkso_clock_getres(clock_id,
-				    (struct vkso_time_value *)value);
-	if (status == VKSO_TIME_OK)
+	if (__vkso_clock_getres(clock_id, (struct vkso_time_value *)value) ==
+	    VKSO_TIME_OK)
 		return 0;
 	return vkso_raw_syscall2(SYS_clock_getres, clock_id, (long)value);
 }
 
 int vkso_user_gettimeofday(struct timeval *tv, struct timezone *tz)
 {
-	int status;
-
-	status = vkso_gettimeofday_core(
-		(struct vkso_timeval *)tv, (struct vkso_timezone *)tz,
-		&vkso_user_cycle_context);
-	if (status == VKSO_TIME_OK)
+	if (vkso_gettimeofday_core(
+		    (struct vkso_timeval *)tv, (struct vkso_timezone *)tz,
+		    &vkso_user_cycle_context) == VKSO_TIME_OK)
 		return 0;
 	return vkso_raw_syscall2(SYS_gettimeofday, (long)tv, (long)tz);
 }
