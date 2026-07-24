@@ -40,25 +40,11 @@ class BuiltinThunkTests(unittest.TestCase):
             "__x86_indirect_thunk_r11",
             "__x86_return_thunk",
         })
-        self.assertEqual(regular, {"kmalloc"})
+        self.assertEqual(regular, {"kmalloc", "__x86_return_thunk"})
         self.assertEqual(
             builtin,
-            {
-                "__x86_indirect_thunk_array",
-                "__x86_indirect_thunk_r11",
-                "__x86_return_thunk",
-            },
+            {"__x86_indirect_thunk_array", "__x86_indirect_thunk_r11"},
         )
-
-    def test_return_thunk_alone_generates_ret(self) -> None:
-        page = 0x12000000
-        ret = self.make_symbol("__x86_return_thunk", page + 0x580, 2)
-
-        pages = build_builtin_thunk_pages([ret], {"__x86_return_thunk"})
-
-        self.assertEqual(set(pages), {page})
-        self.assertEqual(pages[page][0x580], 0xC3)
-        self.assertEqual(ret.module_name, BUILTIN_THUNK_MODULE)
 
     def test_array_alias_generates_rax_jump_and_return(self) -> None:
         page = 0x12345000

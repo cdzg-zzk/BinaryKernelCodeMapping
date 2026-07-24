@@ -158,7 +158,6 @@ def split_builtin_thunk_shims(shim_symbols: Set[str]) -> tuple[Set[str], Set[str
     builtin = {
         name for name in shim_symbols
         if indirect_thunk_register(name) is not None
-        or name.startswith(RETURN_THUNK_PREFIX)
     }
     return shim_symbols - builtin, builtin
 
@@ -759,7 +758,7 @@ def role_for_symbol(sym: ResolvedSymbol, owner_module: str) -> str:
 def build_builtin_thunk_pages(
     symbols: Sequence[ResolvedSymbol], configured_thunks: Set[str]
 ) -> Dict[int, bytes]:
-    """Build direct-jump/return thunk pages selected through shim.txt.
+    """Build direct-jump thunk pages selected through shim.txt.
 
     Kernel callers contain fixed rel32 calls to the thunk virtual addresses, so
     the generated code must remain at those same relative addresses.  The whole
@@ -770,15 +769,9 @@ def build_builtin_thunk_pages(
         for name in configured_thunks
         if (register := indirect_thunk_register(name)) is not None
     }
-    configured_return = any(
-        name.startswith(RETURN_THUNK_PREFIX) for name in configured_thunks
-    )
     selected = [
         sym for sym in symbols
-        if sym.defined and (
-            indirect_thunk_register(sym.name) in configured_registers
-            or (configured_return and sym.name.startswith(RETURN_THUNK_PREFIX))
-        )
+        if sym.defined and indirect_thunk_register(sym.name) in configured_registers
     ]
     if not selected:
         return {}
