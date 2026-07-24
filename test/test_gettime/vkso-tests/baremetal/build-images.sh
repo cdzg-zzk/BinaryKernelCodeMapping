@@ -177,6 +177,11 @@ shared_value=$(nm -a "$DSO_BUILD/libkernel.so" |
 	     END { if (value) print value }')
 test -n "$shared_value"
 printf '%s\n' "$shared_value" >"$OUT/vkso-shared-st-value.txt"
+core_value=$(nm -D "$DSO_BUILD/libkernel.so" |
+	awk '$3 == "vkso_clock_gettime_core" && !value { value = "0x" $1 }
+	     END { if (value) print value }')
+test -n "$core_value"
+printf '%s\n' "$core_value" >"$OUT/vkso-core-st-value.txt"
 
 gcc -O2 -std=gnu11 -Wall -Wextra -Werror -pthread \
 	-o "$OUT/raw-abi-matrix" \
@@ -189,6 +194,7 @@ gcc -DVKSO_BACKEND -O2 -std=gnu11 -Wall -Wextra -Werror -pthread \
 	-Wl,-rpath,'$ORIGIN'
 gcc -O2 -std=gnu11 -Wall -Wextra -Werror -fno-omit-frame-pointer \
 	-DVKSO_SHARED_ST_VALUE="$shared_value" \
+	-DVKSO_CORE_ST_VALUE="$core_value" \
 	-o "$OUT/vkso-time-bench" \
 	"$HERE/vkso_time_bench.c" \
 	"$ROOT/test/test_gettime/vkso-tests/m27/vkso_user_wrapper.c" \
@@ -237,6 +243,7 @@ install -m 0644 "$HERE/vkso_time_bench.c" "$OUT/vkso_time_bench.c"
 	printf 'vkso_image_sha256=%s\n' \
 		"$(sha256sum "$OUT/vkso-bzImage" | awk '{print $1}')"
 	printf 'vkso_shared_st_value=%s\n' "$shared_value"
+	printf 'vkso_core_st_value=%s\n' "$core_value"
 	printf 'production_test_probe=absent\n'
 	printf 'raw_native_vdso=present\n'
 	printf 'vkso_native_vdso=absent\n'

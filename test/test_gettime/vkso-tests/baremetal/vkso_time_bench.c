@@ -28,6 +28,9 @@
 #ifndef VKSO_SHARED_ST_VALUE
 #error "VKSO_SHARED_ST_VALUE must match libkernel.so"
 #endif
+#ifndef VKSO_CORE_ST_VALUE
+#error "VKSO_CORE_ST_VALUE must match libkernel.so"
+#endif
 
 #define DEFAULT_ITERATIONS 500000U
 #define DEFAULT_REPEATS 31U
@@ -38,6 +41,7 @@
 #define RAW_VVAR_DATA_OFFSET 128U
 #define RAW_VDSO_BASES 12U
 #define RAW_CS_RAW 1U
+#define VKSO_TIME_ABI_VERSION 9U
 
 enum backend {
 	BACKEND_RAW,
@@ -965,15 +969,21 @@ static void run_seq(enum backend backend, uint64_t iterations)
 		print_seq_result(backend, "hres_protocol", &hres);
 		print_seq_result(backend, "raw_protocol", &raw);
 	} else {
-		Dl_info info;
 		const struct vkso_shared_data_bench *data;
+		uintptr_t load_bias;
 		struct seq_result hres, raw;
 
-		if (!dladdr((const void *)vkso_clock_gettime_core, &info) ||
-		    !info.dli_fbase)
-			fail_message("cannot locate libkernel.so base");
-		data = (const void *)((uintptr_t)info.dli_fbase +
+		/*
+		 * libkernel.so is sparse and its first PT_LOAD is not at vaddr 0.
+		 * Derive the ELF load bias from a known exported symbol instead of
+		 * relying on dladdr().dli_fbase semantics.
+		 */
+		load_bias = (uintptr_t)vkso_clock_gettime_core -
+			    (uintptr_t)VKSO_CORE_ST_VALUE;
+		data = (const void *)(load_bias +
 				     (uintptr_t)VKSO_SHARED_ST_VALUE);
+		if (data->abi_version != VKSO_TIME_ABI_VERSION)
+			fail_message("VKSO shared-data address/ABI mismatch");
 		hres = observe_vkso_seq(data, 0, iterations);
 		raw = observe_vkso_seq(data, 1, iterations);
 		print_seq_result(backend, "hres_protocol", &hres);
