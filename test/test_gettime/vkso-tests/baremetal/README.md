@@ -104,6 +104,13 @@ cd /home/zzk/BinaryKernelCodeMapping
 sudo test/test_gettime/vkso-tests/baremetal/collect.sh
 ```
 
+If the saved run already contains both raw and VKSO results, `collect.sh`
+automatically starts a new VKSO-only optimization run and uses that saved
+VKSO result as its baseline.  It does not overwrite the prior result and
+skips the unchanged seq/layout experiments.  The additional outputs are
+`vkso-optimization.csv` and `VKSO-OPT-SUMMARY.md`.  Set `VKSO_REFERENCE` only
+when a baseline other than the saved run is required.
+
 The VKSO phase validates and activates `libkernel.so`, runs the tests, then
 restores the page cache and unloads the module even on failure.  It compares
 the paired raw result and creates:

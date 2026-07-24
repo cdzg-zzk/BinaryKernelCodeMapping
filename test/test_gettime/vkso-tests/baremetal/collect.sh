@@ -20,15 +20,20 @@ WARMUP=${WARMUP:-10000}
 PMU=${PMU:-1}
 SEQ_ITERATIONS=${SEQ_ITERATIONS:-100000000}
 LAYOUT_ITERATIONS=${LAYOUT_ITERATIONS:-200000}
+VKSO_ONLY=${VKSO_ONLY:-auto}
+VKSO_REFERENCE=${VKSO_REFERENCE:-}
+RUN_SEQ=${RUN_SEQ:-auto}
+RUN_LAYOUT=${RUN_LAYOUT:-auto}
 
 if [[ $(id -u) -ne 0 ]]; then
-	exec sudo --preserve-env=PACKAGE,CONTROL_DIR,RESULTS_DIR,STATE_FILE,CPU,ITERATIONS,REPEATS,WARMUP,PMU,SEQ_ITERATIONS,LAYOUT_ITERATIONS \
+	exec sudo --preserve-env=PACKAGE,CONTROL_DIR,RESULTS_DIR,STATE_FILE,CPU,ITERATIONS,REPEATS,WARMUP,PMU,SEQ_ITERATIONS,LAYOUT_ITERATIONS,VKSO_ONLY,VKSO_REFERENCE,RUN_SEQ,RUN_LAYOUT \
 		"$0" "$@"
 fi
 
 for file in SHA256SUMS boot-manifest.txt vkso-time-bench \
 	raw-abi-matrix vkso-abi-matrix libkernel.so page_mappings.txt \
-	page_cache_replace.ko manager compare.py raw.config vkso.config; do
+	page_cache_replace.ko manager compare.py compare-vkso.py \
+	raw.config vkso.config; do
 	test -s "$PACKAGE/$file" || {
 		echo "missing package artifact: $PACKAGE/$file" >&2
 		exit 1
@@ -54,18 +59,54 @@ raw|vkso)
 	;;
 esac
 
+collection_mode=paired
+reference_vkso=
 if [[ "$backend" == raw ]]; then
 	run_id=${1:-$(date -u +%Y%m%dT%H%M%SZ)-baremetal}
 	printf '%s\n' "$run_id" >"$STATE"
 else
 	if [[ $# -gt 0 ]]; then
 		run_id=$1
-	elif [[ -r "$STATE" ]]; then
-		run_id=$(cat "$STATE")
+		if [[ ! -s "$RESULTS_DIR/$run_id/raw/perf.csv" ]]; then
+			collection_mode=vkso-only
+		fi
+	elif [[ "$VKSO_ONLY" != 1 && -r "$STATE" ]]; then
+		saved_run_id=$(cat "$STATE")
+		saved_root=$RESULTS_DIR/$saved_run_id
+		if [[ -s "$saved_root/raw/perf.csv" &&
+		      ! -e "$saved_root/vkso/perf.csv" ]]; then
+			run_id=$saved_run_id
+		else
+			run_id=$(date -u +%Y%m%dT%H%M%SZ)-vkso-opt
+			collection_mode=vkso-only
+			if [[ -s "$saved_root/vkso/perf.csv" ]]; then
+				reference_vkso=$saved_root/vkso
+			fi
+		fi
 	else
-		echo "no raw run id; pass the same run id explicitly" >&2
+		run_id=$(date -u +%Y%m%dT%H%M%SZ)-vkso-opt
+		collection_mode=vkso-only
+	fi
+	if [[ "$VKSO_ONLY" == 1 ]]; then
+		collection_mode=vkso-only
+	fi
+	if [[ "$collection_mode" == vkso-only && -n "$VKSO_REFERENCE" ]]; then
+		reference_vkso=$VKSO_REFERENCE
+		[[ -s "$reference_vkso/perf.csv" ]] ||
+			reference_vkso=$VKSO_REFERENCE/vkso
+	fi
+	if [[ "$collection_mode" == vkso-only &&
+	      ! -s "$reference_vkso/perf.csv" ]]; then
+		echo "cannot locate prior VKSO baseline; set VKSO_REFERENCE" >&2
 		exit 1
 	fi
+fi
+
+if [[ "$RUN_SEQ" == auto ]]; then
+	[[ "$collection_mode" == paired ]] && RUN_SEQ=1 || RUN_SEQ=0
+fi
+if [[ "$RUN_LAYOUT" == auto ]]; then
+	[[ "$collection_mode" == paired ]] && RUN_LAYOUT=1 || RUN_LAYOUT=0
 fi
 
 clocksource=$(cat /sys/devices/system/clocksource/clocksource0/current_clocksource)
@@ -162,6 +203,10 @@ smt_active=$(cat /sys/devices/system/cpu/smt/active 2>/dev/null || echo unknown)
 	printf 'pmu=%s\n' "$PMU"
 	printf 'seq_iterations=%s\n' "$SEQ_ITERATIONS"
 	printf 'layout_iterations=%s\n' "$LAYOUT_ITERATIONS"
+	printf 'collection_mode=%s\n' "$collection_mode"
+	printf 'run_seq=%s\n' "$RUN_SEQ"
+	printf 'run_layout=%s\n' "$RUN_LAYOUT"
+	printf 'reference_vkso=%s\n' "$reference_vkso"
 	printf 'clocksource=%s\n' "$clocksource"
 	printf 'smt_active=%s\n' "$smt_active"
 	printf 'isolated=%s\n' "$isolated"
@@ -169,6 +214,14 @@ smt_active=$(cat /sys/devices/system/cpu/smt/active 2>/dev/null || echo unknown)
 	printf 'package=%s\n' "$PACKAGE"
 	printf 'package_manifest_sha256=%s\n' \
 		"$(sha256sum "$PACKAGE/boot-manifest.txt" | awk '{print $1}')"
+	printf 'package_git_commit=%s\n' \
+		"$(awk -F= '$1 == "git_commit" { print $2; exit }' \
+			"$PACKAGE/boot-manifest.txt")"
+	printf 'package_vkso_image_sha256=%s\n' \
+		"$(awk -F= '$1 == "vkso_image_sha256" { print $2; exit }' \
+			"$PACKAGE/boot-manifest.txt")"
+	printf 'package_libkernel_sha256=%s\n' \
+		"$(sha256sum "$PACKAGE/libkernel.so" | awk '{print $1}')"
 	for file in \
 		/sys/devices/system/cpu/intel_pstate/no_turbo \
 		/sys/devices/system/cpu/intel_pstate/min_perf_pct \
@@ -229,14 +282,18 @@ LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-time-bench" \
 	--backend "$backend" --mode perf --cpu "$CPU" \
 	--iterations "$ITERATIONS" --repeats "$REPEATS" \
 	--warmup "$WARMUP" --pmu "$PMU" >"$out/perf.csv"
-LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-time-bench" \
-	--backend "$backend" --mode seq --cpu "$CPU" \
-	--seq-iterations "$SEQ_ITERATIONS" >"$out/seq.csv"
-if [[ "$backend" == vkso ]]; then
+if [[ "$RUN_SEQ" == 1 ]]; then
 	LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-time-bench" \
-		--backend "$backend" --mode layout --cpu "$CPU" \
-		--layout-iterations "$LAYOUT_ITERATIONS" \
-		--repeats "$REPEATS" >"$out/layout.csv"
+		--backend "$backend" --mode seq --cpu "$CPU" \
+		--seq-iterations "$SEQ_ITERATIONS" >"$out/seq.csv"
+fi
+if [[ "$backend" == vkso ]]; then
+	if [[ "$RUN_LAYOUT" == 1 ]]; then
+		LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-time-bench" \
+			--backend "$backend" --mode layout --cpu "$CPU" \
+			--layout-iterations "$LAYOUT_ITERATIONS" \
+			--repeats "$REPEATS" >"$out/layout.csv"
+	fi
 	cleanup_vkso
 	trap - EXIT INT TERM
 fi
@@ -250,14 +307,23 @@ if [[ "$backend" == raw ]]; then
 	echo "active_run_id=$run_id"
 	echo "next_step=$CONTROL_DIR/boot-vkso.sh"
 else
-	"$PACKAGE/compare.py" "$result_root"
+	if [[ "$collection_mode" == paired ]]; then
+		"$PACKAGE/compare.py" "$result_root"
+		comparison=$result_root/research-questions.csv
+		summary=$result_root/SUMMARY.md
+	else
+		"$PACKAGE/compare-vkso.py" "$reference_vkso" "$out" \
+			"$result_root"
+		comparison=$result_root/vkso-optimization.csv
+		summary=$result_root/VKSO-OPT-SUMMARY.md
+	fi
 	archive=$RESULTS_DIR/$run_id.tar.gz
 	tar -C "$RESULTS_DIR" -czf "$archive" "$run_id"
 	if [[ -n ${SUDO_UID:-} && -n ${SUDO_GID:-} ]]; then
 		chown -R "$SUDO_UID:$SUDO_GID" "$result_root" "$archive"
 	fi
 	echo "vkso_result=$out"
-	echo "comparison=$result_root/research-questions.csv"
-	echo "summary=$result_root/SUMMARY.md"
+	echo "comparison=$comparison"
+	echo "summary=$summary"
 	echo "archive=$archive"
 fi

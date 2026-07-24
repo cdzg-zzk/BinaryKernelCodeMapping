@@ -8,6 +8,7 @@ ROOT=$(cd "$HERE/../../../.." && pwd)
 VKSO_SOURCE=${VKSO_SOURCE:-$ROOT/test/test_gettime/linux-5.15.198-vkso}
 RAW_SOURCE=${RAW_SOURCE:-/tmp/vkso-raw-audit-src}
 RAW_TARBALL=${RAW_TARBALL:-/tmp/linux-5.15.198.tar.xz}
+RAW_PACKAGE=${RAW_PACKAGE:-}
 BUILD_ROOT=${BUILD_ROOT:-/tmp/vkso-baremetal-build}
 RAW_BUILD=${RAW_BUILD:-$BUILD_ROOT/raw}
 VKSO_BUILD=${VKSO_BUILD:-$BUILD_ROOT/vkso}
@@ -28,9 +29,19 @@ test -s "$BASE_CONFIG" || {
 }
 test -f "$VKSO_SOURCE/Makefile"
 
-if [[ ! -f "$RAW_SOURCE/Makefile" ]]; then
+reuse_raw=0
+if [[ -n "$RAW_PACKAGE" ]]; then
+	for file in raw-bzImage raw.config; do
+		test -s "$RAW_PACKAGE/$file" || {
+			echo "missing reusable raw artifact: $RAW_PACKAGE/$file" >&2
+			exit 1
+		}
+	done
+	reuse_raw=1
+elif [[ ! -f "$RAW_SOURCE/Makefile" ]]; then
 	test -s "$RAW_TARBALL" || {
 		echo "missing raw Linux 5.15.198 source and tarball" >&2
+		echo "set RAW_PACKAGE to reuse a previously validated raw image" >&2
 		exit 1
 	}
 	if [[ -e "$RAW_SOURCE" ]]; then
@@ -41,7 +52,9 @@ if [[ ! -f "$RAW_SOURCE/Makefile" ]]; then
 	tar -xf "$RAW_TARBALL" -C "$RAW_SOURCE" --strip-components=1
 fi
 
-test "$(make -s -C "$RAW_SOURCE" kernelversion)" = 5.15.198
+if [[ "$reuse_raw" == 0 ]]; then
+	test "$(make -s -C "$RAW_SOURCE" kernelversion)" = 5.15.198
+fi
 test "$(make -s -C "$VKSO_SOURCE" kernelversion)" = 5.15.198
 mkdir -p "$RAW_BUILD" "$VKSO_BUILD" "$OUT"
 
@@ -95,7 +108,11 @@ configure_tree()
 	make -C "$source" O="$build" olddefconfig
 }
 
-configure_tree "$RAW_SOURCE" "$RAW_BUILD" raw
+if [[ "$reuse_raw" == 1 ]]; then
+	cp "$RAW_PACKAGE/raw.config" "$RAW_BUILD/.config"
+else
+	configure_tree "$RAW_SOURCE" "$RAW_BUILD" raw
+fi
 configure_tree "$VKSO_SOURCE" "$VKSO_BUILD" vkso
 
 config_symbols()
@@ -122,16 +139,24 @@ if grep -q '^CONFIG_VKSO_TIME=' "$RAW_BUILD/.config"; then
 	exit 1
 fi
 
-make -C "$RAW_SOURCE" O="$RAW_BUILD" -j"$JOBS" bzImage modules_prepare
+if [[ "$reuse_raw" == 0 ]]; then
+	make -C "$RAW_SOURCE" O="$RAW_BUILD" -j"$JOBS" bzImage modules_prepare
+fi
 make -C "$VKSO_SOURCE" O="$VKSO_BUILD" -j"$JOBS" bzImage modules_prepare
 cp "$VKSO_BUILD/vmlinux.symvers" "$VKSO_BUILD/Module.symvers"
 
-for artifact in \
-	"$RAW_BUILD/arch/x86/boot/bzImage" \
-	"$RAW_BUILD/vmlinux" \
-	"$RAW_BUILD/arch/x86/entry/vdso/vdso64.so.dbg" \
-	"$VKSO_BUILD/arch/x86/boot/bzImage" \
-	"$VKSO_BUILD/vmlinux"; do
+artifacts=(
+	"$VKSO_BUILD/arch/x86/boot/bzImage"
+	"$VKSO_BUILD/vmlinux"
+)
+if [[ "$reuse_raw" == 0 ]]; then
+	artifacts+=(
+		"$RAW_BUILD/arch/x86/boot/bzImage"
+		"$RAW_BUILD/vmlinux"
+		"$RAW_BUILD/arch/x86/entry/vdso/vdso64.so.dbg"
+	)
+fi
+for artifact in "${artifacts[@]}"; do
 	test -s "$artifact" || {
 		echo "missing build artifact: $artifact" >&2
 		exit 1
@@ -141,9 +166,15 @@ done
 # The 5.15 extract-ikconfig helper cannot always locate IKCONFIG through a
 # ZSTD-compressed x86 bzImage.  kernel/config_data is the exact payload linked
 # into vmlinux and exposed as /proc/config.gz at runtime.
-cmp -s "$RAW_BUILD/.config" "$RAW_BUILD/kernel/config_data"
+if [[ "$reuse_raw" == 0 ]]; then
+	cmp -s "$RAW_BUILD/.config" "$RAW_BUILD/kernel/config_data"
+	cp "$RAW_BUILD/kernel/config_data" "$OUT/raw.image.config"
+elif [[ -s "$RAW_PACKAGE/raw.image.config" ]]; then
+	cp "$RAW_PACKAGE/raw.image.config" "$OUT/raw.image.config"
+else
+	cp "$RAW_PACKAGE/raw.config" "$OUT/raw.image.config"
+fi
 cmp -s "$VKSO_BUILD/.config" "$VKSO_BUILD/kernel/config_data"
-cp "$RAW_BUILD/kernel/config_data" "$OUT/raw.image.config"
 cp "$VKSO_BUILD/kernel/config_data" "$OUT/vkso.image.config"
 
 MODULE_BUILD="$BUILD_ROOT/page-cache-replace"
@@ -201,7 +232,11 @@ gcc -O2 -std=gnu11 -Wall -Wextra -Werror -fno-omit-frame-pointer \
 	-L"$DSO_BUILD" -Wl,--no-as-needed -lkernel -ldl \
 	-Wl,-rpath,'$ORIGIN'
 
-install -m 0644 "$RAW_BUILD/arch/x86/boot/bzImage" "$OUT/raw-bzImage"
+if [[ "$reuse_raw" == 1 ]]; then
+	install -m 0644 "$RAW_PACKAGE/raw-bzImage" "$OUT/raw-bzImage"
+else
+	install -m 0644 "$RAW_BUILD/arch/x86/boot/bzImage" "$OUT/raw-bzImage"
+fi
 install -m 0644 "$VKSO_BUILD/arch/x86/boot/bzImage" "$OUT/vkso-bzImage"
 install -m 0644 "$RAW_BUILD/.config" "$OUT/raw.config"
 install -m 0644 "$VKSO_BUILD/.config" "$OUT/vkso.config"
@@ -213,7 +248,7 @@ install -m 0644 "$MODULE_BUILD/page_cache_replace.ko" \
 	"$OUT/page_cache_replace.ko"
 install -m 0755 "$MODULE_BUILD/manager" "$OUT/manager"
 
-for script in collect.sh compare.py boot-once.sh boot-raw.sh boot-vkso.sh \
+for script in collect.sh compare.py compare-vkso.py boot-once.sh boot-raw.sh boot-vkso.sh \
 	install-grub.sh qemu-preflight.sh qemu-guest-init; do
 	install -m 0755 "$HERE/$script" "$OUT/$script"
 done
@@ -231,7 +266,11 @@ install -m 0644 "$HERE/vkso_time_bench.c" "$OUT/vkso_time_bench.c"
 {
 	date -u '+prepared_utc=%Y-%m-%dT%H:%M:%SZ'
 	printf 'git_commit=%s\n' "$(git -C "$ROOT" rev-parse HEAD)"
-	printf 'raw_source=%s\n' "$RAW_SOURCE"
+	if [[ "$reuse_raw" == 1 ]]; then
+		printf 'raw_source=reused:%s\n' "$RAW_PACKAGE"
+	else
+		printf 'raw_source=%s\n' "$RAW_SOURCE"
+	fi
 	printf 'vkso_source=%s\n' "$VKSO_SOURCE"
 	printf 'raw_build=%s\n' "$RAW_BUILD"
 	printf 'vkso_build=%s\n' "$VKSO_BUILD"
@@ -255,11 +294,13 @@ if nm "$VKSO_BUILD/vmlinux" |
 	echo "production VKSO image contains test probe" >&2
 	exit 1
 fi
-if nm "$RAW_BUILD/vmlinux" |
-	awk '$3 == "vkso_clock_gettime_core" { found = 1 }
-	     END { exit !found }'; then
-	echo "raw image contains VKSO time core" >&2
-	exit 1
+if [[ "$reuse_raw" == 0 ]]; then
+	if nm "$RAW_BUILD/vmlinux" |
+		awk '$3 == "vkso_clock_gettime_core" { found = 1 }
+		     END { exit !found }'; then
+		echo "raw image contains VKSO time core" >&2
+		exit 1
+	fi
 fi
 nm "$VKSO_BUILD/vmlinux" |
 	awk '$3 == "vkso_clock_gettime_core" { found = 1 }
