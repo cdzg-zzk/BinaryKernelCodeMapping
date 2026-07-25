@@ -22,5 +22,5 @@ for marker in \
 	}
 done
 
-echo "M08 static PASS: inline TSC; only direct PV/HV cold calls allowed"
+echo "M08 static PASS: inline TSC; one direct unified cold call allowed"
 echo "M08 PASS: $RESULT"

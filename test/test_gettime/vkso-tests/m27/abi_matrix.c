@@ -90,11 +90,11 @@ static void init_backend(void)
 	if (vkso_user_wrapper_init())
 		fail("vkso wrapper init");
 	backend.name = "vkso";
-	backend.clock_gettime = vkso_user_clock_gettime;
-	backend.clock_getres = vkso_user_clock_getres;
-	backend.gettimeofday = vkso_user_gettimeofday;
-	backend.time = vkso_user_time;
-	backend.getcpu = vkso_user_getcpu;
+	backend.clock_gettime = (clock_gettime_fn)__vkso_clock_gettime;
+	backend.clock_getres = (clock_getres_fn)__vkso_clock_getres;
+	backend.gettimeofday = (gettimeofday_fn)__vkso_gettimeofday;
+	backend.time = (time_fn)__vkso_time;
+	backend.getcpu = (getcpu_fn)__vkso_getcpu;
 #else
 	void *handle = dlopen("linux-vdso.so.1", RTLD_NOW | RTLD_LOCAL);
 
@@ -746,7 +746,10 @@ static void check_namespace_context(void)
 	mm_data = (const void *)getauxval(AT_VKSO_MM_DATA);
 	if (!mm_data || errno ||
 	    mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION ||
-	    mm_data->reserved ||
+	    mm_data->clock_mask != ((1U << CLOCK_MONOTONIC) |
+				    (1U << CLOCK_MONOTONIC_RAW) |
+				    (1U << CLOCK_MONOTONIC_COARSE) |
+				    (1U << CLOCK_BOOTTIME)) ||
 	    mm_data->monotonic_offset.sec != 7 ||
 	    mm_data->monotonic_offset.nsec != 123456789 ||
 	    mm_data->boottime_offset.sec != 11 ||

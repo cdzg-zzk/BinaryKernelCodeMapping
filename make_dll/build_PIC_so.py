@@ -56,6 +56,8 @@ STT_OBJECT = 1
 STT_FUNC = 2
 
 R_X86_64_64 = 1
+R_X86_64_PC32 = 2
+R_X86_64_PLT32 = 4
 R_X86_64_RELATIVE = 8
 
 DT_NULL = 0
@@ -532,6 +534,58 @@ class KoFile:
             return None
         return idx, self.symbols[idx]
 
+    def find_section(self, name: str) -> KoSection | None:
+        return self._sections_by_name.get(name)
+
+    def section_bytes(self, section: KoSection) -> bytes:
+        if section.sh_type == SHT_NOBITS:
+            return bytes(section.sh_size)
+        end = section.sh_offset + section.sh_size
+        if end > len(self._blob):
+            raise ValueError(f"{self.path}: truncated section {section.name}")
+        return bytes(self._blob[section.sh_offset:end])
+
+    def relocations_for(self, target: KoSection) -> List[KoDataReloc]:
+        relocations: List[KoDataReloc] = []
+        for section in self.sections:
+            if section.sh_type != SHT_RELA or section.sh_info != target.index:
+                continue
+            if section.sh_entsize != self._RELA.size:
+                raise ValueError(
+                    f"{self.path}: unsupported relocation entry size "
+                    f"{section.sh_entsize} for {section.name}"
+                )
+            end = section.sh_offset + section.sh_size
+            if end > len(self._blob):
+                raise ValueError(
+                    f"{self.path}: truncated relocation section {section.name}"
+                )
+            for offset in range(section.sh_offset, end, section.sh_entsize):
+                r_offset, r_info, addend = self._RELA.unpack_from(
+                    self._blob, offset
+                )
+                sym_idx = r_info >> 32
+                r_type = r_info & 0xFFFFFFFF
+                if sym_idx >= len(self.symbols):
+                    raise ValueError(
+                        f"{self.path}: relocation references invalid symbol "
+                        f"index {sym_idx}"
+                    )
+                symbol = self.symbols[sym_idx]
+                relocations.append(
+                    KoDataReloc(
+                        offset=r_offset,
+                        sym_idx=sym_idx,
+                        symbol_name=symbol.name,
+                        sym_shndx=symbol.st_shndx,
+                        sym_value=symbol.st_value,
+                        addend=addend,
+                        r_type=r_type,
+                        is_undef=symbol.is_undef,
+                    )
+                )
+        return relocations
+
 
 class KernelElfSymbols:
     """Minimal ELF64 symbol reader for built-in objects omitted from a KRG."""
@@ -747,6 +801,151 @@ class ResolvedSymbol:
     @property
     def is_import(self) -> bool:
         return not self.defined
+
+
+def add_private_wrapper_object(
+    object_path: Path,
+    resolved: List[ResolvedSymbol],
+    owner_lib: str,
+    owner_module: str,
+    text_min_page: int,
+    synthetic_text_pages: Dict[int, bytes],
+) -> tuple[bytes, int]:
+    """Add one user-owned PIC wrapper page and its private context data.
+
+    The object deliberately has a narrow contract: one executable section
+    named .vkso.user.text and one writable section named .vkso.user.data.
+    Calls and RIP-relative data references are resolved locally while the DSO
+    is built, so wrappers never acquire a PLT/GOT dependency on shared core
+    symbols.  The executable page contains real file bytes and is therefore
+    excluded from page-cache replacement.
+    """
+
+    wrapper = KoFile(object_path)
+    text = wrapper.find_section(".vkso.user.text")
+    data = wrapper.find_section(".vkso.user.data")
+    if text is None or not text.is_alloc or not text.is_exec:
+        raise ValueError(
+            f"{object_path}: missing executable .vkso.user.text section"
+        )
+    if data is None or not data.is_alloc or not data.is_write:
+        raise ValueError(
+            f"{object_path}: missing writable .vkso.user.data section"
+        )
+    if text.sh_size > PAGE_SIZE:
+        raise ValueError(
+            f"{object_path}: wrapper text exceeds one page ({text.sh_size} bytes)"
+        )
+    if data.sh_size > PAGE_SIZE:
+        raise ValueError(
+            f"{object_path}: wrapper data exceeds one page ({data.sh_size} bytes)"
+        )
+
+    occupied_end = max(
+        (
+            sym.address + max(sym.size, 1)
+            for sym in resolved
+            if sym.defined and sym.address
+        ),
+        default=text_min_page,
+    )
+    if synthetic_text_pages:
+        occupied_end = max(
+            occupied_end,
+            max(synthetic_text_pages) + PAGE_SIZE,
+        )
+    text_kernel_page = align(occupied_end, PAGE_SIZE)
+    text_vaddr = TEXT_BASE_VADDR + (text_kernel_page - text_min_page)
+    data_vaddr = align(text_vaddr + PAGE_SIZE, PAGE_SIZE)
+
+    by_name = {sym.name: sym for sym in resolved}
+
+    def dso_address(symbol: KoSymbol) -> int:
+        if symbol.st_shndx == text.index:
+            return text_vaddr + symbol.st_value
+        if symbol.st_shndx == data.index:
+            return data_vaddr + symbol.st_value
+        if symbol.st_shndx == SHN_ABS:
+            return symbol.st_value
+        if symbol.is_undef:
+            target = by_name.get(symbol.name)
+            if target is None or not target.defined:
+                raise ValueError(
+                    f"{object_path}: unresolved wrapper dependency "
+                    f"{symbol.name}"
+                )
+            return TEXT_BASE_VADDR + (target.address - text_min_page)
+        raise ValueError(
+            f"{object_path}: wrapper symbol {symbol.name or '<anonymous>'} "
+            f"uses unsupported section index {symbol.st_shndx}"
+        )
+
+    text_image = bytearray(wrapper.section_bytes(text))
+    for relocation in wrapper.relocations_for(text):
+        if relocation.r_type not in (R_X86_64_PC32, R_X86_64_PLT32):
+            raise ValueError(
+                f"{object_path}: unsupported wrapper text relocation "
+                f"type {relocation.r_type} for {relocation.symbol_name}"
+            )
+        symbol = wrapper.symbols[relocation.sym_idx]
+        place = text_vaddr + relocation.offset
+        value = dso_address(symbol) + relocation.addend - place
+        if not -(1 << 31) <= value < (1 << 31):
+            raise ValueError(
+                f"{object_path}: wrapper relocation to {symbol.name} "
+                "does not fit rel32"
+            )
+        if relocation.offset + 4 > len(text_image):
+            raise ValueError(
+                f"{object_path}: wrapper relocation falls outside text"
+            )
+        struct.pack_into("<i", text_image, relocation.offset, value)
+
+    page = bytearray(PAGE_SIZE)
+    page[:len(text_image)] = text_image
+    if text_kernel_page in synthetic_text_pages:
+        raise ValueError(
+            f"{object_path}: private wrapper page overlaps synthetic page "
+            f"0x{text_kernel_page:x}"
+        )
+    synthetic_text_pages[text_kernel_page] = bytes(page)
+
+    export_order = max(
+        (sym.export_order for sym in resolved if sym.exported),
+        default=-1,
+    ) + 1
+    for symbol in wrapper.symbols:
+        if (
+            symbol.bind != STB_GLOBAL
+            or symbol.typ != STT_FUNC
+            or symbol.st_shndx != text.index
+            or not symbol.name
+        ):
+            continue
+        if symbol.name in by_name:
+            raise ValueError(
+                f"{object_path}: wrapper export conflicts with "
+                f"{symbol.name}"
+            )
+        exported = ResolvedSymbol(
+            name=symbol.name,
+            source=owner_lib,
+            defined=True,
+            exported=True,
+            st_type=STT_FUNC,
+            size=symbol.st_size,
+            address=text_kernel_page + symbol.st_value,
+            export_order=export_order,
+            original_order=len(resolved),
+            module_name=owner_module,
+            replace_from_kernel=False,
+            reuse_kind="text",
+        )
+        resolved.append(exported)
+        by_name[symbol.name] = exported
+        export_order += 1
+
+    return wrapper.section_bytes(data), data_vaddr
 
 def role_for_symbol(sym: ResolvedSymbol, owner_module: str) -> str:
     if not sym.replace_from_kernel:
@@ -1570,6 +1769,7 @@ def build_shared_object(
     symbol_dump_path: Path | None = None, shim_list_path: Path | None = None,
     ko_path: Path | None = None, page_map_path: Path | None = None,
     shared_data_list_path: Path | None = None, vmlinux_path: Path | None = None,
+    private_wrapper_object: Path | None = None,
 ) -> None:
     graph = KrgGraph(krg_path)
     shim_symbols = load_shim_symbols(shim_list_path)
@@ -1776,6 +1976,21 @@ def build_shared_object(
             sym.reuse_kind = "shared_data"
 
     synthetic_text_pages = build_builtin_thunk_pages(resolved, builtin_thunk_shims)
+    if private_wrapper_object is not None:
+        if data_bytes:
+            raise ValueError(
+                "--private-wrapper-object cannot be combined with an existing "
+                "writable module image"
+            )
+        text_min_page = compute_text_min_page(resolved)
+        data_bytes, rw_base_vaddr = add_private_wrapper_object(
+            private_wrapper_object,
+            resolved,
+            owner_lib,
+            owner_module,
+            text_min_page,
+            synthetic_text_pages,
+        )
 
     dep_modules = ["shim"] if LIB_SHIM in needed_libs else []
     module_deps_path = symbols_path.parent / "module_deps.txt"
@@ -1808,6 +2023,13 @@ def main() -> None:
         "--vmlinux", type=Path, default=None,
         help="matching vmlinux used to resolve explicit shared_data omitted by KRG",
     )
+    parser.add_argument(
+        "--private-wrapper-object", type=Path, default=None,
+        help=(
+            "PIC ET_REL object containing one private .vkso.user.text page "
+            "and per-process .vkso.user.data"
+        ),
+    )
     args = parser.parse_args()
     krg_path = args.krg
     if krg_path is None:
@@ -1825,6 +2047,7 @@ def main() -> None:
         page_map_path=args.page_map,
         shared_data_list_path=args.shared_data_list,
         vmlinux_path=args.vmlinux,
+        private_wrapper_object=args.private_wrapper_object,
     )
 
 if __name__ == "__main__":

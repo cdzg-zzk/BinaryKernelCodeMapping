@@ -27,3 +27,15 @@ AGENTS.md
 # ai-chat
 ai_prompt.md
 ai_output.md
+
+# test
+/test/test_BCH/
+/test/test_glibc/
+/test/test_lz4/
+/test/test_UTF-8/
+/test/test_xz/
+
+/test/test_gettime/*
+!/test/test_gettime/.gitignore
+!/test/test_gettime/linux-5.15.198-vkso/
+!/test/test_gettime/vkso-tests/

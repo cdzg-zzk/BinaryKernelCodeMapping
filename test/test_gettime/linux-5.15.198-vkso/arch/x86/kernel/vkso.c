@@ -120,6 +120,14 @@ void vkso_time_update_mm_data(struct task_struct *task,
 		   offsets->monotonic.tv_nsec);
 	WRITE_ONCE(data->data.boottime_offset.sec, offsets->boottime.tv_sec);
 	WRITE_ONCE(data->data.boottime_offset.nsec, offsets->boottime.tv_nsec);
+	smp_wmb();
+	WRITE_ONCE(data->data.clock_mask,
+		   (offsets->monotonic.tv_sec || offsets->monotonic.tv_nsec ?
+		    (1U << CLOCK_MONOTONIC) |
+		    (1U << CLOCK_MONOTONIC_RAW) |
+		    (1U << CLOCK_MONOTONIC_COARSE) : 0) |
+		   (offsets->boottime.tv_sec || offsets->boottime.tv_nsec ?
+		    (1U << CLOCK_BOOTTIME) : 0));
 }
 
 int arch_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)

@@ -5,7 +5,9 @@ obj-$(CONFIG_VKSO_TIME_TEST) += vkso_time_test.o
 
 # These objects are mapped into user space as well as called by the kernel.
 # Do not let the compiler add instrumentation that requires kernel-only state.
-CFLAGS_vkso_time_core.o := -fno-stack-protector
+# The clock dispatcher uses tail calls so one clock class does not inherit the
+# register pressure and stack frame of every other class.
+CFLAGS_vkso_time_core.o := -fno-stack-protector -foptimize-sibling-calls
 CFLAGS_REMOVE_vkso_time_core.o := $(CC_FLAGS_FTRACE)
 GCOV_PROFILE_vkso_time_core.o := n
 KCOV_INSTRUMENT_vkso_time_core.o := n

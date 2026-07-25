@@ -23,9 +23,13 @@ make -C "$KERNEL" O="$BUILD" -j"$JOBS" vmlinux
 grep -Fqx 'CONFIG_VKSO_TIME=y' "$BUILD/.config"
 grep -Fqx 'CONFIG_PARAVIRT_CLOCK=y' "$BUILD/.config"
 
-cold=$(objdump -d --disassemble=vkso_read_pvclock_cycles "$BUILD/vmlinux")
-clock_gettime=$(objdump -d --disassemble=vkso_clock_gettime_core \
-	"$BUILD/vmlinux")
+cold=$(objdump -d --disassemble=vkso_read_cycles_cold "$BUILD/vmlinux")
+clock_readers=$(
+	for symbol in vkso_clock_gettime_realtime \
+		vkso_clock_gettime_monotonic vkso_clock_gettime_other; do
+		objdump -d --disassemble="$symbol" "$BUILD/vmlinux"
+	done
+)
 provider=$(objdump -d --disassemble=pvclock_set_pvti_cpu0_va \
 	"$BUILD/vmlinux")
 
@@ -36,7 +40,7 @@ if grep -Eq '[[:space:]](call|jmp)[q]?[[:space:]]+\*|[[:space:]]call[q]?[[:space
 	echo "M25 PVClock cold path contains a call/indirect branch" >&2
 	exit 1
 fi
-grep -Fq '<vkso_read_pvclock_cycles>' <<<"$clock_gettime"
+grep -Fq '<vkso_read_cycles_cold>' <<<"$clock_readers"
 grep -Fq '<vkso_time_set_pvclock_page>' <<<"$provider"
 
-echo "M25 static PASS: PVClock page registered; cold reader is self-contained"
+echo "M25 static PASS: PVClock page registered; unified cold reader is self-contained"

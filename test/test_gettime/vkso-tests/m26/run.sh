@@ -10,9 +10,13 @@ BUILD="$BUILD" "$SCRIPT_DIR/../m25/run.sh"
 
 grep -Fqx 'CONFIG_HYPERV_TIMER=y' "$BUILD/.config"
 
-cold=$(objdump -d --disassemble=vkso_read_hvclock_cycles "$BUILD/vmlinux")
-clock_gettime=$(objdump -d --disassemble=vkso_clock_gettime_core \
-	"$BUILD/vmlinux")
+cold=$(objdump -d --disassemble=vkso_read_cycles_cold "$BUILD/vmlinux")
+clock_readers=$(
+	for symbol in vkso_clock_gettime_realtime \
+		vkso_clock_gettime_monotonic vkso_clock_gettime_other; do
+		objdump -d --disassemble="$symbol" "$BUILD/vmlinux"
+	done
+)
 provider=$(objdump -d --disassemble=hv_init_clocksource \
 	"$BUILD/vmlinux")
 
@@ -23,7 +27,7 @@ if grep -Eq '[[:space:]](call|jmp)[q]?[[:space:]]+\*|[[:space:]]call[q]?[[:space
 	echo "M26 Hyper-V cold path contains a call/indirect branch" >&2
 	exit 1
 fi
-grep -Fq '<vkso_read_hvclock_cycles>' <<<"$clock_gettime"
+grep -Fq '<vkso_read_cycles_cold>' <<<"$clock_readers"
 grep -Fq '<vkso_time_set_hvclock_page>' <<<"$provider"
 
-echo "M26 static PASS: Hyper-V TSC page registered; cold reader is self-contained"
+echo "M26 static PASS: Hyper-V TSC page registered; unified cold reader is self-contained"

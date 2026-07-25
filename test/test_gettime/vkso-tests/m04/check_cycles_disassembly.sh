@@ -20,9 +20,9 @@ if grep -Eq '[[:space:]](call|jmp)[q]?[[:space:]]+\*' \
 fi
 unexpected_calls=$(grep -E '[[:space:]]call[q]?[[:space:]]' \
 	<<<"$disassembly" |
-	grep -Ev '<vkso_read_(pvclock|hvclock)_cycles>$' || true)
+	grep -Ev '<vkso_read_cycles_cold>$' || true)
 if [[ -n "$unexpected_calls" ]]; then
-	echo "$LABEL: call outside approved PV/HV cold paths" >&2
+	echo "$LABEL: call outside the unified cycles cold path" >&2
 	echo "$unexpected_calls" >&2
 	exit 1
 fi

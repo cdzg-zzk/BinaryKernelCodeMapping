@@ -4,9 +4,9 @@
 
 #include <linux/types.h>
 
-#define VKSO_TIME_ABI_VERSION	9U
+#define VKSO_TIME_ABI_VERSION	10U
 #define VKSO_SHARED_PAGE_SIZE	4096U
-#define VKSO_MM_DATA_ABI_VERSION	2U
+#define VKSO_MM_DATA_ABI_VERSION	3U
 
 enum vkso_time_status {
 	VKSO_TIME_OK = 0,
@@ -28,6 +28,17 @@ struct vkso_timezone {
 	s32 minuteswest;
 	s32 dsttime;
 } __attribute__((__may_alias__));
+
+enum vkso_fallback_operation {
+	VKSO_FALLBACK_CLOCK_GETTIME,
+	VKSO_FALLBACK_CLOCK_GETRES,
+	VKSO_FALLBACK_GETTIMEOFDAY,
+};
+
+enum vkso_fallback_mode {
+	VKSO_FALLBACK_RETURN,
+	VKSO_FALLBACK_SYSCALL,
+};
 
 /* Nanoseconds remain shifted until the reader adds elapsed cycles. */
 struct vkso_hres_base {
@@ -91,7 +102,7 @@ union vkso_shared_page {
 /* Stable while the mm remains in one time namespace. */
 struct vkso_mm_data {
 	u32 abi_version;
-	u32 reserved;
+	u32 clock_mask;
 	struct vkso_time_value monotonic_offset;
 	struct vkso_time_value boottime_offset;
 };
@@ -105,9 +116,11 @@ union vkso_mm_page {
  * Environment-specific aliases of hypervisor-owned counter pages. Kernel
  * and user wrappers provide addresses valid in their own address spaces.
  */
-struct vkso_cycle_context {
+struct vkso_context {
 	const void *pvclock_page;
 	const void *hvclock_page;
+	u32 fallback_mode;
+	u32 reserved;
 };
 
 /*
@@ -120,11 +133,12 @@ struct vkso_cycle_context {
 int vkso_clock_gettime_core(
 	const struct vkso_mm_data *mm_data, int clock_id,
 	struct vkso_time_value *value,
-	const struct vkso_cycle_context *cycle_context);
-int __vkso_clock_getres(int clock_id, struct vkso_time_value *value);
+	const struct vkso_context *context);
+int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value,
+			   const struct vkso_context *context);
 int vkso_gettimeofday_core(
 	struct vkso_timeval *tv, struct vkso_timezone *tz,
-	const struct vkso_cycle_context *cycle_context);
+	const struct vkso_context *context);
 s64 __vkso_time(s64 *tloc);
 #ifdef CONFIG_VKSO_TIME_TEST
 int __vkso_test_hres_cycle_probe_at(

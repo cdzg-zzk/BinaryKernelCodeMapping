@@ -10,7 +10,7 @@ RESULT="$WORK/qemu.log"
 
 BUILD="$BUILD" WORK="$WORK" "$SCRIPT_DIR/../m14/run.sh"
 
-disassembly=$(objdump -d --disassemble=__vkso_clock_getres \
+disassembly=$(objdump -d --disassemble=vkso_clock_getres_core \
 	"$BUILD/vmlinux")
 if grep -Eq '[[:space:]]call[q]?[[:space:]]|[[:space:]]jmp[q]?[[:space:]]+\*' \
 	<<<"$disassembly"; then

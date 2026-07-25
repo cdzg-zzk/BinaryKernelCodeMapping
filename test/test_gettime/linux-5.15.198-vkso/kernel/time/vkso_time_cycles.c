@@ -10,38 +10,49 @@
 #endif
 
 #ifdef CONFIG_PARAVIRT_CLOCK
-noinline notrace __vkso_text
-bool vkso_read_pvclock_cycles(const void *page, u64 *cycles)
+static __always_inline
+s64 vkso_read_pvclock_cycles(const void *page)
 {
 	const struct pvclock_vcpu_time_info *pvti;
 	u32 version;
 	u64 value;
 
 	if (unlikely(!page))
-		return false;
+		return -1;
 	pvti = &((const struct pvclock_vsyscall_time_info *)page)->pvti;
 	do {
 		version = pvclock_read_begin(pvti);
 		if (unlikely(!(pvti->flags & PVCLOCK_TSC_STABLE_BIT)))
-			return false;
+			return -1;
 		value = __pvclock_read_cycles(pvti, rdtsc_ordered());
 	} while (pvclock_read_retry(pvti, version));
 
-	*cycles = value;
-	return (s64)value >= 0;
+	return value;
 }
 #endif
 
 #ifdef CONFIG_HYPERV_TIMER
-noinline notrace __vkso_text
-bool vkso_read_hvclock_cycles(const void *page, u64 *cycles)
+static __always_inline
+s64 vkso_read_hvclock_cycles(const void *page)
 {
-	u64 value;
-
 	if (unlikely(!page))
-		return false;
-	value = hv_read_tsc_page(page);
-	*cycles = value;
-	return (s64)value >= 0;
+		return -1;
+	return hv_read_tsc_page(page);
 }
 #endif
+
+noinline notrace __vkso_text
+s64 vkso_read_cycles_cold(const struct vkso_context *context, s32 clock_mode)
+{
+	if (unlikely(!context))
+		return -1;
+#ifdef CONFIG_PARAVIRT_CLOCK
+	if (clock_mode == VDSO_CLOCKMODE_PVCLOCK)
+		return vkso_read_pvclock_cycles(context->pvclock_page);
+#endif
+#ifdef CONFIG_HYPERV_TIMER
+	if (clock_mode == VDSO_CLOCKMODE_HVCLOCK)
+		return vkso_read_hvclock_cycles(context->hvclock_page);
+#endif
+	return -1;
+}

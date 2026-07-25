@@ -5,12 +5,10 @@
 #include <sys/time.h>
 #include <time.h>
 
-/*
- * Hand-written user adapter used until make_dll grows wrapper generation.
- * These signatures, return values and fallback rules match the native vDSO
- * ABI; internal MM/counter context is deliberately not exposed.
- */
+/* Bind auxv-provided per-MM state to libkernel.so once per process image. */
 int vkso_user_wrapper_init(void);
+
+/* Compatibility names for tests that predate the standard DSO exports. */
 int vkso_user_clock_gettime(clockid_t clock_id, struct timespec *value);
 int vkso_user_clock_getres(clockid_t clock_id, struct timespec *value);
 int vkso_user_gettimeofday(struct timeval *tv, struct timezone *tz);

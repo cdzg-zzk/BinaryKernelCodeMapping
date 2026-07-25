@@ -30,7 +30,7 @@ assert_call_order()
 }
 
 assert_call_order __x64_sys_clock_gettime vkso_clock_gettime_core
-assert_call_order __x64_sys_clock_getres __vkso_clock_getres
+assert_call_order __x64_sys_clock_getres vkso_clock_getres_core
 
 for symbol in \
 	posix_get_realtime_timespec \

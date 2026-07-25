@@ -12,6 +12,7 @@ RAW_BUILD=${RAW_BUILD:-/tmp/vkso-m27-raw-build}
 RAW_TARBALL=${RAW_TARBALL:-/tmp/linux-5.15.198.tar.xz}
 WORK=${WORK:-/tmp/vkso-m27-run}
 JOBS=${JOBS:-$(nproc)}
+VKSO_ONLY=${VKSO_ONLY:-0}
 # Stable TSC is required to prove the high-resolution user fast path.  TCG
 # marks the TSC unstable with multiple vCPUs; the multi-CPU matrix is a
 # separate run and must not silently turn this path test into syscall fallback.
@@ -33,21 +34,23 @@ make -C "$VKSO_KERNEL" O="$VKSO_BUILD" olddefconfig
 make -C "$VKSO_KERNEL" O="$VKSO_BUILD" -j"$JOBS" bzImage modules_prepare
 cp "$VKSO_BUILD/vmlinux.symvers" "$VKSO_BUILD/Module.symvers"
 
-if [[ ! -f "$RAW_KERNEL/Makefile" ]]; then
-	[[ -f "$RAW_TARBALL" ]] || {
-		echo "missing raw Linux 5.15.198 tarball: $RAW_TARBALL" >&2
-		exit 1
-	}
-	rm -rf "$RAW_KERNEL"
-	mkdir -p "$RAW_KERNEL"
-	tar -xf "$RAW_TARBALL" -C "$RAW_KERNEL" --strip-components=1
-fi
+if [[ "$VKSO_ONLY" -eq 0 ]]; then
+	if [[ ! -f "$RAW_KERNEL/Makefile" ]]; then
+		[[ -f "$RAW_TARBALL" ]] || {
+			echo "missing raw Linux 5.15.198 tarball: $RAW_TARBALL" >&2
+			exit 1
+		}
+		rm -rf "$RAW_KERNEL"
+		mkdir -p "$RAW_KERNEL"
+		tar -xf "$RAW_TARBALL" -C "$RAW_KERNEL" --strip-components=1
+	fi
 
-# Start from the already-resolved VKSO config.  Raw olddefconfig removes the
-# VKSO-only symbols and restores the native x86 vDSO selects.
-cp "$VKSO_BUILD/.config" "$RAW_BUILD/.config"
-make -C "$RAW_KERNEL" O="$RAW_BUILD" olddefconfig
-make -C "$RAW_KERNEL" O="$RAW_BUILD" -j"$JOBS" bzImage
+	# Start from the already-resolved VKSO config.  Raw olddefconfig removes
+	# VKSO-only symbols and restores the native x86 vDSO selects.
+	cp "$VKSO_BUILD/.config" "$RAW_BUILD/.config"
+	make -C "$RAW_KERNEL" O="$RAW_BUILD" olddefconfig
+	make -C "$RAW_KERNEL" O="$RAW_BUILD" -j"$JOBS" bzImage
+fi
 
 config_symbols()
 {
@@ -57,16 +60,18 @@ config_symbols()
 		sort
 }
 
-if ! diff -u <(config_symbols "$RAW_BUILD/.config") \
-		   <(config_symbols "$VKSO_BUILD/.config") \
-		   >"$WORK/config.diff"; then
-	echo "raw/VKSO configs differ outside the implementation selects" >&2
-	cat "$WORK/config.diff" >&2
-	exit 1
+if [[ "$VKSO_ONLY" -eq 0 ]]; then
+	if ! diff -u <(config_symbols "$RAW_BUILD/.config") \
+			   <(config_symbols "$VKSO_BUILD/.config") \
+			   >"$WORK/config.diff"; then
+		echo "raw/VKSO configs differ outside the implementation selects" >&2
+		cat "$WORK/config.diff" >&2
+		exit 1
+	fi
+	grep -Fqx 'CONFIG_GENERIC_GETTIMEOFDAY=y' "$RAW_BUILD/.config"
 fi
 grep -Fqx 'CONFIG_VKSO_TIME=y' "$VKSO_BUILD/.config"
 grep -Fqx '# CONFIG_VKSO_TIME_TEST is not set' "$VKSO_BUILD/.config"
-grep -Fqx 'CONFIG_GENERIC_GETTIMEOFDAY=y' "$RAW_BUILD/.config"
 
 MODULE="$WORK/module"
 mkdir -p "$MODULE"
@@ -84,6 +89,8 @@ fi
 DSO="$WORK/dso"
 mkdir -p "$DSO"
 cp "$SCRIPT_DIR/symbols.txt" "$SCRIPT_DIR/shared_data.txt" "$DSO/"
+gcc -c -fPIC -o "$DSO/vkso_user_entry.o" \
+	"$SCRIPT_DIR/vkso_user_entry.S"
 (
 	cd "$DSO"
 	python3 "$ROOT/make_dll/build_PIC_so.py" \
@@ -92,12 +99,15 @@ cp "$SCRIPT_DIR/symbols.txt" "$SCRIPT_DIR/shared_data.txt" "$DSO/"
 		--shim-list "$ROOT/make_dll/shim.txt" \
 		--shared-data-list shared_data.txt \
 		--vmlinux "$VKSO_BUILD/vmlinux" \
+		--private-wrapper-object vkso_user_entry.o \
 		--symbol-addresses resolved_symbol_addresses.txt \
 		--page-map page_mappings.txt
 )
 
-gcc -O2 -Wall -Wextra -Werror -pthread \
-	-o "$WORK/raw-abi-matrix" "$SCRIPT_DIR/abi_matrix.c" -ldl
+if [[ "$VKSO_ONLY" -eq 0 ]]; then
+	gcc -O2 -Wall -Wextra -Werror -pthread \
+		-o "$WORK/raw-abi-matrix" "$SCRIPT_DIR/abi_matrix.c" -ldl
+fi
 gcc -DVKSO_BACKEND -O2 -Wall -Wextra -Werror -pthread \
 	-o "$WORK/vkso-abi-matrix" \
 	"$SCRIPT_DIR/abi_matrix.c" "$SCRIPT_DIR/vkso_user_wrapper.c" \
@@ -178,36 +188,43 @@ run_qemu()
 		>"$WORK/$label.matrix"
 }
 
-make_payload raw
 make_payload vkso
-run_qemu raw "$RAW_BUILD"
 run_qemu vkso "$VKSO_BUILD"
 grep -Fq 'lifecycle.repeat_restore=pass cycles=2' "$WORK/vkso.log"
 
-if ! diff -u "$WORK/raw.matrix" "$WORK/vkso.matrix" \
-		   >"$WORK/raw-vkso-matrix.diff"; then
-	echo "raw vDSO and VKSO semantic/path matrices differ" >&2
-	cat "$WORK/raw-vkso-matrix.diff" >&2
-	exit 1
+if [[ "$VKSO_ONLY" -eq 0 ]]; then
+	make_payload raw
+	run_qemu raw "$RAW_BUILD"
+	if ! diff -u "$WORK/raw.matrix" "$WORK/vkso.matrix" \
+			   >"$WORK/raw-vkso-matrix.diff"; then
+		echo "raw vDSO and VKSO semantic/path matrices differ" >&2
+		cat "$WORK/raw-vkso-matrix.diff" >&2
+		exit 1
+	fi
 fi
 
-make_payload raw raw-multicpu multicpu
 make_payload vkso vkso-multicpu multicpu
-run_qemu raw-multicpu "$RAW_BUILD" 4 multicpu_matrix_status=pass
 run_qemu vkso-multicpu "$VKSO_BUILD" 4 multicpu_matrix_status=pass
 
-if ! diff -u "$WORK/raw-multicpu.matrix" \
-		   "$WORK/vkso-multicpu.matrix" \
-		   >"$WORK/raw-vkso-multicpu-matrix.diff"; then
-	echo "raw vDSO and VKSO multi-CPU matrices differ" >&2
-	cat "$WORK/raw-vkso-multicpu-matrix.diff" >&2
-	exit 1
+if [[ "$VKSO_ONLY" -eq 0 ]]; then
+	make_payload raw raw-multicpu multicpu
+	run_qemu raw-multicpu "$RAW_BUILD" 4 multicpu_matrix_status=pass
+	if ! diff -u "$WORK/raw-multicpu.matrix" \
+			   "$WORK/vkso-multicpu.matrix" \
+			   >"$WORK/raw-vkso-multicpu-matrix.diff"; then
+		echo "raw vDSO and VKSO multi-CPU matrices differ" >&2
+		cat "$WORK/raw-vkso-multicpu-matrix.diff" >&2
+		exit 1
+	fi
+	grep -Fq 'semantics.multicpu_threads=pass threads=4' \
+		"$WORK/raw-multicpu.matrix"
 fi
 
-grep -Fq 'semantics.multicpu_threads=pass threads=4' \
-	"$WORK/raw-multicpu.matrix"
-
-echo "M27 PASS: raw and VKSO semantic/path/multi-CPU matrices are identical"
-echo "raw_result=$WORK/raw.log"
+if [[ "$VKSO_ONLY" -eq 0 ]]; then
+	echo "M27 PASS: raw and VKSO semantic/path/multi-CPU matrices are identical"
+	echo "raw_result=$WORK/raw.log"
+else
+	echo "M27 VKSO-only PASS: semantic/path/multi-CPU matrices passed"
+fi
 echo "vkso_result=$WORK/vkso.log"
-echo "matrix=$WORK/raw.matrix"
+echo "matrix=$WORK/vkso.matrix"

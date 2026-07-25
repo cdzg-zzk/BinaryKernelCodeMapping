@@ -126,6 +126,7 @@ require_file "$WORK/raw.log"
 require_file "$WORK/vkso.log"
 require_file "$WORK/raw-multicpu.log"
 require_file "$WORK/vkso-multicpu.log"
+require_file "$WORK/dso/libkernel.so"
 
 mkdir -p "$AUDIT_WORK" "$(dirname "$RESULT")"
 exec > >(tee "$RESULT") 2>&1
@@ -195,19 +196,35 @@ objdump -dr "$VKSO_BUILD/kernel/time/vkso_time_core.o" \
 objdump -dr "$VKSO_BUILD/kernel/time/vkso_time_cycles.o" \
 	>"$AUDIT_WORK/vkso_time_cycles.dis"
 grep -qw rdtsc "$AUDIT_WORK/vkso_time_core.dis"
-grep -q 'R_X86_64_PLT32[[:space:]]*vkso_read_pvclock_cycles' \
-	"$AUDIT_WORK/vkso_time_core.dis"
-grep -q 'R_X86_64_PLT32[[:space:]]*vkso_read_hvclock_cycles' \
+grep -q 'R_X86_64_PLT32[[:space:]]*vkso_read_cycles_cold' \
 	"$AUDIT_WORK/vkso_time_core.dis"
 if grep -Eq '\bcallq?[[:space:]]+\*' "$AUDIT_WORK/vkso_time_core.dis"; then
 	echo "shared time core contains an indirect call" >&2
 	exit 1
 fi
-grep -q ' vkso_read_pvclock_cycles$' "$AUDIT_WORK/vkso.symbols"
-grep -q ' vkso_read_hvclock_cycles$' "$AUDIT_WORK/vkso.symbols"
+grep -q ' vkso_read_cycles_cold$' "$AUDIT_WORK/vkso.symbols"
 echo "disassembly.tsc=pass inline=1 indirect_calls=0"
-echo "disassembly.pvclock=static-pass direct_cold_call=1"
-echo "disassembly.hyperv=static-pass direct_cold_call=1"
+echo "disassembly.pvclock=static-pass unified_cold_call=1"
+echo "disassembly.hyperv=static-pass unified_cold_call=1"
+
+libkernel="$WORK/dso/libkernel.so"
+wrapper_dis="$AUDIT_WORK/libkernel-wrapper.dis"
+for symbol in \
+	__vkso_clock_gettime __vkso_clock_getres __vkso_gettimeofday; do
+	objdump -d --disassemble="$symbol" "$libkernel" >>"$wrapper_dis"
+done
+grep -Eq 'jmp[[:space:]].*<vkso_clock_gettime_core>' "$wrapper_dis"
+grep -Eq 'jmp[[:space:]].*<vkso_clock_getres_core>' "$wrapper_dis"
+grep -Eq 'jmp[[:space:]].*<vkso_gettimeofday_core>' "$wrapper_dis"
+if grep -Eq '@plt|jmpq?[[:space:]]+\*|callq?[[:space:]]+\*' "$wrapper_dis"; then
+	echo "libkernel standard wrapper contains PLT or indirect transfer" >&2
+	exit 1
+fi
+if ! readelf -rW "$libkernel" | grep -Fq 'There are no relocations'; then
+	echo "libkernel contains unresolved dynamic relocations" >&2
+	exit 1
+fi
+echo "disassembly.libkernel_wrapper=pass direct_tail_jumps=3 relocations=0"
 
 core_text=$(section_size "$VKSO_BUILD/kernel/time/vkso_time_core.o" \
 	.vkso.text)
@@ -227,14 +244,12 @@ for symbol in \
 		"$RAW_BUILD/arch/x86/entry/vdso/vdso64.so.dbg" "$symbol")))
 done
 
-wrapper_object="$AUDIT_WORK/vkso_user_wrapper.o"
-gcc -O2 -Wall -Wextra -Werror -c \
-	"$SCRIPT_DIR/vkso_user_wrapper.c" -o "$wrapper_object"
-wrapper_text=$(section_size "$wrapper_object" .text)
+wrapper_object="$AUDIT_WORK/vkso_user_entry.o"
+gcc -c "$SCRIPT_DIR/vkso_user_entry.S" -o "$wrapper_object"
+wrapper_text=$(section_size "$wrapper_object" .vkso.user.text)
 wrapper_api_text=0
 for symbol in \
-	vkso_user_clock_gettime vkso_user_clock_getres \
-	vkso_user_gettimeofday vkso_user_time vkso_user_getcpu; do
+	__vkso_clock_gettime __vkso_clock_getres __vkso_gettimeofday; do
 	wrapper_api_text=$((wrapper_api_text +
 		$(symbol_size "$wrapper_object" "$symbol")))
 done
@@ -245,8 +260,8 @@ echo "text.vkso_getcpu_bytes=$getcpu_text"
 echo "text.vkso_total_production_bytes=$vkso_text"
 echo "text.raw_vdso_section_bytes=$raw_text"
 echo "text.raw_vdso_api_bytes=$raw_api_text"
-echo "text.user_wrapper_section_bytes=$wrapper_text"
-echo "text.user_wrapper_api_bytes=$wrapper_api_text"
+echo "text.libkernel_private_wrapper_section_bytes=$wrapper_text"
+echo "text.libkernel_hot_wrapper_api_bytes=$wrapper_api_text"
 echo "text.vkso_steady_user_bytes=$((vkso_text + wrapper_api_text))"
 
 shared_core_sloc=$(c_sloc \
@@ -264,6 +279,7 @@ kernel_adapter_sloc=$(c_sloc \
 	"$KERNEL/include/linux/vkso_time.h" \
 	"$KERNEL/include/linux/vkso_getcpu.h")
 user_wrapper_sloc=$(c_sloc \
+	"$SCRIPT_DIR/vkso_user_entry.S" \
 	"$SCRIPT_DIR/vkso_user_wrapper.c" \
 	"$SCRIPT_DIR/vkso_user_wrapper.h" \
 	"$SCRIPT_DIR/vkso_abi.h")

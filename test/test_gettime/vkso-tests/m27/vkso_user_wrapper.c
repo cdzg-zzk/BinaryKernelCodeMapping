@@ -4,13 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <sys/auxv.h>
-#include <sys/syscall.h>
 
 #include "vkso_abi.h"
 #include "vkso_user_wrapper.h"
-
-static const struct vkso_mm_data *vkso_mm_data;
-static const struct vkso_cycle_context vkso_user_cycle_context;
 
 _Static_assert(sizeof(struct timespec) == sizeof(struct vkso_time_value),
 	       "timespec and VKSO result layouts differ");
@@ -27,22 +23,10 @@ _Static_assert(sizeof(struct timezone) == sizeof(struct vkso_timezone),
 _Static_assert(sizeof(time_t) == sizeof(int64_t),
 	       "native x86-64 time_t is required");
 
-static inline long vkso_raw_syscall2(long number, long first, long second)
-{
-	register long rax asm("rax") = number;
-	register long rdi asm("rdi") = first;
-	register long rsi asm("rsi") = second;
-
-	asm volatile("syscall"
-		     : "+a" (rax)
-		     : "D" (rdi), "S" (rsi)
-		     : "rcx", "r11", "memory");
-	return rax;
-}
-
 int vkso_user_wrapper_init(void)
 {
 	unsigned long address;
+	const struct vkso_mm_data *mm_data;
 
 	errno = 0;
 	address = getauxval(AT_VKSO_MM_DATA);
@@ -50,41 +34,34 @@ int vkso_user_wrapper_init(void)
 		errno = ENOSYS;
 		return -1;
 	}
-	vkso_mm_data = (const void *)address;
-	if (vkso_mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION ||
-	    vkso_mm_data->reserved) {
+	mm_data = (const void *)address;
+	if (mm_data->abi_version != VKSO_MM_DATA_ABI_VERSION ||
+	    (mm_data->clock_mask & ~((1U << CLOCK_MONOTONIC) |
+				     (1U << CLOCK_MONOTONIC_RAW) |
+				     (1U << CLOCK_MONOTONIC_COARSE) |
+				     (1U << CLOCK_BOOTTIME)))) {
 		errno = EPROTO;
-		vkso_mm_data = NULL;
 		return -1;
 	}
-	return 0;
+	return __vkso_bind_context(mm_data, NULL, NULL);
 }
 
 int vkso_user_clock_gettime(clockid_t clock_id, struct timespec *value)
 {
-	if (vkso_clock_gettime_core(
-		    vkso_mm_data, clock_id, (struct vkso_time_value *)value,
-		    &vkso_user_cycle_context) == VKSO_TIME_OK)
-		return 0;
-	return vkso_raw_syscall2(SYS_clock_gettime, clock_id,
-				 (long)value);
+	return __vkso_clock_gettime(
+		clock_id, (struct vkso_time_value *)value);
 }
 
 int vkso_user_clock_getres(clockid_t clock_id, struct timespec *value)
 {
-	if (__vkso_clock_getres(clock_id, (struct vkso_time_value *)value) ==
-	    VKSO_TIME_OK)
-		return 0;
-	return vkso_raw_syscall2(SYS_clock_getres, clock_id, (long)value);
+	return __vkso_clock_getres(clock_id,
+				   (struct vkso_time_value *)value);
 }
 
 int vkso_user_gettimeofday(struct timeval *tv, struct timezone *tz)
 {
-	if (vkso_gettimeofday_core(
-		    (struct vkso_timeval *)tv, (struct vkso_timezone *)tz,
-		    &vkso_user_cycle_context) == VKSO_TIME_OK)
-		return 0;
-	return vkso_raw_syscall2(SYS_gettimeofday, (long)tv, (long)tz);
+	return __vkso_gettimeofday(
+		(struct vkso_timeval *)tv, (struct vkso_timezone *)tz);
 }
 
 time_t vkso_user_time(time_t *tloc)

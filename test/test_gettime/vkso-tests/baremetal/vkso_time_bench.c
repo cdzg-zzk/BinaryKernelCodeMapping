@@ -41,7 +41,7 @@
 #define RAW_VVAR_DATA_OFFSET 128U
 #define RAW_VDSO_BASES 12U
 #define RAW_CS_RAW 1U
-#define VKSO_TIME_ABI_VERSION 9U
+#define VKSO_TIME_ABI_VERSION 10U
 
 enum backend {
 	BACKEND_RAW,
@@ -160,7 +160,7 @@ static vdso_gettimeofday_fn vdso_gettimeofday;
 static vdso_time_fn vdso_time;
 static vdso_getcpu_fn vdso_getcpu;
 static const struct vkso_mm_data *vkso_mm_data;
-static const struct vkso_cycle_context cycle_context;
+static const struct vkso_context context;
 static volatile uint64_t sink;
 
 struct pmu_group {
@@ -506,9 +506,11 @@ uint64_t invoke(enum operation operation, enum path path)
 		else if (path == PATH_VKSO_CORE)
 			result = vkso_clock_gettime_core(
 				vkso_mm_data, info->clock_id,
-				(struct vkso_time_value *)&ts, &cycle_context);
+				(struct vkso_time_value *)&ts, &context);
 		else
-			result = vkso_user_clock_gettime(info->clock_id, &ts);
+			result = __vkso_clock_gettime(
+				info->clock_id,
+				(struct vkso_time_value *)&ts);
 	} else if (operation_is_clock_getres(operation)) {
 		if (path == PATH_SYSCALL)
 			result = raw_syscall2(SYS_clock_getres, info->clock_id,
@@ -516,10 +518,13 @@ uint64_t invoke(enum operation operation, enum path path)
 		else if (path == PATH_RAW_VDSO)
 			result = vdso_clock_getres(info->clock_id, &ts);
 		else if (path == PATH_VKSO_CORE)
-			result = __vkso_clock_getres(
-				info->clock_id, (struct vkso_time_value *)&ts);
+			result = vkso_clock_getres_core(
+				info->clock_id, (struct vkso_time_value *)&ts,
+				&context);
 		else
-			result = vkso_user_clock_getres(info->clock_id, &ts);
+			result = __vkso_clock_getres(
+				info->clock_id,
+				(struct vkso_time_value *)&ts);
 	} else if (operation >= OP_GTOD_TV && operation <= OP_GTOD_NULL) {
 		struct timeval *tv_pointer =
 			operation == OP_GTOD_TZ || operation == OP_GTOD_NULL ?
@@ -538,9 +543,11 @@ uint64_t invoke(enum operation operation, enum path path)
 			result = vkso_gettimeofday_core(
 				(struct vkso_timeval *)tv_pointer,
 				(struct vkso_timezone *)tz_pointer,
-				&cycle_context);
+				&context);
 		else
-			result = vkso_user_gettimeofday(tv_pointer, tz_pointer);
+			result = __vkso_gettimeofday(
+				(struct vkso_timeval *)tv_pointer,
+				(struct vkso_timezone *)tz_pointer);
 	} else if (operation == OP_TIME_NULL ||
 		   operation == OP_TIME_POINTER) {
 		time_t *pointer =
@@ -553,7 +560,7 @@ uint64_t invoke(enum operation operation, enum path path)
 		else if (path == PATH_VKSO_CORE)
 			result = __vkso_time((int64_t *)pointer);
 		else
-			result = vkso_user_time(pointer);
+			result = __vkso_time((int64_t *)pointer);
 	} else {
 		unsigned int *cpu_pointer =
 			operation == OP_GETCPU_BOTH ? &cpu : NULL;
@@ -568,8 +575,7 @@ uint64_t invoke(enum operation operation, enum path path)
 		else if (path == PATH_VKSO_CORE)
 			result = __vkso_getcpu(cpu_pointer, node_pointer, NULL);
 		else
-			result = vkso_user_getcpu(cpu_pointer, node_pointer,
-						 NULL);
+			result = __vkso_getcpu(cpu_pointer, node_pointer, NULL);
 	}
 	if (result < 0)
 		fail_message("benchmark operation returned an error");

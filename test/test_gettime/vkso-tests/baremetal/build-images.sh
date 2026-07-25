@@ -119,7 +119,7 @@ config_symbols()
 {
 	grep -E '^(CONFIG_|# CONFIG_.* is not set)' "$1" |
 		grep -Ev \
-		'^(CONFIG_VKSO_TIME=|# CONFIG_VKSO_TIME|CONFIG_GENERIC_GETTIMEOFDAY=|CONFIG_GENERIC_TIME_VSYSCALL=|CONFIG_GENERIC_VDSO_TIME_NS=|CONFIG_HAVE_GENERIC_VDSO=|# CONFIG_IA32_EMULATION is not set|# CONFIG_X86_X32 is not set)' |
+		'^(CONFIG_CC_VERSION_TEXT=|CONFIG_VKSO_TIME=|# CONFIG_VKSO_TIME|CONFIG_GENERIC_GETTIMEOFDAY=|CONFIG_GENERIC_TIME_VSYSCALL=|CONFIG_GENERIC_VDSO_TIME_NS=|CONFIG_HAVE_GENERIC_VDSO=|# CONFIG_IA32_EMULATION is not set|# CONFIG_X86_X32 is not set)' |
 		sort
 }
 
@@ -191,6 +191,8 @@ KRG="$BUILD_ROOT/vkso.krg"
 DSO_BUILD="$BUILD_ROOT/dso"
 mkdir -p "$DSO_BUILD"
 cp "$HERE/symbols.txt" "$HERE/shared_data.txt" "$DSO_BUILD/"
+gcc -c -fPIC -o "$DSO_BUILD/vkso_user_entry.o" \
+	"$ROOT/test/test_gettime/vkso-tests/m27/vkso_user_entry.S"
 (
 	cd "$DSO_BUILD"
 	python3 "$ROOT/make_dll/build_PIC_so.py" \
@@ -199,6 +201,7 @@ cp "$HERE/symbols.txt" "$HERE/shared_data.txt" "$DSO_BUILD/"
 		--shim-list "$ROOT/make_dll/shim.txt" \
 		--shared-data-list shared_data.txt \
 		--vmlinux "$VKSO_BUILD/vmlinux" \
+		--private-wrapper-object vkso_user_entry.o \
 		--symbol-addresses resolved_symbol_addresses.txt \
 		--page-map page_mappings.txt
 )
