@@ -53,9 +53,10 @@ static_assert(sizeof(union vkso_shared_page) == VKSO_SHARED_PAGE_SIZE);
 static_assert(sizeof(union vkso_mm_page) == VKSO_SHARED_PAGE_SIZE);
 static_assert(sizeof(struct vkso_context) == 3 * sizeof(void *));
 
+/* All fallback ABIs used here are two-argument x86-64 syscalls. */
 static noinline notrace __vkso_text int
-vkso_fallback(const struct vkso_context *context, u32 operation, int clock_id,
-	      void *first, void *second)
+vkso_fallback(const struct vkso_context *context, long syscall_number,
+	      long first, long second)
 {
 	register long number asm("rax");
 	register long first_arg asm("rdi");
@@ -63,19 +64,9 @@ vkso_fallback(const struct vkso_context *context, u32 operation, int clock_id,
 
 	if (!context || context->fallback_mode != VKSO_FALLBACK_SYSCALL)
 		return VKSO_TIME_FALLBACK;
-	if (operation == VKSO_FALLBACK_CLOCK_GETTIME) {
-		number = __NR_clock_gettime;
-		first_arg = clock_id;
-		second_arg = (long)first;
-	} else if (operation == VKSO_FALLBACK_CLOCK_GETRES) {
-		number = __NR_clock_getres;
-		first_arg = clock_id;
-		second_arg = (long)first;
-	} else {
-		number = __NR_gettimeofday;
-		first_arg = (long)first;
-		second_arg = (long)second;
-	}
+	number = syscall_number;
+	first_arg = first;
+	second_arg = second;
 	asm volatile("syscall"
 		     : "+a" (number)
 		     : "D" (first_arg), "S" (second_arg)
@@ -96,8 +87,8 @@ int vkso_clock_gettime_realtime(
 	if (unlikely(vkso_read_hres_time(
 			shared, &shared->hres.realtime_base,
 			&shared->hres.cycles, context, value) != VKSO_TIME_OK))
-		return vkso_fallback(context, VKSO_FALLBACK_CLOCK_GETTIME,
-				     CLOCK_REALTIME, value, NULL);
+		return vkso_fallback(context, __NR_clock_gettime,
+				     CLOCK_REALTIME, (long)value);
 	return VKSO_TIME_OK;
 }
 
@@ -119,8 +110,8 @@ int vkso_clock_gettime_monotonic(
 	if (unlikely(vkso_read_hres_time(
 			shared, &shared->hres.monotonic_base,
 			&shared->hres.cycles, context, value) != VKSO_TIME_OK))
-		return vkso_fallback(context, VKSO_FALLBACK_CLOCK_GETTIME,
-				     CLOCK_MONOTONIC, value, NULL);
+		return vkso_fallback(context, __NR_clock_gettime,
+				     CLOCK_MONOTONIC, (long)value);
 	if (unlikely(offset))
 		vkso_apply_offset(offset, value);
 	return VKSO_TIME_OK;
@@ -189,8 +180,8 @@ int vkso_clock_gettime_other(
 	return VKSO_TIME_OK;
 
 fallback:
-	return vkso_fallback(context, VKSO_FALLBACK_CLOCK_GETTIME,
-			     clock_id, value, NULL);
+	return vkso_fallback(context, __NR_clock_gettime,
+			     clock_id, (long)value);
 }
 
 __visible noinline notrace __vkso_text
@@ -227,8 +218,8 @@ int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value,
 	u32 resolution;
 
 	if (id > CLOCK_TAI)
-		return vkso_fallback(context, VKSO_FALLBACK_CLOCK_GETRES,
-				     clock_id, value, NULL);
+		return vkso_fallback(context, __NR_clock_getres,
+				     clock_id, (long)value);
 	mask = 1U << id;
 	if (mask & hres_clocks) {
 		shared = vkso_shared_data();
@@ -236,8 +227,8 @@ int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value,
 	} else if (mask & coarse_clocks) {
 		resolution = LOW_RES_NSEC;
 	} else {
-		return vkso_fallback(context, VKSO_FALLBACK_CLOCK_GETRES,
-				     clock_id, value, NULL);
+		return vkso_fallback(context, __NR_clock_getres,
+				     clock_id, (long)value);
 	}
 	if (value) {
 		value->sec = 0;
@@ -259,9 +250,8 @@ int vkso_gettimeofday_core(
 				shared, &shared->hres.realtime_base,
 				&shared->hres.cycles, context,
 				&now) != VKSO_TIME_OK))
-			return vkso_fallback(context,
-					     VKSO_FALLBACK_GETTIMEOFDAY,
-					     0, tv, tz);
+			return vkso_fallback(context, __NR_gettimeofday,
+					     (long)tv, (long)tz);
 		tv->sec = now.sec;
 		/*
 		 * vkso_read_hres_time() normalizes nsec to [0, NSEC_PER_SEC).

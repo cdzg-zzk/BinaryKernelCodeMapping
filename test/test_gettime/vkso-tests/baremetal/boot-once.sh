@@ -10,8 +10,14 @@ raw)
 vkso)
 	entry=vkso-time-vkso
 	;;
+raw-no-thunk)
+	entry=vkso-time-raw-no-thunk
+	;;
+vkso-no-thunk)
+	entry=vkso-time-vkso-no-thunk
+	;;
 *)
-	echo "usage: $0 {raw|vkso}" >&2
+	echo "usage: $0 {raw|vkso|raw-no-thunk|vkso-no-thunk}" >&2
 	exit 2
 	;;
 esac
@@ -22,6 +28,8 @@ fi
 
 test -s /boot/vkso-time-raw-5.15.198.bzImage
 test -s /boot/vkso-time-vkso-5.15.198.bzImage
+test -s /boot/vkso-time-raw-no-thunk-5.15.198.bzImage
+test -s /boot/vkso-time-vkso-no-thunk-5.15.198.bzImage
 grep -Fq -- "--id $entry" /boot/grub/grub.cfg
 
 grub-reboot "$entry"

@@ -1,12 +1,16 @@
 # Raw vDSO / VKSO native x86-64 bare-metal experiment
 
-This suite builds and boots two Linux 5.15.198 images from one resolved
+This suite builds and boots four Linux 5.15.198 images from one resolved
 bare-metal configuration:
 
 ```text
 raw image:   native x86-64 vDSO + native syscall implementation
 VKSO image:  no native vDSO + shared VKSO core + VKSO syscall adapter
 ```
+
+Each backend is built both normally and with `CONFIG_RETPOLINE`,
+`CONFIG_RETHUNK` and their dependent `CONFIG_CPU_UNRET_ENTRY` disabled.  The
+normal and no-thunk pairs are compared separately.
 
 The VKSO user path uses the project page-replacement mechanism and the same
 hand-written wrapper validated by M27.  `CONFIG_VKSO_TIME_TEST` is disabled;
@@ -22,6 +26,14 @@ page mapper.
 ```sh
 cd /home/zzk/BinaryKernelCodeMapping
 
+RAW_PACKAGE=test/test_gettime/vkso-tests/baremetal/artifacts/<validated-normal-package> \
+BUILD_ROOT=/tmp/vkso-baremetal-build-final-normal \
+BUILD_VARIANT=normal \
+test/test_gettime/vkso-tests/baremetal/build-images.sh
+
+RAW_SOURCE=/tmp/vkso-raw-audit-src \
+BUILD_ROOT=/tmp/vkso-baremetal-build-final-no-thunk \
+BUILD_VARIANT=no-thunk \
 test/test_gettime/vkso-tests/baremetal/build-images.sh
 ```
 
@@ -38,15 +50,18 @@ The completed package is linked as:
 
 ```text
 test/test_gettime/vkso-tests/baremetal/artifacts/current
+test/test_gettime/vkso-tests/baremetal/artifacts/current-no-thunk
 ```
 
 It contains both `bzImage` files, their exact configs, `libkernel.so`, page
 map, replacement module/manager, functional matrices, performance benchmark,
 scripts, manifest and checksums.
 
-Run a functional preflight on both packaged images before changing GRUB:
+Run a functional preflight on all four packaged images before changing GRUB:
 
 ```sh
+test/test_gettime/vkso-tests/baremetal/qemu-preflight.sh
+PACKAGE=test/test_gettime/vkso-tests/baremetal/artifacts/current-no-thunk \
 test/test_gettime/vkso-tests/baremetal/qemu-preflight.sh
 ```
 
@@ -65,9 +80,10 @@ The installer:
 
 - verifies the package checksums;
 - backs up any existing experiment images and GRUB script;
-- installs raw/VKSO images and configs in `/boot`;
+- installs normal and no-thunk raw/VKSO images and configs in `/boot`;
 - derives the current `/boot` UUID and root PARTUUID;
-- writes IDs `vkso-time-raw` and `vkso-time-vkso`;
+- writes IDs `vkso-time-raw`, `vkso-time-vkso`,
+  `vkso-time-raw-no-thunk` and `vkso-time-vkso-no-thunk`;
 - uses identical experiment arguments, including `nokaslr`, TSC,
   `nosmt`, CPU 2 isolation, full dynticks, IRQ affinity, idle polling,
   disabled deep C-states and watchdogs;
@@ -184,3 +200,18 @@ sudo CPU=2 ITERATIONS=1000000 REPEATS=51 WARMUP=20000 \
 
 Do not use QEMU timing as a performance result.  QEMU remains a functional
 preflight only.
+
+## No-thunk pair
+
+Collect the compile-time no-retpoline/no-return-thunk pair with the separate
+state file and matching package:
+
+```sh
+test/test_gettime/vkso-tests/baremetal/boot-raw-no-thunk.sh
+# after reboot
+sudo test/test_gettime/vkso-tests/baremetal/collect-no-thunk.sh
+
+test/test_gettime/vkso-tests/baremetal/boot-vkso-no-thunk.sh
+# after reboot
+sudo test/test_gettime/vkso-tests/baremetal/collect-no-thunk.sh
+```

@@ -23,12 +23,6 @@ struct vkso_timezone {
 	int32_t dsttime;
 } __attribute__((__may_alias__));
 
-enum vkso_fallback_operation {
-	VKSO_FALLBACK_CLOCK_GETTIME,
-	VKSO_FALLBACK_CLOCK_GETRES,
-	VKSO_FALLBACK_GETTIMEOFDAY,
-};
-
 enum vkso_fallback_mode {
 	VKSO_FALLBACK_RETURN,
 	VKSO_FALLBACK_SYSCALL,

@@ -13,9 +13,26 @@ BUILD_ROOT=${BUILD_ROOT:-/tmp/vkso-baremetal-build}
 RAW_BUILD=${RAW_BUILD:-$BUILD_ROOT/raw}
 VKSO_BUILD=${VKSO_BUILD:-$BUILD_ROOT/vkso}
 BASE_CONFIG=${BASE_CONFIG:-/boot/config-vkso-time-raw-5.15.198}
+BUILD_VARIANT=${BUILD_VARIANT:-normal}
 STAMP=${STAMP:-$(date -u +%Y%m%dT%H%M%SZ)}
 OUT=${OUT:-$HERE/artifacts/prepared-$STAMP}
 JOBS=${JOBS:-$(nproc)}
+if [[ -z "${CURRENT_LINK+x}" ]]; then
+	if [[ "$BUILD_VARIANT" == normal ]]; then
+		CURRENT_LINK=current
+	else
+		CURRENT_LINK=current-no-thunk
+	fi
+fi
+
+case "$BUILD_VARIANT" in
+normal|no-thunk)
+	;;
+*)
+	echo "BUILD_VARIANT must be normal or no-thunk" >&2
+	exit 2
+	;;
+esac
 
 for command in gcc g++ make tar python3 sha256sum nm readelf; do
 	command -v "$command" >/dev/null || {
@@ -99,6 +116,12 @@ configure_tree()
 		--set-str LOCALVERSION "" \
 		--set-str SYSTEM_TRUSTED_KEYS "" \
 		--set-str SYSTEM_REVOCATION_KEYS ""
+	if [[ "$BUILD_VARIANT" == no-thunk ]]; then
+		"$source/scripts/config" --file "$build/.config" \
+			--disable RETPOLINE \
+			--disable RETHUNK \
+			--disable CPU_UNRET_ENTRY
+	fi
 	if [[ "$backend" == vkso ]]; then
 		"$source/scripts/kconfig/merge_config.sh" -m -O "$build" \
 			"$build/.config" "$HERE/path.config"
@@ -137,6 +160,22 @@ grep -Fqx '# CONFIG_VKSO_TIME_TEST is not set' "$VKSO_BUILD/.config"
 if grep -q '^CONFIG_VKSO_TIME=' "$RAW_BUILD/.config"; then
 	echo "raw config unexpectedly enables VKSO" >&2
 	exit 1
+fi
+if [[ "$BUILD_VARIANT" == normal ]]; then
+	for config in "$RAW_BUILD/.config" "$VKSO_BUILD/.config"; do
+		grep -Fqx 'CONFIG_RETPOLINE=y' "$config"
+		grep -Fqx 'CONFIG_RETHUNK=y' "$config"
+	done
+else
+	for config in "$RAW_BUILD/.config" "$VKSO_BUILD/.config"; do
+		grep -Fqx '# CONFIG_RETPOLINE is not set' "$config"
+		if grep -Eq \
+			'^(CONFIG_RETPOLINE|CONFIG_RETHUNK|CONFIG_CPU_UNRET_ENTRY)=y' \
+			"$config"; then
+			echo "no-thunk config still enables a thunk option: $config" >&2
+			exit 1
+		fi
+	done
 fi
 
 if [[ "$reuse_raw" == 0 ]]; then
@@ -251,8 +290,10 @@ install -m 0644 "$MODULE_BUILD/page_cache_replace.ko" \
 	"$OUT/page_cache_replace.ko"
 install -m 0755 "$MODULE_BUILD/manager" "$OUT/manager"
 
-for script in collect.sh compare.py compare-vkso.py boot-once.sh boot-raw.sh boot-vkso.sh \
-	install-grub.sh qemu-preflight.sh qemu-guest-init; do
+for script in collect.sh collect-no-thunk.sh compare.py compare-vkso.py \
+	boot-once.sh boot-raw.sh boot-vkso.sh boot-raw-no-thunk.sh \
+	boot-vkso-no-thunk.sh install-grub.sh qemu-preflight.sh \
+	qemu-guest-init; do
 	install -m 0755 "$HERE/$script" "$OUT/$script"
 done
 install -m 0644 "$HERE/README.md" "$OUT/README.md"
@@ -269,6 +310,7 @@ install -m 0644 "$HERE/vkso_time_bench.c" "$OUT/vkso_time_bench.c"
 {
 	date -u '+prepared_utc=%Y-%m-%dT%H:%M:%SZ'
 	printf 'git_commit=%s\n' "$(git -C "$ROOT" rev-parse HEAD)"
+	printf 'build_variant=%s\n' "$BUILD_VARIANT"
 	if [[ "$reuse_raw" == 1 ]]; then
 		printf 'raw_source=reused:%s\n' "$RAW_PACKAGE"
 	else
@@ -309,7 +351,7 @@ nm "$VKSO_BUILD/vmlinux" |
 	awk '$3 == "vkso_clock_gettime_core" { found = 1 }
 	     END { exit !found }'
 
-ln -sfn "$(basename "$OUT")" "$HERE/artifacts/current"
+ln -sfn "$(basename "$OUT")" "$HERE/artifacts/$CURRENT_LINK"
 echo "baremetal_package=$OUT"
-echo "current_package=$HERE/artifacts/current"
+echo "current_package=$HERE/artifacts/$CURRENT_LINK"
 cat "$OUT/boot-manifest.txt"
