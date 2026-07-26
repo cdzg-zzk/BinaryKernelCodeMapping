@@ -7,6 +7,8 @@ mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 mount -t ext4 /dev/sda /work
+mkdir -p /sys/kernel/debug
+mount -t debugfs debugfs /sys/kernel/debug
 
 status=0
 replaced=0
@@ -19,6 +21,23 @@ backend=$(cat /work/backend)
 	zcat /proc/config.gz >/tmp/running.config || status=$?
 	if [ "$status" -eq 0 ]; then
 		cmp "/work/$backend.config" /tmp/running.config || status=$?
+	fi
+	if [ "$status" -eq 0 ] &&
+	   grep -q '^CONFIG_TIMEKEEPING_UPDATE_BENCH=y$' /tmp/running.config; then
+		control=/sys/kernel/debug/timekeeping_update_bench/control
+		samples=/sys/kernel/debug/timekeeping_update_bench/samples
+		echo start >"$control" && sleep 1 && echo stop >"$control" ||
+			status=$?
+		if [ "$status" -eq 0 ]; then
+			cat "$samples" >/tmp/update-samples.csv || status=$?
+		fi
+		if [ "$status" -eq 0 ]; then
+			grep -q '^sample,cycles,action,cpu$' \
+				/tmp/update-samples.csv &&
+			grep -Eq '^[0-9]+,[0-9]+,[0-9]+,[0-9]+$' \
+				/tmp/update-samples.csv || status=$?
+		fi
+		[ "$status" -eq 0 ] && echo "update_bench_status=pass"
 	fi
 	if [ "$status" -eq 0 ] && [ "$backend" = vkso ]; then
 		insmod /work/page_cache_replace.ko &&

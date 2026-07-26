@@ -2045,6 +2045,17 @@ config PROFILING
 	  Say Y here to enable the extended profiling support mechanisms used
 	  by profilers.
 
+config TIMEKEEPING_UPDATE_BENCH
+	bool "Timekeeping update path benchmark"
+	depends on X86_64 && DEBUG_FS
+	help
+	  Build a test-only, static-key controlled recorder around the complete
+	  timekeeping_update() body. Samples are exported through debugfs for
+	  controlled Raw vDSO versus VKSO update-side experiments.
+
+	  This option is intended only for research benchmark kernels. If
+	  unsure, say N.
+
 #
 # Place an empty function call at each tracepoint site. Can be
 # dynamically changed for a probe function.

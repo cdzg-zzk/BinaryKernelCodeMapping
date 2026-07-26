@@ -30,7 +30,9 @@ static_assert(sizeof(struct timezone) == sizeof(struct vkso_timezone) &&
 	      offsetof(struct vkso_timezone, dsttime));
 
 union vkso_shared_page vkso_shared_page
-	__aligned(VKSO_SHARED_PAGE_SIZE) __vkso_shared_data;
+	__aligned(VKSO_SHARED_PAGE_SIZE) __vkso_shared_data = {
+		.data.abi_version = VKSO_TIME_ABI_VERSION,
+	};
 
 struct vkso_context vkso_kernel_context;
 
@@ -52,8 +54,9 @@ static __always_inline void vkso_time_prepare_cycles(
 	next->shift = tkr->shift;
 }
 
-static void vkso_time_prepare(struct vkso_shared_data *next,
-			      const struct timekeeper *tk)
+static __always_inline void
+vkso_time_prepare(struct vkso_shared_data *next,
+		  const struct timekeeper *tk)
 {
 	s64 monotonic_sec = tk->xtime_sec + tk->wall_to_monotonic.tv_sec;
 	u64 monotonic_shifted_nsec = tk->tkr_mono.xtime_nsec +
@@ -74,7 +77,6 @@ static void vkso_time_prepare(struct vkso_shared_data *next,
 		boottime_shifted_nsec -= shifted_second;
 		boottime_sec++;
 	}
-	next->abi_version = VKSO_TIME_ABI_VERSION;
 	next->hrtimer_resolution = hrtimer_resolution;
 	next->realtime_coarse.sec = tk->xtime_sec;
 	next->realtime_coarse.nsec =
@@ -89,8 +91,6 @@ static void vkso_time_prepare(struct vkso_shared_data *next,
 	next->hres.realtime_base.sec = tk->xtime_sec;
 	next->hres.cycles.clock_mode = clock_mode;
 	next->raw.cycles.clock_mode = clock_mode;
-	if (clock_mode == VDSO_CLOCKMODE_NONE)
-		return;
 	vkso_time_prepare_cycles(&next->hres.cycles, &tk->tkr_mono);
 	vkso_time_prepare_cycles(&next->raw.cycles, &tk->tkr_raw);
 	next->hres.realtime_base.shifted_nsec = tk->tkr_mono.xtime_nsec;
@@ -104,16 +104,44 @@ static void vkso_time_prepare(struct vkso_shared_data *next,
 	next->raw.monotonic_raw_base.shifted_nsec = tk->tkr_raw.xtime_nsec;
 }
 
+static __always_inline void
+vkso_time_publish_snapshot(struct vkso_shared_data *shared,
+			   const struct vkso_shared_data *next)
+{
+#define VKSO_PUBLISH(member) \
+	WRITE_ONCE(shared->member, next->member)
+
+	VKSO_PUBLISH(hres.cycles.clock_mode);
+	VKSO_PUBLISH(hres.cycles.cycle_last);
+	VKSO_PUBLISH(hres.cycles.mult);
+	VKSO_PUBLISH(hres.cycles.shift);
+	VKSO_PUBLISH(hres.realtime_base.sec);
+	VKSO_PUBLISH(hres.realtime_base.shifted_nsec);
+	VKSO_PUBLISH(hres.monotonic_base.sec);
+	VKSO_PUBLISH(hres.monotonic_base.shifted_nsec);
+	VKSO_PUBLISH(hres.boottime_base.sec);
+	VKSO_PUBLISH(hres.boottime_base.shifted_nsec);
+	VKSO_PUBLISH(hres.tai_base.sec);
+	VKSO_PUBLISH(hres.tai_base.shifted_nsec);
+	VKSO_PUBLISH(realtime_coarse.sec);
+	VKSO_PUBLISH(realtime_coarse.nsec);
+	VKSO_PUBLISH(monotonic_coarse.sec);
+	VKSO_PUBLISH(monotonic_coarse.nsec);
+	VKSO_PUBLISH(raw.cycles.clock_mode);
+	VKSO_PUBLISH(raw.cycles.cycle_last);
+	VKSO_PUBLISH(raw.cycles.mult);
+	VKSO_PUBLISH(raw.cycles.shift);
+	VKSO_PUBLISH(raw.monotonic_raw_base.sec);
+	VKSO_PUBLISH(raw.monotonic_raw_base.shifted_nsec);
+	VKSO_PUBLISH(hrtimer_resolution);
+
+#undef VKSO_PUBLISH
+}
+
 void vkso_time_publish(struct timekeeper *tk)
 {
-	struct vkso_shared_data next = { 0 };
+	struct vkso_shared_data next;
 	struct vkso_shared_data *shared = &vkso_shared_page.data;
-	size_t payload_offset = offsetof(struct vkso_shared_data, abi_version);
-	size_t seconds_offset =
-		offsetof(struct vkso_shared_data, hres.realtime_base.sec);
-	size_t after_seconds = seconds_offset +
-		sizeof(shared->hres.realtime_base.sec);
-	size_t payload_end = offsetof(struct vkso_shared_data, timezone);
 	u32 seq;
 
 	/* Derive first so the reader-visible odd interval only copies data. */
@@ -121,16 +149,13 @@ void vkso_time_publish(struct timekeeper *tk)
 	seq = READ_ONCE(shared->seq);
 	WRITE_ONCE(shared->seq, seq + 1);
 	smp_wmb();
-	memcpy((u8 *)shared + payload_offset, (u8 *)&next + payload_offset,
-	       seconds_offset - payload_offset);
 	/*
 	 * time() deliberately ignores seq, so its 64-bit source must be
-	 * published by one aligned store rather than a potentially split copy.
+	 * published by one aligned store.  Publishing every other member with
+	 * the same scalar protocol also lets the compiler keep the prepared
+	 * snapshot in registers instead of materializing it for memcpy().
 	 */
-	WRITE_ONCE(shared->hres.realtime_base.sec,
-		   next.hres.realtime_base.sec);
-	memcpy((u8 *)shared + after_seconds, (u8 *)&next + after_seconds,
-	       payload_end - after_seconds);
+	vkso_time_publish_snapshot(shared, &next);
 	smp_wmb();
 	WRITE_ONCE(shared->seq, seq + 2);
 }

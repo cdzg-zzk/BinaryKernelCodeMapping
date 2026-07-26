@@ -4,6 +4,7 @@
  *  timer.c, moved in commit 8524070b7982.
  */
 #include <linux/timekeeper_internal.h>
+#include <linux/timekeeping_update_bench.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
 #include <linux/percpu.h>
@@ -740,6 +741,8 @@ static inline void tk_update_ktime_data(struct timekeeper *tk)
 /* must hold timekeeper_lock */
 static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 {
+	u64 update_bench_start = timekeeping_update_bench_start();
+
 	if (action & TK_CLEAR_NTP) {
 		tk->ntp_error = 0;
 		ntp_clear();
@@ -765,6 +768,8 @@ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 	if (action & TK_MIRROR)
 		memcpy(&shadow_timekeeper, &tk_core.timekeeper,
 		       sizeof(tk_core.timekeeper));
+
+	timekeeping_update_bench_finish(update_bench_start, action);
 }
 
 /**

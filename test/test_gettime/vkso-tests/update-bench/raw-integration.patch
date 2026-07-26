@@ -1,0 +1,60 @@
+diff --git a/kernel/time/Kconfig b/kernel/time/Kconfig
+--- a/kernel/time/Kconfig
++++ b/kernel/time/Kconfig
+@@ -74,5 +74,16 @@ config TIME_KUNIT_TEST
+ 
+ 	  If unsure, say N.
+ 
++config TIMEKEEPING_UPDATE_BENCH
++	bool "Timekeeping update path benchmark"
++	depends on X86_64 && DEBUG_FS
++	help
++	  Build a test-only, static-key controlled recorder around the complete
++	  timekeeping_update() body.  Samples are exported through debugfs for
++	  controlled Raw vDSO versus VKSO update-side experiments.
++
++	  This option is intended only for research benchmark kernels.  If
++	  unsure, say N.
++
+ if GENERIC_CLOCKEVENTS
+ menu "Timers subsystem"
+diff --git a/kernel/time/Makefile b/kernel/time/Makefile
+--- a/kernel/time/Makefile
++++ b/kernel/time/Makefile
+@@ -1,5 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
+ obj-y += time.o timer.o hrtimer.o
++obj-$(CONFIG_TIMEKEEPING_UPDATE_BENCH) += timekeeping_update_bench.o
+ obj-y += timekeeping.o ntp.o clocksource.o jiffies.o timer_list.o
+ obj-y += timeconv.o timecounter.o alarmtimer.o
+ 
+diff --git a/kernel/time/timekeeping.c b/kernel/time/timekeeping.c
+--- a/kernel/time/timekeeping.c
++++ b/kernel/time/timekeeping.c
+@@ -3,7 +3,8 @@
+  *  Kernel timekeeping code and accessor functions. Based on code from
+  *  timer.c, moved in commit 8524070b7982.
+  */
+ #include <linux/timekeeper_internal.h>
++#include <linux/timekeeping_update_bench.h>
+ #include <linux/module.h>
+ #include <linux/interrupt.h>
+ #include <linux/percpu.h>
+@@ -741,6 +742,8 @@ static void tk_update_ktime_data(struct timekeeper *tk)
+ /* must hold timekeeper_lock */
+ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
+ {
++	u64 update_bench_start = timekeeping_update_bench_start();
++
+ 	if (action & TK_CLEAR_NTP) {
+ 		tk->ntp_error = 0;
+ 		ntp_clear();
+@@ -768,6 +771,8 @@ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
+ 	if (action & TK_MIRROR)
+ 		memcpy(&shadow_timekeeper, &tk_core.timekeeper,
+ 		       sizeof(tk_core.timekeeper));
++
++	timekeeping_update_bench_finish(update_bench_start, action);
+ }
+ 
+ /**

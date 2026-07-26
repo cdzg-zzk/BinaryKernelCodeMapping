@@ -88,6 +88,10 @@ run_backend()
 	fi
 	grep -Fq 'abi_matrix_status=pass' "$log"
 	grep -Fq 'guest_status=0' "$log"
+	if grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_BENCH=y' \
+		"$PACKAGE/$backend.config"; then
+		grep -Fq 'update_bench_status=pass' "$log"
+	fi
 	if grep -Eq 'Kernel panic|BUG:|WARNING:' "$log"; then
 		echo "kernel failure marker in $log" >&2
 		exit 1

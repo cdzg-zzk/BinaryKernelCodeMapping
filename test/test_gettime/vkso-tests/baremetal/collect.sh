@@ -24,9 +24,10 @@ VKSO_ONLY=${VKSO_ONLY:-auto}
 VKSO_REFERENCE=${VKSO_REFERENCE:-}
 RUN_SEQ=${RUN_SEQ:-auto}
 RUN_LAYOUT=${RUN_LAYOUT:-auto}
+RESET_PAIR=${RESET_PAIR:-0}
 
 if [[ $(id -u) -ne 0 ]]; then
-	exec sudo --preserve-env=PACKAGE,CONTROL_DIR,RESULTS_DIR,STATE_FILE,CPU,ITERATIONS,REPEATS,WARMUP,PMU,SEQ_ITERATIONS,LAYOUT_ITERATIONS,VKSO_ONLY,VKSO_REFERENCE,RUN_SEQ,RUN_LAYOUT \
+	exec sudo --preserve-env=PACKAGE,CONTROL_DIR,RESULTS_DIR,STATE_FILE,CPU,ITERATIONS,REPEATS,WARMUP,PMU,SEQ_ITERATIONS,LAYOUT_ITERATIONS,VKSO_ONLY,VKSO_REFERENCE,RUN_SEQ,RUN_LAYOUT,RESET_PAIR \
 		"$0" "$@"
 fi
 
@@ -59,9 +60,53 @@ raw|vkso)
 	;;
 esac
 
+build_variant=$(awk -F= '$1 == "build_variant" { print $2; exit }' \
+	"$PACKAGE/boot-manifest.txt")
+case "$build_variant" in
+normal)
+	image_suffix=
+	next_vkso_script=$CONTROL_DIR/boot-vkso.sh
+	;;
+no-thunk)
+	image_suffix=-no-thunk
+	next_vkso_script=$CONTROL_DIR/boot-vkso-no-thunk.sh
+	;;
+*)
+	echo "invalid build_variant in $PACKAGE/boot-manifest.txt: $build_variant" >&2
+	exit 1
+	;;
+esac
+
+expected_image=vkso-time-$backend$image_suffix-5.15.198.bzImage
+boot_image=$(awk '{
+	for (i = 1; i <= NF; ++i) {
+		if ($i ~ /^BOOT_IMAGE=/) {
+			sub(/^BOOT_IMAGE=/, "", $i)
+			print $i
+			exit
+		}
+	}
+}' /proc/cmdline)
+if [[ ${boot_image##*/} != "$expected_image" ]]; then
+	echo "boot/package mismatch: backend=$backend variant=$build_variant" >&2
+	echo "expected BOOT_IMAGE=/$expected_image, got ${boot_image:-missing}" >&2
+	exit 1
+fi
+
 collection_mode=paired
 reference_vkso=
 if [[ "$backend" == raw ]]; then
+	if [[ "$RESET_PAIR" != 1 && -r "$STATE" ]]; then
+		saved_run_id=$(cat "$STATE")
+		saved_root=$RESULTS_DIR/$saved_run_id
+		if [[ -s "$saved_root/raw/perf.csv" &&
+		      ! -e "$saved_root/vkso/perf.csv" ]]; then
+			echo "raw result is already waiting for VKSO: $saved_root/raw" >&2
+			echo "next_step=$next_vkso_script" >&2
+			echo "set RESET_PAIR=1 only when intentionally replacing it" >&2
+			exit 1
+		fi
+	fi
 	run_id=${1:-$(date -u +%Y%m%dT%H%M%SZ)-baremetal}
 	printf '%s\n' "$run_id" >"$STATE"
 else
@@ -305,7 +350,7 @@ sync
 if [[ "$backend" == raw ]]; then
 	echo "raw_result=$out"
 	echo "active_run_id=$run_id"
-	echo "next_step=$CONTROL_DIR/boot-vkso.sh"
+	echo "next_step=$next_vkso_script"
 else
 	if [[ "$collection_mode" == paired ]]; then
 		"$PACKAGE/compare.py" "$result_root"

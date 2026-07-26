@@ -14,11 +14,14 @@ RAW_BUILD=${RAW_BUILD:-$BUILD_ROOT/raw}
 VKSO_BUILD=${VKSO_BUILD:-$BUILD_ROOT/vkso}
 BASE_CONFIG=${BASE_CONFIG:-/boot/config-vkso-time-raw-5.15.198}
 BUILD_VARIANT=${BUILD_VARIANT:-normal}
+UPDATE_BENCH=${UPDATE_BENCH:-0}
 STAMP=${STAMP:-$(date -u +%Y%m%dT%H%M%SZ)}
 OUT=${OUT:-$HERE/artifacts/prepared-$STAMP}
 JOBS=${JOBS:-$(nproc)}
 if [[ -z "${CURRENT_LINK+x}" ]]; then
-	if [[ "$BUILD_VARIANT" == normal ]]; then
+	if [[ "$UPDATE_BENCH" == 1 ]]; then
+		CURRENT_LINK=current-update
+	elif [[ "$BUILD_VARIANT" == normal ]]; then
 		CURRENT_LINK=current
 	else
 		CURRENT_LINK=current-no-thunk
@@ -34,6 +37,18 @@ normal|no-thunk)
 	;;
 esac
 
+case "$UPDATE_BENCH" in
+0|1)
+	;;
+*)
+	echo "UPDATE_BENCH must be 0 or 1" >&2
+	exit 2
+	;;
+esac
+if [[ "$UPDATE_BENCH" == 1 && "$BUILD_VARIANT" != normal ]]; then
+	echo "update-side benchmark images currently require BUILD_VARIANT=normal" >&2
+	exit 2
+fi
 for command in gcc g++ make tar python3 sha256sum nm readelf; do
 	command -v "$command" >/dev/null || {
 		echo "missing build dependency: $command" >&2
@@ -73,6 +88,20 @@ if [[ "$reuse_raw" == 0 ]]; then
 	test "$(make -s -C "$RAW_SOURCE" kernelversion)" = 5.15.198
 fi
 test "$(make -s -C "$VKSO_SOURCE" kernelversion)" = 5.15.198
+
+if [[ "$UPDATE_BENCH" == 1 ]]; then
+	if [[ "$reuse_raw" == 0 ]]; then
+		"$HERE/../update-bench/prepare-raw-source.sh" "$RAW_SOURCE"
+	else
+		grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_BENCH=y' \
+			"$RAW_PACKAGE/raw.config" || {
+			echo "reusable raw image lacks update instrumentation" >&2
+			exit 1
+		}
+	fi
+	test -f "$VKSO_SOURCE/include/linux/timekeeping_update_bench.h"
+	test -f "$VKSO_SOURCE/kernel/time/timekeeping_update_bench.c"
+fi
 mkdir -p "$RAW_BUILD" "$VKSO_BUILD" "$OUT"
 
 configure_tree()
@@ -116,6 +145,10 @@ configure_tree()
 		--set-str LOCALVERSION "" \
 		--set-str SYSTEM_TRUSTED_KEYS "" \
 		--set-str SYSTEM_REVOCATION_KEYS ""
+	if [[ "$UPDATE_BENCH" == 1 ]]; then
+		"$source/scripts/config" --file "$build/.config" \
+			--enable DEBUG_FS --enable TIMEKEEPING_UPDATE_BENCH
+	fi
 	if [[ "$BUILD_VARIANT" == no-thunk ]]; then
 		"$source/scripts/config" --file "$build/.config" \
 			--disable RETPOLINE \
@@ -143,6 +176,7 @@ config_symbols()
 	grep -E '^(CONFIG_|# CONFIG_.* is not set)' "$1" |
 		grep -Ev \
 		'^(CONFIG_CC_VERSION_TEXT=|CONFIG_VKSO_TIME=|# CONFIG_VKSO_TIME|CONFIG_GENERIC_GETTIMEOFDAY=|CONFIG_GENERIC_TIME_VSYSCALL=|CONFIG_GENERIC_VDSO_TIME_NS=|CONFIG_HAVE_GENERIC_VDSO=|# CONFIG_IA32_EMULATION is not set|# CONFIG_X86_X32 is not set)' |
+		grep -Ev '^# CONFIG_TIMEKEEPING_UPDATE_BENCH is not set' |
 		sort
 }
 
@@ -157,6 +191,16 @@ grep -Fqx 'CONFIG_MODULES=y' "$RAW_BUILD/.config"
 grep -Fqx 'CONFIG_MODULES=y' "$VKSO_BUILD/.config"
 grep -Fqx 'CONFIG_VKSO_TIME=y' "$VKSO_BUILD/.config"
 grep -Fqx '# CONFIG_VKSO_TIME_TEST is not set' "$VKSO_BUILD/.config"
+if [[ "$UPDATE_BENCH" == 1 ]]; then
+	grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_BENCH=y' "$RAW_BUILD/.config"
+	grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_BENCH=y' "$VKSO_BUILD/.config"
+else
+	if grep -Eq '^CONFIG_TIMEKEEPING_UPDATE_BENCH=y' \
+		"$RAW_BUILD/.config" "$VKSO_BUILD/.config"; then
+		echo "normal reader image unexpectedly enables update benchmark" >&2
+		exit 1
+	fi
+fi
 if grep -q '^CONFIG_VKSO_TIME=' "$RAW_BUILD/.config"; then
 	echo "raw config unexpectedly enables VKSO" >&2
 	exit 1
@@ -296,8 +340,16 @@ for script in collect.sh collect-no-thunk.sh compare.py compare-vkso.py \
 	qemu-guest-init; do
 	install -m 0755 "$HERE/$script" "$OUT/$script"
 done
-install -m 0644 "$HERE/README.md" "$OUT/README.md"
+if [[ -s "$HERE/README.md" ]]; then
+	install -m 0644 "$HERE/README.md" "$OUT/README.md"
+fi
 install -m 0644 "$HERE/vkso_time_bench.c" "$OUT/vkso_time_bench.c"
+if [[ "$UPDATE_BENCH" == 1 ]]; then
+	for script in collect-update.sh compare-update.py \
+		boot-raw-update.sh boot-vkso-update.sh install-update-grub.sh; do
+		install -m 0755 "$HERE/../update-bench/$script" "$OUT/$script"
+	done
+fi
 
 (
 	cd "$OUT"
@@ -305,12 +357,23 @@ install -m 0644 "$HERE/vkso_time_bench.c" "$OUT/vkso_time_bench.c"
 		libkernel.so page_mappings.txt page_cache_replace.ko manager \
 		raw-abi-matrix vkso-abi-matrix vkso-time-bench \
 		>SHA256SUMS
+	if [[ "$UPDATE_BENCH" == 1 ]]; then
+		sha256sum collect-update.sh compare-update.py boot-once.sh \
+			boot-raw-update.sh boot-vkso-update.sh \
+			install-update-grub.sh >>SHA256SUMS
+	fi
 )
 
 {
 	date -u '+prepared_utc=%Y-%m-%dT%H:%M:%SZ'
 	printf 'git_commit=%s\n' "$(git -C "$ROOT" rev-parse HEAD)"
+	if [[ -n $(git -C "$ROOT" status --porcelain) ]]; then
+		printf 'git_worktree_dirty=1\n'
+	else
+		printf 'git_worktree_dirty=0\n'
+	fi
 	printf 'build_variant=%s\n' "$BUILD_VARIANT"
+	printf 'update_bench=%s\n' "$UPDATE_BENCH"
 	if [[ "$reuse_raw" == 1 ]]; then
 		printf 'raw_source=reused:%s\n' "$RAW_PACKAGE"
 	else
@@ -332,6 +395,12 @@ install -m 0644 "$HERE/vkso_time_bench.c" "$OUT/vkso_time_bench.c"
 	printf 'raw_native_vdso=present\n'
 	printf 'vkso_native_vdso=absent\n'
 	printf 'config_difference=implementation_selects_only\n'
+	if [[ "$UPDATE_BENCH" == 1 ]]; then
+		printf 'update_bench_header_sha256=%s\n' \
+			"$(sha256sum "$VKSO_SOURCE/include/linux/timekeeping_update_bench.h" | awk '{print $1}')"
+		printf 'update_bench_recorder_sha256=%s\n' \
+			"$(sha256sum "$VKSO_SOURCE/kernel/time/timekeeping_update_bench.c" | awk '{print $1}')"
+	fi
 } >"$OUT/boot-manifest.txt"
 
 if nm "$VKSO_BUILD/vmlinux" |
@@ -350,6 +419,17 @@ fi
 nm "$VKSO_BUILD/vmlinux" |
 	awk '$3 == "vkso_clock_gettime_core" { found = 1 }
 	     END { exit !found }'
+if [[ "$UPDATE_BENCH" == 1 ]]; then
+	update_bench_images=("$VKSO_BUILD/vmlinux")
+	if [[ "$reuse_raw" == 0 ]]; then
+		update_bench_images+=("$RAW_BUILD/vmlinux")
+	fi
+	for image in "${update_bench_images[@]}"; do
+		nm "$image" |
+			awk '$3 == "timekeeping_update_bench_record" { found = 1 }
+			     END { exit !found }'
+	done
+fi
 
 ln -sfn "$(basename "$OUT")" "$HERE/artifacts/$CURRENT_LINK"
 echo "baremetal_package=$OUT"

@@ -37,6 +37,7 @@
 #define DEFAULT_WARMUP 10000U
 #define DEFAULT_SEQ_ITERATIONS 100000000U
 #define DEFAULT_LAYOUT_ITERATIONS 200000U
+#define DEFAULT_LOAD_SECONDS 10U
 #define PMU_EVENT_COUNT 4U
 #define RAW_VVAR_DATA_OFFSET 128U
 #define RAW_VDSO_BASES 12U
@@ -52,6 +53,7 @@ enum mode {
 	MODE_PERF,
 	MODE_SEQ,
 	MODE_LAYOUT,
+	MODE_LOAD,
 };
 
 enum path {
@@ -1065,13 +1067,81 @@ static void run_layout(unsigned int iterations, unsigned int repeats)
 	free((void *)data);
 }
 
+static int public_clock_gettime(enum backend backend, clockid_t clock_id,
+				struct timespec *value)
+{
+	if (backend == BACKEND_RAW)
+		return vdso_clock_gettime(clock_id, value);
+	return __vkso_clock_gettime(clock_id,
+				    (struct vkso_time_value *)value);
+}
+
+static uint64_t timespec_to_ns(const struct timespec *value)
+{
+	return (uint64_t)value->tv_sec * UINT64_C(1000000000) +
+	       (uint64_t)value->tv_nsec;
+}
+
+static void run_load(enum backend backend, clockid_t clock_id,
+		     const char *operation_name, unsigned int seconds,
+		     unsigned int warmup)
+{
+	const uint64_t batch = UINT64_C(65536);
+	struct timespec previous = { 0 }, current, wall_start, wall_now;
+	unsigned int start_aux, end_aux;
+	uint64_t calls = 0, checksum = 0, start, end, wall_ns;
+	unsigned int index;
+
+	/* Validate ordering separately so it is not charged to the load loop. */
+	for (index = 0; index < warmup; index++) {
+		if (public_clock_gettime(backend, clock_id, &current))
+			fail_message("concurrent reader returned an error");
+		if (index && (current.tv_sec < previous.tv_sec ||
+		    (current.tv_sec == previous.tv_sec &&
+		     current.tv_nsec < previous.tv_nsec)))
+			fail_message("concurrent reader observed time reversal");
+		previous = current;
+	}
+	if (raw_syscall2(SYS_clock_gettime, CLOCK_MONOTONIC,
+			 (long)&wall_start))
+		fail_message("cannot read load-test start time");
+	start = tsc_begin(&start_aux);
+	do {
+		uint64_t step;
+
+		for (step = 0; step < batch; step++) {
+			if (public_clock_gettime(backend, clock_id, &current))
+				fail_message("concurrent reader returned an error");
+			checksum += (uint64_t)current.tv_sec ^
+				    (uint64_t)current.tv_nsec;
+		}
+		calls += batch;
+		if (raw_syscall2(SYS_clock_gettime, CLOCK_MONOTONIC,
+				 (long)&wall_now))
+			fail_message("cannot read load-test current time");
+		wall_ns = timespec_to_ns(&wall_now) - timespec_to_ns(&wall_start);
+	} while (wall_ns < (uint64_t)seconds * UINT64_C(1000000000));
+	end = tsc_end(&end_aux);
+	if (start_aux != end_aux)
+		fail_message("CPU migrated during concurrent reader load");
+	sink = checksum;
+	puts("backend,api,seconds,calls,wall_ns,tsc_cycles_per_call,"
+	     "calls_per_second,cpu_migration,time_reversal");
+	printf("%s,%s,%u,%" PRIu64 ",%" PRIu64 ",%.9f,%.3f,0,0\n",
+	       backend_name(backend), operation_name, seconds, calls, wall_ns,
+	       (double)(end - start) / calls,
+	       (double)calls * 1000000000.0 / wall_ns);
+}
+
 static void usage(const char *program)
 {
 	fprintf(stderr,
 		"usage: %s --probe | --backend {raw|vkso} "
-		"[--mode perf|seq|layout] [--cpu N] [--iterations N] "
+		"[--mode perf|seq|layout|load] [--cpu N] [--iterations N] "
 		"[--repeats N] [--warmup N] [--pmu 0|1] "
-		"[--seq-iterations N] [--layout-iterations N]\n",
+		"[--seq-iterations N] [--layout-iterations N] "
+		"[--operation monotonic|monotonic_raw|monotonic_coarse] "
+		"[--seconds N]\n",
 		program);
 }
 
@@ -1085,6 +1155,9 @@ int main(int argc, char **argv)
 	unsigned int warmup = DEFAULT_WARMUP;
 	uint64_t seq_iterations = DEFAULT_SEQ_ITERATIONS;
 	unsigned int layout_iterations = DEFAULT_LAYOUT_ITERATIONS;
+	unsigned int load_seconds = DEFAULT_LOAD_SECONDS;
+	clockid_t load_clock_id = CLOCK_MONOTONIC;
+	const char *load_operation = "clock_gettime_monotonic";
 	int backend_set = 0;
 	int index;
 
@@ -1117,8 +1190,10 @@ int main(int argc, char **argv)
 				mode = MODE_SEQ;
 			else if (!strcmp(argv[index + 1], "layout"))
 				mode = MODE_LAYOUT;
+			else if (!strcmp(argv[index + 1], "load"))
+				mode = MODE_LOAD;
 			else
-				fail_message("mode must be perf, seq or layout");
+				fail_message("mode must be perf, seq, layout or load");
 		} else if (!strcmp(argv[index], "--cpu")) {
 			cpu = parse_number(argv[index + 1], "CPU", 1);
 		} else if (!strcmp(argv[index], "--iterations")) {
@@ -1140,6 +1215,22 @@ int main(int argc, char **argv)
 			layout_iterations =
 				parse_number(argv[index + 1],
 					     "layout iterations", 0);
+		} else if (!strcmp(argv[index], "--seconds")) {
+			load_seconds =
+				parse_number(argv[index + 1], "seconds", 0);
+		} else if (!strcmp(argv[index], "--operation")) {
+			if (!strcmp(argv[index + 1], "monotonic")) {
+				load_clock_id = CLOCK_MONOTONIC;
+				load_operation = "clock_gettime_monotonic";
+			} else if (!strcmp(argv[index + 1], "monotonic_raw")) {
+				load_clock_id = CLOCK_MONOTONIC_RAW;
+				load_operation = "clock_gettime_monotonic_raw";
+			} else if (!strcmp(argv[index + 1], "monotonic_coarse")) {
+				load_clock_id = CLOCK_MONOTONIC_COARSE;
+				load_operation = "clock_gettime_monotonic_coarse";
+			} else {
+				fail_message("unsupported load operation");
+			}
 		} else {
 			usage(argv[0]);
 			return 2;
@@ -1158,7 +1249,10 @@ int main(int argc, char **argv)
 		run_perf(backend, iterations, repeats, warmup);
 	else if (mode == MODE_SEQ)
 		run_seq(backend, seq_iterations);
-	else
+	else if (mode == MODE_LAYOUT)
 		run_layout(layout_iterations, repeats);
+	else
+		run_load(backend, load_clock_id, load_operation, load_seconds,
+			 warmup);
 	return sink == UINT64_MAX;
 }
