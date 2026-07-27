@@ -27,7 +27,12 @@ test -n "$root_partuuid"
 
 install_atomic()
 {
-	local mode=$1 source=$2 target=$3 temporary=$target.new.$$
+	local mode=$1
+	local source=$2
+	local target=$3
+	local temporary
+
+	temporary=$target.new.$$
 
 	install -m "$mode" "$source" "$temporary"
 	mv "$temporary" "$target"
