@@ -74,6 +74,14 @@ __vkso_bind_context:
 	ret
 	.size __vkso_bind_context, .-__vkso_bind_context
 
+	.p2align 4
+	.globl __vkso_shared_data
+	.type __vkso_shared_data, @function
+__vkso_shared_data:
+	leaq	vkso_shared_page(%rip), %rax
+	ret
+	.size __vkso_shared_data, .-__vkso_shared_data
+
 	.section .vkso.user.data, "aw", @progbits
 	.p2align 3
 	.type vkso_user_mm_data, @object

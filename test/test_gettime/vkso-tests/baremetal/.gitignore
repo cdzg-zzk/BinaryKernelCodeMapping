@@ -1,4 +1,5 @@
 /artifacts/
 /results/
-/.active-run-id
+/.experiment-state
+/.experiment.lock
 /__pycache__/

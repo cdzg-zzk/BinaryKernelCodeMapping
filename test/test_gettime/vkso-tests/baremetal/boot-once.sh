@@ -4,21 +4,21 @@
 set -euo pipefail
 
 case "${1:-}" in
-raw)
-	entry=vkso-time-raw
-	image=/boot/vkso-time-raw-5.15.198.bzImage
+raw-normal)
+	entry=vkso-final-raw-normal
+	image=/boot/vkso-final-raw-normal-5.15.198.bzImage
 	;;
-vkso)
-	entry=vkso-time-vkso
-	image=/boot/vkso-time-vkso-5.15.198.bzImage
+vkso-normal)
+	entry=vkso-final-vkso-normal
+	image=/boot/vkso-final-vkso-normal-5.15.198.bzImage
 	;;
-raw-no-thunk)
-	entry=vkso-time-raw-no-thunk
-	image=/boot/vkso-time-raw-no-thunk-5.15.198.bzImage
+raw-no-retpoline)
+	entry=vkso-final-raw-no-retpoline
+	image=/boot/vkso-final-raw-no-retpoline-5.15.198.bzImage
 	;;
-vkso-no-thunk)
-	entry=vkso-time-vkso-no-thunk
-	image=/boot/vkso-time-vkso-no-thunk-5.15.198.bzImage
+vkso-no-retpoline)
+	entry=vkso-final-vkso-no-retpoline
+	image=/boot/vkso-final-vkso-no-retpoline-5.15.198.bzImage
 	;;
 raw-update)
 	entry=vkso-time-raw-update
@@ -29,7 +29,7 @@ vkso-update)
 	image=/boot/vkso-time-vkso-update-5.15.198.bzImage
 	;;
 *)
-	echo "usage: $0 {raw|vkso|raw-no-thunk|vkso-no-thunk|raw-update|vkso-update}" >&2
+	echo "usage: $0 {raw-normal|vkso-normal|raw-no-retpoline|vkso-no-retpoline|raw-update|vkso-update}" >&2
 	exit 2
 	;;
 esac
@@ -40,14 +40,13 @@ fi
 
 test -s "$image"
 grep -Fq -- "--id $entry" /boot/grub/grub.cfg
-
 grub-reboot "$entry"
 next_entry=$(grub-editenv /boot/grub/grubenv list |
 	awk -F= '$1 == "next_entry" { print $2; exit }')
-if [[ "$next_entry" != "$entry" ]]; then
+test "$next_entry" = "$entry" || {
 	echo "failed to arm GRUB next_entry: expected $entry, got ${next_entry:-empty}" >&2
 	exit 1
-fi
+}
 echo "next_boot_entry=$entry"
 sync
 systemctl reboot

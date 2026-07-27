@@ -4,88 +4,66 @@
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-PACKAGE=${PACKAGE:-$HERE/artifacts/current}
-NO_THUNK_PACKAGE=${NO_THUNK_PACKAGE:-$HERE/artifacts/current-no-thunk}
-CPU=${CPU:-2}
-HOUSEKEEPING_CPUS=${HOUSEKEEPING_CPUS:-0-1,3}
+NORMAL_PACKAGE=${NORMAL_PACKAGE:-$HERE/artifacts/final-normal}
+NO_RETPOLINE_PACKAGE=${NO_RETPOLINE_PACKAGE:-$HERE/artifacts/final-no-retpoline}
 GRUB_SCRIPT=/etc/grub.d/41_vkso_time
-STAMP=$(date -u +%Y%m%dT%H%M%SZ)
+# shellcheck disable=SC1091
+source "$HERE/experiment.conf"
 
 if [[ $(id -u) -ne 0 ]]; then
-	exec sudo --preserve-env=PACKAGE,NO_THUNK_PACKAGE,CPU,HOUSEKEEPING_CPUS \
+	exec sudo --preserve-env=NORMAL_PACKAGE,NO_RETPOLINE_PACKAGE \
 		"$0" "$@"
 fi
 
-validate_package()
-{
-	local package=$1
-	local variant=$2
-	local file
+"$HERE/verify-packages.sh" \
+	"$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"
 
-	for file in raw-bzImage vkso-bzImage raw.config vkso.config \
-		boot-manifest.txt SHA256SUMS; do
-		test -s "$package/$file" || {
-			echo "missing package artifact: $package/$file" >&2
-			exit 1
-		}
-	done
-	(cd "$package" && sha256sum -c SHA256SUMS)
-	grep -Fqx "build_variant=$variant" "$package/boot-manifest.txt"
-}
-
-validate_package "$PACKAGE" normal
-validate_package "$NO_THUNK_PACKAGE" no-thunk
-
-boot_source=$(findmnt -no SOURCE /boot)
-root_source=$(findmnt -no SOURCE /)
+boot_source=$(findmnt -no SOURCE -T /boot)
+root_source=$(findmnt -no SOURCE -T /)
 boot_uuid=$(blkid -s UUID -o value "$boot_source")
 root_partuuid=$(blkid -s PARTUUID -o value "$root_source")
-test -n "$boot_uuid" -a -n "$root_partuuid"
+test -n "$boot_uuid"
+test -n "$root_partuuid"
 
-for target in \
-	/boot/vkso-time-raw-5.15.198.bzImage \
-	/boot/vkso-time-vkso-5.15.198.bzImage \
-	/boot/vkso-time-raw-no-thunk-5.15.198.bzImage \
-	/boot/vkso-time-vkso-no-thunk-5.15.198.bzImage \
-	/boot/config-vkso-time-raw-5.15.198 \
-	/boot/config-vkso-time-vkso-5.15.198 \
-	/boot/config-vkso-time-raw-no-thunk-5.15.198 \
-	/boot/config-vkso-time-vkso-no-thunk-5.15.198; do
-	if [[ -e "$target" ]]; then
-		cp -a "$target" "$target.bak.$STAMP"
-	fi
-done
-if [[ -e "$GRUB_SCRIPT" ]]; then
-	grub_backup=$GRUB_SCRIPT.bak.$STAMP
-	cp -a "$GRUB_SCRIPT" "$grub_backup"
-	chmod a-x "$grub_backup"
-fi
-# update-grub executes every executable file in /etc/grub.d, including an old
-# backup with an otherwise harmless suffix.  Keep all backups as data only.
-for grub_backup in "$GRUB_SCRIPT".bak.*; do
-	[[ -e "$grub_backup" ]] && chmod a-x "$grub_backup"
-done
+install_atomic()
+{
+	local mode=$1 source=$2 target=$3 temporary=$target.new.$$
 
-install -m 0644 "$PACKAGE/raw-bzImage" \
-	/boot/vkso-time-raw-5.15.198.bzImage
-install -m 0644 "$PACKAGE/vkso-bzImage" \
-	/boot/vkso-time-vkso-5.15.198.bzImage
-install -m 0644 "$PACKAGE/raw.config" \
-	/boot/config-vkso-time-raw-5.15.198
-install -m 0644 "$PACKAGE/vkso.config" \
-	/boot/config-vkso-time-vkso-5.15.198
-install -m 0644 "$NO_THUNK_PACKAGE/raw-bzImage" \
-	/boot/vkso-time-raw-no-thunk-5.15.198.bzImage
-install -m 0644 "$NO_THUNK_PACKAGE/vkso-bzImage" \
-	/boot/vkso-time-vkso-no-thunk-5.15.198.bzImage
-install -m 0644 "$NO_THUNK_PACKAGE/raw.config" \
-	/boot/config-vkso-time-raw-no-thunk-5.15.198
-install -m 0644 "$NO_THUNK_PACKAGE/vkso.config" \
-	/boot/config-vkso-time-vkso-no-thunk-5.15.198
-install -m 0644 "$PACKAGE/boot-manifest.txt" \
-	/boot/vkso-time-manifest-5.15.198.txt
-install -m 0644 "$NO_THUNK_PACKAGE/boot-manifest.txt" \
-	/boot/vkso-time-manifest-no-thunk-5.15.198.txt
+	install -m "$mode" "$source" "$temporary"
+	mv "$temporary" "$target"
+}
+
+install_atomic 0644 "$NORMAL_PACKAGE/raw-bzImage" \
+	/boot/vkso-final-raw-normal-5.15.198.bzImage
+install_atomic 0644 "$NORMAL_PACKAGE/vkso-bzImage" \
+	/boot/vkso-final-vkso-normal-5.15.198.bzImage
+install_atomic 0644 "$NO_RETPOLINE_PACKAGE/raw-bzImage" \
+	/boot/vkso-final-raw-no-retpoline-5.15.198.bzImage
+install_atomic 0644 "$NO_RETPOLINE_PACKAGE/vkso-bzImage" \
+	/boot/vkso-final-vkso-no-retpoline-5.15.198.bzImage
+
+install_atomic 0644 "$NORMAL_PACKAGE/raw.config" \
+	/boot/config-vkso-final-raw-normal-5.15.198
+install_atomic 0644 "$NORMAL_PACKAGE/vkso.config" \
+	/boot/config-vkso-final-vkso-normal-5.15.198
+install_atomic 0644 "$NO_RETPOLINE_PACKAGE/raw.config" \
+	/boot/config-vkso-final-raw-no-retpoline-5.15.198
+install_atomic 0644 "$NO_RETPOLINE_PACKAGE/vkso.config" \
+	/boot/config-vkso-final-vkso-no-retpoline-5.15.198
+install_atomic 0644 "$NORMAL_PACKAGE/boot-manifest.txt" \
+	/boot/vkso-final-normal-manifest-5.15.198.txt
+install_atomic 0644 "$NO_RETPOLINE_PACKAGE/boot-manifest.txt" \
+	/boot/vkso-final-no-retpoline-manifest-5.15.198.txt
+
+for item in \
+	"raw-normal:$NORMAL_PACKAGE/raw-bzImage:/boot/vkso-final-raw-normal-5.15.198.bzImage" \
+	"vkso-normal:$NORMAL_PACKAGE/vkso-bzImage:/boot/vkso-final-vkso-normal-5.15.198.bzImage" \
+	"raw-no-retpoline:$NO_RETPOLINE_PACKAGE/raw-bzImage:/boot/vkso-final-raw-no-retpoline-5.15.198.bzImage" \
+	"vkso-no-retpoline:$NO_RETPOLINE_PACKAGE/vkso-bzImage:/boot/vkso-final-vkso-no-retpoline-5.15.198.bzImage"; do
+	IFS=: read -r case_name source target <<<"$item"
+	cmp -s "$source" "$target"
+	echo "installed_case=$case_name image=$target sha256=$(sha256sum "$target" | awk '{print $1}')"
+done
 
 common_args="root=PARTUUID=$root_partuuid rootwait ro nokaslr"
 common_args+=" clocksource=tsc tsc=reliable nosmt"
@@ -95,53 +73,40 @@ common_args+=" idle=poll intel_pstate=active"
 common_args+=" processor.max_cstate=0 intel_idle.max_cstate=0"
 common_args+=" nmi_watchdog=0 nowatchdog audit=0"
 
+temporary=$GRUB_SCRIPT.new.$$
 {
 	echo '#!/bin/sh'
 	echo "cat <<'EOF'"
-	echo "menuentry 'VKSO Time: raw 5.15.198' --id vkso-time-raw {"
-	echo '	insmod part_gpt'
-	echo '	insmod ext2'
-	echo "	search --no-floppy --fs-uuid --set=root $boot_uuid"
-	echo "	linux /vkso-time-raw-5.15.198.bzImage $common_args"
-	echo '}'
-	echo
-	echo "menuentry 'VKSO Time: VKSO 5.15.198' --id vkso-time-vkso {"
-	echo '	insmod part_gpt'
-	echo '	insmod ext2'
-	echo "	search --no-floppy --fs-uuid --set=root $boot_uuid"
-	echo "	linux /vkso-time-vkso-5.15.198.bzImage $common_args"
-	echo '}'
-	echo
-	echo "menuentry 'VKSO Time: raw 5.15.198 (no retpoline/rethunk)' --id vkso-time-raw-no-thunk {"
-	echo '	insmod part_gpt'
-	echo '	insmod ext2'
-	echo "	search --no-floppy --fs-uuid --set=root $boot_uuid"
-	echo "	linux /vkso-time-raw-no-thunk-5.15.198.bzImage $common_args"
-	echo '}'
-	echo
-	echo "menuentry 'VKSO Time: VKSO 5.15.198 (no retpoline/rethunk)' --id vkso-time-vkso-no-thunk {"
-	echo '	insmod part_gpt'
-	echo '	insmod ext2'
-	echo "	search --no-floppy --fs-uuid --set=root $boot_uuid"
-	echo "	linux /vkso-time-vkso-no-thunk-5.15.198.bzImage $common_args"
-	echo '}'
+	for item in \
+		"raw normal:vkso-final-raw-normal:vkso-final-raw-normal-5.15.198.bzImage" \
+		"VKSO normal:vkso-final-vkso-normal:vkso-final-vkso-normal-5.15.198.bzImage" \
+		"raw no-retpoline:vkso-final-raw-no-retpoline:vkso-final-raw-no-retpoline-5.15.198.bzImage" \
+		"VKSO no-retpoline:vkso-final-vkso-no-retpoline:vkso-final-vkso-no-retpoline-5.15.198.bzImage"; do
+		IFS=: read -r title entry image <<<"$item"
+		echo "menuentry 'VKSO final: $title' --id $entry {"
+		echo '	insmod part_gpt'
+		echo '	insmod ext2'
+		echo "	search --no-floppy --fs-uuid --set=root $boot_uuid"
+		echo "	linux /$image $common_args"
+		echo '}'
+		echo
+	done
 	echo 'EOF'
-} >"$GRUB_SCRIPT"
-chmod 0755 "$GRUB_SCRIPT"
+} >"$temporary"
+chmod 0755 "$temporary"
+if [[ -e "$GRUB_SCRIPT" ]]; then
+	cp -a "$GRUB_SCRIPT" "$GRUB_SCRIPT.previous"
+	chmod a-x "$GRUB_SCRIPT.previous"
+fi
+for backup in "$GRUB_SCRIPT".bak.*; do
+	[[ -e "$backup" ]] && chmod a-x "$backup"
+done
+mv "$temporary" "$GRUB_SCRIPT"
 
 update-grub
-grep -Fq -- '--id vkso-time-raw' /boot/grub/grub.cfg
-grep -Fq -- '--id vkso-time-vkso' /boot/grub/grub.cfg
-grep -Fq -- '--id vkso-time-raw-no-thunk' /boot/grub/grub.cfg
-grep -Fq -- '--id vkso-time-vkso-no-thunk' /boot/grub/grub.cfg
-grep -Fq 'nokaslr' /boot/grub/grub.cfg
-
-echo "installed_raw=/boot/vkso-time-raw-5.15.198.bzImage"
-echo "installed_vkso=/boot/vkso-time-vkso-5.15.198.bzImage"
-echo "installed_raw_no_thunk=/boot/vkso-time-raw-no-thunk-5.15.198.bzImage"
-echo "installed_vkso_no_thunk=/boot/vkso-time-vkso-no-thunk-5.15.198.bzImage"
-echo "grub_entry_raw=vkso-time-raw"
-echo "grub_entry_vkso=vkso-time-vkso"
-echo "grub_entry_raw_no_thunk=vkso-time-raw-no-thunk"
-echo "grub_entry_vkso_no_thunk=vkso-time-vkso-no-thunk"
-echo "backup_stamp=$STAMP"
+for entry in vkso-final-raw-normal vkso-final-vkso-normal \
+	vkso-final-raw-no-retpoline vkso-final-vkso-no-retpoline; do
+	grep -Fq -- "--id $entry" /boot/grub/grub.cfg
+done
+sync
+echo "grub_installation=pass"

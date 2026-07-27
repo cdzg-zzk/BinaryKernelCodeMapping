@@ -12,7 +12,9 @@ else
 	CONTROL_DIR=${CONTROL_DIR:-$HERE}
 fi
 STAMP=${STAMP:-$(date -u +%Y%m%dT%H%M%SZ)}
-WORK=${WORK:-$CONTROL_DIR/results/qemu-preflight-$STAMP}
+variant=$(awk -F= '$1 == "build_variant" { print $2; exit }' \
+	"$PACKAGE/boot-manifest.txt" 2>/dev/null || true)
+WORK=${WORK:-$CONTROL_DIR/artifacts/validation/$variant-$STAMP}
 
 for command in qemu-system-x86_64 busybox cpio gzip mkfs.ext4 timeout; do
 	command -v "$command" >/dev/null || {
@@ -29,7 +31,19 @@ for file in raw-bzImage vkso-bzImage raw.config vkso.config \
 	}
 done
 (cd "$PACKAGE" && sha256sum -c SHA256SUMS)
+case "$variant" in
+normal|no-retpoline)
+	;;
+*)
+	echo "invalid package build variant: ${variant:-missing}" >&2
+	exit 1
+	;;
+esac
 
+if [[ -e "$WORK" ]]; then
+	echo "refusing to overwrite QEMU validation output: $WORK" >&2
+	exit 1
+fi
 mkdir -p "$WORK/initramfs/bin" "$WORK/initramfs/dev" \
 	"$WORK/initramfs/proc" "$WORK/initramfs/sys" \
 	"$WORK/initramfs/tmp" "$WORK/initramfs/work" \

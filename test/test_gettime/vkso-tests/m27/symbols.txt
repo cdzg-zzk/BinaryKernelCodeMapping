@@ -1,5 +1,0 @@
-vkso_clock_gettime_core
-vkso_clock_getres_core
-vkso_gettimeofday_core
-__vkso_time
-__vkso_getcpu

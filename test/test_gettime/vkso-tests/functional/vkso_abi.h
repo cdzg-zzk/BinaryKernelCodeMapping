@@ -59,6 +59,7 @@ int __vkso_gettimeofday(struct vkso_timeval *tv,
 			struct vkso_timezone *tz);
 int __vkso_bind_context(const struct vkso_mm_data *mm_data,
 			const void *pvclock_page, const void *hvclock_page);
+const void *__vkso_shared_data(void);
 int64_t __vkso_time(int64_t *tloc);
 int __vkso_getcpu(unsigned int *cpu, unsigned int *node, void *unused);
 

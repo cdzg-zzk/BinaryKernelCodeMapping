@@ -12,27 +12,29 @@ RAW_PACKAGE=${RAW_PACKAGE:-}
 BUILD_ROOT=${BUILD_ROOT:-/tmp/vkso-baremetal-build}
 RAW_BUILD=${RAW_BUILD:-$BUILD_ROOT/raw}
 VKSO_BUILD=${VKSO_BUILD:-$BUILD_ROOT/vkso}
-BASE_CONFIG=${BASE_CONFIG:-/boot/config-vkso-time-raw-5.15.198}
+BASE_CONFIG=${BASE_CONFIG:-$HERE/base.config}
 BUILD_VARIANT=${BUILD_VARIANT:-normal}
 UPDATE_BENCH=${UPDATE_BENCH:-0}
 STAMP=${STAMP:-$(date -u +%Y%m%dT%H%M%SZ)}
 OUT=${OUT:-$HERE/artifacts/prepared-$STAMP}
 JOBS=${JOBS:-$(nproc)}
+CC=${CC:-gcc}
+BENCHMARK_CFLAGS='-O2 -std=gnu11 -Wall -Wextra -Werror'
 if [[ -z "${CURRENT_LINK+x}" ]]; then
 	if [[ "$UPDATE_BENCH" == 1 ]]; then
 		CURRENT_LINK=current-update
 	elif [[ "$BUILD_VARIANT" == normal ]]; then
 		CURRENT_LINK=current
 	else
-		CURRENT_LINK=current-no-thunk
+		CURRENT_LINK=current-no-retpoline
 	fi
 fi
 
 case "$BUILD_VARIANT" in
-normal|no-thunk)
+normal|no-retpoline)
 	;;
 *)
-	echo "BUILD_VARIANT must be normal or no-thunk" >&2
+	echo "BUILD_VARIANT must be normal or no-retpoline" >&2
 	exit 2
 	;;
 esac
@@ -49,7 +51,7 @@ if [[ "$UPDATE_BENCH" == 1 && "$BUILD_VARIANT" != normal ]]; then
 	echo "update-side benchmark images currently require BUILD_VARIANT=normal" >&2
 	exit 2
 fi
-for command in gcc g++ make tar python3 sha256sum nm readelf; do
+for command in "$CC" g++ make tar python3 sha256sum nm readelf; do
 	command -v "$command" >/dev/null || {
 		echo "missing build dependency: $command" >&2
 		exit 1
@@ -60,6 +62,10 @@ test -s "$BASE_CONFIG" || {
 	exit 1
 }
 test -f "$VKSO_SOURCE/Makefile"
+if [[ -e "$OUT" ]]; then
+	echo "refusing to overwrite package output: $OUT" >&2
+	exit 1
+fi
 
 reuse_raw=0
 if [[ -n "$RAW_PACKAGE" ]]; then
@@ -110,6 +116,16 @@ if [[ "$UPDATE_BENCH" == 1 ]]; then
 	test -f "$VKSO_SOURCE/include/linux/timekeeping_update_bench.h"
 	test -f "$VKSO_SOURCE/kernel/time/timekeeping_update_bench.c"
 fi
+vkso_source_tree_sha256=$("$HERE/source-tree-hash.sh" "$VKSO_SOURCE")
+if [[ "$reuse_raw" == 0 ]]; then
+	raw_source_tree_sha256=$("$HERE/source-tree-hash.sh" "$RAW_SOURCE")
+else
+	raw_source_tree_sha256=$(awk -F= \
+		'$1 == "raw_source_tree_sha256" {
+			sub(/^[^=]*=/, ""); print; exit
+		}' "$RAW_PACKAGE/boot-manifest.txt")
+	: "${raw_source_tree_sha256:=reused-package}"
+fi
 mkdir -p "$RAW_BUILD" "$VKSO_BUILD" "$OUT"
 
 configure_tree()
@@ -157,7 +173,7 @@ configure_tree()
 		"$source/scripts/config" --file "$build/.config" \
 			--enable DEBUG_FS --enable TIMEKEEPING_UPDATE_BENCH
 	fi
-	if [[ "$BUILD_VARIANT" == no-thunk ]]; then
+	if [[ "$BUILD_VARIANT" == no-retpoline ]]; then
 		"$source/scripts/config" --file "$build/.config" \
 			--disable RETPOLINE \
 			--disable RETHUNK \
@@ -224,17 +240,32 @@ else
 		if grep -Eq \
 			'^(CONFIG_RETPOLINE|CONFIG_RETHUNK|CONFIG_CPU_UNRET_ENTRY)=y' \
 			"$config"; then
-			echo "no-thunk config still enables a thunk option: $config" >&2
+			echo "no-retpoline config still enables a related option: $config" >&2
 			exit 1
 		fi
 	done
 fi
 
 if [[ "$reuse_raw" == 0 ]]; then
-	make -C "$RAW_SOURCE" O="$RAW_BUILD" -j"$JOBS" bzImage modules_prepare
+	make -C "$RAW_SOURCE" O="$RAW_BUILD" CC="$CC" -j"$JOBS" \
+		bzImage modules_prepare
 fi
-make -C "$VKSO_SOURCE" O="$VKSO_BUILD" -j"$JOBS" bzImage modules_prepare
+make -C "$VKSO_SOURCE" O="$VKSO_BUILD" CC="$CC" -j"$JOBS" \
+	bzImage modules_prepare
 cp "$VKSO_BUILD/vmlinux.symvers" "$VKSO_BUILD/Module.symvers"
+
+test "$vkso_source_tree_sha256" = \
+	"$("$HERE/source-tree-hash.sh" "$VKSO_SOURCE")" || {
+	echo "VKSO source tree changed during build" >&2
+	exit 1
+}
+if [[ "$reuse_raw" == 0 ]]; then
+	test "$raw_source_tree_sha256" = \
+		"$("$HERE/source-tree-hash.sh" "$RAW_SOURCE")" || {
+		echo "raw source tree changed during build" >&2
+		exit 1
+	}
+fi
 
 vkso_uts_version=$(uts_version_from_build "$VKSO_BUILD")
 test -n "$vkso_uts_version"
@@ -284,7 +315,8 @@ mkdir -p "$MODULE_BUILD"
 cp "$ROOT/page_cache_replace/Makefile" \
 	"$ROOT/page_cache_replace/page_cache_replace.c" \
 	"$ROOT/page_cache_replace/manager.cpp" "$MODULE_BUILD/"
-make -C "$MODULE_BUILD" KDIR="$VKSO_BUILD" -j"$JOBS" module manager
+make -C "$MODULE_BUILD" KDIR="$VKSO_BUILD" CC="$CC" -j"$JOBS" \
+	module manager
 
 KRG="$BUILD_ROOT/vkso.krg"
 "$ROOT/kernel_cgd/src/krg" build "$VKSO_BUILD/vmlinux" -o "$KRG" \
@@ -293,8 +325,8 @@ KRG="$BUILD_ROOT/vkso.krg"
 DSO_BUILD="$BUILD_ROOT/dso"
 mkdir -p "$DSO_BUILD"
 cp "$HERE/symbols.txt" "$HERE/shared_data.txt" "$DSO_BUILD/"
-gcc -c -fPIC -o "$DSO_BUILD/vkso_user_entry.o" \
-	"$ROOT/test/test_gettime/vkso-tests/m27/vkso_user_entry.S"
+"$CC" -c -fPIC -o "$DSO_BUILD/vkso_user_entry.o" \
+	"$ROOT/test/test_gettime/vkso-tests/functional/vkso_user_entry.S"
 (
 	cd "$DSO_BUILD"
 	python3 "$ROOT/make_dll/build_PIC_so.py" \
@@ -319,21 +351,19 @@ core_value=$(nm -D "$DSO_BUILD/libkernel.so" |
 test -n "$core_value"
 printf '%s\n' "$core_value" >"$OUT/vkso-core-st-value.txt"
 
-gcc -O2 -std=gnu11 -Wall -Wextra -Werror -pthread \
+"$CC" $BENCHMARK_CFLAGS -pthread \
 	-o "$OUT/raw-abi-matrix" \
-	"$ROOT/test/test_gettime/vkso-tests/m27/abi_matrix.c" -ldl
-gcc -DVKSO_BACKEND -O2 -std=gnu11 -Wall -Wextra -Werror -pthread \
+	"$ROOT/test/test_gettime/vkso-tests/functional/abi_matrix.c" -ldl
+"$CC" -DVKSO_BACKEND $BENCHMARK_CFLAGS -pthread \
 	-o "$OUT/vkso-abi-matrix" \
-	"$ROOT/test/test_gettime/vkso-tests/m27/abi_matrix.c" \
-	"$ROOT/test/test_gettime/vkso-tests/m27/vkso_user_wrapper.c" \
+	"$ROOT/test/test_gettime/vkso-tests/functional/abi_matrix.c" \
+	"$ROOT/test/test_gettime/vkso-tests/functional/vkso_user_wrapper.c" \
 	-L"$DSO_BUILD" -Wl,--no-as-needed -lkernel -ldl \
 	-Wl,-rpath,'$ORIGIN'
-gcc -O2 -std=gnu11 -Wall -Wextra -Werror -fno-omit-frame-pointer \
-	-DVKSO_SHARED_ST_VALUE="$shared_value" \
-	-DVKSO_CORE_ST_VALUE="$core_value" \
+"$CC" $BENCHMARK_CFLAGS -fno-omit-frame-pointer \
 	-o "$OUT/vkso-time-bench" \
 	"$HERE/vkso_time_bench.c" \
-	"$ROOT/test/test_gettime/vkso-tests/m27/vkso_user_wrapper.c" \
+	"$ROOT/test/test_gettime/vkso-tests/functional/vkso_user_wrapper.c" \
 	-L"$DSO_BUILD" -Wl,--no-as-needed -lkernel -ldl \
 	-Wl,-rpath,'$ORIGIN'
 
@@ -353,12 +383,12 @@ install -m 0644 "$MODULE_BUILD/page_cache_replace.ko" \
 	"$OUT/page_cache_replace.ko"
 install -m 0755 "$MODULE_BUILD/manager" "$OUT/manager"
 
-for script in collect.sh collect-no-thunk.sh compare.py compare-vkso.py \
-	boot-once.sh boot-raw.sh boot-vkso.sh boot-raw-no-thunk.sh \
-	boot-vkso-no-thunk.sh install-grub.sh qemu-preflight.sh \
-	qemu-guest-init; do
+for script in collect-case.sh experiment.sh boot-once.sh install-grub.sh \
+	qemu-preflight.sh qemu-guest-init verify-packages.sh \
+	source-tree-hash.sh; do
 	install -m 0755 "$HERE/$script" "$OUT/$script"
 done
+install -m 0644 "$HERE/experiment.conf" "$OUT/experiment.conf"
 if [[ -s "$HERE/README.md" ]]; then
 	install -m 0644 "$HERE/README.md" "$OUT/README.md"
 fi
@@ -370,19 +400,6 @@ if [[ "$UPDATE_BENCH" == 1 ]]; then
 	done
 fi
 
-(
-	cd "$OUT"
-	sha256sum raw-bzImage vkso-bzImage raw.config vkso.config \
-		libkernel.so page_mappings.txt page_cache_replace.ko manager \
-		raw-abi-matrix vkso-abi-matrix vkso-time-bench \
-		>SHA256SUMS
-	if [[ "$UPDATE_BENCH" == 1 ]]; then
-		sha256sum collect-update.sh compare-update.py boot-once.sh \
-			boot-raw-update.sh boot-vkso-update.sh \
-			install-update-grub.sh >>SHA256SUMS
-	fi
-)
-
 {
 	date -u '+prepared_utc=%Y-%m-%dT%H:%M:%SZ'
 	printf 'git_commit=%s\n' "$(git -C "$ROOT" rev-parse HEAD)"
@@ -393,6 +410,19 @@ fi
 	fi
 	printf 'build_variant=%s\n' "$BUILD_VARIANT"
 	printf 'update_bench=%s\n' "$UPDATE_BENCH"
+	printf 'vkso_source_tree_sha256=%s\n' "$vkso_source_tree_sha256"
+	printf 'raw_source_tree_sha256=%s\n' "$raw_source_tree_sha256"
+	printf 'experiment_config_sha256=%s\n' \
+		"$(sha256sum "$HERE/experiment.conf" | awk '{print $1}')"
+	printf 'cc_path=%s\n' "$(command -v "$CC")"
+	printf 'cc_version=%s\n' "$("$CC" -dumpfullversion -dumpversion)"
+	printf 'benchmark_cflags=%s\n' "$BENCHMARK_CFLAGS"
+	printf 'kbuild_build_timestamp=%s\n' \
+		"${KBUILD_BUILD_TIMESTAMP:-unspecified}"
+	printf 'kbuild_build_user=%s\n' \
+		"${KBUILD_BUILD_USER:-unspecified}"
+	printf 'kbuild_build_host=%s\n' \
+		"${KBUILD_BUILD_HOST:-unspecified}"
 	if [[ "$reuse_raw" == 1 ]]; then
 		printf 'raw_source=reused:%s\n' "$RAW_PACKAGE"
 	else
@@ -426,6 +456,23 @@ fi
 	fi
 } >"$OUT/boot-manifest.txt"
 
+(
+	cd "$OUT"
+	sha256sum raw-bzImage vkso-bzImage raw.config vkso.config \
+		raw.image.config vkso.image.config boot-manifest.txt \
+		libkernel.so page_mappings.txt page_cache_replace.ko manager \
+		raw-abi-matrix vkso-abi-matrix vkso-time-bench \
+		collect-case.sh experiment.sh boot-once.sh install-grub.sh \
+		qemu-preflight.sh qemu-guest-init verify-packages.sh \
+		source-tree-hash.sh experiment.conf \
+		>SHA256SUMS
+	if [[ "$UPDATE_BENCH" == 1 ]]; then
+		sha256sum collect-update.sh compare-update.py boot-once.sh \
+			boot-raw-update.sh boot-vkso-update.sh \
+			install-update-grub.sh >>SHA256SUMS
+	fi
+)
+
 if nm "$VKSO_BUILD/vmlinux" |
 	awk '$3 ~ /^__vkso_test_/ { found = 1 } END { exit !found }'; then
 	echo "production VKSO image contains test probe" >&2
@@ -454,7 +501,11 @@ if [[ "$UPDATE_BENCH" == 1 ]]; then
 	done
 fi
 
-ln -sfn "$(basename "$OUT")" "$HERE/artifacts/$CURRENT_LINK"
+if [[ -n "$CURRENT_LINK" ]]; then
+	ln -sfn "$(basename "$OUT")" "$HERE/artifacts/$CURRENT_LINK"
+fi
 echo "baremetal_package=$OUT"
-echo "current_package=$HERE/artifacts/$CURRENT_LINK"
+if [[ -n "$CURRENT_LINK" ]]; then
+	echo "current_package=$HERE/artifacts/$CURRENT_LINK"
+fi
 cat "$OUT/boot-manifest.txt"

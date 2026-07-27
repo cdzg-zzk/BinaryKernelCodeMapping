@@ -19,19 +19,12 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "../m27/vkso_abi.h"
-#include "../m27/vkso_user_wrapper.h"
+#include "../functional/vkso_abi.h"
+#include "../functional/vkso_user_wrapper.h"
 
 #ifndef CLOCK_REALTIME_ALARM
 #define CLOCK_REALTIME_ALARM 8
 #endif
-#ifndef VKSO_SHARED_ST_VALUE
-#error "VKSO_SHARED_ST_VALUE must match libkernel.so"
-#endif
-#ifndef VKSO_CORE_ST_VALUE
-#error "VKSO_CORE_ST_VALUE must match libkernel.so"
-#endif
-
 #define DEFAULT_ITERATIONS 500000U
 #define DEFAULT_REPEATS 31U
 #define DEFAULT_WARMUP 10000U
@@ -254,6 +247,7 @@ _Static_assert(__builtin_offsetof(struct vkso_shared_data_bench, raw) == 128,
 static struct pmu_group core_group = { .leader = -1 };
 static struct pmu_group cache_group = { .leader = -1 };
 static int pmu_enabled;
+static int include_core = 1;
 
 static void fail_message(const char *message)
 {
@@ -777,7 +771,7 @@ static unsigned int available_paths(enum backend backend,
 		return 2;
 	}
 	paths[0] = PATH_SYSCALL;
-	if (operations[operation].core_supported) {
+	if (include_core && operations[operation].core_supported) {
 		paths[1] = PATH_VKSO_CORE;
 		paths[2] = PATH_VKSO_WRAPPER;
 		return 3;
@@ -977,19 +971,10 @@ static void run_seq(enum backend backend, uint64_t iterations)
 		print_seq_result(backend, "hres_protocol", &hres);
 		print_seq_result(backend, "raw_protocol", &raw);
 	} else {
-		const struct vkso_shared_data_bench *data;
-		uintptr_t load_bias;
+		const struct vkso_shared_data_bench *data =
+			__vkso_shared_data();
 		struct seq_result hres, raw;
 
-		/*
-		 * libkernel.so is sparse and its first PT_LOAD is not at vaddr 0.
-		 * Derive the ELF load bias from a known exported symbol instead of
-		 * relying on dladdr().dli_fbase semantics.
-		 */
-		load_bias = (uintptr_t)vkso_clock_gettime_core -
-			    (uintptr_t)VKSO_CORE_ST_VALUE;
-		data = (const void *)(load_bias +
-				     (uintptr_t)VKSO_SHARED_ST_VALUE);
 		if (data->abi_version != VKSO_TIME_ABI_VERSION)
 			fail_message("VKSO shared-data address/ABI mismatch");
 		hres = observe_vkso_seq(data, 0, iterations);
@@ -1139,6 +1124,7 @@ static void usage(const char *program)
 		"usage: %s --probe | --backend {raw|vkso} "
 		"[--mode perf|seq|layout|load] [--cpu N] [--iterations N] "
 		"[--repeats N] [--warmup N] [--pmu 0|1] "
+		"[--include-core 0|1] "
 		"[--seq-iterations N] [--layout-iterations N] "
 		"[--operation monotonic|monotonic_raw|monotonic_coarse] "
 		"[--seconds N]\n",
@@ -1208,6 +1194,10 @@ int main(int argc, char **argv)
 		} else if (!strcmp(argv[index], "--pmu")) {
 			pmu_enabled =
 				parse_number(argv[index + 1], "PMU", 1);
+		} else if (!strcmp(argv[index], "--include-core")) {
+			include_core =
+				parse_number(argv[index + 1],
+					     "include core", 1);
 		} else if (!strcmp(argv[index], "--seq-iterations")) {
 			seq_iterations = parse_number(argv[index + 1],
 						      "seq iterations", 0);
@@ -1242,6 +1232,8 @@ int main(int argc, char **argv)
 	}
 	if (pmu_enabled > 1)
 		fail_message("PMU must be 0 or 1");
+	if (include_core > 1)
+		fail_message("include core must be 0 or 1");
 
 	pin_cpu(cpu);
 	initialize_backend(backend);
