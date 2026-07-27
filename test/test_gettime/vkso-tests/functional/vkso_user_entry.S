@@ -23,8 +23,9 @@
  *
  * Shared core text remains backed by kernel pages.  This page is ordinary
  * DSO-owned RX text so it can inject per-process addresses without changing
- * the shared kernel ABI.  The clock_gettime veneer mirrors the core's branch
- * order and tail-jumps to its existing specialized readers.  This removes one
+ * the shared kernel ABI.  The clock_gettime veneer preserves the two common
+ * clocks as its first tests, then uses a shallow decision tree for the other
+ * IDs before tail-jumping to the specialized readers.  This removes one
  * shared-core dispatch hop and only prepares dependencies used by the selected
  * reader.  make_dll resolves every transfer locally, so no PLT/GOT remains on
  * the hot path.
@@ -50,12 +51,22 @@ __vkso_clock_gettime:
 	jmp	vkso_clock_gettime_monotonic
 
 .Lclock_not_monotonic:
-	cmpl	$VKSO_CLOCK_REALTIME_COARSE, %esi
-	je	.Lclock_realtime_coarse
 	cmpl	$VKSO_CLOCK_MONOTONIC_COARSE, %esi
 	je	.Lclock_monotonic_coarse
+	jg	.Lclock_after_coarse
+	cmpl	$VKSO_CLOCK_REALTIME_COARSE, %esi
+	je	.Lclock_realtime_coarse
 	cmpl	$VKSO_CLOCK_MONOTONIC_RAW, %esi
 	je	.Lclock_monotonic_raw
+
+.Lclock_fallback:
+	movslq	%esi, %rdi
+	movq	%rdx, %rsi
+	movl	$__NR_clock_gettime, %eax
+	syscall
+	ret
+
+.Lclock_after_coarse:
 	cmpl	$VKSO_CLOCK_BOOTTIME, %esi
 	je	.Lclock_boottime
 	cmpl	$VKSO_CLOCK_TAI, %esi
@@ -79,13 +90,6 @@ __vkso_clock_gettime:
 	movq	vkso_user_mm_data(%rip), %rdi
 	leaq	vkso_user_context(%rip), %rcx
 	jmp	vkso_clock_gettime_boottime
-
-.Lclock_fallback:
-	movslq	%esi, %rdi
-	movq	%rdx, %rsi
-	movl	$__NR_clock_gettime, %eax
-	syscall
-	ret
 	.size __vkso_clock_gettime, .-__vkso_clock_gettime
 
 	.p2align 4
