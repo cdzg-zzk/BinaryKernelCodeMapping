@@ -141,6 +141,10 @@ configure_tree()
 		--enable MODULES \
 		--enable MODULE_UNLOAD \
 		--disable MODULE_SIG \
+		--disable SECURITY_LOCKDOWN_LSM \
+		--disable SECURITY_LOCKDOWN_LSM_EARLY \
+		--disable IMA_APPRAISE_MODSIG \
+		--disable IMA_APPRAISE_REQUIRE_MODULE_SIGS \
 		--enable IKCONFIG \
 		--enable IKCONFIG_PROC \
 		--enable PERF_EVENTS \
