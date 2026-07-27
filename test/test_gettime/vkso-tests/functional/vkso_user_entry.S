@@ -1,5 +1,23 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 
+#include <asm/unistd_64.h>
+
+/* x86-64 UAPI clock IDs; the shared C core has matching static assertions. */
+#define VKSO_CLOCK_REALTIME		0
+#define VKSO_CLOCK_MONOTONIC		1
+#define VKSO_CLOCK_MONOTONIC_RAW	4
+#define VKSO_CLOCK_REALTIME_COARSE	5
+#define VKSO_CLOCK_MONOTONIC_COARSE	6
+#define VKSO_CLOCK_BOOTTIME		7
+#define VKSO_CLOCK_TAI			11
+#define VKSO_HRES_CLOCK_MASK \
+	((1 << VKSO_CLOCK_REALTIME) | (1 << VKSO_CLOCK_MONOTONIC) | \
+	 (1 << VKSO_CLOCK_MONOTONIC_RAW) | (1 << VKSO_CLOCK_BOOTTIME) | \
+	 (1 << VKSO_CLOCK_TAI))
+#define VKSO_COARSE_CLOCK_MASK \
+	((1 << VKSO_CLOCK_REALTIME_COARSE) | \
+	 (1 << VKSO_CLOCK_MONOTONIC_COARSE))
+
 /*
  * Private userspace entry veneers embedded directly in libkernel.so.
  *
@@ -25,29 +43,75 @@ __vkso_clock_gettime:
 	jmp	vkso_clock_gettime_realtime
 
 .Lclock_not_realtime:
-	movq	vkso_user_mm_data(%rip), %rdi
-	cmpl	$1, %esi
+	cmpl	$VKSO_CLOCK_MONOTONIC, %esi
 	jne	.Lclock_not_monotonic
+	movq	vkso_user_mm_data(%rip), %rdi
 	leaq	vkso_user_context(%rip), %rcx
 	jmp	vkso_clock_gettime_monotonic
 
 .Lclock_not_monotonic:
-	leal	-5(%rsi), %eax
-	cmpl	$1, %eax
-	jbe	.Lclock_coarse
+	cmpl	$VKSO_CLOCK_REALTIME_COARSE, %esi
+	je	.Lclock_realtime_coarse
+	cmpl	$VKSO_CLOCK_MONOTONIC_COARSE, %esi
+	je	.Lclock_monotonic_coarse
+	cmpl	$VKSO_CLOCK_MONOTONIC_RAW, %esi
+	je	.Lclock_monotonic_raw
+	cmpl	$VKSO_CLOCK_BOOTTIME, %esi
+	je	.Lclock_boottime
+	cmpl	$VKSO_CLOCK_TAI, %esi
+	jne	.Lclock_fallback
 	leaq	vkso_user_context(%rip), %rcx
-	jmp	vkso_clock_gettime_other
+	jmp	vkso_clock_gettime_tai
 
-.Lclock_coarse:
-	jmp	vkso_clock_gettime_coarse
+.Lclock_realtime_coarse:
+	jmp	vkso_clock_gettime_realtime_coarse
+
+.Lclock_monotonic_coarse:
+	movq	vkso_user_mm_data(%rip), %rdi
+	jmp	vkso_clock_gettime_monotonic_coarse
+
+.Lclock_monotonic_raw:
+	movq	vkso_user_mm_data(%rip), %rdi
+	leaq	vkso_user_context(%rip), %rcx
+	jmp	vkso_clock_gettime_monotonic_raw
+
+.Lclock_boottime:
+	movq	vkso_user_mm_data(%rip), %rdi
+	leaq	vkso_user_context(%rip), %rcx
+	jmp	vkso_clock_gettime_boottime
+
+.Lclock_fallback:
+	movslq	%esi, %rdi
+	movq	%rdx, %rsi
+	movl	$__NR_clock_gettime, %eax
+	syscall
+	ret
 	.size __vkso_clock_gettime, .-__vkso_clock_gettime
 
 	.p2align 4
 	.globl __vkso_clock_getres
 	.type __vkso_clock_getres, @function
 __vkso_clock_getres:
-	leaq	vkso_user_context(%rip), %rdx
-	jmp	vkso_clock_getres_core
+	cmpl	$VKSO_CLOCK_TAI, %edi
+	ja	.Lclock_getres_fallback
+	movl	$1, %eax
+	movl	%edi, %ecx
+	shll	%cl, %eax
+	testl	$VKSO_HRES_CLOCK_MASK, %eax
+	jne	.Lclock_getres_hres
+	testl	$VKSO_COARSE_CLOCK_MASK, %eax
+	jne	.Lclock_getres_coarse
+.Lclock_getres_fallback:
+	movslq	%edi, %rdi
+	movl	$__NR_clock_getres, %eax
+	syscall
+	ret
+
+.Lclock_getres_hres:
+	jmp	vkso_clock_getres_hres
+
+.Lclock_getres_coarse:
+	jmp	vkso_clock_getres_coarse
 	.size __vkso_clock_getres, .-__vkso_clock_getres
 
 	.p2align 4

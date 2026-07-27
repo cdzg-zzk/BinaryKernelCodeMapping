@@ -120,6 +120,8 @@ struct vkso_context {
 /*
  * Internal shared-core entry points. They are not the user ABI: kernel and
  * user wrappers inject address-space-specific dependencies here.
+ * MM_data and context are always non-NULL.  Kernel callers use immutable
+ * zero-valued objects when no per-MM offsets or userspace fallback are needed.
  *
  * VKSO_TIME_FALLBACK asks the wrapper to use its native handler: the
  * clock_gettime syscall in userspace or the POSIX clock handler in-kernel.

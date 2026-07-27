@@ -57,6 +57,18 @@ static const struct k_clock * const posix_clocks[];
 static const struct k_clock *clockid_to_kclock(const clockid_t id);
 static const struct k_clock clock_realtime, clock_monotonic;
 
+#ifdef CONFIG_VKSO_TIME
+/*
+ * The shared VKSO core requires a non-NULL MM_data pointer.  User readers
+ * always have their per-MM page so setns() can publish offsets in place;
+ * kernel readers in the initial time namespace use this immutable zero-mask
+ * object and avoid a second nullable-pointer branch in every namespace clock.
+ */
+static const struct vkso_mm_data vkso_root_mm_data = {
+	.abi_version = VKSO_MM_DATA_ABI_VERSION,
+};
+#endif
+
 static __always_inline const struct vkso_mm_data *
 vkso_current_mm_data(clockid_t clock_id)
 {
@@ -71,7 +83,12 @@ vkso_current_mm_data(clockid_t clock_id)
 	    unlikely(current->nsproxy->time_ns != &init_time_ns))
 		return READ_ONCE(current->mm->context.vkso_mm_kdata);
 #endif
+#ifdef CONFIG_VKSO_TIME
+	return &vkso_root_mm_data;
+#else
+	(void)clock_id;
 	return NULL;
+#endif
 }
 
 /*
