@@ -18,3 +18,7 @@ the booted kernel and package identity, refuses overwrites, preserves failed
 collections under `results/<run>/incomplete/`, and stores the complete raw
 CSV, functional logs, interrupt snapshots and environment metadata. It does
 not generate a performance conclusion.
+
+The independent Chinese report for the completed four-image run
+`20260727T124135Z-vkso-final` is
+[`VKSO_READ性能实验报告_20260727.md`](VKSO_READ性能实验报告_20260727.md).
