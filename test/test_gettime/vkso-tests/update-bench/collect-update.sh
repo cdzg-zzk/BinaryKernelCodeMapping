@@ -18,13 +18,23 @@ REPEATS=${REPEATS:-15}
 UPDATE_SECONDS=${UPDATE_SECONDS:-15}
 WARMUP=${WARMUP:-100000}
 SEQ_ITERATIONS=${SEQ_ITERATIONS:-50000000}
+VKSO_ONLY=${VKSO_ONLY:-0}
 DEBUGFS=/sys/kernel/debug
 BENCH_DIR=$DEBUGFS/timekeeping_update_bench
 
 if [[ $(id -u) -ne 0 ]]; then
-	exec sudo --preserve-env=PACKAGE,CONTROL_DIR,RESULTS_DIR,STATE_FILE,CPU,REPEATS,UPDATE_SECONDS,WARMUP,SEQ_ITERATIONS \
+	exec sudo --preserve-env=PACKAGE,CONTROL_DIR,RESULTS_DIR,STATE_FILE,CPU,REPEATS,UPDATE_SECONDS,WARMUP,SEQ_ITERATIONS,VKSO_ONLY \
 		"$0" "$@"
 fi
+
+case "$VKSO_ONLY" in
+0|1)
+	;;
+*)
+	echo "VKSO_ONLY must be 0 or 1" >&2
+	exit 2
+	;;
+esac
 
 for file in SHA256SUMS boot-manifest.txt vkso-time-bench \
 	raw.config vkso.config libkernel.so compare-update.py \
@@ -108,9 +118,17 @@ for governor in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
 	[[ -e "$governor" ]] && set_sysfs_value "$governor" performance
 done
 
+collection_mode=paired
 if [[ "$backend" == raw ]]; then
+	if [[ "$VKSO_ONLY" == 1 ]]; then
+		echo "VKSO_ONLY=1 requires the VKSO update-bench kernel" >&2
+		exit 1
+	fi
 	run_id=${1:-$(date -u +%Y%m%dT%H%M%SZ)-update}
 	printf '%s\n' "$run_id" >"$STATE"
+elif [[ "$VKSO_ONLY" == 1 ]]; then
+	collection_mode=vkso-only
+	run_id=${1:-$(date -u +%Y%m%dT%H%M%SZ)-vkso-update}
 else
 	if [[ $# -gt 0 ]]; then
 		run_id=$1
@@ -145,6 +163,7 @@ cmp -s "$PACKAGE/$backend.config" "$out/running.config"
 	printf 'update_seconds=%s\n' "$UPDATE_SECONDS"
 	printf 'warmup=%s\n' "$WARMUP"
 	printf 'seq_iterations=%s\n' "$SEQ_ITERATIONS"
+	printf 'collection_mode=%s\n' "$collection_mode"
 	printf 'clocksource=%s\n' "$clocksource"
 	printf 'cmdline=%s\n' "$(cat /proc/cmdline)"
 	printf 'package=%s\n' "$PACKAGE"
@@ -213,10 +232,13 @@ record_command()
 
 for ((round = 0; round < REPEATS; round++)); do
 	index=$(printf '%02d' "$round")
+	printf 'update round=%d/%d scenario=idle\n' "$((round + 1))" "$REPEATS"
 	record_command "$out/3.2-idle/round-$index-writer.csv" \
 		sleep "$UPDATE_SECONDS"
 
 	for operation in monotonic monotonic_raw monotonic_coarse; do
+		printf 'update round=%d/%d scenario=%s\n' \
+			"$((round + 1))" "$REPEATS" "$operation"
 		scenario=$out/3.3-concurrent/$operation
 		mkdir -p "$scenario"
 		record_command "$scenario/round-$index-writer.csv" \
@@ -228,6 +250,8 @@ for ((round = 0; round < REPEATS; round++)); do
 	done
 
 	scenario=$out/3.3-concurrent/seq_protocol
+	printf 'update round=%d/%d scenario=seq_protocol\n' \
+		"$((round + 1))" "$REPEATS"
 	mkdir -p "$scenario"
 	record_command "$scenario/round-$index-writer.csv" \
 		"$PACKAGE/vkso-time-bench" \
@@ -247,8 +271,12 @@ if [[ "$backend" == raw ]]; then
 	echo "active_run_id=$run_id"
 	echo "next_step=$CONTROL_DIR/boot-vkso-update.sh"
 else
-	"$PACKAGE/compare-update.py" --result-root "$result_root"
 	echo "vkso_update_result=$out"
-	echo "comparison=$result_root/update-comparison.csv"
-	echo "summary=$result_root/UPDATE_SUMMARY.md"
+	if [[ "$collection_mode" == paired ]]; then
+		"$PACKAGE/compare-update.py" --result-root "$result_root"
+		echo "comparison=$result_root/update-comparison.csv"
+		echo "summary=$result_root/UPDATE_SUMMARY.md"
+	else
+		echo "backend_summary=$out/update-summary.csv"
+	fi
 fi
