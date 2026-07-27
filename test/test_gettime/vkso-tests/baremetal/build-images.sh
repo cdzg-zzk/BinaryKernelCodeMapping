@@ -89,6 +89,14 @@ if [[ "$reuse_raw" == 0 ]]; then
 fi
 test "$(make -s -C "$VKSO_SOURCE" kernelversion)" = 5.15.198
 
+uts_version_from_build()
+{
+	local build=$1
+
+	sed -n 's/^#define UTS_VERSION "\(.*\)"$/\1/p' \
+		"$build/include/generated/compile.h"
+}
+
 if [[ "$UPDATE_BENCH" == 1 ]]; then
 	if [[ "$reuse_raw" == 0 ]]; then
 		"$HERE/../update-bench/prepare-raw-source.sh" "$RAW_SOURCE"
@@ -227,6 +235,17 @@ if [[ "$reuse_raw" == 0 ]]; then
 fi
 make -C "$VKSO_SOURCE" O="$VKSO_BUILD" -j"$JOBS" bzImage modules_prepare
 cp "$VKSO_BUILD/vmlinux.symvers" "$VKSO_BUILD/Module.symvers"
+
+vkso_uts_version=$(uts_version_from_build "$VKSO_BUILD")
+test -n "$vkso_uts_version"
+raw_uts_version=
+if [[ "$reuse_raw" == 0 ]]; then
+	raw_uts_version=$(uts_version_from_build "$RAW_BUILD")
+elif [[ -s "$RAW_PACKAGE/boot-manifest.txt" ]]; then
+	raw_uts_version=$(awk -F= '$1 == "raw_uts_version" {
+		sub(/^[^=]*=/, ""); print; exit
+	}' "$RAW_PACKAGE/boot-manifest.txt")
+fi
 
 artifacts=(
 	"$VKSO_BUILD/arch/x86/boot/bzImage"
@@ -389,6 +408,10 @@ fi
 		"$(sha256sum "$OUT/raw-bzImage" | awk '{print $1}')"
 	printf 'vkso_image_sha256=%s\n' \
 		"$(sha256sum "$OUT/vkso-bzImage" | awk '{print $1}')"
+	if [[ -n "$raw_uts_version" ]]; then
+		printf 'raw_uts_version=%s\n' "$raw_uts_version"
+	fi
+	printf 'vkso_uts_version=%s\n' "$vkso_uts_version"
 	printf 'vkso_shared_st_value=%s\n' "$shared_value"
 	printf 'vkso_core_st_value=%s\n' "$core_value"
 	printf 'production_test_probe=absent\n'

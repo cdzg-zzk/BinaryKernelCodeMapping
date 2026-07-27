@@ -93,6 +93,22 @@ if [[ ${boot_image##*/} != "$expected_image" ]]; then
 	exit 1
 fi
 
+# All experimental builds intentionally share one release and one stable
+# filename.  Updating /boot therefore does not change uname -r or BOOT_IMAGE
+# in an already running kernel.  Compare the full build identity before page
+# replacement so stale symbol offsets cannot be executed.
+expected_uts_version=$(awk -F= -v key="${backend}_uts_version" \
+	'$1 == key { sub(/^[^=]*=/, ""); print; exit }' \
+	"$PACKAGE/boot-manifest.txt")
+if [[ -n "$expected_uts_version" &&
+	$(uname -v) != "$expected_uts_version" ]]; then
+	echo "running kernel does not match the prepared $backend package" >&2
+	echo "running uname -v: $(uname -v)" >&2
+	echo "package uname -v: $expected_uts_version" >&2
+	echo "reboot into $expected_image before collecting" >&2
+	exit 1
+fi
+
 collection_mode=paired
 reference_vkso=
 if [[ "$backend" == raw ]]; then
