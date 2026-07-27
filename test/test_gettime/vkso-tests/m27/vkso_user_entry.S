@@ -5,9 +5,11 @@
  *
  * Shared core text remains backed by kernel pages.  This page is ordinary
  * DSO-owned RX text so it can inject per-process addresses without changing
- * the shared kernel ABI.  All core transfers are local rel32 tail jumps:
- * make_dll resolves them while constructing the DSO, so no PLT/GOT remains
- * on the hot path.
+ * the shared kernel ABI.  The clock_gettime veneer mirrors the core's branch
+ * order and tail-jumps to its existing specialized readers.  This removes one
+ * shared-core dispatch hop and only prepares dependencies used by the selected
+ * reader.  make_dll resolves every transfer locally, so no PLT/GOT remains on
+ * the hot path.
  */
 
 	.section .vkso.user.text, "ax", @progbits
@@ -17,9 +19,27 @@
 __vkso_clock_gettime:
 	movq	%rsi, %rdx
 	movl	%edi, %esi
-	movq	vkso_user_mm_data(%rip), %rdi
+	testl	%esi, %esi
+	jne	.Lclock_not_realtime
 	leaq	vkso_user_context(%rip), %rcx
-	jmp	vkso_clock_gettime_core
+	jmp	vkso_clock_gettime_realtime
+
+.Lclock_not_realtime:
+	movq	vkso_user_mm_data(%rip), %rdi
+	cmpl	$1, %esi
+	jne	.Lclock_not_monotonic
+	leaq	vkso_user_context(%rip), %rcx
+	jmp	vkso_clock_gettime_monotonic
+
+.Lclock_not_monotonic:
+	leal	-5(%rsi), %eax
+	cmpl	$1, %eax
+	jbe	.Lclock_coarse
+	leaq	vkso_user_context(%rip), %rcx
+	jmp	vkso_clock_gettime_other
+
+.Lclock_coarse:
+	jmp	vkso_clock_gettime_coarse
 	.size __vkso_clock_gettime, .-__vkso_clock_gettime
 
 	.p2align 4

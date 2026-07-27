@@ -213,7 +213,11 @@ for symbol in \
 	__vkso_clock_gettime __vkso_clock_getres __vkso_gettimeofday; do
 	objdump -d --disassemble="$symbol" "$libkernel" >>"$wrapper_dis"
 done
-grep -Eq 'jmp[[:space:]].*<vkso_clock_gettime_core>' "$wrapper_dis"
+for target in \
+	vkso_clock_gettime_realtime vkso_clock_gettime_monotonic \
+	vkso_clock_gettime_coarse vkso_clock_gettime_other; do
+	grep -Eq "jmp[[:space:]].*<$target>" "$wrapper_dis"
+done
 grep -Eq 'jmp[[:space:]].*<vkso_clock_getres_core>' "$wrapper_dis"
 grep -Eq 'jmp[[:space:]].*<vkso_gettimeofday_core>' "$wrapper_dis"
 if grep -Eq '@plt|jmpq?[[:space:]]+\*|callq?[[:space:]]+\*' "$wrapper_dis"; then
@@ -224,7 +228,7 @@ if ! readelf -rW "$libkernel" | grep -Fq 'There are no relocations'; then
 	echo "libkernel contains unresolved dynamic relocations" >&2
 	exit 1
 fi
-echo "disassembly.libkernel_wrapper=pass direct_tail_jumps=3 relocations=0"
+echo "disassembly.libkernel_wrapper=pass clock_dispatch=direct relocations=0"
 
 core_text=$(section_size "$VKSO_BUILD/kernel/time/vkso_time_core.o" \
 	.vkso.text)

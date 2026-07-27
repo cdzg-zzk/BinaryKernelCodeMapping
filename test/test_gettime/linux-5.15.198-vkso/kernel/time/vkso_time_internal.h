@@ -170,7 +170,6 @@ vkso_read_hres_sample(const struct vkso_shared_data *shared,
 static __always_inline void
 vkso_read_coarse(const struct vkso_shared_data *shared,
 		 const struct vkso_time_value *base,
-		 const struct vkso_time_value *offset,
 		 struct vkso_time_value *value)
 {
 	struct vkso_time_value next;
@@ -182,14 +181,6 @@ vkso_read_coarse(const struct vkso_shared_data *shared,
 		next.nsec = READ_ONCE(base->nsec);
 		if (!vkso_read_retry(shared, seq))
 			break;
-	}
-	if (unlikely(offset)) {
-		next.sec += READ_ONCE(offset->sec);
-		next.nsec += READ_ONCE(offset->nsec);
-		if (next.nsec >= NSEC_PER_SEC) {
-			next.nsec -= NSEC_PER_SEC;
-			next.sec++;
-		}
 	}
 	*value = next;
 }

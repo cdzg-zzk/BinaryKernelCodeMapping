@@ -99,21 +99,23 @@ int vkso_clock_gettime_monotonic(
 	const struct vkso_context *context)
 {
 	const struct vkso_shared_data *shared = vkso_shared_data();
-	const struct vkso_time_value *offset = NULL;
 
 	(void)clock_id;
-	if (unlikely(mm_data &&
-		     (READ_ONCE(mm_data->clock_mask) &
-		      (1U << CLOCK_MONOTONIC))))
-		offset = &mm_data->monotonic_offset;
-
 	if (unlikely(vkso_read_hres_time(
 			shared, &shared->hres.monotonic_base,
 			&shared->hres.cycles, context, value) != VKSO_TIME_OK))
 		return vkso_fallback(context, __NR_clock_gettime,
 				     CLOCK_MONOTONIC, (long)value);
-	if (unlikely(offset))
-		vkso_apply_offset(offset, value);
+	/*
+	 * MM_data is stable for the read and its offsets are frozen before the
+	 * mask is published.  Test it after the TSC/seq critical path so the root
+	 * namespace does not carry an offset-pointer branch before and after the
+	 * shared read.
+	 */
+	if (unlikely(mm_data &&
+		     (READ_ONCE(mm_data->clock_mask) &
+		      (1U << CLOCK_MONOTONIC))))
+		vkso_apply_offset(&mm_data->monotonic_offset, value);
 	return VKSO_TIME_OK;
 }
 
@@ -124,17 +126,14 @@ int vkso_clock_gettime_coarse(
 	const struct vkso_context *context)
 {
 	const struct vkso_shared_data *shared = vkso_shared_data();
-	const struct vkso_time_value *offset = NULL;
 	u32 index = clock_id - CLOCK_REALTIME_COARSE;
 
 	(void)context;
+	vkso_read_coarse(shared, &shared->realtime_coarse + index, value);
 	if (unlikely(index && mm_data &&
 		     (READ_ONCE(mm_data->clock_mask) &
 		      (1U << CLOCK_MONOTONIC_COARSE))))
-		offset = &mm_data->monotonic_offset;
-
-	vkso_read_coarse(shared, &shared->realtime_coarse + index,
-			 offset, value);
+		vkso_apply_offset(&mm_data->monotonic_offset, value);
 	return VKSO_TIME_OK;
 }
 
