@@ -140,6 +140,7 @@ configure_tree()
 	"$source/scripts/config" --file "$build/.config" \
 		--enable MODULES \
 		--enable MODULE_UNLOAD \
+		--disable MODULE_SIG \
 		--enable IKCONFIG \
 		--enable IKCONFIG_PROC \
 		--enable PERF_EVENTS \
