@@ -5,6 +5,11 @@
 编译器：GCC 11.4.0
 配置：`baremetal/artifacts/final-normal/vkso.config`
 
+> 本文只证明`9ad92a1`之后那次“宏化源码去重”不改变机器码。后续
+> `be35a28`又调整了参数ABI、MM_data选择和fallback，当前最终机器码请以
+> `binary-symbol-manifest.tsv`及主评估报告为准，不能继续引用本文的
+> “最终DSO逐字节相同”作为当前版本结论。
+
 ## Reader
 
 重构前源码由基线提交取得，重构后源码使用相同Kbuild命令编译。比较目标为

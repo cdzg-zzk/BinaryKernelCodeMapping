@@ -4,6 +4,6 @@ reused_shared_data	43d41b2^..43d41b2	page_cache_replace/manager.cpp	2	1	no	manag
 reused_shared_data	43d41b2^..43d41b2	vkso	15	1	no	命令行传入shared_data清单
 unrelated	43d41b2^..43d41b2	page_cache_replace/Makefile	2	1	no	静态链接构建调整，不属于time/shared_data语义
 unrelated	43d41b2^..43d41b2	page_cache_replace/page_cache_replace.c	2	2	no	PMD变量改名，不属于time/shared_data语义
-time_wrapper_adaptation	5b7386b..9ad92a1	make_dll/build_PIC_so.py	227	1	yes	把手写ET_REL wrapper及其私有data合入libkernel.so的通用能力
-time_wrapper_validation	5b7386b..9ad92a1	make_dll/tests/test_builtin_thunks.py	2	1	test	既有thunk测试适配
-shared_data_validation	5b7386b..9ad92a1	make_dll/tests/test_shared_data.py	100	0	test	shared_data单元测试
+time_wrapper_adaptation	5b7386b..be35a28	make_dll/build_PIC_so.py	227	1	yes	把手写ET_REL wrapper及其私有data合入libkernel.so的通用能力；当前实现未再改builder
+time_wrapper_validation	5b7386b..be35a28	make_dll/tests/test_builtin_thunks.py	2	1	test	既有thunk测试适配
+shared_data_validation	5b7386b..be35a28	make_dll/tests/test_shared_data.py	100	0	test	shared_data单元测试

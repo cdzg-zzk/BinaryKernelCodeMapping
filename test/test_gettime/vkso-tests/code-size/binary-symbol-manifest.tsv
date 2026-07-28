@@ -17,20 +17,20 @@ Raw	publication	update_vsyscall_tz	19	exact-config GCC11.4 symbolized rebuild
 VKSO	shared_core	__vkso_getcpu	42	exact-config GCC11.4 symbolized rebuild
 VKSO	shared_core	__vkso_time	24	exact-config GCC11.4 symbolized rebuild
 VKSO	shared_core	vkso_clock_getres_coarse	27	exact-config GCC11.4 symbolized rebuild
-VKSO	shared_core	vkso_clock_getres_core	58	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_getres_core	51	current exact-config GCC11.4 object rebuild
 VKSO	shared_core	vkso_clock_getres_hres	36	exact-config GCC11.4 symbolized rebuild
 VKSO	shared_core	vkso_clock_gettime_boottime	300	exact-config GCC11.4 symbolized rebuild
-VKSO	shared_core	vkso_clock_gettime_core	94	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_gettime_core	82	current exact-config GCC11.4 object rebuild
 VKSO	shared_core	vkso_clock_gettime_monotonic	297	exact-config GCC11.4 symbolized rebuild
 VKSO	shared_core	vkso_clock_gettime_monotonic_coarse	103	exact-config GCC11.4 symbolized rebuild
 VKSO	shared_core	vkso_clock_gettime_monotonic_raw	315	exact-config GCC11.4 symbolized rebuild
 VKSO	shared_core	vkso_clock_gettime_realtime	209	exact-config GCC11.4 symbolized rebuild
 VKSO	shared_core	vkso_clock_gettime_realtime_coarse	46	exact-config GCC11.4 symbolized rebuild
 VKSO	shared_core	vkso_clock_gettime_tai	212	exact-config GCC11.4 symbolized rebuild
-VKSO	shared_core	vkso_fallback	36	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_fallback	26	current exact-config GCC11.4 object rebuild
 VKSO	shared_core	vkso_gettimeofday_core	282	exact-config GCC11.4 symbolized rebuild
-VKSO	shared_core	vkso_read_cycles_cold	116	exact-config GCC11.4 symbolized rebuild
-VKSO	user_wrapper	__vkso_clock_gettime	153	final libkernel.so
+VKSO	shared_core	vkso_read_cycles_cold	111	current exact-config GCC11.4 object rebuild
+VKSO	user_wrapper	__vkso_clock_gettime	145	current final libkernel.so
 VKSO	user_wrapper	__vkso_clock_getres	49	final libkernel.so
 VKSO	user_wrapper	__vkso_gettimeofday	12	final libkernel.so
 VKSO	user_wrapper	__vkso_bind_context	24	final libkernel.so
