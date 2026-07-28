@@ -4,6 +4,7 @@
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+COMPARE=${COMPARE:-$HERE/compare-update.py}
 if [[ -s "$HERE/libkernel.so" ]]; then
 	PACKAGE=${PACKAGE:-$HERE}
 	CONTROL_DIR=${CONTROL_DIR:-$HERE}
@@ -19,11 +20,13 @@ UPDATE_SECONDS=${UPDATE_SECONDS:-15}
 WARMUP=${WARMUP:-100000}
 SEQ_ITERATIONS=${SEQ_ITERATIONS:-50000000}
 VKSO_ONLY=${VKSO_ONLY:-0}
+BENCH_SCOPE=${BENCH_SCOPE:-all}
+STABILIZE_SECONDS=${STABILIZE_SECONDS:-0}
 DEBUGFS=/sys/kernel/debug
 BENCH_DIR=$DEBUGFS/timekeeping_update_bench
 
 if [[ $(id -u) -ne 0 ]]; then
-	exec sudo --preserve-env=PACKAGE,CONTROL_DIR,RESULTS_DIR,STATE_FILE,CPU,REPEATS,UPDATE_SECONDS,WARMUP,SEQ_ITERATIONS,VKSO_ONLY \
+	exec sudo --preserve-env=PACKAGE,COMPARE,CONTROL_DIR,RESULTS_DIR,STATE_FILE,CPU,REPEATS,UPDATE_SECONDS,WARMUP,SEQ_ITERATIONS,VKSO_ONLY,BENCH_SCOPE,STABILIZE_SECONDS \
 		"$0" "$@"
 fi
 
@@ -35,6 +38,22 @@ case "$VKSO_ONLY" in
 	exit 2
 	;;
 esac
+case "$BENCH_SCOPE" in
+all|update-side|concurrent)
+	;;
+*)
+	echo "BENCH_SCOPE must be all, update-side, or concurrent" >&2
+	exit 2
+	;;
+esac
+if [[ ! "$STABILIZE_SECONDS" =~ ^[0-9]+$ ]]; then
+	echo "STABILIZE_SECONDS must be a non-negative integer" >&2
+	exit 2
+fi
+
+if [[ -z "${STATE_FILE+x}" ]]; then
+	STATE=$CONTROL_DIR/.active-$BENCH_SCOPE-run-id
+fi
 
 for file in SHA256SUMS boot-manifest.txt vkso-time-bench \
 	raw.config vkso.config libkernel.so compare-update.py \
@@ -45,6 +64,10 @@ for file in SHA256SUMS boot-manifest.txt vkso-time-bench \
 		exit 1
 	}
 done
+test -x "$COMPARE" || {
+	echo "missing update result analyzer: $COMPARE" >&2
+	exit 1
+}
 (cd "$PACKAGE" && sha256sum -c SHA256SUMS)
 grep -Fqx 'build_variant=normal' "$PACKAGE/boot-manifest.txt"
 grep -Fqx 'update_bench=1' "$PACKAGE/boot-manifest.txt"
@@ -124,7 +147,18 @@ if [[ "$backend" == raw ]]; then
 		echo "VKSO_ONLY=1 requires the VKSO update-bench kernel" >&2
 		exit 1
 	fi
-	run_id=${1:-$(date -u +%Y%m%dT%H%M%SZ)-update}
+	case "$BENCH_SCOPE" in
+	update-side)
+		default_suffix=update-side
+		;;
+	concurrent)
+		default_suffix=update-concurrent
+		;;
+	all)
+		default_suffix=update
+		;;
+	esac
+	run_id=${1:-$(date -u +%Y%m%dT%H%M%SZ)-$default_suffix}
 	printf '%s\n' "$run_id" >"$STATE"
 elif [[ "$VKSO_ONLY" == 1 ]]; then
 	collection_mode=vkso-only
@@ -150,7 +184,17 @@ if [[ -e "$out/complete" ]]; then
 	echo "$backend update result already complete: $out" >&2
 	exit 1
 fi
-mkdir -p "$out/3.2-idle" "$out/3.3-concurrent"
+case "$BENCH_SCOPE" in
+all)
+	mkdir -p "$out/3.2-idle" "$out/3.3-concurrent"
+	;;
+update-side)
+	mkdir -p "$out/3.2-idle"
+	;;
+concurrent)
+	mkdir -p "$out/3.3-concurrent"
+	;;
+esac
 printf '%s\n' "$probe" >"$out/backend-probe.txt"
 zcat /proc/config.gz >"$out/running.config"
 cmp -s "$PACKAGE/$backend.config" "$out/running.config"
@@ -164,6 +208,8 @@ cmp -s "$PACKAGE/$backend.config" "$out/running.config"
 	printf 'warmup=%s\n' "$WARMUP"
 	printf 'seq_iterations=%s\n' "$SEQ_ITERATIONS"
 	printf 'collection_mode=%s\n' "$collection_mode"
+	printf 'bench_scope=%s\n' "$BENCH_SCOPE"
+	printf 'stabilize_seconds=%s\n' "$STABILIZE_SECONDS"
 	printf 'clocksource=%s\n' "$clocksource"
 	printf 'cmdline=%s\n' "$(cat /proc/cmdline)"
 	printf 'package=%s\n' "$PACKAGE"
@@ -217,6 +263,14 @@ grep -Fq 'abi_matrix_status=pass' "$out/functional.log"
 tr -d '\r' <"$out/functional.log" |
 	grep -E '^(semantics|path|namespace)\.' >"$out/functional.matrix"
 
+if ((STABILIZE_SECONDS > 0)); then
+	printf 'stabilizing backend=%s seconds=%s\n' \
+		"$backend" "$STABILIZE_SECONDS"
+	sleep "$STABILIZE_SECONDS"
+fi
+date -u '+measurement_start_utc=%Y-%m-%dT%H:%M:%SZ' \
+	>>"$out/metadata.txt"
+
 record_command()
 {
 	local sample_file=$1
@@ -232,37 +286,42 @@ record_command()
 
 for ((round = 0; round < REPEATS; round++)); do
 	index=$(printf '%02d' "$round")
-	printf 'update round=%d/%d scenario=idle\n' "$((round + 1))" "$REPEATS"
-	record_command "$out/3.2-idle/round-$index-writer.csv" \
-		sleep "$UPDATE_SECONDS"
+	if [[ "$BENCH_SCOPE" != concurrent ]]; then
+		printf 'update round=%d/%d scenario=idle\n' \
+			"$((round + 1))" "$REPEATS"
+		record_command "$out/3.2-idle/round-$index-writer.csv" \
+			sleep "$UPDATE_SECONDS"
+	fi
 
-	for operation in monotonic monotonic_raw monotonic_coarse; do
-		printf 'update round=%d/%d scenario=%s\n' \
-			"$((round + 1))" "$REPEATS" "$operation"
-		scenario=$out/3.3-concurrent/$operation
+	if [[ "$BENCH_SCOPE" != update-side ]]; then
+		for operation in monotonic monotonic_raw monotonic_coarse; do
+			printf 'update round=%d/%d scenario=%s\n' \
+				"$((round + 1))" "$REPEATS" "$operation"
+			scenario=$out/3.3-concurrent/$operation
+			mkdir -p "$scenario"
+			record_command "$scenario/round-$index-writer.csv" \
+				"$PACKAGE/vkso-time-bench" \
+				--backend "$backend" --mode load --cpu "$CPU" \
+				--operation "$operation" --seconds "$UPDATE_SECONDS" \
+				--warmup "$WARMUP" \
+				>"$scenario/round-$index-reader.csv"
+		done
+
+		scenario=$out/3.3-concurrent/seq_protocol
+		printf 'update round=%d/%d scenario=seq_protocol\n' \
+			"$((round + 1))" "$REPEATS"
 		mkdir -p "$scenario"
 		record_command "$scenario/round-$index-writer.csv" \
 			"$PACKAGE/vkso-time-bench" \
-			--backend "$backend" --mode load --cpu "$CPU" \
-			--operation "$operation" --seconds "$UPDATE_SECONDS" \
-			--warmup "$WARMUP" \
+			--backend "$backend" --mode seq --cpu "$CPU" \
+			--seq-iterations "$SEQ_ITERATIONS" \
 			>"$scenario/round-$index-reader.csv"
-	done
-
-	scenario=$out/3.3-concurrent/seq_protocol
-	printf 'update round=%d/%d scenario=seq_protocol\n' \
-		"$((round + 1))" "$REPEATS"
-	mkdir -p "$scenario"
-	record_command "$scenario/round-$index-writer.csv" \
-		"$PACKAGE/vkso-time-bench" \
-		--backend "$backend" --mode seq --cpu "$CPU" \
-		--seq-iterations "$SEQ_ITERATIONS" \
-		>"$scenario/round-$index-reader.csv"
+	fi
 done
 
 printf 'stop\n' >"$BENCH_DIR/control"
 cleanup_all
-"$PACKAGE/compare-update.py" --backend-dir "$out"
+"$COMPARE" --backend-dir "$out"
 touch "$out/complete"
 trap - EXIT INT TERM
 
@@ -273,9 +332,13 @@ if [[ "$backend" == raw ]]; then
 else
 	echo "vkso_update_result=$out"
 	if [[ "$collection_mode" == paired ]]; then
-		"$PACKAGE/compare-update.py" --result-root "$result_root"
+		"$COMPARE" --result-root "$result_root"
 		echo "comparison=$result_root/update-comparison.csv"
-		echo "summary=$result_root/UPDATE_SUMMARY.md"
+		if [[ "$BENCH_SCOPE" == concurrent ]]; then
+			echo "summary=$result_root/CONCURRENT_SUMMARY.md"
+		else
+			echo "summary=$result_root/UPDATE_SUMMARY.md"
+		fi
 	else
 		echo "backend_summary=$out/update-summary.csv"
 	fi

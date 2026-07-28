@@ -10,6 +10,17 @@ from pathlib import Path
 
 
 ROUND_RE = re.compile(r"round-(\d+)-")
+LOAD_APIS = {
+    "monotonic": "clock_gettime_monotonic",
+    "monotonic_raw": "clock_gettime_monotonic_raw",
+    "monotonic_coarse": "clock_gettime_monotonic_coarse",
+}
+SEQ_READERS = {"hres_protocol", "raw_protocol"}
+SCENARIOS_BY_SCOPE = {
+    "update-side": {"idle"},
+    "concurrent": {*LOAD_APIS, "seq_protocol"},
+    "all": {"idle", *LOAD_APIS, "seq_protocol"},
+}
 
 
 def percentile(values, fraction):
@@ -109,9 +120,95 @@ def read_metadata(path):
     return values
 
 
+def integer(row, key, path):
+    try:
+        return int(row[key])
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError(f"invalid integer {key} in {path}") from error
+
+
+def real(row, key, path):
+    try:
+        value = float(row[key])
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError(f"invalid number {key} in {path}") from error
+    if not math.isfinite(value):
+        raise ValueError(f"non-finite number {key} in {path}")
+    return value
+
+
+def validate_reader_rows(path, backend, scenario, rows, metadata):
+    if scenario in LOAD_APIS:
+        if len(rows) != 1:
+            raise ValueError(f"expected one load row in {path}, got {len(rows)}")
+        row = rows[0]
+        if row.get("backend") != backend:
+            raise ValueError(f"reader backend mismatch in {path}")
+        if row.get("api") != LOAD_APIS[scenario]:
+            raise ValueError(f"reader API mismatch in {path}")
+        if integer(row, "seconds", path) != int(metadata["update_seconds"]):
+            raise ValueError(f"reader duration mismatch in {path}")
+        if integer(row, "cpu_migration", path):
+            raise ValueError(f"CPU migration reported in {path}")
+        if integer(row, "time_reversal", path):
+            raise ValueError(f"time reversal reported in {path}")
+        if integer(row, "calls", path) <= 0:
+            raise ValueError(f"no reader calls in {path}")
+        if integer(row, "wall_ns", path) < int(metadata["update_seconds"]) * 10**9:
+            raise ValueError(f"short reader duration in {path}")
+        if real(row, "tsc_cycles_per_call", path) <= 0:
+            raise ValueError(f"invalid reader cycles in {path}")
+        if real(row, "calls_per_second", path) <= 0:
+            raise ValueError(f"invalid reader throughput in {path}")
+        return
+
+    if scenario != "seq_protocol":
+        raise ValueError(f"unexpected reader scenario {scenario} in {path}")
+    if len(rows) != len(SEQ_READERS):
+        raise ValueError(f"expected two seq rows in {path}, got {len(rows)}")
+    if {row.get("reader") for row in rows} != SEQ_READERS:
+        raise ValueError(f"seq reader set mismatch in {path}")
+    for row in rows:
+        if row.get("backend") != backend:
+            raise ValueError(f"seq backend mismatch in {path}")
+        if integer(row, "completed", path) != int(metadata["seq_iterations"]):
+            raise ValueError(f"incomplete seq observation in {path}")
+        retries = integer(row, "retries", path)
+        odd = integer(row, "odd_seq", path)
+        changed = integer(row, "changed_seq", path)
+        if retries != odd + changed:
+            raise ValueError(f"inconsistent seq retry accounting in {path}")
+        if real(row, "retries_per_million", path) < 0:
+            raise ValueError(f"invalid seq retry rate in {path}")
+        if real(row, "cycles_per_read", path) <= 0:
+            raise ValueError(f"invalid seq reader cycles in {path}")
+
+
+def validate_rounds(rows, expected_scenarios, repeats, description):
+    scenarios = {row["scenario"] for row in rows}
+    if scenarios != expected_scenarios:
+        raise ValueError(
+            f"{description} scenario mismatch: expected={sorted(expected_scenarios)}, "
+            f"actual={sorted(scenarios)}"
+        )
+    expected_rounds = list(range(repeats))
+    for scenario in sorted(expected_scenarios):
+        actual = sorted(row["round"] for row in rows if row["scenario"] == scenario)
+        if actual != expected_rounds:
+            raise ValueError(
+                f"{description} rounds for {scenario}: "
+                f"expected={expected_rounds}, actual={actual}"
+            )
+
+
 def summarize_backend(backend_dir):
     backend = backend_dir.name
     metadata = read_metadata(backend_dir / "metadata.txt")
+    scope = metadata.get("bench_scope", "all")
+    if scope not in SCENARIOS_BY_SCOPE:
+        raise ValueError(f"unknown benchmark scope in {backend_dir}: {scope}")
+    repeats = int(metadata["repeats"])
+    expected_scenarios = SCENARIOS_BY_SCOPE[scope]
     update_seconds = float(metadata["update_seconds"])
     writer_rows = []
     for path in sorted(backend_dir.glob("3.*/*writer.csv")) + sorted(
@@ -130,13 +227,24 @@ def summarize_backend(backend_dir):
         writer_rows.append(row)
     if not writer_rows:
         raise ValueError(f"no writer samples below {backend_dir}")
+    validate_rounds(writer_rows, expected_scenarios, repeats, "writer")
+    if any(row["other_actions"] for row in writer_rows):
+        raise ValueError(f"non-periodic writer action below {backend_dir}")
+    overheads = {row["tsc_pair_min"] for row in writer_rows}
+    if len(overheads) != 1:
+        raise ValueError(f"inconsistent TSC measurement overhead below {backend_dir}")
     writer_fields = list(writer_rows[0])
     write_csv(backend_dir / "writer-rounds.csv", writer_fields, writer_rows)
 
     reader_rows = []
-    for path in sorted(backend_dir.glob("3.3-concurrent/*/*reader.csv")):
+    reader_files = sorted(backend_dir.glob("3.3-concurrent/*/*reader.csv"))
+    reader_file_rows = []
+    for path in reader_files:
         scenario = scenario_for(path, backend_dir)
-        for row in read_csv_rows(path):
+        rows = read_csv_rows(path)
+        validate_reader_rows(path, backend, scenario, rows, metadata)
+        reader_file_rows.append({"scenario": scenario, "round": round_for(path)})
+        for row in rows:
             reader_rows.append(
                 {
                     "backend": backend,
@@ -145,6 +253,13 @@ def summarize_backend(backend_dir):
                     **row,
                 }
             )
+    expected_reader_scenarios = expected_scenarios - {"idle"}
+    if expected_reader_scenarios:
+        validate_rounds(
+            reader_file_rows, expected_reader_scenarios, repeats, "reader"
+        )
+    elif reader_files:
+        raise ValueError(f"unexpected reader files below {backend_dir}")
     if reader_rows:
         fields = []
         for row in reader_rows:
@@ -231,6 +346,32 @@ def markdown_table(headers, rows):
 
 
 def compare_result_root(result_root):
+    for backend in ("raw", "vkso"):
+        if not (result_root / backend / "complete").is_file():
+            raise ValueError(f"incomplete backend result: {backend}")
+    raw_metadata = read_metadata(result_root / "raw" / "metadata.txt")
+    vkso_metadata = read_metadata(result_root / "vkso" / "metadata.txt")
+    raw_scope = raw_metadata.get("bench_scope", "all")
+    vkso_scope = vkso_metadata.get("bench_scope", "all")
+    if raw_scope != vkso_scope:
+        raise ValueError(
+            f"benchmark scope mismatch: raw={raw_scope}, vkso={vkso_scope}"
+        )
+    for key in (
+        "cpu",
+        "repeats",
+        "update_seconds",
+        "warmup",
+        "seq_iterations",
+        "collection_mode",
+        "stabilize_seconds",
+        "clocksource",
+    ):
+        if raw_metadata.get(key) != vkso_metadata.get(key):
+            raise ValueError(
+                f"metadata mismatch for {key}: "
+                f"raw={raw_metadata.get(key)}, vkso={vkso_metadata.get(key)}"
+            )
     raw = summarize_backend(result_root / "raw")
     vkso = summarize_backend(result_root / "vkso")
     raw_map = {
@@ -284,34 +425,86 @@ def compare_result_root(result_root):
             )
     seq_table = []
     for scenario in ("hres_protocol", "raw_protocol"):
-        row = comparison_map.get(("seq", scenario, "retries_per_million"))
-        if row:
+        retry = comparison_map.get(("seq", scenario, "retries_per_million"))
+        cycles = comparison_map.get(("seq", scenario, "cycles_per_read"))
+        if retry and cycles:
             seq_table.append(
-                [scenario, f'{float(row["raw"]):.3f}', f'{float(row["vkso"]):.3f}',
-                 f'{float(row["delta_percent"]):+.2f}%']
+                [
+                    scenario,
+                    f'{float(retry["raw"]):.3f}',
+                    f'{float(retry["vkso"]):.3f}',
+                    f'{float(retry["delta_percent"]):+.2f}%',
+                    f'{float(cycles["raw"]):.3f}',
+                    f'{float(cycles["vkso"]):.3f}',
+                    f'{float(cycles["delta_percent"]):+.2f}%',
+                ]
             )
 
+    title = {
+        "update-side": "# VKSO update-side 性能实验结果",
+        "concurrent": "# VKSO read/update 并发实验结果",
+        "all": "# VKSO update-side 3.2/3.3 实验结果",
+    }.get(raw_scope, "# VKSO update-side 实验结果")
     report = [
-        "# VKSO update-side 3.2/3.3 实验结果",
+        title,
         "",
         "主指标均为多轮结果的中位数；`Δ%=(VKSO/Raw-1)×100%`，负值表示VKSO开销更低。",
+        (
+            f'实验参数：repeats={raw_metadata["repeats"]}，'
+            f'每个 load 场景={raw_metadata["update_seconds"]} 秒，'
+            f'seq iterations={raw_metadata["seq_iterations"]}，'
+            f'稳定等待={raw_metadata.get("stabilize_seconds", "0")} 秒。'
+        ),
         "",
-        "## 3.2及3.3 writer完整timekeeping_update",
+        "## 完整 timekeeping_update writer",
         "",
         markdown_table(["场景", "Raw cycles", "VKSO cycles", "差值", "Δ%"], writer_table),
         "",
-        "## 3.3公开用户入口reader负载",
-        "",
-        markdown_table(["场景", "Raw cycles/call", "VKSO cycles/call", "Δ%"], reader_table),
-        "",
-        "## 3.3 seq竞争",
-        "",
-        markdown_table(["协议", "Raw retries/百万", "VKSO retries/百万", "Δ%"], seq_table),
-        "",
-        "完整均值、P95、P99、校正值和每轮数据见 `update-comparison.csv` 及各backend目录。",
-        "",
     ]
-    (result_root / "UPDATE_SUMMARY.md").write_text("\n".join(report))
+    if reader_table:
+        report.extend(
+            [
+                "## 并发条件下公开用户入口 reader",
+                "",
+                markdown_table(
+                    ["场景", "Raw cycles/call", "VKSO cycles/call", "Δ%"],
+                    reader_table,
+                ),
+                "",
+            ]
+        )
+    if seq_table:
+        report.extend(
+            [
+                "## 并发 seq 竞争",
+                "",
+                markdown_table(
+                    [
+                        "协议",
+                        "Raw retries/百万",
+                        "VKSO retries/百万",
+                        "retry Δ%",
+                        "Raw cycles/read",
+                        "VKSO cycles/read",
+                        "cycles Δ%",
+                    ],
+                    seq_table,
+                ),
+                "",
+            ]
+        )
+    report.extend(
+        [
+            "完整均值、P95、P99、校正值和每轮数据见 `update-comparison.csv` 及各backend目录。",
+            "",
+        ]
+    )
+    summary_name = (
+        "CONCURRENT_SUMMARY.md"
+        if raw_scope == "concurrent"
+        else "UPDATE_SUMMARY.md"
+    )
+    (result_root / summary_name).write_text("\n".join(report))
 
 
 def main():

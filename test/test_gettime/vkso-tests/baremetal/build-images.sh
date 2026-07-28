@@ -400,6 +400,7 @@ fi
 install -m 0644 "$HERE/vkso_time_bench.c" "$OUT/vkso_time_bench.c"
 if [[ "$UPDATE_BENCH" == 1 ]]; then
 	for script in collect-update.sh compare-update.py \
+		collect-update-side.sh collect-update-concurrent.sh \
 		boot-raw-update.sh boot-vkso-update.sh install-update-grub.sh; do
 		install -m 0755 "$HERE/../update-bench/$script" "$OUT/$script"
 	done
@@ -472,7 +473,8 @@ fi
 		source-tree-hash.sh experiment.conf \
 		>SHA256SUMS
 	if [[ "$UPDATE_BENCH" == 1 ]]; then
-		sha256sum collect-update.sh compare-update.py boot-once.sh \
+		sha256sum collect-update.sh collect-update-side.sh \
+			collect-update-concurrent.sh compare-update.py boot-once.sh \
 			boot-raw-update.sh boot-vkso-update.sh \
 			install-update-grub.sh >>SHA256SUMS
 	fi
