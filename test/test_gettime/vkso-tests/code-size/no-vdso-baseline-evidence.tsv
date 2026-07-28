@@ -1,0 +1,15 @@
+# file	raw_to_no_vdso_added	raw_to_no_vdso_deleted	semantic_result
+arch/x86/Kconfig	3	34	移除generic vDSO选择和compat/vsyscall相关配置
+arch/x86/include/asm/elf.h	0	40	移除AT_SYSINFO_EHDR和vDSO额外页setup
+arch/x86/include/asm/mmu.h	0	3	移除原生vDSO映射状态
+arch/x86/include/uapi/asm/auxvec.h	1	14	移除原生vDSO auxv容量/compat定义
+arch/x86/kernel/vmlinux.lds.S	0	24	移除VVAR linker section
+arch/x86/kernel/pvclock.c	0	2	移除PVClock原生vDSO hook
+drivers/clocksource/hyperv_timer.c	0	9	移除Hyper-V原生vDSO hook
+include/linux/time_namespace.h	4	16	移除time namespace的vvar_page成员与vDSO join声明
+kernel/time/Makefile	0	1	不再构建vsyscall.o
+kernel/time/namespace.c	8	85	移除per-timens VVAR页分配、释放、setup和join；保留offset/freeze
+kernel/time/timekeeping.c	0	1	移除update_vsyscall调用
+kernel/time/time.c	0	1	移除update_vsyscall_tz调用
+arch/x86/entry/vdso/	0	directory	原生x86 vDSO源码目录不在no-vDSO基线
+kernel/time/vsyscall.c	0	file	原生VVAR发布实现不在no-vDSO基线

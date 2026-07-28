@@ -1,0 +1,39 @@
+# system	group	symbol	bytes	origin
+Raw	vdso_target	__vdso_gettimeofday	574	final raw-bzImage embedded vDSO
+Raw	vdso_target	__vdso_time	42	final raw-bzImage embedded vDSO
+Raw	vdso_target	__vdso_clock_gettime	761	final raw-bzImage embedded vDSO
+Raw	vdso_target	__vdso_clock_getres	99	final raw-bzImage embedded vDSO
+Raw	vdso_target	__vdso_getcpu	39	final raw-bzImage embedded vDSO
+Raw	excluded	__vdso_sgx_enter_enclave	157	final raw-bzImage embedded vDSO
+Raw	kernel_reader	ktime_get_coarse_real_ts64	59	exact-config GCC11.4 symbolized rebuild
+Raw	kernel_reader	ktime_get_coarse_ts64	84	exact-config GCC11.4 symbolized rebuild
+Raw	kernel_reader	ktime_get_raw_ts64	195	exact-config GCC11.4 symbolized rebuild
+Raw	kernel_reader	ktime_get_real_seconds	12	exact-config GCC11.4 symbolized rebuild
+Raw	kernel_reader	ktime_get_real_ts64	216	exact-config GCC11.4 symbolized rebuild
+Raw	kernel_reader	ktime_get_ts64	232	exact-config GCC11.4 symbolized rebuild
+Raw	kernel_reader	ktime_get_with_offset	184	exact-config GCC11.4 symbolized rebuild
+Raw	publication	update_vsyscall	556	exact-config GCC11.4 symbolized rebuild
+Raw	publication	update_vsyscall_tz	19	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	__vkso_getcpu	42	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	__vkso_time	24	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_getres_coarse	27	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_getres_core	58	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_getres_hres	36	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_gettime_boottime	300	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_gettime_core	94	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_gettime_monotonic	297	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_gettime_monotonic_coarse	103	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_gettime_monotonic_raw	315	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_gettime_realtime	209	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_gettime_realtime_coarse	46	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_clock_gettime_tai	212	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_fallback	36	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_gettimeofday_core	282	exact-config GCC11.4 symbolized rebuild
+VKSO	shared_core	vkso_read_cycles_cold	116	exact-config GCC11.4 symbolized rebuild
+VKSO	user_wrapper	__vkso_clock_gettime	153	final libkernel.so
+VKSO	user_wrapper	__vkso_clock_getres	49	final libkernel.so
+VKSO	user_wrapper	__vkso_gettimeofday	12	final libkernel.so
+VKSO	user_wrapper	__vkso_bind_context	24	final libkernel.so
+VKSO	user_wrapper	__vkso_shared_data	8	final libkernel.so
+VKSO	publication	vkso_time_publish	430	exact-config GCC11.4 symbolized rebuild
+VKSO	publication	vkso_time_update_timezone	29	exact-config GCC11.4 symbolized rebuild

@@ -1,0 +1,90 @@
+# 历史增量清单：保留用于 no-vDSO→VKSO 的开发增量和测试规模复算。
+# Raw/VKSO 公平主比较请使用 source-manifest.tsv。
+# view	system	layer	status	root	path	ranges	reason
+incremental	VKSO	ABI与数据结构	product	VKSO_KERNEL	include/vkso/time.h	1-63,78-138,144-145	共享数据、MM_data、context和共享核心内部ABI；排除CONFIG_VKSO_TIME_TEST
+incremental	VKSO	ABI与数据结构	product	VKSO_KERNEL	include/vkso/getcpu.h	1-10	getcpu共享核心ABI
+incremental	VKSO	内核接口	product	VKSO_KERNEL	include/linux/vkso.h	1-18	VKSO链接段抽象
+incremental	VKSO	内核接口	product	VKSO_KERNEL	include/linux/vkso_time.h	1-55,101-103	CONFIG_VKSO_TIME=y的接口和内核薄封装；排除CONFIG=n兼容桩
+incremental	VKSO	内核接口	product	VKSO_KERNEL	include/linux/vkso_getcpu.h	1-14,19-21	CONFIG_VKSO_TIME=y的getcpu内核薄封装
+incremental	VKSO	内核接口	product	VKSO_KERNEL	arch/x86/include/asm/vkso.h	1-10,20-21	MM生命周期接口；排除CONFIG=n兼容桩
+incremental	VKSO	共享读取算法	product	VKSO_KERNEL	kernel/time/vkso_time_internal.h	1-15,35-129,169-196	seq、TSC/PV/HV shim、高精度/粗粒度读取；排除测试采样器
+incremental	VKSO	共享读取算法	product	VKSO_KERNEL	kernel/time/vkso_time_core.c	1,6-8,56-287	clock_gettime/getres/gettimeofday/time共享核心；排除编译期ABI断言
+incremental	VKSO	共享读取算法	product	VKSO_KERNEL	kernel/time/vkso_time_cycles.c	1-58	PVClock和Hyper-V冷路径；最终配置中Hyper-V条件代码不进入二进制
+incremental	VKSO	共享读取算法	product	VKSO_KERNEL	arch/x86/kernel/vkso_getcpu.c	1-33	getcpu共享核心
+incremental	VKSO	发布端	product	VKSO_KERNEL	kernel/time/vkso_time.c	1,3,5-6,28-85,87-107	shared_data存储、seq发布、timezone及cycle context；排除验证和timekeeper转换
+incremental	VKSO	MM_data映射	product	VKSO_KERNEL	arch/x86/kernel/vkso.c	1-166	每MM只读页的分配、映射、复制、释放和namespace offset发布
+incremental	VKSO	用户ABI包装	product	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_entry.S	1-169	最终嵌入libkernel.so的用户入口、context绑定与fallback
+incremental	VKSO	构建与链接	product	VKSO_KERNEL	arch/x86/Kconfig	37-46	生产VKSO配置项
+incremental	VKSO	构建与链接	product	VKSO_KERNEL	arch/x86/kernel/Makefile	53-59,67	共享getcpu对象的构建和禁止内核专用插桩
+incremental	VKSO	构建与链接	product	VKSO_KERNEL	kernel/time/Makefile	4,7-24	共享time对象的构建和映射安全编译规则
+incremental	VKSO	构建与链接	product	VKSO_KERNEL	arch/x86/kernel/vmlinux.lds.S	130-137,186-193	共享text与shared_data页边界
+incremental	VKSO	MM_data接入	product	VKSO_KERNEL	arch/x86/include/asm/elf.h	336-342,367-371	auxv传递MM_data地址并建立额外页
+incremental	VKSO	MM_data接入	product	VKSO_KERNEL	arch/x86/include/asm/mmu.h	16,50-54	mm_context保存每MM页、内核地址和用户地址
+incremental	VKSO	MM_data接入	product	VKSO_KERNEL	arch/x86/include/asm/mmu_context.h	13,111,128,173,177-180	MM初始化、复制和销毁钩子；只计实现后真实改动，不把后补入Git的整文件计入
+incremental	VKSO	MM_data接入	product	VKSO_KERNEL	arch/x86/include/uapi/asm/auxvec.h	5-7	AT_VKSO_MM_DATA ABI项
+incremental	VKSO	MM_data接入	product	VKSO_KERNEL	include/linux/time_namespace.h	31,43	CONFIG_TIME_NS=y下传递task以更新所属MM
+incremental	VKSO	MM_data接入	product	VKSO_KERNEL	kernel/nsproxy.c	182,519	fork/setns时把目标task传给time namespace
+incremental	VKSO	MM_data接入	product	VKSO_KERNEL	kernel/time/namespace.c	16,205-209,233,246	namespace冻结时更新MM_data
+incremental	VKSO	内核读取接入	product	VKSO_KERNEL	kernel/time/posix-timers.c	34,60-92,1170-1177,1221-1227	只计相对no-vDSO基线新增的共享核心调用、MM_data选择和fallback；原syscall外壳不重复计
+incremental	VKSO	内核读取接入	product	VKSO_KERNEL	kernel/time/time.c	38,65,67-68,147-172,204	只计相对no-vDSO基线新增/实质改写的time/gettimeofday共享核心逻辑
+incremental	VKSO	内核读取接入	product	VKSO_KERNEL	kernel/sys.c	52,2579-2585,2589	只计getcpu共享核心接入；原SYSCALL_DEFINE和put_user外壳不重复计
+incremental	VKSO	发布端接入	product	VKSO_KERNEL	kernel/time/timekeeping.c	25,757	一次timekeeping_update内发布VKSO数据
+incremental	VKSO	虚拟化接入	product	VKSO_KERNEL	arch/x86/kernel/pvclock.c	14,149	PVClock页地址交给context；不改计数算法
+incremental	VKSO	虚拟化接入	product	VKSO_KERNEL	drivers/clocksource/hyperv_timer.c	24,541	Hyper-V页地址交给context；最终配置禁用
+
+compatibility	VKSO	CONFIG关闭兼容桩	retained	VKSO_KERNEL	include/linux/vkso_time.h	56-100	保证CONFIG_VKSO_TIME=n时原内核继续编译；不进入最终实验二进制
+compatibility	VKSO	CONFIG关闭兼容桩	retained	VKSO_KERNEL	include/linux/vkso_getcpu.h	15-18	CONFIG_VKSO_TIME=n的fallback桩
+compatibility	VKSO	CONFIG关闭兼容桩	retained	VKSO_KERNEL	arch/x86/include/asm/vkso.h	11-19	CONFIG_VKSO_TIME=n的MM生命周期空桩
+compatibility	VKSO	CONFIG关闭兼容桩	retained	VKSO_KERNEL	include/linux/time_namespace.h	103-106,128-132	CONFIG_TIME_NS=n的签名兼容桩
+compatibility	VKSO	旧内核reader	retained	VKSO_KERNEL	kernel/time/timekeeping.c	804-823,868-887,958-979,1009-1026,1506-1522,2244-2273	目标VKSO syscall的支持时钟不再依赖这些实现，但其他内核reader和fallback仍使用
+compatibility	VKSO	timekeeper生产状态	retained	VKSO_KERNEL	include/linux/timekeeper_internal.h	34-43,92-139	不是VKSO新增；保留完整生产者、NTP、其他reader状态，不能按删除代码计
+compatibility	VKSO	timekeeper到VKSO适配	adapter	VKSO_KERNEL	kernel/time/vkso_time_compat.h	1-80	因保留既有timekeeper和其他reader而需要的shared_data派生代码；单独披露
+compatibility	VKSO	timekeeper到VKSO适配	adapter	VKSO_KERNEL	kernel/time/vkso_time.c	8,86	兼容适配头接入及转换调用
+
+validation	VKSO	内核功能测试	test	VKSO_KERNEL	arch/x86/Kconfig	48-54	CONFIG_VKSO_TIME_TEST
+validation	VKSO	编译期ABI验证	excluded_validation	VKSO_KERNEL	kernel/time/vkso_time_core.c	3-4,10-54	static_assert及其专用include；不计功能工作量
+validation	VKSO	编译期ABI验证	excluded_validation	VKSO_KERNEL	kernel/time/vkso_time.c	4,10-26	内核类型与VKSO ABI布局断言；不计功能工作量
+validation	VKSO	内核功能测试	test	VKSO_KERNEL	include/vkso/time.h	64-77,139-143	测试采样ABI与probe声明
+validation	VKSO	内核功能测试	test	VKSO_KERNEL	kernel/time/vkso_time_internal.h	16-34,130-168	测试快照和重试计数
+validation	VKSO	内核功能测试	test	VKSO_KERNEL	kernel/time/vkso_time_test.c	1-45	合成shared_data测试入口
+validation	VKSO	update基准插桩	test	VKSO_KERNEL	init/Kconfig	2048-2058	TIMEKEEPING_UPDATE_BENCH配置
+validation	VKSO	update基准插桩	test	VKSO_KERNEL	include/linux/timekeeping_update_bench.h	1-43	静态键计时接口
+validation	VKSO	update基准插桩	test	VKSO_KERNEL	kernel/time/timekeeping_update_bench.c	1-197	debugfs采样实现
+validation	VKSO	update基准插桩	test	VKSO_KERNEL	kernel/time/Makefile	3,25-31	基准对象和测试对象构建规则
+validation	VKSO	update基准插桩	test	VKSO_KERNEL	kernel/time/timekeeping.c	8,744,772	基准计时钩子；第8行同时承载头文件
+validation	VKSO	功能矩阵	test	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/abi_matrix.c	1-1027	Raw/VKSO语义矩阵
+validation	VKSO	功能矩阵	test	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_abi.h	1-66	测试侧ABI声明
+validation	VKSO	功能矩阵	test	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_wrapper.c	1-75	测试程序适配层；不是libkernel.so生产wrapper
+validation	VKSO	功能矩阵	test	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_wrapper.h	1-18	测试程序适配声明
+validation	VKSO	read性能基准	test	VKSO_PROJECT	test/test_gettime/vkso-tests/baremetal/vkso_time_bench.c	1-1250	read/syscall/retry性能采样
+
+infrastructure	VKSO	私有wrapper构建适配	adaptation	VKSO_PROJECT	make_dll/build_PIC_so.py	59-60,535-586,803-950,1770,1977-1991,2024-2030,2048	本实验新增但可复用的ET_REL wrapper重定位、导出和CLI支持
+functional	VKSO	共享user/kernel算法	product	VKSO_KERNEL	include/vkso/time.h	1-63,78-138,144-145	VKSO同功能切片的ABI与数据
+functional	VKSO	共享user/kernel算法	product	VKSO_KERNEL	kernel/time/vkso_time_internal.h	1-15,35-129,169-196	VKSO同功能切片的公共读取原语
+functional	VKSO	共享user/kernel算法	product	VKSO_KERNEL	kernel/time/vkso_time_core.c	1,6-8,56-287	VKSO同功能切片的time核心；排除编译期ABI断言
+functional	VKSO	共享user/kernel算法	product	VKSO_KERNEL	kernel/time/vkso_time_cycles.c	1-58	VKSO同功能切片的cycle shim
+functional	VKSO	共享user/kernel算法	product	VKSO_KERNEL	arch/x86/kernel/vkso_getcpu.c	1-33	VKSO同功能切片的getcpu
+functional	VKSO	用户入口	product	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_entry.S	1-169	VKSO对外用户入口和fallback
+functional	VKSO	发布端	product	VKSO_KERNEL	kernel/time/vkso_time.c	1,3,5-6,28-85,87-107	VKSO shared_data发布；timekeeper转换单列为兼容适配
+functional	VKSO	MM_data与映射	product	VKSO_KERNEL	arch/x86/kernel/vkso.c	1-166	VKSO per-MM context映射
+functional	VKSO	内核syscall包装	product	VKSO_KERNEL	kernel/time/posix-timers.c	1163-1183,1214-1233	clock_gettime/getres系统调用边界和k_clock fallback
+functional	VKSO	内核syscall包装	product	VKSO_KERNEL	kernel/time/time.c	63-76,144-173	time/gettimeofday系统调用边界和copy_to_user
+functional	VKSO	内核syscall包装	product	VKSO_KERNEL	kernel/sys.c	2575-2591	getcpu系统调用边界
+
+functional	Raw	用户vDSO算法	product	RAW_KERNEL	lib/vdso/gettimeofday.c	20-32,48-95,110-269,298-412	x86-64 time接口公共算法；排除BUILD_VDSO32分支
+functional	Raw	用户vDSO架构shim	product	RAW_KERNEL	arch/x86/include/asm/vdso/gettimeofday.h	1-104,196-323	x86-64 syscall fallback、TSC/PV/HV cycles和timens别名；排除32位分支
+functional	Raw	用户vDSO入口	product	RAW_KERNEL	arch/x86/entry/vdso/vclock_gettime.c	1-56	x86-64 time/gettimeofday入口；排除i386/x32
+functional	Raw	用户vDSO入口	product	RAW_KERNEL	arch/x86/entry/vdso/vgetcpu.c	1-22	getcpu入口
+functional	Raw	用户vDSO数据ABI	product	RAW_KERNEL	include/vdso/datapage.h	1-137	vdso_data/vvar ABI
+functional	Raw	用户vDSO同步原语	product	RAW_KERNEL	include/vdso/helpers.h	1-56	seq reader/writer helpers
+functional	Raw	用户vDSO数学依赖	attributable_shared	RAW_KERNEL	include/vdso/time.h	1-12	time namespace offset类型
+functional	Raw	用户vDSO数学依赖	attributable_shared	RAW_KERNEL	include/vdso/clocksource.h	1-22	clock mode帮助
+functional	Raw	用户vDSO数学依赖	attributable_shared	RAW_KERNEL	include/vdso/ktime.h	1-16	clock resolution帮助
+functional	Raw	用户vDSO数学依赖	attributable_shared	RAW_KERNEL	include/vdso/math64.h	1-24	64位除法帮助
+functional	Raw	发布端	product	RAW_KERNEL	kernel/time/vsyscall.c	18-131	update_vsyscall和timezone发布；排除x86未用的generic begin/end
+functional	Raw	映射与namespace	product	RAW_KERNEL	arch/x86/entry/vdso/vma.c	1-70,89-142,150-350,388-395,437-458	x86-64 vDSO/VVAR/timens/PV/HV映射；排除IA32/x32与可选map_vdso_once
+functional	Raw	映射与链接	build_support	RAW_KERNEL	arch/x86/entry/vdso/vdso-layout.lds.S	1-112	x86-64 VVAR/PV/HV/timens和ELF布局；构建支持单列，不混入运行时代码主比较
+functional	Raw	内核syscall包装	product	RAW_KERNEL	kernel/time/time.c	62-72,140-156	time/gettimeofday系统调用边界
+functional	Raw	内核syscall包装	product	RAW_KERNEL	kernel/time/posix-timers.c	1128-1144,1175-1191	clock_gettime/getres系统调用边界
+functional	Raw	内核syscall包装	product	RAW_KERNEL	kernel/sys.c	2574-2585	getcpu系统调用边界
+functional	Raw	内核reader依赖	attributable_shared	RAW_KERNEL	kernel/time/timekeeping.c	191-196,284-295,374-390,798-817,862-881,952-973,1003-1020,1500-1516,2238-2267	目标Raw syscall实际调用但也被其他内核reader共享，不宣称可全部删除

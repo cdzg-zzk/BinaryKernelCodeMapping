@@ -1,0 +1,93 @@
+# 公平主清单：Raw 与 VKSO 使用同一组分层规则。
+# 脚本只对人工选择的范围做算术，不参与代码归属判断。
+# view	system	layer	status	root	path	ranges	reason
+runtime	Raw	用户ABI与读取核心	primary	RAW_KERNEL	lib/vdso/gettimeofday.c	20-32,48-95,110-269,298-412	x86-64 time/gettimeofday/clock_gettime/clock_getres 算法；排除 BUILD_VDSO32
+runtime	Raw	用户ABI与读取核心	primary	RAW_KERNEL	arch/x86/include/asm/vdso/gettimeofday.h	1-104,196-323	x86-64 TSC/PV/HV、timens 与 syscall fallback shim；排除 32 位分支
+runtime	Raw	用户ABI与读取核心	primary	RAW_KERNEL	arch/x86/entry/vdso/vclock_gettime.c	1-56	x86-64 五个 time ABI 入口；排除 i386/x32 条件入口
+runtime	Raw	用户ABI与读取核心	primary	RAW_KERNEL	arch/x86/entry/vdso/vgetcpu.c	1-22	getcpu 用户入口
+runtime	Raw	数据ABI与同步	primary	RAW_KERNEL	include/vdso/datapage.h	1-133,136-142	x86-64 vdso_data/VVAR ABI；排除 compat include 分支
+runtime	Raw	数据ABI与同步	primary	RAW_KERNEL	include/vdso/helpers.h	1-56	seq 读写协议
+runtime	Raw	数据ABI与同步	primary	RAW_KERNEL	include/vdso/time.h	1-12	time namespace offset 数据类型
+runtime	Raw	数据ABI与同步	primary	RAW_KERNEL	arch/x86/include/asm/vvar.h	1-55	x86 VVAR 声明、定义和固定 offset 机制
+runtime	Raw	架构运行时接口	primary	RAW_KERNEL	arch/x86/include/asm/vgtod.h	1-24	x86 vDSO 与发布端共享类型/头文件接口
+runtime	Raw	架构运行时接口	primary	RAW_KERNEL	arch/x86/include/asm/vdso/vsyscall.h	1-29	x86 VVAR 实例与 generic update_vsyscall 适配
+runtime	Raw	架构运行时接口	primary	RAW_KERNEL	arch/x86/include/asm/vdso.h	1-16,21-26,34-38,48,55-57	x86-64 vDSO image 元数据与初始化声明；排除 SGX extable 和 32/x32 字段
+runtime	Raw	架构运行时接口	primary	RAW_KERNEL	arch/x86/include/asm/clocksource.h	9-19	vclocks_used 状态查询与登记接口；clock-mode enum 基础另列共同依赖
+runtime	Raw	发布端	primary	RAW_KERNEL	kernel/time/vsyscall.c	1-131	x86 实际使用的 update_vsyscall、timezone 发布及其依赖；排除未使用的 generic begin/end API
+runtime	Raw	映射与生命周期	primary	RAW_KERNEL	arch/x86/entry/vdso/vma.c	1-70,89-142,150-350,388-395,437-458	x86-64 vDSO/VVAR/timens/PV/HV 映射、fault、mremap 与初始化；排除 IA32/x32、SGX sigreturn 和可选 map_vdso_once
+runtime	Raw	time namespace	primary	RAW_KERNEL	include/linux/time_namespace.h	24,32-34,46-47	VVAR 页字段、join/commit 与架构数据接口；CONFIG=n 桩单列
+runtime	Raw	time namespace	primary	RAW_KERNEL	kernel/time/namespace.c	19-21,97-99,112-114,142-150,179-193,201-227,229-235,280-284	VVAR namespace 页分配/释放、offset 编码、冻结发布与 join
+runtime	Raw	内核syscall边界	primary	RAW_KERNEL	kernel/time/time.c	62-72,140-156	time/gettimeofday syscall 与用户复制边界
+runtime	Raw	内核syscall边界	primary	RAW_KERNEL	kernel/time/posix-timers.c	1128-1144,1175-1191	clock_gettime/clock_getres syscall、k_clock 分派与用户复制
+runtime	Raw	内核syscall边界	primary	RAW_KERNEL	kernel/sys.c	2574-2585	getcpu syscall 与用户复制边界
+runtime	Raw	配置与ABI接入	primary	RAW_KERNEL	arch/x86/Kconfig	150-152,250	x86-64 generic time vDSO 能力选择；排除 IA32/x32/legacy
+runtime	Raw	配置与ABI接入	primary	RAW_KERNEL	arch/x86/include/asm/elf.h	75,77-79,349-355,384-389,410	x86-64 AT_SYSINFO_EHDR 与追加映射接口；排除 IA32/x32
+runtime	Raw	配置与ABI接入	primary	RAW_KERNEL	arch/x86/include/asm/mmu.h	48-49	mm_context 的 vDSO 地址与 image
+runtime	Raw	配置与ABI接入	primary	RAW_KERNEL	arch/x86/include/uapi/asm/auxvec.h	11,13,16-18	x86-64 auxv 项及 vector 大小
+compatibility	Raw	CONFIG关闭兼容桩	excluded_support	RAW_KERNEL	include/linux/time_namespace.h	107-116,138-142	CONFIG_TIME_NS=n兼容桩；最终实验启用TIME_NS，不计功能工作量
+runtime	Raw	配置与ABI接入	primary	RAW_KERNEL	kernel/nsproxy.c	182,519	fork/setns 传 task 以更新 vDSO namespace 映射
+runtime	Raw	配置与ABI接入	primary	RAW_KERNEL	kernel/time/timekeeping.c	750	timekeeping_update 调用 update_vsyscall
+runtime	Raw	配置与ABI接入	primary	RAW_KERNEL	kernel/time/time.c	188	timezone 变化调用 update_vsyscall_tz
+runtime	Raw	虚拟化接入	primary	RAW_KERNEL	arch/x86/kernel/kvmclock.c	153	启用 PVClock vDSO clock mode
+runtime	Raw	虚拟化接入	primary	RAW_KERNEL	arch/x86/kernel/pvclock.c	16,148	PVClock VVAR 使用检查
+runtime	Raw	虚拟化接入	primary	RAW_KERNEL	drivers/clocksource/hyperv_timer.c	431-438,447-450	Hyper-V clock mode enable 与 clocksource 接入
+
+runtime	VKSO	共享ABI与读取核心	primary	VKSO_KERNEL	include/vkso/time.h	1-63,78-138,144-145	shared_data、MM_data、context 与 time 内部 ABI；排除测试 ABI
+runtime	VKSO	共享ABI与读取核心	primary	VKSO_KERNEL	include/vkso/getcpu.h	1-10	getcpu 共享核心 ABI
+runtime	VKSO	共享ABI与读取核心	primary	VKSO_KERNEL	kernel/time/vkso_time_internal.h	1-15,35-129,169-196	seq、TSC/PV/HV shim、高精度/粗粒度读取；排除测试采样
+runtime	VKSO	共享ABI与读取核心	primary	VKSO_KERNEL	kernel/time/vkso_time_core.c	1,6-8,56-287	一份clock/time/gettimeofday/getres算法供kernel/user共用；排除编译期ABI断言
+runtime	VKSO	共享ABI与读取核心	primary	VKSO_KERNEL	kernel/time/vkso_time_cycles.c	1-58	PVClock/Hyper-V cycles 冷路径
+runtime	VKSO	共享ABI与读取核心	primary	VKSO_KERNEL	arch/x86/kernel/vkso_getcpu.c	1-33	getcpu 共享核心
+runtime	VKSO	用户ABI入口	primary	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_entry.S	1-169	嵌入 libkernel.so 的用户入口、context 绑定和 fallback
+runtime	VKSO	内核接口	primary	VKSO_KERNEL	include/linux/vkso.h	1-18	导出 text/shared_data 链接段接口
+runtime	VKSO	内核接口	primary	VKSO_KERNEL	include/linux/vkso_time.h	1-55,101-103	CONFIG=y 的内核薄封装；排除 CONFIG=n 桩
+runtime	VKSO	内核接口	primary	VKSO_KERNEL	include/linux/vkso_getcpu.h	1-14,19-21	CONFIG=y 的 getcpu 内核薄封装
+runtime	VKSO	内核接口	primary	VKSO_KERNEL	arch/x86/include/asm/vkso.h	1-10,20-21	MM 生命周期接口；排除 CONFIG=n 桩
+runtime	VKSO	发布端	primary	VKSO_KERNEL	kernel/time/vkso_time.c	1,3,5-6,28-85,87-107	shared_data存储、seq发布、timezone与cycle context；排除编译期断言和timekeeper转换调用
+compatibility	VKSO	timekeeper到VKSO适配	compatibility_adapter	VKSO_KERNEL	kernel/time/vkso_time_compat.h	1-80	为保留既有timekeeper及其他reader而派生VKSO shared_data；非VKSO内在功能
+compatibility	VKSO	timekeeper到VKSO适配	compatibility_adapter	VKSO_KERNEL	kernel/time/vkso_time.c	8,86	兼容适配头接入及timekeeper快照转换调用
+runtime	VKSO	映射与生命周期	primary	VKSO_KERNEL	arch/x86/kernel/vkso.c	1-166	每 MM context 页分配、只读映射、复制、释放和 namespace offset 发布
+runtime	VKSO	内核syscall边界	primary	VKSO_KERNEL	kernel/time/posix-timers.c	1163-1183,1214-1233	clock_gettime/getres syscall、共享核心与 k_clock fallback
+runtime	VKSO	内核syscall边界	primary	VKSO_KERNEL	kernel/time/time.c	63-76,144-173	time/gettimeofday syscall、共享核心与用户复制
+runtime	VKSO	内核syscall边界	primary	VKSO_KERNEL	kernel/sys.c	2575-2591	getcpu syscall、共享核心与用户复制
+runtime	VKSO	配置与ABI接入	primary	VKSO_KERNEL	arch/x86/Kconfig	37-46	VKSO 生产配置；与 build 视图为同一源码，两个视图不可相加
+runtime	VKSO	配置与ABI接入	primary	VKSO_KERNEL	arch/x86/include/asm/elf.h	336-342,367-371	AT_VKSO_MM_DATA 与追加 context 页映射
+runtime	VKSO	配置与ABI接入	primary	VKSO_KERNEL	arch/x86/include/asm/mmu.h	16,50-54	mm_context 保存 per-MM 页、kernel/user 地址
+runtime	VKSO	配置与ABI接入	primary	VKSO_KERNEL	arch/x86/include/asm/mmu_context.h	13,111,128,173,177-180	MM 初始化、复制和销毁钩子
+runtime	VKSO	配置与ABI接入	primary	VKSO_KERNEL	arch/x86/include/uapi/asm/auxvec.h	5-7	AT_VKSO_MM_DATA ABI
+runtime	VKSO	配置与ABI接入	primary	VKSO_KERNEL	include/linux/time_namespace.h	31,43	CONFIG_TIME_NS=y 的 task 传递签名
+compatibility	VKSO	CONFIG关闭兼容桩	excluded_support	VKSO_KERNEL	include/linux/time_namespace.h	103-106,128-132	CONFIG_TIME_NS=n兼容桩；最终实验启用TIME_NS，不计功能工作量
+runtime	VKSO	配置与ABI接入	primary	VKSO_KERNEL	kernel/nsproxy.c	182,519	fork/setns 传 task 以更新 MM_data
+runtime	VKSO	配置与ABI接入	primary	VKSO_KERNEL	kernel/time/namespace.c	16,205-209,233,246	namespace 冻结时发布 MM_data
+runtime	VKSO	配置与ABI接入	primary	VKSO_KERNEL	kernel/time/timekeeping.c	25,757	timekeeping_update 中调用 VKSO 发布
+runtime	VKSO	配置与ABI接入	primary	VKSO_KERNEL	kernel/time/time.c	38,204	timezone 更新接入
+runtime	VKSO	虚拟化接入	primary	VKSO_KERNEL	arch/x86/kernel/pvclock.c	14,149	PVClock 页显式注入 context
+runtime	VKSO	虚拟化接入	primary	VKSO_KERNEL	drivers/clocksource/hyperv_timer.c	24,541	Hyper-V 页显式注入 context
+
+dependency	Raw	旧内核reader	shared_dependency	RAW_KERNEL	kernel/time/timekeeping.c	191-196,284-295,374-390,798-817,862-881,952-973,1003-1020,1500-1516,2238-2267	Raw syscall 直接使用，但也服务大量其他内核调用者；不作为 vDSO 专属新增
+dependency	VKSO	旧内核reader	shared_dependency	VKSO_KERNEL	kernel/time/timekeeping.c	193-198,286-297,376-392,804-823,868-887,958-979,1009-1026,1506-1522,2244-2273	VKSO unsupported-clock fallback 和其他内核调用者仍使用；与 Raw 为同一组函数，仅因新增 include 与后段发布/基准代码导致行号后移；不作为 VKSO 新增
+dependency	Raw	共同数学与clock-mode基础	common	RAW_KERNEL	include/vdso/clocksource.h	1-22	Raw/VKSO 都使用的通用 enum；从两边主表同时排除
+dependency	Raw	共同数学与clock-mode基础	common	RAW_KERNEL	include/vdso/ktime.h	1-16	Raw/VKSO 都使用的 resolution helper；从两边主表同时排除
+dependency	Raw	共同数学与clock-mode基础	common	RAW_KERNEL	include/vdso/math64.h	1-24	Raw/VKSO 都使用的 64 位除法 helper；从两边主表同时排除
+dependency	VKSO	共同数学与clock-mode基础	common	VKSO_KERNEL	include/vdso/clocksource.h	1-22	Raw/VKSO 都使用的通用 enum；从两边主表同时排除
+dependency	VKSO	共同数学与clock-mode基础	common	VKSO_KERNEL	include/vdso/ktime.h	1-16	Raw/VKSO 都使用的 resolution helper；从两边主表同时排除
+dependency	VKSO	共同数学与clock-mode基础	common	VKSO_KERNEL	include/vdso/math64.h	1-24	Raw/VKSO 都使用的 64 位除法 helper；从两边主表同时排除
+
+validation	VKSO	编译期ABI验证	excluded_validation	VKSO_KERNEL	kernel/time/vkso_time_core.c	3-4,10-54	static_assert及其专用include；不生成运行指令，不计功能工作量
+validation	VKSO	编译期ABI验证	excluded_validation	VKSO_KERNEL	kernel/time/vkso_time.c	4,10-26	内核类型与VKSO ABI布局断言；不生成运行指令，不计功能工作量
+
+build	Raw	功能构建胶水	build_glue	RAW_KERNEL	arch/x86/entry/Makefile	17	把 x86 vDSO 目录纳入构建
+build	Raw	功能构建胶水	build_glue	RAW_KERNEL	arch/x86/entry/vdso/Makefile	1-21,26-27,32-40,46,49-51,54-100,134-136,172-187	x86-64 vDSO 对象、DSO、image 生成和映射对象规则；排除 IA32/x32、安装和 SGX
+build	Raw	功能构建胶水	build_glue	RAW_KERNEL	arch/x86/entry/vdso/vdso.lds.S	1-29,33-35	x86-64 time/getcpu ABI 导出；排除 SGX symbol
+build	Raw	功能构建胶水	build_glue	RAW_KERNEL	arch/x86/entry/vdso/vdso-layout.lds.S	1-112	x86-64 VVAR/PV/HV/timens 与 ELF 布局
+build	Raw	功能构建胶水	build_glue	RAW_KERNEL	arch/x86/kernel/vmlinux.lds.S	204-225	内核 VVAR 页链接布局
+build	Raw	功能构建胶水	build_glue	RAW_KERNEL	kernel/time/Makefile	21	构建 update_vsyscall
+build	Raw	功能构建胶水	build_glue	RAW_KERNEL	arch/x86/Kconfig	150-152,250	通用 vDSO 构建能力选择；与 runtime 接入相同源码，构建总计中单列而不与 runtime 相加
+build	VKSO	功能构建胶水	build_glue	VKSO_KERNEL	arch/x86/Kconfig	37-46	VKSO 生产配置项
+build	VKSO	功能构建胶水	build_glue	VKSO_KERNEL	arch/x86/kernel/Makefile	53-59,67	共享 getcpu 对象及映射安全编译规则
+build	VKSO	功能构建胶水	build_glue	VKSO_KERNEL	kernel/time/Makefile	4,7-24	共享 time 对象及映射安全编译规则；排除 test
+build	VKSO	功能构建胶水	build_glue	VKSO_KERNEL	arch/x86/kernel/vmlinux.lds.S	130-137,186-193	共享 text 与 shared_data 页边界
+build	VKSO	private wrapper适配	mechanism_adaptation	VKSO_PROJECT	make_dll/build_PIC_so.py	59-60,535-586,803-950,1770,1977-1991,2024-2030,2048	本次为通用 make_dll 新增的 ET_REL wrapper 重定位、导出和 CLI 适配
+build	Raw	image生成工具	reused_infrastructure	RAW_KERNEL	arch/x86/entry/vdso/vdso2c.c	1-254	Raw 构建依赖的既有 DSO-to-C 工具；含同时服务 32/64 的通用实现，不能当作 time 算法
+build	Raw	image生成工具	reused_infrastructure	RAW_KERNEL	arch/x86/entry/vdso/vdso2c.h	1-222	Raw 构建依赖的既有 ELF 模板；含同时服务 32/64 的通用实现
+build	Raw	generic vDSO构建帮助	reused_infrastructure	RAW_KERNEL	lib/vdso/Makefile	1-22	通用 gettimeofday 对象和 relocation 检查
