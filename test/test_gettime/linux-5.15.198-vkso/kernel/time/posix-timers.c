@@ -57,36 +57,17 @@ static const struct k_clock * const posix_clocks[];
 static const struct k_clock *clockid_to_kclock(const clockid_t id);
 static const struct k_clock clock_realtime, clock_monotonic;
 
-#ifdef CONFIG_VKSO_TIME
-/*
- * The shared VKSO core requires a non-NULL MM_data pointer.  User readers
- * always have their per-MM page so setns() can publish offsets in place;
- * kernel readers in the initial time namespace use this immutable zero-mask
- * object and avoid a second nullable-pointer branch in every namespace clock.
- */
-static const struct vkso_mm_data vkso_root_mm_data = {
-	.abi_version = VKSO_MM_DATA_ABI_VERSION,
-};
-#endif
-
 static __always_inline const struct vkso_mm_data *
-vkso_current_mm_data(clockid_t clock_id)
+vkso_current_mm_data(void)
 {
-#if defined(CONFIG_VKSO_TIME) && defined(CONFIG_TIME_NS)
-	const u32 namespace_clocks = (1U << CLOCK_MONOTONIC) |
-		(1U << CLOCK_MONOTONIC_RAW) |
-		(1U << CLOCK_MONOTONIC_COARSE) |
-		(1U << CLOCK_BOOTTIME);
-	u32 id = clock_id;
-
-	if (id <= CLOCK_BOOTTIME && (namespace_clocks & (1U << id)) &&
-	    unlikely(current->nsproxy->time_ns != &init_time_ns))
-		return READ_ONCE(current->mm->context.vkso_mm_kdata);
-#endif
 #ifdef CONFIG_VKSO_TIME
-	return &vkso_root_mm_data;
+	/*
+	 * Every userspace mm receives this page during exec.  Its mask is zero
+	 * in the root time namespace and is updated in place after setns(), so
+	 * the shared reader needs no separate namespace classification here.
+	 */
+	return READ_ONCE(current->mm->context.vkso_mm_kdata);
 #else
-	(void)clock_id;
 	return NULL;
 #endif
 }
@@ -1167,7 +1148,7 @@ SYSCALL_DEFINE2(clock_gettime, const clockid_t, which_clock,
 	struct timespec64 kernel_tp;
 	int error;
 
-	error = vkso_time_get(vkso_current_mm_data(which_clock), which_clock,
+	error = vkso_time_get(vkso_current_mm_data(), which_clock,
 			      &kernel_tp);
 	if (unlikely(error == VKSO_TIME_FALLBACK)) {
 		kc = clockid_to_kclock(which_clock);

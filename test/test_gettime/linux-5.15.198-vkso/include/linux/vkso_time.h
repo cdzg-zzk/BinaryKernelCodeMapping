@@ -26,8 +26,8 @@ static __always_inline int
 vkso_time_get(const struct vkso_mm_data *mm_data, clockid_t clock_id,
 	      struct timespec64 *tp)
 {
-	return vkso_clock_gettime_core(mm_data, clock_id,
-				      (struct vkso_time_value *)tp,
+	return vkso_clock_gettime_core(clock_id,
+				      (struct vkso_time_value *)tp, mm_data,
 				      &vkso_kernel_context);
 }
 

@@ -127,8 +127,8 @@ struct vkso_context {
  * clock_gettime syscall in userspace or the POSIX clock handler in-kernel.
  */
 int vkso_clock_gettime_core(
-	const struct vkso_mm_data *mm_data, int clock_id,
-	struct vkso_time_value *value,
+	int clock_id, struct vkso_time_value *value,
+	const struct vkso_mm_data *mm_data,
 	const struct vkso_context *context);
 int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value,
 			   const struct vkso_context *context);

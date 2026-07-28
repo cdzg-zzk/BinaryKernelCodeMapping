@@ -36,40 +36,37 @@
 	.globl __vkso_clock_gettime
 	.type __vkso_clock_gettime, @function
 __vkso_clock_gettime:
-	movq	%rsi, %rdx
-	movl	%edi, %esi
-	testl	%esi, %esi
+	testl	%edi, %edi
 	jne	.Lclock_not_realtime
 	leaq	vkso_user_context(%rip), %rcx
 	jmp	vkso_clock_gettime_realtime
 
 .Lclock_not_realtime:
-	cmpl	$VKSO_CLOCK_MONOTONIC, %esi
+	cmpl	$VKSO_CLOCK_MONOTONIC, %edi
 	jne	.Lclock_not_monotonic
-	movq	vkso_user_mm_data(%rip), %rdi
+	movq	vkso_user_mm_data(%rip), %rdx
 	leaq	vkso_user_context(%rip), %rcx
 	jmp	vkso_clock_gettime_monotonic
 
 .Lclock_not_monotonic:
-	cmpl	$VKSO_CLOCK_MONOTONIC_COARSE, %esi
+	cmpl	$VKSO_CLOCK_MONOTONIC_COARSE, %edi
 	je	.Lclock_monotonic_coarse
 	jg	.Lclock_after_coarse
-	cmpl	$VKSO_CLOCK_REALTIME_COARSE, %esi
+	cmpl	$VKSO_CLOCK_REALTIME_COARSE, %edi
 	je	.Lclock_realtime_coarse
-	cmpl	$VKSO_CLOCK_MONOTONIC_RAW, %esi
+	cmpl	$VKSO_CLOCK_MONOTONIC_RAW, %edi
 	je	.Lclock_monotonic_raw
 
 .Lclock_fallback:
-	movslq	%esi, %rdi
-	movq	%rdx, %rsi
+	movslq	%edi, %rdi
 	movl	$__NR_clock_gettime, %eax
 	syscall
 	ret
 
 .Lclock_after_coarse:
-	cmpl	$VKSO_CLOCK_BOOTTIME, %esi
+	cmpl	$VKSO_CLOCK_BOOTTIME, %edi
 	je	.Lclock_boottime
-	cmpl	$VKSO_CLOCK_TAI, %esi
+	cmpl	$VKSO_CLOCK_TAI, %edi
 	jne	.Lclock_fallback
 	leaq	vkso_user_context(%rip), %rcx
 	jmp	vkso_clock_gettime_tai
@@ -78,16 +75,16 @@ __vkso_clock_gettime:
 	jmp	vkso_clock_gettime_realtime_coarse
 
 .Lclock_monotonic_coarse:
-	movq	vkso_user_mm_data(%rip), %rdi
+	movq	vkso_user_mm_data(%rip), %rdx
 	jmp	vkso_clock_gettime_monotonic_coarse
 
 .Lclock_monotonic_raw:
-	movq	vkso_user_mm_data(%rip), %rdi
+	movq	vkso_user_mm_data(%rip), %rdx
 	leaq	vkso_user_context(%rip), %rcx
 	jmp	vkso_clock_gettime_monotonic_raw
 
 .Lclock_boottime:
-	movq	vkso_user_mm_data(%rip), %rdi
+	movq	vkso_user_mm_data(%rip), %rdx
 	leaq	vkso_user_context(%rip), %rcx
 	jmp	vkso_clock_gettime_boottime
 	.size __vkso_clock_gettime, .-__vkso_clock_gettime
@@ -127,9 +124,10 @@ __vkso_gettimeofday:
 	.size __vkso_gettimeofday, .-__vkso_gettimeofday
 
 	/*
-	 * Bind once after reading AT_VKSO_MM_DATA.  A NULL first argument is the
-	 * optimized root-time-namespace representation.  The other arguments
-	 * are address-space-correct PVClock/Hyper-V aliases when available.
+	 * Bind once after reading AT_VKSO_MM_DATA.  The per-MM page remains
+	 * valid across time-namespace changes; root namespace offsets are
+	 * represented by its zero clock mask.  The other arguments are
+	 * address-space-correct PVClock/Hyper-V aliases when available.
 	 */
 	.p2align 4
 	.globl __vkso_bind_context

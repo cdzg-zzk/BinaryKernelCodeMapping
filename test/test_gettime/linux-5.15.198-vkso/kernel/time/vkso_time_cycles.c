@@ -44,8 +44,6 @@ s64 vkso_read_hvclock_cycles(const void *page)
 noinline notrace __vkso_text
 s64 vkso_read_cycles_cold(const struct vkso_context *context, s32 clock_mode)
 {
-	if (unlikely(!context))
-		return -1;
 #ifdef CONFIG_PARAVIRT_CLOCK
 	if (clock_mode == VDSO_CLOCKMODE_PVCLOCK)
 		return vkso_read_pvclock_cycles(context->pvclock_page);
