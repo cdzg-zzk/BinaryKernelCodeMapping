@@ -374,11 +374,11 @@ shared_value=$(nm -a "$DSO_BUILD/libkernel.so" |
 	     END { if (value) print value }')
 test -n "$shared_value"
 printf '%s\n' "$shared_value" >"$OUT/vkso-shared-st-value.txt"
-core_value=$(nm -D "$DSO_BUILD/libkernel.so" |
-	awk '$3 == "vkso_clock_gettime_core" && !value { value = "0x" $1 }
+text_anchor_value=$(nm -D "$DSO_BUILD/libkernel.so" |
+	awk '$3 == "vkso_clock_gettime_realtime" && !value { value = "0x" $1 }
 	     END { if (value) print value }')
-test -n "$core_value"
-printf '%s\n' "$core_value" >"$OUT/vkso-core-st-value.txt"
+test -n "$text_anchor_value"
+printf '%s\n' "$text_anchor_value" >"$OUT/vkso-text-anchor-st-value.txt"
 
 "$CC" $BENCHMARK_CFLAGS -pthread \
 	-o "$OUT/raw-abi-matrix" \
@@ -476,7 +476,7 @@ fi
 	fi
 	printf 'vkso_uts_version=%s\n' "$vkso_uts_version"
 	printf 'vkso_shared_st_value=%s\n' "$shared_value"
-	printf 'vkso_core_st_value=%s\n' "$core_value"
+	printf 'vkso_text_anchor_st_value=%s\n' "$text_anchor_value"
 	if [[ "$VKSO_VALIDATION_TESTS" == 1 ]]; then
 		printf 'production_test_probe=validation-only\n'
 	else
@@ -524,14 +524,14 @@ else
 fi
 if [[ "$reuse_raw" == 0 ]]; then
 	if nm "$RAW_BUILD/vmlinux" |
-		awk '$3 == "vkso_clock_gettime_core" { found = 1 }
+		awk '$3 == "vkso_clock_gettime_realtime" { found = 1 }
 		     END { exit !found }'; then
 		echo "raw image contains VKSO time core" >&2
 		exit 1
 	fi
 fi
 nm "$VKSO_BUILD/vmlinux" |
-	awk '$3 == "vkso_clock_gettime_core" { found = 1 }
+	awk '$3 == "vkso_clock_gettime_realtime" { found = 1 }
 	     END { exit !found }'
 if [[ "$UPDATE_BENCH" == 1 ]]; then
 	update_bench_images=("$VKSO_BUILD/vmlinux")

@@ -165,7 +165,6 @@ begin_experiment()
 		printf 'warmup=%s\n' "$WARMUP"
 		printf 'pmu=%s\n' "$PMU"
 		printf 'seq_iterations=%s\n' "$SEQ_ITERATIONS"
-		printf 'include_core=%s\n' "$INCLUDE_CORE"
 		printf 'raw_data_only=1\n'
 		printf 'old_results_reused=0\n'
 	} >"$manifest"

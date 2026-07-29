@@ -947,6 +947,32 @@ def add_private_wrapper_object(
 
     return wrapper.section_bytes(data), data_vaddr
 
+
+def private_wrapper_dependencies(object_path: Path) -> List[str]:
+    """Return kernel symbols referenced by the private executable veneer.
+
+    These are dependency roots, not DSO exports.  Keeping the distinction here
+    lets a feature list only its public kernel-backed API while the generic
+    builder owns the private-wrapper closure.
+    """
+
+    wrapper = KoFile(object_path)
+    text = wrapper.find_section(".vkso.user.text")
+    if text is None or not text.is_alloc or not text.is_exec:
+        raise ValueError(
+            f"{object_path}: missing executable .vkso.user.text section"
+        )
+    dependencies: List[str] = []
+    seen: Set[str] = set()
+    for relocation in wrapper.relocations_for(text):
+        symbol = wrapper.symbols[relocation.sym_idx]
+        if not symbol.is_undef or not symbol.name or symbol.name in seen:
+            continue
+        seen.add(symbol.name)
+        dependencies.append(symbol.name)
+    return dependencies
+
+
 def role_for_symbol(sym: ResolvedSymbol, owner_module: str) -> str:
     if not sym.replace_from_kernel:
         return "synthetic"
@@ -1008,12 +1034,15 @@ def build_builtin_thunk_pages(
     return {page: bytes(data) for page, data in pages.items()}
 
 def resolve_requested_symbols(
-    requested_names: Sequence[str], graph: KrgGraph, shim_symbols: Set[str]
+    requested_names: Sequence[str], graph: KrgGraph, shim_symbols: Set[str],
+    exported_names: Sequence[str] | None = None,
 ) -> tuple[List[ResolvedSymbol], List[str], str, str, List[str]]:
     if not requested_names:
         raise ValueError("at least one symbol is required")
 
-    export_order = {name: idx for idx, name in enumerate(requested_names)}
+    if exported_names is None:
+        exported_names = requested_names
+    export_order = {name: idx for idx, name in enumerate(exported_names)}
     # An explicitly requested API is a native export even when the same name is
     # listed as a user-space replacement for dependency closure traversal.
     dependency_shim_symbols = shim_symbols - set(export_order)
@@ -1775,12 +1804,17 @@ def build_shared_object(
     shim_symbols = load_shim_symbols(shim_list_path)
     requested = parse_symbol_requests(symbols_path)
     shared_data_names = load_shared_data_symbols(shared_data_list_path)
+    exported_code_names = [
+        name for name in requested if name not in shared_data_names
+    ]
     # KRG intentionally describes executable dependency closure and may omit a
     # page-sized data object.  Resolve such explicitly allowed exports below.
-    graph_requested = [
-        name for name in requested
-        if name not in shared_data_names or graph.lookup(name) is not None
-    ]
+    graph_requested = list(exported_code_names)
+    if private_wrapper_object is not None:
+        for name in private_wrapper_dependencies(private_wrapper_object):
+            if name in shared_data_names or name in graph_requested:
+                continue
+            graph_requested.append(name)
     if not graph_requested:
         raise ValueError("at least one KRG-resolved code symbol is required")
     # shim.txt defines dependency boundaries, not replacements for APIs the
@@ -1791,7 +1825,8 @@ def build_shared_object(
         shim_symbols.discard(f"{INDIRECT_THUNK_PREFIX}rax")
     shim_symbols, builtin_thunk_shims = split_builtin_thunk_shims(shim_symbols)
     resolved, needed_libs, owner_module, owner_lib, dep_modules = resolve_requested_symbols(
-        graph_requested, graph, shim_symbols
+        graph_requested, graph, shim_symbols,
+        exported_names=exported_code_names,
     )
 
     data_bytes = b""

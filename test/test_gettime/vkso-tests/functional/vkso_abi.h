@@ -9,7 +9,6 @@
 #define VKSO_MM_DATA_ABI_VERSION 3U
 #define VKSO_TIME_OK 0
 #define VKSO_TIME_UNSUPPORTED_MODE (-1)
-#define VKSO_TIME_BACKEND_REQUIRED (-2)
 
 struct vkso_time_value {
 	int64_t sec;
@@ -71,32 +70,6 @@ struct vkso_context {
 	const void *pvclock_page;
 	const void *hvclock_page;
 };
-
-int vkso_clock_gettime_core(
-	int clock_id, struct vkso_time_value *value,
-	const struct vkso_mm_data *mm_data,
-	const struct vkso_context *context);
-int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value);
-int vkso_clock_gettime_realtime(
-	struct vkso_time_value *value, const struct vkso_context *context);
-int vkso_clock_gettime_monotonic(
-	struct vkso_time_value *value, const struct vkso_context *context);
-int vkso_clock_gettime_monotonic_raw(
-	struct vkso_time_value *value, const struct vkso_context *context);
-int vkso_clock_gettime_boottime(
-	struct vkso_time_value *value, const struct vkso_context *context);
-int vkso_clock_gettime_tai(
-	struct vkso_time_value *value, const struct vkso_context *context);
-int vkso_clock_gettime_realtime_coarse(struct vkso_time_value *value);
-int vkso_clock_gettime_monotonic_coarse(struct vkso_time_value *value);
-int vkso_clock_getres_hres(struct vkso_time_value *value);
-int vkso_clock_getres_coarse(struct vkso_time_value *value);
-int vkso_time_apply_offset(
-	const struct vkso_time_value *offset,
-	struct vkso_time_value *value);
-int vkso_gettimeofday_core(
-	struct vkso_timeval *tv, struct vkso_timezone *tz,
-	const struct vkso_context *context);
 
 /* Standard user ABI exported by the private libkernel.so entry page. */
 int __vkso_clock_gettime(int clock_id, struct vkso_time_value *value);

@@ -78,13 +78,11 @@ REPEATS=$(manifest_value "$EXPERIMENT_MANIFEST" repeats)
 WARMUP=$(manifest_value "$EXPERIMENT_MANIFEST" warmup)
 PMU=$(manifest_value "$EXPERIMENT_MANIFEST" pmu)
 SEQ_ITERATIONS=$(manifest_value "$EXPERIMENT_MANIFEST" seq_iterations)
-INCLUDE_CORE=$(manifest_value "$EXPERIMENT_MANIFEST" include_core)
 
 for value in "$CPU" "$ITERATIONS" "$REPEATS" "$WARMUP" "$PMU" \
-	"$SEQ_ITERATIONS" "$INCLUDE_CORE"; do
+	"$SEQ_ITERATIONS"; do
 	[[ "$value" =~ ^[0-9]+$ ]]
 done
-test "$INCLUDE_CORE" = 0
 
 test "$(uname -r)" = 5.15.198 || {
 	echo "expected experimental kernel 5.15.198, got $(uname -r)" >&2
@@ -249,7 +247,6 @@ printf '%s\n' "$probe" >"$PARTIAL/backend-probe.txt"
 	printf 'warmup=%s\n' "$WARMUP"
 	printf 'pmu=%s\n' "$PMU"
 	printf 'seq_iterations=%s\n' "$SEQ_ITERATIONS"
-	printf 'include_core=%s\n' "$INCLUDE_CORE"
 	printf 'clocksource=%s\n' "$clocksource"
 	printf 'isolated=%s\n' "$isolated"
 	printf 'cmdline=%s\n' "$(cat /proc/cmdline)"
@@ -313,12 +310,10 @@ LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-time-bench" \
 	--backend "$BACKEND" --mode perf --cpu "$CPU" \
 	--iterations "$ITERATIONS" --repeats "$REPEATS" \
 	--warmup "$WARMUP" --pmu "$PMU" \
-	--include-core "$INCLUDE_CORE" \
 	>"$PARTIAL/perf.csv" 2>"$PARTIAL/perf.stderr"
 LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-time-bench" \
 	--backend "$BACKEND" --mode seq --cpu "$CPU" \
 	--seq-iterations "$SEQ_ITERATIONS" \
-	--include-core "$INCLUDE_CORE" \
 	>"$PARTIAL/seq.csv" 2>"$PARTIAL/seq.stderr"
 
 test "$(sed -n '1p' "$PARTIAL/perf.csv")" = \

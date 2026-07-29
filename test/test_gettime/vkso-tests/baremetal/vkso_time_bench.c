@@ -51,7 +51,6 @@ enum mode {
 enum path {
 	PATH_SYSCALL,
 	PATH_RAW_VDSO,
-	PATH_VKSO_CORE,
 	PATH_VKSO_WRAPPER,
 };
 
@@ -82,64 +81,62 @@ enum operation {
 struct operation_info {
 	const char *name;
 	clockid_t clock_id;
-	int core_supported;
 };
 
 static const struct operation_info operations[OP_COUNT] = {
 	[OP_CGT_REALTIME] = {
-		"clock_gettime_realtime", CLOCK_REALTIME, 1
+		"clock_gettime_realtime", CLOCK_REALTIME
 	},
 	[OP_CGT_MONOTONIC] = {
-		"clock_gettime_monotonic", CLOCK_MONOTONIC, 1
+		"clock_gettime_monotonic", CLOCK_MONOTONIC
 	},
 	[OP_CGT_MONOTONIC_RAW] = {
-		"clock_gettime_monotonic_raw", CLOCK_MONOTONIC_RAW, 1
+		"clock_gettime_monotonic_raw", CLOCK_MONOTONIC_RAW
 	},
 	[OP_CGT_BOOTTIME] = {
-		"clock_gettime_boottime", CLOCK_BOOTTIME, 1
+		"clock_gettime_boottime", CLOCK_BOOTTIME
 	},
 	[OP_CGT_TAI] = {
-		"clock_gettime_tai", CLOCK_TAI, 1
+		"clock_gettime_tai", CLOCK_TAI
 	},
 	[OP_CGT_REALTIME_COARSE] = {
-		"clock_gettime_realtime_coarse", CLOCK_REALTIME_COARSE, 1
+		"clock_gettime_realtime_coarse", CLOCK_REALTIME_COARSE
 	},
 	[OP_CGT_MONOTONIC_COARSE] = {
 		"clock_gettime_monotonic_coarse",
-		CLOCK_MONOTONIC_COARSE, 1
+		CLOCK_MONOTONIC_COARSE
 	},
 	[OP_CGT_PROCESS_CPU] = {
 		"clock_gettime_process_cpu_fallback",
-		CLOCK_PROCESS_CPUTIME_ID, 0
+		CLOCK_PROCESS_CPUTIME_ID
 	},
 	[OP_CGT_REALTIME_ALARM] = {
 		"clock_gettime_realtime_alarm_fallback",
-		CLOCK_REALTIME_ALARM, 0
+		CLOCK_REALTIME_ALARM
 	},
 	[OP_CGR_REALTIME] = {
-		"clock_getres_realtime", CLOCK_REALTIME, 1
+		"clock_getres_realtime", CLOCK_REALTIME
 	},
 	[OP_CGR_REALTIME_COARSE] = {
-		"clock_getres_realtime_coarse", CLOCK_REALTIME_COARSE, 1
+		"clock_getres_realtime_coarse", CLOCK_REALTIME_COARSE
 	},
 	[OP_CGR_PROCESS_CPU] = {
 		"clock_getres_process_cpu_fallback",
-		CLOCK_PROCESS_CPUTIME_ID, 0
+		CLOCK_PROCESS_CPUTIME_ID
 	},
-	[OP_GTOD_TV] = { "gettimeofday_tv", 0, 1 },
-	[OP_GTOD_TZ] = { "gettimeofday_timezone", 0, 1 },
-	[OP_GTOD_BOTH] = { "gettimeofday_both", 0, 1 },
-	[OP_GTOD_NULL] = { "gettimeofday_null", 0, 1 },
-	[OP_TIME_NULL] = { "time_null", 0, 1 },
-	[OP_TIME_POINTER] = { "time_pointer", 0, 1 },
-	[OP_GETCPU_BOTH] = { "getcpu_both", 0, 1 },
-	[OP_GETCPU_NULL] = { "getcpu_null", 0, 1 },
+	[OP_GTOD_TV] = { "gettimeofday_tv", 0 },
+	[OP_GTOD_TZ] = { "gettimeofday_timezone", 0 },
+	[OP_GTOD_BOTH] = { "gettimeofday_both", 0 },
+	[OP_GTOD_NULL] = { "gettimeofday_null", 0 },
+	[OP_TIME_NULL] = { "time_null", 0 },
+	[OP_TIME_POINTER] = { "time_pointer", 0 },
+	[OP_GETCPU_BOTH] = { "getcpu_both", 0 },
+	[OP_GETCPU_NULL] = { "getcpu_null", 0 },
 };
 
 static const char *const path_names[] = {
 	[PATH_SYSCALL] = "syscall",
 	[PATH_RAW_VDSO] = "raw_vdso",
-	[PATH_VKSO_CORE] = "vkso_core",
 	[PATH_VKSO_WRAPPER] = "vkso_wrapper",
 };
 
@@ -154,7 +151,6 @@ static vdso_gettimeofday_fn vdso_gettimeofday;
 static vdso_time_fn vdso_time;
 static vdso_getcpu_fn vdso_getcpu;
 static const struct vkso_mm_data *vkso_mm_data;
-static const struct vkso_context context;
 static volatile uint64_t sink;
 
 struct pmu_group {
@@ -248,7 +244,6 @@ _Static_assert(__builtin_offsetof(struct vkso_shared_data_bench,
 static struct pmu_group core_group = { .leader = -1 };
 static struct pmu_group cache_group = { .leader = -1 };
 static int pmu_enabled;
-static int include_core = 1;
 
 static void fail_message(const char *message)
 {
@@ -500,11 +495,6 @@ uint64_t invoke(enum operation operation, enum path path)
 					      (long)&ts);
 		else if (path == PATH_RAW_VDSO)
 			result = vdso_clock_gettime(info->clock_id, &ts);
-		else if (path == PATH_VKSO_CORE)
-			result = vkso_clock_gettime_core(
-				info->clock_id,
-				(struct vkso_time_value *)&ts,
-				vkso_mm_data, &context);
 		else
 			result = __vkso_clock_gettime(
 				info->clock_id,
@@ -515,10 +505,6 @@ uint64_t invoke(enum operation operation, enum path path)
 					      (long)&ts);
 		else if (path == PATH_RAW_VDSO)
 			result = vdso_clock_getres(info->clock_id, &ts);
-		else if (path == PATH_VKSO_CORE)
-			result = vkso_clock_getres_core(
-				info->clock_id,
-				(struct vkso_time_value *)&ts);
 		else
 			result = __vkso_clock_getres(
 				info->clock_id,
@@ -537,11 +523,6 @@ uint64_t invoke(enum operation operation, enum path path)
 					      (long)tz_pointer);
 		else if (path == PATH_RAW_VDSO)
 			result = vdso_gettimeofday(tv_pointer, tz_pointer);
-		else if (path == PATH_VKSO_CORE)
-			result = vkso_gettimeofday_core(
-				(struct vkso_timeval *)tv_pointer,
-				(struct vkso_timezone *)tz_pointer,
-				&context);
 		else
 			result = __vkso_gettimeofday(
 				(struct vkso_timeval *)tv_pointer,
@@ -555,8 +536,6 @@ uint64_t invoke(enum operation operation, enum path path)
 			result = raw_syscall1(SYS_time, (long)pointer);
 		else if (path == PATH_RAW_VDSO)
 			result = vdso_time(pointer);
-		else if (path == PATH_VKSO_CORE)
-			result = __vkso_time((int64_t *)pointer);
 		else
 			result = __vkso_time((int64_t *)pointer);
 	} else {
@@ -570,8 +549,6 @@ uint64_t invoke(enum operation operation, enum path path)
 					      (long)node_pointer, 0);
 		else if (path == PATH_RAW_VDSO)
 			result = vdso_getcpu(cpu_pointer, node_pointer, NULL);
-		else if (path == PATH_VKSO_CORE)
-			result = __vkso_getcpu(cpu_pointer, node_pointer, NULL);
 		else
 			result = __vkso_getcpu(cpu_pointer, node_pointer, NULL);
 	}
@@ -763,9 +740,7 @@ static struct measurement measure(enum operation operation, enum path path,
 	return measurement;
 }
 
-static unsigned int available_paths(enum backend backend,
-				    enum operation operation,
-				    enum path *paths)
+static unsigned int available_paths(enum backend backend, enum path *paths)
 {
 	if (backend == BACKEND_RAW) {
 		paths[0] = PATH_SYSCALL;
@@ -773,11 +748,6 @@ static unsigned int available_paths(enum backend backend,
 		return 2;
 	}
 	paths[0] = PATH_SYSCALL;
-	if (include_core && operations[operation].core_supported) {
-		paths[1] = PATH_VKSO_CORE;
-		paths[2] = PATH_VKSO_WRAPPER;
-		return 3;
-	}
 	paths[1] = PATH_VKSO_WRAPPER;
 	return 2;
 }
@@ -790,8 +760,8 @@ static void run_perf(enum backend backend, unsigned int iterations,
 	if (pmu_enabled)
 		initialize_pmu();
 	for (operation = 0; operation < OP_COUNT; ++operation) {
-		enum path paths[3];
-		unsigned int count = available_paths(backend, operation, paths);
+		enum path paths[2];
+		unsigned int count = available_paths(backend, paths);
 		unsigned int index;
 
 		for (index = 0; index < count; ++index)
@@ -804,8 +774,8 @@ static void run_perf(enum backend backend, unsigned int iterations,
 	     "cache_misses_per_call,l1d_load_misses_per_call,"
 	     "llc_load_misses_per_call");
 	for (operation = 0; operation < OP_COUNT; ++operation) {
-		enum path paths[3];
-		unsigned int count = available_paths(backend, operation, paths);
+		enum path paths[2];
+		unsigned int count = available_paths(backend, paths);
 
 		for (repeat = 0; repeat < repeats; ++repeat) {
 			unsigned int step;
@@ -1127,7 +1097,6 @@ static void usage(const char *program)
 		"usage: %s --probe | --backend {raw|vkso} "
 		"[--mode perf|seq|layout|load] [--cpu N] [--iterations N] "
 		"[--repeats N] [--warmup N] [--pmu 0|1] "
-		"[--include-core 0|1] "
 		"[--seq-iterations N] [--layout-iterations N] "
 		"[--operation monotonic|monotonic_raw|monotonic_coarse] "
 		"[--seconds N]\n",
@@ -1197,10 +1166,6 @@ int main(int argc, char **argv)
 		} else if (!strcmp(argv[index], "--pmu")) {
 			pmu_enabled =
 				parse_number(argv[index + 1], "PMU", 1);
-		} else if (!strcmp(argv[index], "--include-core")) {
-			include_core =
-				parse_number(argv[index + 1],
-					     "include core", 1);
 		} else if (!strcmp(argv[index], "--seq-iterations")) {
 			seq_iterations = parse_number(argv[index + 1],
 						      "seq iterations", 0);
@@ -1235,8 +1200,6 @@ int main(int argc, char **argv)
 	}
 	if (pmu_enabled > 1)
 		fail_message("PMU must be 0 or 1");
-	if (include_core > 1)
-		fail_message("include core must be 0 or 1");
 
 	pin_cpu(cpu);
 	initialize_backend(backend);

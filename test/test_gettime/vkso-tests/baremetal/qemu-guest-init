@@ -153,7 +153,7 @@ backend=$(cat /work/backend)
 		LD_LIBRARY_PATH=/work /work/vkso-time-bench \
 			--backend "$backend" --mode perf --cpu 0 \
 			--iterations 1000 --repeats 1 --warmup 100 \
-			--pmu 0 --include-core 0 >/tmp/perf.csv || status=$?
+			--pmu 0 >/tmp/perf.csv || status=$?
 	fi
 	if [ "$replaced" -eq 1 ]; then
 		/work/manager restore /work/libkernel.so \
