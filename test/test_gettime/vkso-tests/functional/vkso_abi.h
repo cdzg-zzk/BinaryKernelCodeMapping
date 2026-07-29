@@ -77,6 +77,25 @@ int vkso_clock_gettime_core(
 	const struct vkso_mm_data *mm_data,
 	const struct vkso_context *context);
 int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value);
+int vkso_clock_gettime_realtime(
+	struct vkso_time_value *value, const struct vkso_context *context);
+int vkso_clock_gettime_monotonic(
+	struct vkso_time_value *value, const struct vkso_context *context);
+int vkso_clock_gettime_monotonic_raw(
+	struct vkso_time_value *value, const struct vkso_context *context);
+int vkso_clock_gettime_boottime(
+	struct vkso_time_value *value, const struct vkso_context *context);
+int vkso_clock_gettime_tai(
+	struct vkso_time_value *value, const struct vkso_context *context);
+int vkso_clock_gettime_realtime_coarse(struct vkso_time_value *value);
+int vkso_clock_gettime_monotonic_coarse(struct vkso_time_value *value);
+int vkso_clock_gettime_boottime_coarse(struct vkso_time_value *value);
+int vkso_clock_gettime_tai_coarse(struct vkso_time_value *value);
+int vkso_clock_getres_hres(struct vkso_time_value *value);
+int vkso_clock_getres_coarse(struct vkso_time_value *value);
+int vkso_time_apply_offset(
+	const struct vkso_time_value *offset,
+	struct vkso_time_value *value);
 int vkso_gettimeofday_core(
 	struct vkso_timeval *tv, struct vkso_timezone *tz,
 	const struct vkso_context *context);

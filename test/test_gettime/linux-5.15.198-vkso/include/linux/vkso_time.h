@@ -30,6 +30,42 @@ vkso_time_get(const struct vkso_mm_data *mm_data, clockid_t clock_id,
 				      &vkso_kernel_context);
 }
 
+/*
+ * A typed root reader names the clock at the call site. These two adapters
+ * only bridge the kernel result type and environment; they compile to a
+ * direct call and never inspect MM_data or a generic clock ID.
+ */
+#define vkso_time_get_root_hres(reader, tp)				\
+	(reader)((struct vkso_time_value *)(tp), &vkso_kernel_context)
+#define vkso_time_get_root_coarse(reader, tp)				\
+	(reader)((struct vkso_time_value *)(tp))
+
+static __always_inline int vkso_time_get_root_resolution(u32 *nsec)
+{
+	struct vkso_time_value value;
+	int status;
+
+	status = vkso_clock_getres_hres(&value);
+	if (likely(status == VKSO_TIME_OK))
+		*nsec = value.nsec;
+	return status;
+}
+
+static __always_inline int
+vkso_time_get_root_monotonic_seconds(time64_t *seconds)
+{
+	*seconds = READ_ONCE(
+		vkso_shared_page.data.state.monotonic_coarse.sec);
+	return VKSO_TIME_OK;
+}
+
+static __always_inline int
+vkso_time_get_root_realtime_seconds(time64_t *seconds)
+{
+	*seconds = READ_ONCE(vkso_shared_page.data.state.realtime_base.sec);
+	return VKSO_TIME_OK;
+}
+
 static __always_inline int
 vkso_time_getres(clockid_t clock_id, struct timespec64 *tp)
 {
@@ -76,6 +112,26 @@ vkso_time_get(const struct vkso_mm_data *mm_data, clockid_t clock_id,
 
 static inline int
 vkso_time_getres(clockid_t clock_id, struct timespec64 *tp)
+{
+	return VKSO_TIME_BACKEND_REQUIRED;
+}
+
+#define vkso_time_get_root_hres(reader, tp) VKSO_TIME_BACKEND_REQUIRED
+#define vkso_time_get_root_coarse(reader, tp) VKSO_TIME_BACKEND_REQUIRED
+
+static inline int vkso_time_get_root_resolution(u32 *nsec)
+{
+	return VKSO_TIME_BACKEND_REQUIRED;
+}
+
+static inline int
+vkso_time_get_root_monotonic_seconds(time64_t *seconds)
+{
+	return VKSO_TIME_BACKEND_REQUIRED;
+}
+
+static inline int
+vkso_time_get_root_realtime_seconds(time64_t *seconds)
 {
 	return VKSO_TIME_BACKEND_REQUIRED;
 }

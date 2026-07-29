@@ -114,9 +114,9 @@ struct vkso_context {
 
 /*
  * Internal shared-core entry points. They are not the user ABI: kernel and
- * user wrappers inject address-space-specific dependencies here.
- * MM_data and context are always non-NULL. Kernel callers use immutable
- * zero-valued objects when no per-MM offsets are needed.
+ * user wrappers inject address-space-specific dependencies here. Typed
+ * readers always return root-namespace time; a public boundary applies
+ * MM_data only when its namespace mask selects that clock.
  *
  * The core never performs a syscall or enters a kernel backend. An unavailable
  * cycle provider returns VKSO_TIME_UNSUPPORTED_MODE; a clock outside the
@@ -128,6 +128,25 @@ int vkso_clock_gettime_core(
 	const struct vkso_mm_data *mm_data,
 	const struct vkso_context *context);
 int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value);
+int vkso_clock_gettime_realtime(
+	struct vkso_time_value *value, const struct vkso_context *context);
+int vkso_clock_gettime_monotonic(
+	struct vkso_time_value *value, const struct vkso_context *context);
+int vkso_clock_gettime_monotonic_raw(
+	struct vkso_time_value *value, const struct vkso_context *context);
+int vkso_clock_gettime_boottime(
+	struct vkso_time_value *value, const struct vkso_context *context);
+int vkso_clock_gettime_tai(
+	struct vkso_time_value *value, const struct vkso_context *context);
+int vkso_clock_gettime_realtime_coarse(struct vkso_time_value *value);
+int vkso_clock_gettime_monotonic_coarse(struct vkso_time_value *value);
+int vkso_clock_gettime_boottime_coarse(struct vkso_time_value *value);
+int vkso_clock_gettime_tai_coarse(struct vkso_time_value *value);
+int vkso_clock_getres_hres(struct vkso_time_value *value);
+int vkso_clock_getres_coarse(struct vkso_time_value *value);
+int vkso_time_apply_offset(
+	const struct vkso_time_value *offset,
+	struct vkso_time_value *value);
 int vkso_gettimeofday_core(
 	struct vkso_timeval *tv, struct vkso_timezone *tz,
 	const struct vkso_context *context);

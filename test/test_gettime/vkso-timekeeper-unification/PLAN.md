@@ -895,12 +895,12 @@ M01～M09 的“静态性能模型”不得写成裸机性能结论。
 | M03 timekeeper 所有权重构 | 已完成 | v11 行为等价 |
 | M04 短发布/删除转换层 | 已完成 | canonical producer 完整 |
 | M05 纯共享读取 core | 已完成 | 发布协议通过 |
-| M06 普通 kernel reader 统一 | 进行中 | shared core 功能完整 |
-| M07 dispatcher/backend 重构 | 待开始 | 普通 reader 稳定 |
+| M06 普通 kernel reader 统一 | 已完成 | shared core 功能完整 |
+| M07 dispatcher/backend 重构 | 进行中 | 普通 reader 稳定 |
 | M08 清理与静态审计 | 待开始 | 完整分派通过 |
 | M09 完整正确性验证 | 待开始 | 无临时/双重路径 |
 | M10 裸机性能与最终证据 | 待开始 | M09 pre-performance tag |
 
-M00～M05 已通过；下一步执行 M06，只将普通上下文安全的 `ktime_get_*`
-迁入 root-namespace typed shared-core 路径，继续隔离 fast/NMI、
-writer-locked、early-boot 与 cross-timestamp reader。
+M00～M06 已通过；下一步执行 M07，统一 global、CPU、alarm、dynamic/PTP
+与 invalid clock 的 public 分派和 cold backend 边界，消除重复 fallback
+判断且保持 Raw 错误语义。

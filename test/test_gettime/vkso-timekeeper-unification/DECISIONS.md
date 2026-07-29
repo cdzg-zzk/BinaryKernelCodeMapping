@@ -198,3 +198,27 @@ finite mask 时使用 clocksource 等价的 modulo delta。该规则既保留当
 
 启动期测试覆盖 forward、backward clamp 和 8-bit wrap；M09 继续用
 clocksource switch 与并发 seq 测试验证完整路径。
+
+## D017：typed reader 固定为 root namespace
+
+- 状态：已决定并验证
+- 阶段：M06
+
+clock-specific typed reader 不接收 MM_data。kernel 普通 reader直接调用该入口；
+syscall generic core和user public entry只在typed读取成功后应用per-MM offset。
+
+offset归一化仍由一份可映射的`vkso_time_apply_offset()`实现，user assembly
+不复制公式。这样kernel root path不支付MM指针、mask或NULL分支，shared core
+也不依赖current task。
+
+## D018：unsupported clocksource 使用单一 private cold helper
+
+- 状态：已决定并验证
+- 阶段：M06
+
+用户可见shared state不能包含clocksource函数指针。对于无法由TSC/PV/HV
+provider表示的合法clocksource，普通kernel reader由一个
+`timekeeping_get_private()` cold helper保持完整动态read语义。
+
+该helper只处理provider failure/early mode，不是normal global-time算法的
+第二source of truth；fast/NMI/writer-held reader继续使用各自专用路径。

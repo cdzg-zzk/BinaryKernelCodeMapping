@@ -17,6 +17,17 @@
 #define VKSO_COARSE_CLOCK_MASK \
 	((1 << VKSO_CLOCK_REALTIME_COARSE) | \
 	 (1 << VKSO_CLOCK_MONOTONIC_COARSE))
+#define VKSO_MM_CLOCK_MASK_OFFSET	4
+#define VKSO_MM_MONOTONIC_OFFSET	8
+#define VKSO_MM_BOOTTIME_OFFSET		24
+
+	.macro VKSO_APPLY_MM clock, member
+	movq	vkso_user_mm_data(%rip), %rax
+	testl	$(1 << \clock), VKSO_MM_CLOCK_MASK_OFFSET(%rax)
+	je	.Lclock_return
+	leaq	\member(%rax), %rdi
+	jmp	vkso_time_apply_offset
+	.endm
 
 /*
  * Private userspace entry veneers embedded directly in libkernel.so.
@@ -40,8 +51,9 @@
 __vkso_clock_gettime:
 	testl	%edi, %edi
 	jne	.Lclock_not_realtime
-	leaq	vkso_user_context(%rip), %rcx
 	pushq	%rsi
+	movq	%rsi, %rdi
+	leaq	vkso_user_context(%rip), %rsi
 	call	vkso_clock_gettime_realtime
 	popq	%rsi
 	testl	%eax, %eax
@@ -52,13 +64,13 @@ __vkso_clock_gettime:
 .Lclock_not_realtime:
 	cmpl	$VKSO_CLOCK_MONOTONIC, %edi
 	jne	.Lclock_not_monotonic
-	movq	vkso_user_mm_data(%rip), %rdx
-	leaq	vkso_user_context(%rip), %rcx
 	pushq	%rsi
+	movq	%rsi, %rdi
+	leaq	vkso_user_context(%rip), %rsi
 	call	vkso_clock_gettime_monotonic
 	popq	%rsi
 	testl	%eax, %eax
-	je	.Lclock_return
+	je	.Lclock_apply_monotonic
 	movl	$VKSO_CLOCK_MONOTONIC, %edi
 	jmp	.Lclock_fallback
 
@@ -82,8 +94,9 @@ __vkso_clock_gettime:
 	je	.Lclock_boottime
 	cmpl	$VKSO_CLOCK_TAI, %edi
 	jne	.Lclock_fallback
-	leaq	vkso_user_context(%rip), %rcx
 	pushq	%rsi
+	movq	%rsi, %rdi
+	leaq	vkso_user_context(%rip), %rsi
 	call	vkso_clock_gettime_tai
 	popq	%rsi
 	testl	%eax, %eax
@@ -92,35 +105,52 @@ __vkso_clock_gettime:
 	jmp	.Lclock_fallback
 
 .Lclock_realtime_coarse:
+	movq	%rsi, %rdi
 	jmp	vkso_clock_gettime_realtime_coarse
 
 .Lclock_monotonic_coarse:
-	movq	vkso_user_mm_data(%rip), %rdx
-	jmp	vkso_clock_gettime_monotonic_coarse
+	pushq	%rsi
+	movq	%rsi, %rdi
+	call	vkso_clock_gettime_monotonic_coarse
+	popq	%rsi
+	jmp	.Lclock_apply_monotonic_coarse
 
 .Lclock_monotonic_raw:
-	movq	vkso_user_mm_data(%rip), %rdx
-	leaq	vkso_user_context(%rip), %rcx
 	pushq	%rsi
+	movq	%rsi, %rdi
+	leaq	vkso_user_context(%rip), %rsi
 	call	vkso_clock_gettime_monotonic_raw
 	popq	%rsi
 	testl	%eax, %eax
-	je	.Lclock_return
+	je	.Lclock_apply_monotonic_raw
 	movl	$VKSO_CLOCK_MONOTONIC_RAW, %edi
 	jmp	.Lclock_fallback
 
 .Lclock_boottime:
-	movq	vkso_user_mm_data(%rip), %rdx
-	leaq	vkso_user_context(%rip), %rcx
 	pushq	%rsi
+	movq	%rsi, %rdi
+	leaq	vkso_user_context(%rip), %rsi
 	call	vkso_clock_gettime_boottime
 	popq	%rsi
 	testl	%eax, %eax
-	je	.Lclock_return
+	je	.Lclock_apply_boottime
 	movl	$VKSO_CLOCK_BOOTTIME, %edi
 	jmp	.Lclock_fallback
 
+.Lclock_apply_monotonic:
+	VKSO_APPLY_MM VKSO_CLOCK_MONOTONIC, VKSO_MM_MONOTONIC_OFFSET
+
+.Lclock_apply_monotonic_coarse:
+	VKSO_APPLY_MM VKSO_CLOCK_MONOTONIC_COARSE, VKSO_MM_MONOTONIC_OFFSET
+
+.Lclock_apply_monotonic_raw:
+	VKSO_APPLY_MM VKSO_CLOCK_MONOTONIC_RAW, VKSO_MM_MONOTONIC_OFFSET
+
+.Lclock_apply_boottime:
+	VKSO_APPLY_MM VKSO_CLOCK_BOOTTIME, VKSO_MM_BOOTTIME_OFFSET
+
 .Lclock_return:
+	xorl	%eax, %eax
 	ret
 	.size __vkso_clock_gettime, .-__vkso_clock_gettime
 
@@ -144,9 +174,11 @@ __vkso_clock_getres:
 	ret
 
 .Lclock_getres_hres:
+	movq	%rsi, %rdi
 	jmp	vkso_clock_getres_hres
 
 .Lclock_getres_coarse:
+	movq	%rsi, %rdi
 	jmp	vkso_clock_getres_coarse
 	.size __vkso_clock_getres, .-__vkso_clock_getres
 
