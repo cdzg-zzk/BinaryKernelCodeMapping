@@ -242,3 +242,23 @@ M07 因此将两类失败明确分开：
 native 和 compat syscall 共用该 dispatcher。正常 global 路径仍只调用
 `vkso_clock_gettime_core()` 一次；用户 public wrapper 的 syscall fallback
 边界不变。
+
+## D020：用配置边界移除不可达的 global k_clock callback
+
+- 状态：已决定并验证
+- 阶段：M08
+
+启用 VKSO 后，统一 dispatcher 在进入 `k_clock` 前已经处理全部七种 global
+clock；合法 global provider failure 也直接进入 private helper。因此原
+`clock_get_timespec`/`clock_getres` global callback 在产品中不可达，却仍占用
+机器码并形成算法所有权歧义。
+
+M08 将这些 callback 及表项放到 `CONFIG_VKSO_TIME=n` 构建边界：
+
+- VKSO 产品对象不再编译七个 gettime 与两个 getres callback；
+- `clock_get_ktime`、set/adj、sleep 和 timer operation 保留，因为 POSIX timer
+  仍真实调用它们；
+- VKSO 关闭配置继续得到完整 Raw 行为。
+
+这是静态功能选择，不是运行时条件分支。默认对象减少 772 bytes，Raw
+compatibility build 的 callback 符号完整，QEMU Raw/VKSO 语义矩阵保持一致。

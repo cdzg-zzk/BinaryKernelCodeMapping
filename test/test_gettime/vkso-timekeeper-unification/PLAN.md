@@ -897,10 +897,11 @@ M01～M09 的“静态性能模型”不得写成裸机性能结论。
 | M05 纯共享读取 core | 已完成 | 发布协议通过 |
 | M06 普通 kernel reader 统一 | 已完成 | shared core 功能完整 |
 | M07 dispatcher/backend 重构 | 已完成 | 普通 reader 稳定 |
-| M08 清理与静态审计 | 进行中 | 完整分派通过 |
-| M09 完整正确性验证 | 待开始 | 无临时/双重路径 |
+| M08 清理与静态审计 | 已完成 | 完整分派通过 |
+| M09 完整正确性验证 | 进行中 | 无临时/双重路径 |
 | M10 裸机性能与最终证据 | 待开始 | M09 pre-performance tag |
 
-M00～M07 已通过；下一步执行 M08，删除无调用桥接和临时双路径，固定
+M00～M08 已通过。M08 已删除启用 VKSO 时不可达的 global `k_clock`
+gettime/getres callback 和用户测试兼容 wrapper，确认 `X1=0`，并冻结
 public wrapper、typed/generic dispatcher、shared primitive/provider 与 cold
-backend 的层次，并重新审计源码和机器码归属。
+backend 的互斥归属。下一步执行 M09 完整正确性验证。

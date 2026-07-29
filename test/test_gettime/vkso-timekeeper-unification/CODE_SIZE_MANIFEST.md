@@ -128,3 +128,47 @@ M08 必须确认：
 - 测试和 `CONFIG=n` stub 未混入产品 SLOC。
 
 M10 才填写最终 SLOC、Git churn、symbol bytes 和 payload bytes。
+
+## 6. M08 产品边界复核
+
+M08 以 `CONFIG_VKSO_TIME=y` 的最终链接结果作为产品代码边界。下表中的
+文件可以物理重叠，但符号职责互斥；M10 必须按符号或明确行区间统计，不能把
+整个文件重复归入多类。
+
+| ID | VKSO 产品符号/行区间 | 唯一职责 |
+|---|---|---|
+| U1 | `vkso_user_entry.S` 的 `__vkso_clock_gettime`、`__vkso_clock_getres`、`__vkso_gettimeofday`、`__vkso_time`、`__vkso_getcpu` 及其本地 syscall/context veneer | 用户 public ABI、context/environment 绑定和唯一 syscall fallback |
+| S1 | `vkso_time_core.c` 的 typed/global readers、`vkso_time_apply_offset()`、gettimeofday/time；`vkso_time_internal.h` 的 seq/delta/normalize primitive；`vkso_time_cycles.c` 的可映射 cycles provider | kernel/user 唯一 global-time 读取公式 |
+| K1 | `timekeeping.c` 中普通 `ktime_get_*`、`ktime_get_coarse_with_offset()` 的 VKSO 分支 | 保持既有内核 ABI 的 root-namespace 薄入口 |
+| K2 | `timekeeping.c` 的 `vkso_timekeeper_refresh()` 及其 writer 调用点；`struct timekeeper.vkso_read` | producer 直接维护 canonical state |
+| K3 | `vkso_time.c` 的 `vkso_time_publish*()`、timezone 更新；`include/vkso/time.h` 的 v11 payload 定义 | 短发布协议和 shared data ABI |
+| K4 | `posix-timers.c` 的 `vkso_clock_gettime_dispatch()`、`vkso_clock_getres_dispatch()` 及三个 cold helper；`time.c` 的 gettimeofday/time syscall 接入 | syscall global 成功路径与统一冷出口 |
+| B1 | `posix-cpu-timers.c`、`alarmtimer.c`、`posix-clock.c` 的原 callback；`posix-timers.c` 中非 global `k_clock` 解析 | CPU、alarm、dynamic/PTP 必需 backend |
+| C1 | `arch/x86/kernel/vkso.c` 的 MM_data special mapping、auxv/context 选择；time namespace 初始化/更新 hook | per-MM namespace/context 语义 |
+| E1 | `vkso_time_cycles.c` 的 kernel clocksource 与 user TSC/PVClock/Hyper-V provider 边界 | 环境相关 cycles 获取，不包含换算公式 |
+| G1 | `kernel/time/Makefile`、Kconfig、VKSO section/导出 manifest、`vkso_user_entry.S` 的 DSO section 声明 | 仅为功能产物存在的构建与链接接入 |
+| P1 | 通用 `make_dll`、manager、page replacement、KRG 与映射生命周期实现 | 项目通用机制，单列而不计入 clock/time 专属实现 |
+| T1 | `CONFIG_VKSO_TIME_TEST` probe、layout assert、ABI matrix、benchmark、QEMU/裸机脚本和阶段报告 | 验证证据，不进入产品运行时 SLOC |
+
+以下内容明确不进入启用 VKSO 的产品切片：
+
+- `CONFIG_VKSO_TIME=n` stub 和该配置下的原 global `k_clock`
+  gettime/getres callback；
+- fast/NMI、writer-locked、early-boot、crosststamp 与 hrtimer
+  update-offset 等特殊 reader；
+- x32、IA32、legacy vsyscall 和本实验关闭的功能；
+- 其他子系统继续需要、但目标 clock/time ABI 不调用的旧算法。
+
+M08 链接/符号审计结果：
+
+- `X1=0`：不存在 compat conversion、双 shared ABI、fallback mode 或临时
+  bridge；
+- 启用 VKSO 的 `posix-timers.o` 不含九个旧 global gettime/getres callback；
+  `CONFIG_VKSO_TIME=n` 对象仍完整包含它们；
+- 用户测试兼容层只保留一次性 `vkso_user_wrapper_init()`，不再导出六个无调用
+  转发函数；
+- `CONFIG_VKSO_TIME_TEST` probe 只进入测试配置，生产 package 明确标记
+  `production_test_probe=absent`。
+
+M10 仍需对 Raw 建立同样的精确 symbol/line-range 映射，并为每个 ID 填写
+SLOC、Git churn 与 symbol bytes；本节只冻结语义归属，不提前用脚本猜测数字。

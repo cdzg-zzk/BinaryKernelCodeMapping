@@ -89,9 +89,8 @@ vkso_cycle_delta(u64 cycles, u64 cycle_last, u64 mask)
 }
 
 /*
- * Read and convert in one inlined operation.  Keeping an intermediate
- * snapshot forced the production build to spill every field to the stack
- * and reload it after the seq check.
+ * All conversion inputs belong to one seq generation.  Publish the result
+ * only after that generation has been validated.
  */
 static __always_inline int
 vkso_read_hres_time(const struct vkso_shared_data *shared,

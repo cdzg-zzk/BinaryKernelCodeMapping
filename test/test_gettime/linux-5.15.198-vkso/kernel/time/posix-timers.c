@@ -261,13 +261,6 @@ static inline void unlock_timer(struct k_itimer *timr, unsigned long flags)
 	spin_unlock_irqrestore(&timr->it_lock, flags);
 }
 
-/* Get clock_realtime */
-static int posix_get_realtime_timespec(clockid_t which_clock, struct timespec64 *tp)
-{
-	ktime_get_real_ts64(tp);
-	return 0;
-}
-
 static ktime_t posix_get_realtime_ktime(clockid_t which_clock)
 {
 	return ktime_get_real();
@@ -286,57 +279,9 @@ static int posix_clock_realtime_adj(const clockid_t which_clock,
 	return do_adjtimex(t);
 }
 
-/*
- * Get monotonic time for posix timers
- */
-static int posix_get_monotonic_timespec(clockid_t which_clock, struct timespec64 *tp)
-{
-	ktime_get_ts64(tp);
-	timens_add_monotonic(tp);
-	return 0;
-}
-
 static ktime_t posix_get_monotonic_ktime(clockid_t which_clock)
 {
 	return ktime_get();
-}
-
-/*
- * Get monotonic-raw time for posix timers
- */
-static int posix_get_monotonic_raw(clockid_t which_clock, struct timespec64 *tp)
-{
-	ktime_get_raw_ts64(tp);
-	timens_add_monotonic(tp);
-	return 0;
-}
-
-
-static int posix_get_realtime_coarse(clockid_t which_clock, struct timespec64 *tp)
-{
-	ktime_get_coarse_real_ts64(tp);
-	return 0;
-}
-
-static int posix_get_monotonic_coarse(clockid_t which_clock,
-						struct timespec64 *tp)
-{
-	ktime_get_coarse_ts64(tp);
-	timens_add_monotonic(tp);
-	return 0;
-}
-
-static int posix_get_coarse_res(const clockid_t which_clock, struct timespec64 *tp)
-{
-	*tp = ktime_to_timespec64(KTIME_LOW_RES);
-	return 0;
-}
-
-static int posix_get_boottime_timespec(const clockid_t which_clock, struct timespec64 *tp)
-{
-	ktime_get_boottime_ts64(tp);
-	timens_add_boottime(tp);
-	return 0;
 }
 
 static ktime_t posix_get_boottime_ktime(const clockid_t which_clock)
@@ -344,15 +289,75 @@ static ktime_t posix_get_boottime_ktime(const clockid_t which_clock)
 	return ktime_get_boottime();
 }
 
-static int posix_get_tai_timespec(clockid_t which_clock, struct timespec64 *tp)
+static ktime_t posix_get_tai_ktime(clockid_t which_clock)
+{
+	return ktime_get_clocktai();
+}
+
+#ifndef CONFIG_VKSO_TIME
+/*
+ * The native backend owns global gettime/getres when VKSO is disabled.
+ * With VKSO enabled, its dispatcher handles global clocks before k_clock;
+ * only CPU, alarm and dynamic backends reach k_clock.
+ */
+static int
+posix_get_realtime_timespec(clockid_t which_clock, struct timespec64 *tp)
+{
+	ktime_get_real_ts64(tp);
+	return 0;
+}
+
+static int
+posix_get_monotonic_timespec(clockid_t which_clock, struct timespec64 *tp)
+{
+	ktime_get_ts64(tp);
+	timens_add_monotonic(tp);
+	return 0;
+}
+
+static int
+posix_get_monotonic_raw(clockid_t which_clock, struct timespec64 *tp)
+{
+	ktime_get_raw_ts64(tp);
+	timens_add_monotonic(tp);
+	return 0;
+}
+
+static int
+posix_get_realtime_coarse(clockid_t which_clock, struct timespec64 *tp)
+{
+	ktime_get_coarse_real_ts64(tp);
+	return 0;
+}
+
+static int
+posix_get_monotonic_coarse(clockid_t which_clock, struct timespec64 *tp)
+{
+	ktime_get_coarse_ts64(tp);
+	timens_add_monotonic(tp);
+	return 0;
+}
+
+static int
+posix_get_boottime_timespec(clockid_t which_clock, struct timespec64 *tp)
+{
+	ktime_get_boottime_ts64(tp);
+	timens_add_boottime(tp);
+	return 0;
+}
+
+static int posix_get_tai_timespec(clockid_t which_clock,
+				  struct timespec64 *tp)
 {
 	ktime_get_clocktai_ts64(tp);
 	return 0;
 }
 
-static ktime_t posix_get_tai_ktime(clockid_t which_clock)
+static int posix_get_coarse_res(clockid_t which_clock,
+				struct timespec64 *tp)
 {
-	return ktime_get_clocktai();
+	*tp = ktime_to_timespec64(KTIME_LOW_RES);
+	return 0;
 }
 
 static int posix_get_hrtimer_res(clockid_t which_clock, struct timespec64 *tp)
@@ -361,6 +366,13 @@ static int posix_get_hrtimer_res(clockid_t which_clock, struct timespec64 *tp)
 	tp->tv_nsec = hrtimer_resolution;
 	return 0;
 }
+
+#define POSIX_GLOBAL_GETTIME(function)	.clock_get_timespec = function,
+#define POSIX_GLOBAL_GETRES(function)	.clock_getres = function,
+#else
+#define POSIX_GLOBAL_GETTIME(function)
+#define POSIX_GLOBAL_GETRES(function)
+#endif
 
 /*
  * Initialize everything, well, just everything in Posix clocks/timers ;)
@@ -1415,8 +1427,8 @@ SYSCALL_DEFINE4(clock_nanosleep_time32, clockid_t, which_clock, int, flags,
 #endif
 
 static const struct k_clock clock_realtime = {
-	.clock_getres		= posix_get_hrtimer_res,
-	.clock_get_timespec	= posix_get_realtime_timespec,
+	POSIX_GLOBAL_GETRES(posix_get_hrtimer_res)
+	POSIX_GLOBAL_GETTIME(posix_get_realtime_timespec)
 	.clock_get_ktime	= posix_get_realtime_ktime,
 	.clock_set		= posix_clock_realtime_set,
 	.clock_adj		= posix_clock_realtime_adj,
@@ -1434,8 +1446,8 @@ static const struct k_clock clock_realtime = {
 };
 
 static const struct k_clock clock_monotonic = {
-	.clock_getres		= posix_get_hrtimer_res,
-	.clock_get_timespec	= posix_get_monotonic_timespec,
+	POSIX_GLOBAL_GETRES(posix_get_hrtimer_res)
+	POSIX_GLOBAL_GETTIME(posix_get_monotonic_timespec)
 	.clock_get_ktime	= posix_get_monotonic_ktime,
 	.nsleep			= common_nsleep_timens,
 	.timer_create		= common_timer_create,
@@ -1451,24 +1463,24 @@ static const struct k_clock clock_monotonic = {
 };
 
 static const struct k_clock clock_monotonic_raw = {
-	.clock_getres		= posix_get_hrtimer_res,
-	.clock_get_timespec	= posix_get_monotonic_raw,
+	POSIX_GLOBAL_GETRES(posix_get_hrtimer_res)
+	POSIX_GLOBAL_GETTIME(posix_get_monotonic_raw)
 };
 
 static const struct k_clock clock_realtime_coarse = {
-	.clock_getres		= posix_get_coarse_res,
-	.clock_get_timespec	= posix_get_realtime_coarse,
+	POSIX_GLOBAL_GETRES(posix_get_coarse_res)
+	POSIX_GLOBAL_GETTIME(posix_get_realtime_coarse)
 };
 
 static const struct k_clock clock_monotonic_coarse = {
-	.clock_getres		= posix_get_coarse_res,
-	.clock_get_timespec	= posix_get_monotonic_coarse,
+	POSIX_GLOBAL_GETRES(posix_get_coarse_res)
+	POSIX_GLOBAL_GETTIME(posix_get_monotonic_coarse)
 };
 
 static const struct k_clock clock_tai = {
-	.clock_getres		= posix_get_hrtimer_res,
+	POSIX_GLOBAL_GETRES(posix_get_hrtimer_res)
+	POSIX_GLOBAL_GETTIME(posix_get_tai_timespec)
 	.clock_get_ktime	= posix_get_tai_ktime,
-	.clock_get_timespec	= posix_get_tai_timespec,
 	.nsleep			= common_nsleep,
 	.timer_create		= common_timer_create,
 	.timer_set		= common_timer_set,
@@ -1483,9 +1495,9 @@ static const struct k_clock clock_tai = {
 };
 
 static const struct k_clock clock_boottime = {
-	.clock_getres		= posix_get_hrtimer_res,
+	POSIX_GLOBAL_GETRES(posix_get_hrtimer_res)
+	POSIX_GLOBAL_GETTIME(posix_get_boottime_timespec)
 	.clock_get_ktime	= posix_get_boottime_ktime,
-	.clock_get_timespec	= posix_get_boottime_timespec,
 	.nsleep			= common_nsleep_timens,
 	.timer_create		= common_timer_create,
 	.timer_set		= common_timer_set,
@@ -1498,6 +1510,9 @@ static const struct k_clock clock_boottime = {
 	.timer_wait_running	= common_timer_wait_running,
 	.timer_arm		= common_hrtimer_arm,
 };
+
+#undef POSIX_GLOBAL_GETRES
+#undef POSIX_GLOBAL_GETTIME
 
 static const struct k_clock * const posix_clocks[] = {
 	[CLOCK_REALTIME]		= &clock_realtime,

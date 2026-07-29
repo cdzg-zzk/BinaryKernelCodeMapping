@@ -82,9 +82,8 @@ void vkso_time_publish(const struct vkso_read_state *next)
 	smp_wmb();
 	/*
 	 * time() deliberately ignores seq, so its 64-bit source must be
-	 * published by one aligned store.  Publishing every other member with
-	 * the same scalar protocol also lets the compiler keep the prepared
-	 * snapshot in registers instead of materializing it for memcpy().
+	 * published by one aligned store.  The remaining fields use the same
+	 * explicit scalar protocol so every published member is auditable.
 	 */
 	vkso_time_publish_snapshot(shared, next);
 	smp_wmb();

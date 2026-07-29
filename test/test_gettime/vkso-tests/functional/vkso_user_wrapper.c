@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <sys/auxv.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "vkso_abi.h"
 #include "vkso_user_wrapper.h"
@@ -62,32 +64,4 @@ int vkso_user_wrapper_init(void)
 		return -1;
 	}
 	return __vkso_bind_context(mm_data, NULL, NULL);
-}
-
-int vkso_user_clock_gettime(clockid_t clock_id, struct timespec *value)
-{
-	return __vkso_clock_gettime(
-		clock_id, (struct vkso_time_value *)value);
-}
-
-int vkso_user_clock_getres(clockid_t clock_id, struct timespec *value)
-{
-	return __vkso_clock_getres(clock_id,
-				   (struct vkso_time_value *)value);
-}
-
-int vkso_user_gettimeofday(struct timeval *tv, struct timezone *tz)
-{
-	return __vkso_gettimeofday(
-		(struct vkso_timeval *)tv, (struct vkso_timezone *)tz);
-}
-
-time_t vkso_user_time(time_t *tloc)
-{
-	return __vkso_time((int64_t *)tloc);
-}
-
-int vkso_user_getcpu(unsigned int *cpu, unsigned int *node, void *unused)
-{
-	return __vkso_getcpu(cpu, node, unused);
 }

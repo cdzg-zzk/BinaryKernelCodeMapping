@@ -36,8 +36,8 @@
  * DSO-owned RX text so it can inject per-process addresses without changing
  * the shared kernel ABI.  The clock_gettime veneer preserves the two common
  * clocks as its first tests, then uses a shallow decision tree for the other
- * IDs before tail-jumping to the specialized readers.  This removes one
- * shared-core dispatch hop and only prepares dependencies used by the selected
+ * IDs before tail-jumping to the specialized readers.  This bypasses the
+ * generic dispatcher and prepares only dependencies used by the selected
  * reader. Coarse readers cannot fail and remain tail calls; high-resolution
  * readers return a pure-core status so this public page owns their cold
  * syscall exit. make_dll resolves every transfer locally, so no PLT/GOT

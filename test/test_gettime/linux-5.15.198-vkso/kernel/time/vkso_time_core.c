@@ -82,8 +82,6 @@ static_assert(sizeof(struct vkso_context) == 2 * sizeof(void *));
  * Typed readers expose root-namespace time. MM_data is stable for a public
  * read and its offsets are frozen before the mask is published, so the
  * boundary may apply an offset after the TSC/seq critical path.
- *
- * Keep the original definition order: it is part of the measured text layout.
  */
 VKSO_DEFINE_HRES_READER(realtime, realtime_base, mono_mult)
 VKSO_DEFINE_HRES_READER(monotonic, monotonic_base, mono_mult)
