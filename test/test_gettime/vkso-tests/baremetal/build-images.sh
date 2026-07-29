@@ -374,7 +374,7 @@ shared_value=$(nm -a "$DSO_BUILD/libkernel.so" |
 	     END { if (value) print value }')
 test -n "$shared_value"
 printf '%s\n' "$shared_value" >"$OUT/vkso-shared-st-value.txt"
-text_anchor_value=$(nm -D "$DSO_BUILD/libkernel.so" |
+text_anchor_value=$(nm -a "$DSO_BUILD/libkernel.so" |
 	awk '$3 == "vkso_clock_gettime_realtime" && !value { value = "0x" $1 }
 	     END { if (value) print value }')
 test -n "$text_anchor_value"
