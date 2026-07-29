@@ -172,6 +172,12 @@ static int __init vkso_kernel_reader_selftest(void)
 	ktime_get_coarse_real_ts64(&coarse_real);
 	ktime_get_coarse_ts64(&coarse_monotonic);
 	seconds = ktime_get_seconds();
+	/*
+	 * Exercise the public reader, but do not require a non-zero result.
+	 * Raw defines the resolution as mult >> shift, which is legitimately
+	 * zero for sufficiently fast clocksources.
+	 */
+	(void)ktime_get_resolution_ns();
 
 	if (!vkso_test_normalized(&real) ||
 	    !vkso_test_normalized(&monotonic) ||
@@ -182,8 +188,7 @@ static int __init vkso_kernel_reader_selftest(void)
 	    !vkso_test_normalized(&coarse_monotonic) ||
 	    boot.tv_sec < monotonic.tv_sec ||
 	    seconds < coarse_monotonic.tv_sec ||
-	    seconds > coarse_monotonic.tv_sec + 1 ||
-	    !ktime_get_resolution_ns()) {
+	    seconds > coarse_monotonic.tv_sec + 1) {
 		pr_err("VKSO kernel-reader selftest failed\n");
 		return -EINVAL;
 	}

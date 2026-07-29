@@ -88,47 +88,6 @@ vkso_cycle_delta(u64 cycles, u64 cycle_last, u64 mask)
 	return (cycles - cycle_last) & mask;
 }
 
-/*
- * All conversion inputs belong to one seq generation.  Publish the result
- * only after that generation has been validated.
- */
-static __always_inline int
-vkso_read_hres_time(const struct vkso_shared_data *shared,
-		    const struct vkso_hres_base *base,
-		    const struct vkso_cycle_data *cycle_data,
-		    const u32 *multiplier,
-		    const struct vkso_context *context,
-		    struct vkso_time_value *value)
-{
-	u64 cycles, cycle_last, mask, ns;
-	s64 sec;
-	u32 mult, shift;
-	u32 seq;
-	s32 clock_mode;
-
-	for (;;) {
-		seq = vkso_read_begin(shared);
-		clock_mode = READ_ONCE(cycle_data->clock_mode);
-		cycles = vkso_cycles_read(context, clock_mode);
-		if (unlikely((s64)cycles < 0))
-			return VKSO_TIME_UNSUPPORTED_MODE;
-		cycle_last = READ_ONCE(cycle_data->cycle_last);
-		mask = READ_ONCE(cycle_data->mask);
-		mult = READ_ONCE(*multiplier);
-		ns = READ_ONCE(base->shifted_nsec);
-		ns += vkso_cycle_delta(cycles, cycle_last, mask) * mult;
-		shift = READ_ONCE(cycle_data->shift);
-		sec = READ_ONCE(base->sec);
-		if (!vkso_read_retry(shared, seq))
-			break;
-	}
-
-	ns >>= shift;
-	value->sec = sec + __iter_div_u64_rem(ns, NSEC_PER_SEC, &ns);
-	value->nsec = ns;
-	return VKSO_TIME_OK;
-}
-
 static __always_inline void
 vkso_apply_offset(const struct vkso_time_value *offset,
 		  struct vkso_time_value *value)

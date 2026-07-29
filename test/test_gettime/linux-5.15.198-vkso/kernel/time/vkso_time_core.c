@@ -48,6 +48,64 @@ static_assert(sizeof(union vkso_shared_page) == VKSO_SHARED_PAGE_SIZE);
 static_assert(sizeof(union vkso_mm_page) == VKSO_SHARED_PAGE_SIZE);
 static_assert(sizeof(struct vkso_context) == 2 * sizeof(void *));
 
+static noinline notrace __vkso_text
+int vkso_finish_hres_cold(s64 sec, u64 nsec,
+			  struct vkso_time_value *value)
+{
+	u64 remainder;
+
+	sec += __iter_div_u64_rem(nsec, NSEC_PER_SEC, &remainder);
+	value->sec = sec;
+	value->nsec = remainder;
+	return VKSO_TIME_OK;
+}
+
+/*
+ * All conversion inputs belong to one seq generation. Publish the result
+ * only after that generation has been validated. Typed clock readers outline
+ * the exceptional normalization path; gettimeofday keeps it inline because
+ * it must continue with the usec conversion.
+ */
+static __always_inline int
+vkso_read_hres_time(const struct vkso_shared_data *shared,
+		    const struct vkso_hres_base *base,
+		    const struct vkso_cycle_data *cycle_data,
+		    const u32 *multiplier,
+		    const struct vkso_context *context,
+		    struct vkso_time_value *value,
+		    bool outline_normalize)
+{
+	u64 cycles, cycle_last, mask, ns;
+	s64 sec;
+	u32 mult, shift;
+	u32 seq;
+	s32 clock_mode;
+
+	for (;;) {
+		seq = vkso_read_begin(shared);
+		clock_mode = READ_ONCE(cycle_data->clock_mode);
+		cycles = vkso_cycles_read(context, clock_mode);
+		if (unlikely((s64)cycles < 0))
+			return VKSO_TIME_UNSUPPORTED_MODE;
+		cycle_last = READ_ONCE(cycle_data->cycle_last);
+		mask = READ_ONCE(cycle_data->mask);
+		mult = READ_ONCE(*multiplier);
+		ns = READ_ONCE(base->shifted_nsec);
+		ns += vkso_cycle_delta(cycles, cycle_last, mask) * mult;
+		shift = READ_ONCE(cycle_data->shift);
+		sec = READ_ONCE(base->sec);
+		if (!vkso_read_retry(shared, seq))
+			break;
+	}
+
+	ns >>= shift;
+	if (outline_normalize && unlikely(ns >= NSEC_PER_SEC))
+		return vkso_finish_hres_cold(sec, ns, value);
+	value->sec = sec + __iter_div_u64_rem(ns, NSEC_PER_SEC, &ns);
+	value->nsec = ns;
+	return VKSO_TIME_OK;
+}
+
 /*
  * Keep one source definition while preserving per-clock functions.  The
  * private user veneer tail-jumps to these symbols, so replacing them with one
@@ -64,7 +122,8 @@ static_assert(sizeof(struct vkso_context) == 2 * sizeof(void *));
 		return vkso_read_hres_time(				\
 			shared, &shared->state.base_member,		\
 			&shared->state.cycles,				\
-			&shared->state.cycles.mult_member, context, value); \
+			&shared->state.cycles.mult_member, context, value, \
+			true);						\
 	}
 
 #define VKSO_DEFINE_COARSE_READER(name, base_member)			\
@@ -260,7 +319,8 @@ int vkso_gettimeofday_core(
 		int status = vkso_read_hres_time(
 			shared, &shared->state.realtime_base,
 			&shared->state.cycles,
-			&shared->state.cycles.mono_mult, context, &now);
+			&shared->state.cycles.mono_mult, context, &now,
+			false);
 
 		if (unlikely(status != VKSO_TIME_OK))
 			return status;

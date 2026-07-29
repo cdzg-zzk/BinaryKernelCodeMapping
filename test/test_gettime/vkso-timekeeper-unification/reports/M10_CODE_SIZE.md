@@ -15,14 +15,14 @@
 
 | 互斥口径 | Raw SLOC | VKSO SLOC | VKSO - Raw |
 |---|---:|---:|---:|
-| 运行时功能 | 801 | 1,055 | +254 |
+| 运行时功能 | 801 | 1,070 | +269 |
 | 运行时机制 | 546 | 316 | -230 |
-| **运行时小计** | **1,347** | **1,371** | **+24（+1.78%）** |
+| **运行时小计** | **1,347** | **1,386** | **+39（+2.90%）** |
 | 功能专属构建/链接 | 158 | 57 | -101 |
-| **产品功能合计** | **1,505** | **1,428** | **-77（-5.12%）** |
+| **产品功能合计** | **1,505** | **1,443** | **-62（-4.12%）** |
 
 因此，VKSO 的运行时源码接近持平；把各自实际需要的功能专属构建/链接代码
-纳入后，VKSO 总体少 77 SLOC。项目已有的通用 `make_dll`、manager 和页面替换
+纳入后，VKSO 总体少 62 SLOC。项目已有的通用 `make_dll`、manager 和页面替换
 基础设施不计入 kernel/user 产品合计，但必须作为项目机制另行披露。
 
 另外单列：
@@ -30,16 +30,20 @@
 | 非产品主表 | Raw | VKSO | 处理 |
 |---|---:|---:|---|
 | 最终配置不执行的兼容桩 | 14 | 9 | 不计产品；VKSO 只剩 TIME_NS 通用桩 |
-| ABI/assert/probe 验证 | — | 137 | 不计产品 |
+| ABI/assert/probe/内核自测 | — | 340 | 不计产品 |
 
 专用 VKSO kernel 不再支持 `CONFIG_VKSO_TIME=n`。原来的 148 SLOC VKSO 关闭
 模式、旧 global callback 和空桩已经删除；Raw/no-vDSO 由独立源码树承担。
 
 相对本分支起点 `d89f2e5` 的 Git 物理行 churn 也解释了“看起来增加很多”的
-现象：当前范围为新增 827、删除 685；其中测试文件
-`vkso_time_test.c`单独净增 164 行。排除该 T1 测试后，产品源码实际是新增
-659、删除 681，**净减少 22 个物理行**。Git churn 反映重写过程，不替代下文
+现象：当前范围为新增 872、删除 706；其中测试文件
+`vkso_time_test.c`单独新增 173、删除 4 行。排除该 T1 测试后，产品源码实际是
+新增 699、删除 702，**净减少 3 个物理行**。Git churn 反映重写过程，不替代下文
 Raw/VKSO 最终 SLOC 对照。
+
+与已验证的 `4d34fc1` 基线相比，当前候选另外增加 15 SLOC，用于把
+`ns >= 1 second` 的极冷归一化外提。它不增加常用 TSC 路径的动态指令，
+并使目标 reader 机器码减少 160 B；是否最终保留仍由裸机结果决定。
 
 ## 2. 为什么功能代码仍比 Raw 多
 
@@ -48,12 +52,12 @@ Raw/VKSO 最终 SLOC 对照。
 | 类别 | Raw | VKSO | 差异 |
 |---|---:|---:|---:|
 | U1 用户 public ABI/算法或 wrapper | 359 | 179 | -180 |
-| S1 kernel/user 共享 global 算法 | — | 371 | +371 |
+| S1 kernel/user 共享 global 算法 | — | 386 | +386 |
 | K1 普通 kernel global reader | 194 | 238 | +44 |
 | K2 canonical producer | — | 52 | +52 |
 | K4 syscall/dispatcher | 132 | 137 | +5 |
 | E1 cycles/environment provider | 116 | 78 | -38 |
-| **运行时功能** | **801** | **1,055** | **+254** |
+| **运行时功能** | **801** | **1,070** | **+269** |
 
 增长并不是多了一份 mult/shift/base 换算公式，而是边界代码：
 
@@ -156,23 +160,39 @@ VKSO 反而少 14 SLOC。K2 不能孤立解释成“额外转换”：Raw 的
 | 同功能机器码口径 | Raw | VKSO | VKSO - Raw |
 |---|---:|---:|---:|
 | 用户 public entry/wrapper | 1,515 B | 446 B | -1,069 B |
-| kernel reader / shared core（含 cycles cold provider） | 982 B | 2,489 B | +1,507 B |
-| **user + kernel/shared core** | **2,497 B** | **2,935 B** | **+438 B（+17.54%）** |
+| kernel reader / shared core（含 cycles cold provider） | 982 B | 2,329 B | +1,347 B |
+| **user + kernel/shared core** | **2,497 B** | **2,775 B** | **+278 B（+11.13%）** |
 | publisher + timezone | 575 B | 296 B | -279 B（-48.52%） |
 
 因此，目前“源码总体减少”与“reader 机器码增加”同时成立。真实机器码增长不是
 第二份数据结构或第二套源算法，而是 typed reader 专门化展开。它是否值得保留
-必须由最终裸机 read 性能决定；若收益不足，再以独立提交比较
-“共享 hres helper + 小型 typed veneer”，不能直接按 SLOC 判断。
+必须由最终裸机 read 性能决定，不能直接按 SLOC 判断。
+
+对象级候选实验已经排除了“把所有 hres 换算合成一个大 helper”：
+
+- 全部合并可使 `vkso_time_core.o` `.text` 从 2,744 B 降至 1,624 B；
+- 仅合并 mono-mult clocks 可降至 1,816 B；
+- 但两者分别在每次常用读取中增加约 10 条和 6 条动态指令，来源是参数准备、
+  额外 callee-saved register 和 tail jump。
+
+当前只保留极冷归一化外提候选：常用 `ns < 1 second` 路径动态指令不增加，
+`gettimeofday` 函数体逐指令保持不变，目标 reader 机器码净减 160 B。
 
 ## 7. 构建与功能验证
 
 - 全量 x86-64 kernel、模块、manager、libkernel.so 和实验包构建通过；
-- 最终包：`vkso-tests/baremetal/artifacts/unification-m10-source-compact`；
-- QEMU Raw/VKSO 各 112 行 ABI 矩阵通过；
+- `4d34fc1` 已验证基线包：
+  `vkso-tests/baremetal/artifacts/unification-m10-source-compact`；
+- 当前候选生产包：
+  `vkso-tests/baremetal/artifacts/unification-m10-hres-cold`；
+- 当前候选 validation 包：
+  `vkso-tests/baremetal/artifacts/unification-m10-hres-cold-validation-r2`；
+- production 与 validation 的 QEMU Raw/VKSO 各 112 行 ABI 矩阵通过；
 - Raw/VKSO no-RTC fallback 均通过；
-- `qemu_preflight=pass`，结果目录：
-  `artifacts/validation/normal-20260729T130023Z`。
+- validation 配置的 early、cycle-delta、NMI、IRQ、writer-context 和普通
+  kernel reader 自测全部通过；
+- 当前生产结果目录：
+  `artifacts/validation/normal-20260729T132339Z`。
 
 这只证明精简未改变功能，不替代 M10 裸机性能测量。
 
