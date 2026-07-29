@@ -325,7 +325,7 @@ retry 或 tail latency 显著恶化，则回退 D023，而不是重新引入第�
 
 ## D024：只共享kernel/user真正重合的reader
 
-- 状态：已实现并通过静态构建，等待最终QEMU与裸机门槛
+- 状态：已实现并通过normal/no-retpoline QEMU，等待裸机门槛
 - 阶段：M10
 
 `ktime_get_coarse_with_offset()`支持kernel-only的REAL/BOOT/TAI offset读取；

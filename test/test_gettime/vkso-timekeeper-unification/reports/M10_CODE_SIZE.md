@@ -210,20 +210,22 @@ symbol求和减少273 B。`time()`状态wrapper原先已被编译器内联消除
 - 全量 x86-64 kernel、模块、manager、libkernel.so 和实验包构建通过；
 - `4d34fc1` 已验证基线包：
   `vkso-tests/baremetal/artifacts/unification-m10-source-compact`；
-- `64a08e4`直接shared候选生产包：
-  `vkso-tests/baremetal/artifacts/direct-shared-normal`；
-- 当前候选 validation 包：
+- `64a08e4`直接shared validation包：
   `vkso-tests/baremetal/artifacts/direct-shared-validation`；
-- production 与 validation 的 QEMU Raw/VKSO 各 112 行 ABI 矩阵通过；
-- Raw/VKSO no-RTC fallback 均通过；
+- `9755724`最终候选normal/no-retpoline生产包：
+  `artifacts/direct-shared-final-normal`和
+  `artifacts/direct-shared-final-no-retpoline`；
+- 两个最终包的commit、source hash、测试二进制和除thunk族外配置一致性校验
+  通过；
+- normal与no-retpoline的QEMU Raw/VKSO各112行ABI矩阵均通过；
+- 两种构建下Raw/VKSO no-RTC fallback均通过；
 - validation 配置的 early、cycle-delta、NMI、IRQ、writer-context 和普通
   kernel reader 自测全部通过；
-- 当前validation/production QEMU结果目录分别为：
-  `artifacts/validation/normal-direct-shared-validation`和
-  `artifacts/validation/normal-direct-shared-normal`。
-- `b059b67`边界精简后的normal、TIME_NS=n和Hyper-V目标对象构建通过，
-  normal全量bzImage/modules构建通过；与该提交精确匹配的production package和
-  QEMU矩阵仍待生成。
+- 最终QEMU结果目录：
+  `artifacts/validation/normal-direct-shared-final-r2`和
+  `artifacts/validation/no-retpoline-direct-shared-final`；
+- `b059b67`边界精简后的TIME_NS=n和Hyper-V目标对象构建通过，normal/no-ret
+  全量镜像构建通过。
 
 这只证明精简未改变功能，不替代 M10 裸机性能测量。
 
