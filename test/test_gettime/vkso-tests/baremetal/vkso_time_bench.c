@@ -145,11 +145,15 @@ typedef int (*vdso_gettimeofday_fn)(struct timeval *, struct timezone *);
 typedef time_t (*vdso_time_fn)(time_t *);
 typedef int (*vdso_getcpu_fn)(unsigned int *, unsigned int *, void *);
 
-static vdso_clock_fn vdso_clock_gettime;
-static vdso_clock_fn vdso_clock_getres;
-static vdso_gettimeofday_fn vdso_gettimeofday;
-static vdso_time_fn vdso_time;
-static vdso_getcpu_fn vdso_getcpu;
+struct user_time_functions {
+	vdso_clock_fn clock_gettime;
+	vdso_clock_fn clock_getres;
+	vdso_gettimeofday_fn gettimeofday;
+	vdso_time_fn time;
+	vdso_getcpu_fn getcpu;
+};
+
+static struct user_time_functions user_time;
 static const struct vkso_mm_data *vkso_mm_data;
 static volatile uint64_t sink;
 
@@ -401,17 +405,49 @@ static void *vdso_lookup(const char *name)
 
 static void resolve_raw_vdso(void)
 {
-	vdso_clock_gettime =
+	user_time.clock_gettime =
 		(vdso_clock_fn)vdso_lookup("__vdso_clock_gettime");
-	vdso_clock_getres =
+	user_time.clock_getres =
 		(vdso_clock_fn)vdso_lookup("__vdso_clock_getres");
-	vdso_gettimeofday =
+	user_time.gettimeofday =
 		(vdso_gettimeofday_fn)vdso_lookup("__vdso_gettimeofday");
-	vdso_time = (vdso_time_fn)vdso_lookup("__vdso_time");
-	vdso_getcpu = (vdso_getcpu_fn)vdso_lookup("__vdso_getcpu");
-	if (!vdso_clock_gettime || !vdso_clock_getres ||
-	    !vdso_gettimeofday || !vdso_time || !vdso_getcpu)
+	user_time.time = (vdso_time_fn)vdso_lookup("__vdso_time");
+	user_time.getcpu = (vdso_getcpu_fn)vdso_lookup("__vdso_getcpu");
+	if (!user_time.clock_gettime || !user_time.clock_getres ||
+	    !user_time.gettimeofday || !user_time.time ||
+	    !user_time.getcpu)
 		fail_message("raw vDSO is missing a required native symbol");
+}
+
+static void *lookup_vkso_symbol(const char *name)
+{
+	const char *error;
+	void *symbol;
+
+	dlerror();
+	symbol = dlsym(RTLD_DEFAULT, name);
+	error = dlerror();
+	if (error || !symbol) {
+		fprintf(stderr, "cannot resolve %s: %s\n", name,
+			error ? error : "symbol is NULL");
+		exit(1);
+	}
+	return symbol;
+}
+
+static void resolve_vkso(void)
+{
+	user_time.clock_gettime =
+		(vdso_clock_fn)lookup_vkso_symbol("__vkso_clock_gettime");
+	user_time.clock_getres =
+		(vdso_clock_fn)lookup_vkso_symbol("__vkso_clock_getres");
+	user_time.gettimeofday =
+		(vdso_gettimeofday_fn)lookup_vkso_symbol(
+			"__vkso_gettimeofday");
+	user_time.time =
+		(vdso_time_fn)lookup_vkso_symbol("__vkso_time");
+	user_time.getcpu =
+		(vdso_getcpu_fn)lookup_vkso_symbol("__vkso_getcpu");
 }
 
 static enum backend detect_backend(void)
@@ -444,6 +480,7 @@ static void initialize_backend(enum backend backend)
 	}
 	if (vkso_user_wrapper_init())
 		die("vkso_user_wrapper_init");
+	resolve_vkso();
 	vkso_mm_data = (const void *)getauxval(AT_VKSO_MM_DATA);
 }
 
@@ -493,22 +530,14 @@ uint64_t invoke(enum operation operation, enum path path)
 		if (path == PATH_SYSCALL)
 			result = raw_syscall2(SYS_clock_gettime, info->clock_id,
 					      (long)&ts);
-		else if (path == PATH_RAW_VDSO)
-			result = vdso_clock_gettime(info->clock_id, &ts);
 		else
-			result = __vkso_clock_gettime(
-				info->clock_id,
-				(struct vkso_time_value *)&ts);
+			result = user_time.clock_gettime(info->clock_id, &ts);
 	} else if (operation_is_clock_getres(operation)) {
 		if (path == PATH_SYSCALL)
 			result = raw_syscall2(SYS_clock_getres, info->clock_id,
 					      (long)&ts);
-		else if (path == PATH_RAW_VDSO)
-			result = vdso_clock_getres(info->clock_id, &ts);
 		else
-			result = __vkso_clock_getres(
-				info->clock_id,
-				(struct vkso_time_value *)&ts);
+			result = user_time.clock_getres(info->clock_id, &ts);
 	} else if (operation >= OP_GTOD_TV && operation <= OP_GTOD_NULL) {
 		struct timeval *tv_pointer =
 			operation == OP_GTOD_TZ || operation == OP_GTOD_NULL ?
@@ -521,12 +550,8 @@ uint64_t invoke(enum operation operation, enum path path)
 			result = raw_syscall2(SYS_gettimeofday,
 					      (long)tv_pointer,
 					      (long)tz_pointer);
-		else if (path == PATH_RAW_VDSO)
-			result = vdso_gettimeofday(tv_pointer, tz_pointer);
 		else
-			result = __vkso_gettimeofday(
-				(struct vkso_timeval *)tv_pointer,
-				(struct vkso_timezone *)tz_pointer);
+			result = user_time.gettimeofday(tv_pointer, tz_pointer);
 	} else if (operation == OP_TIME_NULL ||
 		   operation == OP_TIME_POINTER) {
 		time_t *pointer =
@@ -534,10 +559,8 @@ uint64_t invoke(enum operation operation, enum path path)
 
 		if (path == PATH_SYSCALL)
 			result = raw_syscall1(SYS_time, (long)pointer);
-		else if (path == PATH_RAW_VDSO)
-			result = vdso_time(pointer);
 		else
-			result = __vkso_time((int64_t *)pointer);
+			result = user_time.time(pointer);
 	} else {
 		unsigned int *cpu_pointer =
 			operation == OP_GETCPU_BOTH ? &cpu : NULL;
@@ -547,10 +570,8 @@ uint64_t invoke(enum operation operation, enum path path)
 		if (path == PATH_SYSCALL)
 			result = raw_syscall3(SYS_getcpu, (long)cpu_pointer,
 					      (long)node_pointer, 0);
-		else if (path == PATH_RAW_VDSO)
-			result = vdso_getcpu(cpu_pointer, node_pointer, NULL);
 		else
-			result = __vkso_getcpu(cpu_pointer, node_pointer, NULL);
+			result = user_time.getcpu(cpu_pointer, node_pointer, NULL);
 	}
 	if (result < 0)
 		fail_message("benchmark operation returned an error");
@@ -1025,13 +1046,9 @@ static void run_layout(unsigned int iterations, unsigned int repeats)
 	free((void *)data);
 }
 
-static int public_clock_gettime(enum backend backend, clockid_t clock_id,
-				struct timespec *value)
+static int public_clock_gettime(clockid_t clock_id, struct timespec *value)
 {
-	if (backend == BACKEND_RAW)
-		return vdso_clock_gettime(clock_id, value);
-	return __vkso_clock_gettime(clock_id,
-				    (struct vkso_time_value *)value);
+	return user_time.clock_gettime(clock_id, value);
 }
 
 static uint64_t timespec_to_ns(const struct timespec *value)
@@ -1052,7 +1069,7 @@ static void run_load(enum backend backend, clockid_t clock_id,
 
 	/* Validate ordering separately so it is not charged to the load loop. */
 	for (index = 0; index < warmup; index++) {
-		if (public_clock_gettime(backend, clock_id, &current))
+		if (public_clock_gettime(clock_id, &current))
 			fail_message("concurrent reader returned an error");
 		if (index && (current.tv_sec < previous.tv_sec ||
 		    (current.tv_sec == previous.tv_sec &&
@@ -1068,7 +1085,7 @@ static void run_load(enum backend backend, clockid_t clock_id,
 		uint64_t step;
 
 		for (step = 0; step < batch; step++) {
-			if (public_clock_gettime(backend, clock_id, &current))
+			if (public_clock_gettime(clock_id, &current))
 				fail_message("concurrent reader returned an error");
 			checksum += (uint64_t)current.tv_sec ^
 				    (uint64_t)current.tv_nsec;
