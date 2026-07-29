@@ -27,8 +27,10 @@
  * clocks as its first tests, then uses a shallow decision tree for the other
  * IDs before tail-jumping to the specialized readers.  This removes one
  * shared-core dispatch hop and only prepares dependencies used by the selected
- * reader.  make_dll resolves every transfer locally, so no PLT/GOT remains on
- * the hot path.
+ * reader. Coarse readers cannot fail and remain tail calls; high-resolution
+ * readers return a pure-core status so this public page owns their cold
+ * syscall exit. make_dll resolves every transfer locally, so no PLT/GOT
+ * remains on the hot path.
  */
 
 	.section .vkso.user.text, "ax", @progbits
@@ -39,14 +41,26 @@ __vkso_clock_gettime:
 	testl	%edi, %edi
 	jne	.Lclock_not_realtime
 	leaq	vkso_user_context(%rip), %rcx
-	jmp	vkso_clock_gettime_realtime
+	pushq	%rsi
+	call	vkso_clock_gettime_realtime
+	popq	%rsi
+	testl	%eax, %eax
+	je	.Lclock_return
+	xorl	%edi, %edi
+	jmp	.Lclock_fallback
 
 .Lclock_not_realtime:
 	cmpl	$VKSO_CLOCK_MONOTONIC, %edi
 	jne	.Lclock_not_monotonic
 	movq	vkso_user_mm_data(%rip), %rdx
 	leaq	vkso_user_context(%rip), %rcx
-	jmp	vkso_clock_gettime_monotonic
+	pushq	%rsi
+	call	vkso_clock_gettime_monotonic
+	popq	%rsi
+	testl	%eax, %eax
+	je	.Lclock_return
+	movl	$VKSO_CLOCK_MONOTONIC, %edi
+	jmp	.Lclock_fallback
 
 .Lclock_not_monotonic:
 	cmpl	$VKSO_CLOCK_MONOTONIC_COARSE, %edi
@@ -69,7 +83,13 @@ __vkso_clock_gettime:
 	cmpl	$VKSO_CLOCK_TAI, %edi
 	jne	.Lclock_fallback
 	leaq	vkso_user_context(%rip), %rcx
-	jmp	vkso_clock_gettime_tai
+	pushq	%rsi
+	call	vkso_clock_gettime_tai
+	popq	%rsi
+	testl	%eax, %eax
+	je	.Lclock_return
+	movl	$VKSO_CLOCK_TAI, %edi
+	jmp	.Lclock_fallback
 
 .Lclock_realtime_coarse:
 	jmp	vkso_clock_gettime_realtime_coarse
@@ -81,12 +101,27 @@ __vkso_clock_gettime:
 .Lclock_monotonic_raw:
 	movq	vkso_user_mm_data(%rip), %rdx
 	leaq	vkso_user_context(%rip), %rcx
-	jmp	vkso_clock_gettime_monotonic_raw
+	pushq	%rsi
+	call	vkso_clock_gettime_monotonic_raw
+	popq	%rsi
+	testl	%eax, %eax
+	je	.Lclock_return
+	movl	$VKSO_CLOCK_MONOTONIC_RAW, %edi
+	jmp	.Lclock_fallback
 
 .Lclock_boottime:
 	movq	vkso_user_mm_data(%rip), %rdx
 	leaq	vkso_user_context(%rip), %rcx
-	jmp	vkso_clock_gettime_boottime
+	pushq	%rsi
+	call	vkso_clock_gettime_boottime
+	popq	%rsi
+	testl	%eax, %eax
+	je	.Lclock_return
+	movl	$VKSO_CLOCK_BOOTTIME, %edi
+	jmp	.Lclock_fallback
+
+.Lclock_return:
+	ret
 	.size __vkso_clock_gettime, .-__vkso_clock_gettime
 
 	.p2align 4
@@ -119,8 +154,21 @@ __vkso_clock_getres:
 	.globl __vkso_gettimeofday
 	.type __vkso_gettimeofday, @function
 __vkso_gettimeofday:
+	pushq	%rdi
+	pushq	%rsi
+	subq	$8, %rsp
 	leaq	vkso_user_context(%rip), %rdx
-	jmp	vkso_gettimeofday_core
+	call	vkso_gettimeofday_core
+	addq	$8, %rsp
+	popq	%rsi
+	popq	%rdi
+	testl	%eax, %eax
+	jne	.Lgettimeofday_fallback
+	ret
+.Lgettimeofday_fallback:
+	movl	$__NR_gettimeofday, %eax
+	syscall
+	ret
 	.size __vkso_gettimeofday, .-__vkso_gettimeofday
 
 	/*
@@ -160,8 +208,6 @@ vkso_user_mm_data:
 vkso_user_context:
 	.quad 0			/* pvclock_page */
 	.quad 0			/* hvclock_page */
-	.long 1		/* VKSO_FALLBACK_SYSCALL */
-	.long 0
 	.size vkso_user_context, .-vkso_user_context
 
 	.section .note.GNU-stack, "", @progbits

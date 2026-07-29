@@ -42,7 +42,7 @@ s64 vkso_read_hvclock_cycles(const void *page)
 #endif
 
 noinline notrace __vkso_text
-s64 vkso_read_cycles_cold(const struct vkso_context *context, s32 clock_mode)
+s64 vkso_cycles_read_cold(const struct vkso_context *context, s32 clock_mode)
 {
 #ifdef CONFIG_PARAVIRT_CLOCK
 	if (clock_mode == VDSO_CLOCKMODE_PVCLOCK)

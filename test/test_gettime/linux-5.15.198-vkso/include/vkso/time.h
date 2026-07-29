@@ -10,7 +10,8 @@
 
 enum vkso_time_status {
 	VKSO_TIME_OK = 0,
-	VKSO_TIME_FALLBACK = -1,
+	VKSO_TIME_UNSUPPORTED_MODE = -1,
+	VKSO_TIME_BACKEND_REQUIRED = -2,
 };
 
 /* Fixed-width result used by the common kernel/user implementation. */
@@ -28,11 +29,6 @@ struct vkso_timezone {
 	s32 minuteswest;
 	s32 dsttime;
 } __attribute__((__may_alias__));
-
-enum vkso_fallback_mode {
-	VKSO_FALLBACK_RETURN,
-	VKSO_FALLBACK_SYSCALL,
-};
 
 /* Nanoseconds remain shifted until the reader adds elapsed cycles. */
 struct vkso_hres_base {
@@ -114,25 +110,24 @@ union vkso_mm_page {
 struct vkso_context {
 	const void *pvclock_page;
 	const void *hvclock_page;
-	u32 fallback_mode;
-	u32 reserved;
 };
 
 /*
  * Internal shared-core entry points. They are not the user ABI: kernel and
  * user wrappers inject address-space-specific dependencies here.
- * MM_data and context are always non-NULL.  Kernel callers use immutable
- * zero-valued objects when no per-MM offsets or userspace fallback are needed.
+ * MM_data and context are always non-NULL. Kernel callers use immutable
+ * zero-valued objects when no per-MM offsets are needed.
  *
- * VKSO_TIME_FALLBACK asks the wrapper to use its native handler: the
- * clock_gettime syscall in userspace or the POSIX clock handler in-kernel.
+ * The core never performs a syscall or enters a kernel backend. An unavailable
+ * cycle provider returns VKSO_TIME_UNSUPPORTED_MODE; a clock outside the
+ * global-time set returns VKSO_TIME_BACKEND_REQUIRED. Public wrappers own the
+ * corresponding fallback policy.
  */
 int vkso_clock_gettime_core(
 	int clock_id, struct vkso_time_value *value,
 	const struct vkso_mm_data *mm_data,
 	const struct vkso_context *context);
-int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value,
-			   const struct vkso_context *context);
+int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value);
 int vkso_gettimeofday_core(
 	struct vkso_timeval *tv, struct vkso_timezone *tz,
 	const struct vkso_context *context);

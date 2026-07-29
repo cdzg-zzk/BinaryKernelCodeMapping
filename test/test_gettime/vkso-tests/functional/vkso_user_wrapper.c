@@ -26,6 +26,8 @@ _Static_assert(sizeof(struct vkso_read_state) == 160,
 	       "VKSO shared read state layout differs");
 _Static_assert(sizeof(struct vkso_shared_data) == 168,
 	       "VKSO shared data layout differs");
+_Static_assert(sizeof(struct vkso_context) == 16,
+	       "VKSO environment context layout differs");
 _Static_assert(offsetof(struct vkso_shared_data,
 			state.realtime_base.sec) == 40,
 	       "VKSO realtime hot field moved");

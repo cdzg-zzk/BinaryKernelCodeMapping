@@ -1150,7 +1150,7 @@ SYSCALL_DEFINE2(clock_gettime, const clockid_t, which_clock,
 
 	error = vkso_time_get(vkso_current_mm_data(), which_clock,
 			      &kernel_tp);
-	if (unlikely(error == VKSO_TIME_FALLBACK)) {
+	if (unlikely(error != VKSO_TIME_OK)) {
 		kc = clockid_to_kclock(which_clock);
 		if (!kc)
 			return -EINVAL;
@@ -1200,7 +1200,7 @@ SYSCALL_DEFINE2(clock_getres, const clockid_t, which_clock,
 	int error;
 
 	error = vkso_time_getres(which_clock, &rtn_tp);
-	if (unlikely(error == VKSO_TIME_FALLBACK)) {
+	if (unlikely(error != VKSO_TIME_OK)) {
 		kc = clockid_to_kclock(which_clock);
 		if (!kc)
 			return -EINVAL;

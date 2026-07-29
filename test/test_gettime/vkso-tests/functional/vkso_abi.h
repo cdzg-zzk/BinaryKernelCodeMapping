@@ -8,6 +8,8 @@
 #define VKSO_TIME_ABI_VERSION 11U
 #define VKSO_MM_DATA_ABI_VERSION 3U
 #define VKSO_TIME_OK 0
+#define VKSO_TIME_UNSUPPORTED_MODE (-1)
+#define VKSO_TIME_BACKEND_REQUIRED (-2)
 
 struct vkso_time_value {
 	int64_t sec;
@@ -58,11 +60,6 @@ struct vkso_shared_data {
 	struct vkso_read_state state;
 };
 
-enum vkso_fallback_mode {
-	VKSO_FALLBACK_RETURN,
-	VKSO_FALLBACK_SYSCALL,
-};
-
 struct vkso_mm_data {
 	uint32_t abi_version;
 	uint32_t clock_mask;
@@ -73,16 +70,13 @@ struct vkso_mm_data {
 struct vkso_context {
 	const void *pvclock_page;
 	const void *hvclock_page;
-	uint32_t fallback_mode;
-	uint32_t reserved;
 };
 
 int vkso_clock_gettime_core(
 	int clock_id, struct vkso_time_value *value,
 	const struct vkso_mm_data *mm_data,
 	const struct vkso_context *context);
-int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value,
-			   const struct vkso_context *context);
+int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value);
 int vkso_gettimeofday_core(
 	struct vkso_timeval *tv, struct vkso_timezone *tz,
 	const struct vkso_context *context);

@@ -172,3 +172,29 @@ publisher直接接收canonical `tk_read_state`，不构造栈上shared snapshot�
 当前编译结果的奇数窗口只有直接load/store与配对barrier，无函数调用、除法、
 循环或跨模型转换。保留显式scalar发布是为了使字段和原子宽度可审计；只有
 M10证据证明固定尺寸copy更优且不破坏`time()`原子字段时，才允许独立试验替换。
+
+## D015：pure core 使用有限状态，不拥有 fallback
+
+- 状态：已决定并验证
+- 阶段：M05
+
+shared core 只返回 `OK`、`UNSUPPORTED_MODE` 或 `BACKEND_REQUIRED`。前者表示
+算法成功，后两者分别表示 environment provider 不可用和 clock 不属于
+global-time 集合。
+
+user public wrapper 唯一执行 syscall，kernel dispatcher 唯一进入 POSIX
+backend。`fallback_mode`、syscall number 和 syscall asm 不得重新进入 shared
+core。这样 typed 成功路径不支付策略字段读取，也不会让可映射算法依赖某一种
+地址空间的执行政策。
+
+## D016：cycle delta 同时保持 x86 clamp 与有限 mask wrap
+
+- 状态：已决定并验证
+- 阶段：M05
+
+`mask == U64_MAX` 时保持 x86 native vDSO 的 backward-observation clamp；
+finite mask 时使用 clocksource 等价的 modulo delta。该规则既保留当前 TSC
+热路径语义，又让 ABI v11 的 mask 对未来合法 provider 有实际含义。
+
+启动期测试覆盖 forward、backward clamp 和 8-bit wrap；M09 继续用
+clocksource switch 与并发 seq 测试验证完整路径。

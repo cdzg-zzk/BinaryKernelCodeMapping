@@ -3,8 +3,6 @@
 #include <linux/build_bug.h>
 #include <linux/stddef.h>
 
-#include <asm/unistd.h>
-
 #include "vkso_time_internal.h"
 
 /* Keep the binary contract explicit before executable interfaces are added. */
@@ -48,28 +46,7 @@ static_assert(offsetof(struct vkso_mm_data, monotonic_offset) == 8);
 static_assert(offsetof(struct vkso_mm_data, boottime_offset) == 24);
 static_assert(sizeof(union vkso_shared_page) == VKSO_SHARED_PAGE_SIZE);
 static_assert(sizeof(union vkso_mm_page) == VKSO_SHARED_PAGE_SIZE);
-static_assert(sizeof(struct vkso_context) == 3 * sizeof(void *));
-
-/* All fallback ABIs used here are two-argument x86-64 syscalls. */
-static noinline notrace __vkso_text int
-vkso_fallback(long first, long second, long syscall_number,
-	      const struct vkso_context *context)
-{
-	register long number asm("rax");
-	register long first_arg asm("rdi");
-	register long second_arg asm("rsi");
-
-	if (context->fallback_mode != VKSO_FALLBACK_SYSCALL)
-		return VKSO_TIME_FALLBACK;
-	number = syscall_number;
-	first_arg = first;
-	second_arg = second;
-	asm volatile("syscall"
-		     : "+a" (number)
-		     : "D" (first_arg), "S" (second_arg)
-		     : "rcx", "r11", "memory");
-	return number;
-}
+static_assert(sizeof(struct vkso_context) == 2 * sizeof(void *));
 
 #define VKSO_NO_OFFSET(mm_data, value)					\
 	do {								\
@@ -89,7 +66,7 @@ vkso_fallback(long first, long second, long syscall_number,
  * private user veneer tail-jumps to these symbols, so replacing them with one
  * generic reader would add parameters and branches to the hot path.
  */
-#define VKSO_DEFINE_HRES_READER(name, base_member, mult_member, clock, offset) \
+#define VKSO_DEFINE_HRES_READER(name, base_member, mult_member, offset)	\
 	static noinline __noclone notrace __vkso_text			\
 	int vkso_clock_gettime_##name(					\
 		int clock_id, struct vkso_time_value *value,		\
@@ -97,16 +74,15 @@ vkso_fallback(long first, long second, long syscall_number,
 		const struct vkso_context *context)			\
 	{								\
 		const struct vkso_shared_data *shared = vkso_shared_data(); \
+		int status;						\
 									\
 		(void)clock_id;						\
-		if (unlikely(vkso_read_hres_time(			\
-				shared, &shared->state.base_member,	\
-				&shared->state.cycles,			\
-				&shared->state.cycles.mult_member,	\
-				context, value) !=			\
-			     VKSO_TIME_OK))				\
-			return vkso_fallback(clock, (long)value,		\
-					     __NR_clock_gettime, context);	\
+		status = vkso_read_hres_time(				\
+			shared, &shared->state.base_member,		\
+			&shared->state.cycles,				\
+			&shared->state.cycles.mult_member, context, value); \
+		if (unlikely(status != VKSO_TIME_OK))			\
+			return status;					\
 		offset;							\
 		return VKSO_TIME_OK;					\
 	}
@@ -135,9 +111,8 @@ vkso_fallback(long first, long second, long syscall_number,
  * Keep the original definition order: it is part of the measured text layout.
  */
 VKSO_DEFINE_HRES_READER(realtime, realtime_base, mono_mult,
-			CLOCK_REALTIME, VKSO_NO_OFFSET(mm_data, value))
+			VKSO_NO_OFFSET(mm_data, value))
 VKSO_DEFINE_HRES_READER(monotonic, monotonic_base, mono_mult,
-			CLOCK_MONOTONIC,
 			VKSO_MM_OFFSET(CLOCK_MONOTONIC, monotonic_offset,
 				       mm_data, value))
 VKSO_DEFINE_COARSE_READER(realtime_coarse, realtime_coarse,
@@ -146,15 +121,13 @@ VKSO_DEFINE_COARSE_READER(monotonic_coarse, monotonic_coarse,
 			  VKSO_MM_OFFSET(CLOCK_MONOTONIC_COARSE,
 					 monotonic_offset, mm_data, value))
 VKSO_DEFINE_HRES_READER(monotonic_raw, monotonic_raw_base, raw_mult,
-			CLOCK_MONOTONIC_RAW,
 			VKSO_MM_OFFSET(CLOCK_MONOTONIC_RAW, monotonic_offset,
 				       mm_data, value))
 VKSO_DEFINE_HRES_READER(boottime, boottime_base, mono_mult,
-			CLOCK_BOOTTIME,
 			VKSO_MM_OFFSET(CLOCK_BOOTTIME, boottime_offset,
 				       mm_data, value))
 VKSO_DEFINE_HRES_READER(tai, tai_base, mono_mult,
-			CLOCK_TAI, VKSO_NO_OFFSET(mm_data, value))
+			VKSO_NO_OFFSET(mm_data, value))
 
 #undef VKSO_DEFINE_COARSE_READER
 #undef VKSO_DEFINE_HRES_READER
@@ -188,18 +161,15 @@ int vkso_clock_gettime_core(
 	if (clock_id == CLOCK_TAI)
 		return vkso_clock_gettime_tai(clock_id, value, mm_data,
 					      context);
-	return vkso_fallback(clock_id, (long)value, __NR_clock_gettime,
-			     context);
+	return VKSO_TIME_BACKEND_REQUIRED;
 }
 
 static noinline __noclone notrace __vkso_text
-int vkso_clock_getres_hres(int clock_id, struct vkso_time_value *value,
-			   const struct vkso_context *context)
+int vkso_clock_getres_hres(int clock_id, struct vkso_time_value *value)
 {
 	const struct vkso_shared_data *shared = vkso_shared_data();
 
 	(void)clock_id;
-	(void)context;
 	if (value) {
 		value->sec = 0;
 		value->nsec = READ_ONCE(shared->state.hrtimer_resolution);
@@ -208,11 +178,9 @@ int vkso_clock_getres_hres(int clock_id, struct vkso_time_value *value,
 }
 
 static noinline __noclone notrace __vkso_text
-int vkso_clock_getres_coarse(int clock_id, struct vkso_time_value *value,
-			     const struct vkso_context *context)
+int vkso_clock_getres_coarse(int clock_id, struct vkso_time_value *value)
 {
 	(void)clock_id;
-	(void)context;
 	if (value) {
 		value->sec = 0;
 		value->nsec = LOW_RES_NSEC;
@@ -221,8 +189,7 @@ int vkso_clock_getres_coarse(int clock_id, struct vkso_time_value *value,
 }
 
 __visible noinline notrace __vkso_text
-int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value,
-			   const struct vkso_context *context)
+int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value)
 {
 	const u32 hres_clocks = (1U << CLOCK_REALTIME) |
 		(1U << CLOCK_MONOTONIC) | (1U << CLOCK_MONOTONIC_RAW) |
@@ -233,15 +200,14 @@ int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value,
 	u32 mask;
 
 	if (id > CLOCK_TAI)
-		goto fallback;
+		goto backend;
 	mask = 1U << id;
 	if (mask & hres_clocks)
-		return vkso_clock_getres_hres(clock_id, value, context);
+		return vkso_clock_getres_hres(clock_id, value);
 	if (mask & coarse_clocks)
-		return vkso_clock_getres_coarse(clock_id, value, context);
-fallback:
-	return vkso_fallback(clock_id, (long)value, __NR_clock_getres,
-			     context);
+		return vkso_clock_getres_coarse(clock_id, value);
+backend:
+	return VKSO_TIME_BACKEND_REQUIRED;
 }
 
 __visible noinline notrace __vkso_text
@@ -253,13 +219,13 @@ int vkso_gettimeofday_core(
 	struct vkso_time_value now;
 
 	if (likely(tv)) {
-		if (unlikely(vkso_read_hres_time(
-				shared, &shared->state.realtime_base,
-				&shared->state.cycles,
-				&shared->state.cycles.mono_mult, context,
-				&now) != VKSO_TIME_OK))
-			return vkso_fallback((long)tv, (long)tz,
-					     __NR_gettimeofday, context);
+		int status = vkso_read_hres_time(
+			shared, &shared->state.realtime_base,
+			&shared->state.cycles,
+			&shared->state.cycles.mono_mult, context, &now);
+
+		if (unlikely(status != VKSO_TIME_OK))
+			return status;
 		tv->sec = now.sec;
 		/*
 		 * vkso_read_hres_time() normalizes nsec to [0, NSEC_PER_SEC).

@@ -33,7 +33,7 @@ vkso_count_retry(struct vkso_hres_snapshot *snapshot)
 }
 #endif
 
-s64 vkso_read_cycles_cold(const struct vkso_context *context,
+s64 vkso_cycles_read_cold(const struct vkso_context *context,
 			  s32 clock_mode);
 
 static __always_inline u32
@@ -62,12 +62,30 @@ static __always_inline bool vkso_read_retry(
  * out-of-line cold paths, reached by direct calls within .vkso.text.
  */
 static __always_inline s64
-vkso_read_cycles(const struct vkso_context *context, s32 clock_mode)
+vkso_cycles_read(const struct vkso_context *context, s32 clock_mode)
 {
 	if (likely(clock_mode == VDSO_CLOCKMODE_TSC))
 		return rdtsc_ordered();
 	barrier();
-	return vkso_read_cycles_cold(context, clock_mode);
+	return vkso_cycles_read_cold(context, clock_mode);
+}
+
+/*
+ * All x86 clocks exported to userspace currently have a U64_MAX mask.  Clamp
+ * their rare backward observation exactly as the native x86 vDSO does.  The
+ * finite-mask case retains the generic clocksource wrap rule, which keeps the
+ * canonical state expressive without charging the common x86 path an
+ * unnecessary mask operation.
+ */
+static __always_inline u64
+vkso_cycle_delta(u64 cycles, u64 cycle_last, u64 mask)
+{
+	if (likely(mask == U64_MAX)) {
+		if (likely(cycles > cycle_last))
+			return cycles - cycle_last;
+		return 0;
+	}
+	return (cycles - cycle_last) & mask;
 }
 
 /*
@@ -83,7 +101,7 @@ vkso_read_hres_time(const struct vkso_shared_data *shared,
 		    const struct vkso_context *context,
 		    struct vkso_time_value *value)
 {
-	u64 cycles, cycle_last, ns;
+	u64 cycles, cycle_last, mask, ns;
 	s64 sec;
 	u32 mult, shift;
 	u32 seq;
@@ -92,15 +110,14 @@ vkso_read_hres_time(const struct vkso_shared_data *shared,
 	for (;;) {
 		seq = vkso_read_begin(shared);
 		clock_mode = READ_ONCE(cycle_data->clock_mode);
-		cycles = vkso_read_cycles(context, clock_mode);
+		cycles = vkso_cycles_read(context, clock_mode);
 		if (unlikely((s64)cycles < 0))
-			return VKSO_TIME_FALLBACK;
+			return VKSO_TIME_UNSUPPORTED_MODE;
 		cycle_last = READ_ONCE(cycle_data->cycle_last);
+		mask = READ_ONCE(cycle_data->mask);
 		mult = READ_ONCE(*multiplier);
 		ns = READ_ONCE(base->shifted_nsec);
-		/* Match the x86 vDSO rule: clamp a slightly backward TSC. */
-		if (cycles > cycle_last)
-			ns += (cycles - cycle_last) * mult;
+		ns += vkso_cycle_delta(cycles, cycle_last, mask) * mult;
 		shift = READ_ONCE(cycle_data->shift);
 		sec = READ_ONCE(base->sec);
 		if (!vkso_read_retry(shared, seq))
@@ -153,9 +170,9 @@ vkso_read_hres_sample(const struct vkso_shared_data *shared,
 		/* Keep payload loads between the two seq observations. */
 		smp_rmb();
 		next.clock_mode = READ_ONCE(cycle_data->clock_mode);
-		next.cycles = vkso_read_cycles(context, next.clock_mode);
+		next.cycles = vkso_cycles_read(context, next.clock_mode);
 		if (unlikely((s64)next.cycles < 0))
-			return VKSO_TIME_FALLBACK;
+			return VKSO_TIME_UNSUPPORTED_MODE;
 		next.cycle_last = READ_ONCE(cycle_data->cycle_last);
 		next.mult = READ_ONCE(*multiplier);
 		next.shift = READ_ONCE(cycle_data->shift);

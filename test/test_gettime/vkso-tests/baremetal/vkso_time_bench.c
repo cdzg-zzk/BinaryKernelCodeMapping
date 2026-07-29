@@ -517,8 +517,8 @@ uint64_t invoke(enum operation operation, enum path path)
 			result = vdso_clock_getres(info->clock_id, &ts);
 		else if (path == PATH_VKSO_CORE)
 			result = vkso_clock_getres_core(
-				info->clock_id, (struct vkso_time_value *)&ts,
-				&context);
+				info->clock_id,
+				(struct vkso_time_value *)&ts);
 		else
 			result = __vkso_clock_getres(
 				info->clock_id,
