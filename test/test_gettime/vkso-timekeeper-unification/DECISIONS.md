@@ -262,3 +262,36 @@ M08 将这些 callback 及表项放到 `CONFIG_VKSO_TIME=n` 构建边界：
 
 这是静态功能选择，不是运行时条件分支。默认对象减少 772 bytes，Raw
 compatibility build 的 callback 符号完整，QEMU Raw/VKSO 语义矩阵保持一致。
+
+## D021：完整验证 hook 只进入专用配置
+
+- 状态：已决定并验证
+- 阶段：M09
+
+early-boot、IRQ、NMI、writer-held、seq/mask 和无效 mode 的 kernel selftest
+由 `CONFIG_VKSO_TIME_TEST` 统一控制。构建系统同时生成：
+
+- validation image：启用 hook，用于证明特殊上下文和并发不变量；
+- production image：关闭 hook，符号审计要求所有 `__vkso_test_*` 消失。
+
+测试 hook、动态 POSIX clock module、ABI matrix 和 QEMU orchestration 全部归
+T1，不进入产品 SLOC 或性能路径。M09 不允许为了制造后端状态而向产品
+alarm/CPU/dynamic 实现添加测试分支。
+
+## D022：后端与时间事件必须走真实状态转换
+
+- 状态：已决定并验证
+- 阶段：M09
+
+完整验证不用 mock 替代关键语义：
+
+- dynamic/PTP 由注册 `struct posix_clock` 的外部测试 module 提供合法 FD clock；
+- 无 RTC alarm 通过启动时 blacklist RTC device/driver initcall 构造，Raw/VKSO
+  均实际进入原 alarm backend；
+- leap 测试把 realtime 定位到 UTC 日界前，等待真实 insertion，并验证
+  TAI-realtime offset 增加一秒；
+- clocksource 测试实际在 TSC 与 HPET 间切换，验证 user provider fallback；
+- suspend 测试实际进入 QEMU S3，由 RTC 唤醒并核对 monotonic/boottime/realtime。
+
+因此 M09 证明的是 dispatcher、producer、发布和后端的完整运行路径，而不只是
+静态编译或人为调用单个 helper。

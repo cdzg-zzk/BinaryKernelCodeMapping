@@ -1168,6 +1168,26 @@ noinstr time64_t __ktime_get_real_seconds(void)
 	return tk->xtime_sec;
 }
 
+#ifdef CONFIG_VKSO_TIME_TEST
+int __init vkso_timekeeping_writer_context_selftest(void)
+{
+	unsigned long flags;
+	time64_t seconds;
+	u64 monotonic, raw, real;
+
+	raw_spin_lock_irqsave(&timekeeper_lock, flags);
+	write_seqcount_begin(&tk_core.seq);
+	seconds = __ktime_get_real_seconds();
+	monotonic = ktime_get_mono_fast_ns();
+	raw = ktime_get_raw_fast_ns();
+	real = ktime_get_real_fast_ns();
+	write_seqcount_end(&tk_core.seq);
+	raw_spin_unlock_irqrestore(&timekeeper_lock, flags);
+
+	return seconds > 0 && monotonic && raw && real ? 0 : -EINVAL;
+}
+#endif
+
 /**
  * ktime_get_snapshot - snapshots the realtime/monotonic raw clocks with counter
  * @systime_snapshot:	pointer to struct receiving the system time snapshot

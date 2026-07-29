@@ -13,6 +13,7 @@ mount -t debugfs debugfs /sys/kernel/debug
 status=0
 replaced=0
 module_loaded=0
+clock_module_loaded=0
 backend=$(cat /work/backend)
 
 {
@@ -39,6 +40,13 @@ backend=$(cat /work/backend)
 		fi
 		[ "$status" -eq 0 ] && echo "update_bench_status=pass"
 	fi
+	if [ "$status" -eq 0 ]; then
+		insmod /work/vkso_m09_clock.ko &&
+			clock_module_loaded=1 || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		test -c /dev/vkso-m09-clock || status=$?
+	fi
 	if [ "$status" -eq 0 ] && [ "$backend" = vkso ]; then
 		insmod /work/page_cache_replace.ko &&
 			module_loaded=1 || status=$?
@@ -56,8 +64,90 @@ backend=$(cat /work/backend)
 		LD_LIBRARY_PATH=/work /work/vkso-time-bench --probe ||
 			status=$?
 	fi
+	if grep -qw vkso_no_rtc /proc/cmdline; then
+		if [ "$status" -eq 0 ]; then
+			VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
+				LD_LIBRARY_PATH=/work /work/abi-matrix \
+				--alarm-no-rtc || status=$?
+		fi
+		[ "$status" -eq 0 ] && echo "no_rtc_status=pass"
+		echo "guest_status=$status"
+		sync
+		reboot -f
+		while :; do
+			sleep 1
+		done
+	fi
 	if [ "$status" -eq 0 ]; then
-		LD_LIBRARY_PATH=/work /work/abi-matrix || status=$?
+		VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
+			LD_LIBRARY_PATH=/work /work/abi-matrix || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
+			LD_LIBRARY_PATH=/work /work/abi-matrix \
+			--time-events || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		LD_LIBRARY_PATH=/work /work/vkso-time-bench \
+			--backend "$backend" --mode seq --cpu 0 \
+			--seq-iterations 500000 >/tmp/seq.csv || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		awk -F, '
+			NR == 1 { next }
+			NF == 8 && $3 == 500000 { rows++ }
+			END { exit rows == 2 ? 0 : 1 }
+		' /tmp/seq.csv || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		echo "concurrency.seq_protocol=pass readers=2"
+		sed 's/^/evidence.seq./' /tmp/seq.csv
+	fi
+	if [ "$status" -eq 0 ]; then
+		current_source=$(cat \
+			/sys/devices/system/clocksource/clocksource0/current_clocksource)
+		alternate_source=
+		for source in $(cat \
+			/sys/devices/system/clocksource/clocksource0/available_clocksource); do
+			if [ "$source" != "$current_source" ]; then
+				alternate_source=$source
+				break
+			fi
+		done
+		test -n "$alternate_source" || status=1
+	fi
+	if [ "$status" -eq 0 ]; then
+		echo "$alternate_source" \
+			>/sys/devices/system/clocksource/clocksource0/current_clocksource ||
+			status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		test "$(cat \
+			/sys/devices/system/clocksource/clocksource0/current_clocksource)" \
+			= "$alternate_source" || status=1
+	fi
+	if [ "$status" -eq 0 ]; then
+		VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
+			LD_LIBRARY_PATH=/work /work/abi-matrix \
+			--provider-fallback || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		echo "$current_source" \
+			>/sys/devices/system/clocksource/clocksource0/current_clocksource ||
+			status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
+			LD_LIBRARY_PATH=/work /work/abi-matrix \
+			--lifecycle-smoke || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		echo "event.clocksource_switch=pass"
+	fi
+	if [ "$status" -eq 0 ]; then
+		VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
+			LD_LIBRARY_PATH=/work /work/abi-matrix \
+			--suspend-resume || status=$?
 	fi
 	if [ "$status" -eq 0 ]; then
 		LD_LIBRARY_PATH=/work /work/vkso-time-bench \
@@ -73,6 +163,10 @@ backend=$(cat /work/backend)
 	if [ "$module_loaded" -eq 1 ]; then
 		rmmod page_cache_replace || status=$?
 		module_loaded=0
+	fi
+	if [ "$clock_module_loaded" -eq 1 ]; then
+		rmmod vkso_m09_clock || status=$?
+		clock_module_loaded=0
 	fi
 	echo "guest_status=$status"
 } 2>&1

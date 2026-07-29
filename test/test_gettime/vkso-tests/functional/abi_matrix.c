@@ -15,9 +15,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/auxv.h>
+#include <sys/ptrace.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
+#include <sys/timex.h>
 #include <sys/time.h>
+#include <sys/user.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
@@ -46,6 +49,8 @@
 #define MAX_TEST_THREADS 4
 #define NS_MONOTONIC_OFFSET_NS INT64_C(7123456789)
 #define NS_BOOTTIME_OFFSET_NS INT64_C(11234567890)
+#define LEAP_TIMEOUT_NS INT64_C(6000000000)
+#define LEAP_DELTA_TOLERANCE_NS INT64_C(100000000)
 
 #define TEST_CPUCLOCK_PERTHREAD_MASK 4
 #define TEST_CPUCLOCK_SCHED 2
@@ -67,6 +72,8 @@ struct backend {
 };
 
 static struct backend backend;
+static int dynamic_clock_fd = -1;
+static clockid_t dynamic_clock_id;
 
 static void fail(const char *message)
 {
@@ -116,6 +123,80 @@ static void init_backend(void)
 #endif
 }
 
+static int mapping_at(const void *address, char permissions[5])
+{
+	const uintptr_t target = (uintptr_t)address;
+	char line[512], current[5];
+	unsigned long start, end;
+	FILE *stream;
+
+	stream = fopen("/proc/self/maps", "r");
+	if (!stream)
+		fail("open process maps");
+	while (fgets(line, sizeof(line), stream)) {
+		if (sscanf(line, "%lx-%lx %4s", &start, &end, current) != 3)
+			continue;
+		if (target < start || target >= end)
+			continue;
+		memcpy(permissions, current, sizeof(current));
+		fclose(stream);
+		return 0;
+	}
+	fclose(stream);
+	return -1;
+}
+
+#ifndef VKSO_BACKEND
+static int named_mapping(const char *name, char permissions[5])
+{
+	char line[512], current[5];
+	unsigned long start, end;
+	FILE *stream;
+
+	stream = fopen("/proc/self/maps", "r");
+	if (!stream)
+		fail("open named process maps");
+	while (fgets(line, sizeof(line), stream)) {
+		if (!strstr(line, name) ||
+		    sscanf(line, "%lx-%lx %4s", &start, &end, current) != 3)
+			continue;
+		memcpy(permissions, current, sizeof(current));
+		fclose(stream);
+		return 0;
+	}
+	fclose(stream);
+	return -1;
+}
+#endif
+
+static void check_mapping_security(void)
+{
+	char code[5], shared[5], context[5];
+
+	if (mapping_at((const void *)backend.clock_gettime, code) ||
+	    code[0] != 'r' || code[1] != '-' || code[2] != 'x')
+		fail("public code mapping permissions");
+#ifdef VKSO_BACKEND
+	{
+		const void *mm_data = (const void *)getauxval(AT_VKSO_MM_DATA);
+		const void *shared_data = __vkso_shared_data();
+
+		if (!mm_data || !shared_data ||
+		    mapping_at(shared_data, shared) ||
+		    mapping_at(mm_data, context))
+			fail("VKSO data mapping lookup");
+	}
+#else
+	if (named_mapping("[vvar]", shared) ||
+	    named_mapping("[vvar]", context))
+		fail("Raw VVAR mapping lookup");
+#endif
+	if (shared[0] != 'r' || shared[1] != '-' || shared[2] != '-' ||
+	    context[0] != 'r' || context[1] != '-' || context[2] != '-')
+		fail("shared/context mapping permissions");
+	puts("security.mapping_permissions=pass code=R-X data=R-- context=R--");
+}
+
 static int64_t timespec_ns(const struct timespec *value)
 {
 	return (int64_t)value->tv_sec * INT64_C(1000000000) +
@@ -137,6 +218,18 @@ static clockid_t make_test_cpuclock(unsigned int id, int per_thread)
 static clockid_t make_test_fd_clock(int fd)
 {
 	return (clockid_t)(((~(unsigned int)fd) << 3) | TEST_CLOCKFD);
+}
+
+static void open_dynamic_clock(void)
+{
+	const char *path = getenv("VKSO_TEST_DYNAMIC_CLOCK");
+
+	if (!path || !*path)
+		fail("missing dynamic clock path");
+	dynamic_clock_fd = open(path, O_RDWR | O_CLOEXEC);
+	if (dynamic_clock_fd < 0)
+		fail("open dynamic clock");
+	dynamic_clock_id = make_test_fd_clock(dynamic_clock_fd);
 }
 
 static void check_clock_value(clockid_t id, const char *name)
@@ -355,6 +448,20 @@ static void check_clock_getres(void)
 	    errno != EDOM)
 		fail("clock_getres invalid positive IDs");
 	puts("semantics.clock_getres.invalid_positive=pass");
+}
+
+static void check_dynamic_clock(void)
+{
+	struct timespec expected, value;
+
+	check_clock_value(dynamic_clock_id, "dynamic_success");
+	if (syscall(SYS_clock_getres, dynamic_clock_id, &expected) ||
+	    backend.clock_getres(dynamic_clock_id, &value) ||
+	    value.tv_sec != expected.tv_sec ||
+	    value.tv_nsec != expected.tv_nsec ||
+	    backend.clock_getres(dynamic_clock_id, NULL))
+		fail("dynamic clock_getres success");
+	puts("semantics.clock_getres.dynamic_success=pass");
 }
 
 static void check_gettimeofday(void)
@@ -703,6 +810,266 @@ static void check_paths(int getcpu_only)
 	}
 }
 
+static void check_dynamic_paths(void)
+{
+	const struct path_case gettime = {
+		"clock_gettime.dynamic_success", PATH_CLOCK_GETTIME,
+		SYS_clock_gettime, dynamic_clock_id, 1, 1, 0,
+	};
+	const struct path_case getres = {
+		"clock_getres.dynamic_success", PATH_CLOCK_GETRES,
+		SYS_clock_getres, dynamic_clock_id, 1, 1, 0,
+	};
+	const struct path_case getres_null = {
+		"clock_getres.dynamic_success_null", PATH_CLOCK_GETRES,
+		SYS_clock_getres, dynamic_clock_id, 0, 1, 0,
+	};
+
+	run_path_case(&gettime);
+	run_path_case(&getres);
+	run_path_case(&getres_null);
+}
+
+enum traced_fallback {
+	TRACE_CLOCK_GETTIME,
+	TRACE_CLOCK_GETRES,
+};
+
+static void trace_one_fallback(enum traced_fallback operation,
+			       clockid_t clock_id, int syscall_number)
+{
+	pid_t child;
+	int status, syscall_stops = 0;
+
+	child = fork();
+	if (child < 0)
+		fail("fork fallback trace");
+	if (!child) {
+		struct timespec value;
+		int result;
+
+		if (ptrace(PTRACE_TRACEME, 0, NULL, NULL))
+			_exit(80);
+		raise(SIGSTOP);
+		if (operation == TRACE_CLOCK_GETTIME)
+			result = backend.clock_gettime(clock_id, &value);
+		else
+			result = backend.clock_getres(clock_id, &value);
+		_exit(result ? 81 : 0);
+	}
+
+	if (waitpid(child, &status, 0) != child || !WIFSTOPPED(status))
+		fail("initial fallback trace stop");
+	if (ptrace(PTRACE_SETOPTIONS, child, NULL,
+		   (void *)(uintptr_t)PTRACE_O_TRACESYSGOOD))
+		fail("set fallback trace options");
+	if (ptrace(PTRACE_SYSCALL, child, NULL, NULL))
+		fail("start fallback trace");
+
+	for (;;) {
+		struct user_regs_struct registers;
+
+		if (waitpid(child, &status, 0) != child)
+			fail("wait fallback trace");
+		if (WIFEXITED(status))
+			break;
+		if (!WIFSTOPPED(status))
+			fail("unexpected fallback trace state");
+		if (WSTOPSIG(status) == (SIGTRAP | 0x80)) {
+			if (ptrace(PTRACE_GETREGS, child, NULL, &registers))
+				fail("read fallback trace registers");
+			if ((int)registers.orig_rax == syscall_number)
+				syscall_stops++;
+		}
+		if (ptrace(PTRACE_SYSCALL, child, NULL, NULL))
+			fail("continue fallback trace");
+	}
+	if (WEXITSTATUS(status) || syscall_stops != 2)
+		fail("fallback syscall count");
+}
+
+static void check_single_fallback(void)
+{
+	trace_one_fallback(TRACE_CLOCK_GETTIME, CLOCK_PROCESS_CPUTIME_ID,
+			   SYS_clock_gettime);
+	trace_one_fallback(TRACE_CLOCK_GETRES, CLOCK_PROCESS_CPUTIME_ID,
+			   SYS_clock_getres);
+	trace_one_fallback(TRACE_CLOCK_GETTIME, dynamic_clock_id,
+			   SYS_clock_gettime);
+	puts("path.fallback.single_syscall=pass cases=3");
+}
+
+static void check_provider_fallback(void)
+{
+	static const struct path_case cases[] = {
+		{ "provider.clock_gettime", PATH_CLOCK_GETTIME,
+		  SYS_clock_gettime, CLOCK_REALTIME, 1, 1, 0 },
+		{ "provider.gettimeofday", PATH_GETTIMEOFDAY,
+		  SYS_gettimeofday, 0, 1, 1, 0 },
+		{ "provider.clock_getres", PATH_CLOCK_GETRES,
+		  SYS_clock_getres, CLOCK_REALTIME, 1, 0, 0 },
+		{ "provider.time", PATH_TIME, SYS_time, 0, 0, 0, 0 },
+	};
+	struct timespec value;
+	size_t index;
+
+	if (backend.clock_gettime(CLOCK_REALTIME, &value))
+		fail("provider fallback value");
+	for (index = 0; index < sizeof(cases) / sizeof(cases[0]); ++index)
+		run_path_case(&cases[index]);
+	puts("event.clocksource_provider_fallback=pass");
+}
+
+static void validate_global_after_event(const char *event)
+{
+	static const clockid_t clocks[] = {
+		CLOCK_REALTIME, CLOCK_MONOTONIC, CLOCK_MONOTONIC_RAW,
+		CLOCK_BOOTTIME, CLOCK_TAI, CLOCK_REALTIME_COARSE,
+		CLOCK_MONOTONIC_COARSE,
+	};
+	struct timeval tv;
+	time_t seconds;
+	size_t index;
+
+	for (index = 0; index < sizeof(clocks) / sizeof(clocks[0]); ++index) {
+		struct timespec value;
+
+		if (backend.clock_gettime(clocks[index], &value) ||
+		    value.tv_nsec < 0 || value.tv_nsec >= 1000000000L)
+			fail(event);
+	}
+	if (backend.gettimeofday(&tv, NULL) || tv.tv_usec < 0 ||
+	    tv.tv_usec >= 1000000 || (seconds = backend.time(NULL)) <= 0 ||
+	    llabs((long long)seconds - (long long)tv.tv_sec) > 1)
+		fail(event);
+}
+
+static void check_time_events(void)
+{
+	struct timespec realtime, tai, next, timeout_start, now;
+	struct timex current = { 0 }, change = { 0 };
+	long long tai_delta, expected_tai_delta;
+	int leap_observed = 0;
+	int new_tai;
+
+	if (syscall(SYS_clock_gettime, CLOCK_REALTIME, &realtime))
+		fail("read realtime before settime");
+	next = realtime;
+	next.tv_sec += 2;
+	if (syscall(SYS_clock_settime, CLOCK_REALTIME, &next))
+		fail("clock_settime event");
+	validate_global_after_event("validate settime event");
+	puts("event.settime=pass");
+
+	if (syscall(SYS_adjtimex, &current) < 0)
+		fail("query timex for TAI");
+	new_tai = current.tai == 37 ? 38 : 37;
+	change.modes = ADJ_TAI;
+	change.constant = new_tai;
+	if (syscall(SYS_adjtimex, &change) < 0 ||
+	    syscall(SYS_clock_gettime, CLOCK_REALTIME, &realtime) ||
+	    syscall(SYS_clock_gettime, CLOCK_TAI, &tai))
+		fail("TAI update event");
+	tai_delta = timespec_ns(&tai) - timespec_ns(&realtime);
+	if (llabs(tai_delta - (long long)new_tai * 1000000000LL) >
+	    10000000LL)
+		fail("TAI offset publication");
+	validate_global_after_event("validate TAI event");
+	puts("event.tai_update=pass");
+
+	memset(&current, 0, sizeof(current));
+	if (syscall(SYS_adjtimex, &current) < 0)
+		fail("query timex for frequency");
+	memset(&change, 0, sizeof(change));
+	change.modes = ADJ_FREQUENCY;
+	change.freq = current.freq > 30000000 ?
+		current.freq - 65536 : current.freq + 65536;
+	if (syscall(SYS_adjtimex, &change) < 0)
+		fail("NTP frequency event");
+	usleep(20000);
+	validate_global_after_event("validate NTP frequency event");
+	puts("event.ntp_frequency=pass");
+
+	memset(&current, 0, sizeof(current));
+	if (syscall(SYS_adjtimex, &current) < 0)
+		fail("query timex for leap");
+	memset(&change, 0, sizeof(change));
+	change.modes = ADJ_STATUS;
+	change.status = current.status & ~(STA_INS | STA_DEL);
+	if (syscall(SYS_adjtimex, &change) < 0)
+		fail("clear leap status");
+
+	if (syscall(SYS_clock_gettime, CLOCK_REALTIME, &realtime))
+		fail("read realtime before leap");
+	next.tv_sec = (realtime.tv_sec / 86400 + 1) * 86400 - 2;
+	next.tv_nsec = 0;
+	if (syscall(SYS_clock_settime, CLOCK_REALTIME, &next))
+		fail("position realtime before leap");
+
+	memset(&current, 0, sizeof(current));
+	if (syscall(SYS_adjtimex, &current) < 0)
+		fail("query timex before leap insertion");
+	memset(&change, 0, sizeof(change));
+	change.modes = ADJ_STATUS;
+	change.status = (current.status & ~(STA_INS | STA_DEL)) | STA_INS;
+	if (syscall(SYS_adjtimex, &change) < 0)
+		fail("leap schedule event");
+	expected_tai_delta = (long long)(new_tai + 1) * 1000000000LL;
+	if (syscall(SYS_clock_gettime, CLOCK_MONOTONIC, &timeout_start))
+		fail("start leap timeout");
+	for (;;) {
+		if (backend.clock_gettime(CLOCK_REALTIME, &realtime) ||
+		    backend.clock_gettime(CLOCK_TAI, &tai) ||
+		    syscall(SYS_clock_gettime, CLOCK_MONOTONIC, &now))
+			fail("observe leap insertion");
+		tai_delta = timespec_ns(&tai) - timespec_ns(&realtime);
+		if (llabs(tai_delta - expected_tai_delta) <=
+		    LEAP_DELTA_TOLERANCE_NS) {
+			leap_observed = 1;
+			break;
+		}
+		if (timespec_ns(&now) - timespec_ns(&timeout_start) >
+		    LEAP_TIMEOUT_NS)
+			break;
+		usleep(10000);
+	}
+	if (!leap_observed)
+		fail("leap insertion transition");
+	validate_global_after_event("validate leap insertion event");
+	memset(&current, 0, sizeof(current));
+	if (syscall(SYS_adjtimex, &current) < 0)
+		fail("query timex after leap");
+	memset(&change, 0, sizeof(change));
+	change.modes = ADJ_STATUS;
+	change.status = current.status & ~(STA_INS | STA_DEL);
+	if (syscall(SYS_adjtimex, &change) < 0)
+		fail("clear leap insertion");
+	puts("event.leap_schedule=pass");
+	puts("event.leap_transition=pass");
+}
+
+static void check_alarm_no_rtc(void)
+{
+	static const clockid_t clocks[] = {
+		CLOCK_REALTIME_ALARM,
+		CLOCK_BOOTTIME_ALARM,
+	};
+	struct timespec value;
+	size_t index;
+
+	for (index = 0; index < sizeof(clocks) / sizeof(clocks[0]); ++index) {
+		errno = EDOM;
+		if (backend.clock_gettime(clocks[index], &value) != -EINVAL ||
+		    errno != EDOM)
+			fail("alarm clock_gettime without RTC");
+		errno = EDOM;
+		if (backend.clock_getres(clocks[index], &value) != -EINVAL ||
+		    errno != EDOM)
+			fail("alarm clock_getres without RTC");
+	}
+	puts("semantics.alarm.no_rtc=pass clocks=2 operations=4");
+}
+
 enum namespace_clock_index {
 	NS_MONOTONIC,
 	NS_MONOTONIC_RAW,
@@ -767,6 +1134,58 @@ static void read_full(int fd, void *buffer, size_t size)
 		cursor += received;
 		size -= received;
 	}
+}
+
+static void write_control_file(const char *path, const char *value)
+{
+	int fd = open(path, O_WRONLY | O_CLOEXEC);
+
+	if (fd < 0)
+		fail(path);
+	write_full(fd, value, strlen(value));
+	if (close(fd))
+		fail("close control file");
+}
+
+static void check_suspend_resume(void)
+{
+	struct timespec mono_before, boot_before, real_before;
+	struct timespec mono_after, boot_after, real_after;
+	char states[128] = { 0 };
+	int fd;
+	ssize_t length;
+	int64_t mono_delta, boot_delta, real_delta;
+
+	fd = open("/sys/power/state", O_RDONLY | O_CLOEXEC);
+	if (fd < 0)
+		fail("open power state");
+	length = read(fd, states, sizeof(states) - 1);
+	if (length < 0 || close(fd))
+		fail("read power state");
+	if (!strstr(states, "mem"))
+		fail("QEMU lacks suspend-to-RAM");
+
+	if (backend.clock_gettime(CLOCK_MONOTONIC, &mono_before) ||
+	    backend.clock_gettime(CLOCK_BOOTTIME, &boot_before) ||
+	    backend.clock_gettime(CLOCK_REALTIME, &real_before))
+		fail("read clocks before suspend");
+
+	write_control_file("/sys/class/rtc/rtc0/wakealarm", "0\n");
+	write_control_file("/sys/class/rtc/rtc0/wakealarm", "+2\n");
+	write_control_file("/sys/power/state", "mem\n");
+
+	if (backend.clock_gettime(CLOCK_MONOTONIC, &mono_after) ||
+	    backend.clock_gettime(CLOCK_BOOTTIME, &boot_after) ||
+	    backend.clock_gettime(CLOCK_REALTIME, &real_after))
+		fail("read clocks after resume");
+	mono_delta = timespec_ns(&mono_after) - timespec_ns(&mono_before);
+	boot_delta = timespec_ns(&boot_after) - timespec_ns(&boot_before);
+	real_delta = timespec_ns(&real_after) - timespec_ns(&real_before);
+	if (mono_delta < 0 || boot_delta < 0 || real_delta < 500000000 ||
+	    boot_delta + 100000000 < mono_delta)
+		fail("suspend/resume clock relationship");
+	validate_global_after_event("validate suspend/resume");
+	puts("event.suspend_resume=pass");
 }
 
 static void syscall_namespace_sample(struct namespace_sample *sample)
@@ -1068,14 +1487,24 @@ int main(int argc, char **argv)
 	int multicpu_only = argc == 2 && !strcmp(argv[1], "--multicpu-only");
 	int lifecycle_smoke = argc == 2 &&
 		!strcmp(argv[1], "--lifecycle-smoke");
+	int provider_fallback = argc == 2 &&
+		!strcmp(argv[1], "--provider-fallback");
+	int time_events = argc == 2 && !strcmp(argv[1], "--time-events");
+	int suspend_resume = argc == 2 &&
+		!strcmp(argv[1], "--suspend-resume");
+	int alarm_no_rtc = argc == 2 &&
+		!strcmp(argv[1], "--alarm-no-rtc");
 	int namespace_child = argc == 3 &&
 		!strcmp(argv[1], "--namespace-exec-child");
 	char *end;
 	long result_fd;
 
-	if (!multicpu_only && !lifecycle_smoke && !namespace_child && argc != 1)
-		fail("usage: abi-matrix [--multicpu-only|--lifecycle-smoke]");
+	if (!multicpu_only && !lifecycle_smoke && !provider_fallback &&
+	    !time_events && !suspend_resume && !alarm_no_rtc &&
+	    !namespace_child && argc != 1)
+		fail("usage: abi-matrix [validation mode]");
 	init_backend();
+	open_dynamic_clock();
 	if (namespace_child) {
 		errno = 0;
 		result_fd = strtol(argv[2], &end, 10);
@@ -1085,6 +1514,22 @@ int main(int argc, char **argv)
 	}
 	if (lifecycle_smoke)
 		return run_lifecycle_smoke();
+	if (provider_fallback) {
+		check_provider_fallback();
+		return 0;
+	}
+	if (time_events) {
+		check_time_events();
+		return 0;
+	}
+	if (suspend_resume) {
+		check_suspend_resume();
+		return 0;
+	}
+	if (alarm_no_rtc) {
+		check_alarm_no_rtc();
+		return 0;
+	}
 	printf("backend=%s\n", backend.name);
 	if (multicpu_only) {
 		check_getcpu();
@@ -1096,12 +1541,18 @@ int main(int argc, char **argv)
 	check_clock_gettime();
 	check_fast_null_clock_gettime();
 	check_clock_getres();
+	check_dynamic_clock();
 	check_gettimeofday();
 	check_time();
 	check_getcpu();
 	check_multicpu_threads();
 	check_paths(0);
+	check_dynamic_paths();
+	check_single_fallback();
+	check_mapping_security();
 	check_namespace_lifecycle();
+	if (close(dynamic_clock_fd))
+		fail("close dynamic clock");
 	puts("abi_matrix_status=pass");
 	return 0;
 }

@@ -23,6 +23,9 @@ void vkso_time_update_mm_data(struct task_struct *task,
 			      const struct timens_offsets *offsets);
 void vkso_time_set_pvclock_page(const void *page);
 void vkso_time_set_hvclock_page(const void *page);
+#ifdef CONFIG_VKSO_TIME_TEST
+int vkso_timekeeping_writer_context_selftest(void);
+#endif
 
 static __always_inline int
 vkso_time_get(const struct vkso_mm_data *mm_data, clockid_t clock_id,

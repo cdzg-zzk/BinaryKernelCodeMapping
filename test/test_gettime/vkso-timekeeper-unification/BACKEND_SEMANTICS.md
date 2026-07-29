@@ -185,3 +185,23 @@ M02～M09 的功能矩阵必须至少覆盖：
 - root/non-root time namespace。
 
 任何 errno 或 fallback 次数差异都视为语义失败，而不是性能优化。
+
+## 8. M09 最终证据
+
+M09 用相同 ABI matrix 分别验证 Raw vDSO 和 VKSO：
+
+- 合法 dynamic clock 由 `vkso_m09_clock.ko` 注册，gettime/getres 成功；
+- CPU、alarm、dynamic 的 public fallback 经 ptrace 证明各只执行一次目标
+  syscall；
+- 正常 RTC 启动验证两个 alarm clock 成功；
+- blacklist RTC initcall 的独立启动验证两个 alarm clock 的 gettime/getres
+  均返回 `-EINVAL`，且 direct vDSO/VKSO ABI 不改写 errno；
+- 切换到 HPET 时 realtime/gettimeofday fallback，clock_getres/time 保持
+  无需 cycles 的 fast path；
+- invalid positive、invalid negative、无效 FD、NULL 和非法输出地址继续与
+  Raw 一致。
+
+最终 production 与 validation 两套结果均为 Raw/VKSO 各 113 行，矩阵
+SHA-256 都是
+`9bd68c6bba35638029aad3fb854776fb7b547da0f215aed9de809206ecff0695`，
+semantic diff 为空。

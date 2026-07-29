@@ -23,7 +23,8 @@ validate_package()
 	for file in raw-bzImage vkso-bzImage raw.config vkso.config \
 		raw.image.config vkso.image.config boot-manifest.txt SHA256SUMS \
 		raw-abi-matrix vkso-abi-matrix vkso-time-bench libkernel.so \
-		page_mappings.txt page_cache_replace.ko manager; do
+		page_mappings.txt page_cache_replace.ko vkso_m09_clock.ko \
+		manager; do
 		test -s "$package/$file" || {
 			echo "missing package artifact: $package/$file" >&2
 			exit 1

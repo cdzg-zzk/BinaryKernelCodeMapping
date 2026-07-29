@@ -172,3 +172,21 @@ M08 链接/符号审计结果：
 
 M10 仍需对 Raw 建立同样的精确 symbol/line-range 映射，并为每个 ID 填写
 SLOC、Git churn 与 symbol bytes；本节只冻结语义归属，不提前用脚本猜测数字。
+
+## 7. M09 验证代码边界
+
+M09 没有新增生产读取、发布、dispatcher 或 backend 算法。新增内容全部属于
+T1：
+
+- `CONFIG_VKSO_TIME_TEST` 下的 early/IRQ/NMI/writer-held/seq/mask selftest；
+- `vkso_m09_clock.ko` dynamic/PTP 测试设备；
+- ABI matrix 的 event、fallback-count、VMA、无 RTC 和动态 clock 检查；
+- validation/production 双配置构建和四启动 QEMU orchestration。
+
+生产 package 明确满足 `CONFIG_VKSO_TIME_TEST=n` 且
+`production_test_probe=absent`。`alarmtimer.c`、CPU backend 和 dynamic backend
+没有为测试加入产品分支；无 RTC 状态由独立启动真实构造。
+
+因此 M09 的产品功能 SLOC 净变化为 0；测试规模单列，不能在 M10 被误计入
+VKSO 功能实现。M10 仍以第 6 节冻结的 U1/S1/K1/K2/K3/K4/B1/C1/E1/G1/P1
+边界进行人工分类和机械复算。

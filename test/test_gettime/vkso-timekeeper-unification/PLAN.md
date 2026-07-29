@@ -898,10 +898,12 @@ M01～M09 的“静态性能模型”不得写成裸机性能结论。
 | M06 普通 kernel reader 统一 | 已完成 | shared core 功能完整 |
 | M07 dispatcher/backend 重构 | 已完成 | 普通 reader 稳定 |
 | M08 清理与静态审计 | 已完成 | 完整分派通过 |
-| M09 完整正确性验证 | 进行中 | 无临时/双重路径 |
-| M10 裸机性能与最终证据 | 待开始 | M09 pre-performance tag |
+| M09 完整正确性验证 | 已完成 | 无临时/双重路径 |
+| M10 裸机性能与最终证据 | 等待用户介入 | M09 pre-performance tag |
 
-M00～M08 已通过。M08 已删除启用 VKSO 时不可达的 global `k_clock`
-gettime/getres callback 和用户测试兼容 wrapper，确认 `X1=0`，并冻结
-public wrapper、typed/generic dispatcher、shared primitive/provider 与 cold
-backend 的互斥归属。下一步执行 M09 完整正确性验证。
+M00～M09 已通过。M09 的 validation 与 production 配置均完成 Raw/VKSO
+完整 QEMU 对照；正常 RTC 与无 RTC 四种启动、真实 leap insertion、
+clocksource switch、S3 suspend/resume、动态 clock、特殊 reader、seq、
+namespace、fallback 次数和映射权限均通过。两套 Raw/VKSO 最终语义矩阵各
+113 行且 diff 为空。下一阶段是需要用户介入的 M10 裸机性能和最终代码量证据，
+不得用 M09 的 QEMU cycles 代替。

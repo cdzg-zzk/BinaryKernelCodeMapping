@@ -1,11 +1,18 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include <linux/build_bug.h>
+#include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/irqflags.h>
 #include <linux/ktime.h>
+#include <linux/limits.h>
 #include <linux/printk.h>
+#include <linux/smp.h>
 #include <linux/stddef.h>
+#include <linux/vkso_time.h>
+
+#include <asm/apic.h>
+#include <asm/nmi.h>
 
 #include "vkso_time_internal.h"
 
@@ -52,16 +59,96 @@ int __vkso_test_hres_cycle_probe_at(
 
 static int __init vkso_cycle_delta_selftest(void)
 {
+	struct vkso_hres_cycle_sample sample;
+	struct vkso_shared_data synthetic = {
+		.seq = 2,
+		.abi_version = VKSO_TIME_ABI_VERSION,
+		.state = {
+			.cycles = {
+				.clock_mode = S32_MAX,
+				.mask = U64_MAX,
+				.mono_mult = 1,
+			},
+		},
+	};
+	u32 seq;
+
 	if (vkso_cycle_delta(105, 100, U64_MAX) != 5 ||
 	    vkso_cycle_delta(95, 100, U64_MAX) != 0 ||
-	    vkso_cycle_delta(3, 0xfe, 0xff) != 5) {
+	    vkso_cycle_delta(3, 0xfe, 0xff) != 5 ||
+	    vkso_hres_sample(&synthetic, &sample) !=
+		    VKSO_TIME_UNSUPPORTED_MODE) {
 		pr_err("VKSO cycle-delta selftest failed\n");
+		return -EINVAL;
+	}
+	seq = vkso_read_begin(&synthetic);
+	WRITE_ONCE(synthetic.seq, seq + 2);
+	if (!vkso_read_retry(&synthetic, seq)) {
+		pr_err("VKSO seq-change selftest failed\n");
 		return -EINVAL;
 	}
 	pr_info("VKSO cycle-delta selftest passed\n");
 	return 0;
 }
 late_initcall(vkso_cycle_delta_selftest);
+
+static int __init vkso_early_reader_selftest(void)
+{
+	struct timespec64 value;
+
+	ktime_get_ts64(&value);
+	if (value.tv_sec < 0 || value.tv_nsec < 0 ||
+	    value.tv_nsec >= NSEC_PER_SEC) {
+		pr_err("VKSO early-reader selftest failed\n");
+		return -EINVAL;
+	}
+	pr_info("VKSO early-reader selftest passed\n");
+	return 0;
+}
+early_initcall(vkso_early_reader_selftest);
+
+static int vkso_nmi_seen;
+static u64 vkso_nmi_monotonic;
+static u64 vkso_nmi_raw;
+static u64 vkso_nmi_boot;
+static u64 vkso_nmi_real;
+
+static int vkso_nmi_reader(unsigned int type, struct pt_regs *registers)
+{
+	(void)type;
+	(void)registers;
+	vkso_nmi_monotonic = ktime_get_mono_fast_ns();
+	vkso_nmi_raw = ktime_get_raw_fast_ns();
+	vkso_nmi_boot = ktime_get_boot_fast_ns();
+	vkso_nmi_real = ktime_get_real_fast_ns();
+	smp_wmb();
+	WRITE_ONCE(vkso_nmi_seen, 1);
+	return NMI_HANDLED;
+}
+
+static int __init vkso_nmi_reader_selftest(void)
+{
+	unsigned long timeout = USEC_PER_SEC;
+	int error;
+
+	error = register_nmi_handler(NMI_LOCAL, vkso_nmi_reader,
+				     NMI_FLAG_FIRST, "vkso_time_reader");
+	if (error)
+		return error;
+	apic->send_IPI_self(NMI_VECTOR);
+	while (!READ_ONCE(vkso_nmi_seen) && --timeout)
+		udelay(1);
+	smp_rmb();
+	unregister_nmi_handler(NMI_LOCAL, "vkso_time_reader");
+	if (!timeout || !vkso_nmi_monotonic || !vkso_nmi_raw ||
+	    !vkso_nmi_boot || !vkso_nmi_real) {
+		pr_err("VKSO NMI-reader selftest failed\n");
+		return -EINVAL;
+	}
+	pr_info("VKSO NMI-reader selftest passed\n");
+	return 0;
+}
+late_initcall(vkso_nmi_reader_selftest);
 
 static __always_inline bool
 vkso_test_normalized(const struct timespec64 *value)
@@ -110,7 +197,12 @@ static int __init vkso_kernel_reader_selftest(void)
 		pr_err("VKSO kernel-reader IRQ/fast selftest failed\n");
 		return -EINVAL;
 	}
-
+	pr_info("VKSO IRQ-reader selftest passed\n");
+	if (vkso_timekeeping_writer_context_selftest()) {
+		pr_err("VKSO writer-context selftest failed\n");
+		return -EINVAL;
+	}
+	pr_info("VKSO writer-context selftest passed\n");
 	pr_info("VKSO kernel-reader selftest passed\n");
 	return 0;
 }

@@ -24,7 +24,8 @@ for command in qemu-system-x86_64 busybox cpio gzip mkfs.ext4 timeout; do
 done
 for file in raw-bzImage vkso-bzImage raw.config vkso.config \
 	raw-abi-matrix vkso-abi-matrix vkso-time-bench libkernel.so \
-	page_mappings.txt page_cache_replace.ko manager SHA256SUMS; do
+	page_mappings.txt page_cache_replace.ko vkso_m09_clock.ko manager \
+	SHA256SUMS; do
 	test -s "$PACKAGE/$file" || {
 		echo "missing package artifact: $PACKAGE/$file" >&2
 		exit 1
@@ -71,7 +72,8 @@ make_payload()
 	printf '%s\n' "$backend" >"$payload/backend"
 	cp "$PACKAGE/$backend.config" "$payload/$backend.config"
 	cp "$PACKAGE/$backend-abi-matrix" "$payload/abi-matrix"
-	cp "$PACKAGE/vkso-time-bench" "$PACKAGE/libkernel.so" "$payload/"
+	cp "$PACKAGE/vkso-time-bench" "$PACKAGE/libkernel.so" \
+		"$PACKAGE/vkso_m09_clock.ko" "$payload/"
 	if [[ "$backend" == vkso ]]; then
 		cp "$PACKAGE/page_cache_replace.ko" "$PACKAGE/manager" \
 			"$PACKAGE/page_mappings.txt" "$payload/"
@@ -87,8 +89,8 @@ run_backend()
 	local qemu_status
 
 	set +e
-	timeout 180 qemu-system-x86_64 \
-		-accel tcg,thread=single -cpu max -m 768M -smp 1 \
+	timeout 300 qemu-system-x86_64 \
+		-accel tcg,thread=single -cpu max -m 768M -smp 2 \
 		-kernel "$PACKAGE/$backend-bzImage" \
 		-initrd "$WORK/initramfs.cpio.gz" \
 		-drive "file=$WORK/payload-$backend.ext4,if=ide,format=raw" \
@@ -102,6 +104,19 @@ run_backend()
 	fi
 	grep -Fq 'abi_matrix_status=pass' "$log"
 	grep -Fq 'guest_status=0' "$log"
+	grep -Fq 'concurrency.seq_protocol=pass' "$log"
+	grep -Fq 'event.clocksource_switch=pass' "$log"
+	grep -Fq 'event.suspend_resume=pass' "$log"
+	if [[ "$backend" == vkso ]] &&
+	   grep -Fqx 'CONFIG_VKSO_TIME_TEST=y' "$PACKAGE/vkso.config"; then
+		grep -Fq 'VKSO early-reader selftest passed' "$log"
+		grep -Fq 'VKSO cycle-delta selftest passed' "$log"
+		grep -Fq 'VKSO NMI-reader selftest passed' "$log"
+		grep -Fq 'VKSO IRQ-reader selftest passed' "$log"
+		grep -Fq 'VKSO writer-context selftest passed' "$log"
+		grep -Fq 'VKSO kernel-reader selftest passed' "$log"
+	fi
+	grep -Fq 'event.leap_transition=pass' "$log"
 	if grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_BENCH=y' \
 		"$PACKAGE/$backend.config"; then
 		grep -Fq 'update_bench_status=pass' "$log"
@@ -110,15 +125,49 @@ run_backend()
 		echo "kernel failure marker in $log" >&2
 		exit 1
 	fi
-	grep -E '^(semantics|path|namespace)\.' "$log" \
+	grep -E '^(semantics|path|namespace|event|concurrency|security)\.' "$log" \
 		>"$WORK/$backend.matrix"
 	echo "qemu_backend=$backend status=pass matrix_rows=$(wc -l <"$WORK/$backend.matrix")"
+}
+
+run_backend_no_rtc()
+{
+	local backend=$1
+	local log=$WORK/$backend-no-rtc.log
+	local qemu_status
+
+	set +e
+	timeout 120 qemu-system-x86_64 \
+		-accel tcg,thread=single -cpu max -m 768M -smp 2 \
+		-kernel "$PACKAGE/$backend-bzImage" \
+		-initrd "$WORK/initramfs.cpio.gz" \
+		-drive "file=$WORK/payload-$backend.ext4,if=ide,format=raw" \
+		-append "console=ttyS0 init=/init panic=-1 oops=panic nokaslr clocksource=tsc tsc=reliable initcall_blacklist=cmos_init,add_rtc_cmos vkso_no_rtc" \
+		-nographic -no-reboot >"$log" 2>&1
+	qemu_status=$?
+	set -e
+	if [[ "$qemu_status" -ne 0 && "$qemu_status" -ne 124 ]]; then
+		echo "$backend no-RTC QEMU failed with status $qemu_status" >&2
+		exit "$qemu_status"
+	fi
+	grep -Fq 'semantics.alarm.no_rtc=pass' "$log"
+	grep -Fq 'no_rtc_status=pass' "$log"
+	grep -Fq 'guest_status=0' "$log"
+	if grep -Eq 'Kernel panic|BUG:|WARNING:' "$log"; then
+		echo "kernel failure marker in $log" >&2
+		exit 1
+	fi
+	grep -E '^(semantics|path|namespace|event|concurrency|security)\.' \
+		"$log" >>"$WORK/$backend.matrix"
+	echo "qemu_backend=$backend no_rtc=pass"
 }
 
 make_payload raw
 make_payload vkso
 run_backend raw
 run_backend vkso
+run_backend_no_rtc raw
+run_backend_no_rtc vkso
 diff -u "$WORK/raw.matrix" "$WORK/vkso.matrix" \
 	>"$WORK/raw-vkso-matrix.diff"
 

@@ -15,6 +15,7 @@ VKSO_BUILD=${VKSO_BUILD:-$BUILD_ROOT/vkso}
 BASE_CONFIG=${BASE_CONFIG:-$HERE/base.config}
 BUILD_VARIANT=${BUILD_VARIANT:-normal}
 UPDATE_BENCH=${UPDATE_BENCH:-0}
+VKSO_VALIDATION_TESTS=${VKSO_VALIDATION_TESTS:-0}
 STAMP=${STAMP:-$(date -u +%Y%m%dT%H%M%SZ)}
 OUT=${OUT:-$HERE/artifacts/prepared-$STAMP}
 JOBS=${JOBS:-$(nproc)}
@@ -44,6 +45,14 @@ case "$UPDATE_BENCH" in
 	;;
 *)
 	echo "UPDATE_BENCH must be 0 or 1" >&2
+	exit 2
+	;;
+esac
+case "$VKSO_VALIDATION_TESTS" in
+0|1)
+	;;
+*)
+	echo "VKSO_VALIDATION_TESTS must be 0 or 1" >&2
 	exit 2
 	;;
 esac
@@ -187,8 +196,13 @@ configure_tree()
 	if [[ "$backend" == vkso ]]; then
 		"$source/scripts/kconfig/merge_config.sh" -m -O "$build" \
 			"$build/.config" "$HERE/path.config"
-		"$source/scripts/config" --file "$build/.config" \
-			--enable VKSO_TIME --disable VKSO_TIME_TEST
+		if [[ "$VKSO_VALIDATION_TESTS" == 1 ]]; then
+			"$source/scripts/config" --file "$build/.config" \
+				--enable VKSO_TIME --enable VKSO_TIME_TEST
+		else
+			"$source/scripts/config" --file "$build/.config" \
+				--enable VKSO_TIME --disable VKSO_TIME_TEST
+		fi
 	fi
 	make -C "$source" O="$build" olddefconfig
 }
@@ -204,7 +218,7 @@ config_symbols()
 {
 	grep -E '^(CONFIG_|# CONFIG_.* is not set)' "$1" |
 		grep -Ev \
-		'^(CONFIG_CC_VERSION_TEXT=|CONFIG_VKSO_TIME=|# CONFIG_VKSO_TIME|CONFIG_GENERIC_GETTIMEOFDAY=|CONFIG_GENERIC_TIME_VSYSCALL=|CONFIG_GENERIC_VDSO_TIME_NS=|CONFIG_HAVE_GENERIC_VDSO=|# CONFIG_IA32_EMULATION is not set|# CONFIG_X86_X32 is not set)' |
+		'^(CONFIG_CC_VERSION_TEXT=|CONFIG_VKSO_TIME=|CONFIG_VKSO_TIME_TEST=|# CONFIG_VKSO_TIME|CONFIG_GENERIC_GETTIMEOFDAY=|CONFIG_GENERIC_TIME_VSYSCALL=|CONFIG_GENERIC_VDSO_TIME_NS=|CONFIG_HAVE_GENERIC_VDSO=|# CONFIG_IA32_EMULATION is not set|# CONFIG_X86_X32 is not set)' |
 		grep -Ev '^# CONFIG_TIMEKEEPING_UPDATE_BENCH is not set' |
 		sort
 }
@@ -219,7 +233,11 @@ fi
 grep -Fqx 'CONFIG_MODULES=y' "$RAW_BUILD/.config"
 grep -Fqx 'CONFIG_MODULES=y' "$VKSO_BUILD/.config"
 grep -Fqx 'CONFIG_VKSO_TIME=y' "$VKSO_BUILD/.config"
-grep -Fqx '# CONFIG_VKSO_TIME_TEST is not set' "$VKSO_BUILD/.config"
+if [[ "$VKSO_VALIDATION_TESTS" == 1 ]]; then
+	grep -Fqx 'CONFIG_VKSO_TIME_TEST=y' "$VKSO_BUILD/.config"
+else
+	grep -Fqx '# CONFIG_VKSO_TIME_TEST is not set' "$VKSO_BUILD/.config"
+fi
 if [[ "$UPDATE_BENCH" == 1 ]]; then
 	grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_BENCH=y' "$RAW_BUILD/.config"
 	grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_BENCH=y' "$VKSO_BUILD/.config"
@@ -323,6 +341,12 @@ cp "$ROOT/page_cache_replace/Makefile" \
 make -C "$MODULE_BUILD" KDIR="$VKSO_BUILD" CC="$CC" -j"$JOBS" \
 	module manager
 
+M09_CLOCK_BUILD="$BUILD_ROOT/m09-posix-clock"
+mkdir -p "$M09_CLOCK_BUILD"
+cp "$HERE/../m09-posix-clock/Makefile" \
+	"$HERE/../m09-posix-clock/vkso_m09_clock.c" "$M09_CLOCK_BUILD/"
+make -C "$M09_CLOCK_BUILD" KDIR="$VKSO_BUILD" CC="$CC" -j"$JOBS"
+
 KRG="$BUILD_ROOT/vkso.krg"
 "$ROOT/kernel_cgd/src/krg" build "$VKSO_BUILD/vmlinux" -o "$KRG" \
 	--kallsyms "$VKSO_BUILD/System.map"
@@ -386,6 +410,8 @@ install -m 0644 "$DSO_BUILD/resolved_symbol_addresses.txt" \
 	"$OUT/resolved_symbol_addresses.txt"
 install -m 0644 "$MODULE_BUILD/page_cache_replace.ko" \
 	"$OUT/page_cache_replace.ko"
+install -m 0644 "$M09_CLOCK_BUILD/vkso_m09_clock.ko" \
+	"$OUT/vkso_m09_clock.ko"
 install -m 0755 "$MODULE_BUILD/manager" "$OUT/manager"
 
 for script in collect-case.sh experiment.sh boot-once.sh install-grub.sh \
@@ -416,6 +442,7 @@ fi
 	fi
 	printf 'build_variant=%s\n' "$BUILD_VARIANT"
 	printf 'update_bench=%s\n' "$UPDATE_BENCH"
+	printf 'vkso_validation_tests=%s\n' "$VKSO_VALIDATION_TESTS"
 	printf 'vkso_source_tree_sha256=%s\n' "$vkso_source_tree_sha256"
 	printf 'raw_source_tree_sha256=%s\n' "$raw_source_tree_sha256"
 	printf 'experiment_config_sha256=%s\n' \
@@ -450,7 +477,11 @@ fi
 	printf 'vkso_uts_version=%s\n' "$vkso_uts_version"
 	printf 'vkso_shared_st_value=%s\n' "$shared_value"
 	printf 'vkso_core_st_value=%s\n' "$core_value"
-	printf 'production_test_probe=absent\n'
+	if [[ "$VKSO_VALIDATION_TESTS" == 1 ]]; then
+		printf 'production_test_probe=validation-only\n'
+	else
+		printf 'production_test_probe=absent\n'
+	fi
 	printf 'raw_native_vdso=present\n'
 	printf 'vkso_native_vdso=absent\n'
 	printf 'config_difference=implementation_selects_only\n'
@@ -466,7 +497,8 @@ fi
 	cd "$OUT"
 	sha256sum raw-bzImage vkso-bzImage raw.config vkso.config \
 		raw.image.config vkso.image.config boot-manifest.txt \
-		libkernel.so page_mappings.txt page_cache_replace.ko manager \
+		libkernel.so page_mappings.txt page_cache_replace.ko \
+		vkso_m09_clock.ko manager \
 		raw-abi-matrix vkso-abi-matrix vkso-time-bench \
 		collect-case.sh experiment.sh boot-once.sh install-grub.sh \
 		qemu-preflight.sh qemu-guest-init verify-packages.sh \
@@ -480,10 +512,15 @@ fi
 	fi
 )
 
-if nm "$VKSO_BUILD/vmlinux" |
+if [[ "$VKSO_VALIDATION_TESTS" == 0 ]]; then
+	if nm "$VKSO_BUILD/vmlinux" |
 	awk '$3 ~ /^__vkso_test_/ { found = 1 } END { exit !found }'; then
-	echo "production VKSO image contains test probe" >&2
-	exit 1
+		echo "production VKSO image contains test probe" >&2
+		exit 1
+	fi
+else
+	nm "$VKSO_BUILD/vmlinux" |
+		awk '$3 ~ /^__vkso_test_/ { found = 1 } END { exit !found }'
 fi
 if [[ "$reuse_raw" == 0 ]]; then
 	if nm "$RAW_BUILD/vmlinux" |
