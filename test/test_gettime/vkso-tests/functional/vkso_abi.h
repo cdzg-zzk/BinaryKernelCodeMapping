@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #define AT_VKSO_MM_DATA 52
+#define VKSO_TIME_ABI_VERSION 11U
 #define VKSO_MM_DATA_ABI_VERSION 3U
 #define VKSO_TIME_OK 0
 
@@ -22,6 +23,40 @@ struct vkso_timezone {
 	int32_t minuteswest;
 	int32_t dsttime;
 } __attribute__((__may_alias__));
+
+struct vkso_hres_base {
+	int64_t sec;
+	uint64_t shifted_nsec;
+};
+
+struct vkso_cycle_data {
+	int32_t clock_mode;
+	uint32_t shift;
+	uint64_t cycle_last;
+	uint64_t mask;
+	uint32_t mono_mult;
+	uint32_t raw_mult;
+};
+
+struct vkso_read_state {
+	struct vkso_cycle_data cycles;
+	struct vkso_hres_base realtime_base;
+	struct vkso_hres_base monotonic_base;
+	struct vkso_hres_base boottime_base;
+	struct vkso_hres_base tai_base;
+	struct vkso_time_value realtime_coarse;
+	uint32_t hrtimer_resolution;
+	uint32_t reserved;
+	struct vkso_hres_base monotonic_raw_base;
+	struct vkso_time_value monotonic_coarse;
+	struct vkso_timezone timezone;
+};
+
+struct vkso_shared_data {
+	uint32_t seq;
+	uint32_t abi_version;
+	struct vkso_read_state state;
+};
 
 enum vkso_fallback_mode {
 	VKSO_FALLBACK_RETURN,

@@ -15,38 +15,35 @@ static_assert(sizeof(struct vkso_timeval) == 16);
 static_assert(offsetof(struct vkso_timeval, sec) == 0);
 static_assert(offsetof(struct vkso_timeval, usec) == 8);
 static_assert(sizeof(struct vkso_timezone) == 8);
-static_assert(offsetof(struct vkso_shared_data, hres) == 8);
-static_assert(offsetof(struct vkso_shared_data, realtime_coarse) == 96);
-static_assert(offsetof(struct vkso_shared_data, monotonic_coarse) == 112);
-static_assert(offsetof(struct vkso_shared_data, raw) == 128);
-static_assert(offsetof(struct vkso_shared_data, hrtimer_resolution) == 168);
-static_assert(offsetof(struct vkso_shared_data, timezone) == 176);
+static_assert(offsetof(struct vkso_shared_data, state) == 8);
 static_assert(offsetof(struct vkso_cycle_data, cycle_last) == 8);
-static_assert(offsetof(struct vkso_cycle_data, mult) == 16);
-static_assert(offsetof(struct vkso_cycle_data, shift) == 20);
-static_assert(offsetof(struct vkso_hres_data, realtime_base) == 24);
-static_assert(offsetof(struct vkso_hres_data, monotonic_base) == 40);
-static_assert(offsetof(struct vkso_hres_data, boottime_base) == 56);
-static_assert(offsetof(struct vkso_hres_data, tai_base) == 72);
-static_assert(offsetof(struct vkso_raw_data, monotonic_raw_base) == 24);
+static_assert(offsetof(struct vkso_cycle_data, mask) == 16);
+static_assert(offsetof(struct vkso_cycle_data, mono_mult) == 24);
+static_assert(offsetof(struct vkso_cycle_data, raw_mult) == 28);
+static_assert(offsetof(struct vkso_read_state, realtime_base) == 32);
+static_assert(offsetof(struct vkso_read_state, monotonic_base) == 48);
+static_assert(offsetof(struct vkso_read_state, boottime_base) == 64);
+static_assert(offsetof(struct vkso_read_state, tai_base) == 80);
+static_assert(offsetof(struct vkso_read_state, realtime_coarse) == 96);
+static_assert(offsetof(struct vkso_read_state, hrtimer_resolution) == 112);
+static_assert(offsetof(struct vkso_read_state, monotonic_raw_base) == 120);
+static_assert(offsetof(struct vkso_read_state, monotonic_coarse) == 136);
+static_assert(offsetof(struct vkso_read_state, timezone) == 152);
 static_assert(CLOCK_REALTIME == 0);
 static_assert(CLOCK_MONOTONIC == CLOCK_REALTIME + 1);
 static_assert(CLOCK_MONOTONIC_COARSE == CLOCK_REALTIME_COARSE + 1);
-static_assert(offsetof(struct vkso_hres_data, monotonic_base) ==
-	      offsetof(struct vkso_hres_data, realtime_base) +
+static_assert(offsetof(struct vkso_read_state, monotonic_base) ==
+	      offsetof(struct vkso_read_state, realtime_base) +
 	      sizeof(struct vkso_hres_base));
-static_assert(offsetof(struct vkso_shared_data, monotonic_coarse) ==
-	      offsetof(struct vkso_shared_data, realtime_coarse) +
-	      sizeof(struct vkso_time_value));
-static_assert(offsetof(struct vkso_shared_data, monotonic_coarse) +
-	      sizeof(struct vkso_time_value) ==
-	      offsetof(struct vkso_shared_data, raw));
-static_assert(offsetof(struct vkso_shared_data, hres.monotonic_base) +
-	      sizeof(struct vkso_hres_base) == 64);
-static_assert(offsetof(struct vkso_shared_data, raw) % 64 == 0);
-static_assert(offsetof(struct vkso_shared_data, raw.monotonic_raw_base) +
-	      sizeof(struct vkso_hres_base) <=
-	      offsetof(struct vkso_shared_data, raw) + 64);
+static_assert(offsetof(struct vkso_shared_data, state.realtime_base.sec) == 40);
+static_assert(offsetof(struct vkso_shared_data, state.monotonic_base) +
+	      sizeof(struct vkso_hres_base) <= 2 * 64);
+static_assert(offsetof(struct vkso_shared_data,
+		       state.monotonic_raw_base) == 2 * 64);
+static_assert(offsetof(struct vkso_shared_data,
+		       state.monotonic_raw_base) % 64 == 0);
+static_assert(sizeof(struct vkso_read_state) == 160);
+static_assert(sizeof(struct vkso_shared_data) == 168);
 static_assert(offsetof(struct vkso_mm_data, monotonic_offset) == 8);
 static_assert(offsetof(struct vkso_mm_data, boottime_offset) == 24);
 static_assert(sizeof(union vkso_shared_page) == VKSO_SHARED_PAGE_SIZE);
@@ -92,7 +89,7 @@ vkso_fallback(long first, long second, long syscall_number,
  * private user veneer tail-jumps to these symbols, so replacing them with one
  * generic reader would add parameters and branches to the hot path.
  */
-#define VKSO_DEFINE_HRES_READER(name, base_member, cycle_member, clock, offset) \
+#define VKSO_DEFINE_HRES_READER(name, base_member, mult_member, clock, offset) \
 	static noinline __noclone notrace __vkso_text			\
 	int vkso_clock_gettime_##name(					\
 		int clock_id, struct vkso_time_value *value,		\
@@ -103,8 +100,10 @@ vkso_fallback(long first, long second, long syscall_number,
 									\
 		(void)clock_id;						\
 		if (unlikely(vkso_read_hres_time(			\
-				shared, &shared->base_member,		\
-				&shared->cycle_member, context, value) !=	\
+				shared, &shared->state.base_member,	\
+				&shared->state.cycles,			\
+				&shared->state.cycles.mult_member,	\
+				context, value) !=			\
 			     VKSO_TIME_OK))				\
 			return vkso_fallback(clock, (long)value,		\
 					     __NR_clock_gettime, context);	\
@@ -123,7 +122,7 @@ vkso_fallback(long first, long second, long syscall_number,
 									\
 		(void)clock_id;						\
 		(void)context;						\
-		vkso_read_coarse(shared, &shared->base_member, value);	\
+		vkso_read_coarse(shared, &shared->state.base_member, value); \
 		offset;							\
 		return VKSO_TIME_OK;					\
 	}
@@ -135,9 +134,9 @@ vkso_fallback(long first, long second, long syscall_number,
  *
  * Keep the original definition order: it is part of the measured text layout.
  */
-VKSO_DEFINE_HRES_READER(realtime, hres.realtime_base, hres.cycles,
+VKSO_DEFINE_HRES_READER(realtime, realtime_base, mono_mult,
 			CLOCK_REALTIME, VKSO_NO_OFFSET(mm_data, value))
-VKSO_DEFINE_HRES_READER(monotonic, hres.monotonic_base, hres.cycles,
+VKSO_DEFINE_HRES_READER(monotonic, monotonic_base, mono_mult,
 			CLOCK_MONOTONIC,
 			VKSO_MM_OFFSET(CLOCK_MONOTONIC, monotonic_offset,
 				       mm_data, value))
@@ -146,15 +145,15 @@ VKSO_DEFINE_COARSE_READER(realtime_coarse, realtime_coarse,
 VKSO_DEFINE_COARSE_READER(monotonic_coarse, monotonic_coarse,
 			  VKSO_MM_OFFSET(CLOCK_MONOTONIC_COARSE,
 					 monotonic_offset, mm_data, value))
-VKSO_DEFINE_HRES_READER(monotonic_raw, raw.monotonic_raw_base, raw.cycles,
+VKSO_DEFINE_HRES_READER(monotonic_raw, monotonic_raw_base, raw_mult,
 			CLOCK_MONOTONIC_RAW,
 			VKSO_MM_OFFSET(CLOCK_MONOTONIC_RAW, monotonic_offset,
 				       mm_data, value))
-VKSO_DEFINE_HRES_READER(boottime, hres.boottime_base, hres.cycles,
+VKSO_DEFINE_HRES_READER(boottime, boottime_base, mono_mult,
 			CLOCK_BOOTTIME,
 			VKSO_MM_OFFSET(CLOCK_BOOTTIME, boottime_offset,
 				       mm_data, value))
-VKSO_DEFINE_HRES_READER(tai, hres.tai_base, hres.cycles,
+VKSO_DEFINE_HRES_READER(tai, tai_base, mono_mult,
 			CLOCK_TAI, VKSO_NO_OFFSET(mm_data, value))
 
 #undef VKSO_DEFINE_COARSE_READER
@@ -203,7 +202,7 @@ int vkso_clock_getres_hres(int clock_id, struct vkso_time_value *value,
 	(void)context;
 	if (value) {
 		value->sec = 0;
-		value->nsec = READ_ONCE(shared->hrtimer_resolution);
+		value->nsec = READ_ONCE(shared->state.hrtimer_resolution);
 	}
 	return VKSO_TIME_OK;
 }
@@ -255,8 +254,9 @@ int vkso_gettimeofday_core(
 
 	if (likely(tv)) {
 		if (unlikely(vkso_read_hres_time(
-				shared, &shared->hres.realtime_base,
-				&shared->hres.cycles, context,
+				shared, &shared->state.realtime_base,
+				&shared->state.cycles,
+				&shared->state.cycles.mono_mult, context,
 				&now) != VKSO_TIME_OK))
 			return vkso_fallback((long)tv, (long)tz,
 					     __NR_gettimeofday, context);
@@ -269,8 +269,9 @@ int vkso_gettimeofday_core(
 		tv->usec = (u32)now.nsec / NSEC_PER_USEC;
 	}
 	if (unlikely(tz)) {
-		tz->minuteswest = READ_ONCE(shared->timezone.minuteswest);
-		tz->dsttime = READ_ONCE(shared->timezone.dsttime);
+		tz->minuteswest =
+			READ_ONCE(shared->state.timezone.minuteswest);
+		tz->dsttime = READ_ONCE(shared->state.timezone.dsttime);
 	}
 	return VKSO_TIME_OK;
 }
@@ -279,7 +280,7 @@ __visible noinline notrace __vkso_text
 s64 __vkso_time(s64 *tloc)
 {
 	const struct vkso_shared_data *shared = vkso_shared_data();
-	s64 seconds = READ_ONCE(shared->hres.realtime_base.sec);
+	s64 seconds = READ_ONCE(shared->state.realtime_base.sec);
 
 	if (tloc)
 		*tloc = seconds;

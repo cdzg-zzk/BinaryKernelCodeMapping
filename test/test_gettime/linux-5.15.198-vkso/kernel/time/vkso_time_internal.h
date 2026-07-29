@@ -79,6 +79,7 @@ static __always_inline int
 vkso_read_hres_time(const struct vkso_shared_data *shared,
 		    const struct vkso_hres_base *base,
 		    const struct vkso_cycle_data *cycle_data,
+		    const u32 *multiplier,
 		    const struct vkso_context *context,
 		    struct vkso_time_value *value)
 {
@@ -95,7 +96,7 @@ vkso_read_hres_time(const struct vkso_shared_data *shared,
 		if (unlikely((s64)cycles < 0))
 			return VKSO_TIME_FALLBACK;
 		cycle_last = READ_ONCE(cycle_data->cycle_last);
-		mult = READ_ONCE(cycle_data->mult);
+		mult = READ_ONCE(*multiplier);
 		ns = READ_ONCE(base->shifted_nsec);
 		/* Match the x86 vDSO rule: clamp a slightly backward TSC. */
 		if (cycles > cycle_last)
@@ -131,6 +132,7 @@ vkso_apply_offset(const struct vkso_time_value *offset,
 static __always_inline int
 vkso_read_hres_sample(const struct vkso_shared_data *shared,
 		      size_t value_offset, size_t cycle_offset,
+		      size_t mult_offset,
 		      const struct vkso_context *context,
 		      struct vkso_hres_snapshot *snapshot)
 {
@@ -138,6 +140,8 @@ vkso_read_hres_sample(const struct vkso_shared_data *shared,
 		(const void *)((const u8 *)shared + value_offset);
 	const struct vkso_cycle_data *cycle_data =
 		(const void *)((const u8 *)shared + cycle_offset);
+	const u32 *multiplier =
+		(const void *)((const u8 *)shared + mult_offset);
 	struct vkso_hres_snapshot next = { .retries = 0 };
 	u32 seq;
 
@@ -153,7 +157,7 @@ vkso_read_hres_sample(const struct vkso_shared_data *shared,
 		if (unlikely((s64)next.cycles < 0))
 			return VKSO_TIME_FALLBACK;
 		next.cycle_last = READ_ONCE(cycle_data->cycle_last);
-		next.mult = READ_ONCE(cycle_data->mult);
+		next.mult = READ_ONCE(*multiplier);
 		next.shift = READ_ONCE(cycle_data->shift);
 		next.base.sec = READ_ONCE(base->sec);
 		next.base.shifted_nsec = READ_ONCE(base->shifted_nsec);

@@ -4,7 +4,7 @@
 
 #include <linux/types.h>
 
-#define VKSO_TIME_ABI_VERSION	10U
+#define VKSO_TIME_ABI_VERSION	11U
 #define VKSO_SHARED_PAGE_SIZE	4096U
 #define VKSO_MM_DATA_ABI_VERSION	3U
 
@@ -42,23 +42,30 @@ struct vkso_hres_base {
 
 struct vkso_cycle_data {
 	s32 clock_mode;
-	u32 reserved;
-	u64 cycle_last;
-	u32 mult;
 	u32 shift;
+	u64 cycle_last;
+	u64 mask;
+	u32 mono_mult;
+	u32 raw_mult;
 };
 
-struct vkso_hres_data {
+/*
+ * Canonical global-time reader state.  The common cycle descriptor and
+ * realtime base fit after the eight-byte shared header in the first cache
+ * line.  The raw base starts at shared offset 128.
+ */
+struct vkso_read_state {
 	struct vkso_cycle_data cycles;
 	struct vkso_hres_base realtime_base;
 	struct vkso_hres_base monotonic_base;
 	struct vkso_hres_base boottime_base;
 	struct vkso_hres_base tai_base;
-};
-
-struct vkso_raw_data {
-	struct vkso_cycle_data cycles;
+	struct vkso_time_value realtime_coarse;
+	u32 hrtimer_resolution;
+	u32 reserved;
 	struct vkso_hres_base monotonic_raw_base;
+	struct vkso_time_value monotonic_coarse;
+	struct vkso_timezone timezone;
 };
 
 #ifdef CONFIG_VKSO_TIME_TEST
@@ -79,13 +86,7 @@ struct vkso_hres_cycle_sample {
 struct vkso_shared_data {
 	u32 seq;
 	u32 abi_version;
-	struct vkso_hres_data hres;
-	struct vkso_time_value realtime_coarse;
-	struct vkso_time_value monotonic_coarse;
-	struct vkso_raw_data raw;
-	u32 hrtimer_resolution;
-	u32 reserved;
-	struct vkso_timezone timezone;
+	struct vkso_read_state state;
 };
 
 union vkso_shared_page {

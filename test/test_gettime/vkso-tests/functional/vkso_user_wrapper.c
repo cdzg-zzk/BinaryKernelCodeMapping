@@ -22,12 +22,28 @@ _Static_assert(sizeof(struct timezone) == sizeof(struct vkso_timezone),
 	       "timezone and VKSO result layouts differ");
 _Static_assert(sizeof(time_t) == sizeof(int64_t),
 	       "native x86-64 time_t is required");
+_Static_assert(sizeof(struct vkso_read_state) == 160,
+	       "VKSO shared read state layout differs");
+_Static_assert(sizeof(struct vkso_shared_data) == 168,
+	       "VKSO shared data layout differs");
+_Static_assert(offsetof(struct vkso_shared_data,
+			state.realtime_base.sec) == 40,
+	       "VKSO realtime hot field moved");
+_Static_assert(offsetof(struct vkso_shared_data,
+			state.monotonic_raw_base) == 128,
+	       "VKSO raw cache-line layout differs");
 
 int vkso_user_wrapper_init(void)
 {
 	unsigned long address;
+	const struct vkso_shared_data *shared;
 	const struct vkso_mm_data *mm_data;
 
+	shared = __vkso_shared_data();
+	if (!shared || shared->abi_version != VKSO_TIME_ABI_VERSION) {
+		errno = EPROTO;
+		return -1;
+	}
 	errno = 0;
 	address = getauxval(AT_VKSO_MM_DATA);
 	if (!address || errno) {

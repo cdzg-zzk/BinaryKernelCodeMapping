@@ -35,7 +35,6 @@
 #define RAW_VVAR_DATA_OFFSET 128U
 #define RAW_VDSO_BASES 12U
 #define RAW_CS_RAW 1U
-#define VKSO_TIME_ABI_VERSION 10U
 
 enum backend {
 	BACKEND_RAW,
@@ -203,10 +202,11 @@ struct raw_vdso_data {
 
 struct vkso_cycle_data_bench {
 	int32_t clock_mode;
-	uint32_t reserved;
-	volatile uint64_t cycle_last;
-	volatile uint32_t mult;
 	volatile uint32_t shift;
+	volatile uint64_t cycle_last;
+	volatile uint64_t mask;
+	volatile uint32_t mono_mult;
+	volatile uint32_t raw_mult;
 };
 
 struct vkso_hres_base_bench {
@@ -214,35 +214,36 @@ struct vkso_hres_base_bench {
 	volatile uint64_t shifted_nsec;
 };
 
-struct vkso_hres_data_bench {
+struct vkso_read_state_bench {
 	struct vkso_cycle_data_bench cycles;
 	struct vkso_hres_base_bench realtime_base;
 	struct vkso_hres_base_bench monotonic_base;
 	struct vkso_hres_base_bench boottime_base;
 	struct vkso_hres_base_bench tai_base;
-};
-
-struct vkso_raw_data_bench {
-	struct vkso_cycle_data_bench cycles;
+	struct vkso_time_value realtime_coarse;
+	uint32_t hrtimer_resolution;
+	uint32_t reserved;
 	struct vkso_hres_base_bench monotonic_raw_base;
+	struct vkso_time_value monotonic_coarse;
+	struct vkso_timezone timezone;
 };
 
 struct vkso_shared_data_bench {
 	volatile uint32_t seq;
 	uint32_t abi_version;
-	struct vkso_hres_data_bench hres;
-	struct vkso_time_value realtime_coarse;
-	struct vkso_time_value monotonic_coarse;
-	struct vkso_raw_data_bench raw;
-	uint32_t hrtimer_resolution;
-	uint32_t reserved;
-	struct vkso_timezone timezone;
+	struct vkso_read_state_bench state;
 };
 
 _Static_assert(sizeof(struct raw_vdso_data) == 240,
 	       "raw x86-64 vdso_data layout changed");
-_Static_assert(__builtin_offsetof(struct vkso_shared_data_bench, raw) == 128,
+_Static_assert(sizeof(struct vkso_shared_data_bench) == 168,
+	       "VKSO shared-data size changed");
+_Static_assert(__builtin_offsetof(struct vkso_shared_data_bench,
+				  state.monotonic_raw_base) == 128,
 	       "VKSO raw layout changed");
+_Static_assert(__builtin_offsetof(struct vkso_shared_data_bench,
+				  state.realtime_base.sec) == 40,
+	       "VKSO time seconds layout changed");
 
 static struct pmu_group core_group = { .leader = -1 };
 static struct pmu_group cache_group = { .leader = -1 };
@@ -913,10 +914,11 @@ observe_vkso_seq(const struct vkso_shared_data_bench *data, int raw,
 
 	while (result.completed < iterations) {
 		const struct vkso_cycle_data_bench *cycles =
-			raw ? &data->raw.cycles : &data->hres.cycles;
+			&data->state.cycles;
 		const struct vkso_hres_base_bench *base =
-			raw ? &data->raw.monotonic_raw_base :
-			      &data->hres.monotonic_base;
+			raw ? &data->state.monotonic_raw_base :
+			      &data->state.monotonic_base;
+		uint32_t mult = raw ? cycles->raw_mult : cycles->mono_mult;
 		uint32_t seq = __atomic_load_n(&data->seq, __ATOMIC_ACQUIRE);
 
 		if (seq & 1) {
@@ -925,7 +927,7 @@ observe_vkso_seq(const struct vkso_shared_data_bench *data, int raw,
 			continue;
 		}
 		checksum ^= cycles->cycle_last;
-		checksum ^= cycles->mult;
+		checksum ^= mult;
 		checksum ^= cycles->shift;
 		checksum ^= base->sec;
 		checksum ^= base->shifted_nsec;

@@ -131,3 +131,16 @@ mult/shift、base、offset 和 normalize 不能在 user 目录重写。
 
 M01～M09 只做 QEMU 正确性、汇编/调用图/代码量审计。只有 M10 在裸机重新
 成对构建和测量 Raw/VKSO；历史结果只作基线，不把 QEMU cycles 当性能证据。
+
+## D012：ABI v11 布局固定为 168-byte 单 descriptor payload
+
+- 状态：已决定并验证
+- 阶段：M02
+
+布局将 header、公共 descriptor 和 realtime base放在首个 cache line；
+monotonic最多增加一条 cache line；raw base从 shared offset 128开始。
+`time()` seconds位于自然对齐 offset 40。
+
+有效 payload从 v10 的184 bytes降到168 bytes。ABI v10不保留运行时兼容分支；
+wrapper init同时检查 shared v11和MM_data v3，版本错配返回`EPROTO`。
+精确布局和 memory-order 协议见 `ABI_V11.md`。

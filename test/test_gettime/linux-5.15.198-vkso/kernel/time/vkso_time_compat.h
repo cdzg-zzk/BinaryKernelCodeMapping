@@ -20,11 +20,14 @@
  * interval.
  */
 static __always_inline void vkso_time_compat_prepare_cycles(
-	struct vkso_cycle_data *next, const struct tk_read_base *tkr)
+	struct vkso_cycle_data *next, const struct timekeeper *tk)
 {
-	next->cycle_last = tkr->cycle_last;
-	next->mult = tkr->mult;
-	next->shift = tkr->shift;
+	next->clock_mode = tk->tkr_mono.clock->vdso_clock_mode;
+	next->shift = tk->tkr_mono.shift;
+	next->cycle_last = tk->tkr_mono.cycle_last;
+	next->mask = tk->tkr_mono.mask;
+	next->mono_mult = tk->tkr_mono.mult;
+	next->raw_mult = tk->tkr_raw.mult;
 }
 
 static __always_inline void
@@ -37,7 +40,6 @@ vkso_time_compat_prepare(struct vkso_shared_data *next,
 	s64 boottime_sec;
 	u64 boottime_shifted_nsec;
 	u64 shifted_second = (u64)NSEC_PER_SEC << tk->tkr_mono.shift;
-	s32 clock_mode = tk->tkr_mono.clock->vdso_clock_mode;
 
 	if (monotonic_shifted_nsec >= shifted_second) {
 		monotonic_shifted_nsec -= shifted_second;
@@ -50,31 +52,28 @@ vkso_time_compat_prepare(struct vkso_shared_data *next,
 		boottime_shifted_nsec -= shifted_second;
 		boottime_sec++;
 	}
-	next->hrtimer_resolution = hrtimer_resolution;
-	next->realtime_coarse.sec = tk->xtime_sec;
-	next->realtime_coarse.nsec =
+	next->state.hrtimer_resolution = hrtimer_resolution;
+	next->state.realtime_coarse.sec = tk->xtime_sec;
+	next->state.realtime_coarse.nsec =
 		tk->tkr_mono.xtime_nsec >> tk->tkr_mono.shift;
-	next->monotonic_coarse.sec = monotonic_sec;
-	next->monotonic_coarse.nsec =
+	next->state.monotonic_coarse.sec = monotonic_sec;
+	next->state.monotonic_coarse.nsec =
 		monotonic_shifted_nsec >> tk->tkr_mono.shift;
 	/*
 	 * time() reads only this naturally atomic field and remains available
 	 * even when the clocksource cannot serve high-resolution VKSO reads.
 	 */
-	next->hres.realtime_base.sec = tk->xtime_sec;
-	next->hres.cycles.clock_mode = clock_mode;
-	next->raw.cycles.clock_mode = clock_mode;
-	vkso_time_compat_prepare_cycles(&next->hres.cycles, &tk->tkr_mono);
-	vkso_time_compat_prepare_cycles(&next->raw.cycles, &tk->tkr_raw);
-	next->hres.realtime_base.shifted_nsec = tk->tkr_mono.xtime_nsec;
-	next->hres.monotonic_base.sec = monotonic_sec;
-	next->hres.monotonic_base.shifted_nsec = monotonic_shifted_nsec;
-	next->hres.boottime_base.sec = boottime_sec;
-	next->hres.boottime_base.shifted_nsec = boottime_shifted_nsec;
-	next->hres.tai_base.sec = tk->xtime_sec + tk->tai_offset;
-	next->hres.tai_base.shifted_nsec = tk->tkr_mono.xtime_nsec;
-	next->raw.monotonic_raw_base.sec = tk->raw_sec;
-	next->raw.monotonic_raw_base.shifted_nsec = tk->tkr_raw.xtime_nsec;
+	next->state.realtime_base.sec = tk->xtime_sec;
+	vkso_time_compat_prepare_cycles(&next->state.cycles, tk);
+	next->state.realtime_base.shifted_nsec = tk->tkr_mono.xtime_nsec;
+	next->state.monotonic_base.sec = monotonic_sec;
+	next->state.monotonic_base.shifted_nsec = monotonic_shifted_nsec;
+	next->state.boottime_base.sec = boottime_sec;
+	next->state.boottime_base.shifted_nsec = boottime_shifted_nsec;
+	next->state.tai_base.sec = tk->xtime_sec + tk->tai_offset;
+	next->state.tai_base.shifted_nsec = tk->tkr_mono.xtime_nsec;
+	next->state.monotonic_raw_base.sec = tk->raw_sec;
+	next->state.monotonic_raw_base.shifted_nsec = tk->tkr_raw.xtime_nsec;
 }
 
 #endif /* _KERNEL_TIME_VKSO_TIME_COMPAT_H */

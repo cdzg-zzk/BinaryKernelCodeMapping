@@ -49,29 +49,27 @@ vkso_time_publish_snapshot(struct vkso_shared_data *shared,
 #define VKSO_PUBLISH(member) \
 	WRITE_ONCE(shared->member, next->member)
 
-	VKSO_PUBLISH(hres.cycles.clock_mode);
-	VKSO_PUBLISH(hres.cycles.cycle_last);
-	VKSO_PUBLISH(hres.cycles.mult);
-	VKSO_PUBLISH(hres.cycles.shift);
-	VKSO_PUBLISH(hres.realtime_base.sec);
-	VKSO_PUBLISH(hres.realtime_base.shifted_nsec);
-	VKSO_PUBLISH(hres.monotonic_base.sec);
-	VKSO_PUBLISH(hres.monotonic_base.shifted_nsec);
-	VKSO_PUBLISH(hres.boottime_base.sec);
-	VKSO_PUBLISH(hres.boottime_base.shifted_nsec);
-	VKSO_PUBLISH(hres.tai_base.sec);
-	VKSO_PUBLISH(hres.tai_base.shifted_nsec);
-	VKSO_PUBLISH(realtime_coarse.sec);
-	VKSO_PUBLISH(realtime_coarse.nsec);
-	VKSO_PUBLISH(monotonic_coarse.sec);
-	VKSO_PUBLISH(monotonic_coarse.nsec);
-	VKSO_PUBLISH(raw.cycles.clock_mode);
-	VKSO_PUBLISH(raw.cycles.cycle_last);
-	VKSO_PUBLISH(raw.cycles.mult);
-	VKSO_PUBLISH(raw.cycles.shift);
-	VKSO_PUBLISH(raw.monotonic_raw_base.sec);
-	VKSO_PUBLISH(raw.monotonic_raw_base.shifted_nsec);
-	VKSO_PUBLISH(hrtimer_resolution);
+	VKSO_PUBLISH(state.cycles.clock_mode);
+	VKSO_PUBLISH(state.cycles.shift);
+	VKSO_PUBLISH(state.cycles.cycle_last);
+	VKSO_PUBLISH(state.cycles.mask);
+	VKSO_PUBLISH(state.cycles.mono_mult);
+	VKSO_PUBLISH(state.cycles.raw_mult);
+	VKSO_PUBLISH(state.realtime_base.sec);
+	VKSO_PUBLISH(state.realtime_base.shifted_nsec);
+	VKSO_PUBLISH(state.monotonic_base.sec);
+	VKSO_PUBLISH(state.monotonic_base.shifted_nsec);
+	VKSO_PUBLISH(state.boottime_base.sec);
+	VKSO_PUBLISH(state.boottime_base.shifted_nsec);
+	VKSO_PUBLISH(state.tai_base.sec);
+	VKSO_PUBLISH(state.tai_base.shifted_nsec);
+	VKSO_PUBLISH(state.realtime_coarse.sec);
+	VKSO_PUBLISH(state.realtime_coarse.nsec);
+	VKSO_PUBLISH(state.monotonic_raw_base.sec);
+	VKSO_PUBLISH(state.monotonic_raw_base.shifted_nsec);
+	VKSO_PUBLISH(state.monotonic_coarse.sec);
+	VKSO_PUBLISH(state.monotonic_coarse.nsec);
+	VKSO_PUBLISH(state.hrtimer_resolution);
 
 #undef VKSO_PUBLISH
 }
@@ -100,7 +98,8 @@ void vkso_time_publish(struct timekeeper *tk)
 
 void vkso_time_update_timezone(void)
 {
-	struct vkso_timezone *timezone = &vkso_shared_page.data.timezone;
+	struct vkso_timezone *timezone =
+		&vkso_shared_page.data.state.timezone;
 
 	WRITE_ONCE(timezone->minuteswest, sys_tz.tz_minuteswest);
 	WRITE_ONCE(timezone->dsttime, sys_tz.tz_dsttime);
