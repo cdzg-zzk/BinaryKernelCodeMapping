@@ -57,6 +57,13 @@ static struct {
 };
 
 static struct timekeeper shadow_timekeeper;
+/*
+ * offs_boot is the authoritative kernel value. Cache its split form only
+ * when suspend time changes so the periodic shared-state producer needs no
+ * 64-bit division. Unlike a timekeeper member, this cache is not duplicated
+ * or copied with the real/shadow producer state.
+ */
+static struct timespec64 timekeeping_boot_offset;
 
 /* flag for if timekeeping is suspended */
 int __read_mostly timekeeping_suspended;
@@ -174,7 +181,7 @@ static inline void tk_update_sleep_time(struct timekeeper *tk, ktime_t delta)
 	 * Keep the offset in a division-free form for the shared-data producer.
 	 * This rare event is the only place that converts offs_boot.
 	 */
-	tk->monotonic_to_boot = ktime_to_timespec64(tk->offs_boot);
+	timekeeping_boot_offset = ktime_to_timespec64(tk->offs_boot);
 }
 
 /*
@@ -738,14 +745,6 @@ static inline void tk_update_ktime_data(struct timekeeper *tk)
 	tk->tkr_raw.base = ns_to_ktime(tk->raw_sec * NSEC_PER_SEC);
 }
 
-/*
- * One private canonical snapshot is finalized under timekeeper_lock and then
- * published to the physically separate read-only page.  Keeping it outside
- * struct timekeeper avoids copying the 160-byte user payload between the real
- * and shadow timekeepers on every update.
- */
-static struct vkso_read_state timekeeper_read_state;
-
 static __always_inline void
 tk_set_read_base(struct vkso_hres_base *base, s64 sec, u64 shifted_nsec,
 		 u32 shift)
@@ -756,19 +755,29 @@ tk_set_read_base(struct vkso_hres_base *base, s64 sec, u64 shifted_nsec,
 		shifted_nsec -= shifted_second;
 		sec++;
 	}
-	base->sec = sec;
-	base->shifted_nsec = shifted_nsec;
+	/*
+	 * realtime_base.sec is also the lockless time() source. Keep every base
+	 * component as one naturally aligned scalar store.
+	 */
+	WRITE_ONCE(base->sec, sec);
+	WRITE_ONCE(base->shifted_nsec, shifted_nsec);
 }
 
 /*
- * Finalize the reader-owned representation while timekeeper_lock is held.
- * The publisher receives this canonical type directly and only performs the
- * short scalar transfer to the physically separate read-only page.
+ * The project maps this physical page read-only/NX in userspace while the
+ * kernel alias remains writable. Maintain the only canonical global-reader
+ * state directly in that page: seq excludes partial generations, so no
+ * private staging object or second payload transfer is needed.
  */
-static void tk_update_read_state(struct timekeeper *tk)
+static void tk_publish_read_state(struct timekeeper *tk)
 {
-	struct vkso_read_state *state = &timekeeper_read_state;
+	struct vkso_shared_data *shared = &vkso_shared_page.data;
+	struct vkso_read_state *state = &shared->state;
 	u32 shift = tk->tkr_mono.shift;
+	u32 seq = READ_ONCE(shared->seq);
+
+	WRITE_ONCE(shared->seq, seq + 1);
+	smp_wmb();
 
 	state->cycles.clock_mode = tk->tkr_mono.clock->vdso_clock_mode;
 	state->cycles.shift = shift;
@@ -786,9 +795,9 @@ static void tk_update_read_state(struct timekeeper *tk)
 			 shift);
 	tk_set_read_base(&state->boottime_base,
 			 state->monotonic_base.sec +
-			 tk->monotonic_to_boot.tv_sec,
+			 timekeeping_boot_offset.tv_sec,
 			 state->monotonic_base.shifted_nsec +
-			 ((u64)tk->monotonic_to_boot.tv_nsec << shift),
+			 ((u64)timekeeping_boot_offset.tv_nsec << shift),
 			 shift);
 	tk_set_read_base(&state->tai_base,
 			 state->realtime_base.sec + tk->tai_offset,
@@ -804,6 +813,8 @@ static void tk_update_read_state(struct timekeeper *tk)
 		state->monotonic_base.shifted_nsec >> shift;
 	state->hrtimer_resolution = hrtimer_resolution;
 	state->clocksource_resolution = tk->tkr_mono.mult >> shift;
+	smp_wmb();
+	WRITE_ONCE(shared->seq, seq + 2);
 }
 
 /* must hold timekeeper_lock */
@@ -818,12 +829,11 @@ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 
 	tk_update_leap_state(tk);
 	tk_update_ktime_data(tk);
-	tk_update_read_state(tk);
 
 	update_pvclock_gtod(tk, action & TK_CLOCK_WAS_SET);
 
 	tk->tkr_mono.base_real = tk->tkr_mono.base + tk->offs_real;
-	vkso_time_publish(&timekeeper_read_state);
+	tk_publish_read_state(tk);
 	update_fast_timekeeper(&tk->tkr_mono, &tk_fast_mono);
 	update_fast_timekeeper(&tk->tkr_raw,  &tk_fast_raw);
 

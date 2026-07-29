@@ -40,57 +40,6 @@ void vkso_time_set_hvclock_page(const void *page)
 	WRITE_ONCE(vkso_kernel_context.hvclock_page, page);
 }
 
-static __always_inline void
-vkso_time_publish_snapshot(struct vkso_shared_data *shared,
-			   const struct vkso_read_state *next)
-{
-#define VKSO_PUBLISH(member) \
-	WRITE_ONCE(shared->state.member, next->member)
-
-	VKSO_PUBLISH(cycles.clock_mode);
-	VKSO_PUBLISH(cycles.shift);
-	VKSO_PUBLISH(cycles.cycle_last);
-	VKSO_PUBLISH(cycles.mask);
-	VKSO_PUBLISH(cycles.mono_mult);
-	VKSO_PUBLISH(cycles.raw_mult);
-	VKSO_PUBLISH(realtime_base.sec);
-	VKSO_PUBLISH(realtime_base.shifted_nsec);
-	VKSO_PUBLISH(monotonic_base.sec);
-	VKSO_PUBLISH(monotonic_base.shifted_nsec);
-	VKSO_PUBLISH(boottime_base.sec);
-	VKSO_PUBLISH(boottime_base.shifted_nsec);
-	VKSO_PUBLISH(tai_base.sec);
-	VKSO_PUBLISH(tai_base.shifted_nsec);
-	VKSO_PUBLISH(realtime_coarse.sec);
-	VKSO_PUBLISH(realtime_coarse.nsec);
-	VKSO_PUBLISH(monotonic_raw_base.sec);
-	VKSO_PUBLISH(monotonic_raw_base.shifted_nsec);
-	VKSO_PUBLISH(monotonic_coarse.sec);
-	VKSO_PUBLISH(monotonic_coarse.nsec);
-	VKSO_PUBLISH(hrtimer_resolution);
-	VKSO_PUBLISH(clocksource_resolution);
-
-#undef VKSO_PUBLISH
-}
-
-void vkso_time_publish(const struct vkso_read_state *next)
-{
-	struct vkso_shared_data *shared = &vkso_shared_page.data;
-	u32 seq;
-
-	seq = READ_ONCE(shared->seq);
-	WRITE_ONCE(shared->seq, seq + 1);
-	smp_wmb();
-	/*
-	 * time() deliberately ignores seq, so its 64-bit source must be
-	 * published by one aligned store.  The remaining fields use the same
-	 * explicit scalar protocol so every published member is auditable.
-	 */
-	vkso_time_publish_snapshot(shared, next);
-	smp_wmb();
-	WRITE_ONCE(shared->seq, seq + 2);
-}
-
 void vkso_time_update_timezone(void)
 {
 	struct vkso_timezone *timezone =

@@ -15,7 +15,6 @@ void vkso_timekeeping_get_private(clockid_t clock_id, struct timespec64 *ts);
 extern union vkso_shared_page vkso_shared_page;
 extern struct vkso_context vkso_kernel_context;
 
-void vkso_time_publish(const struct vkso_read_state *state);
 void vkso_time_update_timezone(void);
 void vkso_time_update_mm_data(struct task_struct *task,
 			      const struct timens_offsets *offsets);
