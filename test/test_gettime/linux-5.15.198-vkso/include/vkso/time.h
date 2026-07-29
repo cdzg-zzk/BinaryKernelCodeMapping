@@ -11,6 +11,7 @@
 enum vkso_time_status {
 	VKSO_TIME_OK = 0,
 	VKSO_TIME_UNSUPPORTED_MODE = -1,
+	VKSO_TIME_BACKEND_REQUIRED = -2,
 };
 
 /* Fixed-width result used by the common kernel/user implementation. */
@@ -113,26 +114,18 @@ struct vkso_context {
 
 /*
  * Internal shared-core entry points. They are not the user ABI: kernel and
- * user wrappers inject address-space-specific dependencies here. Typed
- * readers always return root-namespace time; a public boundary applies
- * MM_data only when its namespace mask selects that clock.
+ * user wrappers inject address-space-specific dependencies here. A NULL
+ * MM_data pointer selects the root namespace; otherwise the common reader
+ * applies the per-MM offset selected by clock_mask.
  *
  * The core never performs a syscall or enters a kernel backend. An unavailable
- * cycle provider returns VKSO_TIME_UNSUPPORTED_MODE. Public wrappers own the
- * corresponding fallback policy.
+ * cycle provider returns VKSO_TIME_UNSUPPORTED_MODE, while a non-global clock
+ * returns VKSO_TIME_BACKEND_REQUIRED. Public wrappers own both fallback
+ * policies.
  */
-int vkso_clock_gettime_realtime(
-	struct vkso_time_value *value, const struct vkso_context *context);
-int vkso_clock_gettime_monotonic(
-	struct vkso_time_value *value, const struct vkso_context *context);
-int vkso_clock_gettime_monotonic_raw(
-	struct vkso_time_value *value, const struct vkso_context *context);
-int vkso_clock_gettime_boottime(
-	struct vkso_time_value *value, const struct vkso_context *context);
-int vkso_clock_gettime_tai(
-	struct vkso_time_value *value, const struct vkso_context *context);
-int vkso_clock_gettime_realtime_coarse(struct vkso_time_value *value);
-int vkso_clock_gettime_monotonic_coarse(struct vkso_time_value *value);
+int vkso_clock_gettime_common(s32 clock_id, struct vkso_time_value *value,
+			      const struct vkso_mm_data *mm_data,
+			      const struct vkso_context *context);
 int vkso_clock_getres_hres(struct vkso_time_value *value);
 int vkso_clock_getres_coarse(struct vkso_time_value *value);
 int vkso_time_apply_offset(

@@ -68,26 +68,28 @@ vkso_current_mm_data(void)
 	return READ_ONCE(current->mm->context.vkso_mm_kdata);
 }
 
-static noinline __cold int
-posix_clock_gettime_backend(clockid_t clock_id, struct timespec64 *tp)
-{
-	const struct k_clock *kc = clockid_to_kclock(clock_id);
-
-	if (!kc || !kc->clock_get_timespec)
-		return -EINVAL;
-	return kc->clock_get_timespec(clock_id, tp);
-}
-
 /*
  * A provider failure is different from a non-global clock.  The former must
  * use the private timekeeper state directly; routing it through k_clock would
  * call ktime_get_*() and retry the shared provider which just failed.
+ *
+ * This is the only cold exit from the normal clock_gettime dispatcher.
  */
 static noinline __cold int
-posix_clock_gettime_private(clockid_t clock_id, struct timespec64 *tp)
+posix_clock_gettime_fallback(clockid_t clock_id, struct timespec64 *tp,
+			     const struct vkso_mm_data *mm_data, int status)
 {
-	const struct vkso_mm_data *mm_data = vkso_current_mm_data();
+	const struct k_clock *kc;
 	const struct vkso_time_value *offset;
+
+	if (status == VKSO_TIME_BACKEND_REQUIRED) {
+		kc = clockid_to_kclock(clock_id);
+		if (!kc || !kc->clock_get_timespec)
+			return -EINVAL;
+		return kc->clock_get_timespec(clock_id, tp);
+	}
+	if (status != VKSO_TIME_UNSUPPORTED_MODE)
+		return -EINVAL;
 
 	vkso_timekeeping_get_private(clock_id, tp);
 	if (clock_id == CLOCK_BOOTTIME)
@@ -107,58 +109,15 @@ posix_clock_gettime_private(clockid_t clock_id, struct timespec64 *tp)
 static int
 posix_clock_gettime_dispatch(clockid_t clock_id, struct timespec64 *tp)
 {
-	const struct vkso_mm_data *mm_data;
-	const struct vkso_time_value *offset;
-	struct vkso_time_value *value = (struct vkso_time_value *)tp;
+	const struct vkso_mm_data *mm_data = vkso_current_mm_data();
 	int status;
 
-	if (likely(clock_id == CLOCK_REALTIME)) {
-		status = vkso_clock_gettime_realtime(
-			value, &vkso_kernel_context);
-		goto root_time;
-	}
-	if (likely(clock_id == CLOCK_MONOTONIC)) {
-		status = vkso_clock_gettime_monotonic(
-			value, &vkso_kernel_context);
-		goto monotonic_offset;
-	} else if (clock_id == CLOCK_REALTIME_COARSE) {
-		status = vkso_clock_gettime_realtime_coarse(value);
-		goto root_time;
-	} else if (clock_id == CLOCK_MONOTONIC_COARSE) {
-		status = vkso_clock_gettime_monotonic_coarse(value);
-		goto monotonic_offset;
-	} else if (clock_id == CLOCK_MONOTONIC_RAW) {
-		status = vkso_clock_gettime_monotonic_raw(
-			value, &vkso_kernel_context);
-		goto monotonic_offset;
-	} else if (clock_id == CLOCK_BOOTTIME) {
-		status = vkso_clock_gettime_boottime(
-			value, &vkso_kernel_context);
-		goto boottime_offset;
-	} else if (clock_id == CLOCK_TAI) {
-		status = vkso_clock_gettime_tai(value, &vkso_kernel_context);
-		goto root_time;
-	} else {
-		return posix_clock_gettime_backend(clock_id, tp);
-	}
-
-monotonic_offset:
-	mm_data = vkso_current_mm_data();
-	offset = &mm_data->monotonic_offset;
-	goto apply_offset;
-boottime_offset:
-	mm_data = vkso_current_mm_data();
-	offset = &mm_data->boottime_offset;
-apply_offset:
-	if (unlikely(status != VKSO_TIME_OK))
-		return posix_clock_gettime_private(clock_id, tp);
-	if (!(READ_ONCE(mm_data->clock_mask) & (1U << clock_id)))
+	status = vkso_clock_gettime_common(
+		clock_id, (struct vkso_time_value *)tp, mm_data,
+		&vkso_kernel_context);
+	if (likely(status == VKSO_TIME_OK))
 		return 0;
-	return vkso_time_apply_offset(offset, value);
-root_time:
-	if (unlikely(status != VKSO_TIME_OK))
-		return posix_clock_gettime_private(clock_id, tp);
-	return 0;
+	return posix_clock_gettime_fallback(clock_id, tp, mm_data, status);
 }
 
 static noinline __cold int

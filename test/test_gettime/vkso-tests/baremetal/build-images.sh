@@ -375,7 +375,7 @@ shared_value=$(nm -a "$DSO_BUILD/libkernel.so" |
 test -n "$shared_value"
 printf '%s\n' "$shared_value" >"$OUT/vkso-shared-st-value.txt"
 text_anchor_value=$(nm -a "$DSO_BUILD/libkernel.so" |
-	awk '$3 == "vkso_clock_gettime_realtime" && !value { value = "0x" $1 }
+	awk '$3 == "vkso_clock_gettime_common" && !value { value = "0x" $1 }
 	     END { if (value) print value }')
 test -n "$text_anchor_value"
 printf '%s\n' "$text_anchor_value" >"$OUT/vkso-text-anchor-st-value.txt"
@@ -524,14 +524,14 @@ else
 fi
 if [[ "$reuse_raw" == 0 ]]; then
 	if nm "$RAW_BUILD/vmlinux" |
-		awk '$3 == "vkso_clock_gettime_realtime" { found = 1 }
+		awk '$3 == "vkso_clock_gettime_common" { found = 1 }
 		     END { exit !found }'; then
 		echo "raw image contains VKSO time core" >&2
 		exit 1
 	fi
 fi
 nm "$VKSO_BUILD/vmlinux" |
-	awk '$3 == "vkso_clock_gettime_realtime" { found = 1 }
+	awk '$3 == "vkso_clock_gettime_common" { found = 1 }
 	     END { exit !found }'
 if [[ "$UPDATE_BENCH" == 1 ]]; then
 	update_bench_images=("$VKSO_BUILD/vmlinux")

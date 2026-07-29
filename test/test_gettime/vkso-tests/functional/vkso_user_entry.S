@@ -17,43 +17,17 @@
 #define VKSO_COARSE_CLOCK_MASK \
 	((1 << VKSO_CLOCK_REALTIME_COARSE) | \
 	 (1 << VKSO_CLOCK_MONOTONIC_COARSE))
-#define VKSO_MM_CLOCK_MASK_OFFSET	4
-#define VKSO_MM_MONOTONIC_OFFSET	8
-#define VKSO_MM_BOOTTIME_OFFSET		24
-
-	.macro VKSO_APPLY_MM clock, member
-	movq	vkso_user_mm_data(%rip), %rax
-	testl	$(1 << \clock), VKSO_MM_CLOCK_MASK_OFFSET(%rax)
-	je	.Lclock_return
-	leaq	\member(%rax), %rdi
-		jmp	vkso_time_apply_offset
-		.endm
-
-		.macro VKSO_HRES_CALL reader, clock, success
-		pushq	%rsi
-		movq	%rsi, %rdi
-		leaq	vkso_user_context(%rip), %rsi
-		call	\reader
-		popq	%rsi
-		testl	%eax, %eax
-		je	\success
-		movl	$\clock, %edi
-		jmp	.Lclock_fallback
-		.endm
 
 /*
  * Private userspace entry veneers embedded directly in libkernel.so.
  *
  * Shared core text remains backed by kernel pages.  This page is ordinary
  * DSO-owned RX text so it can inject per-process addresses without changing
- * the shared kernel ABI.  The clock_gettime veneer preserves the two common
- * clocks as its first tests, then uses a shallow decision tree for the other
- * IDs before tail-jumping to the specialized readers.  This bypasses the
- * generic dispatcher and prepares only dependencies used by the selected
- * reader. Coarse readers cannot fail and remain tail calls; high-resolution
- * readers return a pure-core status so this public page owns their cold
- * syscall exit. make_dll resolves every transfer locally, so no PLT/GOT
- * remains on the hot path.
+ * the shared kernel ABI.  The shared clock_gettime core owns the global-clock
+ * dispatch and MM offset.  This veneer saves the public arguments only so its
+ * single cold syscall exit can reproduce the original ABI call after a
+ * provider or clock-ID rejection. make_dll resolves the core transfer
+ * locally, so no PLT/GOT remains on the hot path.
  */
 
 	.section .vkso.user.text, "ax", @progbits
@@ -61,80 +35,28 @@
 	.globl __vkso_clock_gettime
 	.type __vkso_clock_gettime, @function
 __vkso_clock_gettime:
-	testl	%edi, %edi
-	jne	.Lclock_not_realtime
-	pushq	%rsi
-	movq	%rsi, %rdi
-	leaq	vkso_user_context(%rip), %rsi
-	call	vkso_clock_gettime_realtime
-	popq	%rsi
+	/*
+	 * SysV enters with rsp % 16 == 8.  Reserve 24 bytes both to preserve
+	 * the fallback arguments and to align the shared-core call.
+	 */
+	subq	$24, %rsp
+	movl	%edi, (%rsp)
+	movq	%rsi, 8(%rsp)
+	movq	vkso_user_mm_data(%rip), %rdx
+	leaq	vkso_user_context(%rip), %rcx
+	call	vkso_clock_gettime_common
 	testl	%eax, %eax
-	je	.Lclock_return
-	xorl	%edi, %edi
-	jmp	.Lclock_fallback
-
-.Lclock_not_realtime:
-	cmpl	$VKSO_CLOCK_MONOTONIC, %edi
-	jne	.Lclock_not_monotonic
-	VKSO_HRES_CALL vkso_clock_gettime_monotonic, \
-		VKSO_CLOCK_MONOTONIC, .Lclock_apply_monotonic
-
-.Lclock_not_monotonic:
-	cmpl	$VKSO_CLOCK_MONOTONIC_COARSE, %edi
-	je	.Lclock_monotonic_coarse
-	jg	.Lclock_after_coarse
-	cmpl	$VKSO_CLOCK_REALTIME_COARSE, %edi
-	je	.Lclock_realtime_coarse
-	cmpl	$VKSO_CLOCK_MONOTONIC_RAW, %edi
-	je	.Lclock_monotonic_raw
+	jne	.Lclock_fallback
+	addq	$24, %rsp
+	ret
 
 .Lclock_fallback:
+	movl	(%rsp), %edi
+	movq	8(%rsp), %rsi
+	addq	$24, %rsp
 	movslq	%edi, %rdi
 	movl	$__NR_clock_gettime, %eax
 	syscall
-	ret
-
-.Lclock_after_coarse:
-	cmpl	$VKSO_CLOCK_BOOTTIME, %edi
-	je	.Lclock_boottime
-	cmpl	$VKSO_CLOCK_TAI, %edi
-	jne	.Lclock_fallback
-	VKSO_HRES_CALL vkso_clock_gettime_tai, \
-		VKSO_CLOCK_TAI, .Lclock_return
-
-.Lclock_realtime_coarse:
-	movq	%rsi, %rdi
-	jmp	vkso_clock_gettime_realtime_coarse
-
-.Lclock_monotonic_coarse:
-	pushq	%rsi
-	movq	%rsi, %rdi
-	call	vkso_clock_gettime_monotonic_coarse
-	popq	%rsi
-	jmp	.Lclock_apply_monotonic_coarse
-
-.Lclock_monotonic_raw:
-	VKSO_HRES_CALL vkso_clock_gettime_monotonic_raw, \
-		VKSO_CLOCK_MONOTONIC_RAW, .Lclock_apply_monotonic_raw
-
-.Lclock_boottime:
-	VKSO_HRES_CALL vkso_clock_gettime_boottime, \
-		VKSO_CLOCK_BOOTTIME, .Lclock_apply_boottime
-
-.Lclock_apply_monotonic:
-	VKSO_APPLY_MM VKSO_CLOCK_MONOTONIC, VKSO_MM_MONOTONIC_OFFSET
-
-.Lclock_apply_monotonic_coarse:
-	VKSO_APPLY_MM VKSO_CLOCK_MONOTONIC_COARSE, VKSO_MM_MONOTONIC_OFFSET
-
-.Lclock_apply_monotonic_raw:
-	VKSO_APPLY_MM VKSO_CLOCK_MONOTONIC_RAW, VKSO_MM_MONOTONIC_OFFSET
-
-.Lclock_apply_boottime:
-	VKSO_APPLY_MM VKSO_CLOCK_BOOTTIME, VKSO_MM_BOOTTIME_OFFSET
-
-.Lclock_return:
-	xorl	%eax, %eax
 	ret
 	.size __vkso_clock_gettime, .-__vkso_clock_gettime
 

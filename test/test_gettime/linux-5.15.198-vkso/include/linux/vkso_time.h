@@ -25,16 +25,14 @@ int vkso_timekeeping_writer_context_selftest(void);
 #endif
 
 /*
- * A typed root reader names the clock at the call site. These two adapters
- * only bridge the kernel result type and environment; they compile to a
- * direct call and never inspect MM_data or a generic clock ID.
+ * Ordinary kernel readers use the same global-clock dispatcher as userspace,
+ * but select root-namespace semantics with a NULL MM_data pointer.  Special
+ * NMI, writer-locked and early-boot readers remain on their private paths.
  */
-#define vkso_time_get_root_hres(reader, tp)				\
-	(reader)((struct vkso_time_value *)(tp), &vkso_kernel_context)
-#define vkso_time_get_root_coarse(reader, tp)				\
-	do {								\
-		(void)(reader)((struct vkso_time_value *)(tp));		\
-	} while (0)
+#define vkso_time_get_root(clock_id, tp)				\
+	vkso_clock_gettime_common((clock_id),				\
+		(struct vkso_time_value *)(tp), NULL,			\
+		&vkso_kernel_context)
 
 static __always_inline u32 vkso_time_get_root_resolution(void)
 {
