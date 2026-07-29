@@ -1,5 +1,6 @@
 /artifacts/
 /results/
+/validation/
 /.experiment-state
 /.experiment.lock
 /__pycache__/
