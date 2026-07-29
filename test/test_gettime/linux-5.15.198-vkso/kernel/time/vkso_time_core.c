@@ -161,54 +161,6 @@ int vkso_time_apply_offset(const struct vkso_time_value *offset,
 	return VKSO_TIME_OK;
 }
 
-static __always_inline int
-vkso_time_apply_mm_offset(int status, u32 clock_mask,
-			  const struct vkso_time_value *offset,
-			  const struct vkso_mm_data *mm_data,
-			  struct vkso_time_value *value)
-{
-	if (unlikely(status != VKSO_TIME_OK))
-		return status;
-	if (unlikely(READ_ONCE(mm_data->clock_mask) & clock_mask))
-		return vkso_time_apply_offset(offset, value);
-	return VKSO_TIME_OK;
-}
-
-__visible noinline notrace __vkso_text
-int vkso_clock_gettime_core(
-	int clock_id, struct vkso_time_value *value,
-	const struct vkso_mm_data *mm_data,
-	const struct vkso_context *context)
-{
-	if (likely(clock_id == CLOCK_REALTIME))
-		return vkso_clock_gettime_realtime(value, context);
-	if (likely(clock_id == CLOCK_MONOTONIC))
-		return vkso_time_apply_mm_offset(
-			vkso_clock_gettime_monotonic(value, context),
-			1U << CLOCK_MONOTONIC, &mm_data->monotonic_offset,
-			mm_data, value);
-	if (clock_id == CLOCK_REALTIME_COARSE)
-		return vkso_clock_gettime_realtime_coarse(value);
-	if (clock_id == CLOCK_MONOTONIC_COARSE)
-		return vkso_time_apply_mm_offset(
-			vkso_clock_gettime_monotonic_coarse(value),
-			1U << CLOCK_MONOTONIC_COARSE,
-			&mm_data->monotonic_offset, mm_data, value);
-	if (clock_id == CLOCK_MONOTONIC_RAW)
-		return vkso_time_apply_mm_offset(
-			vkso_clock_gettime_monotonic_raw(value, context),
-			1U << CLOCK_MONOTONIC_RAW, &mm_data->monotonic_offset,
-			mm_data, value);
-	if (clock_id == CLOCK_BOOTTIME)
-		return vkso_time_apply_mm_offset(
-			vkso_clock_gettime_boottime(value, context),
-			1U << CLOCK_BOOTTIME, &mm_data->boottime_offset,
-			mm_data, value);
-	if (clock_id == CLOCK_TAI)
-		return vkso_clock_gettime_tai(value, context);
-	return VKSO_TIME_BACKEND_REQUIRED;
-}
-
 __visible noinline __noclone notrace __vkso_text
 int vkso_clock_getres_hres(struct vkso_time_value *value)
 {
@@ -229,28 +181,6 @@ int vkso_clock_getres_coarse(struct vkso_time_value *value)
 		value->nsec = LOW_RES_NSEC;
 	}
 	return VKSO_TIME_OK;
-}
-
-__visible noinline notrace __vkso_text
-int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value)
-{
-	const u32 hres_clocks = (1U << CLOCK_REALTIME) |
-		(1U << CLOCK_MONOTONIC) | (1U << CLOCK_MONOTONIC_RAW) |
-		(1U << CLOCK_BOOTTIME) | (1U << CLOCK_TAI);
-	const u32 coarse_clocks = (1U << CLOCK_REALTIME_COARSE) |
-		(1U << CLOCK_MONOTONIC_COARSE);
-	u32 id = clock_id;
-	u32 mask;
-
-	if (id > CLOCK_TAI)
-		goto backend;
-	mask = 1U << id;
-	if (mask & hres_clocks)
-		return vkso_clock_getres_hres(value);
-	if (mask & coarse_clocks)
-		return vkso_clock_getres_coarse(value);
-backend:
-	return VKSO_TIME_BACKEND_REQUIRED;
 }
 
 __visible noinline notrace __vkso_text

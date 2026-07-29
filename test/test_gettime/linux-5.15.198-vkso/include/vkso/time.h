@@ -11,7 +11,6 @@
 enum vkso_time_status {
 	VKSO_TIME_OK = 0,
 	VKSO_TIME_UNSUPPORTED_MODE = -1,
-	VKSO_TIME_BACKEND_REQUIRED = -2,
 };
 
 /* Fixed-width result used by the common kernel/user implementation. */
@@ -119,15 +118,9 @@ struct vkso_context {
  * MM_data only when its namespace mask selects that clock.
  *
  * The core never performs a syscall or enters a kernel backend. An unavailable
- * cycle provider returns VKSO_TIME_UNSUPPORTED_MODE; a clock outside the
- * global-time set returns VKSO_TIME_BACKEND_REQUIRED. Public wrappers own the
+ * cycle provider returns VKSO_TIME_UNSUPPORTED_MODE. Public wrappers own the
  * corresponding fallback policy.
  */
-int vkso_clock_gettime_core(
-	int clock_id, struct vkso_time_value *value,
-	const struct vkso_mm_data *mm_data,
-	const struct vkso_context *context);
-int vkso_clock_getres_core(int clock_id, struct vkso_time_value *value);
 int vkso_clock_gettime_realtime(
 	struct vkso_time_value *value, const struct vkso_context *context);
 int vkso_clock_gettime_monotonic(

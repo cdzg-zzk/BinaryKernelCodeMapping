@@ -24,15 +24,6 @@ void vkso_time_set_hvclock_page(const void *page);
 int vkso_timekeeping_writer_context_selftest(void);
 #endif
 
-static __always_inline int
-vkso_time_get(const struct vkso_mm_data *mm_data, clockid_t clock_id,
-	      struct timespec64 *tp)
-{
-	return vkso_clock_gettime_core(clock_id,
-				      (struct vkso_time_value *)tp, mm_data,
-				      &vkso_kernel_context);
-}
-
 /*
  * A typed root reader names the clock at the call site. These two adapters
  * only bridge the kernel result type and environment; they compile to a
@@ -59,13 +50,6 @@ static __always_inline time64_t vkso_time_get_root_monotonic_seconds(void)
 static __always_inline time64_t vkso_time_get_root_realtime_seconds(void)
 {
 	return READ_ONCE(vkso_shared_page.data.state.realtime_base.sec);
-}
-
-static __always_inline int
-vkso_time_getres(clockid_t clock_id, struct timespec64 *tp)
-{
-	return vkso_clock_getres_core(clock_id,
-				      (struct vkso_time_value *)tp);
 }
 
 static __always_inline int

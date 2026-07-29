@@ -107,14 +107,58 @@ posix_clock_gettime_private(clockid_t clock_id, struct timespec64 *tp)
 static int
 posix_clock_gettime_dispatch(clockid_t clock_id, struct timespec64 *tp)
 {
+	const struct vkso_mm_data *mm_data;
+	const struct vkso_time_value *offset;
+	struct vkso_time_value *value = (struct vkso_time_value *)tp;
 	int status;
 
-	status = vkso_time_get(vkso_current_mm_data(), clock_id, tp);
-	if (likely(status == VKSO_TIME_OK))
-		return 0;
-	if (status == VKSO_TIME_UNSUPPORTED_MODE)
+	if (likely(clock_id == CLOCK_REALTIME)) {
+		status = vkso_clock_gettime_realtime(
+			value, &vkso_kernel_context);
+		goto root_time;
+	}
+	if (likely(clock_id == CLOCK_MONOTONIC)) {
+		status = vkso_clock_gettime_monotonic(
+			value, &vkso_kernel_context);
+		goto monotonic_offset;
+	} else if (clock_id == CLOCK_REALTIME_COARSE) {
+		status = vkso_clock_gettime_realtime_coarse(value);
+		goto root_time;
+	} else if (clock_id == CLOCK_MONOTONIC_COARSE) {
+		status = vkso_clock_gettime_monotonic_coarse(value);
+		goto monotonic_offset;
+	} else if (clock_id == CLOCK_MONOTONIC_RAW) {
+		status = vkso_clock_gettime_monotonic_raw(
+			value, &vkso_kernel_context);
+		goto monotonic_offset;
+	} else if (clock_id == CLOCK_BOOTTIME) {
+		status = vkso_clock_gettime_boottime(
+			value, &vkso_kernel_context);
+		goto boottime_offset;
+	} else if (clock_id == CLOCK_TAI) {
+		status = vkso_clock_gettime_tai(value, &vkso_kernel_context);
+		goto root_time;
+	} else {
+		return posix_clock_gettime_backend(clock_id, tp);
+	}
+
+monotonic_offset:
+	mm_data = vkso_current_mm_data();
+	offset = &mm_data->monotonic_offset;
+	goto apply_offset;
+boottime_offset:
+	mm_data = vkso_current_mm_data();
+	offset = &mm_data->boottime_offset;
+apply_offset:
+	if (unlikely(status != VKSO_TIME_OK))
 		return posix_clock_gettime_private(clock_id, tp);
-	return posix_clock_gettime_backend(clock_id, tp);
+	if (!(READ_ONCE(mm_data->clock_mask) & (1U << clock_id)))
+		return 0;
+	return vkso_time_apply_offset(offset, value);
+root_time:
+	if (unlikely(status != VKSO_TIME_OK))
+		return posix_clock_gettime_private(clock_id, tp);
+	return 0;
 }
 
 static noinline __cold int
@@ -130,10 +174,23 @@ posix_clock_getres_backend(clockid_t clock_id, struct timespec64 *tp)
 static int
 posix_clock_getres_dispatch(clockid_t clock_id, struct timespec64 *tp)
 {
-	int status = vkso_time_getres(clock_id, tp);
+	const u32 hres_clocks = (1U << CLOCK_REALTIME) |
+		(1U << CLOCK_MONOTONIC) | (1U << CLOCK_MONOTONIC_RAW) |
+		(1U << CLOCK_BOOTTIME) | (1U << CLOCK_TAI);
+	const u32 coarse_clocks = (1U << CLOCK_REALTIME_COARSE) |
+		(1U << CLOCK_MONOTONIC_COARSE);
+	u32 id = clock_id;
+	u32 mask;
 
-	if (likely(status == VKSO_TIME_OK))
-		return 0;
+	if (id <= CLOCK_TAI) {
+		mask = 1U << id;
+		if (mask & hres_clocks)
+			return vkso_clock_getres_hres(
+				(struct vkso_time_value *)tp);
+		if (mask & coarse_clocks)
+			return vkso_clock_getres_coarse(
+				(struct vkso_time_value *)tp);
+	}
 	return posix_clock_getres_backend(clock_id, tp);
 }
 

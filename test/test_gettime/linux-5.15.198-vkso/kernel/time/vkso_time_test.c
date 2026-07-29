@@ -32,7 +32,7 @@ static __always_inline int vkso_hres_sample(
 	int status;
 
 	if (!shared || !sample)
-		return VKSO_TIME_BACKEND_REQUIRED;
+		return -EINVAL;
 	status = vkso_read_hres_sample(shared, base_offset, cycle_offset,
 				       mult_offset, NULL, &snapshot);
 	if (status != VKSO_TIME_OK)
