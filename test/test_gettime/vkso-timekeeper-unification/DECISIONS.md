@@ -322,3 +322,25 @@ payload 发布到独立 shared 页。虽然不存在跨模型转换，但仍有�
 这会让 shared seq 奇数窗口包含最终的固定字段派生，因此不再满足 D014
 “奇数区间只做复制”的旧目标。代价必须通过 read/update 并发实验衡量；若
 retry 或 tail latency 显著恶化，则回退 D023，而不是重新引入第三种数据模型。
+
+## D024：只共享kernel/user真正重合的reader
+
+- 状态：已实现并通过静态构建，等待最终QEMU与裸机门槛
+- 阶段：M10
+
+`ktime_get_coarse_with_offset()`支持kernel-only的REAL/BOOT/TAI offset读取；
+Linux没有对应的`CLOCK_BOOTTIME_COARSE`或`CLOCK_TAI_COARSE`用户clock ID。
+将其强行统一到shared core曾需要两个额外typed入口和一套从hres base恢复offset
+的算法，但没有消除任何用户侧重复。
+
+当前决定：
+
+- realtime/monotonic coarse继续使用shared core，因为它们有对应用户ABI；
+- kernel-only BOOT/TAI coarse直接读取timekeeper private base与offset，保持
+  Raw的seq和返回语义；
+- 删除`vkso_clock_gettime_boottime_coarse()`、
+  `vkso_clock_gettime_tai_coarse()`及其通用base差值helper；
+- 该例外不允许扩展到已有用户等价实现的hres/global reader。
+
+相对D023直接shared基线，功能源码减少58 SLOC，目标对象`.text`减少292 B；
+读取路径还减少一次shared函数调用和多组base load，因此没有以性能换代码量。

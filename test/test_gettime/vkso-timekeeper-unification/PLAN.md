@@ -56,6 +56,10 @@ ABI、正确性、验证和 Git 规则。
 这些后端仍属于完整功能的一部分，但应通过统一的冷分派边界接入，不能把其
 特殊语义硬塞进 global-time 算法。
 
+只有存在用户等价功能的普通kernel reader才进入shared core。没有用户clock ID
+对应项的kernel-only转换或coarse offset reader保留private唯一实现，不为形式
+上的“统一”新增shared入口。
+
 ### 1.3 不可改变的外部接口
 
 必须保持：
@@ -322,8 +326,10 @@ public ABI wrapper
 
 - 已知 global clock 使用 typed 入口，不经过 generic clockid 大 switch；
 - user 成功路径不进入 syscall fallback，也不先调用 backend；
-- kernel 普通 `ktime_get_*` 以 root namespace typed 薄 wrapper 进入共享算法，
-  不支付 MM_data NULL 检查和 generic dispatcher 成本；
+- 有用户等价功能的kernel普通`ktime_get_*`以root namespace typed薄wrapper
+  进入共享算法，不支付MM_data NULL检查和generic dispatcher成本；
+- kernel-only reader直接使用private owner，不生成没有用户消费者的shared
+  typed入口；
 - public wrapper 之后不得出现多层只转发参数的包装；是否 inline/tail-call 由
   汇编检查决定，目标是成功热路径最多保留一个必要的非内联算法调用；
 - 不为追求“单一入口”引入新的函数指针、重复 mode 判断或 call/ret；
@@ -366,7 +372,8 @@ canonical state 对齐。不得用“兼容性”作为未审计重复算法的�
 - **shared primitives**：seq、delta、mult/shift、normalize；
 - **typed global readers**：realtime/monotonic/raw/coarse/boottime/TAI；
 - **providers**：kernel clocksource、user TSC/PV/HV；
-- **kernel adapters**：现有 `ktime_get_*` 薄 wrapper；
+- **kernel adapters**：有用户等价功能的 `ktime_get_*` 薄 wrapper；
+- **kernel-only readers**：只在内核存在的转换/offset功能直接使用private状态；
 - **public user wrappers**：`__vkso_*` ABI、MM/environment 参数绑定和 syscall
   fallback；
 - **cold dispatcher/backends**：CPU、alarm、dynamic/PTP、invalid；
