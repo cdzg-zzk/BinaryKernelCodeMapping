@@ -22,9 +22,9 @@ clock_mode + shift + cycle_last + mask + mono_mult + raw_mult
 只发布一次公共 mode/shift/last/mask，mult 分开。删除 ABI v10 中 raw 的重复
 mode/last/shift。M09 用 clocksource switch、NTP 和 suspend/resume 验证。
 
-## D002：canonical state 嵌入 `struct timekeeper`
+## D002：canonical state 嵌入 `struct timekeeper`（已被 D023 取代）
 
-- 状态：已决定
+- 状态：历史决定；M10 直接 shared 实验后废止
 - 阶段：M01
 
 原因：
@@ -145,9 +145,9 @@ monotonic最多增加一条 cache line；raw base从 shared offset 128开始。
 wrapper init同时检查 shared v11和MM_data v3，版本错配返回`EPROTO`。
 精确布局和 memory-order 协议见 `ABI_V11.md`。
 
-## D013：boottime offset从canonical base差值保留
+## D013：boottime offset从canonical base差值保留（已被 D023 取代）
 
-- 状态：已决定并验证
+- 状态：历史决定；M10 直接 shared 实验后废止
 - 阶段：M03
 
 删除仅供发布转换使用的`monotonic_to_boot`，但不在每个tick调用
@@ -160,9 +160,9 @@ wrapper init同时检查 shared v11和MM_data v3，版本错配返回`EPROTO`。
 这同时消除冗余字段和周期64-bit division。`offs_boot`仍为fast/snapshot等
 专用kernel接口保留，不作为普通global reader数据源。
 
-## D014：shared publisher使用显式148-byte scalar协议
+## D014：shared publisher使用显式148-byte scalar协议（已被 D023 取代）
 
-- 状态：已决定并验证
+- 状态：历史决定；M10 直接 shared 实验后废止
 - 阶段：M04
 
 publisher直接接收canonical `tk_read_state`，不构造栈上shared snapshot，也不
@@ -295,3 +295,30 @@ alarm/CPU/dynamic 实现添加测试分支。
 
 因此 M09 证明的是 dispatcher、producer、发布和后端的完整运行路径，而不只是
 静态编译或人为调用单个 helper。
+
+## D023：shared 页直接作为唯一 canonical reader state
+
+- 状态：已实现并通过 QEMU 功能验证，等待 M10 裸机性能门槛
+- 阶段：M10
+
+M03/M04 的过渡实现仍保留一份 kernel-private canonical staging，然后将同类型
+payload 发布到独立 shared 页。虽然不存在跨模型转换，但仍有一个 160-byte
+重复实例和一次逐字段搬运，不符合最终的单一数据所有权目标。
+
+最终候选改为：
+
+- 物理独立的 `vkso_shared_page.data.state` 本身就是唯一 canonical
+  global-reader state；
+- kernel 通过可写 alias 维护该页，用户只得到同一物理页的 R--/NX 映射；
+- `struct timekeeper` 只保留 NTP、clocksource、特殊 reader 和 producer
+  必需的 private 状态，不嵌入 canonical payload；
+- producer 完成 NTP 等复杂 private 更新后，将 shared seq 置奇数，直接从
+  private owner 派生并写入最终 canonical 字段，随后结束 seq；
+- 删除 staging 对象、real/shadow canonical 副本和
+  `vkso_time_publish()` 第二次 payload 搬运；
+- `offs_boot` 保持权威 private offset，只额外维护一个事件型
+  `timespec64` split cache，避免每个 tick 在 seq 窗口中进行 64-bit 除法。
+
+这会让 shared seq 奇数窗口包含最终的固定字段派生，因此不再满足 D014
+“奇数区间只做复制”的旧目标。代价必须通过 read/update 并发实验衡量；若
+retry 或 tail latency 显著恶化，则回退 D023，而不是重新引入第三种数据模型。

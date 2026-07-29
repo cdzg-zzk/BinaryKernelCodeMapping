@@ -15,14 +15,14 @@
 
 | 互斥口径 | Raw SLOC | VKSO SLOC | VKSO - Raw |
 |---|---:|---:|---:|
-| 运行时功能 | 801 | 1,070 | +269 |
-| 运行时机制 | 546 | 316 | -230 |
-| **运行时小计** | **1,347** | **1,386** | **+39（+2.90%）** |
+| 运行时功能 | 857 | 1,065 | +208 |
+| 运行时机制 | 490 | 285 | -205 |
+| **运行时小计** | **1,347** | **1,350** | **+3（+0.22%）** |
 | 功能专属构建/链接 | 158 | 57 | -101 |
-| **产品功能合计** | **1,505** | **1,443** | **-62（-4.12%）** |
+| **产品功能合计** | **1,505** | **1,407** | **-98（-6.51%）** |
 
-因此，VKSO 的运行时源码接近持平；把各自实际需要的功能专属构建/链接代码
-纳入后，VKSO 总体少 62 SLOC。项目已有的通用 `make_dll`、manager 和页面替换
+因此，VKSO 的运行时源码已基本持平；把各自实际需要的功能专属构建/链接代码
+纳入后，VKSO 总体少 98 SLOC。项目已有的通用 `make_dll`、manager 和页面替换
 基础设施不计入 kernel/user 产品合计，但必须作为项目机制另行披露。
 
 另外单列：
@@ -36,14 +36,19 @@
 模式、旧 global callback 和空桩已经删除；Raw/no-vDSO 由独立源码树承担。
 
 相对本分支起点 `d89f2e5` 的 Git 物理行 churn 也解释了“看起来增加很多”的
-现象：当前范围为新增 872、删除 706；其中测试文件
+现象：当前范围为新增 878、删除 767；其中测试文件
 `vkso_time_test.c`单独新增 173、删除 4 行。排除该 T1 测试后，产品源码实际是
-新增 699、删除 702，**净减少 3 个物理行**。Git churn 反映重写过程，不替代下文
+新增 705、删除 763，**净减少 58 个物理行**。Git churn 反映重写过程，不替代下文
 Raw/VKSO 最终 SLOC 对照。
 
-与已验证的 `4d34fc1` 基线相比，当前候选另外增加 15 SLOC，用于把
-`ns >= 1 second` 的极冷归一化外提。它不增加常用 TSC 路径的动态指令，
-并使目标 reader 机器码减少 160 B；是否最终保留仍由裸机结果决定。
+当前候选包含两项彼此独立的改进：
+
+- `16e7e55`把`ns >= 1 second`的极冷归一化外提，不增加常用TSC路径动态
+  指令，并使目标reader机器码减少160 B；
+- `64a08e4`让producer直接维护项目映射的shared物理页，删除160-byte私有
+  staging对象和`vkso_time_publish()`第二次字段搬运。
+
+两项是否最终保留仍由裸机read、update和并发结果共同决定。
 
 ## 2. 为什么功能代码仍比 Raw 多
 
@@ -54,10 +59,10 @@ Raw/VKSO 最终 SLOC 对照。
 | U1 用户 public ABI/算法或 wrapper | 359 | 179 | -180 |
 | S1 kernel/user 共享 global 算法 | — | 386 | +386 |
 | K1 普通 kernel global reader | 194 | 238 | +44 |
-| K2 canonical producer | — | 52 | +52 |
+| K2 canonical producer | 56 | 47 | -9 |
 | K4 syscall/dispatcher | 132 | 137 | +5 |
 | E1 cycles/environment provider | 116 | 78 | -38 |
-| **运行时功能** | **801** | **1,070** | **+269** |
+| **运行时功能** | **857** | **1,065** | **+208** |
 
 增长并不是多了一份 mult/shift/base 换算公式，而是边界代码：
 
@@ -75,53 +80,59 @@ Raw/VKSO 最终 SLOC 对照。
 这说明“共享 core”消除了算法维护的第二份源定义，但不会让 ABI wrapper、
 environment binding 和 kernel export symbol 自动消失。
 
-## 3. Producer/publisher 并未变大
+## 3. Producer/publisher 已合并为直接shared维护
 
 把生产和发布作为一个完整职责比较：
 
 | 生产/发布职责 | Raw | VKSO |
 |---|---:|---:|
-| K2 canonical producer | — | 52 |
-| K3 payload ABI + publisher | 175 | 109 |
-| **合计** | **175** | **161** |
+| K2 canonical producer | 56 | 47 |
+| K3 payload ABI + publisher | 119 | 78 |
+| **合计** | **175** | **125** |
 
-VKSO 反而少 14 SLOC。K2 不能孤立解释成“额外转换”：Raw 的
-`update_vsyscall()`也必须从 private timekeeper 派生用户可读状态，只是它全部
-计在 K3 中。
+VKSO 在同一职责上少50 SLOC。这里同时修正了旧统计的不对称：Raw
+`update_vsyscall()`中的base/cycle派生现在也归K2，seq/VVAR/架构同步归K3；
+VKSO采用完全相同的功能/机制划分。
 
 当前 VKSO 的数据所有权是：
 
 - `struct timekeeper`继续保存 NTP、clocksource、suspend、fast/NMI 等
   kernel-private 状态；
-- 全局只有一份 160-byte kernel-private canonical snapshot；
-- 物理独立的 shared 页保存用户只读发布副本；
-- real/shadow timekeeper 不再各自嵌入 canonical snapshot。
+- 物理独立的shared页本身就是唯一160-byte canonical global-reader state；
+- kernel通过可写alias直接维护，用户只看到同一物理页的R--/NX映射；
+- 不再存在private canonical snapshot、real/shadow canonical副本或第二次
+  payload搬运；
+- `offs_boot`仍是权威值，只有一份16-byte split cache在罕见suspend事件更新，
+  避免周期路径64-bit除法；该cache不进入real/shadow复制。
 
 这次审计发现并修复了 M03 遗留的真实冗余：此前 real/shadow timekeeper 各自
-携带 160-byte `vkso_read_state`，并随 mirror memcpy。修复后恢复原有
-`monotonic_to_boot`，canonical state 只保留一份。相对修复前：
+携带 160-byte `vkso_read_state`，并随 mirror memcpy。随后直接shared候选又
+删除了过渡期的全局160-byte staging和real/shadow中的
+`monotonic_to_boot`副本。相对`16e7e55`：
 
-- `timekeeping.o` BSS 减少 144 bytes；
-- canonical 修复本身使 `.text` 减少 160 bytes；
-- 随后的不可达 reader fallback 清理再减少 291 bytes；
-- 当前 `timekeeping.o` `.text` 为 12,936 bytes，BSS 为 928 bytes。
+- `timekeeping.o` BSS从928降到784 bytes（-144 B）；
+- `timekeeping.o + vkso_time.o`主`.text`从10,975降到10,735 bytes
+  （-240 B）；
+- `timekeeping_update + vkso_time_publish`从两个函数、合计882 B，变为单一
+  650 B的`timekeeping_update`（-232 B）；
+- user reader及shared core对象逐字节不变。
 
-发布仍必须从 private canonical state 写入 R-- shared 页，否则只能把复杂计算
-放进 shared seq 奇数窗口，增加用户 retry。当前不复制整页，只在最后以可审计
-的 scalar stores 短发布所需字段。
+直接维护使seq奇数窗口包含canonical派生，因而比短scalar publisher更长；
+这是删除staging/copy后的唯一实质代价。Raw VVAR同样在seq奇数期间派生并写入
+状态。最终必须用裸机read/update并发实验比较retry，而不能只凭对象大小接受。
 
 ## 4. 机制代码为什么显著减少
 
 | 机制类别 | Raw | VKSO | 差异 |
 |---|---:|---:|---:|
 | C1 MM/context/namespace 映射 | 371 | 207 | -164 |
-| K3 shared ABI/publisher | 175 | 109 | -66 |
-| **运行时机制** | **546** | **316** | **-230** |
+| K3 shared ABI/publisher | 119 | 78 | -41 |
+| **运行时机制** | **490** | **285** | **-205** |
 | G1 功能构建/链接 | 158 | 57 | -101 |
 
 这正是项目机制复用产生的收益：VKSO kernel 只实现 time 专属 shared/MM
 语义和链接边界，通用 ELF 导出、DSO 形成、页面替换与回收由项目基础设施
-承担。论文中应把这 331 SLOC 的 kernel/build 减少作为机制复用结果，同时另表
+承担。论文中应把这 306 SLOC 的机制/build减少作为机制复用结果，同时另表
 披露项目基础设施，不能假装它不存在。
 
 项目 P1 不加入上面的 kernel/user 合计。已有人工审计可单独披露为：
@@ -162,7 +173,7 @@ VKSO 反而少 14 SLOC。K2 不能孤立解释成“额外转换”：Raw 的
 | 用户 public entry/wrapper | 1,515 B | 446 B | -1,069 B |
 | kernel reader / shared core（含 cycles cold provider） | 982 B | 2,329 B | +1,347 B |
 | **user + kernel/shared core** | **2,497 B** | **2,775 B** | **+278 B（+11.13%）** |
-| publisher + timezone | 575 B | 296 B | -279 B（-48.52%） |
+| update-side canonical/publisher | 独立`update_vsyscall` | 已融合进producer，无第二个函数 |
 
 因此，目前“源码总体减少”与“reader 机器码增加”同时成立。真实机器码增长不是
 第二份数据结构或第二套源算法，而是 typed reader 专门化展开。它是否值得保留
@@ -175,8 +186,9 @@ VKSO 反而少 14 SLOC。K2 不能孤立解释成“额外转换”：Raw 的
 - 但两者分别在每次常用读取中增加约 10 条和 6 条动态指令，来源是参数准备、
   额外 callee-saved register 和 tail jump。
 
-当前只保留极冷归一化外提候选：常用 `ns < 1 second` 路径动态指令不增加，
-`gettimeofday` 函数体逐指令保持不变，目标 reader 机器码净减 160 B。
+当前保留的reader候选仍只有极冷归一化外提：常用`ns < 1 second`路径动态
+指令不增加，`gettimeofday`函数体逐指令保持不变，目标reader机器码净减160 B。
+direct-shared候选不修改任何reader机器码，只改变update-side。
 
 ## 7. 构建与功能验证
 
@@ -184,15 +196,16 @@ VKSO 反而少 14 SLOC。K2 不能孤立解释成“额外转换”：Raw 的
 - `4d34fc1` 已验证基线包：
   `vkso-tests/baremetal/artifacts/unification-m10-source-compact`；
 - 当前候选生产包：
-  `vkso-tests/baremetal/artifacts/unification-m10-hres-cold`；
+  `vkso-tests/baremetal/artifacts/direct-shared-normal`；
 - 当前候选 validation 包：
-  `vkso-tests/baremetal/artifacts/unification-m10-hres-cold-validation-r2`；
+  `vkso-tests/baremetal/artifacts/direct-shared-validation`；
 - production 与 validation 的 QEMU Raw/VKSO 各 112 行 ABI 矩阵通过；
 - Raw/VKSO no-RTC fallback 均通过；
 - validation 配置的 early、cycle-delta、NMI、IRQ、writer-context 和普通
   kernel reader 自测全部通过；
-- 当前生产结果目录：
-  `artifacts/validation/normal-20260729T132339Z`。
+- 当前validation/production QEMU结果目录分别为：
+  `artifacts/validation/normal-direct-shared-validation`和
+  `artifacts/validation/normal-direct-shared-normal`。
 
 这只证明精简未改变功能，不替代 M10 裸机性能测量。
 

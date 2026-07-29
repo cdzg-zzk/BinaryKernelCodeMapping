@@ -9,7 +9,8 @@ runtime,Raw,K1 kernel public global reader,functional,RAW_KERNEL,kernel/time/tim
 runtime,Raw,K3 publisher and shared ABI,mechanism,RAW_KERNEL,include/vdso/datapage.h,"1-133,136-142",140,124,60,vdso_data/VVAR payload ABI；排除 compat include
 runtime,Raw,K3 publisher and shared ABI,mechanism,RAW_KERNEL,arch/x86/include/asm/vgtod.h,1-24,24,20,15,x86 发布类型接口
 runtime,Raw,K3 publisher and shared ABI,mechanism,RAW_KERNEL,arch/x86/include/asm/vdso/vsyscall.h,1-29,29,23,18,x86 VVAR 实例和 publisher 适配
-runtime,Raw,K3 publisher and shared ABI,mechanism,RAW_KERNEL,kernel/time/vsyscall.c,1-131,131,106,80,update_vsyscall、timezone 与 seq 发布
+runtime,Raw,K2 canonical producer,functional,RAW_KERNEL,kernel/time/vsyscall.c,"18-70,82-114",86,73,56,VVAR reader state的cycle/base/coarse/resolution派生；与VKSO canonical producer同口径
+runtime,Raw,K3 publisher and shared ABI,mechanism,RAW_KERNEL,kernel/time/vsyscall.c,"1-17,72-81,115-131",44,33,24,VVAR定位、seq边界、架构同步与timezone事件发布
 runtime,Raw,K3 publisher and shared ABI,mechanism,RAW_KERNEL,kernel/time/timekeeping.c,750,1,1,1,timekeeping producer 调用 publisher
 runtime,Raw,K3 publisher and shared ABI,mechanism,RAW_KERNEL,kernel/time/time.c,187,1,1,1,timezone 事件调用 publisher
 runtime,Raw,K4 syscall and clock dispatcher,functional,RAW_KERNEL,kernel/time/time.c,"62-72,140-156",28,26,26,time/gettimeofday syscall 边界
@@ -36,19 +37,20 @@ runtime,VKSO,S1 shared global algorithm,functional,VKSO_KERNEL,include/vkso/getc
 runtime,VKSO,S1 shared global algorithm,functional,VKSO_KERNEL,kernel/time/vkso_time_internal.h,"1-15,39-58,73-104,149-173",92,81,71,seq、delta、offset 和 coarse 读取原语；排除 provider 与测试采样
 runtime,VKSO,S1 shared global algorithm,functional,VKSO_KERNEL,kernel/time/vkso_time_core.c,"1,6,51-352",304,276,254,高精度换算、极冷归一化、七种 global clock、getres/gettimeofday/time 和 namespace offset 的唯一共享算法；排除 static_assert
 runtime,VKSO,S1 shared global algorithm,functional,VKSO_KERNEL,arch/x86/kernel/vkso_getcpu.c,1-33,33,28,19,getcpu 共享算法
-runtime,VKSO,K1 kernel public global reader,functional,VKSO_KERNEL,include/linux/vkso_time.h,"1-7,13,28-84",65,57,51,kernel typed adapter 和普通 reader 接口
+runtime,VKSO,K1 kernel public global reader,functional,VKSO_KERNEL,include/linux/vkso_time.h,"1-7,13,27-83",65,57,51,kernel typed adapter 和普通 reader 接口
 runtime,VKSO,K1 kernel public global reader,functional,VKSO_KERNEL,include/linux/vkso_getcpu.h,1-14,14,11,10,kernel getcpu adapter
-runtime,VKSO,K1 kernel public global reader,functional,VKSO_KERNEL,kernel/time/timekeeping.c,"193-198,286-297,376-392,872-904,912-991,1016-1026,1036-1044,1055-1060,1072-1076,1576-1584,2306-2316",199,179,177,普通 ktime_get typed wrapper、单一 unsupported-clocksource cold helper 与直接 helper；coarse/resolution/seconds 无不可达 fallback
-runtime,VKSO,K2 canonical producer,functional,VKSO_KERNEL,kernel/time/timekeeping.c,"741-807,821,826",69,63,52,一个 kernel-private canonical read_state 的维护和 producer hook
+runtime,VKSO,K1 kernel public global reader,functional,VKSO_KERNEL,kernel/time/timekeeping.c,"200-205,293-304,383-399,882-914,922-1001,1026-1036,1046-1054,1065-1070,1082-1086,1586-1594,2316-2326",199,179,177,普通 ktime_get typed wrapper、单一 unsupported-clocksource cold helper 与直接 helper；coarse/resolution/seconds 无不可达 fallback
+runtime,VKSO,K2 canonical producer,functional,VKSO_KERNEL,kernel/time/timekeeping.c,"66,184,748-764,776,782-815",54,51,47,直接维护shared canonical state的cycle/base/coarse/resolution派生；boottime split仅在suspend事件更新
 runtime,VKSO,K3 publisher and shared ABI,mechanism,VKSO_KERNEL,include/vkso/time.h,"1-6,17-65,82-91",65,57,49,canonical/shared payload ABI；MM/context 部分另归 C1/E1
-runtime,VKSO,K3 publisher and shared ABI,mechanism,VKSO_KERNEL,kernel/time/vkso_time.c,"1,3-6,26-29,43-101",68,62,56,物理独立 shared 页、scalar seq publisher 和 timezone 发布；排除 static_assert/provider
-runtime,VKSO,K3 publisher and shared ABI,mechanism,VKSO_KERNEL,include/linux/vkso_time.h,"15,18-19",3,3,3,publisher 状态与接口
+runtime,VKSO,K3 publisher and shared ABI,mechanism,VKSO_KERNEL,kernel/time/vkso_time.c,"1,3-6,26-29,43-50",17,16,15,物理独立shared页实例与timezone事件发布；排除static_assert/provider
+runtime,VKSO,K3 publisher and shared ABI,mechanism,VKSO_KERNEL,include/linux/vkso_time.h,"15,18",2,2,2,shared页与事件发布接口
+runtime,VKSO,K3 publisher and shared ABI,mechanism,VKSO_KERNEL,kernel/time/timekeeping.c,"772-775,777-780,816-818,836",12,11,11,shared alias绑定、seq发布协议与producer hook；无staging copy
 runtime,VKSO,K3 publisher and shared ABI,mechanism,VKSO_KERNEL,kernel/time/time.c,204,1,1,1,timezone 事件发布 hook
 runtime,VKSO,K4 syscall and clock dispatcher,functional,VKSO_KERNEL,kernel/time/posix-timers.c,"56-58,60-138,1141-1152,1183-1194",106,91,81,MM选择、global direct path、provider/private/backend cold exit 和 gettime/getres syscall
 runtime,VKSO,K4 syscall and clock dispatcher,functional,VKSO_KERNEL,kernel/time/time.c,"63-76,144-173",44,40,40,time/gettimeofday syscall 与共享 core 接入
 runtime,VKSO,K4 syscall and clock dispatcher,functional,VKSO_KERNEL,kernel/sys.c,2575-2591,17,16,16,getcpu syscall 与共享 core 接入
 runtime,VKSO,C1 MM context namespace mapping,mechanism,VKSO_KERNEL,include/vkso/time.h,93-104,12,11,10,MM_data v3 payload
-runtime,VKSO,C1 MM context namespace mapping,mechanism,VKSO_KERNEL,include/linux/vkso_time.h,"9-11,20-21",5,5,5,MM/namespace 类型与更新接口
+runtime,VKSO,C1 MM context namespace mapping,mechanism,VKSO_KERNEL,include/linux/vkso_time.h,"9-11,19-20",5,5,5,MM/namespace 类型与更新接口
 runtime,VKSO,C1 MM context namespace mapping,mechanism,VKSO_KERNEL,arch/x86/kernel/vkso.c,1-166,166,147,146,per-MM 页分配、只读映射、复制、释放、offset 发布和 exec 接入
 runtime,VKSO,C1 MM context namespace mapping,mechanism,VKSO_KERNEL,arch/x86/include/asm/vkso.h,1-11,11,8,7,MM 生命周期接口
 runtime,VKSO,C1 MM context namespace mapping,mechanism,VKSO_KERNEL,arch/x86/include/asm/elf.h,"336-342,367-371",12,12,12,AT_VKSO_MM_DATA 和追加 context 页映射
@@ -62,7 +64,7 @@ runtime,VKSO,E1 cycles and environment provider,functional,VKSO_KERNEL,include/v
 runtime,VKSO,E1 cycles and environment provider,functional,VKSO_KERNEL,kernel/time/vkso_time_internal.h,"36-37,60-71",14,14,10,TSC inline provider 和 cold provider 边界
 runtime,VKSO,E1 cycles and environment provider,functional,VKSO_KERNEL,kernel/time/vkso_time_cycles.c,1-56,56,49,48,PVClock/Hyper-V cold cycles provider
 runtime,VKSO,E1 cycles and environment provider,functional,VKSO_KERNEL,kernel/time/vkso_time.c,31-41,11,9,9,kernel environment context 和注入接口
-runtime,VKSO,E1 cycles and environment provider,functional,VKSO_KERNEL,include/linux/vkso_time.h,"16,22-23",3,3,3,kernel context 与 PV/HV 注入声明
+runtime,VKSO,E1 cycles and environment provider,functional,VKSO_KERNEL,include/linux/vkso_time.h,"16,21-22",3,3,3,kernel context 与 PV/HV 注入声明
 runtime,VKSO,E1 cycles and environment provider,functional,VKSO_KERNEL,arch/x86/kernel/pvclock.c,"14,149",2,2,2,PVClock page 注入
 runtime,VKSO,E1 cycles and environment provider,functional,VKSO_KERNEL,drivers/clocksource/hyperv_timer.c,"24,541",2,2,2,Hyper-V page 注入
 compatibility,Raw,X1 disabled-config compatibility,compatibility,RAW_KERNEL,include/linux/time_namespace.h,"107-116,138-142",15,14,14,CONFIG_TIME_NS=n 桩；不进入最终功能配置

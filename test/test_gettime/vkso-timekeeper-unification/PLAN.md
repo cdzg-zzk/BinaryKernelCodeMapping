@@ -21,7 +21,9 @@ ABI、正确性、验证和 Git 规则。
 
 ### 1.1 分支、基线与源码范围
 
-- 开发分支固定为 `vkso-timekeeper-unification`，起点为 `d89f2e5`。
+- 主重构线起点为 `d89f2e5`；M00～M09 位于
+  `vkso-timekeeper-unification`，M10 的直接 shared 候选位于
+  `vkso-timekeeper-direct-shared`。
 - 实际功能代码只修改 `test/test_gettime/linux-5.15.198-vkso`。
 - `linux-5.15.198-no-vdso` 只用于确认干净结构、识别 VKSO 实际新增工作量。
 - Raw Linux 5.15.198 只用于 ABI、语义、错误行为、源码归属和最终性能对照。
@@ -82,9 +84,10 @@ ABI 测试和 benchmark 必须在同一阶段同步更新，禁止长期维护 v
    和归一化算法只维护一份源定义。
 2. 通过项目机制导出内核构建出的共享算法；用户 wrapper 不重新实现相同公式。
 3. kernel 普通 reader 与用户 reader 消费同一种 canonical read state。
-4. producer 直接维护 canonical state，消除
+4. producer 直接维护 shared 页中的 canonical state，消除
    `vkso_time_compat_prepare()` 式跨数据模型逐字段转换。
-5. private 复杂更新与 shared 短发布分离，缩短 shared seq 为奇数的窗口。
+5. 不保留 private canonical staging 或第二次 payload 搬运；shared seq
+   只覆盖最终字段派生和写入，实际冲突成本由并发实验验证。
 6. public ABI wrapper 保持薄；已知 clock 的热路径不经过统一大 switch、
    backend、syscall 或新增间接调用。
 7. 功能、可读性和可验证性优先；不为减少几行代码制造晦涩宏或隐含状态。
@@ -168,17 +171,17 @@ private 中不得长期保留一份与 canonical read state 含义相同、独�
 timekeeper writer 同步的条件下直接维护它；所有 derived base 也是 producer
 正式职责，而不是发布前的兼容转换。
 
-canonical state 是 kernel-private 的当前完整状态。用户可见 shared 页保存
-同类型的已发布快照；二者可以是两个物理实例，但必须使用相同字段语义，
-只能存在“发布”，不能存在“模型转换”。
+canonical state 直接位于物理独立的 shared 页。kernel 通过可写 alias 维护，
+用户通过项目机制只读映射同一物理页；不再存在 kernel-private canonical
+staging、real/shadow canonical 副本或第二次 payload 发布。
 
 #### C. shared_data
 
-- 只包含 seq、ABI header、已发布的 `tk_read_state` 和极少事件型全局数据；
+- 只包含 seq、ABI header、canonical `tk_read_state` 和极少事件型全局数据；
 - 使用项目机制建立 R--/NX 用户映射；
 - 物理上与 timekeeper private 数据隔离，避免相邻 private 数据泄漏；
 - 不含内核指针、锁、函数地址、per-MM namespace 数据或可写用户状态；
-- kernel 普通 reader 和用户 reader 读取同一发布语义。
+- kernel 普通 reader 和用户 reader 读取同一物理状态和同一 seq 代际。
 
 #### D. MM_data/context_data
 
@@ -245,29 +248,28 @@ cache-line 布局是静态访问模型，不预先宣称能提升 cycles；最�
 
 ### 3.3 producer 与短发布
 
-producer 的顺序固定为：
+当前直接 shared producer 的顺序固定为：
 
 1. 在既有 writer 锁/seq 保护下更新 private 状态；
-2. 完成 NTP、leap、offset、coarse、cycle base 和 derived base 的复杂计算；
-3. 直接得到完整 canonical `tk_read_state`；
-4. 进入 shared 短发布；
-5. 将 shared seq 置为奇数并执行所需的写侧排序；
-6. 用显式、可审计的 `WRITE_ONCE` 字段发布本次变化的 canonical payload；
-7. 执行与 reader 协议配对的 memory barrier；
-8. 将 shared seq 置为偶数。
+2. 完成 NTP、leap、clocksource 切换等复杂 private 计算；
+3. 将 shared seq 置为奇数并执行所需的写侧排序；
+4. 从 private owner 直接派生并写入最终 canonical 字段；
+5. 执行与 reader 协议配对的 memory barrier；
+6. 将 shared seq 置为偶数。
 
 约束：
 
-- shared seq 为奇数期间禁止 NTP、除法、clocksource 切换判断等复杂计算；
-- 初版不复制整页，不无条件重写 timezone 等事件型字段；
+- shared seq 为奇数期间禁止 NTP、除法和 clocksource 切换等复杂状态更新；
+- 固定的加法、移位、归一化和最终 scalar store 在该区间直接完成；
+- 不复制整页，不无条件重写 timezone 等事件型字段；
 - 先保证协议正确，再依据汇编统计发布字段、字节数和 seq 奇数窗口；
 - `time()` 的 seconds 不得发生撕裂；
 - writer-locked helper 不得读取自己正在更新的 shared seq；
 - memory ordering 必须同时说明 kernel reader 和用户 reader 的配对关系。
 
-只有 M09 功能稳定后，固定尺寸复制才可作为独立性能候选提交；必须证明不会
-扩大 seq 窗口、不会破坏原子字段，并在 M10 与 scalar publisher 直接比较。
-失败候选不得与正确性重构混合保留。
+若 M10 并发证据表明直接派生造成不可接受的 retry 或 tail latency，可将
+private staging + 短 scalar publisher 作为独立对照候选回退；不得同时长期
+保留两套 canonical owner。
 
 ### 3.4 可导出的共享算法
 
@@ -348,7 +350,7 @@ fallback 约束：
 - suspend/resume、clocksource switch 中的内部 helper；
 - 依赖尚未发布 private 中间状态的 producer helper。
 
-它们可读取 private canonical state 或保留专用快照，但必须在矩阵中说明：
+它们可读取原有 private producer state 或保留专用快照，但必须在矩阵中说明：
 调用上下文、同步方式、数据来源、为何不能共用普通 reader，以及何时与
 canonical state 对齐。不得用“兼容性”作为未审计重复算法的理由。
 
@@ -360,7 +362,7 @@ canonical state 对齐。不得用“兼容性”作为未审计重复算法的�
 
 - **internal ABI**：v11 固定宽度结构、状态码、offset/size 断言；
 - **producer/private**：NTP、settime、leap、suspend、clocksource switch；
-- **publisher**：唯一 shared 写入口和 memory-order 协议；
+- **canonical producer**：唯一 shared 写入口、字段派生和 memory-order 协议；
 - **shared primitives**：seq、delta、mult/shift、normalize；
 - **typed global readers**：realtime/monotonic/raw/coarse/boottime/TAI；
 - **providers**：kernel clocksource、user TSC/PV/HV；
@@ -803,7 +805,7 @@ M10 是唯一进行正式性能结论的阶段。
 | 风险 | 主要控制 |
 |---|---|
 | shared seq 与 timekeeper writer 锁嵌套 | M01 reader-context 审计；writer-locked 使用 private helper |
-| canonical/private 双 source-of-truth | 字段唯一所有权；按字段组迁移后立即删除旧 owner |
+| canonical/private 双 source-of-truth | shared 页是唯一 canonical；private 只保留生产/特殊 reader 状态 |
 | mono/raw cycle 参数并非恒等 | M01 全 writer 审计；不成立则 v11 双 descriptor |
 | 64 位字段撕裂或发布重排 | 自然对齐、`WRITE_ONCE`、配对 barrier、并发测试与汇编检查 |
 | shared 暴露 private 指针/相邻数据 | 独立物理页、无指针断言、VMA/内容检查 |
@@ -859,7 +861,8 @@ M01～M09 的“静态性能模型”不得写成裸机性能结论。
 - private、canonical shared、MM_data、environment 和 special-reader 状态边界明确；
 - 每个 reader 字段只有一个逻辑 owner；
 - shared 页最小、R--/NX、无指针/锁/private 泄漏；
-- complex update 位于 shared seq 奇数区间之外；
+- NTP、除法和clocksource切换等复杂更新位于shared seq奇数区间之外；最终固定
+  字段派生与写入由并发实验验证；
 - `time()` 原子、mask wrap、namespace、NTP、suspend 和 clock switch 正确；
 - NMI/writer-locked/early-boot 路径无 seq 自等待。
 

@@ -16,7 +16,7 @@
 | 标记 | 目标归属 |
 |---|---|
 | P | timekeeper private producer 状态 |
-| C | canonical `tk_read_state`，并以同类型快照发布到 shared_data |
+| C | shared_data 中唯一 canonical `tk_read_state` |
 | M | per-MM `vkso_mm_data` |
 | E | kernel/user environment context |
 | F | fast/NMI/writer-locked/early-boot 专用状态 |
@@ -32,7 +32,7 @@ canonical 字段；不是允许两个独立 source-of-truth。
 | `tk_core.timekeeper` | `timekeeper_lock` + `tk_core.seq` | 普通 reader 使用 `tk_core.seq` | 全局 |
 | `shadow_timekeeper` | `timekeeper_lock`，seq 外复杂计算 | 无外部 reader；最终 memcpy 到 real | 全局 |
 | `tk_fast_mono/raw` | `seqcount_latch_t` 双 buffer | NMI-safe latch reader | 全局 |
-| `vkso_shared_page` | `timekeeper_lock` 内，独立 shared seq | kernel/user shared seq | 全局独立页 |
+| `vkso_shared_page` | `timekeeper_lock` 内，直接维护 canonical state，并使用独立 shared seq | kernel/user shared seq | 全局独立页 |
 | `vkso_mm_page` | exec/fork/setns 生命周期串行更新 | mask acquire 语义后读 offset | per-MM |
 | `vkso_context` | 初始化/虚拟化页面注册时 `WRITE_ONCE` | cycles provider `READ_ONCE`/稳定页协议 | 每执行环境 |
 
@@ -42,7 +42,7 @@ canonical 字段；不是允许两个独立 source-of-truth。
 在 shadow_timekeeper 上完成复杂计算
   -> begin tk_core.seq
   -> timekeeping_update(shadow)
-  -> 发布 VKSO shared
+  -> 直接派生并写入 VKSO shared canonical state
   -> memcpy shadow 到 tk_core.timekeeper
   -> end tk_core.seq
 ```
@@ -50,9 +50,10 @@ canonical 字段；不是允许两个独立 source-of-truth。
 其他 settime、clocksource、suspend/resume 路径直接更新
 `tk_core.timekeeper`，均持有 `timekeeper_lock` 和 `tk_core.seq`。
 
-目标 canonical state 必须嵌入每个 `struct timekeeper` 实例，使 shadow/real
-复制机制自然携带 canonical 状态；不得另建一个脱离 shadow 更新顺序的全局
-可写 canonical 对象。
+最终 canonical state 不嵌入 `struct timekeeper`。它只存在于物理独立的
+`vkso_shared_page`；producer 在既有 shadow/real 更新顺序内直接维护它，
+shared seq 排除用户和普通 kernel reader 观察到部分代际。real/shadow 只携带
+各自原有的 private producer 状态。
 
 ## 3. `struct tk_read_base` 字段
 
@@ -133,7 +134,7 @@ canonical 字段；不是允许两个独立 source-of-truth。
 
 | 字段 | 当前来源 | 当前 reader | v11 目标 |
 |---|---|---|---|
-| `seq` | `vkso_time_publish()` | 全部 shared snapshot reader | 保留，唯一全局发布 seq |
+| `seq` | `tk_publish_read_state()` | 全部 shared reader | 保留，唯一全局 canonical seq |
 | `abi_version` | 静态初始化 | loader/test | 升级为 11 |
 | `hres.cycles.clock_mode` | `tkr_mono.clock->vdso_clock_mode` | cycles provider | 移入公共 descriptor |
 | `hres.cycles.cycle_last` | `tkr_mono.cycle_last` | hres reader | 公共 descriptor |
@@ -191,7 +192,7 @@ M05 将其从算法依赖中删除；environment 只提供 cycles 所需状态�
 
 | 事件 | 入口 | 变化的逻辑状态 | 当前 publish | v11 要求 |
 |---|---|---|---|---|
-| periodic tick | `timekeeping_advance(TK_ADV_TICK)` | cycle last、bases、NTP mult、raw | 每次 | 更新 canonical 后短发布 |
+| periodic tick | `timekeeping_advance(TK_ADV_TICK)` | cycle last、bases、NTP mult、raw | 每次 | private更新后直接维护shared canonical |
 | frequency/NTP | `do_adjtimex()` / `TK_ADV_FREQ` | mono mult、xtime、TAI 可能变化 | 每次 | mult/base 同一代发布 |
 | settimeofday | `do_settimeofday64()` | realtime、wall/real/tai offsets | 每次 | real/mono/tai bases 同次发布 |
 | inject offset/warp | `timekeeping_inject_offset()` | realtime、wall offset | 每次 | 同 settimeofday |
@@ -209,8 +210,8 @@ M05 将其从算法依赖中删除；environment 只提供 cycles 所需状态�
 
 - 每个当前字段均有目标归属，没有未分类字段；
 - mono/raw 公共 descriptor 不变量成立；
-- canonical state 应嵌入 `struct timekeeper`，同时存在 real/shadow 实例；
-- 用户可见页是同类型 published snapshot，不是另一种数据模型；
+- canonical state 只存在于独立 shared 页，不进入 real/shadow；
+- kernel可写alias与用户R--/NX映射指向同一物理状态；
 - `monotonic_to_boot` 和重复 raw cycle metadata 是明确可删除项；
 - private NTP、event offset、cross-timestamp 和 fast 状态必须保留；
 - MM_data 无需 seq，environment 不进入 global shared 页；
