@@ -140,7 +140,7 @@ M08 以 `CONFIG_VKSO_TIME=y` 的最终链接结果作为产品代码边界。下
 | U1 | `vkso_user_entry.S` 的 `__vkso_clock_gettime`、`__vkso_clock_getres`、`__vkso_gettimeofday`、`__vkso_time`、`__vkso_getcpu` 及其本地 syscall/context veneer | 用户 public ABI、context/environment 绑定和唯一 syscall fallback |
 | S1 | `vkso_time_core.c` 的 typed/global readers、`vkso_time_apply_offset()`、gettimeofday/time；`vkso_time_internal.h` 的 seq/delta/normalize primitive；`vkso_time_cycles.c` 的可映射 cycles provider | kernel/user 唯一 global-time 读取公式 |
 | K1 | `timekeeping.c` 中普通 `ktime_get_*`、`ktime_get_coarse_with_offset()` 的 VKSO 分支 | 保持既有内核 ABI 的 root-namespace 薄入口 |
-| K2 | `timekeeping.c` 的 `vkso_timekeeper_refresh()` 及其 writer 调用点；`struct timekeeper.vkso_read` | producer 直接维护 canonical state |
+| K2 | `timekeeping.c` 的 `tk_update_read_state()` 及其 writer 调用点；唯一 private `timekeeper_read_state` | producer 维护 canonical state；不嵌入 real/shadow timekeeper |
 | K3 | `vkso_time.c` 的 `vkso_time_publish*()`、timezone 更新；`include/vkso/time.h` 的 v11 payload 定义 | 短发布协议和 shared data ABI |
 | K4 | `posix-timers.c` 的 `vkso_clock_gettime_dispatch()`、`vkso_clock_getres_dispatch()` 及三个 cold helper；`time.c` 的 gettimeofday/time syscall 接入 | syscall global 成功路径与统一冷出口 |
 | B1 | `posix-cpu-timers.c`、`alarmtimer.c`、`posix-clock.c` 的原 callback；`posix-timers.c` 中非 global `k_clock` 解析 | CPU、alarm、dynamic/PTP 必需 backend |
@@ -152,8 +152,8 @@ M08 以 `CONFIG_VKSO_TIME=y` 的最终链接结果作为产品代码边界。下
 
 以下内容明确不进入启用 VKSO 的产品切片：
 
-- `CONFIG_VKSO_TIME=n` stub 和该配置下的原 global `k_clock`
-  gettime/getres callback；
+- 专用 VKSO kernel 已删除 `CONFIG_VKSO_TIME=n` stub 和原 global
+  `k_clock` gettime/getres callback；
 - fast/NMI、writer-locked、early-boot、crosststamp 与 hrtimer
   update-offset 等特殊 reader；
 - x32、IA32、legacy vsyscall 和本实验关闭的功能；
@@ -163,8 +163,8 @@ M08 链接/符号审计结果：
 
 - `X1=0`：不存在 compat conversion、双 shared ABI、fallback mode 或临时
   bridge；
-- 启用 VKSO 的 `posix-timers.o` 不含九个旧 global gettime/getres callback；
-  `CONFIG_VKSO_TIME=n` 对象仍完整包含它们；
+- `posix-timers.o` 不含九个旧 global gettime/getres callback；Raw/no-vDSO
+  由各自独立源码树提供，不在 VKSO tree 内维持关闭模式；
 - 用户测试兼容层只保留一次性 `vkso_user_wrapper_init()`，不再导出六个无调用
   转发函数；
 - `CONFIG_VKSO_TIME_TEST` probe 只进入测试配置，生产 package 明确标记

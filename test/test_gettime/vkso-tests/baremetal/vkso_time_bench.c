@@ -222,7 +222,7 @@ struct vkso_read_state_bench {
 	struct vkso_hres_base_bench tai_base;
 	struct vkso_time_value realtime_coarse;
 	uint32_t hrtimer_resolution;
-	uint32_t reserved;
+	uint32_t clocksource_resolution;
 	struct vkso_hres_base_bench monotonic_raw_base;
 	struct vkso_time_value monotonic_coarse;
 	struct vkso_timezone timezone;

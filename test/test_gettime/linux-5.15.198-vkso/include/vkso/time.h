@@ -58,7 +58,7 @@ struct vkso_read_state {
 	struct vkso_hres_base tai_base;
 	struct vkso_time_value realtime_coarse;
 	u32 hrtimer_resolution;
-	u32 reserved;
+	u32 clocksource_resolution;
 	struct vkso_hres_base monotonic_raw_base;
 	struct vkso_time_value monotonic_coarse;
 	struct vkso_timezone timezone;

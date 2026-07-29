@@ -167,27 +167,14 @@ static void tk_set_wall_to_mono(struct timekeeper *tk, struct timespec64 wtm)
 	tk->offs_tai = ktime_add(tk->offs_real, ktime_set(tk->tai_offset, 0));
 }
 
-static inline void
-tk_update_sleep_time(struct timekeeper *tk, const struct timespec64 *delta)
+static inline void tk_update_sleep_time(struct timekeeper *tk, ktime_t delta)
 {
-	tk->offs_boot = ktime_add(tk->offs_boot,
-				  timespec64_to_ktime(*delta));
-#ifdef CONFIG_VKSO_TIME
+	tk->offs_boot = ktime_add(tk->offs_boot, delta);
 	/*
-	 * Boottime alone includes suspend.  Advance its canonical base at the
-	 * rare injection event; the normal producer then preserves this offset
-	 * without converting offs_boot on every tick.
+	 * Keep the offset in a division-free form for the shared-data producer.
+	 * This rare event is the only place that converts offs_boot.
 	 */
-	tk->read_state.boottime_base.sec += delta->tv_sec;
-	tk->read_state.boottime_base.shifted_nsec +=
-		(u64)delta->tv_nsec << tk->read_state.cycles.shift;
-	if (tk->read_state.boottime_base.shifted_nsec >=
-	    (u64)NSEC_PER_SEC << tk->read_state.cycles.shift) {
-		tk->read_state.boottime_base.shifted_nsec -=
-			(u64)NSEC_PER_SEC << tk->read_state.cycles.shift;
-		tk->read_state.boottime_base.sec++;
-	}
-#endif
+	tk->monotonic_to_boot = ktime_to_timespec64(tk->offs_boot);
 }
 
 /*
@@ -751,7 +738,14 @@ static inline void tk_update_ktime_data(struct timekeeper *tk)
 	tk->tkr_raw.base = ns_to_ktime(tk->raw_sec * NSEC_PER_SEC);
 }
 
-#ifdef CONFIG_VKSO_TIME
+/*
+ * One private canonical snapshot is finalized under timekeeper_lock and then
+ * published to the physically separate read-only page.  Keeping it outside
+ * struct timekeeper avoids copying the 160-byte user payload between the real
+ * and shadow timekeepers on every update.
+ */
+static struct vkso_read_state timekeeper_read_state;
+
 static __always_inline void
 tk_set_read_base(struct vkso_hres_base *base, s64 sec, u64 shifted_nsec,
 		 u32 shift)
@@ -768,34 +762,13 @@ tk_set_read_base(struct vkso_hres_base *base, s64 sec, u64 shifted_nsec,
 
 /*
  * Finalize the reader-owned representation while timekeeper_lock is held.
- * This is part of the producer, not a conversion performed by the publisher:
- * real/shadow timekeepers and the shared page all carry the same state type.
+ * The publisher receives this canonical type directly and only performs the
+ * short scalar transfer to the physically separate read-only page.
  */
 static void tk_update_read_state(struct timekeeper *tk)
 {
-	struct vkso_read_state *state = &tk->read_state;
+	struct vkso_read_state *state = &timekeeper_read_state;
 	u32 shift = tk->tkr_mono.shift;
-	u64 boot_offset_nsec = 0;
-	s64 boot_offset_sec = 0;
-
-	if (state->cycles.mask) {
-		boot_offset_sec =
-			state->boottime_base.sec - state->monotonic_base.sec;
-		if (state->boottime_base.shifted_nsec >=
-		    state->monotonic_base.shifted_nsec) {
-			boot_offset_nsec =
-				state->boottime_base.shifted_nsec -
-				state->monotonic_base.shifted_nsec;
-		} else {
-			boot_offset_sec--;
-			boot_offset_nsec =
-				((u64)NSEC_PER_SEC <<
-				 state->cycles.shift) -
-				state->monotonic_base.shifted_nsec +
-				state->boottime_base.shifted_nsec;
-		}
-		boot_offset_nsec >>= state->cycles.shift;
-	}
 
 	state->cycles.clock_mode = tk->tkr_mono.clock->vdso_clock_mode;
 	state->cycles.shift = shift;
@@ -812,9 +785,10 @@ static void tk_update_read_state(struct timekeeper *tk)
 			 ((u64)tk->wall_to_monotonic.tv_nsec << shift),
 			 shift);
 	tk_set_read_base(&state->boottime_base,
-			 state->monotonic_base.sec + boot_offset_sec,
+			 state->monotonic_base.sec +
+			 tk->monotonic_to_boot.tv_sec,
 			 state->monotonic_base.shifted_nsec +
-			 (boot_offset_nsec << shift),
+			 ((u64)tk->monotonic_to_boot.tv_nsec << shift),
 			 shift);
 	tk_set_read_base(&state->tai_base,
 			 state->realtime_base.sec + tk->tai_offset,
@@ -829,13 +803,8 @@ static void tk_update_read_state(struct timekeeper *tk)
 	state->monotonic_coarse.nsec =
 		state->monotonic_base.shifted_nsec >> shift;
 	state->hrtimer_resolution = hrtimer_resolution;
-	state->reserved = 0;
+	state->clocksource_resolution = tk->tkr_mono.mult >> shift;
 }
-#else
-static inline void tk_update_read_state(struct timekeeper *tk)
-{
-}
-#endif
 
 /* must hold timekeeper_lock */
 static void timekeeping_update(struct timekeeper *tk, unsigned int action)
@@ -854,7 +823,7 @@ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 	update_pvclock_gtod(tk, action & TK_CLOCK_WAS_SET);
 
 	tk->tkr_mono.base_real = tk->tkr_mono.base + tk->offs_real;
-	vkso_time_publish(&tk->read_state);
+	vkso_time_publish(&timekeeper_read_state);
 	update_fast_timekeeper(&tk->tkr_mono, &tk_fast_mono);
 	update_fast_timekeeper(&tk->tkr_raw,  &tk_fast_raw);
 
@@ -901,8 +870,7 @@ static void timekeeping_forward_now(struct timekeeper *tk)
  * state first; special readers continue to use their dedicated private path.
  */
 noinline __cold void
-vkso_timekeeping_get_private(clockid_t clock_id, bool coarse,
-			     struct timespec64 *ts)
+vkso_timekeeping_get_private(clockid_t clock_id, struct timespec64 *ts)
 {
 	struct timekeeper *tk = &tk_core.timekeeper;
 	unsigned int seq;
@@ -912,12 +880,8 @@ vkso_timekeeping_get_private(clockid_t clock_id, bool coarse,
 	do {
 		seq = read_seqcount_begin(&tk_core.seq);
 		if (clock_id == CLOCK_REALTIME) {
-			if (coarse) {
-				*ts = tk_xtime(tk);
-			} else {
-				ts->tv_sec = tk->xtime_sec;
-				nsecs = timekeeping_get_ns(&tk->tkr_mono);
-			}
+			ts->tv_sec = tk->xtime_sec;
+			nsecs = timekeeping_get_ns(&tk->tkr_mono);
 		} else if (clock_id == CLOCK_MONOTONIC_RAW) {
 			base = tk->tkr_raw.base;
 			nsecs = timekeeping_get_ns(&tk->tkr_raw);
@@ -927,14 +891,10 @@ vkso_timekeeping_get_private(clockid_t clock_id, bool coarse,
 				base = ktime_add(base, tk->offs_boot);
 			else if (clock_id == CLOCK_TAI)
 				base = ktime_add(base, tk->offs_tai);
-			nsecs = coarse ?
-				tk->tkr_mono.xtime_nsec >> tk->tkr_mono.shift :
-				timekeeping_get_ns(&tk->tkr_mono);
+			nsecs = timekeeping_get_ns(&tk->tkr_mono);
 		}
 	} while (read_seqcount_retry(&tk_core.seq, seq));
 
-	if (clock_id == CLOCK_REALTIME && coarse)
-		return;
 	if (clock_id == CLOCK_REALTIME) {
 		ts->tv_nsec = 0;
 		timespec64_add_ns(ts, nsecs);
@@ -955,7 +915,7 @@ void ktime_get_real_ts64(struct timespec64 *ts)
 	if (likely(vkso_time_get_root_hres(
 			   vkso_clock_gettime_realtime, ts) == VKSO_TIME_OK))
 		return;
-	vkso_timekeeping_get_private(CLOCK_REALTIME, false, ts);
+	vkso_timekeeping_get_private(CLOCK_REALTIME, ts);
 }
 EXPORT_SYMBOL(ktime_get_real_ts64);
 
@@ -967,27 +927,15 @@ ktime_t ktime_get(void)
 	if (unlikely(vkso_time_get_root_hres(
 			     vkso_clock_gettime_monotonic, &ts) !=
 		     VKSO_TIME_OK))
-		vkso_timekeeping_get_private(CLOCK_MONOTONIC, false, &ts);
+		vkso_timekeeping_get_private(CLOCK_MONOTONIC, &ts);
 	return timespec64_to_ktime(ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get);
 
 u32 ktime_get_resolution_ns(void)
 {
-	struct timekeeper *tk = &tk_core.timekeeper;
-	unsigned int seq;
-	u32 nsecs;
-
 	WARN_ON(timekeeping_suspended);
-	if (likely(vkso_time_get_root_resolution(&nsecs) == VKSO_TIME_OK))
-		return nsecs;
-
-	do {
-		seq = read_seqcount_begin(&tk_core.seq);
-		nsecs = tk->tkr_mono.mult >> tk->tkr_mono.shift;
-	} while (read_seqcount_retry(&tk_core.seq, seq));
-
-	return nsecs;
+	return vkso_time_get_root_resolution();
 }
 EXPORT_SYMBOL_GPL(ktime_get_resolution_ns);
 
@@ -1018,7 +966,7 @@ ktime_t ktime_get_with_offset(enum tk_offsets offs)
 			vkso_clock_gettime_tai, &ts);
 	}
 	if (unlikely(status != VKSO_TIME_OK))
-		vkso_timekeeping_get_private(clock_id, false, &ts);
+		vkso_timekeeping_get_private(clock_id, &ts);
 	return timespec64_to_ktime(ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get_with_offset);
@@ -1026,25 +974,18 @@ EXPORT_SYMBOL_GPL(ktime_get_with_offset);
 ktime_t ktime_get_coarse_with_offset(enum tk_offsets offs)
 {
 	struct timespec64 ts;
-	clockid_t clock_id;
-	int status;
 
 	WARN_ON(timekeeping_suspended);
 	if (offs == TK_OFFS_REAL) {
-		clock_id = CLOCK_REALTIME;
-		status = vkso_time_get_root_coarse(
+		vkso_time_get_root_coarse(
 			vkso_clock_gettime_realtime_coarse, &ts);
 	} else if (offs == TK_OFFS_BOOT) {
-		clock_id = CLOCK_BOOTTIME;
-		status = vkso_time_get_root_coarse(
+		vkso_time_get_root_coarse(
 			vkso_clock_gettime_boottime_coarse, &ts);
 	} else {
-		clock_id = CLOCK_TAI;
-		status = vkso_time_get_root_coarse(
+		vkso_time_get_root_coarse(
 			vkso_clock_gettime_tai_coarse, &ts);
 	}
-	if (unlikely(status != VKSO_TIME_OK))
-		vkso_timekeeping_get_private(clock_id, true, &ts);
 	return timespec64_to_ktime(ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get_coarse_with_offset);
@@ -1079,7 +1020,7 @@ ktime_t ktime_get_raw(void)
 	if (unlikely(vkso_time_get_root_hres(
 			     vkso_clock_gettime_monotonic_raw, &ts) !=
 		     VKSO_TIME_OK))
-		vkso_timekeeping_get_private(CLOCK_MONOTONIC_RAW, false, &ts);
+		vkso_timekeeping_get_private(CLOCK_MONOTONIC_RAW, &ts);
 	return timespec64_to_ktime(ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get_raw);
@@ -1098,7 +1039,7 @@ void ktime_get_ts64(struct timespec64 *ts)
 	if (likely(vkso_time_get_root_hres(
 			   vkso_clock_gettime_monotonic, ts) == VKSO_TIME_OK))
 		return;
-	vkso_timekeeping_get_private(CLOCK_MONOTONIC, false, ts);
+	vkso_timekeeping_get_private(CLOCK_MONOTONIC, ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get_ts64);
 
@@ -1113,14 +1054,8 @@ EXPORT_SYMBOL_GPL(ktime_get_ts64);
  */
 time64_t ktime_get_seconds(void)
 {
-	struct timekeeper *tk = &tk_core.timekeeper;
-	time64_t seconds;
-
 	WARN_ON(timekeeping_suspended);
-	if (likely(vkso_time_get_root_monotonic_seconds(&seconds) ==
-		   VKSO_TIME_OK))
-		return seconds;
-	return tk->ktime_sec;
+	return vkso_time_get_root_monotonic_seconds();
 }
 EXPORT_SYMBOL_GPL(ktime_get_seconds);
 
@@ -1136,23 +1071,7 @@ EXPORT_SYMBOL_GPL(ktime_get_seconds);
  */
 time64_t ktime_get_real_seconds(void)
 {
-	struct timekeeper *tk = &tk_core.timekeeper;
-	time64_t seconds;
-	unsigned int seq;
-
-	if (likely(vkso_time_get_root_realtime_seconds(&seconds) ==
-		   VKSO_TIME_OK))
-		return seconds;
-	if (IS_ENABLED(CONFIG_64BIT))
-		return tk->xtime_sec;
-
-	do {
-		seq = read_seqcount_begin(&tk_core.seq);
-		seconds = tk->xtime_sec;
-
-	} while (read_seqcount_retry(&tk_core.seq, seq));
-
-	return seconds;
+	return vkso_time_get_root_realtime_seconds();
 }
 EXPORT_SYMBOL_GPL(ktime_get_real_seconds);
 
@@ -1660,7 +1579,7 @@ void ktime_get_raw_ts64(struct timespec64 *ts)
 			   vkso_clock_gettime_monotonic_raw, ts) ==
 		   VKSO_TIME_OK))
 		return;
-	vkso_timekeeping_get_private(CLOCK_MONOTONIC_RAW, false, ts);
+	vkso_timekeeping_get_private(CLOCK_MONOTONIC_RAW, ts);
 }
 EXPORT_SYMBOL(ktime_get_raw_ts64);
 
@@ -1828,7 +1747,7 @@ static void __timekeeping_inject_sleeptime(struct timekeeper *tk,
 	}
 	tk_xtime_add(tk, delta);
 	tk_set_wall_to_mono(tk, timespec64_sub(tk->wall_to_monotonic, *delta));
-	tk_update_sleep_time(tk, delta);
+	tk_update_sleep_time(tk, timespec64_to_ktime(*delta));
 	tk_debug_account_sleep_time(delta);
 }
 
@@ -2386,21 +2305,13 @@ EXPORT_SYMBOL_GPL(getboottime64);
 
 void ktime_get_coarse_real_ts64(struct timespec64 *ts)
 {
-	if (likely(vkso_time_get_root_coarse(
-			   vkso_clock_gettime_realtime_coarse, ts) ==
-		   VKSO_TIME_OK))
-		return;
-	vkso_timekeeping_get_private(CLOCK_REALTIME, true, ts);
+	vkso_time_get_root_coarse(vkso_clock_gettime_realtime_coarse, ts);
 }
 EXPORT_SYMBOL(ktime_get_coarse_real_ts64);
 
 void ktime_get_coarse_ts64(struct timespec64 *ts)
 {
-	if (likely(vkso_time_get_root_coarse(
-			   vkso_clock_gettime_monotonic_coarse, ts) ==
-		   VKSO_TIME_OK))
-		return;
-	vkso_timekeeping_get_private(CLOCK_MONOTONIC, true, ts);
+	vkso_time_get_root_coarse(vkso_clock_gettime_monotonic_coarse, ts);
 }
 EXPORT_SYMBOL(ktime_get_coarse_ts64);
 

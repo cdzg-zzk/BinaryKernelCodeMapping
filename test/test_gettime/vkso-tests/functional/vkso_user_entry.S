@@ -26,8 +26,20 @@
 	testl	$(1 << \clock), VKSO_MM_CLOCK_MASK_OFFSET(%rax)
 	je	.Lclock_return
 	leaq	\member(%rax), %rdi
-	jmp	vkso_time_apply_offset
-	.endm
+		jmp	vkso_time_apply_offset
+		.endm
+
+		.macro VKSO_HRES_CALL reader, clock, success
+		pushq	%rsi
+		movq	%rsi, %rdi
+		leaq	vkso_user_context(%rip), %rsi
+		call	\reader
+		popq	%rsi
+		testl	%eax, %eax
+		je	\success
+		movl	$\clock, %edi
+		jmp	.Lclock_fallback
+		.endm
 
 /*
  * Private userspace entry veneers embedded directly in libkernel.so.
@@ -64,15 +76,8 @@ __vkso_clock_gettime:
 .Lclock_not_realtime:
 	cmpl	$VKSO_CLOCK_MONOTONIC, %edi
 	jne	.Lclock_not_monotonic
-	pushq	%rsi
-	movq	%rsi, %rdi
-	leaq	vkso_user_context(%rip), %rsi
-	call	vkso_clock_gettime_monotonic
-	popq	%rsi
-	testl	%eax, %eax
-	je	.Lclock_apply_monotonic
-	movl	$VKSO_CLOCK_MONOTONIC, %edi
-	jmp	.Lclock_fallback
+	VKSO_HRES_CALL vkso_clock_gettime_monotonic, \
+		VKSO_CLOCK_MONOTONIC, .Lclock_apply_monotonic
 
 .Lclock_not_monotonic:
 	cmpl	$VKSO_CLOCK_MONOTONIC_COARSE, %edi
@@ -94,15 +99,8 @@ __vkso_clock_gettime:
 	je	.Lclock_boottime
 	cmpl	$VKSO_CLOCK_TAI, %edi
 	jne	.Lclock_fallback
-	pushq	%rsi
-	movq	%rsi, %rdi
-	leaq	vkso_user_context(%rip), %rsi
-	call	vkso_clock_gettime_tai
-	popq	%rsi
-	testl	%eax, %eax
-	je	.Lclock_return
-	movl	$VKSO_CLOCK_TAI, %edi
-	jmp	.Lclock_fallback
+	VKSO_HRES_CALL vkso_clock_gettime_tai, \
+		VKSO_CLOCK_TAI, .Lclock_return
 
 .Lclock_realtime_coarse:
 	movq	%rsi, %rdi
@@ -116,26 +114,12 @@ __vkso_clock_gettime:
 	jmp	.Lclock_apply_monotonic_coarse
 
 .Lclock_monotonic_raw:
-	pushq	%rsi
-	movq	%rsi, %rdi
-	leaq	vkso_user_context(%rip), %rsi
-	call	vkso_clock_gettime_monotonic_raw
-	popq	%rsi
-	testl	%eax, %eax
-	je	.Lclock_apply_monotonic_raw
-	movl	$VKSO_CLOCK_MONOTONIC_RAW, %edi
-	jmp	.Lclock_fallback
+	VKSO_HRES_CALL vkso_clock_gettime_monotonic_raw, \
+		VKSO_CLOCK_MONOTONIC_RAW, .Lclock_apply_monotonic_raw
 
 .Lclock_boottime:
-	pushq	%rsi
-	movq	%rsi, %rdi
-	leaq	vkso_user_context(%rip), %rsi
-	call	vkso_clock_gettime_boottime
-	popq	%rsi
-	testl	%eax, %eax
-	je	.Lclock_apply_boottime
-	movl	$VKSO_CLOCK_BOOTTIME, %edi
-	jmp	.Lclock_fallback
+	VKSO_HRES_CALL vkso_clock_gettime_boottime, \
+		VKSO_CLOCK_BOOTTIME, .Lclock_apply_boottime
 
 .Lclock_apply_monotonic:
 	VKSO_APPLY_MM VKSO_CLOCK_MONOTONIC, VKSO_MM_MONOTONIC_OFFSET

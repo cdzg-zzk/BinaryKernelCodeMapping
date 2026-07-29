@@ -44,7 +44,7 @@ ABI v11 只统一 shared global-time 数据布局，不在 M02 改变时间算�
 | 88 | 80 | 16 | `tai_base` |
 | 104 | 96 | 16 | `realtime_coarse` |
 | 120 | 112 | 4 | `hrtimer_resolution` |
-| 124 | 116 | 4 | `reserved` |
+| 124 | 116 | 4 | `clocksource_resolution` |
 | 128 | 120 | 16 | `monotonic_raw_base` |
 | 144 | 136 | 16 | `monotonic_coarse` |
 | 160 | 152 | 8 | `timezone` |

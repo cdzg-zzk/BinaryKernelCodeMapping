@@ -68,6 +68,7 @@ vkso_time_publish_snapshot(struct vkso_shared_data *shared,
 	VKSO_PUBLISH(monotonic_coarse.sec);
 	VKSO_PUBLISH(monotonic_coarse.nsec);
 	VKSO_PUBLISH(hrtimer_resolution);
+	VKSO_PUBLISH(clocksource_resolution);
 
 #undef VKSO_PUBLISH
 }

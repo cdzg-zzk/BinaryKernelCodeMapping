@@ -10,7 +10,6 @@
 #include <linux/clocksource.h>
 #include <linux/jiffies.h>
 #include <linux/time.h>
-#include <vkso/time.h>
 
 /**
  * struct tk_read_base - base structure for timekeeping readout
@@ -58,7 +57,7 @@ struct tk_read_base {
  * @cs_was_changed_seq:	The sequence number of clocksource change events
  * @next_leap_ktime:	CLOCK_MONOTONIC time value of a pending leap-second
  * @raw_sec:		CLOCK_MONOTONIC_RAW  time in seconds
- * @read_state:		Canonical state for ordinary global-time readers
+ * @monotonic_to_boot:	CLOCK_MONOTONIC to CLOCK_BOOTTIME offset
  * @cycle_interval:	Number of clock cycles in one NTP interval
  * @xtime_interval:	Number of clock shifted nano seconds in one NTP
  *			interval.
@@ -87,6 +86,8 @@ struct tk_read_base {
  * wall_to_monotonic is no longer the boot time, getboottime must be
  * used instead.
  *
+ * @monotonic_to_boottime is a timespec64 representation of @offs_boot to
+ * accelerate the shared-data update for CLOCK_BOOTTIME.
  */
 struct timekeeper {
 	struct tk_read_base	tkr_mono;
@@ -102,7 +103,7 @@ struct timekeeper {
 	u8			cs_was_changed_seq;
 	ktime_t			next_leap_ktime;
 	u64			raw_sec;
-	struct vkso_read_state	read_state;
+	struct timespec64	monotonic_to_boot;
 
 	/* The following members are for timekeeping internal use */
 	u64			cycle_interval;
