@@ -89,8 +89,6 @@ int vkso_clock_gettime_tai(
 	struct vkso_time_value *value, const struct vkso_context *context);
 int vkso_clock_gettime_realtime_coarse(struct vkso_time_value *value);
 int vkso_clock_gettime_monotonic_coarse(struct vkso_time_value *value);
-int vkso_clock_gettime_boottime_coarse(struct vkso_time_value *value);
-int vkso_clock_gettime_tai_coarse(struct vkso_time_value *value);
 int vkso_clock_getres_hres(struct vkso_time_value *value);
 int vkso_clock_getres_coarse(struct vkso_time_value *value);
 int vkso_time_apply_offset(

@@ -153,60 +153,6 @@ VKSO_DEFINE_HRES_READER(tai, tai_base, mono_mult)
 #undef VKSO_DEFINE_COARSE_READER
 #undef VKSO_DEFINE_HRES_READER
 
-static noinline notrace __vkso_text
-int vkso_clock_gettime_coarse_offset(
-	const struct vkso_time_value *coarse,
-	const struct vkso_hres_base *source,
-	const struct vkso_hres_base *target,
-	struct vkso_time_value *value)
-{
-	const struct vkso_shared_data *shared = vkso_shared_data();
-	struct vkso_time_value offset;
-	u64 source_nsec, target_nsec;
-	u32 shift, seq;
-
-	do {
-		seq = vkso_read_begin(shared);
-		value->sec = READ_ONCE(coarse->sec);
-		value->nsec = READ_ONCE(coarse->nsec);
-		offset.sec = READ_ONCE(target->sec) -
-			READ_ONCE(source->sec);
-		source_nsec = READ_ONCE(source->shifted_nsec);
-		target_nsec = READ_ONCE(target->shifted_nsec);
-		shift = READ_ONCE(shared->state.cycles.shift);
-	} while (vkso_read_retry(shared, seq));
-
-	if (target_nsec >= source_nsec) {
-		offset.nsec = (target_nsec - source_nsec) >> shift;
-	} else {
-		offset.sec--;
-		offset.nsec = (((u64)NSEC_PER_SEC << shift) -
-			       source_nsec + target_nsec) >> shift;
-	}
-	vkso_apply_offset(&offset, value);
-	return VKSO_TIME_OK;
-}
-
-__visible noinline notrace __vkso_text
-int vkso_clock_gettime_boottime_coarse(struct vkso_time_value *value)
-{
-	const struct vkso_read_state *state = &vkso_shared_data()->state;
-
-	return vkso_clock_gettime_coarse_offset(
-		&state->monotonic_coarse, &state->monotonic_base,
-		&state->boottime_base, value);
-}
-
-__visible noinline notrace __vkso_text
-int vkso_clock_gettime_tai_coarse(struct vkso_time_value *value)
-{
-	const struct vkso_read_state *state = &vkso_shared_data()->state;
-
-	return vkso_clock_gettime_coarse_offset(
-		&state->realtime_coarse, &state->realtime_base,
-		&state->tai_base, value);
-}
-
 __visible noinline notrace __vkso_text
 int vkso_time_apply_offset(const struct vkso_time_value *offset,
 			   struct vkso_time_value *value)

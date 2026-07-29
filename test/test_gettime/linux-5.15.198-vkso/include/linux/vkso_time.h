@@ -76,10 +76,4 @@ vkso_time_gettimeofday(struct __kernel_old_timeval *tv, struct timezone *tz)
 				      &vkso_kernel_context);
 }
 
-static __always_inline int vkso_time_get_seconds(__kernel_old_time_t *value)
-{
-	*value = (__kernel_old_time_t)__vkso_time(NULL);
-	return VKSO_TIME_OK;
-}
-
 #endif /* _LINUX_VKSO_TIME_H */

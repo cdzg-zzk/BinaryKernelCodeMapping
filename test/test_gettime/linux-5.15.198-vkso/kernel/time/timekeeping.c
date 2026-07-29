@@ -983,20 +983,20 @@ EXPORT_SYMBOL_GPL(ktime_get_with_offset);
 
 ktime_t ktime_get_coarse_with_offset(enum tk_offsets offs)
 {
-	struct timespec64 ts;
+	struct timekeeper *tk = &tk_core.timekeeper;
+	unsigned int seq;
+	ktime_t base, *offset = offsets[offs];
+	u64 nsecs;
 
 	WARN_ON(timekeeping_suspended);
-	if (offs == TK_OFFS_REAL) {
-		vkso_time_get_root_coarse(
-			vkso_clock_gettime_realtime_coarse, &ts);
-	} else if (offs == TK_OFFS_BOOT) {
-		vkso_time_get_root_coarse(
-			vkso_clock_gettime_boottime_coarse, &ts);
-	} else {
-		vkso_time_get_root_coarse(
-			vkso_clock_gettime_tai_coarse, &ts);
-	}
-	return timespec64_to_ktime(ts);
+
+	do {
+		seq = read_seqcount_begin(&tk_core.seq);
+		base = ktime_add(tk->tkr_mono.base, *offset);
+		nsecs = tk->tkr_mono.xtime_nsec >> tk->tkr_mono.shift;
+	} while (read_seqcount_retry(&tk_core.seq, seq));
+
+	return ktime_add_ns(base, nsecs);
 }
 EXPORT_SYMBOL_GPL(ktime_get_coarse_with_offset);
 

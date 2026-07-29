@@ -62,10 +62,7 @@ EXPORT_SYMBOL(sys_tz);
  */
 SYSCALL_DEFINE1(time, __kernel_old_time_t __user *, tloc)
 {
-	__kernel_old_time_t i;
-
-	if (vkso_time_get_seconds(&i))
-		i = (__kernel_old_time_t)ktime_get_real_seconds();
+	__kernel_old_time_t i = (__kernel_old_time_t)__vkso_time(NULL);
 
 	if (tloc) {
 		if (put_user(i,tloc))
