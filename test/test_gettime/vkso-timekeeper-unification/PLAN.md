@@ -893,12 +893,13 @@ M01～M09 的“静态性能模型”不得写成裸机性能结论。
 | M01 字段/reader/backend 审计 | 已完成 | M00 通过 |
 | M02 ABI v11 | 已完成 | M01 无未分类项 |
 | M03 timekeeper 所有权重构 | 已完成 | v11 行为等价 |
-| M04 短发布/删除转换层 | 进行中 | canonical producer 完整 |
-| M05 纯共享读取 core | 待开始 | 发布协议通过 |
+| M04 短发布/删除转换层 | 已通过 | canonical producer 完整 |
+| M05 纯共享读取 core | 进行中 | 发布协议通过 |
 | M06 普通 kernel reader 统一 | 待开始 | shared core 功能完整 |
 | M07 dispatcher/backend 重构 | 待开始 | 普通 reader 稳定 |
 | M08 清理与静态审计 | 待开始 | 完整分派通过 |
 | M09 完整正确性验证 | 待开始 | 无临时/双重路径 |
 | M10 裸机性能与最终证据 | 待开始 | M09 pre-performance tag |
 
-M00～M03 已通过；下一步执行 M04同类型短发布并删除最后的临时bridge。
+M00～M04 已通过；下一步执行 M05，分离纯共享算法、environment provider 与
+public fallback，并恢复可审计的 cycle mask 语义。

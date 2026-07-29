@@ -159,3 +159,16 @@ wrapper init同时检查 shared v11和MM_data v3，版本错配返回`EPROTO`。
 
 这同时消除冗余字段和周期64-bit division。`offs_boot`仍为fast/snapshot等
 专用kernel接口保留，不作为普通global reader数据源。
+
+## D014：shared publisher使用显式148-byte scalar协议
+
+- 状态：已决定并验证
+- 阶段：M04
+
+publisher直接接收canonical `tk_read_state`，不构造栈上shared snapshot，也不
+接收`struct timekeeper`。周期更新只在shared seq奇数区间发布21个必要字段，
+共148 bytes；timezone继续按事件单独更新，reserved字段不复制。
+
+当前编译结果的奇数窗口只有直接load/store与配对barrier，无函数调用、除法、
+循环或跨模型转换。保留显式scalar发布是为了使字段和原子宽度可审计；只有
+M10证据证明固定尺寸copy更优且不破坏`time()`原子字段时，才允许独立试验替换。

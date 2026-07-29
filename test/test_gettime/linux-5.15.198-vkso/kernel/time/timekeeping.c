@@ -854,7 +854,7 @@ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 	update_pvclock_gtod(tk, action & TK_CLOCK_WAS_SET);
 
 	tk->tkr_mono.base_real = tk->tkr_mono.base + tk->offs_real;
-	vkso_time_publish(tk);
+	vkso_time_publish(&tk->read_state);
 	update_fast_timekeeper(&tk->tkr_mono, &tk_fast_mono);
 	update_fast_timekeeper(&tk->tkr_raw,  &tk_fast_raw);
 

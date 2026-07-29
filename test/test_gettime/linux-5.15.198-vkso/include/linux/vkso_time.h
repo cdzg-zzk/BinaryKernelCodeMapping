@@ -8,14 +8,13 @@
 
 struct mm_struct;
 struct task_struct;
-struct timekeeper;
 struct timens_offsets;
 
 #ifdef CONFIG_VKSO_TIME
 extern union vkso_shared_page vkso_shared_page;
 extern struct vkso_context vkso_kernel_context;
 
-void vkso_time_publish(struct timekeeper *tk);
+void vkso_time_publish(const struct vkso_read_state *state);
 void vkso_time_update_timezone(void);
 void vkso_time_update_mm_data(struct task_struct *task,
 			      const struct timens_offsets *offsets);
@@ -53,7 +52,7 @@ static __always_inline int vkso_time_get_seconds(__kernel_old_time_t *value)
 	return VKSO_TIME_OK;
 }
 #else
-static inline void vkso_time_publish(struct timekeeper *tk)
+static inline void vkso_time_publish(const struct vkso_read_state *state)
 {
 }
 

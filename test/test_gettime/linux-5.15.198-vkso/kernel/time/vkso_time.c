@@ -5,8 +5,6 @@
 #include <linux/time.h>
 #include <linux/vkso_time.h>
 
-#include "vkso_time_compat.h"
-
 static_assert(sizeof(struct timespec64) == sizeof(struct vkso_time_value) &&
 	      offsetof(struct timespec64, tv_sec) ==
 	      offsetof(struct vkso_time_value, sec) &&
@@ -44,43 +42,41 @@ void vkso_time_set_hvclock_page(const void *page)
 
 static __always_inline void
 vkso_time_publish_snapshot(struct vkso_shared_data *shared,
-			   const struct vkso_shared_data *next)
+			   const struct vkso_read_state *next)
 {
 #define VKSO_PUBLISH(member) \
-	WRITE_ONCE(shared->member, next->member)
+	WRITE_ONCE(shared->state.member, next->member)
 
-	VKSO_PUBLISH(state.cycles.clock_mode);
-	VKSO_PUBLISH(state.cycles.shift);
-	VKSO_PUBLISH(state.cycles.cycle_last);
-	VKSO_PUBLISH(state.cycles.mask);
-	VKSO_PUBLISH(state.cycles.mono_mult);
-	VKSO_PUBLISH(state.cycles.raw_mult);
-	VKSO_PUBLISH(state.realtime_base.sec);
-	VKSO_PUBLISH(state.realtime_base.shifted_nsec);
-	VKSO_PUBLISH(state.monotonic_base.sec);
-	VKSO_PUBLISH(state.monotonic_base.shifted_nsec);
-	VKSO_PUBLISH(state.boottime_base.sec);
-	VKSO_PUBLISH(state.boottime_base.shifted_nsec);
-	VKSO_PUBLISH(state.tai_base.sec);
-	VKSO_PUBLISH(state.tai_base.shifted_nsec);
-	VKSO_PUBLISH(state.realtime_coarse.sec);
-	VKSO_PUBLISH(state.realtime_coarse.nsec);
-	VKSO_PUBLISH(state.monotonic_raw_base.sec);
-	VKSO_PUBLISH(state.monotonic_raw_base.shifted_nsec);
-	VKSO_PUBLISH(state.monotonic_coarse.sec);
-	VKSO_PUBLISH(state.monotonic_coarse.nsec);
-	VKSO_PUBLISH(state.hrtimer_resolution);
+	VKSO_PUBLISH(cycles.clock_mode);
+	VKSO_PUBLISH(cycles.shift);
+	VKSO_PUBLISH(cycles.cycle_last);
+	VKSO_PUBLISH(cycles.mask);
+	VKSO_PUBLISH(cycles.mono_mult);
+	VKSO_PUBLISH(cycles.raw_mult);
+	VKSO_PUBLISH(realtime_base.sec);
+	VKSO_PUBLISH(realtime_base.shifted_nsec);
+	VKSO_PUBLISH(monotonic_base.sec);
+	VKSO_PUBLISH(monotonic_base.shifted_nsec);
+	VKSO_PUBLISH(boottime_base.sec);
+	VKSO_PUBLISH(boottime_base.shifted_nsec);
+	VKSO_PUBLISH(tai_base.sec);
+	VKSO_PUBLISH(tai_base.shifted_nsec);
+	VKSO_PUBLISH(realtime_coarse.sec);
+	VKSO_PUBLISH(realtime_coarse.nsec);
+	VKSO_PUBLISH(monotonic_raw_base.sec);
+	VKSO_PUBLISH(monotonic_raw_base.shifted_nsec);
+	VKSO_PUBLISH(monotonic_coarse.sec);
+	VKSO_PUBLISH(monotonic_coarse.nsec);
+	VKSO_PUBLISH(hrtimer_resolution);
 
 #undef VKSO_PUBLISH
 }
 
-void vkso_time_publish(struct timekeeper *tk)
+void vkso_time_publish(const struct vkso_read_state *next)
 {
-	struct vkso_shared_data next;
 	struct vkso_shared_data *shared = &vkso_shared_page.data;
 	u32 seq;
 
-	vkso_time_compat_prepare(&next, tk);
 	seq = READ_ONCE(shared->seq);
 	WRITE_ONCE(shared->seq, seq + 1);
 	smp_wmb();
@@ -90,7 +86,7 @@ void vkso_time_publish(struct timekeeper *tk)
 	 * the same scalar protocol also lets the compiler keep the prepared
 	 * snapshot in registers instead of materializing it for memcpy().
 	 */
-	vkso_time_publish_snapshot(shared, &next);
+	vkso_time_publish_snapshot(shared, next);
 	smp_wmb();
 	WRITE_ONCE(shared->seq, seq + 2);
 }
