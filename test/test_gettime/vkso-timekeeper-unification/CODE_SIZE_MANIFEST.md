@@ -99,6 +99,27 @@ M01 必须为每类补充：
 - 其他 reader 保留代码为何不属于目标切片；
 - 由同一源模板生成多份机器码时的实例数量和原因。
 
+M01 已确认的 VKSO 符号/职责：
+
+| 类别 | 当前符号/文件 | M08 目标 |
+|---|---|---|
+| U1 | `vkso_user_entry.S` 的 `__vkso_*`、bind/fallback | 只保留 ABI/context/cold fallback |
+| S1 | `vkso_time_internal.h`、`vkso_time_core.c`、`vkso_time_cycles.c` | v11 typed shared algorithm |
+| K1 | `timekeeping.c` 普通 `ktime_get_*` | root typed 薄 wrapper |
+| K2 | `struct timekeeper`、NTP/settime/suspend/switch writer | private + canonical直接维护 |
+| K3 | `vkso_time.c` publisher、`include/vkso/time.h` | 同类型 scalar publisher |
+| K4 | `posix-timers.c`、`time.c` | global direct + cold backend |
+| B1 | `posix-cpu-timers.c`、`alarmtimer.c`、`posix-clock.c` | 原语义保留 |
+| C1 | `arch/x86/kernel/vkso.c`、namespace/mm/auxv hooks | MM ABI v3保持 |
+| E1 | kernel clocksource、`vkso_time_cycles.c` TSC/PV/HV | 最小 provider |
+| G1 | Kconfig/Makefile/lds/export manifests | v11同步修改 |
+| X1 | `vkso_time_compat.h`、fallback mode core耦合、重复 raw descriptor | M08 为零 |
+| T1 | ABI matrix、probe、assert、QEMU/bare-metal | 独立统计 |
+
+特殊 reader（fast/NMI、hrtimer update-offset、snapshot/crosststamp、
+`ktime_mono_to_any`）属于既有 kernel 必要功能，不混入 S1，也不因物理保留而
+重复计入目标 global reader。
+
 M08 必须确认：
 
 - `X1=0`；
