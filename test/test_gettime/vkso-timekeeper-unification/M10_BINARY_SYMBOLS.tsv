@@ -1,0 +1,44 @@
+# system	layer	symbol	bytes	origin
+Raw	U1 public user ABI	__vdso_gettimeofday	574	official 5.15.198 source rebuilt with final raw.config
+Raw	U1 public user ABI	__vdso_time	42	official 5.15.198 source rebuilt with final raw.config
+Raw	U1 public user ABI	__vdso_clock_gettime	761	official 5.15.198 source rebuilt with final raw.config
+Raw	U1 public user ABI	__vdso_clock_getres	99	official 5.15.198 source rebuilt with final raw.config
+Raw	U1 public user ABI	__vdso_getcpu	39	official 5.15.198 source rebuilt with final raw.config
+Raw	U1 private dependency	__arch_get_hw_counter.constprop.0	142	unique helper called by public vDSO readers
+Raw	K1 kernel reader	ktime_get_coarse_real_ts64	59	exact final raw.config timekeeping.o
+Raw	K1 kernel reader	ktime_get_coarse_ts64	84	exact final raw.config timekeeping.o
+Raw	K1 kernel reader	ktime_get_raw_ts64	195	exact final raw.config timekeeping.o
+Raw	K1 kernel reader	ktime_get_real_seconds	12	exact final raw.config timekeeping.o
+Raw	K1 kernel reader	ktime_get_real_ts64	216	exact final raw.config timekeeping.o
+Raw	K1 kernel reader	ktime_get_ts64	232	exact final raw.config timekeeping.o
+Raw	K1 kernel reader	ktime_get_with_offset	184	exact final raw.config timekeeping.o
+
+VKSO	U1 user wrapper	__vkso_clock_gettime	322	dispatch-compact libkernel.so
+VKSO	U1 user wrapper	__vkso_clock_getres	55	dispatch-compact libkernel.so
+VKSO	U1 user wrapper	__vkso_gettimeofday	37	dispatch-compact libkernel.so
+VKSO	S1 shared core	__vkso_getcpu	42	dispatch-compact vmlinux
+VKSO	S1 shared core	__vkso_time	24	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_clock_getres_coarse	27	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_clock_getres_hres	33	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_clock_gettime_realtime_coarse	46	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_clock_gettime_monotonic_coarse	52	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_clock_gettime_realtime	216	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_clock_gettime_monotonic	216	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_clock_gettime_monotonic_raw	225	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_clock_gettime_boottime	216	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_clock_gettime_tai	216	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_gettimeofday_core	290	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_cycles_read_cold	111	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_finish_hres_cold	47	dispatch-compact vmlinux
+VKSO	S1 shared core	vkso_time_apply_offset	46	dispatch-compact vmlinux
+VKSO	K1 kernel reader	ktime_get_coarse_real_ts64	15	dispatch-compact vmlinux
+VKSO	K1 kernel reader	ktime_get_coarse_ts64	15	dispatch-compact vmlinux
+VKSO	K1 kernel reader	ktime_get_raw_ts64	39	dispatch-compact vmlinux
+VKSO	K1 kernel reader	ktime_get_real_seconds	12	dispatch-compact vmlinux
+VKSO	K1 kernel reader	ktime_get_real_ts64	56	dispatch-compact vmlinux
+VKSO	K1 kernel reader	ktime_get_ts64	56	dispatch-compact vmlinux
+VKSO	K1 kernel reader	ktime_get_with_offset	188	dispatch-compact vmlinux
+VKSO	K1 cold private reader	vkso_timekeeping_get_private	227	dispatch-compact vmlinux
+VKSO	C2 user context bootstrap	__vkso_bind_context	24	dispatch-compact libkernel.so
+VKSO	C2 user context bootstrap	__vkso_shared_data	8	dispatch-compact libkernel.so
+VKSO	C2 user context bootstrap	vkso_user_wrapper_init	136	dispatch-compact benchmark and ABI client

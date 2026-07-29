@@ -344,3 +344,28 @@ Linux没有对应的`CLOCK_BOOTTIME_COARSE`或`CLOCK_TAI_COARSE`用户clock ID�
 
 相对D023直接shared基线，功能源码减少58 SLOC，目标对象`.text`减少292 B；
 读取路径还减少一次shared函数调用和多组base load，因此没有以性能换代码量。
+
+## D025：clock-id分派只存在于kernel/user public边界
+
+- 状态：已实现并通过多配置静态构建与normal QEMU，等待裸机门槛
+- 阶段：M10
+
+旧`vkso_clock_gettime_core()`和`vkso_clock_getres_core()`并非真正共享边界：
+用户public汇编为性能直接调用typed reader，只有kernel syscall和benchmark调用
+generic core；它们却被列为libkernel.so动态导出，形成第三份clock-id策略和
+benchmark-only ABI。
+
+当前决定：
+
+- shared core只保留seq/cycles/base/offset/normalize及typed reader；
+- user public wrapper保留一次用户clock-id分派和唯一syscall fallback；
+- kernel syscall边界保留一次kernel clock-id分派和private/`k_clock` cold exit；
+- 删除`BACKEND_REQUIRED`伪状态、两个generic core及其kernel adapter；
+- `make_dll`从private wrapper relocation自动求dependency roots，typed reader
+  保持内部符号，不再写入功能export清单；
+- benchmark不再直接调用内部core，只测真实public ABI。
+
+相对D024候选，生产功能源码净减少30 SLOC，两条kernel syscall目标机器码净减
+52 B，`libkernel.so`文件减少256 B；用户typed reader和public wrapper机器码
+不变。动态导出从10个降到7个，其中五个是时间public ABI，两个是当前C2
+context启动机制。

@@ -19,6 +19,7 @@ M10 生成最终源码和机器码数字。
 - kernel producer/private 状态中仅为目标读取语义必需的部分；
 - publisher、shared ABI、MM_data 选择和必要映射接入；
 - user ABI wrapper；
+- 当前实现真实需要的用户context启动与auxv绑定；
 - CPU/alarm/dynamic 等目标 ABI 必需 backend 边界；
 - PVClock/Hyper-V 源码支持；
 - 最终启用配置需要的构建/链接胶水。
@@ -38,9 +39,9 @@ M10 生成最终源码和机器码数字。
 VKSO core 位于 kernel tree 且由项目机制导出给用户执行，归为
 “kernel/user shared”，不能同时计入 kernel 专属和 user 专属。
 
-用户 wrapper 只计 ABI、context/environment 绑定和 syscall fallback。若用户
-目录出现 seq、delta、mult/shift、base 或 normalize 的第二份实现，必须标记为
-重复代码并在 M08 前删除。
+用户 wrapper 的每次读取功能只计 ABI、MM offset 和 syscall fallback；
+一次性的context/environment绑定单列为C2机制。若用户目录出现 seq、delta、
+mult/shift、base 或 normalize 的第二份实现，必须标记为重复代码并删除。
 
 ### 2.3 源码与机器码
 
@@ -54,7 +55,7 @@ VKSO core 位于 kernel tree 且由项目机制导出给用户执行，归为
 
 | ID | 类别 | Raw 典型内容 | VKSO 目标内容 |
 |---|---|---|---|
-| U1 | user public ABI wrapper | `__vdso_*` entry/clock switch | `__vkso_*` wrapper、context 绑定、fallback |
+| U1 | user public ABI wrapper | `__vdso_*` entry/clock switch | `__vkso_*` wrapper、MM offset、fallback |
 | S1 | shared global algorithm | 无 kernel/user 共享机器码 | seq、delta、mask、mult/shift、base、offset、normalize |
 | K1 | kernel public reader | `ktime_get_*` 目标依赖算法 | root-namespace typed 薄 wrapper |
 | K2 | producer/private | 目标读取所需 timekeeper 更新 | canonical state 的直接维护 |
@@ -62,6 +63,7 @@ VKSO core 位于 kernel tree 且由项目机制导出给用户执行，归为
 | K4 | syscall/dispatcher | global `k_clock`/syscall 分派 | typed global path + cold backend |
 | B1 | CPU/alarm/dynamic backend | Raw 必需后端边界 | 原语义后端边界 |
 | C1 | MM/context/namespace | VVAR/timens | MM_data v3/VVAR special mapping |
+| C2 | user context bootstrap | 无time专属初始化 | auxv读取、ABI检查、一次性context绑定 |
 | E1 | environment provider | vDSO TSC/PV/HV | kernel clocksource + user TSC/PV/HV |
 | G1 | 功能构建/链接胶水 | vDSO linker/image/Kbuild | VKSO section/export/wrapper glue |
 | P1 | 项目通用机制 | 不适用/既有 vDSO infra | make_dll/manager/page replacement |
@@ -103,7 +105,7 @@ M01 已确认的 VKSO 符号/职责：
 
 | 类别 | 当前符号/文件 | M08 目标 |
 |---|---|---|
-| U1 | `vkso_user_entry.S` 的 `__vkso_*`、bind/fallback | 只保留 ABI/context/cold fallback |
+| U1 | `vkso_user_entry.S` 的public time wrapper/fallback | 只保留 ABI/MM offset/cold fallback |
 | S1 | `vkso_time_internal.h`、`vkso_time_core.c`、`vkso_time_cycles.c` | v11 typed shared algorithm |
 | K1 | `timekeeping.c` 普通 `ktime_get_*` | root typed 薄 wrapper |
 | K2 | `struct timekeeper`、NTP/settime/suspend/switch writer | private + canonical直接维护 |
@@ -111,6 +113,7 @@ M01 已确认的 VKSO 符号/职责：
 | K4 | `posix-timers.c`、`time.c` | global direct + cold backend |
 | B1 | `posix-cpu-timers.c`、`alarmtimer.c`、`posix-clock.c` | 原语义保留 |
 | C1 | `arch/x86/kernel/vkso.c`、namespace/mm/auxv hooks | MM ABI v3保持 |
+| C2 | `vkso_user_wrapper_init()`、private wrapper bind/data | 当前真实初始化单列；未来可由P1自动完成 |
 | E1 | kernel clocksource、`vkso_time_cycles.c` TSC/PV/HV | 最小 provider |
 | G1 | Kconfig/Makefile/lds/export manifests | v11同步修改 |
 | X1 | `vkso_time_compat.h`、fallback mode core耦合、重复 raw descriptor | M08 为零 |
@@ -137,16 +140,17 @@ M08 以 `CONFIG_VKSO_TIME=y` 的最终链接结果作为产品代码边界。下
 
 | ID | VKSO 产品符号/行区间 | 唯一职责 |
 |---|---|---|
-| U1 | `vkso_user_entry.S` 的 `__vkso_clock_gettime`、`__vkso_clock_getres`、`__vkso_gettimeofday`、`__vkso_time`、`__vkso_getcpu` 及其本地 syscall/context veneer | 用户 public ABI、context/environment 绑定和唯一 syscall fallback |
-| S1 | `vkso_time_core.c` 的 typed/global readers、`vkso_time_apply_offset()`、gettimeofday/time；`vkso_time_internal.h` 的 seq/delta/normalize primitive；`vkso_time_cycles.c` 的可映射 cycles provider | kernel/user 唯一 global-time 读取公式 |
+| U1 | `vkso_user_entry.S` 的 `__vkso_clock_gettime`、`__vkso_clock_getres`、`__vkso_gettimeofday`及其本地syscall/MM veneer | 用户private public wrapper和唯一syscall fallback |
+| S1 | `vkso_time_core.c` 的 typed/global readers、`vkso_time_apply_offset()`、gettimeofday/time；共享`__vkso_time`/`__vkso_getcpu`；`vkso_time_internal.h` 的 seq/delta/normalize primitive | kernel/user 唯一 global-time 读取公式 |
 | K1 | `timekeeping.c` 中普通 `ktime_get_*`、`ktime_get_coarse_with_offset()` 的 VKSO 分支 | 保持既有内核 ABI 的 root-namespace 薄入口 |
-| K2 | `timekeeping.c` 的 `tk_update_read_state()` 及其 writer 调用点；唯一 private `timekeeper_read_state` | producer 维护 canonical state；不嵌入 real/shadow timekeeper |
-| K3 | `vkso_time.c` 的 `vkso_time_publish*()`、timezone 更新；`include/vkso/time.h` 的 v11 payload 定义 | 短发布协议和 shared data ABI |
-| K4 | `posix-timers.c` 的 `vkso_clock_gettime_dispatch()`、`vkso_clock_getres_dispatch()` 及三个 cold helper；`time.c` 的 gettimeofday/time syscall 接入 | syscall global 成功路径与统一冷出口 |
+| K2 | `timekeeping.c` 的 `tk_publish_read_state()`内canonical派生 | producer直接维护shared canonical state；无private staging |
+| K3 | `tk_publish_read_state()`的seq边界、`vkso_time.c`的shared页实例/timezone更新、v11 payload定义 | 直接shared发布协议和data ABI |
+| K4 | `posix-timers.c` 的`posix_clock_gettime_dispatch()`、`posix_clock_getres_dispatch()`及cold helper；`time.c`的gettimeofday/time syscall接入 | kernel唯一clock-id分派、global成功路径与冷出口 |
 | B1 | `posix-cpu-timers.c`、`alarmtimer.c`、`posix-clock.c` 的原 callback；`posix-timers.c` 中非 global `k_clock` 解析 | CPU、alarm、dynamic/PTP 必需 backend |
 | C1 | `arch/x86/kernel/vkso.c` 的 MM_data special mapping、auxv/context 选择；time namespace 初始化/更新 hook | per-MM namespace/context 语义 |
+| C2 | `vkso_user_entry.S` 的bind/private data与`vkso_user_wrapper_init()` | 当前每进程一次的auxv/context启动机制 |
 | E1 | `vkso_time_cycles.c` 的 kernel clocksource 与 user TSC/PVClock/Hyper-V provider 边界 | 环境相关 cycles 获取，不包含换算公式 |
-| G1 | `kernel/time/Makefile`、Kconfig、VKSO section/导出 manifest、`vkso_user_entry.S` 的 DSO section 声明 | 仅为功能产物存在的构建与链接接入 |
+| G1 | `kernel/time/Makefile`、Kconfig、VKSO section/导出manifest、wrapper的GNU-stack声明 | 仅为功能产物存在的构建与链接接入 |
 | P1 | 通用 `make_dll`、manager、page replacement、KRG 与映射生命周期实现 | 项目通用机制，单列而不计入 clock/time 专属实现 |
 | T1 | `CONFIG_VKSO_TIME_TEST` probe、layout assert、ABI matrix、benchmark、QEMU/裸机脚本和阶段报告 | 验证证据，不进入产品运行时 SLOC |
 
@@ -167,11 +171,13 @@ M08 链接/符号审计结果：
   由各自独立源码树提供，不在 VKSO tree 内维持关闭模式；
 - 用户测试兼容层只保留一次性 `vkso_user_wrapper_init()`，不再导出六个无调用
   转发函数；
+- generic clock-id core和benchmark-only公开ABI已删除；private wrapper依赖由
+  `make_dll`自动作为内部闭包解析；
 - `CONFIG_VKSO_TIME_TEST` probe 只进入测试配置，生产 package 明确标记
   `production_test_probe=absent`。
 
-M10 仍需对 Raw 建立同样的精确 symbol/line-range 映射，并为每个 ID 填写
-SLOC、Git churn 与 symbol bytes；本节只冻结语义归属，不提前用脚本猜测数字。
+M10已在`M10_SOURCE_MANIFEST.tsv`和`M10_BINARY_SYMBOLS.tsv`中为Raw/VKSO建立
+同范围映射；脚本只对人工清单做算术。
 
 ## 7. M09 验证代码边界
 
@@ -188,5 +194,5 @@ T1：
 没有为测试加入产品分支；无 RTC 状态由独立启动真实构造。
 
 因此 M09 的产品功能 SLOC 净变化为 0；测试规模单列，不能在 M10 被误计入
-VKSO 功能实现。M10 仍以第 6 节冻结的 U1/S1/K1/K2/K3/K4/B1/C1/E1/G1/P1
+VKSO 功能实现。M10 仍以第 6 节冻结的 U1/S1/K1/K2/K3/K4/B1/C1/C2/E1/G1/P1
 边界进行人工分类和机械复算。
