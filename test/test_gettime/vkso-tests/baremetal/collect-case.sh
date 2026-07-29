@@ -193,6 +193,7 @@ mkdir -p "$PARTIAL"
 mv "$RESULT_ROOT/.running-config-$CASE.tmp" "$PARTIAL/running.config"
 
 module_loaded=0
+clock_module_loaded=0
 replaced=0
 irqbalance_was_active=0
 completed=0
@@ -210,6 +211,10 @@ cleanup()
 	if [[ "$module_loaded" == 1 ]]; then
 		rmmod page_cache_replace
 		module_loaded=0
+	fi
+	if [[ "$clock_module_loaded" == 1 ]]; then
+		rmmod vkso_m09_clock
+		clock_module_loaded=0
 	fi
 	if [[ "$irqbalance_was_active" == 1 ]]; then
 		systemctl start irqbalance
@@ -257,6 +262,12 @@ printf '%s\n' "$probe" >"$PARTIAL/backend-probe.txt"
 		"$(sha256sum "$PACKAGE/$BACKEND-bzImage" | awk '{print $1}')"
 	printf 'test_binary_sha256=%s\n' \
 		"$(sha256sum "$PACKAGE/vkso-time-bench" | awk '{print $1}')"
+	printf 'collector_sha256=%s\n' \
+		"$(sha256sum "$0" | awk '{print $1}')"
+	printf 'package_collector_sha256=%s\n' \
+		"$(sha256sum "$PACKAGE/collect-case.sh" | awk '{print $1}')"
+	printf 'collector_git_commit=%s\n' \
+		"$(git -C "$HERE/../../../.." rev-parse HEAD)"
 	printf 'irqbalance_stopped=%s\n' "$irqbalance_was_active"
 	printf 'uname=%s\n' "$(uname -a)"
 	printf 'uname_version=%s\n' "$(uname -v)"
@@ -283,6 +294,21 @@ printf '%s\n' "$probe" >"$PARTIAL/backend-probe.txt"
 cat /proc/interrupts >"$PARTIAL/interrupts-before.txt"
 dmesg >"$PARTIAL/dmesg-before.txt"
 
+if grep -q '^vkso_m09_clock ' /proc/modules; then
+	echo "vkso_m09_clock is already loaded" >&2
+	exit 1
+fi
+insmod "$PACKAGE/vkso_m09_clock.ko"
+clock_module_loaded=1
+for _ in $(seq 1 50); do
+	[[ -c /dev/vkso-m09-clock ]] && break
+	sleep 0.1
+done
+test -c /dev/vkso-m09-clock || {
+	echo "vkso_m09_clock did not create /dev/vkso-m09-clock" >&2
+	exit 1
+}
+
 if [[ "$BACKEND" == vkso ]]; then
 	if grep -q '^page_cache_replace ' /proc/modules; then
 		echo "page_cache_replace is already loaded" >&2
@@ -295,10 +321,12 @@ if [[ "$BACKEND" == vkso ]]; then
 	"$PACKAGE/manager" replace "$PACKAGE/libkernel.so" \
 		"$PACKAGE/page_mappings.txt"
 	replaced=1
-	LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-abi-matrix" \
+	VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
+		LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-abi-matrix" \
 		>"$PARTIAL/functional.log" 2>&1
 else
-	LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/raw-abi-matrix" \
+	VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
+		LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/raw-abi-matrix" \
 		>"$PARTIAL/functional.log" 2>&1
 fi
 grep -Fq 'abi_matrix_status=pass' "$PARTIAL/functional.log"
@@ -367,6 +395,10 @@ fi
 if [[ "$module_loaded" == 1 ]]; then
 	rmmod page_cache_replace
 	module_loaded=0
+fi
+if [[ "$clock_module_loaded" == 1 ]]; then
+	rmmod vkso_m09_clock
+	clock_module_loaded=0
 fi
 if [[ "$irqbalance_was_active" == 1 ]]; then
 	systemctl start irqbalance

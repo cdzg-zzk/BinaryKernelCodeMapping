@@ -213,10 +213,17 @@ cmp -s "$PACKAGE/$backend.config" "$out/running.config"
 	printf 'clocksource=%s\n' "$clocksource"
 	printf 'cmdline=%s\n' "$(cat /proc/cmdline)"
 	printf 'package=%s\n' "$PACKAGE"
+	printf 'collector_sha256=%s\n' \
+		"$(sha256sum "$0" | awk '{print $1}')"
+	printf 'package_collector_sha256=%s\n' \
+		"$(sha256sum "$PACKAGE/collect-update.sh" | awk '{print $1}')"
+	printf 'collector_git_commit=%s\n' \
+		"$(git -C "$HERE/../../../.." rev-parse HEAD)"
 } >"$out/metadata.txt"
 
 recorder_running=0
 module_loaded=0
+clock_module_loaded=0
 replaced=0
 cleanup_all()
 {
@@ -236,10 +243,29 @@ cleanup_all()
 		rmmod page_cache_replace || status=$?
 		module_loaded=0
 	fi
+	if [[ "$clock_module_loaded" == 1 ]]; then
+		rmmod vkso_m09_clock || status=$?
+		clock_module_loaded=0
+	fi
 	set -e
 	return "$status"
 }
 trap 'cleanup_all || true' EXIT INT TERM
+
+if grep -q '^vkso_m09_clock ' /proc/modules; then
+	echo "vkso_m09_clock is already loaded; unload the prior test module first" >&2
+	exit 1
+fi
+insmod "$PACKAGE/vkso_m09_clock.ko"
+clock_module_loaded=1
+for _ in $(seq 1 50); do
+	[[ -c /dev/vkso-m09-clock ]] && break
+	sleep 0.1
+done
+test -c /dev/vkso-m09-clock || {
+	echo "vkso_m09_clock did not create /dev/vkso-m09-clock" >&2
+	exit 1
+}
 
 if [[ "$backend" == vkso ]]; then
 	if grep -q '^page_cache_replace ' /proc/modules; then
@@ -253,10 +279,12 @@ if [[ "$backend" == vkso ]]; then
 	"$PACKAGE/manager" replace "$PACKAGE/libkernel.so" \
 		"$PACKAGE/page_mappings.txt"
 	replaced=1
-	LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-abi-matrix" \
+	VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
+		LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-abi-matrix" \
 		>"$out/functional.log" 2>&1
 else
-	LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/raw-abi-matrix" \
+	VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
+		LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/raw-abi-matrix" \
 		>"$out/functional.log" 2>&1
 fi
 grep -Fq 'abi_matrix_status=pass' "$out/functional.log"
