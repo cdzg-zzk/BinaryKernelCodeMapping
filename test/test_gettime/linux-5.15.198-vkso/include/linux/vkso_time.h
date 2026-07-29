@@ -10,6 +10,9 @@ struct mm_struct;
 struct task_struct;
 struct timens_offsets;
 
+void vkso_timekeeping_get_private(clockid_t clock_id, bool coarse,
+				   struct timespec64 *ts);
+
 #ifdef CONFIG_VKSO_TIME
 extern union vkso_shared_page vkso_shared_page;
 extern struct vkso_context vkso_kernel_context;

@@ -47,6 +47,10 @@
 #define NS_MONOTONIC_OFFSET_NS INT64_C(7123456789)
 #define NS_BOOTTIME_OFFSET_NS INT64_C(11234567890)
 
+#define TEST_CPUCLOCK_PERTHREAD_MASK 4
+#define TEST_CPUCLOCK_SCHED 2
+#define TEST_CLOCKFD 3
+
 typedef int (*clock_gettime_fn)(clockid_t, struct timespec *);
 typedef int (*clock_getres_fn)(clockid_t, struct timespec *);
 typedef int (*gettimeofday_fn)(struct timeval *, struct timezone *);
@@ -124,6 +128,17 @@ static int64_t timeval_us(const struct timeval *value)
 		value->tv_usec;
 }
 
+static clockid_t make_test_cpuclock(unsigned int id, int per_thread)
+{
+	return (clockid_t)(((~id) << 3) | TEST_CPUCLOCK_SCHED |
+		(per_thread ? TEST_CPUCLOCK_PERTHREAD_MASK : 0));
+}
+
+static clockid_t make_test_fd_clock(int fd)
+{
+	return (clockid_t)(((~(unsigned int)fd) << 3) | TEST_CLOCKFD);
+}
+
 static void check_clock_value(clockid_t id, const char *name)
 {
 	struct timespec before, value, after, previous = { 0 };
@@ -195,12 +210,28 @@ static void check_clock_gettime(void)
 	     ++index)
 		check_fallback_clock_value(fallback[index].id,
 					   fallback[index].name);
+	check_fallback_clock_value(make_test_cpuclock(0, 0),
+				   "encoded_process_cpu");
+	check_fallback_clock_value(make_test_cpuclock(0, 1),
+				   "encoded_thread_cpu");
 
 	errno = EDOM;
 	if (backend.clock_gettime((clockid_t)-1, &value) != -EINVAL ||
 	    errno != EDOM)
 		fail("clock_gettime invalid return ABI");
 	puts("semantics.clock_gettime.invalid=pass");
+
+	check_fallback_clock_value(make_test_fd_clock(12345),
+				   "dynamic_invalid_fd");
+	errno = EDOM;
+	if (backend.clock_gettime((clockid_t)10, &value) != -EINVAL ||
+	    errno != EDOM ||
+	    backend.clock_gettime((clockid_t)12, &value) != -EINVAL ||
+	    errno != EDOM ||
+	    backend.clock_gettime((clockid_t)INT32_MAX, &value) != -EINVAL ||
+	    errno != EDOM)
+		fail("clock_gettime invalid positive IDs");
+	puts("semantics.clock_gettime.invalid_positive=pass");
 }
 
 static void check_fast_null_clock_gettime(void)
@@ -284,6 +315,46 @@ static void check_clock_getres(void)
 	    errno != EDOM)
 		fail("clock_getres invalid ABI");
 	puts("semantics.clock_getres.invalid_null=pass");
+
+	for (index = 0; index < 2; ++index) {
+		clockid_t id = make_test_cpuclock(0, index != 0);
+
+		if (syscall(SYS_clock_getres, id, &expected))
+			fail("encoded CPU clock_getres oracle");
+		errno = EDOM;
+		if (backend.clock_getres(id, &value) ||
+		    value.tv_sec != expected.tv_sec ||
+		    value.tv_nsec != expected.tv_nsec ||
+		    backend.clock_getres(id, NULL) || errno != EDOM)
+			fail("encoded CPU clock_getres");
+	}
+	puts("semantics.clock_getres.encoded_cpu=pass");
+
+	errno = 0;
+	if (syscall(SYS_clock_getres, make_test_fd_clock(12345),
+		    &expected) != -1)
+		fail("dynamic invalid clock_getres oracle");
+	{
+		int expected_errno = errno;
+
+		errno = EDOM;
+		if (backend.clock_getres(make_test_fd_clock(12345), &value) !=
+		    -expected_errno || errno != EDOM ||
+		    backend.clock_getres(make_test_fd_clock(12345), NULL) !=
+		    -expected_errno || errno != EDOM)
+			fail("dynamic invalid clock_getres");
+	}
+	puts("semantics.clock_getres.dynamic_invalid_fd=pass");
+
+	errno = EDOM;
+	if (backend.clock_getres((clockid_t)10, &value) != -EINVAL ||
+	    errno != EDOM ||
+	    backend.clock_getres((clockid_t)12, NULL) != -EINVAL ||
+	    errno != EDOM ||
+	    backend.clock_getres((clockid_t)INT32_MAX, NULL) != -EINVAL ||
+	    errno != EDOM)
+		fail("clock_getres invalid positive IDs");
+	puts("semantics.clock_getres.invalid_positive=pass");
 }
 
 static void check_gettimeofday(void)
@@ -579,7 +650,12 @@ static void check_paths(int getcpu_only)
 		CGT("thread_cpu", CLOCK_THREAD_CPUTIME_ID, 1),
 		CGT("realtime_alarm", CLOCK_REALTIME_ALARM, 1),
 		CGT("boottime_alarm", CLOCK_BOOTTIME_ALARM, 1),
+		CGT("encoded_process_cpu", (clockid_t)-6, 1),
+		CGT("encoded_thread_cpu", (clockid_t)-2, 1),
+		CGT("dynamic", (clockid_t)-5, 1),
 		CGT("invalid", (clockid_t)-1, 1),
+		CGT("invalid_slot", (clockid_t)10, 1),
+		CGT("invalid_large", (clockid_t)INT32_MAX, 1),
 		{ "clock_gettime.realtime_null", PATH_CLOCK_GETTIME,
 		  SYS_clock_gettime, CLOCK_REALTIME, 0, 0, 1 },
 		{ "clock_gettime.process_cpu_null", PATH_CLOCK_GETTIME,
@@ -595,8 +671,12 @@ static void check_paths(int getcpu_only)
 		CGR("realtime_null", CLOCK_REALTIME, 0, 0),
 		CGR("process_cpu", CLOCK_PROCESS_CPUTIME_ID, 1, 1),
 		CGR("process_cpu_null", CLOCK_PROCESS_CPUTIME_ID, 0, 1),
+		CGR("encoded_process_cpu", (clockid_t)-6, 1, 1),
+		CGR("dynamic", (clockid_t)-5, 1, 1),
 		CGR("invalid", (clockid_t)-1, 1, 1),
 		CGR("invalid_null", (clockid_t)-1, 0, 1),
+		CGR("invalid_slot", (clockid_t)10, 1, 1),
+		CGR("invalid_large_null", (clockid_t)INT32_MAX, 0, 1),
 
 		{ "gettimeofday.tv", PATH_GETTIMEOFDAY, SYS_gettimeofday,
 		  0, 1, 0, 0 },

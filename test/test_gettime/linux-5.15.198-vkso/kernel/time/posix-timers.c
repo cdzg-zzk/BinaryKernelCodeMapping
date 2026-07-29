@@ -72,6 +72,79 @@ vkso_current_mm_data(void)
 #endif
 }
 
+static noinline __cold int
+posix_clock_gettime_backend(clockid_t clock_id, struct timespec64 *tp)
+{
+	const struct k_clock *kc = clockid_to_kclock(clock_id);
+
+	if (!kc || !kc->clock_get_timespec)
+		return -EINVAL;
+	return kc->clock_get_timespec(clock_id, tp);
+}
+
+/*
+ * A provider failure is different from a non-global clock.  The former must
+ * use the private timekeeper state directly; routing it through k_clock would
+ * call ktime_get_*() and retry the shared provider which just failed.
+ */
+#ifdef CONFIG_VKSO_TIME
+static noinline __cold int
+posix_clock_gettime_private(clockid_t clock_id, struct timespec64 *tp)
+{
+	const struct vkso_mm_data *mm_data = vkso_current_mm_data();
+	const struct vkso_time_value *offset;
+
+	vkso_timekeeping_get_private(clock_id, false, tp);
+	if (clock_id == CLOCK_BOOTTIME)
+		offset = &mm_data->boottime_offset;
+	else if (clock_id == CLOCK_MONOTONIC ||
+		 clock_id == CLOCK_MONOTONIC_RAW)
+		offset = &mm_data->monotonic_offset;
+	else
+		return 0;
+
+	if (READ_ONCE(mm_data->clock_mask) & (1U << clock_id))
+		return vkso_time_apply_offset(
+			offset, (struct vkso_time_value *)tp);
+	return 0;
+}
+#endif
+
+static int
+posix_clock_gettime_dispatch(clockid_t clock_id, struct timespec64 *tp)
+{
+	int status;
+
+	status = vkso_time_get(vkso_current_mm_data(), clock_id, tp);
+	if (likely(status == VKSO_TIME_OK))
+		return 0;
+#ifdef CONFIG_VKSO_TIME
+	if (status == VKSO_TIME_UNSUPPORTED_MODE)
+		return posix_clock_gettime_private(clock_id, tp);
+#endif
+	return posix_clock_gettime_backend(clock_id, tp);
+}
+
+static noinline __cold int
+posix_clock_getres_backend(clockid_t clock_id, struct timespec64 *tp)
+{
+	const struct k_clock *kc = clockid_to_kclock(clock_id);
+
+	if (!kc || !kc->clock_getres)
+		return -EINVAL;
+	return kc->clock_getres(clock_id, tp);
+}
+
+static int
+posix_clock_getres_dispatch(clockid_t clock_id, struct timespec64 *tp)
+{
+	int status = vkso_time_getres(clock_id, tp);
+
+	if (likely(status == VKSO_TIME_OK))
+		return 0;
+	return posix_clock_getres_backend(clock_id, tp);
+}
+
 /*
  * we assume that the new SIGEV_THREAD_ID shares no bits with the other
  * SIGEV values.  Here we put out an error if this assumption fails.
@@ -1144,19 +1217,10 @@ SYSCALL_DEFINE2(clock_settime, const clockid_t, which_clock,
 SYSCALL_DEFINE2(clock_gettime, const clockid_t, which_clock,
 		struct __kernel_timespec __user *, tp)
 {
-	const struct k_clock *kc;
 	struct timespec64 kernel_tp;
 	int error;
 
-	error = vkso_time_get(vkso_current_mm_data(), which_clock,
-			      &kernel_tp);
-	if (unlikely(error != VKSO_TIME_OK)) {
-		kc = clockid_to_kclock(which_clock);
-		if (!kc)
-			return -EINVAL;
-		error = kc->clock_get_timespec(which_clock, &kernel_tp);
-	}
-
+	error = posix_clock_gettime_dispatch(which_clock, &kernel_tp);
 	if (!error && put_timespec64(&kernel_tp, tp))
 		error = -EFAULT;
 
@@ -1195,18 +1259,10 @@ SYSCALL_DEFINE2(clock_adjtime, const clockid_t, which_clock,
 SYSCALL_DEFINE2(clock_getres, const clockid_t, which_clock,
 		struct __kernel_timespec __user *, tp)
 {
-	const struct k_clock *kc;
 	struct timespec64 rtn_tp;
 	int error;
 
-	error = vkso_time_getres(which_clock, &rtn_tp);
-	if (unlikely(error != VKSO_TIME_OK)) {
-		kc = clockid_to_kclock(which_clock);
-		if (!kc)
-			return -EINVAL;
-		error = kc->clock_getres(which_clock, &rtn_tp);
-	}
-
+	error = posix_clock_getres_dispatch(which_clock, &rtn_tp);
 	if (!error && tp && put_timespec64(&rtn_tp, tp))
 		error = -EFAULT;
 
@@ -1233,15 +1289,10 @@ SYSCALL_DEFINE2(clock_settime32, clockid_t, which_clock,
 SYSCALL_DEFINE2(clock_gettime32, clockid_t, which_clock,
 		struct old_timespec32 __user *, tp)
 {
-	const struct k_clock *kc = clockid_to_kclock(which_clock);
 	struct timespec64 ts;
 	int err;
 
-	if (!kc)
-		return -EINVAL;
-
-	err = kc->clock_get_timespec(which_clock, &ts);
-
+	err = posix_clock_gettime_dispatch(which_clock, &ts);
 	if (!err && put_old_timespec32(&ts, tp))
 		err = -EFAULT;
 
@@ -1269,14 +1320,10 @@ SYSCALL_DEFINE2(clock_adjtime32, clockid_t, which_clock,
 SYSCALL_DEFINE2(clock_getres_time32, clockid_t, which_clock,
 		struct old_timespec32 __user *, tp)
 {
-	const struct k_clock *kc = clockid_to_kclock(which_clock);
 	struct timespec64 ts;
 	int err;
 
-	if (!kc)
-		return -EINVAL;
-
-	err = kc->clock_getres(which_clock, &ts);
+	err = posix_clock_getres_dispatch(which_clock, &ts);
 	if (!err && tp && put_old_timespec32(&ts, tp))
 		return -EFAULT;
 

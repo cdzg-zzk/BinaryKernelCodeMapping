@@ -143,24 +143,29 @@ shared core 不负责权限、fd、RTC、task lifetime 或 syscall。
 timezone 是事件型全局数据，不属于 time namespace；设置范围校验和首次 warp
 语义仍在 syscall producer 侧。
 
-## 6. 当前重复与 M07 目标
+## 6. M07 后的分派边界
 
-当前存在两层 fallback 政策：
+fallback 政策已经收敛：
 
-- assembly public wrapper 对 unsupported clock 直接 syscall；
-- shared C core 还通过 `context->fallback_mode` 决定 syscall 或返回 fallback；
-- kernel syscall 对 fallback 再调用 `clockid_to_kclock()`。
+- shared C core 只返回 `OK`、`UNSUPPORTED_MODE` 或
+  `BACKEND_REQUIRED`；
+- assembly public wrapper 是用户侧唯一 syscall fallback；
+- native 与 compat syscall 共用同一内部 dispatcher；
+- `UNSUPPORTED_MODE` 直接读取 private timekeeper，再使用同一
+  `vkso_time_apply_offset()` 处理 MM offset，不经 `k_clock` 重试 shared
+  core；
+- `BACKEND_REQUIRED` 只进入一次 `clockid_to_kclock()`，随后调用
+  CPU/alarm/dynamic backend；
+- `clock_getres` 在范围检查后以位图分类 global hres/coarse，其他 ID
+  只进入一次 backend。
 
-目标：
-
-- M05 纯 core 不执行 syscall、不读取 fallback mode；
-- user public wrapper 是唯一 syscall fallback；
-- kernel global typed path不走 `k_clock`；
-- kernel generic dispatcher 对 CPU/alarm/dynamic 进入唯一 backend；
-- backend 不重新调用 shared global core。
+因此 global 成功路径只有一次 clock 分类和一次 shared-core 调用；provider
+失败与“不是 global clock”是两个不同的冷出口，不再互相混用。
 
 位图适合 `clock_getres` 这种“范围检查后按类别选择常量结果”的路径；七个
-`clock_gettime` 的常用 typed entry 继续直接跳转，不用位图制造额外间接分派。
+`clock_gettime` 的 generic core 保留浅层 direct-call 分类，不用位图制造
+间接分派。已知 clock 的 kernel reader 和 user public entry 继续直接进入 typed
+reader，不经过 generic core。
 
 ## 7. 验证矩阵
 

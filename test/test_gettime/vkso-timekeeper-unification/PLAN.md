@@ -896,11 +896,11 @@ M01～M09 的“静态性能模型”不得写成裸机性能结论。
 | M04 短发布/删除转换层 | 已完成 | canonical producer 完整 |
 | M05 纯共享读取 core | 已完成 | 发布协议通过 |
 | M06 普通 kernel reader 统一 | 已完成 | shared core 功能完整 |
-| M07 dispatcher/backend 重构 | 进行中 | 普通 reader 稳定 |
-| M08 清理与静态审计 | 待开始 | 完整分派通过 |
+| M07 dispatcher/backend 重构 | 已完成 | 普通 reader 稳定 |
+| M08 清理与静态审计 | 进行中 | 完整分派通过 |
 | M09 完整正确性验证 | 待开始 | 无临时/双重路径 |
 | M10 裸机性能与最终证据 | 待开始 | M09 pre-performance tag |
 
-M00～M06 已通过；下一步执行 M07，统一 global、CPU、alarm、dynamic/PTP
-与 invalid clock 的 public 分派和 cold backend 边界，消除重复 fallback
-判断且保持 Raw 错误语义。
+M00～M07 已通过；下一步执行 M08，删除无调用桥接和临时双路径，固定
+public wrapper、typed/generic dispatcher、shared primitive/provider 与 cold
+backend 的层次，并重新审计源码和机器码归属。

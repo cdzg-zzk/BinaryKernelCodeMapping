@@ -900,9 +900,9 @@ static void timekeeping_forward_now(struct timekeeper *tk)
  * the user-visible cycles provider. Ordinary readers use the canonical shared
  * state first; special readers continue to use their dedicated private path.
  */
-static noinline __cold void
-timekeeping_get_private(clockid_t clock_id, bool coarse,
-			struct timespec64 *ts)
+noinline __cold void
+vkso_timekeeping_get_private(clockid_t clock_id, bool coarse,
+			     struct timespec64 *ts)
 {
 	struct timekeeper *tk = &tk_core.timekeeper;
 	unsigned int seq;
@@ -955,7 +955,7 @@ void ktime_get_real_ts64(struct timespec64 *ts)
 	if (likely(vkso_time_get_root_hres(
 			   vkso_clock_gettime_realtime, ts) == VKSO_TIME_OK))
 		return;
-	timekeeping_get_private(CLOCK_REALTIME, false, ts);
+	vkso_timekeeping_get_private(CLOCK_REALTIME, false, ts);
 }
 EXPORT_SYMBOL(ktime_get_real_ts64);
 
@@ -967,7 +967,7 @@ ktime_t ktime_get(void)
 	if (unlikely(vkso_time_get_root_hres(
 			     vkso_clock_gettime_monotonic, &ts) !=
 		     VKSO_TIME_OK))
-		timekeeping_get_private(CLOCK_MONOTONIC, false, &ts);
+		vkso_timekeeping_get_private(CLOCK_MONOTONIC, false, &ts);
 	return timespec64_to_ktime(ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get);
@@ -1018,7 +1018,7 @@ ktime_t ktime_get_with_offset(enum tk_offsets offs)
 			vkso_clock_gettime_tai, &ts);
 	}
 	if (unlikely(status != VKSO_TIME_OK))
-		timekeeping_get_private(clock_id, false, &ts);
+		vkso_timekeeping_get_private(clock_id, false, &ts);
 	return timespec64_to_ktime(ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get_with_offset);
@@ -1044,7 +1044,7 @@ ktime_t ktime_get_coarse_with_offset(enum tk_offsets offs)
 			vkso_clock_gettime_tai_coarse, &ts);
 	}
 	if (unlikely(status != VKSO_TIME_OK))
-		timekeeping_get_private(clock_id, true, &ts);
+		vkso_timekeeping_get_private(clock_id, true, &ts);
 	return timespec64_to_ktime(ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get_coarse_with_offset);
@@ -1079,7 +1079,7 @@ ktime_t ktime_get_raw(void)
 	if (unlikely(vkso_time_get_root_hres(
 			     vkso_clock_gettime_monotonic_raw, &ts) !=
 		     VKSO_TIME_OK))
-		timekeeping_get_private(CLOCK_MONOTONIC_RAW, false, &ts);
+		vkso_timekeeping_get_private(CLOCK_MONOTONIC_RAW, false, &ts);
 	return timespec64_to_ktime(ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get_raw);
@@ -1098,7 +1098,7 @@ void ktime_get_ts64(struct timespec64 *ts)
 	if (likely(vkso_time_get_root_hres(
 			   vkso_clock_gettime_monotonic, ts) == VKSO_TIME_OK))
 		return;
-	timekeeping_get_private(CLOCK_MONOTONIC, false, ts);
+	vkso_timekeeping_get_private(CLOCK_MONOTONIC, false, ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get_ts64);
 
@@ -1640,7 +1640,7 @@ void ktime_get_raw_ts64(struct timespec64 *ts)
 			   vkso_clock_gettime_monotonic_raw, ts) ==
 		   VKSO_TIME_OK))
 		return;
-	timekeeping_get_private(CLOCK_MONOTONIC_RAW, false, ts);
+	vkso_timekeeping_get_private(CLOCK_MONOTONIC_RAW, false, ts);
 }
 EXPORT_SYMBOL(ktime_get_raw_ts64);
 
@@ -2370,7 +2370,7 @@ void ktime_get_coarse_real_ts64(struct timespec64 *ts)
 			   vkso_clock_gettime_realtime_coarse, ts) ==
 		   VKSO_TIME_OK))
 		return;
-	timekeeping_get_private(CLOCK_REALTIME, true, ts);
+	vkso_timekeeping_get_private(CLOCK_REALTIME, true, ts);
 }
 EXPORT_SYMBOL(ktime_get_coarse_real_ts64);
 
@@ -2380,7 +2380,7 @@ void ktime_get_coarse_ts64(struct timespec64 *ts)
 			   vkso_clock_gettime_monotonic_coarse, ts) ==
 		   VKSO_TIME_OK))
 		return;
-	timekeeping_get_private(CLOCK_MONOTONIC, true, ts);
+	vkso_timekeeping_get_private(CLOCK_MONOTONIC, true, ts);
 }
 EXPORT_SYMBOL(ktime_get_coarse_ts64);
 

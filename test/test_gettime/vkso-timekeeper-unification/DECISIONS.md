@@ -222,3 +222,23 @@ provider表示的合法clocksource，普通kernel reader由一个
 
 该helper只处理provider failure/early mode，不是normal global-time算法的
 第二source of truth；fast/NMI/writer-held reader继续使用各自专用路径。
+
+## D019：provider failure 与非 global backend 使用不同冷出口
+
+- 状态：已决定并验证
+- 阶段：M07
+
+`UNSUPPORTED_MODE` 表示 clock ID 属于 global 集合，但当前 clocksource 不能由
+共享 provider 采样。若将其交给原 `k_clock`，global backend 会调用已经迁移的
+`ktime_get_*()`，从而再次进入刚失败的 shared reader。
+
+M07 因此将两类失败明确分开：
+
+- `UNSUPPORTED_MODE` 直接进入 `vkso_timekeeping_get_private()`，再由共享
+  `vkso_time_apply_offset()` 应用 MM namespace offset；
+- `BACKEND_REQUIRED` 才通过唯一 cold helper 进入
+  `clockid_to_kclock()`，保留 CPU、alarm、dynamic/PTP 与 invalid 语义。
+
+native 和 compat syscall 共用该 dispatcher。正常 global 路径仍只调用
+`vkso_clock_gettime_core()` 一次；用户 public wrapper 的 syscall fallback
+边界不变。
