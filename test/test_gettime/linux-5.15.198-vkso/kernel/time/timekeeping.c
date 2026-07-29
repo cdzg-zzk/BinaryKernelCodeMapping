@@ -167,14 +167,27 @@ static void tk_set_wall_to_mono(struct timekeeper *tk, struct timespec64 wtm)
 	tk->offs_tai = ktime_add(tk->offs_real, ktime_set(tk->tai_offset, 0));
 }
 
-static inline void tk_update_sleep_time(struct timekeeper *tk, ktime_t delta)
+static inline void
+tk_update_sleep_time(struct timekeeper *tk, const struct timespec64 *delta)
 {
-	tk->offs_boot = ktime_add(tk->offs_boot, delta);
+	tk->offs_boot = ktime_add(tk->offs_boot,
+				  timespec64_to_ktime(*delta));
+#ifdef CONFIG_VKSO_TIME
 	/*
-	 * Timespec representation for VDSO update to avoid 64bit division
-	 * on every update.
+	 * Boottime alone includes suspend.  Advance its canonical base at the
+	 * rare injection event; the normal producer then preserves this offset
+	 * without converting offs_boot on every tick.
 	 */
-	tk->monotonic_to_boot = ktime_to_timespec64(tk->offs_boot);
+	tk->read_state.boottime_base.sec += delta->tv_sec;
+	tk->read_state.boottime_base.shifted_nsec +=
+		(u64)delta->tv_nsec << tk->read_state.cycles.shift;
+	if (tk->read_state.boottime_base.shifted_nsec >=
+	    (u64)NSEC_PER_SEC << tk->read_state.cycles.shift) {
+		tk->read_state.boottime_base.shifted_nsec -=
+			(u64)NSEC_PER_SEC << tk->read_state.cycles.shift;
+		tk->read_state.boottime_base.sec++;
+	}
+#endif
 }
 
 /*
@@ -738,6 +751,92 @@ static inline void tk_update_ktime_data(struct timekeeper *tk)
 	tk->tkr_raw.base = ns_to_ktime(tk->raw_sec * NSEC_PER_SEC);
 }
 
+#ifdef CONFIG_VKSO_TIME
+static __always_inline void
+tk_set_read_base(struct vkso_hres_base *base, s64 sec, u64 shifted_nsec,
+		 u32 shift)
+{
+	u64 shifted_second = (u64)NSEC_PER_SEC << shift;
+
+	if (shifted_nsec >= shifted_second) {
+		shifted_nsec -= shifted_second;
+		sec++;
+	}
+	base->sec = sec;
+	base->shifted_nsec = shifted_nsec;
+}
+
+/*
+ * Finalize the reader-owned representation while timekeeper_lock is held.
+ * This is part of the producer, not a conversion performed by the publisher:
+ * real/shadow timekeepers and the shared page all carry the same state type.
+ */
+static void tk_update_read_state(struct timekeeper *tk)
+{
+	struct vkso_read_state *state = &tk->read_state;
+	u32 shift = tk->tkr_mono.shift;
+	u64 boot_offset_nsec = 0;
+	s64 boot_offset_sec = 0;
+
+	if (state->cycles.mask) {
+		boot_offset_sec =
+			state->boottime_base.sec - state->monotonic_base.sec;
+		if (state->boottime_base.shifted_nsec >=
+		    state->monotonic_base.shifted_nsec) {
+			boot_offset_nsec =
+				state->boottime_base.shifted_nsec -
+				state->monotonic_base.shifted_nsec;
+		} else {
+			boot_offset_sec--;
+			boot_offset_nsec =
+				((u64)NSEC_PER_SEC <<
+				 state->cycles.shift) -
+				state->monotonic_base.shifted_nsec +
+				state->boottime_base.shifted_nsec;
+		}
+		boot_offset_nsec >>= state->cycles.shift;
+	}
+
+	state->cycles.clock_mode = tk->tkr_mono.clock->vdso_clock_mode;
+	state->cycles.shift = shift;
+	state->cycles.cycle_last = tk->tkr_mono.cycle_last;
+	state->cycles.mask = tk->tkr_mono.mask;
+	state->cycles.mono_mult = tk->tkr_mono.mult;
+	state->cycles.raw_mult = tk->tkr_raw.mult;
+
+	tk_set_read_base(&state->realtime_base, tk->xtime_sec,
+			 tk->tkr_mono.xtime_nsec, shift);
+	tk_set_read_base(&state->monotonic_base,
+			 tk->xtime_sec + tk->wall_to_monotonic.tv_sec,
+			 tk->tkr_mono.xtime_nsec +
+			 ((u64)tk->wall_to_monotonic.tv_nsec << shift),
+			 shift);
+	tk_set_read_base(&state->boottime_base,
+			 state->monotonic_base.sec + boot_offset_sec,
+			 state->monotonic_base.shifted_nsec +
+			 (boot_offset_nsec << shift),
+			 shift);
+	tk_set_read_base(&state->tai_base,
+			 state->realtime_base.sec + tk->tai_offset,
+			 state->realtime_base.shifted_nsec, shift);
+	tk_set_read_base(&state->monotonic_raw_base, tk->raw_sec,
+			 tk->tkr_raw.xtime_nsec, shift);
+
+	state->realtime_coarse.sec = state->realtime_base.sec;
+	state->realtime_coarse.nsec =
+		state->realtime_base.shifted_nsec >> shift;
+	state->monotonic_coarse.sec = state->monotonic_base.sec;
+	state->monotonic_coarse.nsec =
+		state->monotonic_base.shifted_nsec >> shift;
+	state->hrtimer_resolution = hrtimer_resolution;
+	state->reserved = 0;
+}
+#else
+static inline void tk_update_read_state(struct timekeeper *tk)
+{
+}
+#endif
+
 /* must hold timekeeper_lock */
 static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 {
@@ -750,6 +849,7 @@ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 
 	tk_update_leap_state(tk);
 	tk_update_ktime_data(tk);
+	tk_update_read_state(tk);
 
 	update_pvclock_gtod(tk, action & TK_CLOCK_WAS_SET);
 
@@ -1685,7 +1785,7 @@ static void __timekeeping_inject_sleeptime(struct timekeeper *tk,
 	}
 	tk_xtime_add(tk, delta);
 	tk_set_wall_to_mono(tk, timespec64_sub(tk->wall_to_monotonic, *delta));
-	tk_update_sleep_time(tk, timespec64_to_ktime(*delta));
+	tk_update_sleep_time(tk, delta);
 	tk_debug_account_sleep_time(delta);
 }
 

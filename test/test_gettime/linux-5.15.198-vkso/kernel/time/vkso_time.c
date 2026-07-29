@@ -80,7 +80,6 @@ void vkso_time_publish(struct timekeeper *tk)
 	struct vkso_shared_data *shared = &vkso_shared_page.data;
 	u32 seq;
 
-	/* Derive first so the reader-visible odd interval only copies data. */
 	vkso_time_compat_prepare(&next, tk);
 	seq = READ_ONCE(shared->seq);
 	WRITE_ONCE(shared->seq, seq + 1);

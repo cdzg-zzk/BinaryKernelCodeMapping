@@ -144,3 +144,18 @@ monotonic最多增加一条 cache line；raw base从 shared offset 128开始。
 有效 payload从 v10 的184 bytes降到168 bytes。ABI v10不保留运行时兼容分支；
 wrapper init同时检查 shared v11和MM_data v3，版本错配返回`EPROTO`。
 精确布局和 memory-order 协议见 `ABI_V11.md`。
+
+## D013：boottime offset从canonical base差值保留
+
+- 状态：已决定并验证
+- 阶段：M03
+
+删除仅供发布转换使用的`monotonic_to_boot`，但不在每个tick调用
+`ktime_to_timespec64(offs_boot)`：
+
+- normal producer从旧canonical boottime与monotonic base的差恢复offset；
+- rare sleeptime事件直接推进canonical boottime；
+- shift变化时用旧shift恢复整数纳秒，再按新shift构造base。
+
+这同时消除冗余字段和周期64-bit division。`offs_boot`仍为fast/snapshot等
+专用kernel接口保留，不作为普通global reader数据源。
