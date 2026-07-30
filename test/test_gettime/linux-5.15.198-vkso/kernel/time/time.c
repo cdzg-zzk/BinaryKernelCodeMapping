@@ -52,6 +52,24 @@ struct timezone sys_tz;
 
 EXPORT_SYMBOL(sys_tz);
 
+int vkso_kernel_gettimeofday_backend(
+	struct vkso_timeval *tv, struct vkso_timezone *tz, int status)
+{
+	struct timespec64 now;
+
+	(void)status;
+	if (tv) {
+		vkso_timekeeping_get_private(CLOCK_REALTIME, &now);
+		tv->sec = now.tv_sec;
+		tv->usec = now.tv_nsec / NSEC_PER_USEC;
+	}
+	if (tz) {
+		tz->minuteswest = READ_ONCE(sys_tz.tz_minuteswest);
+		tz->dsttime = READ_ONCE(sys_tz.tz_dsttime);
+	}
+	return VKSO_TIME_OK;
+}
+
 #ifdef __ARCH_WANT_SYS_TIME
 
 /*
@@ -146,17 +164,8 @@ SYSCALL_DEFINE2(gettimeofday, struct __kernel_old_timeval __user *, tv,
 
 	if (unlikely(!tv && !tz))
 		return 0;
-	if (vkso_time_gettimeofday(tv ? &value : NULL, tz ? &zone : NULL)) {
-		if (tv) {
-			struct timespec64 ts;
-
-			ktime_get_real_ts64(&ts);
-			value.tv_sec = ts.tv_sec;
-			value.tv_usec = ts.tv_nsec / NSEC_PER_USEC;
-		}
-		if (tz)
-			zone = sys_tz;
-	}
+	(void)vkso_time_gettimeofday(
+		tv ? &value : NULL, tz ? &zone : NULL);
 	if (likely(tv != NULL)) {
 		if (put_user(value.tv_sec, &tv->tv_sec) ||
 		    put_user(value.tv_usec, &tv->tv_usec))

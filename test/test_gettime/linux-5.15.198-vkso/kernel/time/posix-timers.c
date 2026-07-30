@@ -75,12 +75,14 @@ vkso_current_mm_data(void)
  *
  * This is the only cold exit from the normal clock_gettime dispatcher.
  */
-static noinline __cold int
-posix_clock_gettime_fallback(clockid_t clock_id, struct timespec64 *tp,
-			     const struct vkso_mm_data *mm_data, int status)
+noinline __cold int
+vkso_posix_clock_gettime_backend(
+	s32 clock_id, struct vkso_time_value *value,
+	const struct vkso_mm_data *mm_data, int status)
 {
 	const struct k_clock *kc;
 	const struct vkso_time_value *offset;
+	struct timespec64 *tp = (struct timespec64 *)value;
 
 	if (status == VKSO_TIME_BACKEND_REQUIRED) {
 		kc = clockid_to_kclock(clock_id);
@@ -92,6 +94,8 @@ posix_clock_gettime_fallback(clockid_t clock_id, struct timespec64 *tp,
 		return -EINVAL;
 
 	vkso_timekeeping_get_private(clock_id, tp);
+	if (!mm_data)
+		return 0;
 	if (clock_id == CLOCK_BOOTTIME)
 		offset = &mm_data->boottime_offset;
 	else if (clock_id == CLOCK_MONOTONIC ||
@@ -110,14 +114,10 @@ static int
 posix_clock_gettime_dispatch(clockid_t clock_id, struct timespec64 *tp)
 {
 	const struct vkso_mm_data *mm_data = vkso_current_mm_data();
-	int status;
 
-	status = vkso_clock_gettime_common(
+	return vkso_clock_gettime_common(
 		clock_id, (struct vkso_time_value *)tp, mm_data,
 		&vkso_kernel_context);
-	if (likely(status == VKSO_TIME_OK))
-		return 0;
-	return posix_clock_gettime_fallback(clock_id, tp, mm_data, status);
 }
 
 static noinline __cold int

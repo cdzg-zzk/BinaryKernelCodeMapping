@@ -23,11 +23,10 @@
  *
  * Shared core text remains backed by kernel pages.  This page is ordinary
  * DSO-owned RX text so it can inject per-process addresses without changing
- * the shared kernel ABI.  The shared clock_gettime core owns the global-clock
- * dispatch and MM offset.  This veneer saves the public arguments only so its
- * single cold syscall exit can reproduce the original ABI call after a
- * provider or clock-ID rejection. make_dll resolves the core transfer
- * locally, so no PLT/GOT remains on the hot path.
+ * the shared kernel ABI. The public entries tail-jump into the shared core;
+ * only a rejected provider or clock ID reaches the syscall backends installed
+ * in vkso_user_context. make_dll resolves the core transfer locally, so no
+ * PLT/GOT remains on the hot path.
  */
 
 	.section .vkso.user.text, "ax", @progbits
@@ -35,30 +34,19 @@
 	.globl __vkso_clock_gettime
 	.type __vkso_clock_gettime, @function
 __vkso_clock_gettime:
-	/*
-	 * SysV enters with rsp % 16 == 8.  Reserve 24 bytes both to preserve
-	 * the fallback arguments and to align the shared-core call.
-	 */
-	subq	$24, %rsp
-	movl	%edi, (%rsp)
-	movq	%rsi, 8(%rsp)
 	movq	vkso_user_mm_data(%rip), %rdx
 	leaq	vkso_user_context(%rip), %rcx
-	call	vkso_clock_gettime_common
-	testl	%eax, %eax
-	jne	.Lclock_fallback
-	addq	$24, %rsp
-	ret
+	jmp	vkso_clock_gettime_common
+	.size __vkso_clock_gettime, .-__vkso_clock_gettime
 
-.Lclock_fallback:
-	movl	(%rsp), %edi
-	movq	8(%rsp), %rsi
-	addq	$24, %rsp
+	.type vkso_user_clock_gettime_backend, @function
+vkso_user_clock_gettime_backend:
 	movslq	%edi, %rdi
 	movl	$__NR_clock_gettime, %eax
 	syscall
 	ret
-	.size __vkso_clock_gettime, .-__vkso_clock_gettime
+	.size vkso_user_clock_gettime_backend, \
+		.-vkso_user_clock_gettime_backend
 
 	.p2align 4
 	.globl __vkso_clock_getres
@@ -92,22 +80,17 @@ __vkso_clock_getres:
 	.globl __vkso_gettimeofday
 	.type __vkso_gettimeofday, @function
 __vkso_gettimeofday:
-	pushq	%rdi
-	pushq	%rsi
-	subq	$8, %rsp
 	leaq	vkso_user_context(%rip), %rdx
-	call	vkso_gettimeofday_core
-	addq	$8, %rsp
-	popq	%rsi
-	popq	%rdi
-	testl	%eax, %eax
-	jne	.Lgettimeofday_fallback
-	ret
-.Lgettimeofday_fallback:
+	jmp	vkso_gettimeofday_core
+	.size __vkso_gettimeofday, .-__vkso_gettimeofday
+
+	.type vkso_user_gettimeofday_backend, @function
+vkso_user_gettimeofday_backend:
 	movl	$__NR_gettimeofday, %eax
 	syscall
 	ret
-	.size __vkso_gettimeofday, .-__vkso_gettimeofday
+	.size vkso_user_gettimeofday_backend, \
+		.-vkso_user_gettimeofday_backend
 
 	/*
 	 * Bind once after reading AT_VKSO_MM_DATA.  The per-MM page remains
@@ -122,6 +105,10 @@ __vkso_bind_context:
 	movq	%rdi, vkso_user_mm_data(%rip)
 	movq	%rsi, vkso_user_context(%rip)
 	movq	%rdx, vkso_user_context+8(%rip)
+	leaq	vkso_user_clock_gettime_backend(%rip), %rax
+	movq	%rax, vkso_user_context+16(%rip)
+	leaq	vkso_user_gettimeofday_backend(%rip), %rax
+	movq	%rax, vkso_user_context+24(%rip)
 	xorl	%eax, %eax
 	ret
 	.size __vkso_bind_context, .-__vkso_bind_context
@@ -146,6 +133,8 @@ vkso_user_mm_data:
 vkso_user_context:
 	.quad 0			/* pvclock_page */
 	.quad 0			/* hvclock_page */
+	.quad 0			/* clock_gettime_backend */
+	.quad 0			/* gettimeofday_backend */
 	.size vkso_user_context, .-vkso_user_context
 
 	.section .note.GNU-stack, "", @progbits

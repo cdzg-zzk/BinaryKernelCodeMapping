@@ -28,7 +28,10 @@ union vkso_shared_page vkso_shared_page
 		.data.abi_version = VKSO_TIME_ABI_VERSION,
 	};
 
-struct vkso_context vkso_kernel_context;
+struct vkso_context vkso_kernel_context = {
+	.clock_gettime_backend = vkso_posix_clock_gettime_backend,
+	.gettimeofday_backend = vkso_kernel_gettimeofday_backend,
+};
 
 void vkso_time_set_pvclock_page(const void *page)
 {

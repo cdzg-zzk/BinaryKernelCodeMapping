@@ -66,9 +66,17 @@ struct vkso_mm_data {
 	struct vkso_time_value boottime_offset;
 };
 
+typedef int (*vkso_clock_gettime_backend_t)(
+	int32_t clock_id, struct vkso_time_value *value,
+	const struct vkso_mm_data *mm_data, int status);
+typedef int (*vkso_gettimeofday_backend_t)(
+	struct vkso_timeval *tv, struct vkso_timezone *tz, int status);
+
 struct vkso_context {
 	const void *pvclock_page;
 	const void *hvclock_page;
+	vkso_clock_gettime_backend_t clock_gettime_backend;
+	vkso_gettimeofday_backend_t gettimeofday_backend;
 };
 
 /* Standard user ABI exported by the private libkernel.so entry page. */

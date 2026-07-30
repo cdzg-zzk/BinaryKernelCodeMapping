@@ -103,13 +103,22 @@ union vkso_mm_page {
 	u8 page[VKSO_SHARED_PAGE_SIZE];
 };
 
+typedef int (*vkso_clock_gettime_backend_t)(
+	s32 clock_id, struct vkso_time_value *value,
+	const struct vkso_mm_data *mm_data, int status);
+typedef int (*vkso_gettimeofday_backend_t)(
+	struct vkso_timeval *tv, struct vkso_timezone *tz, int status);
+
 /*
- * Environment-specific aliases of hypervisor-owned counter pages. Kernel
- * and user wrappers provide addresses valid in their own address spaces.
+ * Environment-specific counter aliases and cold backends. Kernel and user
+ * entry code provide addresses valid in their own address spaces. Backends
+ * are reached only after the shared reader rejects a provider or clock ID.
  */
 struct vkso_context {
 	const void *pvclock_page;
 	const void *hvclock_page;
+	vkso_clock_gettime_backend_t clock_gettime_backend;
+	vkso_gettimeofday_backend_t gettimeofday_backend;
 };
 
 /*
@@ -118,10 +127,10 @@ struct vkso_context {
  * MM_data pointer selects the root namespace; otherwise the common reader
  * applies the per-MM offset selected by clock_mask.
  *
- * The core never performs a syscall or enters a kernel backend. An unavailable
- * cycle provider returns VKSO_TIME_UNSUPPORTED_MODE, while a non-global clock
- * returns VKSO_TIME_BACKEND_REQUIRED. Public wrappers own both fallback
- * policies.
+ * The core contains no syscall or k_clock policy. An unavailable cycle
+ * provider and a non-global clock are handed to the environment's cold
+ * backend. This lets the public user entry tail-jump into the core while the
+ * kernel and user environments retain distinct fallback semantics.
  */
 int vkso_clock_gettime_common(s32 clock_id, struct vkso_time_value *value,
 			      const struct vkso_mm_data *mm_data,

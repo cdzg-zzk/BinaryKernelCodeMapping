@@ -46,7 +46,7 @@ static_assert(offsetof(struct vkso_mm_data, monotonic_offset) == 8);
 static_assert(offsetof(struct vkso_mm_data, boottime_offset) == 24);
 static_assert(sizeof(union vkso_shared_page) == VKSO_SHARED_PAGE_SIZE);
 static_assert(sizeof(union vkso_mm_page) == VKSO_SHARED_PAGE_SIZE);
-static_assert(sizeof(struct vkso_context) == 2 * sizeof(void *));
+static_assert(sizeof(struct vkso_context) == 4 * sizeof(void *));
 
 static noinline notrace __vkso_text
 int vkso_finish_hres_cold(s64 sec, u64 nsec,
@@ -132,8 +132,10 @@ int vkso_clock_gettime_common(s32 clock_id, struct vkso_time_value *value,
 	u32 clock_bit;
 	int status;
 
-	if (unlikely((u32)clock_id > CLOCK_TAI))
-		return VKSO_TIME_BACKEND_REQUIRED;
+	if (unlikely((u32)clock_id > CLOCK_TAI)) {
+		status = VKSO_TIME_BACKEND_REQUIRED;
+		goto backend;
+	}
 	clock_bit = 1U << clock_id;
 
 	if (likely(clock_bit & VKSO_HRES_CLOCK_MASK)) {
@@ -160,7 +162,7 @@ int vkso_clock_gettime_common(s32 clock_id, struct vkso_time_value *value,
 			shared, base, &shared->state.cycles, multiplier,
 			context, value, true);
 		if (unlikely(status != VKSO_TIME_OK))
-			return status;
+			goto backend;
 	} else if (clock_bit & VKSO_COARSE_CLOCK_MASK) {
 		if (clock_id == CLOCK_REALTIME_COARSE) {
 			coarse = &shared->state.realtime_coarse;
@@ -171,12 +173,17 @@ int vkso_clock_gettime_common(s32 clock_id, struct vkso_time_value *value,
 		}
 		vkso_read_coarse(shared, coarse, value);
 	} else {
-		return VKSO_TIME_BACKEND_REQUIRED;
+		status = VKSO_TIME_BACKEND_REQUIRED;
+		goto backend;
 	}
 
 	if (offset && (READ_ONCE(mm_data->clock_mask) & clock_bit))
 		vkso_apply_offset(offset, value);
 	return VKSO_TIME_OK;
+
+backend:
+	return context->clock_gettime_backend(
+		clock_id, value, mm_data, status);
 }
 
 #undef VKSO_COARSE_CLOCK_MASK
@@ -228,7 +235,7 @@ int vkso_gettimeofday_core(
 			false);
 
 		if (unlikely(status != VKSO_TIME_OK))
-			return status;
+			return context->gettimeofday_backend(tv, tz, status);
 		tv->sec = now.sec;
 		/*
 		 * vkso_read_hres_time() normalizes nsec to [0, NSEC_PER_SEC).
