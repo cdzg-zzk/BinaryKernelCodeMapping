@@ -1186,8 +1186,12 @@ monotonic/raw/boottime 则存在 MM_data 指针与 mask 的分散判断。
   `vkso-tests/baremetal/artifacts/validation/o3-fullwidth-aa1855e`；
   Raw/VKSO各112行矩阵、正常RTC与无RTC、自测、seq并发、clocksource切换及
   suspend/resume全部通过。
-- 当前状态：静态和QEMU门槛通过，等待normal裸机PMU/cycles决定是否保留；
-  在裸机结果出来前不进入O2或O4。
+- normal裸机结果：
+  `vkso-tests/baremetal/results/20260730T143832Z-o3-fullwidth`；
+  相比O3前候选，hres成功路径稳定减少3条指令和1个分支，cycles整体中性，
+  未发现功能、常用短接口或syscall路径退化。
+- 当前状态：保留。O3删除了所有hres路径共同支付的无效mask工作，且不触及
+  publisher，因此不会改变update-side。
 
 ### 12.6 O4：冷 backend shim 与 tail-entry（优先级 4，独立原型）
 
@@ -1231,6 +1235,38 @@ monotonic/raw/boottime 则存在 MM_data 指针与 mask 的分散判断。
 - fallback 前置成本下降，且 syscall backend 本身不重复执行；
 - shared core 与 wrapper 总源码/机器码不增加，或增加量有稳定 cycles 收益；
 - 若出现 hot-path spill、间接调用进入热路径或收益不能复现，回退整个 O4。
+
+实施记录（2026-07-30）：
+
+- 候选提交为 `f8d5d16`，开发分支为 `vkso-reader-o4-cold-backend`。
+- `vkso_context`增加两个有类型的冷backend入口：
+  - user context分别进入`clock_gettime`和`gettimeofday` syscall trampoline；
+  - kernel context分别进入既有`k_clock`/private-timekeeper backend；
+  - shared core仍不包含syscall号或`k_clock`策略。
+- user public entry加载MM/context后tail-jump到shared core；成功时core直接返回
+  原调用者，只有unsupported mode或backend-required才间接tail-jump到冷backend。
+- kernel global-clock dispatcher也直接返回shared core，不再重复检查status后
+  进入第二层fallback。
+- 成功路径静态结果：
+  - `__vkso_clock_gettime`：63 B → 19 B（−44 B）；
+  - `__vkso_gettimeofday`：37 B → 12 B（−25 B）；
+  - `__vkso_bind_context`：24 B → 52 B（+28 B，仅初始化执行）；
+  - user wrapper text合计：216 B → 200 B（−16 B）；
+  - shared `clock_gettime` core：560 B → 576 B（+16 B）；
+  - shared `gettimeofday` core：272 B → 288 B（+16 B）；
+  - 新增32 B间接调用thunk，仅由冷backend路径到达。
+- 源码变化为97行增加、67行删除，净增30行；增加部分主要是明确的双环境
+  backend契约，不能把它误报为共享公式增加。
+- 默认、TIME_NS现有配置和Hyper-V静态配置编译通过；`make_dll`单元测试
+  10项通过。
+- validation package：
+  `vkso-tests/baremetal/artifacts/o4-cold-backend-validation-candidate`；
+- QEMU结果：
+  `vkso-tests/baremetal/artifacts/validation/o4-cold-backend-candidate`；
+  Raw/VKSO各112行矩阵、正常RTC与无RTC场景全部通过。
+- 当前状态：静态与QEMU门槛通过，等待normal裸机cycles/PMU决定是否保留。
+  保留标准是成功read动态指令/分支下降能转换为可复现cycles收益，同时fallback
+  总成本无不可接受退化；否则整体回退`f8d5d16`，不继续叠加补丁。
 
 ### 12.7 O5：剩余短路径定向收敛（优先级 5，条件项）
 
@@ -1318,8 +1354,8 @@ monotonic/raw/boottime 则存在 MM_data 指针与 mask 的分散判断。
 | 冻结四组 reader/PMU/seq 基线 | 0 | 已完成 | 结果可复算 |
 | O1 单遍 clock-ID 分派 | 1 | 裸机验证后回退；`e3290c8` | 失败证据已封存 |
 | O2 namespace/offset 收紧 | 2 | 保留为静态原型，不直接实施 | 非namespace路径确实减少动态工作且不复制core |
-| O3 x86 cycle-delta 专门化 | 3 | `aa1855e`；静态/QEMU通过，待normal裸机 | hres指令/cycles下降且常用接口不退化 |
-| O4 cold backend shim/tail-entry | 4 | 保留为高风险独立原型 | 无hot spill/间接调用且成功路径call/ret下降 |
+| O3 x86 cycle-delta 专门化 | 3 | 保留；`aa1855e`，裸机指令/分支下降且cycles中性 | 已满足 |
+| O4 cold backend shim/tail-entry | 4 | `f8d5d16`；静态/QEMU通过，待normal裸机 | 成功read cycles改善且fallback无不可接受退化 |
 | O5 剩余短路径收敛 | 5 | 条件项；仅处理O2～O4后的残余热点 | 仍有可归因固定成本 |
 | O6 root-MM/shared-layout 备选 | 6 | 暂不实施 | 局部优化不足且setns/MM语义可证明 |
 | O7 最终全量验证 | 7 | 待执行 | 所有保留候选冻结 |
