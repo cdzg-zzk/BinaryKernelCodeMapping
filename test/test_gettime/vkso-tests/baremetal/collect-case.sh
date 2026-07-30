@@ -64,8 +64,16 @@ test "$(manifest_value "$STATE" run_id)" = "$RUN_ID"
 test "$(manifest_value "$STATE" status)" = active
 test "$(manifest_value "$PACKAGE/boot-manifest.txt" build_variant)" = \
 	"$VARIANT"
-"$HERE/verify-packages.sh" \
-	"$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE" >/dev/null
+case_order=$(manifest_value "$EXPERIMENT_MANIFEST" case_order)
+if [[ " $case_order " == *" raw-no-retpoline "* ]]; then
+	"$HERE/verify-packages.sh" \
+		"$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE" >/dev/null
+else
+	(
+		cd "$NORMAL_PACKAGE"
+		sha256sum -c SHA256SUMS >/dev/null
+	)
+fi
 (cd "$PACKAGE" && sha256sum -c SHA256SUMS >/dev/null)
 
 config_sha=$(sha256sum "$HERE/experiment.conf" | awk '{print $1}')

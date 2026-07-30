@@ -11,7 +11,9 @@ RESULTS_DIR=${RESULTS_DIR:-$HERE/results}
 STATE=${STATE_FILE:-$HERE/.experiment-state}
 LOCK=${LOCK_FILE:-$HERE/.experiment.lock}
 CONFIG=$HERE/experiment.conf
-CASES=(raw-normal vkso-normal raw-no-retpoline vkso-no-retpoline)
+FULL_CASES=(raw-normal vkso-normal raw-no-retpoline vkso-no-retpoline)
+NORMAL_CASES=(raw-normal vkso-normal)
+CASES=("${FULL_CASES[@]}")
 
 manifest_value()
 {
@@ -60,6 +62,8 @@ write_state()
 
 load_state()
 {
+	local case_order saved_normal saved_no_ret
+
 	test -s "$STATE" || {
 		echo "no active experiment; run: ./experiment.sh begin" >&2
 		exit 1
@@ -67,9 +71,22 @@ load_state()
 	run_id=$(manifest_value "$STATE" run_id)
 	next_index=$(manifest_value "$STATE" next_index)
 	state_status=$(manifest_value "$STATE" status)
-	[[ "$next_index" =~ ^[0-4]$ ]]
 	result_root=$RESULTS_DIR/$run_id
 	test -s "$result_root/experiment-manifest.txt"
+	case_order=$(manifest_value \
+		"$result_root/experiment-manifest.txt" case_order)
+	read -r -a CASES <<<"$case_order"
+	[[ ${#CASES[@]} -eq 2 || ${#CASES[@]} -eq 4 ]]
+	[[ "$next_index" =~ ^[0-9]+$ ]]
+	((next_index <= ${#CASES[@]}))
+	saved_normal=$(manifest_value \
+		"$result_root/experiment-manifest.txt" normal_package)
+	saved_no_ret=$(manifest_value \
+		"$result_root/experiment-manifest.txt" no_retpoline_package)
+	NORMAL_PACKAGE=$saved_normal
+	if [[ "$saved_no_ret" != none ]]; then
+		NO_RETPOLINE_PACKAGE=$saved_no_ret
+	fi
 	test "$(manifest_value "$STATE" experiment_manifest_sha256)" = \
 		"$(sha256sum "$result_root/experiment-manifest.txt" |
 			awk '{print $1}')" || {
@@ -78,10 +95,26 @@ load_state()
 	}
 }
 
+uses_no_retpoline()
+{
+	[[ " ${CASES[*]} " == *" raw-no-retpoline "* ]]
+}
+
 verify_packages_quiet()
 {
-	"$HERE/verify-packages.sh" \
-		"$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE" >/dev/null
+	if uses_no_retpoline; then
+		"$HERE/verify-packages.sh" \
+			"$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE" >/dev/null
+	else
+		(
+			cd "$NORMAL_PACKAGE"
+			sha256sum -c SHA256SUMS >/dev/null
+		)
+		test "$(manifest_value \
+			"$NORMAL_PACKAGE/boot-manifest.txt" build_variant)" = normal
+		test "$(manifest_value \
+			"$NORMAL_PACKAGE/boot-manifest.txt" vkso_validation_tests)" = 0
+	fi
 }
 
 verify_repository_identity()
@@ -96,10 +129,12 @@ verify_repository_identity()
 	commit=$(git -C "$ROOT" rev-parse HEAD)
 	normal_commit=$(manifest_value \
 		"$NORMAL_PACKAGE/boot-manifest.txt" git_commit)
-	no_retpoline_commit=$(manifest_value \
-		"$NO_RETPOLINE_PACKAGE/boot-manifest.txt" git_commit)
 	test "$commit" = "$normal_commit"
-	test "$commit" = "$no_retpoline_commit"
+	if uses_no_retpoline; then
+		no_retpoline_commit=$(manifest_value \
+			"$NO_RETPOLINE_PACKAGE/boot-manifest.txt" git_commit)
+		test "$commit" = "$no_retpoline_commit"
+	fi
 
 	expected_source=$(manifest_value \
 		"$NORMAL_PACKAGE/boot-manifest.txt" vkso_source_tree_sha256)
@@ -113,9 +148,21 @@ verify_repository_identity()
 
 begin_experiment()
 {
-	local requested_run_id=${1:-}
+	local requested_run_id=${1:-} mode=${2:-full}
 	local run_id manifest config_sha normal_manifest_sha no_ret_manifest_sha
 
+	case "$mode" in
+	full)
+		CASES=("${FULL_CASES[@]}")
+		;;
+	normal)
+		CASES=("${NORMAL_CASES[@]}")
+		;;
+	*)
+		echo "invalid experiment mode: $mode" >&2
+		exit 2
+		;;
+	esac
 	verify_packages_quiet
 	verify_repository_identity
 	if [[ -s "$STATE" &&
@@ -138,8 +185,12 @@ begin_experiment()
 	config_sha=$(sha256sum "$CONFIG" | awk '{print $1}')
 	normal_manifest_sha=$(sha256sum \
 		"$NORMAL_PACKAGE/boot-manifest.txt" | awk '{print $1}')
-	no_ret_manifest_sha=$(sha256sum \
-		"$NO_RETPOLINE_PACKAGE/boot-manifest.txt" | awk '{print $1}')
+	if uses_no_retpoline; then
+		no_ret_manifest_sha=$(sha256sum \
+			"$NO_RETPOLINE_PACKAGE/boot-manifest.txt" | awk '{print $1}')
+	else
+		no_ret_manifest_sha=none
+	fi
 	# shellcheck disable=SC1090
 	source "$CONFIG"
 	{
@@ -150,8 +201,12 @@ begin_experiment()
 		printf 'git_commit=%s\n' "$(git -C "$ROOT" rev-parse HEAD)"
 		printf 'experiment_config_sha256=%s\n' "$config_sha"
 		printf 'normal_package=%s\n' "$(realpath "$NORMAL_PACKAGE")"
-		printf 'no_retpoline_package=%s\n' \
-			"$(realpath "$NO_RETPOLINE_PACKAGE")"
+		if uses_no_retpoline; then
+			printf 'no_retpoline_package=%s\n' \
+				"$(realpath "$NO_RETPOLINE_PACKAGE")"
+		else
+			printf 'no_retpoline_package=none\n'
+		fi
 		printf 'normal_manifest_sha256=%s\n' "$normal_manifest_sha"
 		printf 'no_retpoline_manifest_sha256=%s\n' \
 			"$no_ret_manifest_sha"
@@ -180,8 +235,8 @@ set_expected_case()
 		echo "experiment is not active: $state_status" >&2
 		exit 1
 	}
-	test "$next_index" -lt 4 || {
-		echo "all four cases are already complete" >&2
+	test "$next_index" -lt "${#CASES[@]}" || {
+		echo "all experiment cases are already complete" >&2
 		exit 1
 	}
 	current_case=${CASES[$next_index]}
@@ -236,11 +291,11 @@ collect_case()
 		"$HERE/collect-case.sh" "$expected" "$run_id"
 	test -f "$result_root/$expected/complete"
 	next=$((next_index + 1))
-	if [[ "$next" -lt 4 ]]; then
+	if [[ "$next" -lt "${#CASES[@]}" ]]; then
 		write_state "$run_id" "$next" active
 		echo "next_case=${CASES[$next]}"
 	else
-		write_state "$run_id" 4 complete
+		write_state "$run_id" "$next" complete
 		archive=$RESULTS_DIR/$run_id.tar.gz
 		temporary=$archive.partial.$$
 		tar -C "$RESULTS_DIR" -czf "$temporary" "$run_id"
@@ -261,7 +316,8 @@ show_status()
 	echo "run_id=$run_id"
 	echo "status=$state_status"
 	echo "completed_cases=$next_index"
-	if [[ "$state_status" == active && "$next_index" -lt 4 ]]; then
+	if [[ "$state_status" == active &&
+	      "$next_index" -lt "${#CASES[@]}" ]]; then
 		echo "next_case=${CASES[$next_index]}"
 	fi
 	echo "result_root=$result_root"
@@ -276,7 +332,10 @@ flock -n 9 || {
 
 case "${1:-}" in
 begin)
-	begin_experiment "${2:-}"
+	begin_experiment "${2:-}" full
+	;;
+begin-normal)
+	begin_experiment "${2:-}" normal
 	;;
 boot)
 	boot_case "${2:-}"
@@ -288,7 +347,7 @@ status)
 	show_status
 	;;
 *)
-	echo "usage: $0 {begin [RUN_ID]|boot [CASE]|collect [CASE]|status}" >&2
+	echo "usage: $0 {begin [RUN_ID]|begin-normal [RUN_ID]|boot [CASE]|collect [CASE]|status}" >&2
 	exit 2
 	;;
 esac
