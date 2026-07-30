@@ -1159,6 +1159,36 @@ monotonic/raw/boottime 则存在 MM_data 指针与 mask 的分散判断。
 - unsupported mode fallback；
 - 原 finite-mask 单元测试改为验证“有限 mask 不进入该成功入口”，不能简单删除。
 
+实施记录（2026-07-30）：
+
+- 不变量审计通过：
+  - x86 `clocksource_arch_init()` 会将任何非 `CLOCKSOURCE_MASK(64)` 的
+    userspace-readable clocksource 强制改为 `VDSO_CLOCKMODE_NONE`；
+  - TSC、KVM/Xen PVClock 和 Hyper-V TSC page clocksource均声明64位mask；
+  - NONE、未知mode、PV/HV缺页或不稳定provider均在delta计算前返回
+    `VKSO_TIME_UNSUPPORTED_MODE`。
+- 候选提交为 `aa1855e`：
+  - `vkso_cycle_delta()`删除mask参数、load、比较及finite-mask主体；
+  - shared ABI v11中的mask字段和publisher保持不变，便于兼容和诊断；
+  - backward counter仍钳制为零；
+  - validation selftest用finite-mask + unsupported mode验证其不能进入delta。
+- 静态编译：
+  - 默认TSC/KVM/PVClock配置通过；
+  - 独立启用 `CONFIG_HYPERV=y`、`CONFIG_HYPERV_TIMER=y` 后
+    `vkso_time_core.o`、`vkso_time_cycles.o`、`vkso_time_test.o`通过。
+- 机器码：
+  - `vkso_clock_gettime_common`：592 B → 560 B（−32 B）；
+  - `vkso_gettimeofday_core`：304 B → 272 B（−32 B）；
+  - wrapper、shared ABI、映射页数和update-side代码均未改变。
+- validation package：
+  `vkso-tests/baremetal/artifacts/o3-fullwidth-validation-aa1855e`；
+- QEMU结果：
+  `vkso-tests/baremetal/artifacts/validation/o3-fullwidth-aa1855e`；
+  Raw/VKSO各112行矩阵、正常RTC与无RTC、自测、seq并发、clocksource切换及
+  suspend/resume全部通过。
+- 当前状态：静态和QEMU门槛通过，等待normal裸机PMU/cycles决定是否保留；
+  在裸机结果出来前不进入O2或O4。
+
 ### 12.6 O4：冷 backend shim 与 tail-entry（优先级 4，独立原型）
 
 问题：
@@ -1288,7 +1318,7 @@ monotonic/raw/boottime 则存在 MM_data 指针与 mask 的分散判断。
 | 冻结四组 reader/PMU/seq 基线 | 0 | 已完成 | 结果可复算 |
 | O1 单遍 clock-ID 分派 | 1 | 裸机验证后回退；`e3290c8` | 失败证据已封存 |
 | O2 namespace/offset 收紧 | 2 | 保留为静态原型，不直接实施 | 非namespace路径确实减少动态工作且不复制core |
-| O3 x86 cycle-delta 专门化 | 3 | 推荐下一项；full-mask源码审计已通过 | 汇编确认减少load/compare/branch |
+| O3 x86 cycle-delta 专门化 | 3 | `aa1855e`；静态/QEMU通过，待normal裸机 | hres指令/cycles下降且常用接口不退化 |
 | O4 cold backend shim/tail-entry | 4 | 保留为高风险独立原型 | 无hot spill/间接调用且成功路径call/ret下降 |
 | O5 剩余短路径收敛 | 5 | 条件项；仅处理O2～O4后的残余热点 | 仍有可归因固定成本 |
 | O6 root-MM/shared-layout 备选 | 6 | 暂不实施 | 局部优化不足且setns/MM语义可证明 |
