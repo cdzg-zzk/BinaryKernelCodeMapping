@@ -317,14 +317,17 @@ private staging + 短 scalar publisher 作为独立对照候选回退；不得�
 
 ```text
 public ABI wrapper
-    -> typed global reader 或 generic cold dispatcher
+    -> 单次分类的紧凑 global dispatcher / 固定 ID 薄适配器
         -> shared seq/arithmetic primitive + environment provider
             -> backend/fallback（仅失败或非 global clock）
 ```
 
 热路径约束：
 
-- 已知 global clock 使用 typed 入口，不经过 generic clockid 大 switch；
+- public `clock_gettime` 使用一份紧凑 global dispatcher，只分类一次 clock ID，
+  不生成 jump table，也不同时保留“位图分类 + typed reader 二次分类”；
+- 固定 ID 的 kernel API 可以保留 typed 薄适配器，但不得复制七份 seq、cycles、
+  base 和归一化主体；
 - user 成功路径不进入 syscall fallback，也不先调用 backend；
 - 有用户等价功能的kernel普通`ktime_get_*`以root namespace typed薄wrapper
   进入共享算法，不支付MM_data NULL检查和generic dispatcher成本；
@@ -334,7 +337,7 @@ public ABI wrapper
   汇编检查决定，目标是成功热路径最多保留一个必要的非内联算法调用；
 - 不为追求“单一入口”引入新的函数指针、重复 mode 判断或 call/ret；
 - shared core 返回内部 `OK`、`UNSUPPORTED_MODE`、`BACKEND_REQUIRED` 等有限
-  状态，但 typed 成功路径应能被编译器收敛成最少分支。
+  状态，但成功路径应能被编译器收敛成最少分支。
 
 fallback 约束：
 
@@ -917,3 +920,365 @@ clocksource switch、S3 suspend/resume、动态 clock、特殊 reader、seq、
 namespace、fallback 次数和映射权限均通过。两套 Raw/VKSO 最终语义矩阵各
 113 行且 diff 为空。下一阶段是需要用户介入的 M10 裸机性能和最终代码量证据，
 不得用 M09 的 QEMU cycles 代替。
+
+---
+
+## 12. M11：裸机证据驱动的 reader 收敛优化
+
+### 12.1 定位、基线与适用优先级
+
+M11 是 M10 reader 实验之后的独立优化阶段，不重新设计 timekeeper owner、
+shared publisher 或 MM_data 映射。目标是在保持现有功能、复用关系和可读性的
+前提下，减少用户成功路径稳定执行的指令、分支、参数搬运和 call/ret。
+
+冻结优化基线：
+
+- commit：`238c7771eb80fa5807e629ec046df03f2eb0cb74`；
+- result root：
+  `test/test_gettime/vkso-tests/baremetal/results/20260730T053229Z-vkso-final`；
+- case：normal Raw、normal VKSO、no-retpoline Raw、no-retpoline VKSO；
+- 每个 case 包含 20 个 API、2 条路径、31 次重复，共 1240 条性能记录；
+- 每个 case 的功能矩阵均为 44 pass / 0 fail；
+- normal 是生产结论，no-retpoline 只用于分离 thunk/retpoline 影响。
+
+基线证据：
+
+| 路径 | Raw cycles | VKSO cycles | VKSO 额外指令 | VKSO 额外分支 |
+|---|---:|---:|---:|---:|
+| realtime | 56.263 | 57.199 | 24 | 6 |
+| monotonic | 56.196 | 58.204 | 33 | 9 |
+| monotonic raw | 58.303 | 59.212 | 30 | 7 |
+| boottime | 56.258 | 59.208 | 38 | 11 |
+| TAI | 56.199 | 58.204 | 30 | 9 |
+| realtime coarse | 17.061 | 21.166 | 19 | 5 |
+| monotonic coarse | 17.060 | 23.108 | 27 | 6 |
+| gettimeofday(tv) | 64.222 | 67.484 | 25 | 5 |
+
+解释边界：
+
+- PMU 显示 cache miss 和 branch miss 接近零，当前重点不是 cache-line 重排或
+  分支预测失败，而是成功路径无条件执行了更多工作；
+- 关闭 retpoline/return thunk 后，高精度 `clock_gettime` 的 Raw/VKSO 绝对
+  cycles 和差距基本不变，因此 thunk 不是本轮 reader 优化目标；
+- VKSO hres/raw retry 分别约为 31/46 次每百万读取，Raw 约为 144/97 次，
+  retry 优势真实存在但摊销远小于 0.01 cycle，不能抵消每次固定的 1～6 cycles；
+- coarse/NULL 路径的百分比退化较大，但绝对差距仍为 4～6 cycles，评价时必须
+  同时报告绝对 cycles 和百分比。
+
+本阶段按下列顺序串行推进：
+
+1. O1：单遍 clock-ID 分派；
+2. O2：namespace/offset 路径收紧；
+3. O3：x86 成功 provider 的 cycle-delta 专门化；
+4. O4：冷 backend shim 与 tail-entry 原型；
+5. O5：`gettimeofday`/NULL 等剩余短路径定向收敛；
+6. O6：仅在前述优化仍不足时评估 root-MM 或 shared layout 备选；
+7. O7：最终全量功能、read、update、并发和代码规模验证。
+
+O1～O3 是首选低风险优化；O4 必须独立原型和独立决策；O5/O6 是有证据才进入
+的条件项，不因计划列出就默认实施。
+
+### 12.2 通用执行与保留规则
+
+每个优化项必须：
+
+1. 从上一项“已保留”的 commit 开始；
+2. 先记录待删除的动态指令/分支和预期受益 API；
+3. 一个假设对应一个 commit，不把两个候选混在同一镜像；
+4. 构建 normal 配置并检查关键符号、`.text` 大小和汇编；
+5. 运行完整 QEMU 语义矩阵、namespace、fallback 和 provider 定向测试；
+6. QEMU 通过后才安装裸机镜像；
+7. 开发期先测 normal VKSO，并与本节冻结的同协议基线比较；
+8. 保留候选后再进入下一项；失败候选留在可定位 commit/分支，不继续叠补丁。
+
+性能保留标准：
+
+- 目标 API 的动态指令/分支必须按假设减少；若编译器生成相反结果，先停止；
+- cycles 改善必须大于本轮重复分布噪声；小于 1 cycle 的结论至少在两个独立
+  boot 中方向一致；
+- 任一常用非目标 API 不得出现稳定大于 `max(0.5 cycle, 1%)` 的退化；
+- O1～O3 原则上同时减少或不增加机器码；如机器码增加，必须有稳定性能收益和
+  明确可读性理由；
+- 代码量下降而 cycles 中性可以保留，但不得增加分支、破坏可读性或功能边界；
+- 功能、ABI、namespace、PV/HV、fallback 或 update/concurrent 任一退化时
+  直接回退，不以其他接口的收益抵消正确性。
+
+统计规则：
+
+- 开发期可复用冻结的 Raw 数据定位方向，但不得把跨版本拼接结果作为论文最终
+  对照；
+- O7 必须重新成对采集 Raw/VKSO；
+- 每项同时记录源码净增删、核心符号大小、retired instructions、branches、
+  branch misses、cycles 和 retry；
+- 百分比必须和 cycles 绝对值同时报告。
+
+### 12.3 O1：单遍 clock-ID 分派（优先级 1）
+
+问题：
+
+当前 `vkso_clock_gettime_common()` 先执行：
+
+1. clock ID 上界检查；
+2. `1U << clock_id`；
+3. HRES/COARSE 位图分类；
+4. 第二组 clock-ID 比较以选择 base、multiplier 和 offset。
+
+Raw 使用位图分类后可通过稀疏 `basetime[clock]` 直接索引，而 VKSO named
+layout 又进行第二次分类，形成重复工作。
+
+实现方向：
+
+- 删除 HRES/COARSE 双 mask 和后续 named-field ID 链；
+- 使用每个 clock 一个 8-bit descriptor，一次确定：
+  - shared payload 的 `u64` 索引；
+  - hres/coarse 类型；
+  - mono/raw multiplier；
+  - 是否需要 namespace offset；
+- descriptor 以两个编译期打包立即数保存，不增加普通 `.rodata`、shared ABI 或
+  DSO 映射页；零 descriptor 统一表示 CPU、alarm、dynamic 和无效 ID；
+- descriptor 提取只执行一次变量移位；仅 namespace-capable clock 在读取完成后
+  使用 clock ID 检查 MM_data mask；
+- 不启用 jump table，不在 wrapper 复制 clock 分类；
+- 所有 clock 仍进入同一份 hres/coarse 计算主体，不恢复七份 typed 核心。
+
+静态退出条件：
+
+- 成功路径汇编中不再出现 HRES/COARSE 类别 mask 和第二组 clock-ID 比较；
+- realtime、monotonic、coarse 的比较/分支数下降；
+- `vkso_clock_gettime_common` 及关联 wrapper 总机器码不增加；
+- invalid/negative/CPU/alarm clock 的 fallback 只执行一次。
+
+验证重点：
+
+- 七种 global clock；
+- 负 clock ID、`CLOCK_TAI + 1`、CPU、alarm 和 dynamic clock；
+- 输出指针错误与 syscall errno；
+- normal PMU instructions/branches/cycles；
+- coarse 路径必须单独报告绝对 cycles。
+
+实施记录（2026-07-30）：
+
+- 显式浅层树和 C `switch` 候选分别将 common core 从实际 586 B 增至约
+  660 B 和 686 B，均在进入 QEMU 前回退；
+- 普通 `.rodata` descriptor 表可将 text 降至约 512 B，但当前 KRG 闭包不会
+  自动携带该只读对象；为避免扩大加载器机制和新增映射页，该候选回退；
+- 最终采用两个指令立即数承载 12 个 8-bit descriptor：
+  - 源码为 48 行新增、48 行删除，净变化 0 SLOC；
+  - common core 实际尺寸 586 B → 537 B（−49 B）；
+  - `libkernel.so` 对齐符号尺寸 592 B → 544 B（−48 B）；
+  - `__vkso_clock_gettime` wrapper 保持 63 B；
+  - 未增加 `.rodata`、shared-data 或其他 DSO 映射页；
+- validation package：
+  `vkso-tests/baremetal/artifacts/o1-packed-validation`；
+- QEMU 结果：
+  `vkso-tests/baremetal/artifacts/validation/normal-20260730T104146Z`；
+  Raw/VKSO 各 112 行矩阵、正常 RTC 与无 RTC 四种启动全部通过。
+- 当前状态：静态和 QEMU 门槛已通过，等待 normal 裸机 reader 判断是否保留；
+  在裸机结果出来前不进入 O2。
+
+### 12.4 O2：namespace/offset 路径收紧（优先级 2）
+
+问题：
+
+当前 common reader 先形成通用 `offset` 指针，读取结束后再统一执行
+`offset != NULL`、MM_data mask 和 offset 应用判断。realtime、TAI 和
+realtime-coarse 本不需要 namespace offset，也支付了通用收尾控制流；
+monotonic/raw/boottime 则存在 MM_data 指针与 mask 的分散判断。
+
+实现方向：
+
+- realtime、TAI、realtime-coarse 成功后直接完成，不经过通用 offset 收尾；
+- monotonic、raw、boottime、monotonic-coarse 才进入一个可读的
+  namespace-offset helper；
+- helper 将 MM_data 有效性、clock mask 和具体 offset 的选择组织在一处；
+- root namespace 保持当前 NULL/零 mask 语义；
+- 不在一次性 init 中缓存“永远是 root”的假设，不削弱 fork/exec/setns；
+- 不把 MM_data 内容复制到 shared_data，不引入第二个 seq。
+
+静态退出条件：
+
+- 不支持 namespace offset 的 clock 不再读取 MM_data mask；
+- namespace-capable clock 的 MM_data/mask 判断只出现一处；
+- 不增加 user/kernel 两份 offset 算法；
+- root kernel reader 与 user namespace reader 的调用契约仍明确。
+
+验证重点：
+
+- root 与非 root namespace；
+- monotonic/raw/boottime/coarse offset；
+- fork、exec、setns、多线程；
+- realtime/TAI 不受 offset 影响；
+- PMU 重点检查 realtime、monotonic、boottime 和两个 coarse clock。
+
+### 12.5 O3：x86 cycle-delta 专门化（优先级 3）
+
+问题：
+
+当前成功路径读取 `mask`，先判断 `mask == U64_MAX`，再执行
+`cycles > cycle_last` 和 delta。Raw x86 对用户可读的 TSC/PVClock/Hyper-V
+成功路径使用 full-width counter，不支付有限 mask 的通用检查。
+
+实施前审计：
+
+- 列出 TSC、PVClock、Hyper-V 所有可成功返回的 mode；
+- 证明它们发布到 shared state 的 mask 恒为 `U64_MAX`；
+- 证明任何 finite-mask 或不支持 mode 在使用 delta 前进入 fallback；
+- 检查普通 kernel reader 是否可能用同一入口消费 finite-mask clocksource。
+
+仅在上述不变量成立时实施：
+
+- x86 成功 provider 使用 full-width delta：
+  `cycles > cycle_last ? cycles - cycle_last : 0`；
+- shared ABI 中可暂时保留 mask 作为诊断/兼容字段，但成功热路径不读取它；
+- finite-mask 语义不得被静默错误计算；不能证明时放弃 O3，而不是增加猜测分支；
+- 不改变 PV/HV 功能与 fallback 条件。
+
+静态退出条件：
+
+- TSC/PV/HV 成功路径减少一次 mask load、比较和分支；
+- 不支持 mode 仍在写输出前失败；
+- kernel 普通 reader 没有被错误限制为 TSC；
+- 代码量不因保留两个热 delta 主体而增加。
+
+验证重点：
+
+- TSC 裸机正常路径；
+- PVClock/Hyper-V 静态构建和 QEMU 可达路径；
+- 人工 backward-cycle 保护；
+- unsupported mode fallback；
+- 原 finite-mask 单元测试改为验证“有限 mask 不进入该成功入口”，不能简单删除。
+
+### 12.6 O4：冷 backend shim 与 tail-entry（优先级 4，独立原型）
+
+问题：
+
+当前用户 wrapper 为了在 core 返回失败后执行 syscall，会无条件：
+
+- 保存原始参数并调整栈；
+- 加载 MM/environment context；
+- `call` shared core；
+- 检查状态；
+- 恢复栈并 `ret`，失败时再进入 syscall。
+
+这使所有成功调用为极少发生的 fallback 支付 wrapper 往返成本。
+
+候选设计：
+
+- environment context 增加内部 cold backend/fallback 入口；
+- user context 的入口执行相应 syscall trampoline；
+- kernel context 的入口进入既有 kernel backend；
+- public wrapper 加载 context 后 tail-jump 到 shared entry；
+- shared core 成功时直接返回原调用者；
+- 只有 `BACKEND_REQUIRED/UNSUPPORTED_MODE` 才调用 cold backend；
+- core 不直接写 syscall 号、不访问 `k_clock`，仍通过明确 shim 隔离环境语义。
+
+该候选允许改变内部 context ABI，但不得改变 `__vkso_*`、syscall 或
+`ktime_get_*` 外部 ABI。
+
+必须检查：
+
+- compiler 是否因冷 callback 让原始参数长期存活并产生 spill；
+- 成功路径是否真正删除 stack save、status test 和额外 call/ret；
+- indirect callback/retpoline 只存在于 cold 路径；
+- 用户可控 context 在用户态调用时不形成内核权限问题；
+- kernel context 使用静态可信入口；
+- fallback 输出、NULL、errno 和执行次数与 Raw 一致。
+
+保留条件：
+
+- clock_gettime/gettimeofday 成功路径动态指令和 call/ret 明确减少；
+- fallback 前置成本下降，且 syscall backend 本身不重复执行；
+- shared core 与 wrapper 总源码/机器码不增加，或增加量有稳定 cycles 收益；
+- 若出现 hot-path spill、间接调用进入热路径或收益不能复现，回退整个 O4。
+
+### 12.7 O5：剩余短路径定向收敛（优先级 5，条件项）
+
+只有 O1～O4 保留后，以下接口仍稳定落后 Raw 才进入：
+
+- `gettimeofday(tv)`；
+- `gettimeofday(timezone)`；
+- `gettimeofday(NULL, NULL)`；
+- coarse clock；
+- CPU/alarm fallback 前置路径。
+
+处理规则：
+
+- 先用 PMU 和汇编区分 wrapper、core、syscall backend 和镜像布局成本；
+- 优先复用 O4 的 tail-entry/cold fallback，不单独复制 global 公式；
+- NULL/timezone 路径可使用清晰的早返回，但不得生成多份 hres 主体；
+- CPU/alarm 的总差距必须先减去各自镜像的直接 syscall 成本，不能把 kernel
+  backend 差异全部归因于 user wrapper；
+- 任何 specialized leaf 必须同时给出机器码增量和稳定 cycles 收益。
+
+不允许：
+
+- 为少量冷调用在 wrapper 再复制完整 clock-ID 分类；
+- 只因百分比大就接受大量机器码；短路径必须看绝对 cycles；
+- 用 branch miss/cache miss 优化解释当前接近零的事件。
+
+### 12.8 O6：root-MM 与 shared layout 备选（优先级 6，默认不实施）
+
+以下方案风险高于当前证据，只保留为后备：
+
+1. 在加载期选择 root/non-root 专门入口；
+2. 将 MM_data 绑定为无需每次 NULL 检查的稳定 context；
+3. 将 named base 改成 Raw 式 `basetime[clock_id]` 稀疏数组；
+4. 升级 shared ABI 以换取直接索引。
+
+进入条件：
+
+- O1～O5 后仍有稳定且可归因于 MM/context 或二次寻址的显著差距；
+- fork/exec/setns 与 MM 生命周期已经证明允许一次性绑定；
+- shared payload、cache-line、publisher bytes 和 update 性能已完成模型；
+- 预期收益不能由更小的局部优化获得。
+
+任何 O6 候选必须单独分支；涉及 shared layout 时视为新内部 ABI 决策，不能
+夹入普通 reader 优化提交。
+
+### 12.9 明确排除的伪优化
+
+本阶段不执行：
+
+- 关闭 retpoline/return thunk 作为 VKSO reader 优化；
+- 删除 seq、减少一致性检查或故意增加 retry；
+- 删除 time namespace、PVClock、Hyper-V 或 fallback 语义；
+- 恢复七份 typed hres/coarse 主体；
+- 在 wrapper 与 core 重复 clock-ID 判断；
+- 因当前数据任意调整 cache-line；cache miss 并非已观测瓶颈；
+- 为追求 Raw 汇编逐字一致而破坏共享 core 的可读性和复用；
+- 在一个提交中同时修改 reader、publisher 和实验脚本。
+
+### 12.10 O7：最终验证与证据封存
+
+保留的优化全部完成后执行：
+
+1. 默认、TIME_NS、PVClock、Hyper-V 静态构建；
+2. 完整 QEMU Raw/VKSO 语义矩阵和 namespace/provider/fallback 定向测试；
+3. normal Raw 与 normal VKSO 成对 reader 实验；
+4. no-retpoline Raw/VKSO 敏感性实验；
+5. update-side 实验；
+6. read/update 并发实验；
+7. 源码语义分类与机器码复算。
+
+最终报告必须同时对照：
+
+- M11 冻结基线；
+- M11 最终 VKSO；
+- 同批次最终 Raw。
+
+逐接口报告 cycles、百分比、instructions、branches、retry 和 fallback；列出
+每个 O1～O6 候选的保留/回退状态、commit、代码规模变化和理由。最终结论不能
+只说“总体平均提高”，必须解释仍慢于 Raw 的接口及其不可消除的架构边界。
+
+### 12.11 M11 状态表
+
+| 项目 | 优先级 | 当前状态 | 进入下一项条件 |
+|---|---:|---|---|
+| 冻结四组 reader/PMU/seq 基线 | 0 | 已完成 | 结果可复算 |
+| O1 单遍 clock-ID 分派 | 1 | QEMU 通过，待 normal 裸机 | 功能通过且指令/分支下降 |
+| O2 namespace/offset 收紧 | 2 | 待实现 | namespace 全矩阵通过 |
+| O3 x86 cycle-delta 专门化 | 3 | 待审计/实现 | full-mask 不变量成立 |
+| O4 cold backend shim/tail-entry | 4 | 待独立原型 | 无 hot spill 且收益稳定 |
+| O5 剩余短路径收敛 | 5 | 条件项 | 仍有可归因固定成本 |
+| O6 root-MM/shared-layout 备选 | 6 | 默认不实施 | 局部优化不足且语义可证明 |
+| O7 最终全量验证 | 7 | 待执行 | 所有保留候选冻结 |
