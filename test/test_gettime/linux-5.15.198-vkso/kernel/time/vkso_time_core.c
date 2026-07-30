@@ -108,21 +108,17 @@ vkso_read_hres_time(const struct vkso_shared_data *shared,
 
 /*
  * Keep the clock-ID dispatcher and conversion in one shared implementation,
- * as the native vDSO does.  A compact descriptor selects the named payload,
- * conversion kind and namespace offset in one pass.  Invalid entries are
- * zero, so CPU/alarm/dynamic clocks remain backend work.
+ * as the native vDSO does.  Named fields preserve the compact ABI layout; the
+ * selection below only chooses addresses and the conversion body is emitted
+ * once.
  */
-#define VKSO_CLOCK_DATA_MASK	0x1fU
-#define VKSO_CLOCK_COARSE	(1U << 5)
-#define VKSO_CLOCK_RAW		(1U << 6)
-#define VKSO_CLOCK_NAMESPACE	(1U << 7)
-/*
- * One byte per clock ID: [7] namespace, [6] raw multiplier, [5] coarse,
- * [4:0] u64 index from shared.  IDs 2/3/8/9/10 have zero descriptors.
- * The layout assertions above make these packed constants ABI-checked.
- */
-#define VKSO_CLOCK_DESC_0_7	0x89b22dd000008705ULL
-#define VKSO_CLOCK_DESC_8_11	0x000000000b000000ULL
+#define VKSO_HRES_CLOCK_MASK						\
+	((1U << CLOCK_REALTIME) | (1U << CLOCK_MONOTONIC) |		\
+	 (1U << CLOCK_MONOTONIC_RAW) | (1U << CLOCK_BOOTTIME) |		\
+	 (1U << CLOCK_TAI))
+#define VKSO_COARSE_CLOCK_MASK						\
+	((1U << CLOCK_REALTIME_COARSE) |				\
+	 (1U << CLOCK_MONOTONIC_COARSE))
 
 __visible noinline __noclone notrace __vkso_text
 int vkso_clock_gettime_common(s32 clock_id, struct vkso_time_value *value,
@@ -130,58 +126,62 @@ int vkso_clock_gettime_common(s32 clock_id, struct vkso_time_value *value,
 			      const struct vkso_context *context)
 {
 	const struct vkso_shared_data *shared = vkso_shared_data();
-	const void *clock_data;
+	const struct vkso_hres_base *base;
+	const struct vkso_time_value *coarse;
+	const struct vkso_time_value *offset = NULL;
 	const u32 *multiplier;
-	u64 descriptors;
-	u32 descriptor;
-	u32 selector;
+	u32 clock_bit;
 	int status;
 
-	selector = (u32)clock_id;
-	if (likely(selector < 8)) {
-		descriptors = VKSO_CLOCK_DESC_0_7;
-	} else if (likely(selector <= CLOCK_TAI)) {
-		descriptors = VKSO_CLOCK_DESC_8_11;
-		selector -= 8;
-	} else {
+	if (unlikely((u32)clock_id > CLOCK_TAI))
 		return VKSO_TIME_BACKEND_REQUIRED;
-	}
-	descriptor = (descriptors >> (selector * 8)) & 0xffU;
-	if (unlikely(!descriptor))
-		return VKSO_TIME_BACKEND_REQUIRED;
+	clock_bit = 1U << clock_id;
 
-	clock_data = (const u64 *)shared +
-		     (descriptor & VKSO_CLOCK_DATA_MASK);
-	if (likely(!(descriptor & VKSO_CLOCK_COARSE))) {
+	if (likely(clock_bit & VKSO_HRES_CLOCK_MASK)) {
 		multiplier = &shared->state.cycles.mono_mult;
-		if (descriptor & VKSO_CLOCK_RAW)
+		if (likely(clock_id == CLOCK_REALTIME)) {
+			base = &shared->state.realtime_base;
+		} else if (likely(clock_id == CLOCK_MONOTONIC)) {
+			base = &shared->state.monotonic_base;
+			if (mm_data)
+				offset = &mm_data->monotonic_offset;
+		} else if (clock_id == CLOCK_MONOTONIC_RAW) {
+			base = &shared->state.monotonic_raw_base;
 			multiplier = &shared->state.cycles.raw_mult;
+			if (mm_data)
+				offset = &mm_data->monotonic_offset;
+		} else if (clock_id == CLOCK_BOOTTIME) {
+			base = &shared->state.boottime_base;
+			if (mm_data)
+				offset = &mm_data->boottime_offset;
+		} else {
+			base = &shared->state.tai_base;
+		}
 		status = vkso_read_hres_time(
-			shared, clock_data, &shared->state.cycles, multiplier,
+			shared, base, &shared->state.cycles, multiplier,
 			context, value, true);
 		if (unlikely(status != VKSO_TIME_OK))
 			return status;
+	} else if (clock_bit & VKSO_COARSE_CLOCK_MASK) {
+		if (clock_id == CLOCK_REALTIME_COARSE) {
+			coarse = &shared->state.realtime_coarse;
+		} else {
+			coarse = &shared->state.monotonic_coarse;
+			if (mm_data)
+				offset = &mm_data->monotonic_offset;
+		}
+		vkso_read_coarse(shared, coarse, value);
 	} else {
-		vkso_read_coarse(shared, clock_data, value);
+		return VKSO_TIME_BACKEND_REQUIRED;
 	}
 
-	if ((descriptor & VKSO_CLOCK_NAMESPACE) && mm_data &&
-	    (READ_ONCE(mm_data->clock_mask) & (1U << clock_id))) {
-		const struct vkso_time_value *offset =
-			clock_id == CLOCK_BOOTTIME ?
-			&mm_data->boottime_offset : &mm_data->monotonic_offset;
-
+	if (offset && (READ_ONCE(mm_data->clock_mask) & clock_bit))
 		vkso_apply_offset(offset, value);
-	}
 	return VKSO_TIME_OK;
 }
 
-#undef VKSO_CLOCK_DESC_8_11
-#undef VKSO_CLOCK_DESC_0_7
-#undef VKSO_CLOCK_NAMESPACE
-#undef VKSO_CLOCK_RAW
-#undef VKSO_CLOCK_COARSE
-#undef VKSO_CLOCK_DATA_MASK
+#undef VKSO_COARSE_CLOCK_MASK
+#undef VKSO_HRES_CLOCK_MASK
 
 __visible noinline notrace __vkso_text
 int vkso_time_apply_offset(const struct vkso_time_value *offset,
