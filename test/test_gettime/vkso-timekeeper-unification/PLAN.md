@@ -1073,8 +1073,19 @@ layout 又进行第二次分类，形成重复工作。
 - QEMU 结果：
   `vkso-tests/baremetal/artifacts/validation/normal-20260730T104146Z`；
   Raw/VKSO 各 112 行矩阵、正常 RTC 与无 RTC 四种启动全部通过。
-- 当前状态：静态和 QEMU 门槛已通过，等待 normal 裸机 reader 判断是否保留；
-  在裸机结果出来前不进入 O2。
+- normal 裸机结果：
+  `vkso-tests/baremetal/results/20260730T110954Z-vkso-final`；
+  同批次 Raw 镜像、配置和测试程序与冻结基线一致，Raw 用户路径20项中位变化
+  `+0.001%`，足以排除主要环境漂移；
+- packed descriptor 相对修改前 VKSO：
+  - realtime、monotonic、TAI 各退化约 `1.00 cycle`；
+  - realtime 动态指令 `+6`、分支 `+1`，monotonic 指令 `+2`，
+    TAI 指令 `+5`；
+  - monotonic-raw、boottime 基本不变；两个 coarse 一快一慢；
+  - syscall 路径只有不足 `0.6%` 的混合小变化，不能抵消用户热路径退化；
+- 最终决策：O1 未满足动态指令下降、常用接口不退化和可读性要求。候选保留在
+  `54c99ee` 供复算，运行时代码由 `e3290c8` 精确恢复到修改前基线；normal-only
+  实验脚本和证据保留。O1 不进入最终实现。
 
 ### 12.4 O2：namespace/offset 路径收紧（优先级 2）
 
@@ -1275,10 +1286,27 @@ monotonic/raw/boottime 则存在 MM_data 指针与 mask 的分散判断。
 | 项目 | 优先级 | 当前状态 | 进入下一项条件 |
 |---|---:|---|---|
 | 冻结四组 reader/PMU/seq 基线 | 0 | 已完成 | 结果可复算 |
-| O1 单遍 clock-ID 分派 | 1 | QEMU 通过，待 normal 裸机 | 功能通过且指令/分支下降 |
-| O2 namespace/offset 收紧 | 2 | 待实现 | namespace 全矩阵通过 |
-| O3 x86 cycle-delta 专门化 | 3 | 待审计/实现 | full-mask 不变量成立 |
-| O4 cold backend shim/tail-entry | 4 | 待独立原型 | 无 hot spill 且收益稳定 |
-| O5 剩余短路径收敛 | 5 | 条件项 | 仍有可归因固定成本 |
-| O6 root-MM/shared-layout 备选 | 6 | 默认不实施 | 局部优化不足且语义可证明 |
+| O1 单遍 clock-ID 分派 | 1 | 裸机验证后回退；`e3290c8` | 失败证据已封存 |
+| O2 namespace/offset 收紧 | 2 | 保留为静态原型，不直接实施 | 非namespace路径确实减少动态工作且不复制core |
+| O3 x86 cycle-delta 专门化 | 3 | 推荐下一项；full-mask源码审计已通过 | 汇编确认减少load/compare/branch |
+| O4 cold backend shim/tail-entry | 4 | 保留为高风险独立原型 | 无hot spill/间接调用且成功路径call/ret下降 |
+| O5 剩余短路径收敛 | 5 | 条件项；仅处理O2～O4后的残余热点 | 仍有可归因固定成本 |
+| O6 root-MM/shared-layout 备选 | 6 | 暂不实施 | 局部优化不足且setns/MM语义可证明 |
 | O7 最终全量验证 | 7 | 待执行 | 所有保留候选冻结 |
+
+O1 裸机结果后的执行顺序调整：
+
+1. 先实施 O3。TSC、KVM/Xen PVClock 和 Hyper-V 可成功导出的clocksource均声明
+   `CLOCKSOURCE_MASK(64)`；NONE/缺页/不稳定provider在delta前失败。该候选可直接
+   删除所有hres读取共有的mask load、比较和分支，且不需要改变dispatcher、
+   wrapper、shared ABI或publisher。
+2. O2 只先生成候选汇编。当前显式named-field dispatcher可读且分支高度可预测；
+   若为了提前返回而复制内联hres主体、增加机器码或让namespace路径退化，则不进入
+   裸机测试。
+3. O4 独立于 O2/O3。它可能消除user wrapper为冷fallback支付的参数保存和额外
+   call/ret，但也可能因backend callback造成spill或间接调用；必须先比较wrapper、
+   core和组合成功路径汇编。
+4. O5 不再覆盖已经与Raw基本一致的time、getcpu和getres，只根据新结果考虑
+   gettimeofday、coarse及CPU/alarm fallback前置成本。
+5. O6 保持关闭。root namespace mask可在setns后原地变化，不能缓存为永久root；
+   shared layout升级和固定MM地址也不应为数个cycles扩大ABI及加载器机制。
