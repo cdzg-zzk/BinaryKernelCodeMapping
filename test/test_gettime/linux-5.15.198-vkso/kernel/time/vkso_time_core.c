@@ -75,7 +75,7 @@ vkso_read_hres_time(const struct vkso_shared_data *shared,
 		    struct vkso_time_value *value,
 		    bool outline_normalize)
 {
-	u64 cycles, cycle_last, mask, ns;
+	u64 cycles, cycle_last, ns;
 	s64 sec;
 	u32 mult, shift;
 	u32 seq;
@@ -88,10 +88,9 @@ vkso_read_hres_time(const struct vkso_shared_data *shared,
 		if (unlikely((s64)cycles < 0))
 			return VKSO_TIME_UNSUPPORTED_MODE;
 		cycle_last = READ_ONCE(cycle_data->cycle_last);
-		mask = READ_ONCE(cycle_data->mask);
 		mult = READ_ONCE(*multiplier);
 		ns = READ_ONCE(base->shifted_nsec);
-		ns += vkso_cycle_delta(cycles, cycle_last, mask) * mult;
+		ns += vkso_cycle_delta(cycles, cycle_last) * mult;
 		shift = READ_ONCE(cycle_data->shift);
 		sec = READ_ONCE(base->sec);
 		if (!vkso_read_retry(shared, seq))

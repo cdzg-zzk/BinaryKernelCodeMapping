@@ -66,16 +66,20 @@ static int __init vkso_cycle_delta_selftest(void)
 		.state = {
 			.cycles = {
 				.clock_mode = S32_MAX,
-				.mask = U64_MAX,
+				/*
+				 * A finite-mask clocksource cannot retain a
+				 * userspace mode after clocksource_arch_init().
+				 * Model that unsupported-provider exit here.
+				 */
+				.mask = 0xff,
 				.mono_mult = 1,
 			},
 		},
 	};
 	u32 seq;
 
-	if (vkso_cycle_delta(105, 100, U64_MAX) != 5 ||
-	    vkso_cycle_delta(95, 100, U64_MAX) != 0 ||
-	    vkso_cycle_delta(3, 0xfe, 0xff) != 5 ||
+	if (vkso_cycle_delta(105, 100) != 5 ||
+	    vkso_cycle_delta(95, 100) != 0 ||
 	    vkso_hres_sample(&synthetic, &sample) !=
 		    VKSO_TIME_UNSUPPORTED_MODE) {
 		pr_err("VKSO cycle-delta selftest failed\n");

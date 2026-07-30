@@ -71,21 +71,18 @@ vkso_cycles_read(const struct vkso_context *context, s32 clock_mode)
 }
 
 /*
- * All x86 clocks exported to userspace currently have a U64_MAX mask.  Clamp
- * their rare backward observation exactly as the native x86 vDSO does.  The
- * finite-mask case retains the generic clocksource wrap rule, which keeps the
- * canonical state expressive without charging the common x86 path an
- * unnecessary mask operation.
+ * clocksource_arch_init() disables the userspace mode of every x86
+ * clocksource whose mask is not CLOCKSOURCE_MASK(64).  vkso_cycles_read()
+ * rejects disabled modes before this helper, so every successful TSC,
+ * PVClock and Hyper-V read is full-width.  Clamp a rare backward observation
+ * exactly as the native x86 vDSO does.
  */
 static __always_inline u64
-vkso_cycle_delta(u64 cycles, u64 cycle_last, u64 mask)
+vkso_cycle_delta(u64 cycles, u64 cycle_last)
 {
-	if (likely(mask == U64_MAX)) {
-		if (likely(cycles > cycle_last))
-			return cycles - cycle_last;
-		return 0;
-	}
-	return (cycles - cycle_last) & mask;
+	if (likely(cycles > cycle_last))
+		return cycles - cycle_last;
+	return 0;
 }
 
 static __always_inline void
