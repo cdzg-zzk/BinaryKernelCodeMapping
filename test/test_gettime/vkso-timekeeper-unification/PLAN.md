@@ -1337,15 +1337,163 @@ monotonic/raw/boottime 则存在 MM_data 指针与 mask 的分散判断。
 
 ### 12.10 O7：最终验证与证据封存
 
-保留的优化全部完成后执行：
+O7不再修改reader、publisher、ABI、ITS或加载机制，只验证和封存已经接纳的
+代码。实现基线是`d121ec3`，已有O4接纳标签
+`vkso-o4-its-final-20260731`。本计划提交后另建不可移动的O7执行标签
+`vkso-o7-final-code-20260731`；该标签包含本计划，但产品代码必须与
+`d121ec3`相同。
 
-1. 默认、TIME_NS、PVClock、Hyper-V 静态构建；
-2. 完整 QEMU Raw/VKSO 语义矩阵和 namespace/provider/fallback 定向测试；
-3. normal Raw 与 normal VKSO 成对 reader 实验；
-4. no-retpoline Raw/VKSO 敏感性实验；
-5. update-side 实验；
-6. read/update 并发实验；
-7. 源码语义分类与机器码复算。
+若O7期间发现必须修改产品或实验脚本的问题，应停止受影响的采集，建立新提交
+和新标签，再从最早受影响的门槛重新执行。不得在dirty worktree上生成“最终”
+镜像，也不得把旧commit的结果改名成新标签结果。
+
+#### O7-0：冻结身份和干净产物
+
+所有最终package必须同时满足：
+
+- `git_worktree_dirty=0`；
+- `git_commit`等于`vkso-o7-final-code-20260731^{}`；
+- VKSO source-tree hash与tag中的kernel树复算一致；
+- Raw/VKSO使用同一编译器、base config、benchmark和构建时间；
+- package `SHA256SUMS`、`verify-packages.sh`和配置差异审计通过。
+
+reader使用一对新的四镜像package，update/concurrent使用同一对带
+`CONFIG_TIMEKEEPING_UPDATE_BENCH=y`的normal package。两类package不得混用。
+
+固定构建入口：
+
+```bash
+cd test/test_gettime/vkso-tests/baremetal
+export NORMAL_PACKAGE=$PWD/artifacts/o7-final-normal
+export NO_RETPOLINE_PACKAGE=$PWD/artifacts/o7-final-no-retpoline
+export RAW_SOURCE=/tmp/vkso-o7-final-raw-source
+export BUILD_ROOT=/tmp/vkso-o7-final-build
+./build-all.sh
+```
+
+`build-all.sh`必须完成normal与no-retpoline package审计，以及两种配置的完整
+QEMU Raw/VKSO矩阵和namespace/provider/fallback定向验证。默认、TIME_NS、
+PVClock、Hyper-V静态构建作为独立门槛执行并保存日志，不能假定一次bare-metal
+base config构建已经覆盖所有编译分支。输出目录和`RAW_SOURCE`必须是新的空路径；
+脚本拒绝覆盖时不手工绕过。
+
+update/concurrent package固定由：
+
+```bash
+cd test/test_gettime/vkso-tests/update-bench
+OUT=../baremetal/artifacts/o7-final-update \
+RAW_SOURCE=/tmp/vkso-o7-update-raw-source \
+BUILD_ROOT=/tmp/vkso-o7-update-build \
+./build-update-images.sh
+```
+
+生成后先核对manifest、配置和SHA，再用`PACKAGE=... ./install-update-grub.sh`
+安装；禁止复用旧`current-update`指向作为最终身份依据。
+
+#### O7-1：最终 READ
+
+使用`experiment.sh`唯一入口重新采集完整四组，而不是把现有normal结果与新的
+no-retpoline结果拼接：
+
+1. `raw-normal`；
+2. `vkso-normal`；
+3. `raw-no-retpoline`；
+4. `vkso-no-retpoline`。
+
+固定启动方式：
+
+```bash
+./install-grub.sh
+./experiment.sh begin <O7_READ_RUN_ID>
+./experiment.sh boot
+# 重启后
+./experiment.sh collect
+```
+
+之后始终重复不带case参数的`boot`/`collect`，由state和manifest给出下一组；
+不得再次`begin`或手工改变顺序。结果写入
+`vkso-tests/baremetal/results/<O7_READ_RUN_ID>`。
+
+READ验收：
+
+- 每组有`complete`，stderr为空，归档SHA通过；
+- 同一mitigation下Raw/VKSO功能矩阵逐字一致；
+- benchmark二进制在四组间一致；
+- 逐接口报告cycles中位数、百分比、instructions、branches、branch misses、
+  seq retry和fallback；
+- normal结果复现O4结论；no-retpoline只作为mitigation敏感性，不得被解释成
+  可关闭生产安全选项的优化。
+
+#### O7-2：最终 UPDATE-SIDE
+
+update-side只评价完整`timekeeping_update()` writer，不混入reader吞吐。使用
+同一O7 update package，按Raw后VKSO顺序分别启动：
+
+```bash
+./boot-raw-update.sh
+PACKAGE=../baremetal/artifacts/o7-final-update \
+  ./collect-update-side.sh <O7_UPDATE_RUN_ID>
+
+./boot-vkso-update.sh
+PACKAGE=../baremetal/artifacts/o7-final-update \
+  ./collect-update-side.sh <O7_UPDATE_RUN_ID>
+```
+
+每侧保留原始样本、metadata和分析输出；报告Mean、Median、P95、P99、最大值及
+`>1000/>5000 cycles`比例。必须说明O4不改变writer源码，并以最终tag package
+复现而不是直接沿用2026-07-28旧镜像。
+
+#### O7-3：最终 READ/UPDATE 并发
+
+并发实验使用与O7-2相同的update package和Raw→VKSO顺序，入口改为：
+
+```bash
+./collect-update-concurrent.sh <O7_CONCURRENT_RUN_ID>
+```
+
+完整覆盖monotonic、monotonic_raw和monotonic_coarse三个公开reader负载。
+同时报告：
+
+- reader cycles/throughput、时间倒退和CPU migration；
+- writer Mean/Median/P95/P99；
+- hres/raw seq observer的odd、changed和retries per million；
+- Raw/VKSO功能矩阵和package身份。
+
+不能用idle UPDATE结果替代并发writer，也不能用独立READ绝对cycles与并发
+harness直接相减。
+
+#### O7-4：最终代码量与机器码
+
+性能采集不改变源码，因此代码量复算可以与裸机采集并行，但只能以O7 tag和
+最终package为输入。保留M10文件作为历史证据，新增：
+
+- `M11_SOURCE_MANIFEST.tsv`：按U1/S1/K1/K2/K3/K4/B1/C1/C2/E1/G1/P1/T1
+  重新审核最终行区间；
+- `M11_SOURCE_COUNTS.csv`：由`count_manifest.py`机械生成；
+- `M11_BINARY_SYMBOLS.tsv`：从最终Raw `vmlinux`和VKSO
+  `vmlinux`/`libkernel.so`的真实`st_size`生成；
+- `reports/M11_FINAL_CODE_SIZE.md`：最终解释和结论。
+
+源码复算命令固定为：
+
+```bash
+RAW_KERNEL_ROOT=/tmp/vkso-o7-final-raw-source \
+python3 test/test_gettime/vkso-tests/code-size/count_manifest.py \
+  --manifest test/test_gettime/vkso-timekeeper-unification/M11_SOURCE_MANIFEST.tsv \
+  --output test/test_gettime/vkso-timekeeper-unification/M11_SOURCE_COUNTS.csv
+```
+
+最终代码量报告必须：
+
+- 继续分别列出产品运行时SLOC、功能构建/链接、P1通用项目机制、T1测试和文档；
+- 单列O3、O4和ITS/reusable-text相对M10的增减；
+- 将精简overlay中完整新增的`alternative.c`按上游逻辑diff统计，不能把1889行
+  全算成ITS实现；
+- 同时报告Git物理churn、目标symbol bytes、shared/MM payload和映射页数；
+- 复核此前“Raw 1505 SLOC、最终VKSO约1298 SLOC”的临时结论，若人工清单与
+  临时数字不一致，以重新审核后的manifest为准并解释差异。
+
+#### O7-5：最终报告和关闭条件
 
 最终报告必须同时对照：
 
@@ -1357,6 +1505,11 @@ monotonic/raw/boottime 则存在 MM_data 指针与 mask 的分散判断。
 每个 O1～O6 候选的保留/回退状态、commit、代码规模变化和理由。最终结论不能
 只说“总体平均提高”，必须解释仍慢于 Raw 的接口及其不可消除的架构边界。
 
+O7只有在clean package/QEMU、四组READ、UPDATE、并发、源码和机器码六类证据
+全部存在且互相引用同一tag后才可标记完成。最终汇总写入
+`reports/M11_FINAL_VALIDATION.md`，并更新本状态表；加载器自动从auxv绑定
+MM/context属于O7之后的独立机制工作，不得混入本轮。
+
 ### 12.11 M11 状态表
 
 | 项目 | 优先级 | 当前状态 | 进入下一项条件 |
@@ -1366,9 +1519,9 @@ monotonic/raw/boottime 则存在 MM_data 指针与 mask 的分散判断。
 | O2 namespace/offset 收紧 | 2 | 保留为静态原型，不直接实施 | 非namespace路径确实减少动态工作且不复制core |
 | O3 x86 cycle-delta 专门化 | 3 | 保留；`aa1855e`，裸机指令/分支下降且cycles中性 | 已满足 |
 | O4 cold backend shim/tail-entry | 4 | 保留；`f8d5d16`，ITS修复`0c1215f`，normal裸机通过 | 已满足 |
-| O5 剩余短路径收敛 | 5 | 条件项；仅处理O2～O4后的残余热点 | 仍有可归因固定成本 |
-| O6 root-MM/shared-layout 备选 | 6 | 暂不实施 | 局部优化不足且setns/MM语义可证明 |
-| O7 最终全量验证 | 7 | 待执行 | 所有保留候选冻结 |
+| O5 剩余短路径收敛 | 5 | 关闭；当前剩余差距不足以支持继续特化 | 若未来新证据显示稳定固定成本，另立分支 |
+| O6 root-MM/shared-layout 备选 | 6 | 关闭；不为数个cycles扩大ABI/MM风险 | 仅保留设计记录 |
+| O7 最终全量验证 | 7 | 冻结tag `vkso-o7-final-code-20260731`；待采集六类证据 | clean tag package就绪 |
 
 O1 裸机结果后的执行顺序调整：
 
