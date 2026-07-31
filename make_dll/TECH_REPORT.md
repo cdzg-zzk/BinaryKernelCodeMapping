@@ -102,7 +102,18 @@ __x86_indirect_thunk_rax:
 
 合成页会在 `resolved_symbol_addresses.txt` 中标记为 `builtin_thunk,synthetic`，但不会进入构建器生成的 `page_mappings.txt`。页面替换管理器只读取这份显式逐页映射，因此保留合成页的文件内容，只替换真实 kernel/LKM 页。这样既维持原来的 `rel32` 地址关系，也不需要因为 retpoline thunk 引入 `DT_NEEDED: libshim.so`。
 
-### 3.5 显式 reusable page map
+### 3.5 原生 reusable text 依赖
+
+`build_PIC_so.py --reusable-text-list PATH` 接受与 `symbols.txt` 相同格式的
+符号清单。每个条目是额外的原生可执行依赖根：它及其 KRG 闭包会参与稀疏
+代码页布局，但不会进入 DSO 导出表。构造器要求条目是当前 owner 模块内
+已定义的函数，并从 Shim 边界中移除同名条目。
+
+保护粒度是物理页。只要一个清单目标位于某页，该页就不会再由内置 thunk
+逻辑合成，因此同页的其他 thunk 也保留内核原始机器码。目标移动到不同页
+时，逐页映射会随符号地址自动扩展；构建脚本不应再假设多个目标必须同页。
+
+### 3.6 显式 reusable page map
 
 Stub DSO 完成 section offset 和 PT_LOAD 布局后，构建器会同时生成
 `page_mappings.txt`。每一行直接记录：

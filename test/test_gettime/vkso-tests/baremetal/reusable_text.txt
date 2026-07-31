@@ -1,0 +1,5 @@
+# Static targets of runtime-patched branches in secondary-mapped VKSO text.
+__x86_indirect_thunk_rax
+__x86_return_thunk
+__x86_indirect_its_thunk_rax
+its_return_thunk

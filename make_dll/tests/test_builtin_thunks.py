@@ -17,6 +17,7 @@ from build_PIC_so import (  # noqa: E402
     ResolvedSymbol,
     STT_FUNC,
     build_builtin_thunk_pages,
+    load_reusable_text_symbols,
     role_for_symbol,
     split_builtin_thunk_shims,
 )
@@ -45,6 +46,15 @@ class BuiltinThunkTests(unittest.TestCase):
             builtin,
             {"__x86_indirect_thunk_array", "__x86_indirect_thunk_r11"},
         )
+
+    def test_explicit_reusable_text_list_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "reusable_text.txt"
+            with self.assertRaisesRegex(ValueError, "does not exist"):
+                load_reusable_text_symbols(path)
+            path.write_text("# no symbols\n")
+            with self.assertRaisesRegex(ValueError, "is empty"):
+                load_reusable_text_symbols(path)
 
     def test_array_alias_generates_rax_jump_and_return(self) -> None:
         page = 0x12345000
@@ -78,6 +88,20 @@ class BuiltinThunkTests(unittest.TestCase):
             build_builtin_thunk_pages(
                 [thunk, other], {"__x86_indirect_thunk_rax"}
             )
+
+    def test_reusable_target_keeps_its_whole_page_native(self) -> None:
+        page = 0x38000000
+        thunk = self.make_symbol("__x86_indirect_thunk_rax", page + 0x240)
+        its = self.make_symbol("__x86_indirect_its_thunk_rax", page + 0x900)
+
+        pages = build_builtin_thunk_pages(
+            [thunk, its],
+            {"__x86_indirect_thunk_rax"},
+            {"__x86_indirect_its_thunk_rax"},
+        )
+
+        self.assertEqual(pages, {})
+        self.assertTrue(thunk.replace_from_kernel)
 
     def test_manual_builder_writes_synthetic_page(self) -> None:
         page = 0x40000000

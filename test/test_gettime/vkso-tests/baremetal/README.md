@@ -12,6 +12,11 @@ one compiler environment. `verify-packages.sh` rejects implementation-external
 raw/VKSO configuration differences and non-retpoline-related cross-variant
 differences. It also requires byte-identical benchmark executables.
 
+For the normal mitigation build, `reusable_text.txt` lists the static x86
+thunks that runtime-patched VKSO branches may reach. The DSO builder treats
+them as native dependency roots and maps their RX pages independently; the
+list does not assume that those symbols remain on one physical page.
+
 `experiment.sh` is the only reader collection entry point. It fixes all
 parameters through `experiment.conf`, enforces the four-case order, verifies
 the booted kernel and package identity, refuses overwrites, preserves failed

@@ -354,6 +354,11 @@ KRG="$BUILD_ROOT/vkso.krg"
 DSO_BUILD="$BUILD_ROOT/dso"
 mkdir -p "$DSO_BUILD"
 cp "$HERE/symbols.txt" "$HERE/shared_data.txt" "$DSO_BUILD/"
+REUSABLE_TEXT_ARGS=()
+if [[ "$BUILD_VARIANT" == normal ]]; then
+	cp "$HERE/reusable_text.txt" "$DSO_BUILD/"
+	REUSABLE_TEXT_ARGS=(--reusable-text-list reusable_text.txt)
+fi
 "$CC" -c -fPIC -o "$DSO_BUILD/vkso_user_entry.o" \
 	"$ROOT/test/test_gettime/vkso-tests/functional/vkso_user_entry.S"
 (
@@ -362,6 +367,7 @@ cp "$HERE/symbols.txt" "$HERE/shared_data.txt" "$DSO_BUILD/"
 		--symbols symbols.txt \
 		--krg "$KRG" \
 		--shim-list "$ROOT/make_dll/shim.txt" \
+		"${REUSABLE_TEXT_ARGS[@]}" \
 		--shared-data-list shared_data.txt \
 		--vmlinux "$VKSO_BUILD/vmlinux" \
 		--private-wrapper-object vkso_user_entry.o \

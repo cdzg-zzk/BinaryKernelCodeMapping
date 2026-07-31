@@ -148,6 +148,17 @@ def load_shared_data_symbols(path: Path | None) -> Set[str]:
         return set()
     return set(parse_symbol_requests(path))
 
+def load_reusable_text_symbols(path: Path | None) -> Set[str]:
+    """Load native executable dependency roots that must remain reusable."""
+    if path is None:
+        return set()
+    if not path.is_file():
+        raise ValueError(f"{path}: reusable_text list does not exist")
+    names = set(parse_symbol_requests(path))
+    if not names:
+        raise ValueError(f"{path}: reusable_text list is empty")
+    return names
+
 def indirect_thunk_register(name: str) -> str | None:
     if name == INDIRECT_THUNK_ARRAY:
         return "rax"
@@ -981,14 +992,23 @@ def role_for_symbol(sym: ResolvedSymbol, owner_module: str) -> str:
     return "export" if sym.exported else "internal"
 
 def build_builtin_thunk_pages(
-    symbols: Sequence[ResolvedSymbol], configured_thunks: Set[str]
+    symbols: Sequence[ResolvedSymbol], configured_thunks: Set[str],
+    reusable_text_names: Set[str] | None = None,
 ) -> Dict[int, bytes]:
     """Build direct-jump thunk pages selected through shim.txt.
 
     Kernel callers contain fixed rel32 calls to the thunk virtual addresses, so
     the generated code must remain at those same relative addresses.  The whole
     page becomes synthetic because page-cache replacement operates per page.
+    A page containing an explicit reusable-text root stays native in its
+    entirety, even when it also contains a configured built-in thunk.
     """
+    reusable_text_names = reusable_text_names or set()
+    reusable_pages = {
+        align_down(sym.address, PAGE_SIZE)
+        for sym in symbols
+        if sym.defined and sym.address and sym.name in reusable_text_names
+    }
     configured_registers = {
         register
         for name in configured_thunks
@@ -996,7 +1016,9 @@ def build_builtin_thunk_pages(
     }
     selected = [
         sym for sym in symbols
-        if sym.defined and indirect_thunk_register(sym.name) in configured_registers
+        if (sym.defined and
+            indirect_thunk_register(sym.name) in configured_registers and
+            align_down(sym.address, PAGE_SIZE) not in reusable_pages)
     ]
     if not selected:
         return {}
@@ -1799,17 +1821,28 @@ def build_shared_object(
     ko_path: Path | None = None, page_map_path: Path | None = None,
     shared_data_list_path: Path | None = None, vmlinux_path: Path | None = None,
     private_wrapper_object: Path | None = None,
+    reusable_text_list_path: Path | None = None,
 ) -> None:
     graph = KrgGraph(krg_path)
     shim_symbols = load_shim_symbols(shim_list_path)
     requested = parse_symbol_requests(symbols_path)
     shared_data_names = load_shared_data_symbols(shared_data_list_path)
+    reusable_text_names = load_reusable_text_symbols(reusable_text_list_path)
+    overlap = shared_data_names & reusable_text_names
+    if overlap:
+        raise ValueError(
+            "symbols cannot be both shared_data and reusable_text: "
+            + ", ".join(sorted(overlap))
+        )
     exported_code_names = [
         name for name in requested if name not in shared_data_names
     ]
     # KRG intentionally describes executable dependency closure and may omit a
     # page-sized data object.  Resolve such explicitly allowed exports below.
     graph_requested = list(exported_code_names)
+    for name in sorted(reusable_text_names):
+        if name not in graph_requested:
+            graph_requested.append(name)
     if private_wrapper_object is not None:
         for name in private_wrapper_dependencies(private_wrapper_object):
             if name in shared_data_names or name in graph_requested:
@@ -1819,8 +1852,10 @@ def build_shared_object(
         raise ValueError("at least one KRG-resolved code symbol is required")
     # shim.txt defines dependency boundaries, not replacements for APIs the
     # user explicitly asked this DSO to export.
-    shim_symbols.difference_update(requested)
-    if INDIRECT_THUNK_ARRAY in requested or f"{INDIRECT_THUNK_PREFIX}rax" in requested:
+    native_code_names = set(exported_code_names) | reusable_text_names
+    shim_symbols.difference_update(native_code_names)
+    if (INDIRECT_THUNK_ARRAY in native_code_names or
+            f"{INDIRECT_THUNK_PREFIX}rax" in native_code_names):
         shim_symbols.discard(INDIRECT_THUNK_ARRAY)
         shim_symbols.discard(f"{INDIRECT_THUNK_PREFIX}rax")
     shim_symbols, builtin_thunk_shims = split_builtin_thunk_shims(shim_symbols)
@@ -1828,6 +1863,15 @@ def build_shared_object(
         graph_requested, graph, shim_symbols,
         exported_names=exported_code_names,
     )
+    by_name = {sym.name: sym for sym in resolved}
+    for name in sorted(reusable_text_names):
+        sym = by_name.get(name)
+        if (sym is None or not sym.defined or
+                sym.module_name != owner_module or sym.st_type != STT_FUNC):
+            raise ValueError(
+                f"{name}: reusable_text must be defined executable code "
+                f"owned by {owner_module}"
+            )
 
     data_bytes = b""
     data_relocations: List[DataRelocation] = []
@@ -2010,7 +2054,9 @@ def build_shared_object(
                 )
             sym.reuse_kind = "shared_data"
 
-    synthetic_text_pages = build_builtin_thunk_pages(resolved, builtin_thunk_shims)
+    synthetic_text_pages = build_builtin_thunk_pages(
+        resolved, builtin_thunk_shims, reusable_text_names
+    )
     if private_wrapper_object is not None:
         if data_bytes:
             raise ValueError(
@@ -2055,6 +2101,10 @@ def main() -> None:
         help="explicit allow-list of page-aligned kernel objects mapped user R--/NX",
     )
     parser.add_argument(
+        "--reusable-text-list", type=Path, default=None,
+        help="native executable dependency roots whose kernel text pages are reused",
+    )
+    parser.add_argument(
         "--vmlinux", type=Path, default=None,
         help="matching vmlinux used to resolve explicit shared_data omitted by KRG",
     )
@@ -2083,6 +2133,7 @@ def main() -> None:
         shared_data_list_path=args.shared_data_list,
         vmlinux_path=args.vmlinux,
         private_wrapper_object=args.private_wrapper_object,
+        reusable_text_list_path=args.reusable_text_list,
     )
 
 if __name__ == "__main__":
