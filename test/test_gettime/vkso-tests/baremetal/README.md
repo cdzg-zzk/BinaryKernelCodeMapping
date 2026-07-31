@@ -28,6 +28,12 @@ The independent Chinese report for the final completed four-image run
 `20260728T013904Z-vkso-final`, including the Base2 optimization comparison,
 is [`VKSO_READ性能实验报告_20260728.md`](VKSO_READ性能实验报告_20260728.md).
 
+The final O4 cold-backend decision and the secondary-mapped ITS/reusable-text
+fix are documented in
+[`M11_O4_ITS.md`](../../vkso-timekeeper-unification/reports/M11_O4_ITS.md).
+It compares the O3 baseline with both independent O4 normal bare-metal runs
+and records the source-tree/hash provenance of the measured image.
+
 The independent update-side report for the stabilized paired run
 `20260728T031855Z-update-side` is
 [`VKSO_UPDATE性能实验报告_20260728.md`](../update-bench/VKSO_UPDATE性能实验报告_20260728.md).

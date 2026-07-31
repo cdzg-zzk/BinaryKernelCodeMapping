@@ -1263,10 +1263,20 @@ monotonic/raw/boottime 则存在 MM_data 指针与 mask 的分散判断。
   `vkso-tests/baremetal/artifacts/o4-cold-backend-validation-candidate`；
 - QEMU结果：
   `vkso-tests/baremetal/artifacts/validation/o4-cold-backend-candidate`；
-  Raw/VKSO各112行矩阵、正常RTC与无RTC场景全部通过。
-- 当前状态：静态与QEMU门槛通过，等待normal裸机cycles/PMU决定是否保留。
-  保留标准是成功read动态指令/分支下降能转换为可复现cycles收益，同时fallback
-  总成本无不可接受退化；否则整体回退`f8d5d16`，不继续叠加补丁。
+- Raw/VKSO各112行矩阵、正常RTC与无RTC场景全部通过。
+- normal裸机结果：
+  - 静态thunk候选：
+    `vkso-tests/baremetal/results/20260730-its-static-thunk-candidate-read`；
+  - 通用reusable-text最终方案：
+    `vkso-tests/baremetal/results/20260730-its-reusable-text-read`。
+- 两次裸机结果均满足保留条件：hres cycles中性并减少7条指令/2个分支，
+  coarse、gettimeofday和getres稳定改善；cold fallback约增加0.5%～0.7%，
+  但只发生在低频backend/syscall路径。
+- 启动期ITS问题由提交`0c1215f`修复：secondary-mapped VKSO text继续使用
+  静态ITS thunk，构造器通过fail-closed reusable-text根自动保留和映射原生
+  RX页。通用方案与静态候选的read热路径机器码和PMU指令完全相同。
+- 当前状态：保留。完整证据和代码量判断见
+  [`reports/M11_O4_ITS.md`](reports/M11_O4_ITS.md)。
 
 ### 12.7 O5：剩余短路径定向收敛（优先级 5，条件项）
 
@@ -1355,7 +1365,7 @@ monotonic/raw/boottime 则存在 MM_data 指针与 mask 的分散判断。
 | O1 单遍 clock-ID 分派 | 1 | 裸机验证后回退；`e3290c8` | 失败证据已封存 |
 | O2 namespace/offset 收紧 | 2 | 保留为静态原型，不直接实施 | 非namespace路径确实减少动态工作且不复制core |
 | O3 x86 cycle-delta 专门化 | 3 | 保留；`aa1855e`，裸机指令/分支下降且cycles中性 | 已满足 |
-| O4 cold backend shim/tail-entry | 4 | `f8d5d16`；静态/QEMU通过，待normal裸机 | 成功read cycles改善且fallback无不可接受退化 |
+| O4 cold backend shim/tail-entry | 4 | 保留；`f8d5d16`，ITS修复`0c1215f`，normal裸机通过 | 已满足 |
 | O5 剩余短路径收敛 | 5 | 条件项；仅处理O2～O4后的残余热点 | 仍有可归因固定成本 |
 | O6 root-MM/shared-layout 备选 | 6 | 暂不实施 | 局部优化不足且setns/MM语义可证明 |
 | O7 最终全量验证 | 7 | 待执行 | 所有保留候选冻结 |

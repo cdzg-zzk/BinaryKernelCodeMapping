@@ -369,3 +369,38 @@ benchmark-only ABI。
 52 B，`libkernel.so`文件减少256 B；用户typed reader和public wrapper机器码
 不变。动态导出从10个降到7个，其中五个是时间public ABI，两个是当前C2
 context启动机制。
+
+## D026：成功路径 tail-enter shared reader，fallback 进入显式冷 backend
+
+- 状态：已决定并通过 normal 裸机验证
+- 阶段：M11
+
+用户 public wrapper 加载 context 后 tail-jump 到 shared reader；shared reader
+成功时直接返回原调用者，只有 `UNSUPPORTED_MODE/BACKEND_REQUIRED` 才
+tail-jump 到有类型的冷 backend。kernel/user 两个 context 分别绑定可信的
+kernel backend 和用户 syscall trampoline，共享 core 不包含 syscall 号或
+`k_clock` 策略。
+
+提交 `f8d5d16` 的两次独立 normal 裸机结果显示：hres 每次减少 7 条指令和
+2 个分支且 cycles 中性；coarse、gettimeofday 和 getres 明显改善；cold
+fallback 约退化 0.5%～0.7%。因此保留 O4，不继续为剩余亚 cycle 差异引入 O5。
+
+## D027：secondary-mapped ITS 使用显式 reusable-text 静态目标
+
+- 状态：已决定并验证
+- 阶段：M11
+
+x86 ITS 默认可把间接分支改写到启动期动态分配的 thunk。该地址只在 kernel
+映射中有效；若源指令位于被二次映射的 VKSO text，同一条相对分支不能在
+libkernel.so 地址处到达动态 thunk。
+
+提交 `0c1215f` 采用两层通用约束：
+
+- `alternative.c` 只对 secondary-mapped text 保留静态 ITS thunk，其他内核
+  文本继续使用原动态 ITS 行为；
+- `reusable_text.txt` 将静态 thunk 声明为非导出的原生依赖根，构造器校验
+  owner/函数类型、求 KRG 闭包并保留目标所在整页。
+
+清单缺失、为空或条目不合法时构建直接失败。新增目标只增加一个符号根，不在
+内核中累积页地址特例。最终通用方案与早期静态候选的 wrapper 页、关键符号
+布局和 hot-path PMU 指令完全相同，因此修复没有 read 运行时开销。
