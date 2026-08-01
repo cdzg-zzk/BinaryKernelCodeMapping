@@ -15,10 +15,10 @@ void vkso_timekeeping_get_private(clockid_t clock_id, struct timespec64 *ts);
 extern union vkso_shared_page vkso_shared_page;
 extern struct vkso_context vkso_kernel_context;
 
-int vkso_posix_clock_gettime_backend(
+int vkso_posix_clock_gettime_failure(
 	s32 clock_id, struct vkso_time_value *value,
-	const struct vkso_mm_data *mm_data, int status);
-int vkso_kernel_gettimeofday_backend(
+	const struct vkso_mm_data *mm_data);
+int vkso_kernel_gettimeofday_failure(
 	struct vkso_timeval *tv, struct vkso_timezone *tz, int status);
 void vkso_time_update_timezone(void);
 void vkso_time_update_mm_data(struct task_struct *task,
@@ -30,14 +30,27 @@ int vkso_timekeeping_writer_context_selftest(void);
 #endif
 
 /*
- * Ordinary kernel readers use the same global-clock dispatcher as userspace,
- * but select root-namespace semantics with a NULL MM_data pointer.  Special
- * NMI, writer-locked and early-boot readers remain on their private paths.
+ * Ordinary kernel readers cross the same class boundary as userspace, but
+ * select root-namespace semantics with a NULL MM_data pointer. Constant clock
+ * IDs fold to one direct shared entry. Special NMI, writer-locked and
+ * early-boot readers remain on their private paths.
  */
-#define vkso_time_get_root(clock_id, tp)				\
-	vkso_clock_gettime_common((clock_id),				\
-		(struct vkso_time_value *)(tp), NULL,			\
-		&vkso_kernel_context)
+static __always_inline int
+vkso_time_get_root(s32 clock_id, struct timespec64 *tp)
+{
+	struct vkso_time_value *value = (struct vkso_time_value *)tp;
+
+	switch (vkso_clock_classify(clock_id)) {
+	case VKSO_CLOCK_HRES:
+		return vkso_clock_gettime_hres(
+			clock_id, value, NULL, &vkso_kernel_context);
+	case VKSO_CLOCK_COARSE:
+		return vkso_clock_gettime_coarse(
+			clock_id, value, NULL);
+	default:
+		return VKSO_TIME_NOT_SHARED;
+	}
+}
 
 static __always_inline u32 vkso_time_get_root_resolution(void)
 {

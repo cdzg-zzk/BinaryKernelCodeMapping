@@ -1,66 +1,66 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 
 #include <asm/unistd_64.h>
-
-/* x86-64 UAPI clock IDs; the shared C core has matching static assertions. */
-#define VKSO_CLOCK_REALTIME		0
-#define VKSO_CLOCK_MONOTONIC		1
-#define VKSO_CLOCK_MONOTONIC_RAW	4
-#define VKSO_CLOCK_REALTIME_COARSE	5
-#define VKSO_CLOCK_MONOTONIC_COARSE	6
-#define VKSO_CLOCK_BOOTTIME		7
-#define VKSO_CLOCK_TAI			11
-#define VKSO_HRES_CLOCK_MASK \
-	((1 << VKSO_CLOCK_REALTIME) | (1 << VKSO_CLOCK_MONOTONIC) | \
-	 (1 << VKSO_CLOCK_MONOTONIC_RAW) | (1 << VKSO_CLOCK_BOOTTIME) | \
-	 (1 << VKSO_CLOCK_TAI))
-#define VKSO_COARSE_CLOCK_MASK \
-	((1 << VKSO_CLOCK_REALTIME_COARSE) | \
-	 (1 << VKSO_CLOCK_MONOTONIC_COARSE))
+#include <vkso/time.h>
 
 /*
  * Private userspace entry veneers embedded directly in libkernel.so.
  *
  * Shared core text remains backed by kernel pages.  This page is ordinary
  * DSO-owned RX text so it can inject per-process addresses without changing
- * the shared kernel ABI. The public entries tail-jump into the shared core;
- * only a rejected provider or clock ID reaches the syscall backends installed
- * in vkso_user_context. make_dll resolves the core transfer locally, so no
- * PLT/GOT remains on the hot path.
+ * the shared kernel ABI. Clock IDs are classified once at this environment
+ * boundary: native clocks go directly to the syscall failure adapter, while
+ * hres/coarse clocks tail-jump into their shared reader. Only a provider
+ * failure returns through vkso_user_context. make_dll resolves every transfer
+ * locally, so no PLT/GOT remains on the hot path.
  */
 
 	.section .vkso.user.text, "ax", @progbits
+	.macro vkso_dispatch_clock hres, coarse, native
+	cmpl	$VKSO_CLOCK_ID_MAX, %edi
+	ja	\native
+	movl	$VKSO_HRES_CLOCK_MASK, %eax
+	btl	%edi, %eax
+	jc	\hres
+	movl	$VKSO_COARSE_CLOCK_MASK, %eax
+	btl	%edi, %eax
+	jc	\coarse
+	/* Unclassified in-range clock IDs fall through to the native label. */
+	.endm
+
 	.p2align 4
 	.globl __vkso_clock_gettime
 	.type __vkso_clock_gettime, @function
 __vkso_clock_gettime:
-	movq	vkso_user_mm_data(%rip), %rdx
-	leaq	vkso_user_context(%rip), %rcx
-	jmp	vkso_clock_gettime_common
-	.size __vkso_clock_gettime, .-__vkso_clock_gettime
-
-	.type vkso_user_clock_gettime_backend, @function
-vkso_user_clock_gettime_backend:
+	vkso_dispatch_clock .Lclock_gettime_hres, \
+		.Lclock_gettime_coarse, .Lclock_gettime_native
+.Lclock_gettime_native:
+	/* Also entered indirectly when a shared provider rejects its mode. */
+vkso_user_clock_gettime_failure:
 	movslq	%edi, %rdi
 	movl	$__NR_clock_gettime, %eax
 	syscall
 	ret
-	.size vkso_user_clock_gettime_backend, \
-		.-vkso_user_clock_gettime_backend
+
+.Lclock_gettime_hres:
+	movq	vkso_user_mm_data(%rip), %rdx
+	leaq	vkso_user_context(%rip), %rcx
+	jmp	vkso_clock_gettime_hres
+
+.Lclock_gettime_coarse:
+	movq	vkso_user_mm_data(%rip), %rdx
+	jmp	vkso_clock_gettime_coarse
+	.size __vkso_clock_gettime, .-__vkso_clock_gettime
+	.type vkso_user_clock_gettime_failure, @function
+	.size vkso_user_clock_gettime_failure, \
+		.Lclock_gettime_hres-vkso_user_clock_gettime_failure
 
 	.p2align 4
 	.globl __vkso_clock_getres
 	.type __vkso_clock_getres, @function
 __vkso_clock_getres:
-	cmpl	$VKSO_CLOCK_TAI, %edi
-	ja	.Lclock_getres_fallback
-	movl	$1, %eax
-	movl	%edi, %ecx
-	shll	%cl, %eax
-	testl	$VKSO_HRES_CLOCK_MASK, %eax
-	jne	.Lclock_getres_hres
-	testl	$VKSO_COARSE_CLOCK_MASK, %eax
-	jne	.Lclock_getres_coarse
+	vkso_dispatch_clock .Lclock_getres_hres, \
+		.Lclock_getres_coarse, .Lclock_getres_fallback
 .Lclock_getres_fallback:
 	movslq	%edi, %rdi
 	movl	$__NR_clock_getres, %eax
@@ -84,13 +84,13 @@ __vkso_gettimeofday:
 	jmp	vkso_gettimeofday_core
 	.size __vkso_gettimeofday, .-__vkso_gettimeofday
 
-	.type vkso_user_gettimeofday_backend, @function
-vkso_user_gettimeofday_backend:
+	.type vkso_user_gettimeofday_failure, @function
+vkso_user_gettimeofday_failure:
 	movl	$__NR_gettimeofday, %eax
 	syscall
 	ret
-	.size vkso_user_gettimeofday_backend, \
-		.-vkso_user_gettimeofday_backend
+	.size vkso_user_gettimeofday_failure, \
+		.-vkso_user_gettimeofday_failure
 
 	/*
 	 * Bind once after reading AT_VKSO_MM_DATA.  The per-MM page remains
@@ -105,9 +105,9 @@ __vkso_bind_context:
 	movq	%rdi, vkso_user_mm_data(%rip)
 	movq	%rsi, vkso_user_context(%rip)
 	movq	%rdx, vkso_user_context+8(%rip)
-	leaq	vkso_user_clock_gettime_backend(%rip), %rax
+	leaq	vkso_user_clock_gettime_failure(%rip), %rax
 	movq	%rax, vkso_user_context+16(%rip)
-	leaq	vkso_user_gettimeofday_backend(%rip), %rax
+	leaq	vkso_user_gettimeofday_failure(%rip), %rax
 	movq	%rax, vkso_user_context+24(%rip)
 	xorl	%eax, %eax
 	ret
@@ -133,8 +133,8 @@ vkso_user_mm_data:
 vkso_user_context:
 	.quad 0			/* pvclock_page */
 	.quad 0			/* hvclock_page */
-	.quad 0			/* clock_gettime_backend */
-	.quad 0			/* gettimeofday_backend */
+	.quad 0			/* clock_gettime_failure */
+	.quad 0			/* gettimeofday_failure */
 	.size vkso_user_context, .-vkso_user_context
 
 	.section .note.GNU-stack, "", @progbits

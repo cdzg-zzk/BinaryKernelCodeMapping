@@ -27,7 +27,13 @@ static_assert(offsetof(struct vkso_read_state, hrtimer_resolution) == 112);
 static_assert(offsetof(struct vkso_read_state, monotonic_raw_base) == 120);
 static_assert(offsetof(struct vkso_read_state, monotonic_coarse) == 136);
 static_assert(offsetof(struct vkso_read_state, timezone) == 152);
-static_assert(CLOCK_REALTIME == 0);
+static_assert(VKSO_CLOCK_REALTIME == CLOCK_REALTIME);
+static_assert(VKSO_CLOCK_MONOTONIC == CLOCK_MONOTONIC);
+static_assert(VKSO_CLOCK_MONOTONIC_RAW == CLOCK_MONOTONIC_RAW);
+static_assert(VKSO_CLOCK_REALTIME_COARSE == CLOCK_REALTIME_COARSE);
+static_assert(VKSO_CLOCK_MONOTONIC_COARSE == CLOCK_MONOTONIC_COARSE);
+static_assert(VKSO_CLOCK_BOOTTIME == CLOCK_BOOTTIME);
+static_assert(VKSO_CLOCK_TAI == CLOCK_TAI);
 static_assert(CLOCK_MONOTONIC == CLOCK_REALTIME + 1);
 static_assert(CLOCK_MONOTONIC_COARSE == CLOCK_REALTIME_COARSE + 1);
 static_assert(offsetof(struct vkso_read_state, monotonic_base) ==
@@ -106,88 +112,72 @@ vkso_read_hres_time(const struct vkso_shared_data *shared,
 }
 
 /*
- * Keep the clock-ID dispatcher and conversion in one shared implementation,
- * as the native vDSO does.  Named fields preserve the compact ABI layout; the
- * selection below only chooses addresses and the conversion body is emitted
- * once.
+ * The environment boundary classifies the clock ID once. These shared entries
+ * therefore contain only global-time selection, conversion and namespace-
+ * offset policy. Static native fallbacks never enter shared text; only a
+ * provider failure reaches the context callback.
  */
-#define VKSO_HRES_CLOCK_MASK						\
-	((1U << CLOCK_REALTIME) | (1U << CLOCK_MONOTONIC) |		\
-	 (1U << CLOCK_MONOTONIC_RAW) | (1U << CLOCK_BOOTTIME) |		\
-	 (1U << CLOCK_TAI))
-#define VKSO_COARSE_CLOCK_MASK						\
-	((1U << CLOCK_REALTIME_COARSE) |				\
-	 (1U << CLOCK_MONOTONIC_COARSE))
-
 __visible noinline __noclone notrace __vkso_text
-int vkso_clock_gettime_common(s32 clock_id, struct vkso_time_value *value,
-			      const struct vkso_mm_data *mm_data,
-			      const struct vkso_context *context)
+int vkso_clock_gettime_hres(s32 clock_id, struct vkso_time_value *value,
+			    const struct vkso_mm_data *mm_data,
+			    const struct vkso_context *context)
 {
 	const struct vkso_shared_data *shared = vkso_shared_data();
 	const struct vkso_hres_base *base;
-	const struct vkso_time_value *coarse;
 	const struct vkso_time_value *offset = NULL;
-	const u32 *multiplier;
-	u32 clock_bit;
+	const u32 *multiplier = &shared->state.cycles.mono_mult;
 	int status;
 
-	if (unlikely((u32)clock_id > CLOCK_TAI)) {
-		status = VKSO_TIME_BACKEND_REQUIRED;
-		goto backend;
-	}
-	clock_bit = 1U << clock_id;
-
-	if (likely(clock_bit & VKSO_HRES_CLOCK_MASK)) {
-		multiplier = &shared->state.cycles.mono_mult;
-		if (likely(clock_id == CLOCK_REALTIME)) {
-			base = &shared->state.realtime_base;
-		} else if (likely(clock_id == CLOCK_MONOTONIC)) {
-			base = &shared->state.monotonic_base;
-			if (mm_data)
-				offset = &mm_data->monotonic_offset;
-		} else if (clock_id == CLOCK_MONOTONIC_RAW) {
-			base = &shared->state.monotonic_raw_base;
-			multiplier = &shared->state.cycles.raw_mult;
-			if (mm_data)
-				offset = &mm_data->monotonic_offset;
-		} else if (clock_id == CLOCK_BOOTTIME) {
-			base = &shared->state.boottime_base;
-			if (mm_data)
-				offset = &mm_data->boottime_offset;
-		} else {
-			base = &shared->state.tai_base;
-		}
-		status = vkso_read_hres_time(
-			shared, base, &shared->state.cycles, multiplier,
-			context, value, true);
-		if (unlikely(status != VKSO_TIME_OK))
-			goto backend;
-	} else if (clock_bit & VKSO_COARSE_CLOCK_MASK) {
-		if (clock_id == CLOCK_REALTIME_COARSE) {
-			coarse = &shared->state.realtime_coarse;
-		} else {
-			coarse = &shared->state.monotonic_coarse;
-			if (mm_data)
-				offset = &mm_data->monotonic_offset;
-		}
-		vkso_read_coarse(shared, coarse, value);
+	if (likely(clock_id == CLOCK_REALTIME)) {
+		base = &shared->state.realtime_base;
+	} else if (likely(clock_id == CLOCK_MONOTONIC)) {
+		base = &shared->state.monotonic_base;
+		if (mm_data)
+			offset = &mm_data->monotonic_offset;
+	} else if (clock_id == CLOCK_MONOTONIC_RAW) {
+		base = &shared->state.monotonic_raw_base;
+		multiplier = &shared->state.cycles.raw_mult;
+		if (mm_data)
+			offset = &mm_data->monotonic_offset;
+	} else if (clock_id == CLOCK_BOOTTIME) {
+		base = &shared->state.boottime_base;
+		if (mm_data)
+			offset = &mm_data->boottime_offset;
 	} else {
-		status = VKSO_TIME_BACKEND_REQUIRED;
-		goto backend;
+		base = &shared->state.tai_base;
 	}
-
-	if (offset && (READ_ONCE(mm_data->clock_mask) & clock_bit))
+	status = vkso_read_hres_time(
+		shared, base, &shared->state.cycles, multiplier,
+		context, value, true);
+	if (unlikely(status != VKSO_TIME_OK))
+		return context->clock_gettime_failure(
+			clock_id, value, mm_data);
+	if (offset && (READ_ONCE(mm_data->clock_mask) & (1U << clock_id)))
 		vkso_apply_offset(offset, value);
 	return VKSO_TIME_OK;
-
-backend:
-	return context->clock_gettime_backend(
-		clock_id, value, mm_data, status);
 }
 
-#undef VKSO_COARSE_CLOCK_MASK
-#undef VKSO_HRES_CLOCK_MASK
+__visible noinline __noclone notrace __vkso_text
+int vkso_clock_gettime_coarse(s32 clock_id, struct vkso_time_value *value,
+			      const struct vkso_mm_data *mm_data)
+{
+	const struct vkso_shared_data *shared = vkso_shared_data();
+	const struct vkso_time_value *coarse;
+	const struct vkso_time_value *offset = NULL;
+
+	if (clock_id == CLOCK_REALTIME_COARSE) {
+		coarse = &shared->state.realtime_coarse;
+	} else {
+		coarse = &shared->state.monotonic_coarse;
+		if (mm_data)
+			offset = &mm_data->monotonic_offset;
+	}
+	vkso_read_coarse(shared, coarse, value);
+	if (offset && (READ_ONCE(mm_data->clock_mask) &
+		       (1U << CLOCK_MONOTONIC_COARSE)))
+		vkso_apply_offset(offset, value);
+	return VKSO_TIME_OK;
+}
 
 __visible noinline notrace __vkso_text
 int vkso_time_apply_offset(const struct vkso_time_value *offset,
@@ -235,7 +225,7 @@ int vkso_gettimeofday_core(
 			false);
 
 		if (unlikely(status != VKSO_TIME_OK))
-			return context->gettimeofday_backend(tv, tz, status);
+			return context->gettimeofday_failure(tv, tz, status);
 		tv->sec = now.sec;
 		/*
 		 * vkso_read_hres_time() normalizes nsec to [0, NSEC_PER_SEC).

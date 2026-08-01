@@ -52,7 +52,7 @@ struct timezone sys_tz;
 
 EXPORT_SYMBOL(sys_tz);
 
-int vkso_kernel_gettimeofday_backend(
+int vkso_kernel_gettimeofday_failure(
 	struct vkso_timeval *tv, struct vkso_timezone *tz, int status)
 {
 	struct timespec64 now;

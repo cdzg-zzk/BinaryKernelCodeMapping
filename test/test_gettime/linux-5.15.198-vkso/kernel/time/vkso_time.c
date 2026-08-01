@@ -29,8 +29,8 @@ union vkso_shared_page vkso_shared_page
 	};
 
 struct vkso_context vkso_kernel_context = {
-	.clock_gettime_backend = vkso_posix_clock_gettime_backend,
-	.gettimeofday_backend = vkso_kernel_gettimeofday_backend,
+	.clock_gettime_failure = vkso_posix_clock_gettime_failure,
+	.gettimeofday_failure = vkso_kernel_gettimeofday_failure,
 };
 
 void vkso_time_set_pvclock_page(const void *page)

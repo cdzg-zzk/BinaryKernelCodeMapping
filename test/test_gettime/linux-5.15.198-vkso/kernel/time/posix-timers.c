@@ -69,29 +69,19 @@ vkso_current_mm_data(void)
 }
 
 /*
- * A provider failure is different from a non-global clock.  The former must
- * use the private timekeeper state directly; routing it through k_clock would
- * call ktime_get_*() and retry the shared provider which just failed.
+ * A provider failure must use private timekeeper state directly. Routing it
+ * through k_clock would call ktime_get_*() and retry the shared provider which
+ * just failed. Non-shared clock IDs never reach this function.
  *
  * This is the only cold exit from the normal clock_gettime dispatcher.
  */
 noinline __cold int
-vkso_posix_clock_gettime_backend(
+vkso_posix_clock_gettime_failure(
 	s32 clock_id, struct vkso_time_value *value,
-	const struct vkso_mm_data *mm_data, int status)
+	const struct vkso_mm_data *mm_data)
 {
-	const struct k_clock *kc;
 	const struct vkso_time_value *offset;
 	struct timespec64 *tp = (struct timespec64 *)value;
-
-	if (status == VKSO_TIME_BACKEND_REQUIRED) {
-		kc = clockid_to_kclock(clock_id);
-		if (!kc || !kc->clock_get_timespec)
-			return -EINVAL;
-		return kc->clock_get_timespec(clock_id, tp);
-	}
-	if (status != VKSO_TIME_UNSUPPORTED_MODE)
-		return -EINVAL;
 
 	vkso_timekeeping_get_private(clock_id, tp);
 	if (!mm_data)
@@ -113,44 +103,44 @@ vkso_posix_clock_gettime_backend(
 static int
 posix_clock_gettime_dispatch(clockid_t clock_id, struct timespec64 *tp)
 {
-	const struct vkso_mm_data *mm_data = vkso_current_mm_data();
+	const struct vkso_mm_data *mm_data;
+	const struct k_clock *kc;
+	struct vkso_time_value *value = (struct vkso_time_value *)tp;
+	enum vkso_clock_class class;
 
-	return vkso_clock_gettime_common(
-		clock_id, (struct vkso_time_value *)tp, mm_data,
-		&vkso_kernel_context);
-}
+	class = vkso_clock_classify(clock_id);
+	if (unlikely(class == VKSO_CLOCK_NATIVE)) {
+		kc = clockid_to_kclock(clock_id);
+		if (!kc || !kc->clock_get_timespec)
+			return -EINVAL;
+		return kc->clock_get_timespec(clock_id, tp);
+	}
 
-static noinline __cold int
-posix_clock_getres_backend(clockid_t clock_id, struct timespec64 *tp)
-{
-	const struct k_clock *kc = clockid_to_kclock(clock_id);
-
-	if (!kc || !kc->clock_getres)
-		return -EINVAL;
-	return kc->clock_getres(clock_id, tp);
+	mm_data = vkso_current_mm_data();
+	if (likely(class == VKSO_CLOCK_HRES))
+		return vkso_clock_gettime_hres(
+			clock_id, value, mm_data, &vkso_kernel_context);
+	return vkso_clock_gettime_coarse(
+		clock_id, value, mm_data);
 }
 
 static int
 posix_clock_getres_dispatch(clockid_t clock_id, struct timespec64 *tp)
 {
-	const u32 hres_clocks = (1U << CLOCK_REALTIME) |
-		(1U << CLOCK_MONOTONIC) | (1U << CLOCK_MONOTONIC_RAW) |
-		(1U << CLOCK_BOOTTIME) | (1U << CLOCK_TAI);
-	const u32 coarse_clocks = (1U << CLOCK_REALTIME_COARSE) |
-		(1U << CLOCK_MONOTONIC_COARSE);
-	u32 id = clock_id;
-	u32 mask;
+	const struct k_clock *kc;
+	struct vkso_time_value *value = (struct vkso_time_value *)tp;
+	enum vkso_clock_class class;
 
-	if (id <= CLOCK_TAI) {
-		mask = 1U << id;
-		if (mask & hres_clocks)
-			return vkso_clock_getres_hres(
-				(struct vkso_time_value *)tp);
-		if (mask & coarse_clocks)
-			return vkso_clock_getres_coarse(
-				(struct vkso_time_value *)tp);
-	}
-	return posix_clock_getres_backend(clock_id, tp);
+	class = vkso_clock_classify(clock_id);
+	if (likely(class == VKSO_CLOCK_HRES))
+		return vkso_clock_getres_hres(value);
+	if (class == VKSO_CLOCK_COARSE)
+		return vkso_clock_getres_coarse(value);
+
+	kc = clockid_to_kclock(clock_id);
+	if (!kc || !kc->clock_getres)
+		return -EINVAL;
+	return kc->clock_getres(clock_id, tp);
 }
 
 /*
