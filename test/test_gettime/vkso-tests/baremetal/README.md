@@ -24,6 +24,12 @@ collections under `results/<run>/incomplete/`, and stores the complete raw
 CSV, functional logs, interrupt snapshots and environment metadata. It does
 not generate a performance conclusion.
 
+The first `./experiment.sh boot raw-normal` automatically starts a new run.
+After each reboot, use `./experiment.sh collect CASE`, then the same `boot` /
+`collect` pair for the reported next case. An explicit `begin` is optional.
+Uncommitted candidates remain reproducible because each package stores and
+hash-checks its exact tracked `source.patch` relative to `git_commit`.
+
 The independent Chinese report for the final completed four-image run
 `20260728T013904Z-vkso-final`, including the Base2 optimization comparison,
 is [`VKSO_READ性能实验报告_20260728.md`](VKSO_READ性能实验报告_20260728.md).
@@ -48,7 +54,28 @@ It evaluates public readers, the complete update writer, and seq retry
 behavior while read and update execute concurrently.
 
 These three reports are complementary rather than interchangeable:
-standalone READ uses the public-entry/PMU harness, UPDATE measures the complete
-idle writer, and CONCURRENT uses sustained saturated readers. Absolute cycles
-from different harnesses must not be subtracted as though they shared one
-measurement boundary.
+standalone READ measures direct public user-API batches with PMU counters,
+UPDATE measures the complete idle writer, and CONCURRENT runs the same direct
+reader batch while recording the complete writer. Operation/path selection,
+argument initialization and duration-control syscalls are outside the inner
+reader window (`direct-user-api-steady-batch-v3`). Each timed sample first
+re-primes the exact path, and bare-metal collection disables user-space ASLR
+with `setarch -R` so call-site/target layout is identical across repetitions.
+The 31 standalone READ repetitions are distributed across seven fresh
+processes; `perf-process-map.csv` preserves the process/local-repeat identity
+while `perf.csv` retains the established schema and global repeat numbers.
+The three clock readers shared by
+READ and CONCURRENT therefore have the same measured call body; results from
+older `invoke()`-based READ packages must not be mixed with this version.
+CONCURRENT uses 500,000 measured calls per batch, matching READ.  After each
+duration-control syscall it executes 10,000 unmeasured calls to restore the
+exact reader path's predictor state.  Its load CSV records measured,
+conditioning and total calls separately under
+`direct-user-api-conditioned-load-v4`.
+
+The four-image update and concurrency drivers use the same fixed interface as
+the reader experiment. Use `./experiment-update.sh boot/collect CASE` for the
+idle writer experiment and `./experiment-concurrent.sh boot/collect CASE` for
+read/update concurrency. The first `boot raw-normal` starts its run; each
+`collect` prints the next case, and the fourth collection validates and archives
+the complete run.
