@@ -105,6 +105,7 @@ run_backend()
 	grep -Fq 'abi_matrix_status=pass' "$log"
 	grep -Fq 'guest_status=0' "$log"
 	grep -Fq 'concurrency.seq_protocol=pass' "$log"
+	grep -Fq 'concurrency.public_reader_window=pass' "$log"
 	grep -Fq 'event.clocksource_switch=pass' "$log"
 	grep -Fq 'event.suspend_resume=pass' "$log"
 	if [[ "$backend" == vkso ]] &&

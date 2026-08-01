@@ -83,24 +83,34 @@ CPU=$(manifest_value "$EXPERIMENT_MANIFEST" cpu)
 HOUSEKEEPING_CPUS=$(manifest_value "$EXPERIMENT_MANIFEST" housekeeping_cpus)
 ITERATIONS=$(manifest_value "$EXPERIMENT_MANIFEST" iterations)
 REPEATS=$(manifest_value "$EXPERIMENT_MANIFEST" repeats)
+PERF_PROCESSES=$(manifest_value "$EXPERIMENT_MANIFEST" perf_processes)
 WARMUP=$(manifest_value "$EXPERIMENT_MANIFEST" warmup)
 PMU=$(manifest_value "$EXPERIMENT_MANIFEST" pmu)
 SEQ_ITERATIONS=$(manifest_value "$EXPERIMENT_MANIFEST" seq_iterations)
 
-for value in "$CPU" "$ITERATIONS" "$REPEATS" "$WARMUP" "$PMU" \
-	"$SEQ_ITERATIONS"; do
+for value in "$CPU" "$ITERATIONS" "$REPEATS" "$PERF_PROCESSES" \
+	"$WARMUP" "$PMU" "$SEQ_ITERATIONS"; do
 	[[ "$value" =~ ^[0-9]+$ ]]
 done
+(( PERF_PROCESSES > 0 && PERF_PROCESSES <= REPEATS ))
 
 test "$(uname -r)" = 5.15.198 || {
 	echo "expected experimental kernel 5.15.198, got $(uname -r)" >&2
 	exit 1
 }
-probe=$("$PACKAGE/vkso-time-bench" --probe)
+command -v setarch >/dev/null
+BENCHMARK_RUNNER=(setarch "$(uname -m)" -R)
+probe=$("${BENCHMARK_RUNNER[@]}" "$PACKAGE/vkso-time-bench" --probe)
 detected_backend=$(printf '%s\n' "$probe" |
 	awk -F= '$1 == "backend" { print $2; exit }')
+reader_measurement_window=$(printf '%s\n' "$probe" |
+	awk -F= '$1 == "reader_measurement_window" { print $2; exit }')
 test "$detected_backend" = "$BACKEND" || {
 	echo "wrong kernel backend: expected $BACKEND, got $detected_backend" >&2
+	exit 1
+}
+test "$reader_measurement_window" = direct-user-api-steady-batch-v3 || {
+	echo "unsupported reader measurement window: ${reader_measurement_window:-missing}" >&2
 	exit 1
 }
 boot_image=$(awk '{
@@ -257,9 +267,13 @@ printf '%s\n' "$probe" >"$PARTIAL/backend-probe.txt"
 	printf 'housekeeping_cpus=%s\n' "$HOUSEKEEPING_CPUS"
 	printf 'iterations=%s\n' "$ITERATIONS"
 	printf 'repeats=%s\n' "$REPEATS"
+	printf 'perf_processes=%s\n' "$PERF_PROCESSES"
 	printf 'warmup=%s\n' "$WARMUP"
 	printf 'pmu=%s\n' "$PMU"
 	printf 'seq_iterations=%s\n' "$SEQ_ITERATIONS"
+	printf 'reader_measurement_window=%s\n' \
+		"$reader_measurement_window"
+	printf 'user_address_layout=fixed-setarch-R\n'
 	printf 'clocksource=%s\n' "$clocksource"
 	printf 'isolated=%s\n' "$isolated"
 	printf 'cmdline=%s\n' "$(cat /proc/cmdline)"
@@ -342,12 +356,43 @@ tr -d '\r' <"$PARTIAL/functional.log" |
 	grep -E '^(semantics|path|namespace)\.' \
 	>"$PARTIAL/functional.matrix"
 
-LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-time-bench" \
-	--backend "$BACKEND" --mode perf --cpu "$CPU" \
-	--iterations "$ITERATIONS" --repeats "$REPEATS" \
-	--warmup "$WARMUP" --pmu "$PMU" \
-	>"$PARTIAL/perf.csv" 2>"$PARTIAL/perf.stderr"
-LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-time-bench" \
+mkdir "$PARTIAL/perf-processes"
+printf '%s\n' \
+	'process,local_repeat,global_repeat' \
+	>"$PARTIAL/perf-process-map.csv"
+repeat_offset=0
+for ((process = 0; process < PERF_PROCESSES; ++process)); do
+	remaining=$((REPEATS - repeat_offset))
+	processes_left=$((PERF_PROCESSES - process))
+	process_repeats=$(((remaining + processes_left - 1) / processes_left))
+	process_name=$(printf 'process-%02d' "$process")
+	process_csv=$PARTIAL/perf-processes/$process_name.csv
+	process_stderr=$PARTIAL/perf-processes/$process_name.stderr
+
+	LD_LIBRARY_PATH="$PACKAGE" "${BENCHMARK_RUNNER[@]}" \
+		"$PACKAGE/vkso-time-bench" \
+		--backend "$BACKEND" --mode perf --cpu "$CPU" \
+		--iterations "$ITERATIONS" --repeats "$process_repeats" \
+		--warmup "$WARMUP" --pmu "$PMU" \
+		>"$process_csv" 2>"$process_stderr"
+	if (( process == 0 )); then
+		sed -n '1p' "$process_csv" >"$PARTIAL/perf.csv"
+	fi
+	awk -F, -v OFS=, -v offset="$repeat_offset" \
+		'NR > 1 { $3 += offset; print }' "$process_csv" \
+		>>"$PARTIAL/perf.csv"
+	for ((local_repeat = 0; local_repeat < process_repeats;
+	      ++local_repeat)); do
+		printf '%d,%d,%d\n' "$process" "$local_repeat" \
+			"$((repeat_offset + local_repeat))" \
+			>>"$PARTIAL/perf-process-map.csv"
+	done
+	repeat_offset=$((repeat_offset + process_repeats))
+done
+test "$repeat_offset" -eq "$REPEATS"
+cat "$PARTIAL"/perf-processes/*.stderr >"$PARTIAL/perf.stderr"
+LD_LIBRARY_PATH="$PACKAGE" "${BENCHMARK_RUNNER[@]}" \
+	"$PACKAGE/vkso-time-bench" \
 	--backend "$BACKEND" --mode seq --cpu "$CPU" \
 	--seq-iterations "$SEQ_ITERATIONS" \
 	>"$PARTIAL/seq.csv" 2>"$PARTIAL/seq.stderr"
@@ -359,6 +404,8 @@ test "$(wc -l <"$PARTIAL/perf.csv")" -eq "$expected_rows" || {
 	echo "incomplete perf.csv: expected $expected_rows rows" >&2
 	exit 1
 }
+test "$(wc -l <"$PARTIAL/perf-process-map.csv")" \
+	-eq "$((REPEATS + 1))"
 test "$(wc -l <"$PARTIAL/seq.csv")" -eq 3
 if [[ "$BACKEND" == raw ]]; then
 	expected_user_path=raw_vdso

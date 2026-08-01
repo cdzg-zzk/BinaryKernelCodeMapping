@@ -56,10 +56,6 @@ case "$VKSO_VALIDATION_TESTS" in
 	exit 2
 	;;
 esac
-if [[ "$UPDATE_BENCH" == 1 && "$BUILD_VARIANT" != normal ]]; then
-	echo "update-side benchmark images currently require BUILD_VARIANT=normal" >&2
-	exit 2
-fi
 for command in "$CC" g++ make tar python3 sha256sum nm readelf; do
 	command -v "$command" >/dev/null || {
 		echo "missing build dependency: $command" >&2
@@ -71,6 +67,16 @@ test -s "$BASE_CONFIG" || {
 	exit 1
 }
 test -f "$VKSO_SOURCE/Makefile"
+reader_measurement_window=$(sed -n \
+	's/^#define READER_MEASUREMENT_WINDOW "\(.*\)"$/\1/p' \
+	"$HERE/vkso_time_bench.c")
+load_measurement_window=$(sed -n \
+	's/^#define LOAD_MEASUREMENT_WINDOW "\(.*\)"$/\1/p' \
+	"$HERE/vkso_time_bench.c")
+if [[ -z "$reader_measurement_window" || -z "$load_measurement_window" ]]; then
+	echo "benchmark measurement-window metadata is missing" >&2
+	exit 1
+fi
 if [[ -e "$OUT" ]]; then
 	echo "refusing to overwrite package output: $OUT" >&2
 	exit 1
@@ -359,7 +365,8 @@ if [[ "$BUILD_VARIANT" == normal ]]; then
 	cp "$HERE/reusable_text.txt" "$DSO_BUILD/"
 	REUSABLE_TEXT_ARGS=(--reusable-text-list reusable_text.txt)
 fi
-"$CC" -c -fPIC -o "$DSO_BUILD/vkso_user_entry.o" \
+"$CC" -I"$VKSO_SOURCE/include" -c -fPIC \
+	-o "$DSO_BUILD/vkso_user_entry.o" \
 	"$ROOT/test/test_gettime/vkso-tests/functional/vkso_user_entry.S"
 (
 	cd "$DSO_BUILD"
@@ -381,7 +388,7 @@ shared_value=$(nm -a "$DSO_BUILD/libkernel.so" |
 test -n "$shared_value"
 printf '%s\n' "$shared_value" >"$OUT/vkso-shared-st-value.txt"
 text_anchor_value=$(nm -a "$DSO_BUILD/libkernel.so" |
-	awk '$3 == "vkso_clock_gettime_common" && !value { value = "0x" $1 }
+	awk '$3 == "vkso_clock_gettime_hres" && !value { value = "0x" $1 }
 	     END { if (value) print value }')
 test -n "$text_anchor_value"
 printf '%s\n' "$text_anchor_value" >"$OUT/vkso-text-anchor-st-value.txt"
@@ -433,19 +440,31 @@ install -m 0644 "$HERE/vkso_time_bench.c" "$OUT/vkso_time_bench.c"
 if [[ "$UPDATE_BENCH" == 1 ]]; then
 	for script in collect-update.sh compare-update.py \
 		collect-update-side.sh collect-update-concurrent.sh \
-		boot-raw-update.sh boot-vkso-update.sh install-update-grub.sh; do
+		boot-raw-update.sh boot-vkso-update.sh boot-update-once.sh \
+		experiment-update.sh experiment-concurrent.sh install-update-grub.sh \
+		verify-update-packages.sh; do
 		install -m 0755 "$HERE/../update-bench/$script" "$OUT/$script"
 	done
+	for config in update-experiment.conf concurrent-experiment.conf; do
+		install -m 0644 "$HERE/../update-bench/$config" "$OUT/$config"
+	done
 fi
+
+# Preserve the exact tracked candidate when performance is measured before a
+# commit.  A clean build has an empty patch; both forms are hash-checked by the
+# installer and experiment driver.
+git -C "$ROOT" diff --binary --no-ext-diff HEAD -- >"$OUT/source.patch"
+candidate_patch_sha256=$(sha256sum "$OUT/source.patch" | awk '{print $1}')
 
 {
 	date -u '+prepared_utc=%Y-%m-%dT%H:%M:%SZ'
 	printf 'git_commit=%s\n' "$(git -C "$ROOT" rev-parse HEAD)"
-	if [[ -n $(git -C "$ROOT" status --porcelain) ]]; then
+	if [[ -s "$OUT/source.patch" ]]; then
 		printf 'git_worktree_dirty=1\n'
 	else
 		printf 'git_worktree_dirty=0\n'
 	fi
+	printf 'candidate_patch_sha256=%s\n' "$candidate_patch_sha256"
 	printf 'build_variant=%s\n' "$BUILD_VARIANT"
 	printf 'update_bench=%s\n' "$UPDATE_BENCH"
 	printf 'vkso_validation_tests=%s\n' "$VKSO_VALIDATION_TESTS"
@@ -456,6 +475,10 @@ fi
 	printf 'cc_path=%s\n' "$(command -v "$CC")"
 	printf 'cc_version=%s\n' "$("$CC" -dumpfullversion -dumpversion)"
 	printf 'benchmark_cflags=%s\n' "$BENCHMARK_CFLAGS"
+	printf 'reader_measurement_window=%s\n' \
+		"$reader_measurement_window"
+	printf 'load_measurement_window=%s\n' \
+		"$load_measurement_window"
 	printf 'kbuild_build_timestamp=%s\n' \
 		"${KBUILD_BUILD_TIMESTAMP:-unspecified}"
 	printf 'kbuild_build_user=%s\n' \
@@ -492,6 +515,10 @@ fi
 	printf 'vkso_native_vdso=absent\n'
 	printf 'config_difference=implementation_selects_only\n'
 	if [[ "$UPDATE_BENCH" == 1 ]]; then
+		printf 'update_experiment_config_sha256=%s\n' \
+			"$(sha256sum "$HERE/../update-bench/update-experiment.conf" | awk '{print $1}')"
+		printf 'concurrent_experiment_config_sha256=%s\n' \
+			"$(sha256sum "$HERE/../update-bench/concurrent-experiment.conf" | awk '{print $1}')"
 		printf 'update_bench_header_sha256=%s\n' \
 			"$(sha256sum "$VKSO_SOURCE/include/linux/timekeeping_update_bench.h" | awk '{print $1}')"
 		printf 'update_bench_recorder_sha256=%s\n' \
@@ -506,15 +533,19 @@ fi
 		libkernel.so page_mappings.txt page_cache_replace.ko \
 		vkso_m09_clock.ko manager \
 		raw-abi-matrix vkso-abi-matrix vkso-time-bench \
+		vkso_time_bench.c \
 		collect-case.sh experiment.sh boot-once.sh install-grub.sh \
 		qemu-preflight.sh qemu-guest-init verify-packages.sh \
-		source-tree-hash.sh experiment.conf \
+		source-tree-hash.sh experiment.conf source.patch \
 		>SHA256SUMS
 	if [[ "$UPDATE_BENCH" == 1 ]]; then
 		sha256sum collect-update.sh collect-update-side.sh \
 			collect-update-concurrent.sh compare-update.py boot-once.sh \
 			boot-raw-update.sh boot-vkso-update.sh \
-			install-update-grub.sh >>SHA256SUMS
+			boot-update-once.sh experiment-update.sh \
+			experiment-concurrent.sh \
+			install-update-grub.sh verify-update-packages.sh \
+			update-experiment.conf concurrent-experiment.conf >>SHA256SUMS
 	fi
 )
 
@@ -530,14 +561,14 @@ else
 fi
 if [[ "$reuse_raw" == 0 ]]; then
 	if nm "$RAW_BUILD/vmlinux" |
-		awk '$3 == "vkso_clock_gettime_common" { found = 1 }
-		     END { exit !found }'; then
+	awk '$3 == "vkso_clock_gettime_hres" { found = 1 }
+	     END { exit !found }'; then
 		echo "raw image contains VKSO time core" >&2
 		exit 1
 	fi
 fi
 nm "$VKSO_BUILD/vmlinux" |
-	awk '$3 == "vkso_clock_gettime_common" { found = 1 }
+	awk '$3 == "vkso_clock_gettime_hres" { found = 1 }
 	     END { exit !found }'
 if [[ "$UPDATE_BENCH" == 1 ]]; then
 	update_bench_images=("$VKSO_BUILD/vmlinux")

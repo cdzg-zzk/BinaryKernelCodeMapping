@@ -14,10 +14,12 @@ else
 fi
 RESULTS_DIR=${RESULTS_DIR:-$CONTROL_DIR/results}
 STATE=${STATE_FILE:-$CONTROL_DIR/.active-update-run-id}
+RESULT_OWNER_ROOT=${RESULT_OWNER_ROOT:-}
 CPU=${CPU:-2}
 REPEATS=${REPEATS:-15}
 UPDATE_SECONDS=${UPDATE_SECONDS:-15}
-WARMUP=${WARMUP:-100000}
+READER_ITERATIONS=${READER_ITERATIONS:-500000}
+WARMUP=${WARMUP:-10000}
 SEQ_ITERATIONS=${SEQ_ITERATIONS:-50000000}
 VKSO_ONLY=${VKSO_ONLY:-0}
 BENCH_SCOPE=${BENCH_SCOPE:-all}
@@ -26,7 +28,7 @@ DEBUGFS=/sys/kernel/debug
 BENCH_DIR=$DEBUGFS/timekeeping_update_bench
 
 if [[ $(id -u) -ne 0 ]]; then
-	exec sudo --preserve-env=PACKAGE,COMPARE,CONTROL_DIR,RESULTS_DIR,STATE_FILE,CPU,REPEATS,UPDATE_SECONDS,WARMUP,SEQ_ITERATIONS,VKSO_ONLY,BENCH_SCOPE,STABILIZE_SECONDS \
+	exec sudo --preserve-env=PACKAGE,COMPARE,CONTROL_DIR,RESULTS_DIR,RESULT_OWNER_ROOT,STATE_FILE,CPU,REPEATS,UPDATE_SECONDS,READER_ITERATIONS,WARMUP,SEQ_ITERATIONS,VKSO_ONLY,BENCH_SCOPE,STABILIZE_SECONDS \
 		"$0" "$@"
 fi
 
@@ -46,8 +48,17 @@ all|update-side|concurrent)
 	exit 2
 	;;
 esac
-if [[ ! "$STABILIZE_SECONDS" =~ ^[0-9]+$ ]]; then
-	echo "STABILIZE_SECONDS must be a non-negative integer" >&2
+for parameter in CPU REPEATS UPDATE_SECONDS READER_ITERATIONS WARMUP \
+	SEQ_ITERATIONS STABILIZE_SECONDS; do
+	value=${!parameter}
+	if [[ ! "$value" =~ ^[0-9]+$ ]]; then
+		echo "$parameter must be a non-negative integer" >&2
+		exit 2
+	fi
+done
+if ((REPEATS == 0 || UPDATE_SECONDS == 0 ||
+     READER_ITERATIONS == 0 || SEQ_ITERATIONS == 0)); then
+	echo "REPEATS, UPDATE_SECONDS, READER_ITERATIONS and SEQ_ITERATIONS must be positive" >&2
 	exit 2
 fi
 
@@ -69,12 +80,27 @@ test -x "$COMPARE" || {
 	exit 1
 }
 (cd "$PACKAGE" && sha256sum -c SHA256SUMS)
-grep -Fqx 'build_variant=normal' "$PACKAGE/boot-manifest.txt"
 grep -Fqx 'update_bench=1' "$PACKAGE/boot-manifest.txt"
+build_variant=$(awk -F= '$1 == "build_variant" { print $2; exit }' \
+	"$PACKAGE/boot-manifest.txt")
+case "$build_variant" in
+normal|no-retpoline)
+	;;
+*)
+	echo "invalid update package build variant: ${build_variant:-missing}" >&2
+	exit 1
+	;;
+esac
 
-probe=$("$PACKAGE/vkso-time-bench" --probe)
+command -v setarch >/dev/null
+BENCHMARK_RUNNER=(setarch "$(uname -m)" -R)
+probe=$("${BENCHMARK_RUNNER[@]}" "$PACKAGE/vkso-time-bench" --probe)
 backend=$(printf '%s\n' "$probe" |
 	awk -F= '$1 == "backend" { print $2; exit }')
+reader_measurement_window=$(printf '%s\n' "$probe" |
+	awk -F= '$1 == "reader_measurement_window" { print $2; exit }')
+load_measurement_window=$(printf '%s\n' "$probe" |
+	awk -F= '$1 == "load_measurement_window" { print $2; exit }')
 case "$backend" in
 raw|vkso)
 	;;
@@ -84,8 +110,16 @@ raw|vkso)
 	exit 1
 	;;
 esac
+if [[ "$reader_measurement_window" != direct-user-api-steady-batch-v3 ]]; then
+	echo "unsupported reader measurement window: ${reader_measurement_window:-missing}" >&2
+	exit 1
+fi
+if [[ "$load_measurement_window" != direct-user-api-conditioned-load-v4 ]]; then
+	echo "unsupported load measurement window: ${load_measurement_window:-missing}" >&2
+	exit 1
+fi
 
-expected_image=vkso-time-$backend-update-5.15.198.bzImage
+expected_image=vkso-update-$backend-$build_variant-5.15.198.bzImage
 boot_image=$(awk '{
 	for (i = 1; i <= NF; ++i) {
 		if ($i ~ /^BOOT_IMAGE=/) {
@@ -180,6 +214,12 @@ fi
 
 result_root=$RESULTS_DIR/$run_id
 out=$result_root/$backend
+allowed_results_root=$(realpath -m "$CONTROL_DIR/results")
+result_owner_root=$(realpath -m "${RESULT_OWNER_ROOT:-$result_root}")
+if [[ "$result_owner_root" != "$allowed_results_root"/* ]]; then
+	echo "unsafe result ownership root: $result_owner_root" >&2
+	exit 1
+fi
 if [[ -e "$out/complete" ]]; then
 	echo "$backend update result already complete: $out" >&2
 	exit 1
@@ -201,18 +241,31 @@ cmp -s "$PACKAGE/$backend.config" "$out/running.config"
 {
 	date -u '+utc=%Y-%m-%dT%H:%M:%SZ'
 	printf 'backend=%s\n' "$backend"
+	printf 'build_variant=%s\n' "$build_variant"
 	printf 'run_id=%s\n' "$run_id"
 	printf 'cpu=%s\n' "$CPU"
 	printf 'repeats=%s\n' "$REPEATS"
 	printf 'update_seconds=%s\n' "$UPDATE_SECONDS"
+	printf 'reader_iterations=%s\n' "$READER_ITERATIONS"
 	printf 'warmup=%s\n' "$WARMUP"
 	printf 'seq_iterations=%s\n' "$SEQ_ITERATIONS"
 	printf 'collection_mode=%s\n' "$collection_mode"
 	printf 'bench_scope=%s\n' "$BENCH_SCOPE"
+	printf 'reader_measurement_window=%s\n' \
+		"$reader_measurement_window"
+	printf 'load_measurement_window=%s\n' \
+		"$load_measurement_window"
+	printf 'user_address_layout=fixed-setarch-R\n'
 	printf 'stabilize_seconds=%s\n' "$STABILIZE_SECONDS"
 	printf 'clocksource=%s\n' "$clocksource"
 	printf 'cmdline=%s\n' "$(cat /proc/cmdline)"
 	printf 'package=%s\n' "$PACKAGE"
+	printf 'package_manifest_sha256=%s\n' \
+		"$(sha256sum "$PACKAGE/boot-manifest.txt" | awk '{print $1}')"
+	printf 'image_sha256=%s\n' \
+		"$(sha256sum "$PACKAGE/$backend-bzImage" | awk '{print $1}')"
+	printf 'test_binary_sha256=%s\n' \
+		"$(sha256sum "$PACKAGE/vkso-time-bench" | awk '{print $1}')"
 	printf 'collector_sha256=%s\n' \
 		"$(sha256sum "$0" | awk '{print $1}')"
 	printf 'package_collector_sha256=%s\n' \
@@ -220,6 +273,21 @@ cmp -s "$PACKAGE/$backend.config" "$out/running.config"
 	printf 'collector_git_commit=%s\n' \
 		"$(git -C "$HERE/../../../.." rev-parse HEAD)"
 } >"$out/metadata.txt"
+
+normalize_result_permissions()
+{
+	local owner_parent status=0
+
+	owner_parent=$(dirname "$result_owner_root")
+	if [[ ${SUDO_UID:-} =~ ^[0-9]+$ &&
+	      ${SUDO_GID:-} =~ ^[0-9]+$ && ${SUDO_UID:-0} -ne 0 ]]; then
+		chown "$SUDO_UID:$SUDO_GID" "$owner_parent" || status=$?
+		chown -R "$SUDO_UID:$SUDO_GID" "$result_owner_root" || status=$?
+	fi
+	chmod u+rwx,go+rx "$owner_parent" || status=$?
+	chmod -R u+rwX,go+rX "$result_owner_root" || status=$?
+	return "$status"
+}
 
 recorder_running=0
 module_loaded=0
@@ -250,7 +318,7 @@ cleanup_all()
 	set -e
 	return "$status"
 }
-trap 'cleanup_all || true' EXIT INT TERM
+trap 'cleanup_all || true; normalize_result_permissions || true' EXIT INT TERM
 
 if grep -q '^vkso_m09_clock ' /proc/modules; then
 	echo "vkso_m09_clock is already loaded; unload the prior test module first" >&2
@@ -328,8 +396,10 @@ for ((round = 0; round < REPEATS; round++)); do
 			scenario=$out/3.3-concurrent/$operation
 			mkdir -p "$scenario"
 			record_command "$scenario/round-$index-writer.csv" \
+				"${BENCHMARK_RUNNER[@]}" \
 				"$PACKAGE/vkso-time-bench" \
 				--backend "$backend" --mode load --cpu "$CPU" \
+				--iterations "$READER_ITERATIONS" \
 				--operation "$operation" --seconds "$UPDATE_SECONDS" \
 				--warmup "$WARMUP" \
 				>"$scenario/round-$index-reader.csv"
@@ -340,6 +410,7 @@ for ((round = 0; round < REPEATS; round++)); do
 			"$((round + 1))" "$REPEATS"
 		mkdir -p "$scenario"
 		record_command "$scenario/round-$index-writer.csv" \
+			"${BENCHMARK_RUNNER[@]}" \
 			"$PACKAGE/vkso-time-bench" \
 			--backend "$backend" --mode seq --cpu "$CPU" \
 			--seq-iterations "$SEQ_ITERATIONS" \
@@ -351,7 +422,6 @@ printf 'stop\n' >"$BENCH_DIR/control"
 cleanup_all
 "$COMPARE" --backend-dir "$out"
 touch "$out/complete"
-trap - EXIT INT TERM
 
 if [[ "$backend" == raw ]]; then
 	echo "raw_update_result=$out"
@@ -371,3 +441,5 @@ else
 		echo "backend_summary=$out/update-summary.csv"
 	fi
 fi
+normalize_result_permissions
+trap - EXIT INT TERM

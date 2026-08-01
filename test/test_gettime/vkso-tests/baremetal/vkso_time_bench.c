@@ -35,6 +35,8 @@
 #define RAW_VVAR_DATA_OFFSET 128U
 #define RAW_VDSO_BASES 12U
 #define RAW_CS_RAW 1U
+#define READER_MEASUREMENT_WINDOW "direct-user-api-steady-batch-v3"
+#define LOAD_MEASUREMENT_WINDOW "direct-user-api-conditioned-load-v4"
 
 enum backend {
 	BACKEND_RAW,
@@ -495,88 +497,175 @@ static int operation_is_clock_getres(enum operation operation)
 	       operation <= OP_CGR_PROCESS_CPU;
 }
 
-static uint64_t result_checksum(enum operation operation, long result,
-				const struct timespec *ts,
-				const struct timeval *tv,
-				const struct timezone *tz,
-				time_t stored, unsigned int cpu,
-				unsigned int node)
+static uint64_t user_clock_gettime_loop(clockid_t clock_id,
+					uint64_t iterations)
 {
-	if (result < 0)
-		return (uint64_t)-result;
-	if (operation_is_clock_gettime(operation) ||
-	    operation_is_clock_getres(operation))
-		return (uint64_t)ts->tv_sec ^ (uint64_t)ts->tv_nsec;
-	if (operation >= OP_GTOD_TV && operation <= OP_GTOD_NULL)
-		return (uint64_t)tv->tv_sec ^ (uint64_t)tv->tv_usec ^
-		       (uint32_t)tz->tz_minuteswest;
-	if (operation == OP_TIME_NULL || operation == OP_TIME_POINTER)
-		return (uint64_t)result ^ (uint64_t)stored;
-	return cpu ^ node;
+	struct timespec value = { 0 };
+	uint64_t index, checksum = 0;
+
+	for (index = 0; index < iterations; ++index) {
+		if (user_time.clock_gettime(clock_id, &value) < 0)
+			fail_message("benchmark operation returned an error");
+		checksum += (uint64_t)value.tv_sec ^ (uint64_t)value.tv_nsec;
+	}
+	return checksum;
 }
 
-static __attribute__((noinline))
-uint64_t invoke(enum operation operation, enum path path)
+static uint64_t syscall_clock_gettime_loop(clockid_t clock_id,
+					   uint64_t iterations)
 {
-	struct timespec ts = { 0 };
-	struct timeval tv = { 0 };
-	struct timezone tz = { 0 };
+	struct timespec value = { 0 };
+	uint64_t index, checksum = 0;
+
+	for (index = 0; index < iterations; ++index) {
+		long result = raw_syscall2(SYS_clock_gettime, clock_id,
+					   (long)&value);
+
+		if (result < 0)
+			fail_message("benchmark operation returned an error");
+		checksum += (uint64_t)value.tv_sec ^ (uint64_t)value.tv_nsec;
+	}
+	return checksum;
+}
+
+static uint64_t clock_getres_loop(clockid_t clock_id, enum path path,
+				  uint64_t iterations)
+{
+	struct timespec value = { 0 };
+	uint64_t index, checksum = 0;
+
+	if (path == PATH_SYSCALL) {
+		for (index = 0; index < iterations; ++index) {
+			long result = raw_syscall2(SYS_clock_getres, clock_id,
+						   (long)&value);
+
+			if (result < 0)
+				fail_message("benchmark operation returned an error");
+			checksum += (uint64_t)value.tv_sec ^
+				    (uint64_t)value.tv_nsec;
+		}
+	} else {
+		for (index = 0; index < iterations; ++index) {
+			if (user_time.clock_getres(clock_id, &value) < 0)
+				fail_message("benchmark operation returned an error");
+			checksum += (uint64_t)value.tv_sec ^
+				    (uint64_t)value.tv_nsec;
+		}
+	}
+	return checksum;
+}
+
+static uint64_t gettimeofday_loop(enum operation operation, enum path path,
+				  uint64_t iterations)
+{
+	struct timeval value = { 0 };
+	struct timezone timezone = { 0 };
+	struct timeval *value_pointer =
+		operation == OP_GTOD_TZ || operation == OP_GTOD_NULL ?
+		NULL : &value;
+	struct timezone *timezone_pointer =
+		operation == OP_GTOD_TV || operation == OP_GTOD_NULL ?
+		NULL : &timezone;
+	uint64_t index, checksum = 0;
+
+	if (path == PATH_SYSCALL) {
+		for (index = 0; index < iterations; ++index) {
+			long result = raw_syscall2(SYS_gettimeofday,
+						   (long)value_pointer,
+						   (long)timezone_pointer);
+
+			if (result < 0)
+				fail_message("benchmark operation returned an error");
+			checksum += (uint64_t)value.tv_sec ^
+				    (uint64_t)value.tv_usec ^
+				    (uint32_t)timezone.tz_minuteswest;
+		}
+	} else {
+		for (index = 0; index < iterations; ++index) {
+			if (user_time.gettimeofday(value_pointer,
+						    timezone_pointer) < 0)
+				fail_message("benchmark operation returned an error");
+			checksum += (uint64_t)value.tv_sec ^
+				    (uint64_t)value.tv_usec ^
+				    (uint32_t)timezone.tz_minuteswest;
+		}
+	}
+	return checksum;
+}
+
+static uint64_t time_loop(enum operation operation, enum path path,
+			  uint64_t iterations)
+{
 	time_t stored = 0;
+	time_t *pointer = operation == OP_TIME_POINTER ? &stored : NULL;
+	uint64_t index, checksum = 0;
+
+	if (path == PATH_SYSCALL) {
+		for (index = 0; index < iterations; ++index) {
+			long result = raw_syscall1(SYS_time, (long)pointer);
+
+			if (result < 0)
+				fail_message("benchmark operation returned an error");
+			checksum += (uint64_t)result ^ (uint64_t)stored;
+		}
+	} else {
+		for (index = 0; index < iterations; ++index) {
+			time_t result = user_time.time(pointer);
+
+			if (result < 0)
+				fail_message("benchmark operation returned an error");
+			checksum += (uint64_t)result ^ (uint64_t)stored;
+		}
+	}
+	return checksum;
+}
+
+static uint64_t getcpu_loop(enum operation operation, enum path path,
+			    uint64_t iterations)
+{
 	unsigned int cpu = 0, node = 0;
+	unsigned int *cpu_pointer = operation == OP_GETCPU_BOTH ? &cpu : NULL;
+	unsigned int *node_pointer =
+		operation == OP_GETCPU_BOTH ? &node : NULL;
+	uint64_t index, checksum = 0;
+
+	if (path == PATH_SYSCALL) {
+		for (index = 0; index < iterations; ++index) {
+			long result = raw_syscall3(SYS_getcpu, (long)cpu_pointer,
+						   (long)node_pointer, 0);
+
+			if (result < 0)
+				fail_message("benchmark operation returned an error");
+			checksum += cpu ^ node;
+		}
+	} else {
+		for (index = 0; index < iterations; ++index) {
+			if (user_time.getcpu(cpu_pointer, node_pointer, NULL) < 0)
+				fail_message("benchmark operation returned an error");
+			checksum += cpu ^ node;
+		}
+	}
+	return checksum;
+}
+
+static uint64_t direct_operation_loop(enum operation operation,
+				      enum path path, uint64_t iterations)
+{
 	const struct operation_info *info = &operations[operation];
-	long result;
 
 	if (operation_is_clock_gettime(operation)) {
 		if (path == PATH_SYSCALL)
-			result = raw_syscall2(SYS_clock_gettime, info->clock_id,
-					      (long)&ts);
-		else
-			result = user_time.clock_gettime(info->clock_id, &ts);
-	} else if (operation_is_clock_getres(operation)) {
-		if (path == PATH_SYSCALL)
-			result = raw_syscall2(SYS_clock_getres, info->clock_id,
-					      (long)&ts);
-		else
-			result = user_time.clock_getres(info->clock_id, &ts);
-	} else if (operation >= OP_GTOD_TV && operation <= OP_GTOD_NULL) {
-		struct timeval *tv_pointer =
-			operation == OP_GTOD_TZ || operation == OP_GTOD_NULL ?
-			NULL : &tv;
-		struct timezone *tz_pointer =
-			operation == OP_GTOD_TV || operation == OP_GTOD_NULL ?
-			NULL : &tz;
-
-		if (path == PATH_SYSCALL)
-			result = raw_syscall2(SYS_gettimeofday,
-					      (long)tv_pointer,
-					      (long)tz_pointer);
-		else
-			result = user_time.gettimeofday(tv_pointer, tz_pointer);
-	} else if (operation == OP_TIME_NULL ||
-		   operation == OP_TIME_POINTER) {
-		time_t *pointer =
-			operation == OP_TIME_POINTER ? &stored : NULL;
-
-		if (path == PATH_SYSCALL)
-			result = raw_syscall1(SYS_time, (long)pointer);
-		else
-			result = user_time.time(pointer);
-	} else {
-		unsigned int *cpu_pointer =
-			operation == OP_GETCPU_BOTH ? &cpu : NULL;
-		unsigned int *node_pointer =
-			operation == OP_GETCPU_BOTH ? &node : NULL;
-
-		if (path == PATH_SYSCALL)
-			result = raw_syscall3(SYS_getcpu, (long)cpu_pointer,
-					      (long)node_pointer, 0);
-		else
-			result = user_time.getcpu(cpu_pointer, node_pointer, NULL);
+			return syscall_clock_gettime_loop(info->clock_id,
+						   iterations);
+		return user_clock_gettime_loop(info->clock_id, iterations);
 	}
-	if (result < 0)
-		fail_message("benchmark operation returned an error");
-	return result_checksum(operation, result, &ts, &tv, &tz, stored,
-			       cpu, node);
+	if (operation_is_clock_getres(operation))
+		return clock_getres_loop(info->clock_id, path, iterations);
+	if (operation >= OP_GTOD_TV && operation <= OP_GTOD_NULL)
+		return gettimeofday_loop(operation, path, iterations);
+	if (operation == OP_TIME_NULL || operation == OP_TIME_POINTER)
+		return time_loop(operation, path, iterations);
+	return getcpu_loop(operation, path, iterations);
 }
 
 static int perf_event_open(struct perf_event_attr *attribute, int group_fd)
@@ -697,15 +786,10 @@ static double pmu_per_call(const struct pmu_reading *reading,
 	return scaled;
 }
 
-static void invoke_loop(enum operation operation, enum path path,
-			unsigned int iterations)
+static void direct_call_loop(enum operation operation, enum path path,
+			     unsigned int iterations)
 {
-	unsigned int index;
-	uint64_t checksum = 0;
-
-	for (index = 0; index < iterations; ++index)
-		checksum += invoke(operation, path);
-	sink = checksum;
+	sink = direct_operation_loop(operation, path, iterations);
 }
 
 static struct measurement measure(enum operation operation, enum path path,
@@ -721,7 +805,7 @@ static struct measurement measure(enum operation operation, enum path path,
 		if (pmu_enabled)
 			start_pmu_group(&core_group);
 		start = tsc_begin(&start_aux);
-		invoke_loop(operation, path, iterations);
+		direct_call_loop(operation, path, iterations);
 		end = tsc_end(&end_aux);
 		if (pmu_enabled) {
 			stop_pmu_group(&core_group, &reading);
@@ -747,7 +831,7 @@ static struct measurement measure(enum operation operation, enum path path,
 		struct pmu_reading reading;
 
 		start_pmu_group(&cache_group);
-		invoke_loop(operation, path, iterations);
+		direct_call_loop(operation, path, iterations);
 		stop_pmu_group(&cache_group, &reading);
 		measurement.cache_references_per_call =
 			pmu_per_call(&reading, 0, iterations);
@@ -786,7 +870,7 @@ static void run_perf(enum backend backend, unsigned int iterations,
 		unsigned int index;
 
 		for (index = 0; index < count; ++index)
-			invoke_loop(operation, paths[index], warmup);
+			direct_call_loop(operation, paths[index], warmup);
 	}
 
 	puts("backend,api,repeat,path,tsc_cycles_per_call,pmu_enabled,"
@@ -803,8 +887,16 @@ static void run_perf(enum backend backend, unsigned int iterations,
 
 			for (step = 0; step < count; ++step) {
 				enum path path = paths[(step + repeat) % count];
-				struct measurement value =
-					measure(operation, path, iterations);
+				struct measurement value;
+
+				/*
+				 * Re-prime the exact path after alternating with its
+				 * peer.  In particular, do not let the preceding syscall
+				 * sample define the indirect-branch state of the user
+				 * sample.
+				 */
+				direct_call_loop(operation, path, warmup);
+				value = measure(operation, path, iterations);
 
 				printf("%s,%s,%u,%s,%.6f,%d,%.6f,%.6f,"
 				       "%.6f,%.6f,%.6f,%.6f,%.6f,%.6f\n",
@@ -1057,19 +1149,22 @@ static uint64_t timespec_to_ns(const struct timespec *value)
 	       (uint64_t)value->tv_nsec;
 }
 
-static void run_load(enum backend backend, clockid_t clock_id,
-		     const char *operation_name, unsigned int seconds,
+static void run_load(enum backend backend, enum operation operation,
+		     unsigned int iterations, unsigned int seconds,
 		     unsigned int warmup)
 {
-	const uint64_t batch = UINT64_C(65536);
+	const struct operation_info *info = &operations[operation];
+	enum path path = backend == BACKEND_RAW ?
+		PATH_RAW_VDSO : PATH_VKSO_WRAPPER;
 	struct timespec previous = { 0 }, current, wall_start, wall_now;
-	unsigned int start_aux, end_aux;
-	uint64_t calls = 0, checksum = 0, start, end, wall_ns;
+	uint64_t measured_batches = 0, measured_calls = 0;
+	uint64_t conditioning_calls = 0, checksum = 0;
+	uint64_t measured_cycles = 0, wall_ns;
 	unsigned int index;
 
 	/* Validate ordering separately so it is not charged to the load loop. */
 	for (index = 0; index < warmup; index++) {
-		if (public_clock_gettime(clock_id, &current))
+		if (public_clock_gettime(info->clock_id, &current))
 			fail_message("concurrent reader returned an error");
 		if (index && (current.tv_sec < previous.tv_sec ||
 		    (current.tv_sec == previous.tv_sec &&
@@ -1080,32 +1175,41 @@ static void run_load(enum backend backend, clockid_t clock_id,
 	if (raw_syscall2(SYS_clock_gettime, CLOCK_MONOTONIC,
 			 (long)&wall_start))
 		fail_message("cannot read load-test start time");
-	start = tsc_begin(&start_aux);
 	do {
-		uint64_t step;
+		unsigned int start_aux, end_aux;
+		uint64_t start, end;
 
-		for (step = 0; step < batch; step++) {
-			if (public_clock_gettime(clock_id, &current))
-				fail_message("concurrent reader returned an error");
-			checksum += (uint64_t)current.tv_sec ^
-				    (uint64_t)current.tv_nsec;
-		}
-		calls += batch;
+		/* Remove predictor state left by the duration-control syscall. */
+		checksum += direct_operation_loop(operation, path, warmup);
+		conditioning_calls += warmup;
+		start = tsc_begin(&start_aux);
+		checksum += direct_operation_loop(operation, path, iterations);
+		end = tsc_end(&end_aux);
+		if (start_aux != end_aux)
+			fail_message("CPU migrated during concurrent reader load");
+		measured_cycles += end - start;
+		measured_batches++;
+		measured_calls += iterations;
+
+		/* Keep duration control outside the reader measurement window. */
 		if (raw_syscall2(SYS_clock_gettime, CLOCK_MONOTONIC,
 				 (long)&wall_now))
 			fail_message("cannot read load-test current time");
 		wall_ns = timespec_to_ns(&wall_now) - timespec_to_ns(&wall_start);
 	} while (wall_ns < (uint64_t)seconds * UINT64_C(1000000000));
-	end = tsc_end(&end_aux);
-	if (start_aux != end_aux)
-		fail_message("CPU migrated during concurrent reader load");
 	sink = checksum;
-	puts("backend,api,seconds,calls,wall_ns,tsc_cycles_per_call,"
-	     "calls_per_second,cpu_migration,time_reversal");
-	printf("%s,%s,%u,%" PRIu64 ",%" PRIu64 ",%.9f,%.3f,0,0\n",
-	       backend_name(backend), operation_name, seconds, calls, wall_ns,
-	       (double)(end - start) / calls,
-	       (double)calls * 1000000000.0 / wall_ns);
+	puts("backend,api,seconds,batch_iterations,warmup_per_batch,"
+	     "measured_batches,measured_calls,conditioning_calls,total_calls,"
+	     "wall_ns,tsc_cycles_per_call,total_calls_per_second,"
+	     "cpu_migration,time_reversal,measurement_window");
+	printf("%s,%s,%u,%u,%u,%" PRIu64 ",%" PRIu64 ",%" PRIu64
+	       ",%" PRIu64 ",%" PRIu64 ",%.9f,%.3f,0,0,%s\n",
+	       backend_name(backend), info->name, seconds, iterations, warmup,
+	       measured_batches, measured_calls, conditioning_calls,
+	       measured_calls + conditioning_calls, wall_ns,
+	       (double)measured_cycles / measured_calls,
+	       (double)(measured_calls + conditioning_calls) * 1000000000.0 /
+	       wall_ns, LOAD_MEASUREMENT_WINDOW);
 }
 
 static void usage(const char *program)
@@ -1131,8 +1235,7 @@ int main(int argc, char **argv)
 	uint64_t seq_iterations = DEFAULT_SEQ_ITERATIONS;
 	unsigned int layout_iterations = DEFAULT_LAYOUT_ITERATIONS;
 	unsigned int load_seconds = DEFAULT_LOAD_SECONDS;
-	clockid_t load_clock_id = CLOCK_MONOTONIC;
-	const char *load_operation = "clock_gettime_monotonic";
+	enum operation load_operation = OP_CGT_MONOTONIC;
 	int backend_set = 0;
 	int index;
 
@@ -1140,6 +1243,10 @@ int main(int argc, char **argv)
 		enum backend detected = detect_backend();
 
 		printf("backend=%s\n", backend_name(detected));
+		printf("reader_measurement_window=%s\n",
+		       READER_MEASUREMENT_WINDOW);
+		printf("load_measurement_window=%s\n",
+		       LOAD_MEASUREMENT_WINDOW);
 		printf("at_sysinfo_ehdr=%#lx\n", getauxval(AT_SYSINFO_EHDR));
 		printf("at_vkso_mm_data=%#lx\n", getauxval(AT_VKSO_MM_DATA));
 		return 0;
@@ -1195,14 +1302,11 @@ int main(int argc, char **argv)
 				parse_number(argv[index + 1], "seconds", 0);
 		} else if (!strcmp(argv[index], "--operation")) {
 			if (!strcmp(argv[index + 1], "monotonic")) {
-				load_clock_id = CLOCK_MONOTONIC;
-				load_operation = "clock_gettime_monotonic";
+				load_operation = OP_CGT_MONOTONIC;
 			} else if (!strcmp(argv[index + 1], "monotonic_raw")) {
-				load_clock_id = CLOCK_MONOTONIC_RAW;
-				load_operation = "clock_gettime_monotonic_raw";
+				load_operation = OP_CGT_MONOTONIC_RAW;
 			} else if (!strcmp(argv[index + 1], "monotonic_coarse")) {
-				load_clock_id = CLOCK_MONOTONIC_COARSE;
-				load_operation = "clock_gettime_monotonic_coarse";
+				load_operation = OP_CGT_MONOTONIC_COARSE;
 			} else {
 				fail_message("unsupported load operation");
 			}
@@ -1227,7 +1331,7 @@ int main(int argc, char **argv)
 	else if (mode == MODE_LAYOUT)
 		run_layout(layout_iterations, repeats);
 	else
-		run_load(backend, load_clock_id, load_operation, load_seconds,
+		run_load(backend, load_operation, iterations, load_seconds,
 			 warmup);
 	return sink == UINT64_MAX;
 }

@@ -15,6 +15,8 @@ LOAD_APIS = {
     "monotonic_raw": "clock_gettime_monotonic_raw",
     "monotonic_coarse": "clock_gettime_monotonic_coarse",
 }
+READER_MEASUREMENT_WINDOW = "direct-user-api-steady-batch-v3"
+LOAD_MEASUREMENT_WINDOW = "direct-user-api-conditioned-load-v4"
 SEQ_READERS = {"hres_protocol", "raw_protocol"}
 SCENARIOS_BY_SCOPE = {
     "update-side": {"idle"},
@@ -146,19 +148,39 @@ def validate_reader_rows(path, backend, scenario, rows, metadata):
             raise ValueError(f"reader backend mismatch in {path}")
         if row.get("api") != LOAD_APIS[scenario]:
             raise ValueError(f"reader API mismatch in {path}")
+        if row.get("measurement_window") != LOAD_MEASUREMENT_WINDOW:
+            raise ValueError(f"reader measurement window mismatch in {path}")
+        if metadata.get("reader_measurement_window") != READER_MEASUREMENT_WINDOW:
+            raise ValueError(f"reader metadata window mismatch in {path}")
+        if metadata.get("load_measurement_window") != LOAD_MEASUREMENT_WINDOW:
+            raise ValueError(f"load metadata window mismatch in {path}")
         if integer(row, "seconds", path) != int(metadata["update_seconds"]):
             raise ValueError(f"reader duration mismatch in {path}")
         if integer(row, "cpu_migration", path):
             raise ValueError(f"CPU migration reported in {path}")
         if integer(row, "time_reversal", path):
             raise ValueError(f"time reversal reported in {path}")
-        if integer(row, "calls", path) <= 0:
-            raise ValueError(f"no reader calls in {path}")
+        batch = integer(row, "batch_iterations", path)
+        warmup = integer(row, "warmup_per_batch", path)
+        batches = integer(row, "measured_batches", path)
+        measured = integer(row, "measured_calls", path)
+        conditioning = integer(row, "conditioning_calls", path)
+        total = integer(row, "total_calls", path)
+        if batch != int(metadata["reader_iterations"]):
+            raise ValueError(f"reader batch mismatch in {path}")
+        if warmup != int(metadata["warmup"]):
+            raise ValueError(f"reader warmup mismatch in {path}")
+        if batches <= 0 or measured != batches * batch:
+            raise ValueError(f"invalid measured reader calls in {path}")
+        if conditioning != batches * warmup:
+            raise ValueError(f"invalid conditioning reader calls in {path}")
+        if total != measured + conditioning:
+            raise ValueError(f"invalid total reader calls in {path}")
         if integer(row, "wall_ns", path) < int(metadata["update_seconds"]) * 10**9:
             raise ValueError(f"short reader duration in {path}")
         if real(row, "tsc_cycles_per_call", path) <= 0:
             raise ValueError(f"invalid reader cycles in {path}")
-        if real(row, "calls_per_second", path) <= 0:
+        if real(row, "total_calls_per_second", path) <= 0:
             raise ValueError(f"invalid reader throughput in {path}")
         return
 
@@ -303,7 +325,7 @@ def summarize_backend(backend_dir):
     load_rows = [row for row in reader_rows if row["scenario"] != "seq_protocol"]
     for scenario in sorted({row["scenario"] for row in load_rows}):
         rows = [row for row in load_rows if row["scenario"] == scenario]
-        for metric in ("tsc_cycles_per_call", "calls_per_second"):
+        for metric in ("tsc_cycles_per_call", "total_calls_per_second"):
             summary.append(
                 {
                     "backend": backend,
@@ -358,14 +380,21 @@ def compare_result_root(result_root):
             f"benchmark scope mismatch: raw={raw_scope}, vkso={vkso_scope}"
         )
     for key in (
+        "build_variant",
         "cpu",
         "repeats",
         "update_seconds",
+        "reader_iterations",
         "warmup",
         "seq_iterations",
         "collection_mode",
+        "reader_measurement_window",
+        "load_measurement_window",
+        "user_address_layout",
         "stabilize_seconds",
         "clocksource",
+        "package_manifest_sha256",
+        "test_binary_sha256",
     ):
         if raw_metadata.get(key) != vkso_metadata.get(key):
             raise ValueError(
@@ -409,7 +438,7 @@ def compare_result_root(result_root):
     }
     writer_table = []
     for scenario in ("idle", "monotonic", "monotonic_raw", "monotonic_coarse", "seq_protocol"):
-        row = comparison_map.get(("writer", scenario, "median_cycles"))
+        row = comparison_map.get(("writer", scenario, "mean_corrected_cycles"))
         if row:
             writer_table.append(
                 [scenario, f'{float(row["raw"]):.3f}', f'{float(row["vkso"]):.3f}',
@@ -445,20 +474,37 @@ def compare_result_root(result_root):
         "concurrent": "# VKSO read/update 并发实验结果",
         "all": "# VKSO update-side 3.2/3.3 实验结果",
     }.get(raw_scope, "# VKSO update-side 实验结果")
+    parameters = [
+        f'repeats={raw_metadata["repeats"]}',
+        f'每个场景={raw_metadata["update_seconds"]} 秒',
+    ]
+    if reader_table or seq_table:
+        parameters.extend(
+            [
+                f'每批计时调用={raw_metadata["reader_iterations"]}',
+                f'每批同路径预热={raw_metadata["warmup"]}',
+                f'seq iterations={raw_metadata["seq_iterations"]}',
+            ]
+        )
+    parameters.append(
+        f'稳定等待={raw_metadata.get("stabilize_seconds", "0")} 秒'
+    )
     report = [
         title,
         "",
-        "主指标均为多轮结果的中位数；`Δ%=(VKSO/Raw-1)×100%`，负值表示VKSO开销更低。",
         (
-            f'实验参数：repeats={raw_metadata["repeats"]}，'
-            f'每个 load 场景={raw_metadata["update_seconds"]} 秒，'
-            f'seq iterations={raw_metadata["seq_iterations"]}，'
-            f'稳定等待={raw_metadata.get("stabilize_seconds", "0")} 秒。'
+            "Writer 主指标是每轮 `mean_corrected_cycles` 的轮间中位数；"
+            "reader/seq 指标也取轮间中位数。"
+            "`Δ%=(VKSO/Raw-1)×100%`，负值表示VKSO开销更低。"
         ),
+        "实验参数：" + "，".join(parameters) + "。",
         "",
         "## 完整 timekeeping_update writer",
         "",
-        markdown_table(["场景", "Raw cycles", "VKSO cycles", "差值", "Δ%"], writer_table),
+        markdown_table(
+            ["场景", "Raw mean corrected", "VKSO mean corrected", "差值", "Δ%"],
+            writer_table,
+        ),
         "",
     ]
     if reader_table:

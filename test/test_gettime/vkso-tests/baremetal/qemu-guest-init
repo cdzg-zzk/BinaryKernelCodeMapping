@@ -155,6 +155,34 @@ backend=$(cat /work/backend)
 			--iterations 1000 --repeats 1 --warmup 100 \
 			--pmu 0 >/tmp/perf.csv || status=$?
 	fi
+	if [ "$status" -eq 0 ]; then
+		awk -F, '
+			NR == 1 { next }
+			NF == 14 { rows++ }
+			END { exit rows == 40 ? 0 : 1 }
+		' /tmp/perf.csv || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		LD_LIBRARY_PATH=/work /work/vkso-time-bench \
+			--backend "$backend" --mode load --cpu 0 \
+			--iterations 1000 \
+			--operation monotonic_raw --seconds 1 --warmup 100 \
+			>/tmp/load.csv || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		awk -F, '
+			NR == 1 { next }
+			NF == 15 && $2 == "clock_gettime_monotonic_raw" &&
+			$4 == 1000 && $5 == 100 && $6 > 0 &&
+			$7 == $4 * $6 && $8 == $5 * $6 && $9 == $7 + $8 &&
+			$10 > 0 && $11 > 0 && $12 > 0 && $13 == 0 && $14 == 0 &&
+			$15 == "direct-user-api-conditioned-load-v4" { rows++ }
+			END { exit rows == 1 ? 0 : 1 }
+		' /tmp/load.csv || status=$?
+	fi
+	if [ "$status" -eq 0 ]; then
+		echo "concurrency.public_reader_window=pass"
+	fi
 	if [ "$replaced" -eq 1 ]; then
 		/work/manager restore /work/libkernel.so \
 			/work/page_mappings.txt || status=$?

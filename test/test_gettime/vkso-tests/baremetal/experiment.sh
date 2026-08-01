@@ -119,13 +119,9 @@ verify_packages_quiet()
 
 verify_repository_identity()
 {
-	local commit normal_commit no_retpoline_commit expected_source source
+	local commit normal_commit no_retpoline_commit expected_patch current_patch
+	local expected_source source
 
-	if [[ -n $(git -C "$ROOT" status --porcelain) ]]; then
-		echo "Git worktree changed after final package construction" >&2
-		git -C "$ROOT" status --short >&2
-		exit 1
-	fi
 	commit=$(git -C "$ROOT" rev-parse HEAD)
 	normal_commit=$(manifest_value \
 		"$NORMAL_PACKAGE/boot-manifest.txt" git_commit)
@@ -135,6 +131,15 @@ verify_repository_identity()
 			"$NO_RETPOLINE_PACKAGE/boot-manifest.txt" git_commit)
 		test "$commit" = "$no_retpoline_commit"
 	fi
+	expected_patch=$(manifest_value \
+		"$NORMAL_PACKAGE/boot-manifest.txt" candidate_patch_sha256)
+	current_patch=$(git -C "$ROOT" diff --binary --no-ext-diff HEAD -- |
+		sha256sum | awk '{print $1}')
+	test "$current_patch" = "$expected_patch" || {
+		echo "Git worktree changed after candidate package construction" >&2
+		git -C "$ROOT" status --short >&2
+		exit 1
+	}
 
 	expected_source=$(manifest_value \
 		"$NORMAL_PACKAGE/boot-manifest.txt" vkso_source_tree_sha256)
@@ -144,6 +149,25 @@ verify_repository_identity()
 		echo "current VKSO source does not match the final package" >&2
 		exit 1
 	}
+}
+
+boot_or_begin_case()
+{
+	local requested=${1:-} saved_status
+
+	if [[ -s "$STATE" ]]; then
+		saved_status=$(manifest_value "$STATE" status)
+	else
+		saved_status=not-started
+	fi
+	if [[ "$saved_status" != active ]]; then
+		if [[ -n "$requested" && "$requested" != raw-normal ]]; then
+			echo "a new experiment must start with raw-normal" >&2
+			exit 1
+		fi
+		begin_experiment "" full
+	fi
+	boot_case "$requested"
 }
 
 begin_experiment()
@@ -217,6 +241,7 @@ begin_experiment()
 		printf 'housekeeping_cpus=%s\n' "$HOUSEKEEPING_CPUS"
 		printf 'iterations=%s\n' "$ITERATIONS"
 		printf 'repeats=%s\n' "$REPEATS"
+		printf 'perf_processes=%s\n' "$PERF_PROCESSES"
 		printf 'warmup=%s\n' "$WARMUP"
 		printf 'pmu=%s\n' "$PMU"
 		printf 'seq_iterations=%s\n' "$SEQ_ITERATIONS"
@@ -338,7 +363,7 @@ begin-normal)
 	begin_experiment "${2:-}" normal
 	;;
 boot)
-	boot_case "${2:-}"
+	boot_or_begin_case "${2:-}"
 	;;
 collect)
 	collect_case "${2:-}"
