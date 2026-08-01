@@ -75,6 +75,113 @@ CONCURRENT 的外层 load 测量协议是带同路径条件化的 v4；这属于
 
 ### 3.2 代码量与统计范围
 
+本节沿用 M11 正式代码规模审计口径，不以 Git 净增行作为 Raw/VKSO
+代码量结论。人工清单先选取两侧等价的 x86-64 `clock_gettime/getres`、
+`gettimeofday`、`time`、`getcpu`、七种 global clock、fallback、time namespace
+和 TSC/PVClock/Hyper-V 范围；`count_manifest.py` 再去掉空行和纯注释，计算
+lexical SLOC。共有的 timekeeper producer、CPU/alarm/dynamic backend 在两侧同时排除，
+防止整文件统计造成重复归因。
+
+Raw 侧仍使用 M11 冻结的 Linux 5.15.198 清单与计数；VKSO 侧以 M11
+`adfe313` 为完整基表，对 `6656f97` 实际影响的语义行区间按相同规则
+重新计数。因此主结论表示“当前完整 VKSO 与完整 Raw”，不是只表示
+最后一次提交的 churn。
+
+| 互斥口径 | Raw SLOC | 当前 VKSO SLOC | VKSO - Raw |
+|---|---:|---:|---:|
+| 运行时功能 | 857 | 885 | +28（+3.27%） |
+| 运行时机制 | 490 | 363 | -127（-25.92%） |
+| **运行时小计** | **1,347** | **1,248** | **-99（-7.35%）** |
+| 功能专属构建/链接 | 158 | 57 | -101（-63.92%） |
+| **产品功能合计** | **1,505** | **1,305** | **-200（-13.29%）** |
+
+#### 3.2.1 运行时功能分层
+
+| 类别 | Raw | 当前 VKSO | 差异 |
+|---|---:|---:|---:|
+| U1 用户 public ABI/算法或 wrapper | 359 | 68 | -291 |
+| S1 kernel/user 共享 global 算法 | 0 | 310 | +310 |
+| K1 普通 kernel global reader | 194 | 223 | +29 |
+| K2 canonical producer | 56 | 47 | -9 |
+| K4 syscall/cold backend | 132 | 149 | +17 |
+| E1 cycles/environment provider | 116 | 88 | -28 |
+| **合计** | **857** | **885** | **+28** |
+
+#### 3.2.2 运行时机制分层
+
+| 类别 | Raw | 当前 VKSO | 差异 |
+|---|---:|---:|---:|
+| C1 MM/context/namespace 映射 | 371 | 207 | -164 |
+| C2 用户 context 启动 | 0 | 74 | +74 |
+| K3 shared ABI/publisher | 119 | 82 | -37 |
+| **合计** | **490** | **363** | **-127** |
+
+“VKSO 代码比 Raw 多”只对运行时功能子层成立（多 28 SLOC）。把运行时
+机制也纳入后，VKSO 少 99 SLOC；再加上功能专属构建/链接，完整产品代码
+少 200 SLOC。VKSO 把 Raw 用户算法收敛为共享 core，但必须显式保留两个
+环境边界和用户 context 启动；节省主要来自不再维护 Raw 的完整 VVAR/vDSO
+映射与链接机制。
+
+#### 3.2.3 最后 fallback 重构的语义增量
+
+| 层 | M11 | 当前 | 变化 |
+|---|---:|---:|---:|
+| U1 | 71 | 68 | -3 |
+| S1 | 291 | 310 | +19 |
+| K1 | 212 | 223 | +11 |
+| K4 | 158 | 149 | -9 |
+| K3 | 78 | 82 | +4 |
+| 其他运行时与 G1 | 473 | 473 | 0 |
+| **产品合计** | **1,283** | **1,305** | **+22** |
+
+这 22 SLOC 换来统一 clock 分类契约：用户入口和内核 syscall/ordinary-reader
+边界各自分类，shared core 只处理 hres/coarse，native clock 不再穿过 shared core
+再 fallback。
+
+#### 3.2.4 reader 机器码闭包
+
+机器码仍沿用 M11 的边界：Raw 为 public vDSO、其独有 cycle helper 和普通
+kernel reader；VKSO 为用户 wrapper/cold failure、shared core、普通 kernel reader
+以及 provider failure 必须的 private reader。kernel `gettimeofday` failure 只属于 syscall
+路径，和 Raw K4 一样不进 reader closure。
+
+Raw symbol size 冻结自 M11 normal 干净构建。当前 VKSO kernel symbol 使用与
+`reader-load-v4-normal/vkso.config` 字节一致的配置重建 `vmlinux`，用户 symbol
+直接取自正式 READ 包的 `libkernel.so`。所有数字都是 ELF `st_size` 或已验证
+的非重叠本地 symbol body，不是页对齐后的 DSO/镜像文件大小。
+
+| reader closure | Raw | 当前 VKSO |
+|---|---:|---:|
+| 用户 public/wrapper/cold | 1,515 B | 139 B |
+| 用户私有依赖 / shared core | 142 B | 1,188 B |
+| 普通 kernel reader | 982 B | 407 B |
+| kernel clock private reader/failure | 0 B | 321 B |
+| **合计** | **2,639 B** | **2,055 B** |
+| **VKSO - Raw** | — | **-584 B（-22.13%）** |
+
+当前 VKSO 比 M11 fallback 重构前的 2,076 B 还少 21 B（-1.01%）。用户边界
+分类使 wrapper/cold 增大 34 B，拆分 hres/coarse 后 shared core 增大 4 B；但
+普通 kernel reader 缩小 14 B，kernel clock failure/private 合计缩小 45 B，总闭包
+净减 21 B。一次性 C2 启动的 196 B text 和 40 B private data 仍不进
+reader closure。逐 symbol 证据见 `FINAL_BINARY_SYMBOLS.tsv`。
+
+#### 3.2.5 独立统计项
+
+下列代码不混入 1,305 SLOC 产品主表：
+
+- ITS/reusable-text 为通用项目机制 P1，84 SLOC；
+- 编译期和运行时验证 T1 现为 366 SLOC，其中本轮新增 6 SLOC clock ID
+  一致性断言；
+- 实验工具提交 `120cd91` 物理净增 1,285 行，用于固定测量窗口、
+  boot/collect、包校验和结果归档，不进入内核或 `libkernel.so` 运行时路径；
+- 文档、生成镜像、模块、DSO 和结果 CSV。
+
+可复现证据为 `M11_SOURCE_MANIFEST.tsv`、`M11_SOURCE_COUNTS.csv` 以及当前受影响
+行的 `FINAL_SOURCE_DELTA.tsv`。该组合同时保留冻结 Raw 基表、完整 M11 VKSO 基表
+和最后重构的每行区间重算结果。
+
+#### 3.2.6 本轮 Git 物理 churn（次级口径）
+
 代码量以接纳本轮 fallback 边界重构前的 `adfe313` 为基线，以运行时实现
 提交 `6656f97` 为终点，使用 `git diff --numstat --no-renames` 统计物理行。
 该口径包含代码、声明、注释和空行，因此表示源码维护量，不等同于纯 SLOC、
@@ -115,9 +222,10 @@ CONCURRENT 的外层 load 测量协议是带同路径条件化的 v4；这属于
 - README、本文性能报告以及其他说明文档；
 - benchmark、QEMU、GRUB、收集器和结果分析代码。
 
-因此本文后续“值得保留”的代码量判断专指：本轮运行时/ABI 净增 38 行，且
-执行实现本身净减 20 行；不把为完成学术实验而新增的 1,285 行工具代码算作
-生产运行时负担。
+因此 `+232/-194`、净增 38 行只表示最后一轮编辑量。代码规模和是否值得
+保留以前述完整语义 SLOC 为主口径：当前 VKSO 产品代码为 1,305 SLOC，
+比 Raw 少 200 SLOC；本轮本身语义净增 22 SLOC。实验工具仍只作复现性成本
+单列，不算作生产运行时负担。
 
 ### 3.3 数据完整性
 

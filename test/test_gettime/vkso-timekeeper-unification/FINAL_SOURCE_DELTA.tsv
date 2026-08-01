@@ -1,0 +1,25 @@
+# 当前最终版本相对 M11/adfe313 语义清单的受影响行区间。
+# Raw 5.15.198、未列出的 VKSO 行以及分层定义均冻结自 M11_SOURCE_MANIFEST.tsv / M11_SOURCE_COUNTS.csv。
+# final_* 由 code-size/count_manifest.py 的同一 lexical classifier 重算；脚本只去空行和纯注释，不决定语义归属。
+# view	layer	status	root	path	m11_ranges	final_ranges	m11_sloc	final_physical	final_nonblank	final_sloc	delta	reason
+runtime	U1 user public ABI wrapper	functional	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_entry.S	1-94	1-94	71	94	82	68	-3	用户入口在环境边界分类 clock ID；仍含 public wrapper 与用户 syscall failure
+runtime	C2 user context bootstrap	mechanism	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_entry.S	95-138	95-138	35	44	41	35	0	一次性 context 绑定与每进程地址槽
+build	G1 function-specific build glue	build_glue	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_entry.S	140	140	1	1	1	1	0	non-executable-stack 标记
+runtime	S1 shared global algorithm	functional	VKSO_KERNEL	include/vkso/time.h	7-15,124-146	5-20,30-55,165-189	20	67	63	52	32	共享 clock 常量、分类器、状态和 shared-core 接口
+runtime	K3 publisher and shared ABI	mechanism	VKSO_KERNEL	include/vkso/time.h	1-6,17-65,82-91	1-4,22-29,57-106,121-131	49	73	61	53	4	canonical/shared payload ABI
+runtime	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	include/vkso/time.h	93-104	133-144	10	12	11	10	0	MM_data v3 payload
+runtime	E1 cycles and environment provider	functional	VKSO_KERNEL	include/vkso/time.h	106-122	146-163	11	18	17	11	0	environment context 与 provider-failure callback ABI
+validation	T1 compile-time and runtime validation	excluded_validation	VKSO_KERNEL	include/vkso/time.h	67-80,147-151	107-120,190-194	18	19	19	18	0	测试 ABI
+runtime	K1 kernel public global reader	functional	VKSO_KERNEL	include/linux/vkso_time.h	1-7,13,18-22,32-64	1-7,13,18-22,32-77	35	59	53	46	11	普通 kernel reader 在环境边界分类 clock ID
+runtime	K3 publisher and shared ABI	mechanism	VKSO_KERNEL	include/linux/vkso_time.h	15,23	15,23	2	2	2	2	0	shared 页与事件发布接口
+runtime	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	include/linux/vkso_time.h	9-11,24-25	9-11,24-25	5	5	5	5	0	MM/namespace 类型与更新接口
+runtime	E1 cycles and environment provider	functional	VKSO_KERNEL	include/linux/vkso_time.h	16,26-27	16,26-27	3	3	3	3	0	kernel context 与 PV/HV 注入声明
+runtime	S1 shared global algorithm	functional	VKSO_KERNEL	kernel/time/vkso_time_core.c	1,6,51-264	1,6,57-254	178	200	183	165	-13	shared core 只保留 hres/coarse 读取、换算与 namespace offset
+validation	T1 compile-time and runtime validation	excluded_validation	VKSO_KERNEL	kernel/time/vkso_time_core.c	3-4,8-49	3-4,8-55	43	50	50	49	6	新增共享 clock 常量与 Linux clock ID 的编译期一致性约束
+runtime	K4 syscall and clock dispatcher	functional	VKSO_KERNEL	kernel/time/posix-timers.c	56-154,1157-1168,1199-1210	56-144,1147-1158,1189-1200	96	113	99	87	-9	native clock 在 syscall 环境边界直接进入 k_clock；provider failure 保留 private reader
+dependency	B1 common CPU alarm dynamic backend	excluded_common	VKSO_KERNEL	kernel/time/posix-timers.c	1428-1455	1418-1445	24	28	24	24	0	两侧共有的 CPU/alarm/dynamic/invalid k_clock 表和解析
+runtime	K4 syscall and clock dispatcher	functional	VKSO_KERNEL	kernel/time/time.c	55-71,81-91,159-179	55-71,81-91,159-179	46	49	46	46	0	time/gettimeofday syscall 与 kernel failure
+runtime	K3 publisher and shared ABI	mechanism	VKSO_KERNEL	kernel/time/time.c	210	210	1	1	1	1	0	timezone 发布 hook
+runtime	K3 publisher and shared ABI	mechanism	VKSO_KERNEL	kernel/time/vkso_time.c	1,3-6,26-29,46-53	1,3-6,26-29,46-53	15	17	16	15	0	shared 页实例与 timezone 发布
+runtime	E1 cycles and environment provider	functional	VKSO_KERNEL	kernel/time/vkso_time.c	31-44	31-44	12	14	12	12	0	kernel environment context 与 provider failure 注入
+validation	T1 compile-time and runtime validation	excluded_validation	VKSO_KERNEL	kernel/time/vkso_time.c	4,8-24	4,8-24	18	18	18	18	0	kernel/shared 类型布局断言

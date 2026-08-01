@@ -1,0 +1,49 @@
+# 当前最终 fallback 重构的 reader-closure 机器码边界。
+# Raw 行冻结自 M11_BINARY_SYMBOLS.tsv；VKSO kernel 行来自使用 reader-load-v4-normal/vkso.config 干净重建的 vmlinux。
+# VKSO user 行来自 reader-load-v4-normal/libkernel.so。只对不重叠 symbol body 求和，不用 ELF 文件大小。
+# 运行时源码终点 6656f97；GCC 11.4.0；normal config SHA-256 14a93e44df0b989ee2f086e33a24c617525b81202a3008aa2ebadee1f0a17bf1。
+# 正式 libkernel.so SHA-256 d0068e5272e896718bca5984dc1f0aea8df09b607e4e3dd1c91014e86f44420c。
+# system	layer	symbol	bytes	included	origin
+Raw	U1 public user ABI	__vdso_gettimeofday	574	yes	M11 o7-final-normal raw-vdso.so.dbg
+Raw	U1 public user ABI	__vdso_time	42	yes	M11 o7-final-normal raw-vdso.so.dbg
+Raw	U1 public user ABI	__vdso_clock_gettime	761	yes	M11 o7-final-normal raw-vdso.so.dbg
+Raw	U1 public user ABI	__vdso_clock_getres	99	yes	M11 o7-final-normal raw-vdso.so.dbg
+Raw	U1 public user ABI	__vdso_getcpu	39	yes	M11 o7-final-normal raw-vdso.so.dbg
+Raw	U1 private dependency	__arch_get_hw_counter.constprop.0	142	yes	M11 o7-final-normal raw-vdso.so.dbg
+Raw	K1 kernel reader	ktime_get_coarse_real_ts64	59	yes	M11 o7-final-normal raw timekeeping.o
+Raw	K1 kernel reader	ktime_get_coarse_ts64	84	yes	M11 o7-final-normal raw timekeeping.o
+Raw	K1 kernel reader	ktime_get_raw_ts64	195	yes	M11 o7-final-normal raw timekeeping.o
+Raw	K1 kernel reader	ktime_get_real_seconds	12	yes	M11 o7-final-normal raw timekeeping.o
+Raw	K1 kernel reader	ktime_get_real_ts64	216	yes	M11 o7-final-normal raw timekeeping.o
+Raw	K1 kernel reader	ktime_get_ts64	232	yes	M11 o7-final-normal raw timekeeping.o
+Raw	K1 kernel reader	ktime_get_with_offset	184	yes	M11 o7-final-normal raw timekeeping.o
+
+VKSO	U1 user wrapper/cold	__vkso_clock_gettime	67	yes	reader-load-v4-normal libkernel.so; includes nested user clock failure body
+VKSO	U1 user wrapper/cold	__vkso_clock_getres	52	yes	reader-load-v4-normal libkernel.so
+VKSO	U1 user wrapper	__vkso_gettimeofday	12	yes	reader-load-v4-normal libkernel.so
+VKSO	U1 user cold failure	vkso_user_gettimeofday_failure	8	yes	reader-load-v4-normal libkernel.so disassembly 0x160109c..0x16010a4
+VKSO	S1 shared core	__vkso_getcpu	42	yes	final normal vmlinux
+VKSO	S1 shared core	__vkso_time	24	yes	final normal vmlinux
+VKSO	S1 shared core	vkso_clock_getres_coarse	27	yes	final normal vmlinux
+VKSO	S1 shared core	vkso_clock_getres_hres	33	yes	final normal vmlinux
+VKSO	S1 shared core	vkso_clock_gettime_coarse	136	yes	final normal vmlinux
+VKSO	S1 shared core	vkso_clock_gettime_hres	440	yes	final normal vmlinux
+VKSO	S1 shared core	vkso_gettimeofday_core	282	yes	final normal vmlinux
+VKSO	S1 shared core	vkso_cycles_read_cold	111	yes	final normal vmlinux
+VKSO	S1 shared core	vkso_finish_hres_cold	47	yes	final normal vmlinux
+VKSO	S1 shared core	vkso_time_apply_offset	46	yes	final normal vmlinux
+VKSO	K1 kernel reader	ktime_get_coarse_real_ts64	25	yes	final normal vmlinux
+VKSO	K1 kernel reader	ktime_get_coarse_ts64	25	yes	final normal vmlinux
+VKSO	K1 kernel reader	ktime_get_raw_ts64	49	yes	final normal vmlinux
+VKSO	K1 kernel reader	ktime_get_real_seconds	12	yes	final normal vmlinux
+VKSO	K1 kernel reader	ktime_get_real_ts64	60	yes	final normal vmlinux
+VKSO	K1 kernel reader	ktime_get_ts64	63	yes	final normal vmlinux
+VKSO	K1 kernel reader	ktime_get_with_offset	173	yes	final normal vmlinux
+VKSO	K1 cold private reader	vkso_timekeeping_get_private	227	yes	final normal vmlinux
+VKSO	K4 kernel clock failure	vkso_posix_clock_gettime_failure	94	yes	final normal vmlinux
+VKSO	K4 kernel gettimeofday failure	vkso_kernel_gettimeofday_failure	149	no	final normal vmlinux; syscall-only and excluded as in M11
+VKSO	C2 user context bootstrap	__vkso_bind_context	52	no	reader-load-v4-normal libkernel.so
+VKSO	C2 shared-data accessor	__vkso_shared_data	8	no	reader-load-v4-normal libkernel.so
+VKSO	C2 user context bootstrap	vkso_user_wrapper_init	136	no	unchanged from M11 benchmark/ABI client
+VKSO	C2 private data	vkso_user_mm_data	8	no	reader-load-v4-normal libkernel.so
+VKSO	C2 private data	vkso_user_context	32	no	reader-load-v4-normal libkernel.so
