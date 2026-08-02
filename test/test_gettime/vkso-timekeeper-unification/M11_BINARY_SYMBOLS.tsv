@@ -1,0 +1,45 @@
+# M11 最终标签 vkso-o7-final-code-20260731 的机器码边界。
+# system	layer	symbol	bytes	origin
+Raw	U1 public user ABI	__vdso_gettimeofday	574	o7-final-normal raw-vdso.so.dbg
+Raw	U1 public user ABI	__vdso_time	42	o7-final-normal raw-vdso.so.dbg
+Raw	U1 public user ABI	__vdso_clock_gettime	761	o7-final-normal raw-vdso.so.dbg
+Raw	U1 public user ABI	__vdso_clock_getres	99	o7-final-normal raw-vdso.so.dbg
+Raw	U1 public user ABI	__vdso_getcpu	39	o7-final-normal raw-vdso.so.dbg
+Raw	U1 private dependency	__arch_get_hw_counter.constprop.0	142	o7-final-normal raw-vdso.so.dbg
+Raw	K1 kernel reader	ktime_get_coarse_real_ts64	59	o7-final-normal raw timekeeping.o
+Raw	K1 kernel reader	ktime_get_coarse_ts64	84	o7-final-normal raw timekeeping.o
+Raw	K1 kernel reader	ktime_get_raw_ts64	195	o7-final-normal raw timekeeping.o
+Raw	K1 kernel reader	ktime_get_real_seconds	12	o7-final-normal raw timekeeping.o
+Raw	K1 kernel reader	ktime_get_real_ts64	216	o7-final-normal raw timekeeping.o
+Raw	K1 kernel reader	ktime_get_ts64	232	o7-final-normal raw timekeeping.o
+Raw	K1 kernel reader	ktime_get_with_offset	184	o7-final-normal raw timekeeping.o
+
+VKSO	U1 user wrapper	__vkso_clock_gettime	19	o7-final-normal vkso_user_entry.o
+VKSO	U1 user cold backend	vkso_user_clock_gettime_backend	11	o7-final-normal vkso_user_entry.o
+VKSO	U1 user wrapper	__vkso_clock_getres	55	o7-final-normal vkso_user_entry.o
+VKSO	U1 user wrapper	__vkso_gettimeofday	12	o7-final-normal vkso_user_entry.o
+VKSO	U1 user cold backend	vkso_user_gettimeofday_backend	8	o7-final-normal vkso_user_entry.o
+VKSO	S1 shared core	__vkso_getcpu	42	o7-final-normal vmlinux
+VKSO	S1 shared core	__vkso_time	24	o7-final-normal vmlinux
+VKSO	S1 shared core	vkso_clock_getres_coarse	27	o7-final-normal vmlinux
+VKSO	S1 shared core	vkso_clock_getres_hres	33	o7-final-normal vmlinux
+VKSO	S1 shared core	vkso_clock_gettime_common	572	o7-final-normal vmlinux
+VKSO	S1 shared core	vkso_gettimeofday_core	282	o7-final-normal vmlinux
+VKSO	S1 shared core	vkso_cycles_read_cold	111	o7-final-normal vmlinux
+VKSO	S1 shared core	vkso_finish_hres_cold	47	o7-final-normal vmlinux
+VKSO	S1 shared core	vkso_time_apply_offset	46	o7-final-normal vmlinux
+VKSO	K1 kernel reader	ktime_get_coarse_real_ts64	32	o7-final-normal vmlinux
+VKSO	K1 kernel reader	ktime_get_coarse_ts64	32	o7-final-normal vmlinux
+VKSO	K1 kernel reader	ktime_get_raw_ts64	49	o7-final-normal vmlinux
+VKSO	K1 kernel reader	ktime_get_real_seconds	12	o7-final-normal vmlinux
+VKSO	K1 kernel reader	ktime_get_real_ts64	60	o7-final-normal vmlinux
+VKSO	K1 kernel reader	ktime_get_ts64	63	o7-final-normal vmlinux
+VKSO	K1 kernel reader	ktime_get_with_offset	173	o7-final-normal vmlinux
+VKSO	K1 cold private reader	vkso_timekeeping_get_private	227	o7-final-normal vmlinux
+VKSO	K4 kernel clock backend	vkso_posix_clock_gettime_backend	139	o7-final-normal vmlinux
+VKSO	K4 kernel gettimeofday backend	vkso_kernel_gettimeofday_backend	149	o7-final-normal vmlinux; excluded from reader-closure total
+VKSO	C2 user context bootstrap	__vkso_bind_context	52	o7-final-normal vkso_user_entry.o
+VKSO	C2 shared-data accessor	__vkso_shared_data	8	o7-final-normal vkso_user_entry.o
+VKSO	C2 user context bootstrap	vkso_user_wrapper_init	136	o7-final-normal benchmark and ABI client
+VKSO	C2 private data	vkso_user_mm_data	8	o7-final-normal vkso_user_entry.o
+VKSO	C2 private data	vkso_user_context	32	o7-final-normal vkso_user_entry.o

@@ -1,0 +1,115 @@
+# M11 最终人工语义清单。脚本只对本文件选定的范围做算术，不决定语义归属。
+# 主运行时口径覆盖同一组 x86-64 接口：clock_gettime/getres、gettimeofday、
+# time、getcpu，七种 global clock、CPU/alarm/dynamic/invalid fallback、
+# time namespace、TSC/PVClock/Hyper-V。
+# P1 reusable-text 是一次性项目基础设施，T1 是验证；两者均与产品主表分列。
+# view	system	layer	status	root	path	ranges	reason
+runtime	Raw	U1 user public ABI and algorithm	functional	RAW_KERNEL	lib/vdso/gettimeofday.c	20-32,48-95,110-269,298-412	x86-64 clock/time/gettimeofday/getres 算法和用户 fallback；排除 32-bit time ABI
+runtime	Raw	U1 user public ABI and algorithm	functional	RAW_KERNEL	arch/x86/include/asm/vdso/gettimeofday.h	68-104	x86-64 syscall fallback
+runtime	Raw	U1 user public ABI and algorithm	functional	RAW_KERNEL	arch/x86/entry/vdso/vclock_gettime.c	1-56	x86-64 五个 public vDSO 入口；排除 i386 分支
+runtime	Raw	U1 user public ABI and algorithm	functional	RAW_KERNEL	arch/x86/entry/vdso/vgetcpu.c	1-22	getcpu public vDSO 入口
+runtime	Raw	U1 user public ABI and algorithm	functional	RAW_KERNEL	arch/x86/include/asm/segment.h	243-264	getcpu CPU/node 读取公式
+runtime	Raw	U1 user public ABI and algorithm	functional	RAW_KERNEL	include/vdso/helpers.h	1-56	vDSO seq reader 协议
+runtime	Raw	K1 kernel public global reader	functional	RAW_KERNEL	kernel/time/timekeeping.c	191-196,284-295,374-390,798-901,926-942,952-973,984-1020,1500-1516,2238-2267	目标 global clock 使用的普通 ktime_get reader 与直接 helper；排除 fast/NMI/snapshot/writer-held
+runtime	Raw	K3 publisher and shared ABI	mechanism	RAW_KERNEL	include/vdso/datapage.h	1-133,136-142	vdso_data/VVAR payload ABI；排除 compat include
+runtime	Raw	K3 publisher and shared ABI	mechanism	RAW_KERNEL	arch/x86/include/asm/vgtod.h	1-24	x86 发布类型接口
+runtime	Raw	K3 publisher and shared ABI	mechanism	RAW_KERNEL	arch/x86/include/asm/vdso/vsyscall.h	1-29	x86 VVAR 实例和 publisher 适配
+runtime	Raw	K2 canonical producer	functional	RAW_KERNEL	kernel/time/vsyscall.c	18-70,82-114	VVAR reader state的cycle/base/coarse/resolution派生；与VKSO canonical producer同口径
+runtime	Raw	K3 publisher and shared ABI	mechanism	RAW_KERNEL	kernel/time/vsyscall.c	1-17,72-81,115-131	VVAR定位、seq边界、架构同步与timezone事件发布
+runtime	Raw	K3 publisher and shared ABI	mechanism	RAW_KERNEL	kernel/time/timekeeping.c	750	timekeeping producer 调用 publisher
+runtime	Raw	K3 publisher and shared ABI	mechanism	RAW_KERNEL	kernel/time/time.c	187	timezone 事件调用 publisher
+runtime	Raw	K4 syscall and clock dispatcher	functional	RAW_KERNEL	kernel/time/time.c	62-72,140-156	time/gettimeofday syscall 边界
+runtime	Raw	K4 syscall and clock dispatcher	functional	RAW_KERNEL	kernel/time/posix-timers.c	175-180,203-208,218-251,258-274,1128-1144,1175-1191,1348-1349,1367-1368,1384-1385,1389-1390,1394-1395,1399,1401,1416,1418	global k_clock callback、gettime/getres syscall 与表项
+runtime	Raw	K4 syscall and clock dispatcher	functional	RAW_KERNEL	kernel/sys.c	2574-2585	getcpu syscall
+runtime	Raw	C1 MM context namespace mapping	mechanism	RAW_KERNEL	include/vdso/time.h	1-12	time namespace offset payload
+runtime	Raw	C1 MM context namespace mapping	mechanism	RAW_KERNEL	arch/x86/include/asm/vvar.h	1-55	VVAR 声明和固定 offset
+runtime	Raw	C1 MM context namespace mapping	mechanism	RAW_KERNEL	arch/x86/entry/vdso/vma.c	1-70,89-142,150-350,388-395,437-458	x86-64 vDSO/VVAR/timens/PV/HV 映射、fault、mremap 和生命周期；排除 IA32/x32/SGX
+runtime	Raw	C1 MM context namespace mapping	mechanism	RAW_KERNEL	include/linux/time_namespace.h	24,32-34,46-47	VVAR namespace 页字段与架构接口
+runtime	Raw	C1 MM context namespace mapping	mechanism	RAW_KERNEL	kernel/time/namespace.c	19-21,97-99,112-114,142-150,179-193,201-227,229-235,280-284	namespace 页分配、offset 编码和冻结发布
+runtime	Raw	C1 MM context namespace mapping	mechanism	RAW_KERNEL	arch/x86/include/asm/vdso.h	1-16,21-26,34-38,48,55-57	x86-64 image 元数据和映射接口；排除 32/x32
+runtime	Raw	C1 MM context namespace mapping	mechanism	RAW_KERNEL	arch/x86/include/asm/elf.h	75,77-79,349-355,384-389,410	AT_SYSINFO_EHDR 和追加映射接口；排除 IA32/x32
+runtime	Raw	C1 MM context namespace mapping	mechanism	RAW_KERNEL	arch/x86/include/asm/mmu.h	48-49	mm_context 的 vDSO 地址和 image
+runtime	Raw	C1 MM context namespace mapping	mechanism	RAW_KERNEL	arch/x86/include/uapi/asm/auxvec.h	11,13,16-18	x86-64 auxv 项和 vector 大小
+runtime	Raw	C1 MM context namespace mapping	mechanism	RAW_KERNEL	kernel/nsproxy.c	182,519	fork/setns namespace 映射更新 hook
+runtime	Raw	E1 cycles and environment provider	functional	RAW_KERNEL	arch/x86/include/asm/vdso/gettimeofday.h	1-67,196-323	VVAR address、TSC/PVClock/Hyper-V cycles provider 和 delta 规则；排除 x86-32 fallback
+runtime	Raw	E1 cycles and environment provider	functional	RAW_KERNEL	arch/x86/include/asm/clocksource.h	9-19	vDSO clock-mode enable 状态
+runtime	Raw	E1 cycles and environment provider	functional	RAW_KERNEL	arch/x86/kernel/kvmclock.c	153	PVClock vDSO mode enable
+runtime	Raw	E1 cycles and environment provider	functional	RAW_KERNEL	arch/x86/kernel/pvclock.c	16,148	PVClock VVAR 使用检查
+runtime	Raw	E1 cycles and environment provider	functional	RAW_KERNEL	drivers/clocksource/hyperv_timer.c	431-438,447-450	Hyper-V mode enable 和 clocksource 接入
+
+runtime	VKSO	U1 user public ABI wrapper	functional	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_entry.S	1-94	libkernel.so 五个用户时间 ABI 的 tail-jump typed success path、MM offset 与用户 syscall cold backend
+runtime	VKSO	C2 user context bootstrap	mechanism	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_entry.S	95-138	libkernel.so内一次性context绑定入口及每进程地址槽；不进入读取热路径
+runtime	VKSO	C2 user context bootstrap	mechanism	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_wrapper.c	3-11,40-67	当前用户侧读取AT_VKSO_MM_DATA、校验ABI并调用bind所需初始化；排除static_assert测试
+runtime	VKSO	C2 user context bootstrap	mechanism	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_wrapper.h	1-8	当前用户侧初始化接口声明
+runtime	VKSO	S1 shared global algorithm	functional	VKSO_KERNEL	include/vkso/time.h	7-15,124-146	共享状态码、唯一 clock-id dispatch 接口与 kernel/user cold callback 契约
+runtime	VKSO	S1 shared global algorithm	functional	VKSO_KERNEL	include/vkso/getcpu.h	1-10	getcpu 共享接口
+runtime	VKSO	S1 shared global algorithm	functional	VKSO_KERNEL	kernel/time/vkso_time_internal.h	1-15,39-58,73-101,146-170	seq、delta、offset、coarse 与 tail-entry 读取原语；排除 provider 与测试采样
+runtime	VKSO	S1 shared global algorithm	functional	VKSO_KERNEL	kernel/time/vkso_time_core.c	1,6,51-264	高精度换算、极冷归一化、七种global clock、clock-id分派、getres/gettimeofday/time和namespace offset的唯一共享算法
+runtime	VKSO	S1 shared global algorithm	functional	VKSO_KERNEL	arch/x86/kernel/vkso_getcpu.c	1-33	getcpu 共享算法
+runtime	VKSO	K1 kernel public global reader	functional	VKSO_KERNEL	include/linux/vkso_time.h	1-7,13,18-22,32-64	kernel generic/typed adapter、context构造和普通 reader 接口
+runtime	VKSO	K1 kernel public global reader	functional	VKSO_KERNEL	include/linux/vkso_getcpu.h	1-14	kernel getcpu adapter
+runtime	VKSO	K1 kernel public global reader	functional	VKSO_KERNEL	kernel/time/timekeeping.c	200-205,293-304,383-399,882-914,922-995,1020-1029,1039-1047,1058-1063,1075-1079,1579-1586,2308-2318	普通 ktime_get wrapper、统一 shared dispatch 与 unsupported-clocksource kernel cold backend；coarse/resolution/seconds 无不可达 fallback
+runtime	VKSO	K2 canonical producer	functional	VKSO_KERNEL	kernel/time/timekeeping.c	66,184,748-764,776,782-815	直接维护shared canonical state的cycle/base/coarse/resolution派生；boottime split仅在suspend事件更新
+runtime	VKSO	K3 publisher and shared ABI	mechanism	VKSO_KERNEL	include/vkso/time.h	1-6,17-65,82-91	canonical/shared payload ABI；MM/context 部分另归 C1/E1
+runtime	VKSO	K3 publisher and shared ABI	mechanism	VKSO_KERNEL	kernel/time/vkso_time.c	1,3-6,26-29,46-53	物理独立shared页实例与timezone事件发布；排除static_assert/provider
+runtime	VKSO	K3 publisher and shared ABI	mechanism	VKSO_KERNEL	include/linux/vkso_time.h	15,23	shared页与事件发布接口
+runtime	VKSO	K3 publisher and shared ABI	mechanism	VKSO_KERNEL	kernel/time/timekeeping.c	772-775,777-780,816-818,836	shared alias绑定、seq发布协议与producer hook；无staging copy
+runtime	VKSO	K3 publisher and shared ABI	mechanism	VKSO_KERNEL	kernel/time/time.c	210	timezone 事件发布 hook
+runtime	VKSO	K4 syscall and clock dispatcher	functional	VKSO_KERNEL	kernel/time/posix-timers.c	56-154,1157-1168,1199-1210	kernel syscall入口、按需MM/context选择及CPU/alarm/dynamic/private cold backend
+runtime	VKSO	K4 syscall and clock dispatcher	functional	VKSO_KERNEL	kernel/time/time.c	55-71,81-91,159-179	time/gettimeofday syscall、kernel context和kernel cold backend；time直接读取共享seconds
+runtime	VKSO	K4 syscall and clock dispatcher	functional	VKSO_KERNEL	kernel/sys.c	2575-2591	getcpu syscall 与共享 core 接入
+runtime	VKSO	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	include/vkso/time.h	93-104	MM_data v3 payload
+runtime	VKSO	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	include/linux/vkso_time.h	9-11,24-25	MM/namespace 类型与更新接口
+runtime	VKSO	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	arch/x86/kernel/vkso.c	1-166	per-MM 页分配、只读映射、复制、释放、offset 发布和 exec 接入
+runtime	VKSO	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	arch/x86/include/asm/vkso.h	1-11	MM 生命周期接口
+runtime	VKSO	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	arch/x86/include/asm/elf.h	336-342,367-371	AT_VKSO_MM_DATA 和追加 context 页映射
+runtime	VKSO	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	arch/x86/include/asm/mmu.h	50-54	mm_context 的 per-MM page 和地址
+runtime	VKSO	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	arch/x86/include/asm/mmu_context.h	13,111,128,173,177-180	MM 初始化、复制和销毁 hook
+runtime	VKSO	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	arch/x86/include/uapi/asm/auxvec.h	5-7	AT_VKSO_MM_DATA ABI
+runtime	VKSO	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	include/linux/time_namespace.h	31,43	task-aware namespace 接口
+runtime	VKSO	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	kernel/nsproxy.c	182,519	fork/setns 传 task 更新 MM_data
+runtime	VKSO	C1 MM context namespace mapping	mechanism	VKSO_KERNEL	kernel/time/namespace.c	16,205-209,233,246	namespace 冻结时更新 MM_data
+runtime	VKSO	E1 cycles and environment provider	functional	VKSO_KERNEL	include/vkso/time.h	106-122	kernel/user environment context 与 cold callback ABI
+runtime	VKSO	E1 cycles and environment provider	functional	VKSO_KERNEL	kernel/time/vkso_time_internal.h	36-37,60-71	TSC inline provider 和 cold provider 边界
+runtime	VKSO	E1 cycles and environment provider	functional	VKSO_KERNEL	kernel/time/vkso_time_cycles.c	1-56	PVClock/Hyper-V cold cycles provider
+runtime	VKSO	E1 cycles and environment provider	functional	VKSO_KERNEL	kernel/time/vkso_time.c	31-44	kernel environment context、cold callback和注入接口
+runtime	VKSO	E1 cycles and environment provider	functional	VKSO_KERNEL	include/linux/vkso_time.h	16,26-27	kernel context 与 PV/HV 注入声明
+runtime	VKSO	E1 cycles and environment provider	functional	VKSO_KERNEL	arch/x86/kernel/pvclock.c	14,149	PVClock page 注入
+runtime	VKSO	E1 cycles and environment provider	functional	VKSO_KERNEL	drivers/clocksource/hyperv_timer.c	24,541	Hyper-V page 注入
+
+compatibility	Raw	X1 disabled-config compatibility	compatibility	RAW_KERNEL	include/linux/time_namespace.h	107-116,138-142	CONFIG_TIME_NS=n 桩；不进入最终功能配置
+compatibility	VKSO	X1 disabled-config compatibility	compatibility	VKSO_KERNEL	include/linux/time_namespace.h	103-106,128-132	CONFIG_TIME_NS=n 签名桩
+
+build	Raw	G1 function-specific build glue	build_glue	RAW_KERNEL	arch/x86/entry/Makefile	17	纳入 x86 vDSO 构建
+build	Raw	G1 function-specific build glue	build_glue	RAW_KERNEL	arch/x86/entry/vdso/Makefile	1-21,26-27,32-40,46,49-51,54-100,134-136,172-187	x86-64 vDSO 对象/DSO/image 规则；排除 IA32/x32/安装/SGX
+build	Raw	G1 function-specific build glue	build_glue	RAW_KERNEL	arch/x86/entry/vdso/vdso.lds.S	1-29,33-35	x86-64 time/getcpu public symbol
+build	Raw	G1 function-specific build glue	build_glue	RAW_KERNEL	arch/x86/entry/vdso/vdso-layout.lds.S	1-112	x86-64 VVAR/PV/HV/timens 布局
+build	Raw	G1 function-specific build glue	build_glue	RAW_KERNEL	arch/x86/kernel/vmlinux.lds.S	204-225	VVAR 内核链接布局
+build	Raw	G1 function-specific build glue	build_glue	RAW_KERNEL	kernel/time/Makefile	21	构建 update_vsyscall
+build	Raw	G1 function-specific build glue	build_glue	RAW_KERNEL	arch/x86/Kconfig	150-152,250	x86-64 vDSO 能力选择
+build	VKSO	G1 function-specific build glue	build_glue	VKSO_KERNEL	include/linux/vkso.h	1-18	共享 text/data section 接口
+build	VKSO	G1 function-specific build glue	build_glue	VKSO_KERNEL	arch/x86/Kconfig	37-42	VKSO 固定生产能力
+build	VKSO	G1 function-specific build glue	build_glue	VKSO_KERNEL	arch/x86/kernel/Makefile	53-59,67	getcpu shared object 构建和映射安全 flags
+build	VKSO	G1 function-specific build glue	build_glue	VKSO_KERNEL	kernel/time/Makefile	4,7-24	time shared object 构建和映射安全 flags；排除 test
+build	VKSO	G1 function-specific build glue	build_glue	VKSO_KERNEL	arch/x86/kernel/vmlinux.lds.S	130-137,186-193	shared text/data 链接边界
+build	VKSO	G1 function-specific build glue	build_glue	VKSO_PROJECT	test/test_gettime/vkso-tests/functional/vkso_user_entry.S	140	用户wrapper对象的non-executable-stack标记
+
+dependency	Raw	B1 common CPU alarm dynamic backend	excluded_common	RAW_KERNEL	kernel/time/posix-timers.c	1432-1459	CPU/alarm/dynamic/invalid k_clock 表和解析；Raw/VKSO 语义相同，主表两侧同时排除
+dependency	VKSO	B1 common CPU alarm dynamic backend	excluded_common	VKSO_KERNEL	kernel/time/posix-timers.c	1428-1455	CPU/alarm/dynamic/invalid k_clock 表和解析；Raw/VKSO 语义相同，主表两侧同时排除
+dependency	Raw	Common timekeeper producer and special readers	excluded_common	RAW_KERNEL	kernel/time/timekeeping.c	1	完整 NTP/timekeeper producer、fast/NMI/snapshot 等两侧共有且非本次专属重写，按字段审计而非整文件计入
+dependency	VKSO	Common timekeeper producer and special readers	excluded_common	VKSO_KERNEL	kernel/time/timekeeping.c	1	完整 NTP/timekeeper producer、fast/NMI/snapshot 等两侧共有且非本次专属重写，按字段审计而非整文件计入
+
+validation	VKSO	T1 compile-time and runtime validation	excluded_validation	VKSO_KERNEL	kernel/time/vkso_time_core.c	3-4,8-49	static_assert 与验证 include；不生成运行指令
+validation	VKSO	T1 compile-time and runtime validation	excluded_validation	VKSO_KERNEL	kernel/time/vkso_time.c	4,8-24	kernel/shared 类型布局断言
+validation	VKSO	T1 compile-time and runtime validation	excluded_validation	VKSO_KERNEL	include/vkso/time.h	67-80,147-151	测试 ABI
+validation	VKSO	T1 compile-time and runtime validation	excluded_validation	VKSO_KERNEL	kernel/time/vkso_time_internal.h	16-34,103-144	测试采样与 retry 计数
+validation	VKSO	T1 compile-time and runtime validation	excluded_validation	VKSO_KERNEL	kernel/time/vkso_time_test.c	1-218	early、cycle-delta、NMI、IRQ、writer-context 与普通 kernel reader 自测
+validation	VKSO	T1 compile-time and runtime validation	excluded_validation	VKSO_KERNEL	arch/x86/Kconfig	44-50	测试专用配置项
+validation	VKSO	T1 compile-time and runtime validation	excluded_validation	VKSO_KERNEL	kernel/time/Makefile	5,25-31	测试对象构建与 instrumentation 禁用规则
+
+infrastructure	VKSO	P1 kernel reusable-text runtime	infrastructure	VKSO_KERNEL	include/linux/vkso.h	20-34	secondary-mapped text 通用谓词
+infrastructure	VKSO	P1 kernel reusable-text runtime	infrastructure	VKSO_KERNEL	arch/x86/kernel/alternative.c	22,582,588-593	ITS 动态 thunk 分配保护的逻辑新增行
+infrastructure	VKSO	P1 reusable-text construction	infrastructure	VKSO_PROJECT	make_dll/build_PIC_so.py	151-160,996,1003-1011,1019-1021,1824,1830-1836,1843-1845,1855-1860,1867-1874,2057-2059,2103-2106,2136	reusable-text 清单解析、约束校验、依赖闭包和整页保留
+infrastructure	VKSO	P1 reusable-text construction	infrastructure	VKSO_PROJECT	test/test_gettime/vkso-tests/baremetal/build-images.sh	357-361,370	构建包接入 reusable-text 清单
+infrastructure	VKSO	P1 reusable-text roots	infrastructure	VKSO_PROJECT	test/test_gettime/vkso-tests/baremetal/reusable_text.txt	1-5	显式静态根清单
+validation	VKSO	T1 reusable-text tests	excluded_validation	VKSO_PROJECT	make_dll/tests/test_builtin_thunks.py	4,20,50-57,92-104	fail-closed 与目标所在整页保持 native 的单元测试

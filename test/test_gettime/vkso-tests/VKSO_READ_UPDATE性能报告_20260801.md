@@ -57,7 +57,9 @@ READ 的净开销也保持在少量 cycles 范围。因此当前优化值得保�
 
 | 项目 | 值 |
 |---|---|
-| Git commit | `adfe3138e1388c34cb58051d33b2047682ac1a28` |
+| 实验 checkout 基线 | `adfe3138e1388c34cb58051d33b2047682ac1a28` |
+| 接纳的运行时提交 | `6656f97159339c4b464818e5f38ff31d31e4605e` |
+| 最终仓库 tag | `vkso-clock-vdso-final-20260802` |
 | Candidate `source.patch` SHA-256 | `d1c1ac2253702a2adfdb1dec96a88fb2585ce7af1055ef9e6e1bff34992678fa` |
 | VKSO source tree SHA-256 | `a3a9894b6bf89bbec7a9b86b90aaaa867693e2037a8af797262a4f03ed92946c` |
 | Kernel | Linux `5.15.198` |

@@ -298,7 +298,7 @@ alarm/CPU/dynamic 实现添加测试分支。
 
 ## D023：shared 页直接作为唯一 canonical reader state
 
-- 状态：已实现并通过 QEMU 功能验证，等待 M10 裸机性能门槛
+- 状态：已接纳并通过最终 READ/UPDATE/CONCURRENT 裸机门槛
 - 阶段：M10
 
 M03/M04 的过渡实现仍保留一份 kernel-private canonical staging，然后将同类型
@@ -325,7 +325,7 @@ retry 或 tail latency 显著恶化，则回退 D023，而不是重新引入第�
 
 ## D024：只共享kernel/user真正重合的reader
 
-- 状态：已实现并通过normal/no-retpoline QEMU，等待裸机门槛
+- 状态：已接纳并通过 normal/no-retpoline 最终裸机门槛
 - 阶段：M10
 
 `ktime_get_coarse_with_offset()`支持kernel-only的REAL/BOOT/TAI offset读取；
@@ -347,7 +347,7 @@ Linux没有对应的`CLOCK_BOOTTIME_COARSE`或`CLOCK_TAI_COARSE`用户clock ID�
 
 ## D025：clock-id分派只存在于kernel/user public边界
 
-- 状态：已实现并通过多配置静态构建与normal QEMU，等待裸机门槛
+- 状态：已接纳并通过多配置、正确性和最终裸机门槛
 - 阶段：M10
 
 旧`vkso_clock_gettime_core()`和`vkso_clock_getres_core()`并非真正共享边界：
@@ -372,7 +372,7 @@ context启动机制。
 
 ## D026：成功路径 tail-enter shared reader，fallback 进入显式冷 backend
 
-- 状态：已决定并通过 normal 裸机验证
+- 状态：已接纳并通过最终四镜像裸机验证；native fallback 边界由 D028 继续收紧
 - 阶段：M11
 
 用户 public wrapper 加载 context 后 tail-jump 到 shared reader；shared reader
@@ -404,3 +404,27 @@ libkernel.so 地址处到达动态 thunk。
 清单缺失、为空或条目不合法时构建直接失败。新增目标只增加一个符号根，不在
 内核中累积页地址特例。最终通用方案与早期静态候选的 wrapper 页、关键符号
 布局和 hot-path PMU 指令完全相同，因此修复没有 read 运行时开销。
+
+## D028：clock ID 在环境边界分类，shared core 只接收共享 clock
+
+- 状态：已接纳并通过最终 READ/UPDATE/CONCURRENT 验证
+- 阶段：M11/O7 关闭
+- 提交：`6656f97`
+
+D026 的共享 generic core 仍会先处理 native/CPU/alarm/dynamic clock ID，再进入
+环境 cold backend。用户 fallback 因此在 syscall 后又经过一次内核共享分派，
+normal 配置下被 retpoline/ITS 放大为稳定回归。
+
+最终决定为：
+
+- user public wrapper 和 kernel syscall/ordinary-reader 边界各自计算一次
+  `vkso_clock_class`；
+- native clock 在当前环境直接进入 syscall 或 `k_clock`；
+- shared core 拆为 hres/coarse typed entry，不包含 native fallback 策略；
+- context callback 只处理“已分类 shared clock 的 provider failure”，内核使用
+  private timekeeper reader，用户使用直接 syscall。
+
+最终 fallback 分组几何平均相对 Raw 为 Normal `-0.051%`、No-retpoline
+`-0.886%`，且其他 READ 组无明显回归。该重构语义产品代码净增
+22 SLOC，但 reader 机器码闭包减少 21 B。完整结论和证据见
+`vkso-tests/VKSO_READ_UPDATE性能报告_20260801.md`。

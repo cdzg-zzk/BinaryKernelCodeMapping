@@ -1,5 +1,11 @@
 # VKSO timekeeper / clock_gettime 统一重构计划
 
+> **关闭状态（2026-08-02）：已完成。** M00–M11/O7 的实现、正确性、
+> READ、UPDATE、CONCURRENT、源码规模和机器码证据均已封存。
+> 当前权威结论见 `vkso-tests/VKSO_READ_UPDATE性能报告_20260801.md`
+> 和 `reports/M11_FINAL_VALIDATION.md`。本文后续保留的“待采集”命令与门槛
+> 用于记录历史执行计划，不再表示当前状态。
+
 ## 0. 文档定位
 
 本文是 `vkso-timekeeper-unification` 分支的实施基线，用于指导
@@ -912,14 +918,13 @@ M01～M09 的“静态性能模型”不得写成裸机性能结论。
 | M07 dispatcher/backend 重构 | 已完成 | 普通 reader 稳定 |
 | M08 清理与静态审计 | 已完成 | 完整分派通过 |
 | M09 完整正确性验证 | 已完成 | 无临时/双重路径 |
-| M10 裸机性能与最终证据 | 等待用户介入 | M09 pre-performance tag |
+| M10 裸机性能与最终证据 | 已完成 | M09 pre-performance tag |
 
-M00～M09 已通过。M09 的 validation 与 production 配置均完成 Raw/VKSO
-完整 QEMU 对照；正常 RTC 与无 RTC 四种启动、真实 leap insertion、
+M00～M10 均已通过。M09 的 validation 与 production 配置完成 Raw/VKSO
+完整 QEMU 对照；正常 RTC 与无 RTC 启动、真实 leap insertion、
 clocksource switch、S3 suspend/resume、动态 clock、特殊 reader、seq、
-namespace、fallback 次数和映射权限均通过。两套 Raw/VKSO 最终语义矩阵各
-113 行且 diff 为空。下一阶段是需要用户介入的 M10 裸机性能和最终代码量证据，
-不得用 M09 的 QEMU cycles 代替。
+namespace、fallback 和映射权限均通过。M10/M11 后续在裸机完成
+READ、UPDATE 和并发验证；最终结论没有使用 QEMU cycles 代替裸机数据。
 
 ---
 
@@ -1505,10 +1510,11 @@ python3 test/test_gettime/vkso-tests/code-size/count_manifest.py \
 每个 O1～O6 候选的保留/回退状态、commit、代码规模变化和理由。最终结论不能
 只说“总体平均提高”，必须解释仍慢于 Raw 的接口及其不可消除的架构边界。
 
-O7只有在clean package/QEMU、四组READ、UPDATE、并发、源码和机器码六类证据
-全部存在且互相引用同一tag后才可标记完成。最终汇总写入
-`reports/M11_FINAL_VALIDATION.md`，并更新本状态表；加载器自动从auxv绑定
-MM/context属于O7之后的独立机制工作，不得混入本轮。
+O7 的 clean package/QEMU、四组 READ、UPDATE、并发、源码和机器码
+六类证据现已全部存在并完成交叉校验。最终汇总为
+`reports/M11_FINAL_VALIDATION.md` 和
+`vkso-tests/VKSO_READ_UPDATE性能报告_20260801.md`。加载器自动从 auxv 绑定
+MM/context 属于 O7 之后的独立机制工作，不混入本轮。
 
 ### 12.11 M11 状态表
 
@@ -1521,7 +1527,7 @@ MM/context属于O7之后的独立机制工作，不得混入本轮。
 | O4 cold backend shim/tail-entry | 4 | 保留；`f8d5d16`，ITS修复`0c1215f`，normal裸机通过 | 已满足 |
 | O5 剩余短路径收敛 | 5 | 关闭；当前剩余差距不足以支持继续特化 | 若未来新证据显示稳定固定成本，另立分支 |
 | O6 root-MM/shared-layout 备选 | 6 | 关闭；不为数个cycles扩大ABI/MM风险 | 仅保留设计记录 |
-| O7 最终全量验证 | 7 | 冻结tag `vkso-o7-final-code-20260731`；待采集六类证据 | clean tag package就绪 |
+| O7 最终全量验证 | 7 | **已完成**；最终 tag `vkso-clock-vdso-final-20260802` | 关闭；若改产品代码则重开全矩阵 |
 
 O1 裸机结果后的执行顺序调整：
 
