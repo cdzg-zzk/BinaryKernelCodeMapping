@@ -1,0 +1,4 @@
+# Keep only the canonical manuscript under version control in this directory.
+*
+!.gitignore
+!Paper Draft.md
