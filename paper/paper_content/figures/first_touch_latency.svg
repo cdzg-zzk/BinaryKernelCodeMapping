@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="850" height="540"
+     viewBox="0 0 850 540" role="img" aria-labelledby="title desc">
+  <title id="title">First-touch latency of native and kernel-backed DSOs</title>
+  <desc id="desc">Vector figure generated from the checked experiment artifacts.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#687386"/>
+    </marker>
+    <style>
+      text { font-family: "Liberation Sans", "DejaVu Sans", Arial, sans-serif; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="white"/>
+  <text x="65.00" y="35.00" text-anchor="start" font-size="13" font-weight="700" fill="#202938" style=""></text>
+  <text x="65.00" y="35.00" text-anchor="start" font-size="13" font-weight="600" fill="#202938" style="">First-touch latency (median TSC cycles; logarithmic scale)</text>
+  <line x1="85.00" y1="385.00" x2="795.00" y2="385.00" stroke="#D9DEE7" stroke-width="0.8" opacity="1"/>
+  <text x="75.00" y="389.00" text-anchor="end" font-size="10" font-weight="400" fill="#687386" style="">1</text>
+  <line x1="85.00" y1="331.67" x2="795.00" y2="331.67" stroke="#D9DEE7" stroke-width="0.8" opacity="1"/>
+  <text x="75.00" y="335.67" text-anchor="end" font-size="10" font-weight="400" fill="#687386" style="">10</text>
+  <line x1="85.00" y1="278.33" x2="795.00" y2="278.33" stroke="#D9DEE7" stroke-width="0.8" opacity="1"/>
+  <text x="75.00" y="282.33" text-anchor="end" font-size="10" font-weight="400" fill="#687386" style="">100</text>
+  <line x1="85.00" y1="225.00" x2="795.00" y2="225.00" stroke="#D9DEE7" stroke-width="0.8" opacity="1"/>
+  <text x="75.00" y="229.00" text-anchor="end" font-size="10" font-weight="400" fill="#687386" style="">1K</text>
+  <line x1="85.00" y1="171.67" x2="795.00" y2="171.67" stroke="#D9DEE7" stroke-width="0.8" opacity="1"/>
+  <text x="75.00" y="175.67" text-anchor="end" font-size="10" font-weight="400" fill="#687386" style="">10K</text>
+  <line x1="85.00" y1="118.33" x2="795.00" y2="118.33" stroke="#D9DEE7" stroke-width="0.8" opacity="1"/>
+  <text x="75.00" y="122.33" text-anchor="end" font-size="10" font-weight="400" fill="#687386" style="">100K</text>
+  <line x1="85.00" y1="65.00" x2="795.00" y2="65.00" stroke="#D9DEE7" stroke-width="0.8" opacity="1"/>
+  <text x="75.00" y="69.00" text-anchor="end" font-size="10" font-weight="400" fill="#687386" style="">1M</text>
+  <line x1="85.00" y1="65.00" x2="85.00" y2="385.00" stroke="#202938" stroke-width="1" opacity="1"/>
+  <line x1="85.00" y1="385.00" x2="795.00" y2="385.00" stroke="#202938" stroke-width="1" opacity="1"/>
+  <rect x="146.09" y="286.27" width="54.00" height="98.73" rx="2.00" fill="#3568A8" stroke="#3568A8" stroke-width="0" opacity="1"/>
+  <text x="173.09" y="279.27" text-anchor="middle" font-size="10" font-weight="600" fill="#3568A8" style="">71</text>
+  <text x="173.09" y="424.00" text-anchor="middle" font-size="9.5" font-weight="400" fill="#687386" style="">0/0</text>
+  <rect x="206.57" y="286.27" width="54.00" height="98.73" rx="2.00" fill="#D97732" stroke="#D97732" stroke-width="0" opacity="1"/>
+  <text x="233.57" y="279.27" text-anchor="middle" font-size="10" font-weight="600" fill="#D97732" style="">71</text>
+  <text x="233.57" y="424.00" text-anchor="middle" font-size="9.5" font-weight="400" fill="#687386" style="">0/0</text>
+  <text x="203.33" y="405.00" text-anchor="middle" font-size="11" font-weight="600" fill="#202938" style="">Hot</text>
+  <rect x="382.76" y="202.32" width="54.00" height="182.68" rx="2.00" fill="#3568A8" stroke="#3568A8" stroke-width="0" opacity="1"/>
+  <text x="409.76" y="195.32" text-anchor="middle" font-size="10" font-weight="600" fill="#3568A8" style="">2662</text>
+  <text x="409.76" y="424.00" text-anchor="middle" font-size="9.5" font-weight="400" fill="#687386" style="">1/0</text>
+  <rect x="443.24" y="202.54" width="54.00" height="182.46" rx="2.00" fill="#D97732" stroke="#D97732" stroke-width="0" opacity="1"/>
+  <text x="470.24" y="195.54" text-anchor="middle" font-size="10" font-weight="600" fill="#D97732" style="">2637</text>
+  <text x="470.24" y="424.00" text-anchor="middle" font-size="9.5" font-weight="400" fill="#687386" style="">1/0</text>
+  <text x="440.00" y="405.00" text-anchor="middle" font-size="11" font-weight="600" fill="#202938" style="">PTE cold</text>
+  <rect x="619.43" y="73.23" width="54.00" height="311.77" rx="2.00" fill="#3568A8" stroke="#3568A8" stroke-width="0" opacity="1"/>
+  <text x="646.43" y="66.23" text-anchor="middle" font-size="10" font-weight="600" fill="#3568A8" style="">701.1K</text>
+  <text x="646.43" y="424.00" text-anchor="middle" font-size="9.5" font-weight="400" fill="#687386" style="">0/1</text>
+  <rect x="679.91" y="165.42" width="54.00" height="219.58" rx="2.00" fill="#D97732" stroke="#D97732" stroke-width="0" opacity="1"/>
+  <text x="706.91" y="158.42" text-anchor="middle" font-size="10" font-weight="600" fill="#D97732" style="">13.1K</text>
+  <text x="706.91" y="424.00" text-anchor="middle" font-size="9.5" font-weight="400" fill="#687386" style="">1/0</text>
+  <text x="676.67" y="405.00" text-anchor="middle" font-size="11" font-weight="600" fill="#202938" style="">Post drop-caches</text>
+  <text x="30.00" y="225.00" text-anchor="middle" font-size="11" font-weight="400" fill="#687386" transform="rotate(-90 30.00 225.00)" style="">TSC cycles</text>
+  <text x="440.00" y="447.00" text-anchor="middle" font-size="9.5" font-weight="400" fill="#687386" style="">minor / major faults in the measured call</text>
+  <rect x="275.00" y="500.00" width="14.00" height="10.00" rx="0.00" fill="#3568A8" stroke="#3568A8" stroke-width="0" opacity="1"/>
+  <text x="297.00" y="509.00" text-anchor="start" font-size="10.5" font-weight="400" fill="#202938" style="">Native DSO</text>
+  <rect x="460.00" y="500.00" width="14.00" height="10.00" rx="0.00" fill="#D97732" stroke="#D97732" stroke-width="0" opacity="1"/>
+  <text x="482.00" y="509.00" text-anchor="start" font-size="10.5" font-weight="400" fill="#202938" style="">Kernel-backed Stub DSO</text>
+</svg>

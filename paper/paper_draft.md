@@ -297,7 +297,33 @@
 - 用户态仍需拥有自己的可写槽位、导入绑定和局部状态；
 - 这一步是隔离内核可写状态和用户可写状态的关键。
 
-#### 3.3.4 Pseudo GOT and `.rela.dyn` Rebuild
+这里不能只写传统 `.data` 隔离。clocktime 实例说明，运行时依赖至少应区分：
+
+- 所有进程一致的 kernel-published read-only snapshot；
+- 随地址空间或 namespace 变化的 per-process/per-MM read-only context；
+- loader 或 wrapper 私有的地址、回调和绑定槽；
+- 不能安全导出的 kernel-only mutable state。
+
+#### 3.3.4 Explicit Runtime-Dependency Binding
+
+这一小节吸收 clocktime 实验得到的新设计认识：kernel-context independence 不等于
+函数完全不读取状态，而是所有可读取状态都必须具有显式来源、最小 ABI、可验证
+更新协议和确定生命周期。
+
+- shared core 只通过参数、受控只读 snapshot 或显式 context 获取依赖；
+- global snapshot 可由 kernel publisher 更新，并通过版本/seq 协议读取；
+- per-process 状态由宿主 OS 的 address-space lifecycle 创建、复制、更新和回收；
+- Stub DSO 的 private wrapper 在加载后绑定当前地址空间有效的指针和 failure
+  callback，不能把这些地址固化到共享 text；
+- 不能归入上述通道的 `current`、per-CPU、锁、设备对象或任意可写全局仍属于
+  `Unsupported`。
+
+Linux clocktime prototype 中，`vkso_shared_page` 是 global snapshot，
+`vkso_mm_page` 是 per-MM time-namespace context，`AT_VKSO_MM_DATA` 提供发现通道，
+private wrapper 完成一次性 context 绑定。该实例用于证明设计模式，不应把
+time-specific payload 误写成所有导出函数都必须采用的固定 ABI。
+
+#### 3.3.5 Pseudo GOT and `.rela.dyn` Rebuild
 
 这一小节讲 repairable 函数为何成立：
 
@@ -307,7 +333,7 @@
 
 这里要强调：伪 GOT 是行为语义，不是简单“复制一个 `.got` 节”。
 
-#### 3.3.5 Shim Boundary
+#### 3.3.6 Shim Boundary
 
 解释为什么需要 shim：
 
@@ -317,7 +343,7 @@
 
 这一节里要顺带讲当前原型的 `libshim.so` 在系统中的位置，但不展开到工程细枝末节。
 
-#### 3.3.6 File-Backed Segment Forcing
+#### 3.3.7 File-Backed Segment Forcing
 
 讲为什么需要让相关 `PT_LOAD` 段保持 file-backed：
 
@@ -399,6 +425,19 @@
 - 为什么共享代码页不会自动把内核状态带到用户态；
 - 为什么“标准 DSO 形式”对部署和接入很重要。
 
+还应明确给出状态生命周期，而不是只给静态布局图：
+
+- process-private view 在 `exec`/load 时建立；
+- 新地址空间在 `fork` 时复制最小 context，共享地址空间的线程共享同一实例；
+- namespace/configuration 改变时只更新对应 context，不复制共享 text；
+- 地址空间销毁时回收私有状态；
+- global snapshot 的更新频率由数据生产者决定，与 per-process context 更新解耦。
+
+这一设计把“代码共享”和“状态共享”拆开：多个进程可以执行同一物理代码页，
+同时读取同一全局 snapshot、不同的 per-MM context 和各自的 DSO private state。
+对函数可复用性的判断因此应落在依赖是否能被显式化，而不是简单落在“是否读取
+任何数据”。
+
 这一节的最终目标是让读者复述出下面这句话：
 
 > The system shares machine code pages, not kernel execution context; user-visible compatibility comes from a standard DSO shell with private writable state.
@@ -411,6 +450,21 @@
 - 当前明确不支持的能力；
 - 哪些观察是机制直接属性；
 - 哪些现象只是 `current Linux fault path` 下的 measured effects。
+
+当前 Linux prototype 的边界需要准确写成：
+
+- 通用框架已支持 closure、Shim、共享 RX/RO 页、`shared_data`、private wrapper
+  和 reusable-text/thunk；
+- clocktime 完整验证了 global snapshot、per-MM read-only data、auxv discovery、
+  context binding 与 kernel/user fallback；
+- per-MM payload 和 auxv 当前仍是 time-specific implementation，不是已经产品化的
+  arbitrary-subsystem registration framework；
+- 其他子模块需要定义自己的最小 ABI、publisher/lifecycle 和 fallback，并重新通过
+  eligibility audit。
+
+Linux 具体对象、调用点和状态转移集中记录在
+[`chapter4_linux_state_binding.md`](chapter4_linux_state_binding.md)，正文扩写时将其
+吸收到相应 Design/Implementation 小节，而不把实验 README 直接改写成论文正文。
 
 这里要明确降级这些表述：
 
@@ -469,6 +523,8 @@
 - `page-cache grafting`
 - `fault-driven installation`
 - `private writable state`
+- `explicit runtime-dependency binding`
+- `per-process read-only context`
 - `controlled exposure`
 - `measured effects under current Linux paths`
 
@@ -488,6 +544,7 @@
   - Stub DSO 如何构造；
   - page cache 如何 graft；
   - 用户态为什么最终能正常 `call`。
+  - shared snapshot、per-process context 和 private wrapper 分别由谁拥有、何时更新。
 - 到 `Evaluation` 开始前，论文已经形成完整的“问题-边界-机制”闭环，而不是依赖评测章节补定义。
 
 ---

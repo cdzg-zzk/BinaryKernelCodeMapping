@@ -128,6 +128,48 @@ thunk 合成页覆盖。
 在清单中增加一行；若目标后来移动到新的 RX 页，生成的
 `page_mappings.txt` 会自动包含新页，不需要在构建脚本中追加页地址判断。
 
+## 显式运行时依赖与进程私有上下文
+
+最初的 VKSO 工作流主要面向只依赖参数和只读常量的函数。clocktime 实验进一步
+验证了一类更一般的目标：函数的算法主体可以共享，但它还需要少量、可审计且因
+执行环境而异的只读状态。项目因此形成了三种互斥的数据归属方式：
+
+| 数据类别 | 所有权与映射 | 适用内容 |
+| --- | --- | --- |
+| 全局共享快照 | 内核发布，DSO 以 `R--/NX` 共享同一整页 | 所有进程一致、允许无锁读取的版本化状态 |
+| per-MM 数据 | 每个 `mm_struct` 独占一页，用户只读，内核持有可写别名 | namespace offset、进程视图或其他随地址空间变化的上下文 |
+| DSO 私有状态 | 每个装载实例自己的普通私有 `.data` | 用户地址、回调、动态链接结果和一次性绑定状态 |
+
+这三类状态都不允许共享代码直接访问任意内核可写对象。不能收敛为参数、受控只读
+快照、per-MM 数据或用户态 Shim 的依赖仍应由 checker 拒绝，或留在内核专属
+fallback 中。
+
+当前构造器已经提供两项通用支持：
+
+- `--shared-data-list PATH` 声明可复用的、页对齐且占据完整页面的内核数据对象。
+  构造器把它们放入只读、不可执行的 DSO 段，并写入逐页映射清单；普通可写对象
+  与该页重叠时构建失败。
+- `--private-wrapper-object PATH` 把一个 ET_REL wrapper 合入 DSO。wrapper 保留
+  自己的私有状态，并在进入共享机器码前注入当前地址空间有效的指针和回调；其
+  未定义依赖也会进入闭包解析，但不会被误当作公开 API。
+
+clocktime 是 per-MM 通道的第一个完整 Linux 实例。内核在 `exec` 时分配并映射
+`[vkso_mm_data]`，通过 `AT_VKSO_MM_DATA` 把用户地址写入 auxv；复制地址空间的
+`fork` 显式复制该页，线程继续共享同一 `mm`，退出时随 `mm` 回收。time namespace
+提交或切换时，内核只更新这个稳定页面中的 offset，而不是在每次 timekeeping
+tick 更新每个 namespace。用户 wrapper 启动时读取 auxv，并一次性把 MM_data、
+failure callback 绑定到 DSO 私有 context；该 context 也为按执行环境提供的
+provider 数据别名保留显式槽位。完整实现关系见
+[clocktime/VKSO 实验说明](test/test_gettime/vkso-tests/README.md)；论文中的设计抽象
+与 Linux 落地边界见
+[显式状态绑定实现笔记](paper/chapter4_linux_state_binding.md)。
+
+这里需要区分“通用能力”和“当前实例”。整页只读共享、private wrapper 构造和
+显式 context 注入已经是通用构建机制；`struct vkso_mm_data` 的字段、
+`AT_VKSO_MM_DATA` 以及 time namespace 更新钩子目前仍是 clocktime 专用实现。
+其他子模块可以复用同一设计模式，但仍需定义自己的最小数据 ABI、生命周期和
+fallback 策略，不能直接把任意内核状态暴露给用户态。
+
 ## 工作区规范
 
 ```text

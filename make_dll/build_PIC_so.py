@@ -597,75 +597,6 @@ class KoFile:
                 )
         return relocations
 
-
-class KernelElfSymbols:
-    """Minimal ELF64 symbol reader for built-in objects omitted from a KRG."""
-
-    _EHDR = struct.Struct("<16sHHIQQQIHHHHHH")
-    _SHDR = struct.Struct("<IIQQQQIIQQ")
-    _SYMENT = struct.Struct("<IBBHQQ")
-
-    def __init__(self, path: Path) -> None:
-        self.path = path
-        self._symbols: Dict[str, KoSymbol] = {}
-        self._load(memoryview(path.read_bytes()))
-
-    def _load(self, blob: memoryview) -> None:
-        if len(blob) < self._EHDR.size:
-            raise ValueError(f"{self.path}: file too small for ELF header")
-        (e_ident, e_type, e_machine, _e_version, _e_entry, _e_phoff, e_shoff,
-         _e_flags, _e_ehsize, _e_phentsize, _e_phnum, e_shentsize, e_shnum,
-         _e_shstrndx) = self._EHDR.unpack_from(blob, 0)
-        if (e_ident[0:4] != b"\x7fELF" or e_ident[4] != ELFCLASS64 or
-                e_ident[5] != ELFDATA2LSB):
-            raise ValueError(f"{self.path}: expected little-endian ELF64")
-        if e_type not in (ET_EXEC, ET_DYN):
-            raise ValueError(f"{self.path}: expected ET_EXEC/ET_DYN vmlinux, got e_type={e_type}")
-        if e_machine != EM_X86_64:
-            raise ValueError(f"{self.path}: expected EM_X86_64, got e_machine={e_machine}")
-        if e_shentsize != self._SHDR.size or e_shoff == 0 or e_shnum == 0:
-            raise ValueError(f"{self.path}: missing or unsupported section table")
-
-        sections = []
-        for idx in range(e_shnum):
-            offset = e_shoff + idx * e_shentsize
-            if offset + self._SHDR.size > len(blob):
-                raise ValueError(f"{self.path}: truncated section table")
-            sections.append(self._SHDR.unpack_from(blob, offset))
-
-        symtabs = [section for section in sections if section[1] == SHT_SYMTAB]
-        if not symtabs:
-            raise ValueError(f"{self.path}: .symtab is required")
-        for symtab in symtabs:
-            _name, _type, _flags, _addr, offset, size, link, _info, _align, entsize = symtab
-            if entsize != self._SYMENT.size or link >= len(sections):
-                raise ValueError(f"{self.path}: unsupported symbol table")
-            strtab = sections[link]
-            str_offset, str_size = strtab[4], strtab[5]
-            if offset + size > len(blob) or str_offset + str_size > len(blob):
-                raise ValueError(f"{self.path}: truncated symbol/string table")
-            strings = bytes(blob[str_offset:str_offset + str_size])
-            for entry_offset in range(offset, offset + size, entsize):
-                st_name, st_info, st_other, st_shndx, st_value, st_size = \
-                    self._SYMENT.unpack_from(blob, entry_offset)
-                if st_name >= len(strings) or st_shndx == SHN_UNDEF:
-                    continue
-                end = strings.find(b"\x00", st_name)
-                if end < 0:
-                    continue
-                name = strings[st_name:end].decode("utf-8", errors="ignore")
-                if not name:
-                    continue
-                candidate = KoSymbol(name, st_info, st_other, st_shndx, st_value, st_size)
-                current = self._symbols.get(name)
-                # Prefer a global definition, then the definition with useful size.
-                if current is None or (candidate.bind, bool(candidate.st_size)) > \
-                        (current.bind, bool(current.st_size)):
-                    self._symbols[name] = candidate
-
-    def find_symbol(self, name: str) -> KoSymbol | None:
-        return self._symbols.get(name)
-
     @staticmethod
     def _is_core_section(name: str) -> bool:
         if not name:
@@ -782,6 +713,75 @@ class KernelElfSymbols:
             ro_start=ro_start, ro_end=ro_end, data_start=data_start, data_end=data_end,
             ro_image=bytes(ro_image), data_image=bytes(data_image), data_relocs=data_relocs,
         )
+
+
+class KernelElfSymbols:
+    """Minimal ELF64 symbol reader for built-in objects omitted from a KRG."""
+
+    _EHDR = struct.Struct("<16sHHIQQQIHHHHHH")
+    _SHDR = struct.Struct("<IIQQQQIIQQ")
+    _SYMENT = struct.Struct("<IBBHQQ")
+
+    def __init__(self, path: Path) -> None:
+        self.path = path
+        self._symbols: Dict[str, KoSymbol] = {}
+        self._load(memoryview(path.read_bytes()))
+
+    def _load(self, blob: memoryview) -> None:
+        if len(blob) < self._EHDR.size:
+            raise ValueError(f"{self.path}: file too small for ELF header")
+        (e_ident, e_type, e_machine, _e_version, _e_entry, _e_phoff, e_shoff,
+         _e_flags, _e_ehsize, _e_phentsize, _e_phnum, e_shentsize, e_shnum,
+         _e_shstrndx) = self._EHDR.unpack_from(blob, 0)
+        if (e_ident[0:4] != b"\x7fELF" or e_ident[4] != ELFCLASS64 or
+                e_ident[5] != ELFDATA2LSB):
+            raise ValueError(f"{self.path}: expected little-endian ELF64")
+        if e_type not in (ET_EXEC, ET_DYN):
+            raise ValueError(f"{self.path}: expected ET_EXEC/ET_DYN vmlinux, got e_type={e_type}")
+        if e_machine != EM_X86_64:
+            raise ValueError(f"{self.path}: expected EM_X86_64, got e_machine={e_machine}")
+        if e_shentsize != self._SHDR.size or e_shoff == 0 or e_shnum == 0:
+            raise ValueError(f"{self.path}: missing or unsupported section table")
+
+        sections = []
+        for idx in range(e_shnum):
+            offset = e_shoff + idx * e_shentsize
+            if offset + self._SHDR.size > len(blob):
+                raise ValueError(f"{self.path}: truncated section table")
+            sections.append(self._SHDR.unpack_from(blob, offset))
+
+        symtabs = [section for section in sections if section[1] == SHT_SYMTAB]
+        if not symtabs:
+            raise ValueError(f"{self.path}: .symtab is required")
+        for symtab in symtabs:
+            _name, _type, _flags, _addr, offset, size, link, _info, _align, entsize = symtab
+            if entsize != self._SYMENT.size or link >= len(sections):
+                raise ValueError(f"{self.path}: unsupported symbol table")
+            strtab = sections[link]
+            str_offset, str_size = strtab[4], strtab[5]
+            if offset + size > len(blob) or str_offset + str_size > len(blob):
+                raise ValueError(f"{self.path}: truncated symbol/string table")
+            strings = bytes(blob[str_offset:str_offset + str_size])
+            for entry_offset in range(offset, offset + size, entsize):
+                st_name, st_info, st_other, st_shndx, st_value, st_size = \
+                    self._SYMENT.unpack_from(blob, entry_offset)
+                if st_name >= len(strings) or st_shndx == SHN_UNDEF:
+                    continue
+                end = strings.find(b"\x00", st_name)
+                if end < 0:
+                    continue
+                name = strings[st_name:end].decode("utf-8", errors="ignore")
+                if not name:
+                    continue
+                candidate = KoSymbol(name, st_info, st_other, st_shndx, st_value, st_size)
+                current = self._symbols.get(name)
+                # Prefer a global definition, then the definition with useful size.
+                if current is None or (candidate.bind, bool(candidate.st_size)) > \
+                        (current.bind, bool(current.st_size)):
+                    self._symbols[name] = candidate
+
+    def find_symbol(self, name: str) -> KoSymbol | None:
+        return self._symbols.get(name)
 
 # -----------------------------------------------------------------------------
 # Symbol classification

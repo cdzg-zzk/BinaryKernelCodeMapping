@@ -61,7 +61,15 @@
 
 同样地，这一设计共享的是**machine code body**，而不是 privileged execution context。应用之所以能够透明地沿 standard shared-library path 进入该执行体，是因为 stub 提供了兼容既有软件生态的标准对象形态；应用之所以最终执行到同一份 resident pages，则是因为统一的 carrier-and-export architecture 在首次触达时完成了 object-side rebinding 与 process-side installation。于是，系统导出的不是完整的 privileged runtime，而只是一个受控的、可执行的代码对象视图；共享的不是内核上下文，而是已经驻留的机器码主体。第四章将在这一 general-OS 语义之上，进一步说明 Linux 如何以 page cache、fault path 与 PTE 安装来实例化这里的 *Cache-Object Layer*、*Object-Backed Mapping* 与 *Process View*。
 
-至此，本章形成了完整闭环。`3.1` 说明现代主流 OS 已经提供了 standard shared object、cache/object layer、process-side executable view 与 fault-driven installation 这些 general-OS substrates；`3.2` 在这些共有基础之上，从设计目标推导出 transparent no-copy export 所必需的通用机制；`3.3` 则给出统一的 carrier-and-export architecture，说明 *eligible object* 如何被嵌入这些既有抽象，并在不复制执行体的前提下完成跨特权级复用。第四章将进一步回答，这些 general-OS roles 在 Linux 上分别落到哪些具体对象与运行路径上。
+### 3.3.1 Explicit State-Dependency Binding
+
+共享 execution body 还不能自动解决代码对运行时数据的依赖。最严格的 eligible object 只依赖参数和只读常量，但 clocktime 实例进一步表明，某些依赖状态的代码仍可安全地归入 repairable subset，前提是这些状态不再以隐式 privileged context 的形式出现，而是被拆分为具有明确所有权和更新协议的输入。为此，统一架构还需要一条 *explicit state-dependency binding* 原则：所有共享代码可见的非参数状态都必须能够归入 kernel-published read-only snapshot、process-private read-only context 或 Stub DSO private state；无法归入这些通道的任意可写内核全局、`current`、per-CPU、锁和设备对象仍然不可导出。
+
+这三类状态对应不同生命周期。global snapshot 由 privileged producer 统一发布，并以版本或 sequence protocol 保证无锁读取的一致性；process-private context 随地址空间创建、复制、配置变更和销毁，由宿主 OS 生命周期维护；Stub DSO private state 则由 loader 或私有 wrapper 持有，用于保存当前地址空间有效的地址、重定位结果和 failure callback。共享 text 只接收这些显式依赖，不拥有它们，也不把任何进程地址固化在共享机器码中。这样，不同进程可以同时执行同一 resident code body，却读取共同的全局快照、各自的进程视图和各自的 DSO 私有绑定。
+
+该原则并不把任意 stateful kernel function 扩展为 eligible object。相反，它把原先模糊的“无内核上下文依赖”细化为可审计条件：状态 ABI 必须最小且只读，publisher 与 reader 必须具有明确同步协议，process-local data 必须具有完整生命周期，所有失败路径必须回到各自执行环境的受控 backend。第四章将以 Linux clocktime prototype 中的 shared data page、per-MM data、auxiliary-vector discovery 和 private wrapper 为实例，说明这一抽象如何落地；这些具体字段和 hook 属于 Linux 实例，而不是 general-OS 架构的固定接口。
+
+至此，本章形成了完整闭环。`3.1` 说明现代主流 OS 已经提供了 standard shared object、cache/object layer、process-side executable view 与 fault-driven installation 这些 general-OS substrates；`3.2` 在这些共有基础之上，从设计目标推导出 transparent no-copy export 所必需的通用机制；`3.3` 则给出统一的 carrier-and-export architecture，并进一步用 explicit state-dependency binding 说明 *eligible object* 如何在不复制执行体、也不暴露隐式 privileged context 的前提下完成跨特权级复用。第四章将进一步回答，这些 general-OS roles 在 Linux 上分别落到哪些具体对象与运行路径上。
 
 ## 参考文献
 
