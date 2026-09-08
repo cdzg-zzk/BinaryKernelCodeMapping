@@ -20,8 +20,6 @@ VKSO 的关键洞察是把三个通常耦合的问题分开处理。最终机器
 
 在 Linux 5.15 原型上，hot call 保持在测量误差内，同源算法大多落在约 ±5% 内；clocktime 改造将完整 product source 和 reader closure 分别减少 13.29% 与 22.13%，而独立 READ 总体保持在约 ±1% 范围内。我们同时报告 first-touch、短入口和并发 coarse path 的边界情况，以明确这些数字适用的 workload 与 build 条件。
 
-
-
 # Background and Motivation
 
 
@@ -38,12 +36,12 @@ VKSO 的关键洞察是把三个通常耦合的问题分开处理。最终机器
 
 VKSO 关注其中能够保持相同计算语义的一部分功能，使用户态直接复用由内核提供的实现，从而避免为消除跨界而维护第二份同语义代码。对于依赖不同权限策略、特权状态、对象所有权或同步语义的功能，仍保留原有实现和执行路径。
 
-## Limitations of Existing Reuse Mechanisms
+## Existing Reuse Mechanisms
 
-- **（1）接口式复用 Service-based Reuse**：系统可以保留 kernel implementation，只向用户态开放受控服务。例如，Linux AFALG 允许应用通过 socket 选择 kernel crypto algorithm，并使用 `send`/`write` 和 `read`/`recv` 完成请求。[32] 这类接口保留了原生内核所有权，却要求每次操作经过 syscall、参数传递和边界检查；它适合较粗粒度服务，而不能把短小计算转化为普通用户态函数调用。
-- **（2）抽取式复用 Source Extraction**：LKL 和 Rump 的经验表明，从 kernel tree 抽取 VFS 或 file-system code 仍需要手工补充 locks、allocators 与其他关联基础设施，并持续适配内部依赖。[29,30] 这种方法能够得到细粒度用户态实现，但并未消除第二份 executable image 及其维护成本。
-- **（3）内核或子系统重宿主 Kernel/Subsystem Rehosting**：LKL 将 Linux kernel 组织为可在用户空间运行的 library，Rump Filesystems 则把 kernel file-system code 与提供所需 kernel interfaces 的 `librump` 一同带入用户环境。[29,30] 它们适合复用大范围 kernel APIs 或完整 subsystem semantics，但会生成新的用户态执行镜像并携带相应 host/adaptation environment；对于只需一个高频函数的场景，复用粒度和环境规模都偏大。
-- **（4）专用用户态快速路径 Purpose-built User Fast Paths**：Linux vDSO 证明了内核可以向进程映射标准 ELF image，使部分高频查询通过普通 ABI 函数调用完成。[31] 然而，vDSO 由内核按 architecture and stable ABI 单独选择、实现和构建导出内容；它适合少量长期维护的接口，但不是面向一般、满足约束的 final-binary closure 的通用重宿主机制。
+- **接口式复用 Service-based Reuse**：系统可以保留 kernel implementation，只向用户态开放受控服务。例如，Linux AF_ALG 允许应用通过 socket 选择 kernel crypto algorithm，并使用 `send`/`write` 和 `read`/`recv` 完成请求。[32] 这类接口保留了原生内核所有权，却要求每次操作经过 syscall、参数传递和边界检查；它适合较粗粒度服务，而不能把短小计算转化为普通用户态函数调用。
+- **抽取式复用 Source Extraction**：LKL 和 Rump 的经验表明，从 kernel tree 抽取 VFS 或 file-system code 仍需要手工补充 locks、allocators 与其他关联基础设施，并持续适配内部依赖。[29,30] 这种方法能够得到细粒度用户态实现，但并未消除第二份 executable image 及其维护成本。
+- **内核或子系统重宿主 Kernel/Subsystem Rehosting**：LKL 将 Linux kernel 组织为可在用户空间运行的 library，Rump Filesystems 则把 kernel file-system code 与提供所需 kernel interfaces 的 `librump` 一同带入用户环境。[29,30] 它们适合复用大范围 kernel APIs 或完整 subsystem semantics，但会生成新的用户态执行镜像并携带相应 host/adaptation environment；对于只需一个高频函数的场景，复用粒度和环境规模都偏大。
+- **专用用户态快速路径 Purpose-built User Fast Paths**：Linux vDSO 证明了内核可以向进程映射标准 ELF image，使部分高频查询通过普通 ABI 函数调用完成。[31] 然而，vDSO 由内核按 architecture and stable ABI 单独选择、实现和构建导出内容；它适合少量长期维护的接口，但不是面向一般、满足约束的 final-binary closure 的通用重宿主机制。
 
 这些方法分别保留了原生内核服务、复用了源码、重宿主了较大的 kernel environment，或为少量接口建立了专用 fast path，但均在至少一个关键维度上与本文目标不同：它们不能同时获得 **function-level rehostable closure**、复用当前运行内核中的同一 **resident execution body**、保持 **ordinary user-space call**，并以统一方式显式承接跨环境依赖。这一组合缺口构成 VKSO 的设计出发点。
 
@@ -66,19 +64,23 @@ Table 1 对 Linux、Windows、macOS 和 FreeBSD 中与上述四类 substrate 对
 **Table 1: Common OS substrates relevant to transparent code reuse.**
 
 
-| OS      | shared object loader                           | mapping object                                   | cache / object layer                                                                     | first-touch installation                                   |
-| ------- | ---------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| Linux   | ELF `ld.so`。[2]                                 | `mmap(2)`、VMA、file-backed mapping。[1,4]              | `address_space`、`i_pages`、`i_mmap`、page cache。[5,6]                                         | page-fault 路径按需建立页表；默认并非预装全部页，`MAP_POPULATE` 只是显式预取变体。[1,3] |
-| Windows | PE/DLL load-time / run-time dynamic linking。[8–10] | section object / mapped view / file mapping。[11,14] | `SECTION_OBJECT_POINTERS`、`DataSectionObject`、`SharedCacheMap`、`ImageSectionObject`。[12,13] | 视图访问前不分配物理页；首次访问触发 page-fault，再把 file-backed 内容调入内存。[11]     |
-| macOS   | Mach-O image `dyld`。[15–17]                      | VM object / memory object / vnode pager。[18,19]     | VM object、UBC、vnode-backed caching。[18–20]                                                 | page-fault handler 在首次缺页时装页、更新页表并恢复执行。[18]                   |
-| FreeBSD | ELF `rtld` / `ld-elf.so.1`。[21]                  | `mmap(2)`、`vm_object_t`、`vm_map_t`。[22,24]          | UBC、`vm_object_t`、vnode-backed objects。[23,24]                                               | zerofill fault、reactivation fault 与从磁盘调页共同构成按需安装路径。[23,24]   |
+| OS      | shared object loader                               | mapping object                                      | cache / object layer                                                                        | first-touch installation                                    |
+| ------- | -------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Linux   | ELF `ld.so`。[2]                                    | `mmap(2)`、VMA、file-backed mapping。[1,4]             | `address_space`、`i_pages`、`i_mmap`、page cache。[5,6]                                         | page-fault 路径按需建立页表；默认并非预装全部页，`MAP_POPULATE` 只是显式预取变体。[1,3] |
+| Windows | PE/DLL load-time / run-time dynamic linking。[8–10] | section object / mapped view / file mapping。[11,14] | `SECTION_OBJECT_POINTERS`、`DataSectionObject`、`SharedCacheMap`、`ImageSectionObject`。[12,13] | 视图访问前不分配物理页；首次访问触发 page-fault，再把 file-backed 内容调入内存。[11]    |
+| macOS   | Mach-O image `dyld`。[15–17]                        | VM object / memory object / vnode pager。[18,19]     | VM object、UBC、vnode-backed caching。[18–20]                                                  | page-fault handler 在首次缺页时装页、更新页表并恢复执行。[18]                  |
+| FreeBSD | ELF `rtld` / `ld-elf.so.1`。[21]                    | `mmap(2)`、`vm_object_t`、`vm_map_t`。[22,24]          | UBC、`vm_object_t`、vnode-backed objects。[23,24]                                              | zerofill fault、reactivation fault 与从磁盘调页共同构成按需安装路径。[23,24]  |
 
 
 这些系统的命名方式和内部实现并不相同，但都提供共享对象承载、对象化映射、缓存/对象层间接组织以及首次触达驱动的按需安装路径。这里的共性只用于说明 VKSO 所依赖的抽象边界，并不把 Linux 原型的 grafting 实现或性能数字外推到其他系统。
 
 # Design for General-Purpose Operating Systems
 
-高频短函数同时受到 syscall crossing cost 和重复实现的影响。VKSO 的核心思想是：从最终 kernel binary 中构造一个能够跨执行环境保持语义的 machine-code closure，再以标准用户态对象重宿主当前内核已经驻留的执行页。设计需要同时满足三个相互关联的要求：识别真正适合复用的计算，解除其对原生 kernel environment 的隐式依赖，以及让用户进程通过受保护的标准入口访问被复用的代码。
+上述内容提到，高频短函数同时受到 syscall crossing cost 和重复实现的影响。VKSO 的核心思想是：从最终 kernel binary 中构造一个能够跨执行环境保持语义的 machine-code closure，再以标准用户态对象 rehost 当前内核已经驻留的执行页。设计需要同时满足三个相互关联的要求：
+
+- R1：识别真正适合复用的计算
+- R2：解除其对原生 kernel environment 的隐式依赖
+- R3：让用户进程通过受保护的标准入口访问被复用的代码。
 
 前两个要求由同一个 reuse contract 统一约束。它规定 closure 能观察哪些状态、能够到达哪些控制目标，以及同一机器码在不同地址布局中必须保持哪些关系；environment separation 负责把可重建的地址和语义依赖转化为显式契约。第三个要求则由 standard carrier、page grafting 和 permission-separated mappings 实现，使应用获得 ordinary shared-library call，而不复制 execution body 或引入每次调用的 mediation。
 
@@ -92,7 +94,7 @@ Figure 1 概括三个设计要求及其关系。**Candidate** 是开发者希望
 
 访问要求将 rehostable closure 的**对象语义**与**物理后备**分开。Standard carrier 负责应用可见的符号、ABI、布局和装载权限；page grafting 让 carrier 中选定 logical pages 引用 resident kernel code/rodata pages；Shim 则在各 execution domain 中提供 closure 已声明的环境接口。应用最终沿 ordinary shared-library call 进入同一执行体，而不是调用另一个副本。
 
-这一流程保持三项不变式。第一，**single-execution-body invariant** 要求 kernel and user mappings 执行同一组只读机器码页。第二，**explicit-environment invariant** 要求每项非参数依赖属于 closure 或具有经过审核的 environment contract。第三，**permission-separation invariant** 要求用户映射不能获得 kernel writable state、privileged virtual alias 或修改共享执行体的能力。VKSO 因而共享的是满足 contract 的计算，而不是 privileged execution context。
+这一流程保持三项不变式。第一，**single-execution-body invariant** 要求 kernel and user mappings 中的共享计算执行同一组只读机器码页，domain-private entries 负责到达该执行体。第二，**explicit-environment invariant** 要求每项非参数依赖属于 closure 或具有经过审核的 environment contract。第三，**permission-separation invariant** 要求用户映射不能获得内核状态的写权限、privileged virtual alias 或修改共享执行体的能力。VKSO 因而共享的是满足 contract 的计算，而不是 privileged execution context。
 
 **Figure 1: Constructing and rehosting a resident binary closure.** The reuse contract defines a valid closure, while PIC-compatible construction and Shim contracts separate reusable computation from its execution environment. A standard carrier and page grafting then expose the closure through an ordinary user-space function call.
 
@@ -131,6 +133,20 @@ Reuse contract 不把适用范围限制为天然纯净的 kernel functions。一
 
 **Semantic-environment separation** 由 Shim contract 完成。Shim 定义共享计算可以从 execution domain 获得哪些输入和 helper semantics；kernel and user implementations 可以使用不同地址和局部机制，但对 closure 可观察的结果、副作用、同步和失败语义必须等价。Shim 的作用不是复制整个 kernel environment，而是把原本隐式的环境依赖收敛为一个最小、可审核的 boundary。
 
+### Separating State by Ownership and Lifetime
+
+有状态计算需要同时访问系统持续更新的输入、当前地址空间的语义视图，以及只在当前 execution domain 有效的地址。它们具有不同的 owner、更新频率和生命周期。将这些依赖放入同一个共享对象，会把全局更新与进程管理耦合起来，也使共享指令依赖某个 domain 的地址布局。VKSO 据此将环境依赖组织为 kernel-published state、address-space-local state 和 domain-local context。
+
+Kernel-published state 保存多个 consumer 共用的计算输入。内核保留更新所有权，并通过只读映射与 publication protocol 向 kernel/user readers 提供一致的观察结果。Address-space-local state 保存影响计算语义的局部视图，随所属地址空间建立和释放，只在该视图变化时更新。两者的更新路径相互独立，因此全局 producer 无需为每个进程维护一份相同快照。
+
+Domain-local context 保存当前环境中的 helper、provider aliases 和失败处理入口。它由各 domain 分别构造，通过显式参数交给共享计算。这样，状态值的发布与地址的绑定形成不同接口：内核定义哪些值可读，入口适配层提供在哪里读取以及如何完成环境相关操作。共享执行体只依赖这些接口，具体子系统负责定义数据字段与语义。
+
+### Preserving Public Interfaces through Private Entries
+
+共享计算所需的依赖通常多于应用接口中的显式参数。VKSO 在 carrier 中提供 domain-private entry，将普通 public ABI 转换为 shared-core ABI。入口沿用应用可见的参数和返回约定，补充已绑定的地址空间状态与 context，再通过直接调用或尾跳转进入共享执行体。内核入口执行相同的适配职责，传入内核有效的依赖。共享计算的机器码保持唯一，入口和地址槽位则由各 domain 持有。
+
+入口适配还决定哪些请求可以使用共享计算。能够从请求参数判定的原生操作在入口完成分流；需要执行后才能发现的 provider failure 则通过声明的 context callback 返回所属环境处理。两类出口使 shared core 保持共同的计算语义，同时让权限相关操作、系统调用和失败恢复继续由原生环境完成。回退路径必须能够独立完成请求，避免重新进入刚刚失败的共享计算。
+
 ## Rehosting the Rehostable Closure
 
 
@@ -149,14 +165,13 @@ Grafting 必须同时保持 page identity、permission and lifetime。共享代�
 
 ### Transparent and Off-path Execution
 
-Carrier 遵循 standard shared-object ABI，应用因而通过已有 linker/loader 和 ordinary function symbol 使用共享 closure，不需要专用 RPC 或新的调用约定。装载只建立普通 object-backed virtual mappings；selected pages 仍由系统的 native first-touch path 按需安装，避免为未执行代码预建用户 PTE。
+Carrier 遵循 standard shared-object ABI，应用通过已有 linker/loader 和 ordinary function symbol 使用共享 closure。无需附加依赖的入口直接导出共享函数；有环境依赖的入口通过 carrier-private wrapper 补充参数。装载建立普通 object-backed virtual mappings，selected pages 由系统的 native first-touch path 按需安装。
 
-Closure construction、environment binding 和 physical-backing setup 全部位于 steady-state path 之外。First touch 完成后，调用路径不再执行符号查找、代码修补、页面替换或 runtime mediation；调用成本由普通 user-space function call 和 closure 本身决定。由此，reuse contract 界定可复用对象，environment separation 解除可承接的依赖，carrier 与 grafting 则将 closure 转化为标准、透明且高效的应用接口。
-
+Closure construction、初始 environment binding 和 physical-backing setup 均位于 steady-state path 之外。First touch 完成后，共享计算路径只承担普通函数调用、必要的入口分类与参数传递，以及 closure 本身的执行成本；符号解析、代码修补和页面替换不进入每次调用。状态更新沿各自的 publication path 进行，入口继续使用已绑定的地址。这使动态输入可以变化，而共享机器码及其访问方式保持稳定。
 
 # Linux Implementation
 
-我们在 Linux 5.15.198/x86-64 上实现 VKSO。实现由三个部分组成：build-time builder 从 final kernel/LKM ELF 生成 closure manifest 和 Stub DSO；kernel manager 在装载期验证当前运行实例、注册 resident backing 并管理映射生命周期；environment layer 通过 Shim、published mappings 和 private relocation slots 提供显式跨域依赖。所有分析、验证与绑定均位于 build/load boundary，稳态路径只执行普通导出入口；具体子系统改造在 Evaluation 的大型案例中展开。
+我们在 Linux 5.15.198/x86-64 上实现 VKSO。Build-time builder 从 final kernel/LKM ELF 生成 closure manifest 和 Stub DSO，并接入可选的 private wrapper；kernel manager 验证运行实例并注册 resident backing；environment layer 以 `shared_data`、`MM_data`、private context 和 Shim 实现跨域依赖。Builder 负责依赖闭合与对象布局，内核负责发布状态和映射生命周期，入口适配层负责 ABI 转换与环境绑定。下面说明这些项目能力的实现，并以 clocktime 给出具体的数据与接口实例。
 
 ## Build-time Closure and Carrier Generation
 
@@ -183,6 +198,14 @@ Stub DSO 是一个合法的 ETDYN carrier：它提供 exported symbols、dynamic
 Builder 将选中的 `.text` 和 `.rodata` ranges 扩展到页边界，合并连续或重叠页面，并分别形成 RX and R-- `PT_LOAD` segments。Segment file offset、virtual address and alignment 同时满足 ELF 与 Linux file mapping 约束；不同 regions 之间只需在 virtual layout 中保留 logical gaps，不为 padding 分配文件内容。
 
 Reusable regions 在 ELF 中保持 `p_filesz = p_memsz`，使 `ld.so` 将其视为普通 file-backed ranges，而不是匿名 `.bss`；builder 随后以 sparse-file holes 保留这些 file offsets，不写入 resident payload。ELF headers、dynamic symbol/hash tables、relocations 以及 Pseudo-GOT 等 carrier-private writable data 则真实物化。结果是一个可由标准 loader 识别的 shared object，其 logical slots 可在 runtime 绑定到 kernel-owned pages。
+
+### Carrier-private Wrapper Construction
+
+为保持 public ABI，同时向 shared core 传入环境依赖，builder 支持将一个 PIC-compatible ET_REL wrapper object 合入 Stub DSO。Wrapper 通过 `.vkso.user.text` 声明私有入口，通过 `.vkso.user.data` 声明 context 与地址槽位。当前布局为两类 section 各保留最多一页，分别使用普通文件后备的 RX text 和进程私有的 RW data；这些页面与 grafted kernel pages 具有独立的 backing identity。
+
+Builder 从 wrapper text 的重定位中提取外部符号，将它们加入 closure 的 dependency roots。依赖根与 public exports 分开管理，因此内部 shared-core helper 可以参与链接而无需成为应用接口。对象布局确定后，builder 将 `R_X86_64_PC32` 和 `R_X86_64_PLT32` 重定位解析为指向 shared core 或 wrapper-local data 的相对位移，并检查 rel32 范围。Wrapper 到 shared core 的转移在构建时直接解析，热路径无需经过 PLT/GOT 查找。
+
+Wrapper text 在 DSO 中保存实际机器码字节，导出符号标记为 `replace_from_kernel=False`，从页面替换计划中排除。可复用算法仍由 resident kernel pages 提供；私有入口只承担参数注入、请求分类和环境相关出口。该构建接口按 section 和 relocation contract 工作，具体 feature 通过自己的 wrapper object 定义 public ABI。
 
 ### Segment and Backing Classes
 
@@ -212,11 +235,11 @@ Registration 同时建立 backing lifetime。对于 LKM pages，manager 持有 m
 
 Grafting 只改变 file-offset backing；用户 PTE 仍由 Linux 原生 file-fault path 按需安装。第一次取指或访问 rodata 时，fault handler 由 VMA 找到 `address_space[pgoff]`，得到已经注册的 resident page，并按 carrier segment permission 安装 user RX or R-- PTE。Carrier `.data` 不参与 grafting，仍使用普通进程私有页面。
 
-首次 fault 后，kernel and user virtual aliases 指向同一 PFN。后续调用直接经现有 PTE 取指和返回，不再执行 syscall、symbol lookup、runtime trampoline、page replacement or code copy。Page grafting 因而位于 first-touch path，而不进入 closure 的 steady-state execution。
+首次 fault 后，kernel and user virtual aliases 指向同一 PFN。后续共享计算经现有 PTE 取指，直接导出入口或 private wrapper 将控制流送入 closure，page replacement 和 code copy 不再参与调用。需要原生服务的请求由入口或 failure callback 单独处理。Page grafting 位于 first-touch path，而不进入 closure 的 steady-state execution。
 
 ## Cross-domain Environment Provisioning
 
-Page grafting 解决执行体的 physical backing，但不为 closure 自动提供 helper semantics、动态输入或 domain-specific addresses。Environment layer 将通过 reuse contract 审核的依赖实现为三类显式通道：语义等价的 helper Shim、由内核发布的只读输入，以及由各 execution domain 私有解析的地址槽位。它们保持 privileged ownership 在内核侧，也不向用户暴露 arbitrary kernel `.data`。
+Page grafting 解决执行体的 physical backing；environment layer 为 closure 提供持续更新的输入、地址空间语义和环境相关操作。Linux 实现以 `shared_data` 发布全局输入，以 `MM_data` 提供每个地址空间的只读视图，并由 private wrapper 注入 domain-local context。Shim 和 Pseudo-GOT 分别承接 helper semantics 与已有代码中的地址绑定。它们共同使共享计算能够使用动态状态，而将更新所有权与地址解析保留在各自环境中。
 
 ### Shim and Domain-Local Dependencies
 
@@ -224,13 +247,41 @@ Shim 是共享计算与 kernel/user environments 之间受声明的 helper bound
 
 Builder 将通过审核的 user-side helper 保留为 Stub DSO 的 undefined dynamic symbol，并添加对应 `DT_NEEDED` dependency。`ld.so` 在装载时执行标准 symbol resolution，并把最终地址写入 carrier-private binding slot。依赖解析由此发生在装载期，而不进入每次调用的稳态路径。
 
-### Kernel-published State
+### Kernel-published State through shared_data
 
-对于 system-wide state，内核生产者将 closure 所需的最小字段发布到独立的 page-sized object，并保留唯一 writable alias；user mapping 始终为 read-only and non-executable。多字段状态必须随 feature 定义 sequence counter、versioned snapshot 或其他 reader-verifiable protocol，builder 只验证页面边界和权限，不替 feature 推断同步语义。更新仍发生在原 publisher path，成本不随用户进程数量增长。
+持续变化的全局输入需要保留内核写权限，同时向多个用户 reader 提供只读访问。VKSO 为此增加 `shared_data` 允许列表，将 feature 显式发布的页对齐数据对象纳入 closure。Builder 检查对象覆盖的完整页与映射权限，在 carrier 中建立 R--/NX region；page-grafting manager 为该 region 绑定相应的 resident data page。内核继续通过原有 writable alias 更新，用户读取相同物理页中的字段。普通 writable kernel objects 不会因所在 section 可映射而自动进入该列表。
 
-### Address-space-local Context
+数据 schema 和 publication protocol 由 feature 定义。Clocktime 实例以 `vkso_shared_page` 承载 `vkso_shared_data`，其中包括 sequence counter、ABI version 和时间计算所需的 base、cycle conversion parameters 等输入。`tk_publish_read_state()` 先将 seq 置为奇数，直接更新共享页中的 reader state，再通过写屏障和偶数 seq 发布完整一代数据。Shared core 的快照读取在访问字段前后观察 seq，并使用读屏障约束访问顺序；seq 变化时重新读取。
 
-System-wide mapping 不能表达 namespace、policy 或其他 address-space-local configuration。原型为 `mm_struct` 关联一页 typed context，由内核以 read-only special mapping 安装，并通过 auxiliary vector 向 loader 发布地址。`exec` 创建新 context；不共享 MM 的 `fork` 建立独立页，共享 MM 的线程复用同一页；MM destruction 释放其引用。Feature-specific changes 只更新受影响的 context。该通道复用统一的 mapping and MM-lifecycle machinery，但 payload schema、auxv tag 和 update hooks 仍由具体 feature 声明。
+这份共享页也是普通内核 reader 使用的全局快照。Writer 直接在其中发布计算输入，省去中间 staging object 和第二次 payload 搬运；timekeeper 继续维护生产时间所需的内部状态。发布操作不遍历用户进程，进程数增加也不要求为它们复制全局 reader state。通用机制负责页面共享与权限，clocktime 的字段布局和 seq 读写协议构成该机制的一个具体实例。
+
+### Address-space-local State through MM_data
+
+同一共享函数可能需要按调用者的 namespace 或局部配置解释全局输入。VKSO 用 `MM_data` 承载这种地址空间相关的只读状态，并将页面生命周期绑定到 `mm_struct`。内核在 `mm->context` 中分别保存物理页引用 `vkso_mm_page`、内核写地址 `vkso_mm_kdata` 和用户读地址 `vkso_mm_data`。三者指向同一后备对象的不同管理视图，共享机器码通过显式参数取得当前 domain 有效的地址。
+
+`exec` 期间，`arch_setup_additional_pages()` 分配零填充页面，并安装名为 `[vkso_mm_data]` 的 special mapping。VMA 仅允许读取，首次 fault 通过所属 MM 的页引用安装 PTE。映射设置 `VM_DONTCOPY`，由 `vkso_dup_mmap()` 在不共享 MM 的 fork 中复制原页，并在子地址空间相同虚拟地址安装新映射；共享 MM 的线程继续使用同一页。映射拒绝 mremap，MM 销毁时释放页面引用，因此 fork 后继承的已绑定用户指针仍指向各自 MM 的对象。
+
+内核通过 `AT_VKSO_MM_DATA` 将用户读地址写入 ELF auxiliary vector，启动适配代码据此完成发现与绑定。当前 time namespace payload 是 40 B 的 `vkso_mm_data`，包含 `abi_version`、`clock_mask` 以及 monotonic 和 boottime offsets，占据一页 4 KiB 后备。`clock_mask` 标记需要应用非零 namespace offset 的 clock，root namespace 中该值为零。Namespace commit 更新已有页中的 offsets，经写屏障后发布 mask；普通 timekeeping update 不刷新这些字段。
+
+MM_data 的可复用部分是按地址空间组织的只读映射、稳定地址发现和 MM 生命周期管理。当前 payload、auxv tag 与 namespace update hook 实现时间语义；其他 feature 可以沿用这一组织方式，并定义自己的字段与更新时机。它与全局 `shared_data` 分离，使系统级更新和地址空间视图变化各自沿独立路径完成。
+
+### Private Context and Entry Binding
+
+数据页中的值可以跨 domain 共享，但 provider 地址和 failure callback 必须在当前地址空间内解析。Private wrapper 为这些依赖保留本地 context。Clocktime 中，`vkso_context` 保存 PVClock、Hyper-V page aliases 和两个失败回调，另一个私有槽位保存 MM_data 指针。Context 中的地址属于入口提供的环境，不写入 shared text 或 kernel-published data。
+
+用户启动适配代码 `vkso_user_wrapper_init()` 检查 shared/MM ABI version，通过 auxv 取得 MM_data，再调用 `__vkso_bind_context()` 写入私有槽位和用户侧 failure callbacks。随后 `__vkso_clock_gettime()` 在普通 API 参数之外装入 MM_data 与 context 地址，并直接尾跳转到 shared core。内核入口提供 `vkso_kernel_context` 和相应的内核地址。绑定操作发生在首次使用前，后续调用读取已建立的本地槽位。
+
+Provider aliases 由绑定接口显式接收。当前默认用户初始化为 PVClock 和 Hyper-V 传入空指针，TSC 路径直接读取 counter；PV/HV reader 在缺少可用 alias 时返回失败并进入用户 syscall fallback。Shared core 将 TSC 读取内联到热路径，将 PV/HV 读取放入独立冷路径，因此常见 TSC 调用无需访问 context 中的 provider 指针。
+
+Private context 与 Pseudo-GOT 服务于不同的依赖形态。前者把运行时输入与失败出口作为参数传入 shared-core ABI；后者保留代码已有的间接读取形式，在不同 domain 中解析地址槽位。导出 feature 可按依赖形式选择这两种机制，并由 Shim 提供所需的环境语义。
+
+### Request Classification and Environment-local Fallback
+
+入口适配将能够共享的计算与原生请求路径分开。Clocktime 使用共同的 clock classification，将请求区分为 hres、coarse 和 native。用户入口对 native clock 直接执行 syscall；内核 syscall 入口沿 `k_clock` 完成原生分派。支持共享的请求才取得 MM_data 并进入相应 shared entry，避免在必然 fallback 的调用上准备共享状态。
+
+Provider failure 发生在 shared core 读取 counter 时，由 context callback 决定后续操作。用户回调执行原 syscall；内核回调直接读取 private timekeeper state，并在需要时应用 MM_data 中的 namespace offset。内核失败路径绕开会再次调用 shared reader 的 `k_clock` 路径，从而避免回退后重新进入同一个失败 provider。
+
+普通内核 reader 以空 MM_data 指针选择 root namespace 语义，syscall reader 则使用当前 MM 的内核读地址。NMI、early-boot 和 writer-locked reader 保持其原有私有路径，以适配各自的执行上下文。通用入口机制由此提供参数注入、请求分流与失败出口；具体子系统决定共享 core 的请求集合，以及原生环境应如何完成剩余操作。
 
 ### Domain-local Binding through Pseudo-GOT
 
@@ -263,10 +314,8 @@ System-wide mapping 不能表达 namespace、policy 或其他 address-space-loca
 | XZ Embedded      | Kernel-backed vs. same-source DSO                  | 3 inputs × 7 outer runs × 20 decodes          | MB/s ratio                   |
 | Large case study | Shared-code design vs. native split implementation | 31 reader rounds; 15 writer/concurrent rounds | cycles/call or cycles/update |
 
+
 结果按证据层次展开：先验证 page installation 与 first-touch fault class，再分别隔离 Pseudo-GOT 的 primitive cost 和完整 copied closure 的端到端成本，随后检验同源 kernel algorithms，最后评估包含共享状态与并发更新的完整子系统。除 first-touch 外，ratio 接近 1 表示两侧性能接近；paired delta 的正负则按图注中的方向解释。这样可以将启动阶段成本、稳态适配成本和真实闭包性能分开讨论。
-
-
-
 
 ## First-touch and Rehosting Cost
 
@@ -336,9 +385,9 @@ Kernel-backed/native 的 paired median 在 bash、libc.so.6 和 python3 上分�
 
 ### Purpose and Transformation
 
-前述实验主要覆盖纯算法或有限 helper dependencies。为检验方法能否承接真实大型子系统，我们重构 Linux x86-64 time/getcpu path，使 kernel entry 和 user fast path 复用同一 resident calculation core。这个 case study 同时包含持续更新的 global state、per-address-space namespace state、TSC/PVClock/Hyper-V providers、unsupported requests 的 environment-local fallback，以及高频 readers 与 periodic writer，因此能够覆盖 Design 中三类 reuse constraints，而不是把 clocktime 当作设计前提。
+前述实验主要覆盖纯算法或有限 helper dependencies。Clocktime 将 `shared_data`、`MM_data`、private wrapper 与 environment-local fallback 组合到同一子系统中，检验 VKSO 能否在持续发布状态和并发读取下收敛 kernel/user 双重实现。我们重构 Linux x86-64 time/getcpu path，使普通 kernel reader、syscall entry 和 user fast path 使用同一 resident calculation core，并分别通过入口适配选择 root 或当前 time namespace 语义。
 
-重构包含四项工作。第一，将七类 global clock 的 conversion and normalization 抽取为 kernel/user shared core，同时保留 thin kernel adapter 和 user wrapper。第二，将所有进程共用的 base times、cycle conversion parameters 和 mode 发布到 read-only shared-data page，并使用 sequence protocol 保证 multi-field snapshot consistency。第三，为每个 mm 建立 40-byte context payload，通过 read-only special mapping 和 auxiliary vector 提供 namespace offsets 与 valid-clock mask；exec、fork、thread sharing、namespace change 和 MM destruction 维护其生命周期，普通 timekeeping update 不遍历进程。第四，wrapper 在初始化时绑定 per-MM pointer、optional provider aliases 和 syscall fallbacks；CPU clocks、alarm clocks、dynamic clocks、invalid IDs 或 unavailable providers 在进入 shared core 前直接 fallback。
+该实例将七类 global clock 的 conversion and normalization 放入 shared core，由全局共享页提供时间输入，由 MM_data 提供 namespace offsets。用户私有入口注入当前地址空间的依赖，并与内核入口使用相同的 hres/coarse/native 分类；native 请求在入口回退，provider failure 经 shared core 的 context callback 回退。全局 writer 直接发布共同的 reader snapshot，namespace 变化只更新对应 MM_data。以下分别测量这种组织方式的源码与机器码规模，以及 READ、UPDATE 和并发路径的成本。
 
 最终实现覆盖 clock_gettime、clock_getres、gettimeofday、time 和 getcpu，支持 realtime、monotonic、monotonic-raw、boottime、TAI 及 coarse clocks，并在 CPU/alarm/dynamic/invalid cases 保持原 Linux errors and fallback semantics。Normal 和 no-retpoline 的 Raw/VKSO 四种镜像均通过相同 ABI matrix，包括 time namespace、provider cold paths 和 fallback tests。
 
@@ -350,7 +399,7 @@ Kernel-backed/native 的 paired median 在 bash、libc.so.6 和 python3 上分�
 
 
 | Scope                                    | Raw        | Shared-code design | Difference     |
-| :-------------------------------------- | :-------- | :---------------- | :------------ |
+| ---------------------------------------- | ---------- | ------------------ | -------------- |
 | Runtime feature and mechanism            | 1,347 SLOC | 1,248 SLOC         | −99 (−7.35%)   |
 | Product total with feature build/link    | 1,505 SLOC | 1,305 SLOC         | −200 (−13.29%) |
 | Steady-state reader machine-code closure | 2,639 B    | 2,055 B            | −584 (−22.13%) |
