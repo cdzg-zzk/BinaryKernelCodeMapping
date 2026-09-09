@@ -293,13 +293,20 @@ Provider failure 发生在 shared core 读取 counter 时，由 context callback
 
 # Evaluation
 
-本节围绕四个问题评估系统：resident kernel pages 重宿主为 Stub DSO 后，装载后调用和 first-touch 行为是否保持不变；为扩大闭包而引入的 Pseudo-GOT、Shim 和 code-shape adaptation 具有多大稳态成本；真实 kernel algorithm closures 能否保持同源用户态实现的性能与功能语义；以及包含动态共享状态、address-space-local state 和并发 publisher/readers 的大型子系统能否在减少重复代码的同时保持性能。
+VKSO 的目标是让两个 execution domains 复用同一 resident implementation，同时保留普通用户态调用的性能。Evaluation 因此需要同时检验复用机制的成本、依赖适配的成本，以及消除双重实现后的系统收益。我们围绕四个问题组织实验：
+
+- **页面重宿主是否改变调用与缺页成本？** 用字节一致的 Native/Stub DSO，分别测量 hot call、resident minor fault 和 cache eviction 后的 first touch。
+- **显式依赖绑定的稳态代价有多大？** 从 Data/Func-PGOT primitives 到完整 copied closures，测量间接访问、依赖链及 retpoline 对适配成本的影响。
+- **真实 kernel closures 能否保持同源实现的功能与性能？** 通过 LZ4、BCH 和 XZ 的实际 resident-page export，对照普通同源用户态 DSO，覆盖不同工作粒度、控制流和 helper dependencies。
+- **共享动态状态的完整子系统是否值得重构？** 以 clocktime 为案例，同时测量源码与机器码规模、公开 READ 入口、内核 UPDATE 和持续读写并存时双方的成本。
 
 ## Experimental Setup and Measurement
 
-除特别说明外，microbenchmarks 运行在 Intel Core i7-1165G7（4 physical cores，SMT disabled）上，固定 CPU 2，使用 GCC 11.4.0。First-touch、PGOT、LZ4、BCH 和 XZ 使用 Linux 5.15.0-119-generic；大型 case study 使用 Linux 5.15.198 及相同硬件，并通过 isolcpus、nohz_full 和 rcu_nocbs 隔离 CPU 2。每个比较都在同一实验中交错或轮换执行 backend，优先使用 matched-run ratio 或 paired delta，避免把两个独立汇总值当作配对结果。
+实验运行在 Intel Core i7-1165G7（4 physical cores，SMT disabled）上，测量线程固定 CPU 2，使用 GCC 11.4.0。First-touch、PGOT、LZ4、BCH 和 XZ 使用 Linux 5.15.0-119-generic；clocktime 使用 Linux 5.15.198 及相同硬件，并通过 isolcpus、nohz_full 和 rcu_nocbs 隔离 CPU 2。固定执行位置用于降低迁移和 cache locality 变化对短路径的干扰。PGOT 另外比较 retpoline/no-retpoline builds，clocktime 比较 Normal/no-retpoline builds，以观察受保护间接分支相关的构建差异。
 
-每个实验在计时前执行功能校验。PGOT copied-closure tests 比较返回值、输出长度和输出字节；LZ4 对五种 compressor/decompressor 做全交叉验证，并由官方 harness 校验 XXH64；BCH 检查 encode、错误位置和完整 codeword recovery；XZ 比较完整解压输出并检查两侧 guard regions；大型 case study 对每个 kernel variant 执行同一 ABI matrix。正文报告 median 及 IQR 或 P10–P90；原始 CSV、环境信息、source/artifact hashes、disassembly 和 page-map audit 均由对应实验目录保留。除非特别注明，图中正值表示 kernel-backed 路径更慢。
+PGOT 使用轮内 paired delta；LZ4、BCH 和 XZ 先在相同 outer run 内形成 kernel-backed/native ratio，再汇总跨轮次分布。Clocktime 的 Raw/VKSO 则分别启动对应内核镜像，比较各自多轮测量的汇总值，不视作同轮配对实验。其每个 backend/build 的正式批次来自一次启动，31/15 轮重复描述的是该次启动内的变化。表 2 列出各组的重复层次与主指标。
+
+计时前的功能校验用于确认两侧完成相同工作：PGOT copied closures 比较返回值、输出长度和字节；LZ4 交叉验证 compressor/decompressor；BCH 检查错误位置及 codeword recovery；XZ 检查完整输出；clocktime 对各镜像执行相同 ABI matrix。各节同时说明计时窗口，区分部署准备、目标调用和诊断插桩。IQR 与 P10–P90 描述实测样本或跨轮次比值的离散程度，不作为置信区间。延迟差异以 kernel-backed/native − 1 表示，正值为更慢；吞吐比值大于 1 为更快，图注分别标明方向。
 
 **Table 2: Evaluation questions, repetitions, and primary metrics.**
 
@@ -311,21 +318,23 @@ Provider failure 发生在 shared core 读取 counter 时，由 context callback
 | Copied closures  | Origin vs. PGOT closure                            | 3 outer runs × 31 repeats                     | paired cycle delta           |
 | LZ4              | Kernel-backed vs. same-source/upstream DSO         | 7 outer runs; paired median, P10–P90          | MB/s ratio                   |
 | BCH              | Kernel-backed vs. same-source/author DSO           | 11 outer runs; paired median, P10–P90         | latency ratio                |
-| XZ Embedded      | Kernel-backed vs. same-source DSO                  | 3 inputs × 7 outer runs × 20 decodes          | MB/s ratio                   |
-| Large case study | Shared-code design vs. native split implementation | 31 reader rounds; 15 writer/concurrent rounds | cycles/call or cycles/update |
+| XZ Embedded      | Kernel-backed vs. same-source DSO                  | 3 inputs × 7 outer runs × 20 decodes          | MiB/s ratio                  |
+| Clocktime        | Shared-code design vs. native split implementation | 31 reader rounds; 15 writer/concurrent rounds | cycles/call or cycles/update |
 
 
-结果按证据层次展开：先验证 page installation 与 first-touch fault class，再分别隔离 Pseudo-GOT 的 primitive cost 和完整 copied closure 的端到端成本，随后检验同源 kernel algorithms，最后评估包含共享状态与并发更新的完整子系统。除 first-touch 外，ratio 接近 1 表示两侧性能接近；paired delta 的正负则按图注中的方向解释。这样可以将启动阶段成本、稳态适配成本和真实闭包性能分开讨论。
+这组实验由机制分解走向完整功能：字节一致的 DSO 控制计算逻辑差异，copied closures 在同一执行域内隔离 PGOT transformation，实际 kernel-backed algorithms 再引入构建域、Shim 和 page rehosting，clocktime 最后检验共享状态及入口适配的组合效果。后一层的端到端结果与前一层的机制解释互补。
 
 ## First-touch and Rehosting Cost
 
-该实验使用字节一致的 XXH32 function body 构造普通 user-space DSO 和 kernel-backed Stub DSO，并在 dlopen 和 symbol resolution 完成后只测量一次目标调用。我们区分三种状态：Hot 已有 PTE；PTE cold 通过 MADV_DONTNEED 移除 PTE 但保留 resident backing；Post drop-caches 同时清理普通 file cache。每个样本用 minor/major-fault counters 验证实际状态，不符合预期的样本在统计前剔除。
+Page grafting 改变对象的物理后备，而应用仍通过标准 DSO 调用。因此，我们使用字节一致的 XXH32 function body 构造普通 user-space DSO 和 kernel-backed Stub DSO，使两侧的计算工作和调用形式一致。计时从 dlopen 和 symbol resolution 完成后开始，只包围一次目标调用；它测量执行页的首次触达，不包含 DSO 构造、页面替换或动态链接总时间。
+
+三种状态分别隔离不同成本。Hot 保留已有 PTE，用于检查稳态调用是否引入额外路径；PTE cold 通过 MADV_DONTNEED 移除 PTE、保留 resident backing，用于比较按需安装页表的成本；Post drop-caches 进一步清理普通 file cache，用于检验内核页面既有 residency 在文件缓存被逐出后是否仍可利用。每个样本记录 minor/major-fault counters，先按预期 fault class 筛选，再执行基准的 IQR filtering，避免将实际不同的缺页状态混入同一组。
 
 **Figure 4: First-touch latency and observed page-fault class.** Both targets use the same function body. The vertical axis is logarithmic; annotations below each group are minor/major faults in the measured call.
 
-Hot 状态下两种 DSO 均为 71 cycles，说明 backing replacement 不进入稳态调用路径。PTE cold 时两者都触发一个 minor fault，Native 和 Stub 分别为 2,662 和 2,637 cycles，差异不足 1%。Post drop-caches 时，Native 触发 major fault 并达到 701,069 cycles；Stub 的 kernel page 仍驻留，只触发 minor fault，延迟为 13,094 cycles，即该受控场景下低 53.5×。这一结果不是“一般调用加速 53.5×”，而是证明 resident backing 避免了普通 DSO 在 cache eviction 后的 disk-backed major fault。
+Hot 状态下两种 DSO 均为 71 cycles，与 backing replacement 不进入稳态调用路径的设计一致。PTE cold 时两者都触发一个 minor fault，Native 和 Stub 分别为 2,662 和 2,637 cycles，差异不足 1%。Post drop-caches 时，Native 触发 major fault 并达到 701,069 cycles；Stub 的 kernel page 仍驻留，只触发 minor fault，延迟为 13,094 cycles。该受控 first-touch 场景下的延迟比为 53.5×，收益对应于避免 disk-backed major fault；hot call 不具有这一收益。
 
-独立 PMU run 支持该解释：Stub 从 PTE cold 到 Post drop-caches 的 retired instructions 仅由 5,729 增至 5,797，而 L1D/LLC misses 由 1.00/0 增至 62.79/17.61。残余 13K cycles 主要来自变冷的 cache and VM metadata，而不是更长的软件 fault path。Function-graph tracing 也确认两种 PTE-cold case 都进入标准 file-backed minor-fault path；其计时受 tracing 扰动，因此只作为路径证据。
+为解释 fault latency，我们另行采集 PMU 和 function-graph trace，避免其插桩影响主要延迟测量。Stub 从 PTE cold 到 Post drop-caches 的 retired instructions 仅由 5,729 增至 5,797，而 L1D/LLC misses 由 1.00/0 增至 62.79/17.61。这支持残余 13K cycles 与更冷的 cache/metadata 状态有关，而非大量新增软件工作；PMU 的 on-CPU cycles 与包含等待时间的 elapsed TSC latency 分开解释。Function-graph tracing 确认两种 PTE-cold case 都进入标准 file-backed minor-fault path，仅用于路径分析。
 
 **Takeaway.** Page grafting 对 hot call 和 resident minor fault 不增加可测成本；其启动收益来自 kernel code 的既有 residency，而不是一条特殊的用户态 fast path。
 
@@ -335,7 +344,7 @@ Hot 状态下两种 DSO 均为 71 cycles，说明 backing replacement 不进入�
 
 ### Primitive Pseudo-GOT Costs
 
-Data-PGOT 将环境相关地址放入 private slot；Func-PGOT 再通过该 slot 进入固定 helper。我们分别测量可并行的数据读取、串行 dependent chain、稳定单目标调用，以及 target body 中逐步增加 useful work 的情况。计时循环包含等价 empty-loop control；生成的机器码经 objdump 检查，确保 compiler 没有 hoist slot load 或把 indirect call 重新直接化。
+Data-PGOT 将环境相关地址放入 private slot；Func-PGOT 再通过该 slot 调用 helper。单次 slot load 的延迟并不能直接预测整个函数的开销：独立访问可能重叠执行，依赖链则必须等待前次读取，间接调用还受 retpoline 影响。我们据此构造可并行数据读取、串行 dependent chain 和稳定单目标调用，分别观察吞吐成本、关键路径延迟和固定绑定下的调用成本。随后在 target body 内或相邻指令流中增加 useful work，检验额外指令在完整调用中的可见程度。计时循环包含等价 empty-loop control；objdump 检查确认 compiler 没有 hoist slot load 或把 indirect call 重新直接化。
 
 **Figure 5: Primitive adaptation costs.** (a) Data-PGOT lower and upper bounds; (b) a stable function target with and without retpoline; (c) the visible paired delta when useful work surrounds or resides inside the target.
 
@@ -345,19 +354,23 @@ Data-PGOT 将环境相关地址放入 private slot；Func-PGOT 再通过该 slot
 
 ### End-to-end Copied Closures
 
-我们进一步从 Linux 源码复制完整 SHA-256 transform、BCH encode、zlib deflate 和 Zstd decompress closures，并分别构建 origin 与 PGOT variants。这里测试的是 address repair、data slots 和 closure-external helper calls 共同作用后的端到端结果，而非人工空函数。
+为检验 primitive cost 在真实控制流中的表现，我们从 Linux 源码复制完整 SHA-256 transform、BCH encode、zlib deflate 和 Zstd decompress closures，在 LKM 内分别构建 origin 与 PGOT variants。两侧在同一 kernel execution domain 中完成同一计算，不引入用户态 rehosting；差异来自显式 data slots、address repair 和适用的 closure-external helper calls。SHA-256 覆盖只需 data adaptation 的闭包，其余目标进一步覆盖数据与 helper 绑定的组合。每个配置执行 3 个 outer runs、每轮 31 次配对测量，按调用归一化 cycle delta，并保留其 IQR。
 
 **Figure 6: PGOT overhead on complete copied closures.** Bars show the paired median delta normalized by origin cycles; whiskers visualize the retained delta-IQR width. SHA-256 has only an applicable data transformation; the other bars use the complete applicable transformation.
 
-No-retpoline 下，四个闭包按 SHA-256、BCH、zlib 和 Zstd 的顺序，point estimates 分别为 +0.04%、+1.98%、+1.36% 和 +1.38%。Retpoline 下仍按该顺序，分别为 −0.07%、+3.25%、−0.66% 和 +6.23%。Zstd 的变化最大，因为其 measured path 含有更多 closure-external memory helpers；每个 Func-PGOT helper 都会进入 protected indirect branch。相反，SHA-256 只有 data adaptation，两个 build 都与 origin 不可区分。结果说明 Pseudo-GOT 本身通常处于低个位数百分比，但频繁的 retpoline-protected helper calls 是需要单独审计的主要风险。
+No-retpoline 下，四个闭包按 SHA-256、BCH、zlib 和 Zstd 的顺序，point estimates 分别为 +0.04%、+1.98%、+1.36% 和 +1.38%。Retpoline 下仍按该顺序，分别为 −0.07%、+3.25%、−0.66% 和 +6.23%。Zstd 的变化最大，与其 measured path 中较多的 closure-external memory helpers 及 protected indirect branches 一致。SHA-256 只有 data adaptation，两个 build 都与 origin 不可区分；zlib 在 retpoline 下的负值也落在较大的 delta variation 内。对这四个闭包，PGOT 的可见代价大多为低个位数百分比，helper-call-heavy 的 Zstd 则显示 retpoline 下更高的成本。
 
 ## Same-source Kernel Algorithms
 
-本组实验回答的问题不是“改造前后同一 LKM benchmark 是否变化”，而是完整 kernel implementation 经过标准 page-rehosting lifecycle 后，能否与普通 user-space DSO 保持相近性能。每次正式 run 都重新加载 owner module、重新解析 runtime addresses、执行 closure checks、构造 sparse DSO、替换页面并在退出后恢复；因此结果覆盖实际项目路径，而不只是 copied source。
+本组实验将控制范围从同域 PGOT transformation 扩展到实际 resident-page export。LZ4 覆盖不同 block sizes 下的压缩与解压；BCH 通过纠错强度、错误数及 decode 阶段改变计算工作量；XZ 则覆盖带状态的完整流解析、解码、过滤和校验。三者共同检验不同 closure shapes 下的同源性能，计时对象均为内存中的算法组件。
+
+主对照采用同一 Linux source 构建的普通 user-space DSO，使算法版本保持一致；独立 upstream/author implementations 只提供用户态性能参照。每次正式 run 都重新加载 owner module、解析 runtime addresses、执行 closure checks、构造 sparse DSO、替换页面，并在退出后恢复。该流程确认被测调用确实使用 resident kernel pages，但部署与恢复在计时窗口之外，以下结果衡量装载后的算法性能。
 
 ### LZ4
 
-LZ4 使用未修改的 upstream 1.9.3 official benchmark core 和 Silesia corpus，测试 4 KiB、64 KiB 和 1 MiB blocks。五个 backends 区分 upstream/kernel source 与 native/no-SIMD compilation。对机制本身最公平的比较是 kernel-backed 与 same-source no-SIMD：两者执行相同 Linux 5.15 algorithm，并使用相同的 test-local REP memory helpers。七个 outer runs 共得到 105 个完整 benchmark cases；五种 compressor × 五种 decompressor × 12 个边界长度以及所有 XXH64 checks 均通过。
+LZ4 使用未修改的 upstream 1.9.3 official benchmark core 和 Silesia corpus，测试 4 KiB、64 KiB 和 1 MiB blocks。改变 block size 可以观察固定调用/适配工作在短块与较长计算中的相对影响；同时测量 compression 和 decompression，覆盖两种不同的计算与数据搬运路径。五个 backends 区分 upstream/kernel source 与 native/no-SIMD compilation。主比较是 kernel-backed 与 same-source no-SIMD：两者执行相同 Linux 5.15 algorithm，并使用相同的 test-local REP memory helpers。Native/no-SIMD 同时改变编译限制和 memory helpers，因而这一辅助对照衡量的是构建制度的组合影响。
+
+七个 outer runs 共得到 105 个完整 benchmark cases。官方 harness 在每个 time window 内选择最快完整循环，再对 outer-run 配对吞吐比值取 median 和 P10–P90；该统计量衡量吞吐能力，而非请求尾延迟。五种 compressor × 五种 decompressor × 12 个边界长度以及所有 XXH64 checks 均通过。
 
 **Figure 7: LZ4 throughput relative to two user-space baselines.** Points are medians of matched-run ratios; error bars show P10–P90 across seven outer runs. Positive values mean kernel-backed execution is faster.
 
@@ -365,15 +378,19 @@ LZ4 使用未修改的 upstream 1.9.3 official benchmark core 和 Silesia corpus
 
 ### BCH
 
-BCH 测试 Linux 5.15 scalar implementation，参数为 m=13、t∈{4,8}、512-byte data。Kernel-backed 与 same-source native 使用相同 adapted source；author standalone 仅用于展示跨实现差异。每组参数对 128 个随机 vectors、0 到 t 个注入错误以及 full/precomputed decode paths 验证错误位置和完整 codeword recovery，所有检查及 DSO relocation/page-map audit 均通过。
+BCH 测试 Linux 5.15 scalar implementation，沿用作者 benchmark 的 m=13、t∈{4,8} 和 512-byte data 定义。两种 t 分别提供不同纠错能力，注入 0 到 t 个错误则改变实际 decode 工作量。我们分别计时 encode、包含 syndrome 计算的 full decode，以及输入预计算 ECC difference 的 decode；这种分解能够观察去掉前段工作后，较短剩余路径是否更容易暴露适配成本。
+
+Kernel-backed 与 same-source native 使用相同 adapted source；author standalone 用于展示跨实现差异。计时使用 CLOCK_PROCESS_CPUTIME_ID，每个样本自适应运行至少约 10 ms，以摊薄定时器读取成本；11 个 outer runs 形成配对 latency ratios。每组参数对 128 个随机 vectors、0 到 t 个注入错误以及 full/precomputed decode paths 验证错误位置和完整 codeword recovery，所有检查及 DSO relocation/page-map audit 均通过。
 
 **Figure 8: BCH decoding relative to the same-source user-space build.** Points are matched-run median latency differences and whiskers are P10–P90; positive values mean kernel-backed execution is slower.
 
-Encode 的 matched ratios 为 0.984×（t=4）和 1.001×（t=8）。Full decode 在 t=4 时为 −2.8% 至 −0.8%，在 t=8 时为 +0.3% 至 +5.4%。较短的 precomputed path 对 layout/helper effects 更敏感；t=8 的 2-error case 达到 +20.9%，但其余 full decode 和 encode 不支持“kernel-backed BCH 普遍慢 20%”的概括。对较大端到端闭包，更稳定的结论是多数 same-source paths 位于约 ±5% 内。
+Encode 的 matched ratios 为 0.984×（t=4）和 1.001×（t=8）。Full decode 在 t=4 时为 −2.8% 至 −0.8%，在 t=8 时为 +0.3% 至 +5.4%。较短的 precomputed path 出现更大的相对差异：t=8 的 2-error case 达到 +20.9%。这一单项与多数约 ±5% 的 same-source paths 一并说明，适配后的性能取决于具体执行路径；现有分解定位了敏感路径，但尚未单独量化其中的 layout 与 helper effects。
 
 ### XZ Embedded
 
-XZ 使用完整 Linux 5.15 XZ Embedded single-call decoder，闭包覆盖 LZMA2、x86 BCJ 和 CRC32。Same-source native DSO 与 kernel-backed DSO 接收相同的三个真实二进制输入；每个 backend 先完成一次不计时解压，再在固定 CPU 上执行 20 次 timed decodes。七个 outer runs 轮换 backend 顺序，共形成 21 组 matched pairs。每组均验证 consumed/produced lengths、全部 output bytes 以及两侧 guard regions；DSO audit 进一步确认四个 reusable pages、五个 exports 和 `__kmalloc`、`kfree`、`memcpy`、`memmove` 四类 private helper relocations。
+XZ 使用完整 Linux 5.15 XZ Embedded single-call decoder，闭包覆盖 LZMA2、x86 BCJ 和 CRC32。相比单个 transform，它将 format parsing、range decoding、dictionary、filter 和 integrity check 放在同一调用中。输入选择 bash、libc.so.6 和 python3 三个真实二进制文件，统一预先压缩为启用 x86 BCJ、CRC32 和 1 MiB LZMA2 dictionary 的流，使两侧面对完全相同的字节与解码配置。
+
+Same-source native DSO 与 kernel-backed DSO 各先完成一次不计时解压，再执行 20 次 timed decodes。压缩、decoder allocation 和 CRC-table initialization 均在计时之外；每次 timed iteration 包含 xz_dec_reset 和一次完整 xz_dec_run。七个 outer runs 轮换 backend 顺序，共形成 21 组 matched pairs。每组均验证 consumed/produced lengths、全部 output bytes 以及两侧 guard regions；DSO audit 确认四个 reusable pages、五个 exports 和 `__kmalloc`、`kfree`、`memcpy`、`memmove` 四类 private helper relocations。后者描述完整导出依赖，性能窗口则聚焦已经初始化的 decoder。
 
 **Figure 9: XZ Embedded throughput relative to the same-source user-space DSO.** Bars are medians of matched-run ratios and whiskers show P10–P90 across seven outer runs. The dashed line is the equal-weight geometric mean of the three medians.
 
@@ -383,17 +400,17 @@ Kernel-backed/native 的 paired median 在 bash、libc.so.6 和 python3 上分�
 
 
 
-### Purpose and Transformation
+### Evaluation Goals and Baselines
 
-前述实验主要覆盖纯算法或有限 helper dependencies。Clocktime 将 `shared_data`、`MM_data`、private wrapper 与 environment-local fallback 组合到同一子系统中，检验 VKSO 能否在持续发布状态和并发读取下收敛 kernel/user 双重实现。我们重构 Linux x86-64 time/getcpu path，使普通 kernel reader、syscall entry 和 user fast path 使用同一 resident calculation core，并分别通过入口适配选择 root 或当前 time namespace 语义。
+Clocktime 将 `shared_data`、`MM_data`、private wrapper 与 environment-local fallback 组合到同一子系统中。选择它有两个原因：原生 vDSO 已经提供不经过 syscall 的用户态 fast path，能够作为严格的稳态性能基线；其状态又由内核持续更新，并受 time namespace 和 clock provider 影响，因而能够检验纯算法实验没有覆盖的状态发布、入口语义和并发交互。我们比较 Linux 原生分离的 kernel/vDSO implementation（Raw）与共享 resident calculation core 的实现（VKSO）。
 
-该实例将七类 global clock 的 conversion and normalization 放入 shared core，由全局共享页提供时间输入，由 MM_data 提供 namespace offsets。用户私有入口注入当前地址空间的依赖，并与内核入口使用相同的 hres/coarse/native 分类；native 请求在入口回退，provider failure 经 shared core 的 context callback 回退。全局 writer 直接发布共同的 reader snapshot，namespace 变化只更新对应 MM_data。以下分别测量这种组织方式的源码与机器码规模，以及 READ、UPDATE 和并发路径的成本。
+该实例将七类 global clock 的 conversion and normalization 放入 shared core，由全局共享页提供时间输入，由 MM_data 提供 namespace offsets。普通 kernel reader、syscall entry 和 user wrapper 通过入口适配选择各自的状态及 fallback，global writer 发布共同 snapshot。Evaluation 关注这种组合实现的净效果：首先核对等价功能下是否减少代码重复，再分别测量用户 reader、内核 writer，以及二者持续共存时的性能，检查复用是否将成本转移到另一端。
 
-最终实现覆盖 clock_gettime、clock_getres、gettimeofday、time 和 getcpu，支持 realtime、monotonic、monotonic-raw、boottime、TAI 及 coarse clocks，并在 CPU/alarm/dynamic/invalid cases 保持原 Linux errors and fallback semantics。Normal 和 no-retpoline 的 Raw/VKSO 四种镜像均通过相同 ABI matrix，包括 time namespace、provider cold paths 和 fallback tests。
+最终实现覆盖 clock_gettime、clock_getres、gettimeofday、time 和 getcpu，支持 realtime、monotonic、monotonic-raw、boottime、TAI 及 coarse clocks，并在 CPU/alarm/dynamic/invalid cases 保持原 Linux errors and fallback semantics。Raw/VKSO 分别构建 Normal 和 no-retpoline 镜像，在相同 mitigation 条件内比较；no-retpoline 用于诊断 build-dependent cost。四种镜像均通过相同 ABI matrix，包括 time namespace、provider cold paths 和 fallback tests；性能测量使用 TSC clocksource。功能矩阵覆盖状态和回退语义，以下计时则报告实际选择的公开入口与工作负载。
 
 ### Source and Binary Footprint
 
-代码量使用人工语义 manifest 选择两侧等价功能，再机械排除空行和纯注释；不使用 Git churn 代替功能规模。主表沿用最终性能报告的完整产品口径，包含运行时功能、运行时机制和 feature-specific build/link glue，但不包含 benchmark、通用 VKSO infrastructure、验证代码和生成物。Reader closure 使用最终 ELF symbol sizes，不使用页对齐后的 DSO size。
+源码与机器码分别衡量需要维护的功能实现规模和实际 reader execution body 的规模。我们用人工语义 manifest 选择两侧等价功能，再机械排除空行和纯注释，以免将移动代码产生的 Git churn 当作实现增减。表 3 采用完整产品口径，包含运行时功能、运行时机制和 feature-specific build/link glue；benchmark、通用 VKSO infrastructure、验证代码和生成物在两侧排除。Shared core 只计一次，private wrappers 和 feature-specific state support 仍计入 VKSO。Reader closure 使用最终 ELF symbol sizes，排除页对齐和载体 metadata；它衡量机器码去重，不等同于全系统物理内存节省。
 
 **Table 3: Source and machine-code footprint of the case study.**
 
@@ -411,23 +428,37 @@ Kernel-backed/native 的 paired median 在 bash、libc.so.6 和 python3 上分�
 
 同一仓库还保留一份较窄的“内在功能”审计：它排除 timekeeper 兼容适配和部分既有 reader 依赖，得到 Raw 1,201、VKSO 1,102 SLOC（−99，−8.24%），对应的 reader closure 为 2,497 B 与 2,401 B（−3.84%）。这组数字回答的是不含兼容适配的子集问题，不与主表的完整产品口径相加。主表的 1,505/1,305 SLOC 与 2,639/2,055 B 来自同一最终性能报告和完整 reader closure 定义，正文后续均采用这一口径。
 
-### READ, UPDATE, and Concurrency
+### Public READ Cost
 
-READ 使用 20 个公开入口，每个 sample 预热 10,000 次并计时 500,000 calls，31 rounds 分布于 7 个新进程。UPDATE 在没有饱和 reader 时记录完整 timekeeping_update，每个 variant 15 rounds × 15 s；主指标是轮内 corrected mean 再取轮间 median。CONCURRENT 保持正常约 250 Hz writer，同时让一个公开 reader 持续调用同一 API；reader 计时窗口与独立 READ 一致，writer 仍测完整 update function。
+READ 测量应用可见的完整入口，包括 wrapper、状态准备、shared core 和适用的 fallback，而不是只测共享计算体。20 个 API/参数路径覆盖不同长度的 fast paths、空参数短入口和需要 syscall 的 fallback；分别报告分组和逐项结果，观察固定入口工作在不同调用长度下的影响。基准直接在具体 API 的循环中调用 Raw vDSO 或 VKSO wrapper，每个 sample 预热 10,000 次并计时 500,000 calls，31 rounds 分布于 7 个新进程，并通过 setarch -R 固定用户地址布局。READ 镜像关闭 writer recorder，避免将 UPDATE 的测量插桩带入独立 reader 结果。
+
+每个 API 取 31 轮 cycles/call 的中位数；总体和分组结果是逐 API VKSO/Raw ratio 的等权几何平均。这一汇总给予每个接口相同权重，用于描述接口集合的总体变化，不假设真实应用中的调用频率。
 
 **Figure 11: Clocktime case-study performance relative to native Linux.** Negative values favor the shared-code design. UPDATE uses the full writer distribution; concurrent W bars report mean corrected cycles.
 
-独立 READ 的 20 项等权几何平均在 Normal 下慢 0.941%，在 no-retpoline 下快 0.275%。三个 fallback 的分组结果分别为 −0.051% 和 −0.886%，说明入口已在 shared-state preparation 前完成请求分类。最明显的弱项是极短 gettimeofday group（+12.17%/+9.33%）；其中 gettimeofday(NULL,NULL) 的 +33% 实际仅约 2 cycles，因为 Raw baseline 约为 6 cycles。结论应是“总体接近 Raw，但短入口仍有固定 wrapper cost”，而不是所有 API 一致持平。
+独立 READ 的 20 项等权几何平均在 Normal 下慢 0.941%，在 no-retpoline 下快 0.275%。三个 fallback 的分组结果分别为 −0.051% 和 −0.886%，与入口在 shared-state preparation 前完成请求分类的设计一致。最明显的弱项是包含极短入口的 gettimeofday group（+12.17%/+9.33%）；其中 gettimeofday(NULL,NULL) 的 +33% 实际仅约 2 cycles，因为 Raw baseline 约为 6 cycles。总体接近 Raw 与部分短入口存在固定 wrapper cost 同时成立，因此保留相对变化和绝对 cycles 两种尺度。
+
+### Kernel UPDATE Cost
+
+共享 reader snapshot 改变了 writer 发布状态的组织方式。为检查 reader 复用是否增加内核端工作，我们在没有持续 reader load 时记录完整 timekeeping_update，而非只测向 shared_data 写入的局部代码。每个 variant 执行 15 rounds × 15 s，保留系统正常约 250 Hz 更新；Raw/VKSO 使用相同测量插桩，逐样本扣除标定的 33-cycle TSC pair 开销。主指标先计算轮内 Mean corrected，再取 15 轮中位数，用于表示每次 update 的平均 CPU 工作量；Median、P95 和 P99 采用相同的轮内统计、轮间汇总顺序，分别描述典型成本与长尾。
 
 独立 UPDATE 的 mean corrected cost 在 Normal/no-retpoline 下分别下降 13.176% 和 4.111%，P99 均下降约 32.5%；但 Median 分别增加 5 和 4 cycles，且 no-retpoline P95 增加 2 cycles。因此共享 publisher 降低了长期平均工作量和主要长尾，但并非每一次 update 都更快。
 
-并发时，public monotonic reader 的差异为 +0.44%/+2.38%，monotonic-raw 为 +3.87%/+2.80%，coarse 为 +13.69%/+8.98%；coarse 的绝对差仅 1.37/0.90 cycles。相同场景下 writer mean 在两种 build 的全部 point estimates 中均降低：Normal 为 3.16%–10.73%，no-retpoline 为 1.95%–12.20%。其中 raw/coarse 的轮间 IQR 不重叠，monotonic 的 IQR 重叠，应解释为小幅改善或持平。底层 sequence diagnostic 显示 successful snapshot 固定多约 2 cycles、retry 更少；该诊断窗口不是公开 API，不能被写成“每次 clock_gettime 固定慢 2 cycles”。
+### Concurrent Readers and Publisher
+
+单独测量两端无法观察持续读取共享 cache lines 时的 publisher/readers 交互。CONCURRENT 因此让一个 reader 持续调用同一公开 API，同时记录正常约 250 Hz writer 的完整 update function，每个场景执行 15 rounds × 15 s。选择 monotonic、monotonic-raw 和 monotonic-coarse，分别覆盖高精度、raw 和短 coarse 路径；另以 sequence diagnostic 观察 snapshot retry。
+
+公开 reader 沿用独立 READ 的具体 API 调用体，每批计时 500,000 calls；duration-control syscall 放在计时窗口之外，其后执行 10,000 次同路径条件化调用再开始计时。这样可比较相同调用范围，并将负载持续时间控制与 API 本身分开。独立 READ 也会遇到正常周期更新；本实验增加的是持续 reader load 和同步 writer 记录，并没有提高 writer 频率。因此，两组差值不直接等同于新增同步开销。
+
+并发时，public monotonic reader 的差异为 +0.44%/+2.38%，monotonic-raw 为 +3.87%/+2.80%，coarse 为 +13.69%/+8.98%；coarse 的绝对差为 1.37/0.90 cycles。相同场景下 writer mean 在两种 build 的全部 point estimates 中均降低：Normal 为 3.16%–10.73%，no-retpoline 为 1.95%–12.20%。其中 raw/coarse 的轮间 IQR 不重叠，monotonic 的 IQR 重叠，后者的改善幅度小于跨轮次变化。底层 sequence diagnostic 显示 successful snapshot 固定多约 2 cycles、retry 更少；它将 snapshot protocol 的成功读取与竞争重试分开观察，公开 API 总成本仍由上述完整入口测量给出。
 
 **Takeaway.** 该 case study 将一个包含动态发布、地址空间隔离、fallback 和并发更新的双实现路径收敛为 single resident core。它将 product source 减少 13.29%、reader machine code 减少 22.13%，同时使独立 READ 总体保持在 ±1% 左右，并降低 writer average and tail costs。这表明本文机制的适用范围不止于纯算法闭包，但复杂 feature 仍需要按 state ownership 和 environment boundary 做显式重构。
 
 ## Reproducibility
 
-First-touch、PGOT、LZ4、BCH 和 XZ 均提供单命令入口及独立 results directory；clocktime 的 READ/UPDATE/CONCURRENT 分别由固定 boot/collect state machine 生成并带 archive hash。所有绘图由 paper/paper_content/figures/generate_figures.py 直接读取最终 CSV，clocktime aggregate 还会检查最终报告中的关键 token，避免图表与正文静默漂移。Artifact evaluation 应从各 README 的正式参数执行，而不是复用本地临时 DSO 或设置 skip-check。
+First-touch、PGOT、LZ4、BCH 和 XZ 均提供单命令入口，正式参数和数据来源记录于对应 README 与 results directory。结果保留原始 CSV、环境与构建信息、功能校验、disassembly 和 page-map audit，分别支持数值复算与被测执行体核对。Clocktime 的 READ/UPDATE/CONCURRENT 由固定 boot/collect 流程生成，归档中记录内核变体、测量协议和逐轮样本。
+
+绘图脚本 paper/paper_content/figures/generate_figures.py 从各实验的最终 CSV 汇总 first-touch、PGOT 和算法结果，并从最终 clocktime 报告采用代码规模与性能汇总值。复现时按各 README 的正式参数重新建立 owner module、Stub DSO 和页面映射，保留 closure checks，再生成相同统计口径的结果。
 
 # Related Work
 
