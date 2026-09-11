@@ -9,7 +9,7 @@
 | 工作组 | 本轮进展 | 下一步具体交付 |
 | --- | --- | --- |
 | A：Clocktime | 用户/内核 reader、多 reader、完整代码复制对照、PFN 检查及跨启动采集工具已实现；正式采集中 | 完整结果核验、三种方法的性能表、准确的归因结论 |
-| B：页面复用与装载 | Clocktime 已提供局部 PFN 证据；通用 setup、净内存和 lifetime 账本仍未闭合 | 同一注册会话的阶段时间、物理页分类及释放证据 |
+| B：页面复用与装载 | 已追踪算法注册/恢复调用链；页引用及顺序清理存在，module 引用、完成确认与失败原子性证据有缺口 | 隔离验证当前契约，再完成同一会话的时间/PFN/资源账本；基础修复另行明确 |
 | C：PGOT 与真实算法 | 已核实三算法的部署/进程/轮次关系，修正报告生成器，复算 BCH 对照点；完整部署采集入口已准备 | Clocktime 结束后执行完整部署重复，分析 BCH 及实际 owner 内核成本 |
 | D：适用范围与导出工具 | 已有成功案例和适配记录；本轮未建立固定候选全集 | 带分母、失败原因、人工改造和构建约束的适用范围表 |
 | E：真实应用集成 | Clocktime 是完整子系统案例；本轮未新增服务级应用结果 | 一项确实调用 VKSO 的完整工作流对照 |
@@ -129,7 +129,9 @@ Clocktime 的声明闭包运行时 PFN 检查已经补入 A；B 应复用其方�
 
 对 mmap/mprotect/MAP_SHARED 等测试，限定在项目控制的内核和合成测试页，检验契约即可；无须扩成攻击评测或完整 VM 证明。已有 namespace/exec/fallback 案例直接引用，不重复堆测试。建立 `invariant / exercised path / expected behavior / observed result / implementation location` 表，每项明确实际测过的行为。
 
-前次局部查看旧的 `page_cache_replace.c` 未发现 `try_module_get/module_put` 的直接调用，但这不足以证明其他组件没有实现 pinning，本次也未对该机制重新作出缺陷认定。因此应先定位最终运行路径和引用所有权，再决定缺少哪项 lifetime 证据；若确认实现缺机制，按用户约束先报告，不直接修改。普通页面权限也不能证明用户无法跳到所有其他可执行地址，控制闭包保证需保持明确的适用范围。
+实际执行已进一步追踪 `run.sh → vkso exec → manager replace --hold → nl_recv_msg → batch_process_pages → add_page_to_cache` 以及恢复路径，见[注册证据记录](../test/evaluation/registration-evidence.md)。当前注册代码获取/释放 page references，但请求、备份记录及该调用链没有获取/释放 owner module references；runner 的先恢复后卸载是正常流程约束，不能代替并发 owner lifetime 保证。逐页注册遇错会退出批次，已成功页面留在备份中，callback 只记录错误；manager 没有接收逐请求结果，仍以等待两秒后的流程作为成功。这些代码事实不足以支撑正文中的完整 module-reference、失败原子性和精确完成确认主张。
+
+该结论来自实际入口、数据结构及清理调用链，已超过前次局部关键词搜索；仍需隔离验证活跃映射下的引用变化和失败路径，不能把源码问题推演成已经观察到的运行时破坏。已向用户报告这一基础实现边界，当前未修改注册协议、页引用或权限代码。若要补齐明确的 module pinning、内核完成结果和事务回滚，应先提交具体实现方案及原因；不能将正常性能采集的成功当作此类契约验收。普通页面权限也不能证明用户无法跳到所有其他可执行地址，控制闭包保证需保持明确的适用范围。
 
 first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛选，适合估计给定 fault class 的条件延迟。应一并报告总尝试数、各原因剔除数和未筛选分布；不能用过滤后的结果来声称真实 p99 或“永不发生某种 fault”。若原始日志没有保留被丢弃样本，后续采集需补记录，不能反推。
 
@@ -201,4 +203,4 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 
 前次核查包括：阅读 Evaluation/Implementation/Discussion，核对 first-touch/PGOT/算法/Clocktime 的材料，复算 first-touch 汇总和 BCH 报告点，检查 XZ 重复层次、Clocktime 功能记录及所列公开文献。本次继承这些证据记录，没有重复执行这些核查或将其视为最新数据。
 
-前次报告修订核查了旧评估、草稿、分支改动、Clocktime 协议及功能/采集记录，并纠正工具缺失、归因、PFN 和预算等判断。当前实际执行又完成 C/F 的重复单位核实与修正，检查三算法旧 raw 矩阵、重算 BCH 四组对照点，并重新核对三篇主要论文的 Evaluation。没有更改 Clocktime 冻结协议，没有启动并行 benchmark；最终跨启动性能、完整部署变化和全系统净内存仍待相应证据。
+前次报告修订核查了旧评估、草稿、分支改动、Clocktime 协议及功能/采集记录，并纠正工具缺失、归因、PFN 和预算等判断。当前实际执行又完成 C/F 的重复单位核实与修正，检查三算法旧 raw 矩阵、重算 BCH 四组对照点，并重新核对三篇主要论文的 Evaluation；B 已追踪实际注册及恢复路径，记录 module-reference、完成结果和部分失败处理的证据缺口。没有更改 Clocktime 冻结协议，没有启动并行 benchmark；最终跨启动性能、完整部署变化和全系统净内存仍待相应证据。

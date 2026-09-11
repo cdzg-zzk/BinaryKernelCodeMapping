@@ -3,7 +3,10 @@
 This directory implements the grouped work in
 [evaluation-review.md](../../ccfa-review-reports/evaluation-review.md).
 The current addition concerns algorithm repetition identities (group C) and
-the corresponding manuscript/report corrections (group F).
+the corresponding manuscript/report corrections (group F). The
+[registration evidence audit](registration-evidence.md) additionally traces
+group B's runtime call path and identifies the lifetime/completion/failure
+contracts that still need isolated validation.
 
 ## Algorithm deployments
 
