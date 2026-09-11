@@ -1,0 +1,10 @@
+__pycache__/
+build/
+results/
+kernel-reader/.*.cmd
+kernel-reader/*.o
+kernel-reader/*.ko
+kernel-reader/*.mod
+kernel-reader/*.mod.c
+kernel-reader/Module.symvers
+kernel-reader/modules.order
