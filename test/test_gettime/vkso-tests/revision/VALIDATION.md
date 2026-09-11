@@ -49,6 +49,15 @@ validation had no kernel warning. Earlier failed logs remain under `results/`.
 These changes are in test preparation/observation, outside the timed API body.
 They did not require a change to project foundational functionality.
 
+The first bare-metal startup stopped during frequency setup, before the
+collector or any performance sample ran. This machine's BIOS disables turbo;
+the Intel driver reports `no_turbo=1` but rejects even an identical write with
+`EPERM`. Commit `528f4a8` skips already satisfied settings and records only
+settings actually changed for restoration. The original failure is retained in
+`results/normal-campaign/incomplete-initialization/`. The resumed controller
+reached `min_perf_pct=100`, `no_turbo=1`, and the `performance` governor. The
+sample allocation and Clocktime implementation are unchanged.
+
 ## Formal collection still required
 
 The prepared campaign is `results/normal-campaign/plan.json`: five independent
