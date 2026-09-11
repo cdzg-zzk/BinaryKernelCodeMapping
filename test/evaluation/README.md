@@ -1,5 +1,9 @@
 # Evaluation execution evidence
 
+For the current run, [unattended continuation is already scheduled](FOLLOWUP.md)
+after Clocktime returns to the original kernel. The manual commands below
+describe standalone use; follow the scheduled run's logs for this campaign.
+
 This directory implements the grouped work in
 [evaluation-review.md](../../ccfa-review-reports/evaluation-review.md).
 The current addition concerns algorithm repetition identities (group C) and
@@ -7,6 +11,11 @@ the corresponding manuscript/report corrections (group F). The
 [registration evidence audit](registration-evidence.md) additionally traces
 group B's runtime call path and identifies the lifetime/completion/failure
 contracts that still need isolated validation.
+
+Group D now has a [fixed candidate set and inspection driver](applicability.md).
+Group E has a [complete LZ4 CLI workflow](lz4-cli/README.md) prepared for the
+same owner-registration sessions as group C. These additions have not been
+built or run on the live carrier while Clocktime is measuring.
 
 ## Algorithm deployments
 
@@ -85,7 +94,8 @@ and missing-row mutations were rejected for each algorithm. The live-host
 guard rejected collection while Clocktime was active. Regenerating the four
 algorithm summaries left all five numeric aggregate/pairwise CSVs byte-identical
 and every numeric Markdown table unchanged. Full deployment execution is
-pending completion of the Clocktime campaign.
+pending completion of the Clocktime campaign and is now scheduled through
+the follow-up service, with the LZ4 CLI workflow enabled.
 
 ## Evaluation design references
 

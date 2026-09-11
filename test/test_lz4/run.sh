@@ -65,6 +65,10 @@ rm -rf "$RESULT_DIR"
 mkdir -p "$RESULT_DIR"
 "$REPO_ROOT/vkso" init "$WORK_DIR" --symbols "$SYMBOLS"
 make -C "$SCRIPT_DIR" BUILD_DIR="$BUILD_DIR" clean all
+if [[ "${RUN_CLI_WORKFLOW:-0}" == 1 ]]; then
+    python3 "$REPO_ROOT/test/evaluation/lz4-cli/prepare_source.py"
+    make -C "$REPO_ROOT/test/evaluation/lz4-cli" BUILD_DIR="$BUILD_DIR/cli" all
+fi
 python3 "$SCRIPT_DIR/scripts/audit_simd.py" \
     --default "$BUILD_DIR/liblz4-default.so" \
     --nosimd "$BUILD_DIR/liblz4-nosimd.so" \
@@ -110,6 +114,7 @@ rm -f "$WORK_DIR/vkso/metadata/out.krg" \
     echo "official_adapter_sha256=$(sha256sum "$SCRIPT_DIR/src/official_backend_adapter.c" | cut -d' ' -f1)"
     echo "kernel_memory_helpers=memcpy:shim,memset:shim,memmove:shim"
     echo "outer_runs=${OUTER_RUNS:-3}"
+    echo "cli_workflow=${RUN_CLI_WORKFLOW:-0}"
     echo "official_harness_seconds=${BENCH_SECONDS:-1}"
     echo "block_sizes=${BLOCK_SIZES:-4096,65536,1048576}"
     echo "backends=user-default,user-nosimd,kernel-userspace-native,kernel-userspace-nosimd,kernel-vkso"

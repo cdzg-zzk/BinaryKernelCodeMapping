@@ -1,0 +1,19 @@
+[Unit]
+Description=VKSO evaluation audits and collection after Clocktime completion
+After=vkso-clocktime-revision.service
+ConditionPathExists=/home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/revision/results/normal-campaign/campaign-complete.json
+
+[Service]
+Type=exec
+WorkingDirectory=/home/zzk/BinaryKernelCodeMapping
+ExecStart=/usr/bin/python3 /home/zzk/BinaryKernelCodeMapping/test/evaluation/followup.py --execute --managed-service
+CPUAffinity=0 1 2 3
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=PYTHONDONTWRITEBYTECODE=1
+StandardOutput=append:/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/followup-service.log
+StandardError=append:/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/followup-service.log
+TimeoutStopSec=120
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

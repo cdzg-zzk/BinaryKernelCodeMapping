@@ -1,0 +1,4 @@
+__pycache__/
+results/
+lz4-cli/vendor/
+lz4-cli/build/

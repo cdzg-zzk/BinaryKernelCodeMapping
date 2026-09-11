@@ -48,6 +48,12 @@ def host_ready(kernel):
         check=True).stdout.strip()
     if state != "inactive":
         raise RuntimeError(f"Clocktime service state is {state!r}; no algorithm run started")
+    followup = subprocess.run(
+        ["systemctl", "show", "vkso-evaluation-followup.service",
+         "--property=ActiveState", "--value"], capture_output=True, text=True)
+    if followup.stdout.strip() in {"active", "activating", "reloading", "deactivating"}:
+        if "/vkso-evaluation-followup.service" not in Path('/proc/self/cgroup').read_text():
+            raise RuntimeError("the unattended follow-up owns the measurement machine; inspect its state")
     if os.uname().release != kernel:
         raise RuntimeError(f"requires kernel {kernel}, found {os.uname().release}")
     loaded = {line.split()[0] for line in Path('/proc/modules').read_text().splitlines()}
@@ -117,7 +123,7 @@ def read_observations(algorithm, raw, deployment):
     return observations
 
 
-def make_plan(algorithms, count, output, cpu, kernel):
+def make_plan(algorithms, count, output, cpu, kernel, with_lz4_workflow=False):
     entries = []
     for block in range(count):
         order = algorithms[block % len(algorithms):] + algorithms[:block % len(algorithms)]
@@ -135,10 +141,12 @@ def make_plan(algorithms, count, output, cpu, kernel):
                 "SHIM_LIST": str(ROOT / "make_dll/shim.txt"), "VKSO_SKIP_CHECK": "0",
                 **config["environment"],
             }
+            environment["RUN_CLI_WORKFLOW"] = str(int(with_lz4_workflow and algorithm == "lz4"))
             entries.append({"deployment": directory.name, "algorithm": algorithm,
                             "directory": str(directory), "environment": environment,
                             "command": ["bash", str(source / "run.sh")]})
     return {"kernel": kernel, "cpu": cpu, "deployments_per_algorithm": count,
+            "with_lz4_workflow": with_lz4_workflow,
             "sampling_unit": "complete owner load/export/register/benchmark/restore/unload",
             "boot_scope": "same boot unless recorded boot_id values differ",
             "entries": entries}
@@ -154,12 +162,13 @@ def execute(plan, output):
     write_json(output / "plan.json", plan)
     (output / "source-changes.patch").write_bytes(subprocess.check_output([
         "git", "diff", "HEAD", "--", "test/test_lz4", "test/test_BCH", "test/test_xz",
-        "vkso", "make_dll", "page_cache_replace"], cwd=ROOT))
+        "test/evaluation", "vkso", "make_dll", "page_cache_replace"], cwd=ROOT))
     for entry in plan["entries"]:
         host_ready(plan["kernel"])
         directory = Path(entry["directory"])
         directory.mkdir()
         identity = {"deployment": entry["deployment"], "started_utc": timestamp(),
+                    "uid": os.getuid(), "euid": os.geteuid(),
                     "boot_id": Path("/proc/sys/kernel/random/boot_id").read_text().strip(),
                     "kernel": os.uname().release,
                     "repo_commit": subprocess.check_output(
@@ -209,13 +218,17 @@ def main():
     parser.add_argument("--cpu", type=int, default=2)
     parser.add_argument("--kernel", default="5.15.0-119-generic")
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--with-lz4-workflow", action="store_true")
     args = parser.parse_args()
     if args.deployments < 1 or len(set(args.algorithms)) != len(args.algorithms):
         parser.error("use a positive deployment count and distinct algorithms")
+    if args.with_lz4_workflow and "lz4" not in args.algorithms:
+        parser.error("the file workflow requires lz4 in --algorithms")
     output = args.output.resolve()
     if output.exists():
         parser.error("output already exists; use a fresh campaign path")
-    plan = make_plan(args.algorithms, args.deployments, output, args.cpu, args.kernel)
+    plan = make_plan(args.algorithms, args.deployments, output, args.cpu, args.kernel,
+                     args.with_lz4_workflow)
     if args.execute:
         execute(plan, output)
     else:
