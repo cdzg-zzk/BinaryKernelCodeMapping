@@ -142,11 +142,15 @@ returns to the original ordinary kernel. `summary.csv` is the numeric analysis;
 the final experiment report still needs to inspect individual regressions,
 achieved fixed rates, writer CPU records, diagnostic output and footprint scope.
 
-After timed collection ends, run the independent coverage audit and the raw
-writer audit for every UPDATE method directory, for example:
+After timed collection ends, run the independent coverage audit, the reader
+and support-record audits for every completed step, and the raw writer audit
+for every UPDATE method directory, for example:
 
 ```sh
 python3 revision/audit_coverage.py revision/results/normal-campaign
+python3 revision/audit_reader_records.py revision/results/normal-campaign/step-001
+python3 revision/audit_reader_records.py revision/results/normal-campaign/step-003
+python3 revision/audit_support_records.py revision/results/normal-campaign/step-001
 python3 revision/audit_writer_records.py revision/results/normal-campaign/step-003/compact-split
 ```
 
@@ -157,8 +161,31 @@ and recomputed statistics against both per-window JSON and normalized CSV.
 It reports actual CPU/action distributions and retains all action=0 observations
 in the main statistics. For windows containing other CPUs it also emits CPU0-only
 statistics as a sensitivity diagnostic; action=0 does not identify a unique
-caller. These postprocessing tools do not change the frozen collector. Reader
-window/rate checks, ABI diagnostics and PFN evidence still require separate review.
+caller. These postprocessing tools do not change the frozen collector.
+
+The reader audit requires a completed step and verifies its completion identity
+and full normalized coverage. It reconstructs public READ round numbering,
+kernel cycles/call, concurrent call rates, total throughput and Jain fairness
+from the original CSVs. It checks reader IDs/CPUs, batch accounting, shared
+timestamps and containment of the writer interval within every reader window.
+It also checks sequence diagnostic counter identities. User cycle averages
+are compared as recorded; their underlying TSC totals were not saved in these
+CSVs. Output includes achieved-rate ranges, late batches and window margins,
+without filtering observations for rate deviations or lateness. Writer
+timestamps bracket control requests, so their span need not be exactly the
+nominal 13-second recording interval. Exit code 0 certifies only the specified
+step's audited records, not the entire campaign or a performance conclusion.
+The support-record auditor checks every expected default ABI status and
+fast/fallback path, including both namespace fast-path checks. It reports the
+actual thread count: a `multicpu_threads=pass` record with `threads=1` is not
+multi-CPU evidence. It checks recorded PFNs against the declared page plan,
+recomputes unique-page totals, verifies shared/copy relationships and ordinary
+loader permissions, and compares source PFNs between methods within the same
+boot. PROT_NONE reservations are excluded when locating readable pages.
+The resulting counts describe the declared closure, not whole-system memory;
+saved mapping permissions do not establish general VM or module-lifetime
+behavior. These two auditors have not been added to the automatic follow-up
+service while its disposition awaits the user's answer.
 
 To stop an active campaign, remove its `armed` file and stop the service before
 any next reboot. Retain partial output and inspect `failed.json`; do not convert

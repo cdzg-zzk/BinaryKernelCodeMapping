@@ -17,6 +17,8 @@
 
 **无人值守接续已安装并启用：** `vkso-evaluation-followup.service` 仅在当前 Clocktime 完成标记存在、服务停止且恢复 `5.15.0-119-generic` 后执行。先做完整覆盖核验和 15 个 UPDATE 方法目录的原始 writer 审计，再运行 C/E 的完整部署与应用采集，最后执行 D 的固定案例静态检查/允许的 carrier 构造。详细状态、日志路径和停止条件见[接续说明](../test/evaluation/FOLLOWUP.md)。当前该服务 inactive、MainPID 为 0，没有启动额外 benchmark；它将在当前 20 次启动完成后的普通内核启动中接续，不额外安排重启。任何阶段失败就保留证据、停止后续阶段。该自动序列不代替尚缺的 B、BCH/owner 诊断、D runtime 和最终 F 验收。
 
+**接续安排待用户确认（2026-09-11）：** 收到操作边界提醒后，已向用户说明上述系统级自动安排，并询问是否取消新增接续、只保留原来的 20 次 Clocktime 实验。当前尚未收到该问题的答复，也未停用该 unit；`inactive` 只表示尚未运行，不表示取消了未来触发。确认前不扩展接续任务或修改系统服务，继续进行已授权的证据核对和文稿修订。
+
 各组先核对现有材料，列清剩余修改对象、运行成本和验收产物，再集中实施。新增性能采集先验证完整实现和测量路径，再安排正式重复；启动次数、候选数量和硬件矩阵是针对主张的预算，不是统一门槛。当前已运行的 Clocktime 计划保持原样，不因更新本报告而重启或扩大。若任何组确实需要改动项目基础功能，先报告具体不一致与原因；不能把“补证据”默认变成基础功能重写。
 
 这里以 SOSP/OSDI 论文为参照，依据是各篇论文如何验证自己的主张，并非声称这些会议规定了统一的实验清单。本文的分组、样本量建议和实验设计是针对 VKSO 的判断，不是引用论文的硬性要求。
@@ -93,6 +95,12 @@ Clocktime 的既有设计同时改变共享计算、snapshot 字段组织、发�
 
 本类剩余交付包括：所有计划启动的身份/数据覆盖核验、原始 writer 与汇总值一致性、实际速率/late batches/窗口重叠、ABI/sequence/PFN 记录检查，以及最终三方法结果报告。READ 使用不带 writer recorder 的配置，UPDATE/CONCURRENT 使用 recorder；诊断另采。历史 SLOC/符号规模证据对应既有完整实现，新增测试代码不计入产品缩减。已有 PFN 验证在声明闭包中观察到 VKSO 三个唯一页、复制对照五个唯一页；它证明两张代码页共享关系的差别，不代表全系统净节省两页，也不代替 B 类的开销账本。
 
+**reader 原始记录核验已准备：** [独立审计脚本](../test/test_gettime/vkso-tests/revision/audit_reader_records.py)逐个完成启动核对原始 READ/CONCURRENT CSV 与标准化值，重算调用速率、公平性和 kernel cycles，检查批次计数、CPU、读写窗口及 sequence counters。首个物理实验块 steps 000–003 的三方法共 8,619 个 reader 标准化值全部匹配；该块定速实际值/目标范围为 0.9999970704–1.0000032182，late batches 为零。五项测试确认错误身份、计数、窗口和汇总值会被拒绝，并保留合法的不等速负载及 late batches。全量核验和跨启动解释仍待采集结束；ABI/PFN 不在该脚本覆盖范围。详见[验证记录](../test/test_gettime/vkso-tests/revision/VALIDATION.md#reader-record-auditor-validation--2026-09-11)。尚未把该脚本加入待确认处置的自动接续服务。
+
+**ABI/PFN 记录核验已准备：** [支持记录审计脚本](../test/test_gettime/vkso-tests/revision/audit_support_records.py)已核对同一首块的六份 ABI 日志和四份 PFN 记录：各 ABI 日志的 51 个 pass 记录、49 个 fast/fallback 路径均符合默认模式；两次 VKSO 启动分别重算出共享方法 3 页、复制方法 5 页的声明闭包并集，源页面 PFN 在同启动两方法间一致，记录的 text/state loader 权限分别为 RX/R--。六项测试验证错误状态、页面关系、权限和计数会被拒绝。这些是首块保存记录的核验，不是新运行的 VM/lifetime 测试或全系统净内存结果。
+
+**多核功能证据范围已澄清：** 本轮默认 ABI 继承 collector 的 CPU 0 亲和性，`multicpu_threads=pass threads=1` 实际只覆盖一个允许 CPU。已有 [20260801T164548Z-vkso-final 归档](../test/test_gettime/vkso-tests/baremetal/results/20260801T164548Z-vkso-final/)中 Raw/VKSO × normal/no-retpoline 四个完成案例均保留 `threads=4` 的功能记录，可按原构建身份引用，无须将 Raw/VKSO 的多核验证重新列为完全缺失；该历史证据不包含 compact-split。最终正文须分别说明历史功能证据、本轮逐启动 ABI 与多读者性能覆盖，不把单线程 PASS 写成新增多核验证。
+
 | 结果表 | 行的组织 | 必须提供的列/注释 |
 | --- | --- | --- |
 | 公开/内核 READ | 20 个公开 API 路径与 3 个普通内核 API 分组列出 | 方法、独立启动数、cycles/call、绝对差、相对差和 boot 区间；明确独立比较与同启动配对 |
@@ -134,6 +142,8 @@ Clocktime 的声明闭包运行时 PFN 检查已经补入 A；B 应复用其方�
 实际执行已进一步追踪 `run.sh → vkso exec → manager replace --hold → nl_recv_msg → batch_process_pages → add_page_to_cache` 以及恢复路径，见[注册证据记录](../test/evaluation/registration-evidence.md)。当前注册代码获取/释放 page references，但请求、备份记录及该调用链没有获取/释放 owner module references；runner 的先恢复后卸载是正常流程约束，不能代替并发 owner lifetime 保证。逐页注册遇错会退出批次，已成功页面留在备份中，callback 只记录错误；manager 没有接收逐请求结果，仍以等待两秒后的流程作为成功。这些代码事实不足以支撑正文中的完整 module-reference、失败原子性和精确完成确认主张。
 
 该结论来自实际入口、数据结构及清理调用链，已超过前次局部关键词搜索；仍需隔离验证活跃映射下的引用变化和失败路径，不能把源码问题推演成已经观察到的运行时破坏。已向用户报告这一基础实现边界，当前未修改注册协议、页引用或权限代码。若要补齐明确的 module pinning、内核完成结果和事务回滚，应先提交具体实现方案及原因；不能将正常性能采集的成功当作此类契约验收。普通页面权限也不能证明用户无法跳到所有其他可执行地址，控制闭包保证需保持明确的适用范围。
+
+Evaluation 的 Experimental Setup and Measurement 已补入实际 owner 生命周期顺序，以及注册/恢复各两秒等待与现有调用计时窗口的关系。该修订说明现有数字测了什么，没有新增 setup 或生命周期实验结果。Implementation 的 Registering Resident Backing 中关于 module references 和部分失败完整撤销的强主张仍待处理；B 类完成前须将其与最终实现及隔离验证结果统一。
 
 first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛选，适合估计给定 fault class 的条件延迟。应一并报告总尝试数、各原因剔除数和未筛选分布；不能用过滤后的结果来声称真实 p99 或“永不发生某种 fault”。若原始日志没有保留被丢弃样本，后续采集需补记录，不能反推。
 

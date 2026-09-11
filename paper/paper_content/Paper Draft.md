@@ -306,6 +306,8 @@ VKSO 的目标是让两个 execution domains 复用同一 resident implementatio
 
 PGOT 使用轮内 paired delta；LZ4、BCH 和 XZ 先在相同 outer round 内形成 kernel-backed/native ratio，再汇总跨轮次分布。各算法的这些轮次均在一次 owner module 装载和页面注册内完成。LZ4 为每个 round/block/backend 启动一个 benchmark 进程；BCH 和 XZ 则在单个进程中加载各 backend，再循环执行所有轮次。因此，这些分布描述一次部署内的变化。Clocktime 的 Raw/VKSO 分别启动对应内核镜像，比较各自多轮测量的汇总值，不视作同轮配对实验。其每个 backend/build 的正式批次来自一次启动，31/15 轮重复描述的是该次启动内的变化。表 2 列出各组的重复层次与主指标。
 
+算法测试由 runner 先加载 owner module，再注册 carrier 并运行 benchmark；benchmark 退出后，管理器执行映射恢复，runner 随后卸载 owner。Owner 在整个测量期间保持加载。当前管理器在发送注册和恢复请求后各等待两秒，算法表中的计时窗口位于目标计算内部，均不包含这些等待、carrier 构造和页面注册。First-touch 实验则从装载及符号解析完成后计时。因此，调用成本与完整部署耗时属于不同的测量范围。
+
 计时前的功能校验用于确认两侧完成相同工作：PGOT copied closures 比较返回值、输出长度和字节；LZ4 交叉验证 compressor/decompressor；BCH 检查错误位置及 codeword recovery；XZ 检查完整输出；clocktime 对各镜像执行相同 ABI matrix。各节说明计时窗口，区分部署准备、目标调用和诊断插桩。表中的 IQR width 为 P75−P25，P25–P75 则列出区间端点；P10–P90 描述跨轮次比值的变化，这些统计量均不作为置信区间。延迟比值大于 1 表示 VKSO 更慢，吞吐比值大于 1 表示更快；百分比变化为相应比值减 1 后乘以 100%。
 
 **Table 2: Evaluation workloads, comparisons, and measurement units.** Algorithm outer rounds repeat measurements within one deployment. LZ4 starts a process per round/block/backend; BCH and XZ retain one process across rounds. Inner calls amortize timing overhead and are not independent trials.

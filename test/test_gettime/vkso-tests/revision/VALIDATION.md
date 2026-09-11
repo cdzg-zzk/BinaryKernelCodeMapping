@@ -71,3 +71,62 @@ current progress. This validation record does not assert that formal collection
 has finished. Completion also requires inspection of the resulting individual
 path regressions, achieved rates, writer CPU/sample records and boot-level
 intervals, followed by an updated experiment report.
+
+## Reader-record auditor validation — 2026-09-11
+
+The new `audit_reader_records.py` was checked against the first completed
+physical block, steps 000–003, using CPU 0 for the short file-only check.
+This covered Raw, VKSO and compact-split for READ and UPDATE: 713 normalized
+reader values per READ method and 2,160 per UPDATE method, 8,619 in total.
+All reconstructed values matched. READ coverage included both saved syscall
+and public paths plus the ordinary kernel reader; concurrent coverage included
+270 CSV windows and 540 reader observations per method. Sequence diagnostic
+counts were also consistent for all six method/role records.
+
+For this block, all writer control intervals were inside every associated
+reader load window. Across the three methods, the achieved fixed-rate/target
+ratio ranged from 0.9999970703898143 to 1.0000032182188345; all concurrent
+observations recorded zero late batches. These are within-block audit facts,
+not full-campaign results or evidence of a particular performance benefit.
+
+Five unit tests passed. Independent arithmetic fixtures retain unequal reader
+rates and nonzero lateness, check known total throughput and fairness, and
+accept a control envelope longer than the nominal recording interval.
+Mutations of reader identity, CPU, counts, timestamps, protocol, finite values
+and normalized values are rejected; a missing reader or normalized row is
+also rejected. The fixtures are synthetic verification inputs, not experimental
+measurements. ABI/PFN verification and the remaining physical blocks are
+outside this check. No collector, foundational code or service was changed.
+
+## ABI and PFN record validation — 2026-09-11
+
+`audit_support_records.py` passed on physical steps 000–003. Each of the six
+method/role ABI logs contains the expected 51 pass records and 49 fast/fallback
+path records; `namespace.fast_paths` occurs twice for its two lifecycle paths.
+The raw ABI executable identifies itself as `raw-vdso`, whereas the performance
+CSV uses `raw`; the auditor preserves this distinction. Its initial name
+mismatch was a postprocessing issue, not a failed experiment.
+
+In both the READ and UPDATE VKSO boots, the saved PFNs reconstruct three unique
+source/user pages for VKSO and five for compact-split. All three VKSO pages
+match their kernel backing; compact-split shares the state page and has two
+distinct copied text pages. The two methods have the same source PFNs within
+each boot. Saved readable loader mappings are RX for text and R-- for state.
+These observations apply to the declared closure and normal loader mappings.
+
+Six tests passed, covering ABI case omission/duplication/failure, path-status
+changes, backend names, actual thread scope, wrong PFNs/counts, writable text,
+executable state, wrong carrier identity, and differing same-boot sources.
+Synthetic PFN fixtures also exercise overlapping PROT_NONE reservations.
+The auditor was not added to the automatic follow-up service.
+
+The current ABI logs report `semantics.multicpu_threads=pass threads=1`:
+`collect.py` pins control work to CPU 0 before launching the ABI executable,
+and `check_multicpu_threads()` creates one thread per allowed CPU. This is
+single-CPU evidence for that check. Historical four-CPU evidence remains in
+`baremetal/results/20260801T164548Z-vkso-final/`, under `raw-normal`,
+`vkso-normal`, `raw-no-retpoline` and `vkso-no-retpoline`: each completed case's
+`functional.matrix` records `threads=4` and has no fail/skip records. Its
+`environment.txt` identifies the corresponding Raw/VKSO 5.15.198 image.
+Those historical runs do not include compact-split; their coverage is retained
+under their original build identity. No new multi-CPU test was launched.
