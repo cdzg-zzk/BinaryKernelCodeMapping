@@ -47,10 +47,35 @@ zero late batches. Its ABI matrix passed, and the measured declared-page union
 is five PFNs, compared with three for VKSO. Both sequence diagnostic readers
 completed 100 million iterations for each method in steps 003 through 005.
 
-This check used the completed writer summaries and reader/diagnostic records;
-the code-copy writer CSVs still require a full raw-record audit of CPU placement,
-header counts and drops before the final report. No measurements were removed
+This check used the completed writer summaries and reader/diagnostic records.
+The subsequent raw-record audit is recorded below. No measurements were removed
 or collection parameters changed.
+
+## Raw-record audit of the first two code-copy UPDATE measurements
+
+On 2026-09-11, during step-006's existing stabilization interval before VKSO
+measurement, all writer CSVs for step-003/compact-split and
+step-006/compact-split were read. The audit finished at 12:19:55 UTC, before any
+VKSO writer CSV existed in step-006; no workload or stabilization settings changed.
+
+| Check | Step-003 code-copy | Step-006 code-copy |
+| --- | ---: | ---: |
+| Writer windows | 285 | 285 |
+| Recorded action-zero samples | 926,282 | 926,257 |
+| Recorder drops | 0 | 0 |
+| Header count mismatches | 0 | 0 |
+| Sample-index sequence errors | 0 | 0 |
+| Summary/raw action-count mismatches | 0 | 0 |
+| Nonzero-action samples | 0 | 0 |
+| CPU 0 samples | 926,281 | 926,256 |
+| Other-CPU samples | 1 on CPU 2 | 1 on CPU 1 |
+
+The other-CPU records occur in
+`step-003/compact-split/monotonic_raw/readers-3/rate-0/round-13-writer.csv`
+and
+`step-006/compact-split/monotonic_coarse/readers-2/rate-0/round-14-writer.csv`.
+Both are retained. The same action-filter interpretation constraints described
+below apply; CPU placement alone does not identify the caller.
 
 ## First Raw and VKSO UPDATE measurements
 
