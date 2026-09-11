@@ -43,6 +43,40 @@ Output:
 
 - `first_touch_results.csv`
 
+The latency CSV contains batch aggregates. `Grand_Median` is the arithmetic
+mean of accepted batch medians; `Avg_P25`, `Avg_P75` and `Avg_P95` likewise
+average batch order statistics. Within a sorted, filtered batch of size `n`,
+the benchmark selects zero-based indices `n/2`, `n/4`, `3*n/4` and `95*n/100`
+using integer division. In particular, an even-sized batch uses its upper
+middle observation as the median. These aggregates are not pooled quantiles.
+
+The runner defaults to 100 calls per attempt, accepts a batch when at least
+90% of all calls survive both fault-class and IQR filtering, and stops at five
+accepted batches or 20 attempts per target/condition. The historical collector
+kept only accepted-batch aggregates; its rejected attempts and unfiltered tails
+cannot be reconstructed from the existing CSV. See the
+[evidence and collection changes](../../evaluation/first-touch-evidence.md).
+
+The revised latency collector adds `-o samples.csv`, writing every attempted
+sample in acquisition order after sampling and before sorting/filtering. A
+preparation status of 0 means a measured call, -1 means page eviction failed,
+and -2 means cache dropping failed; failed preparations have empty measurement
+fields. Page-eviction failures now stop the attempt instead of continuing with
+an unprepared condition. File output is outside the timed call.
+
+`run_benchmarks.sh` pins the latency process with `CPU` (default 2), preserves
+the benchmark executable, records configuration and affinity, and saves each
+attempt's raw CSV, stdout and stderr under `LOG_DIR`. `attempts.csv` records
+filter counts and accepted/rejected/failed decisions. Existing output paths
+are refused. Exhausting the attempt budget returns 2; benchmark failure stops
+the run with its nonzero status. `complete.txt` appears only when every group
+reaches the requested accepted-batch count.
+
+Three synthetic-output tests passed for rejection/acceptance, incomplete
+collection, failure retention and existing-file preservation. C compilation
+and real Native/Stub validation of this revised protocol remain pending until
+the active Clocktime campaign ends. No new latency results have been collected.
+
 ### 2. PMU
 
 `benchmark_pmc` measures the same target/condition matrix, but enables hardware
@@ -101,27 +135,31 @@ STUB_DSO=/home/zzk/BinaryKernelCodeMapping/test/test_first_call/tmp/libzzk_xxh32
 NATIVE_DSO=/home/zzk/BinaryKernelCodeMapping/test/test_first_call/so/libclone_xxh32.so
 ```
 
-Override them if the generated files are in different locations:
+Override them if the generated files are in different locations; pass these
+variables through `sudo env` alongside the output settings below:
 
 ```sh
-STUB_DSO=/path/to/libzzk_xxh32_lkm.so \
-NATIVE_DSO=/path/to/libclone_xxh32.so \
-sudo ./run_full_evaluation.sh
+export STUB_DSO=/path/to/libzzk_xxh32_lkm.so
+export NATIVE_DSO=/path/to/libclone_xxh32.so
 ```
 
 ## Run Full Latency + PMU Evaluation
 
-After `make`, run:
+After Clocktime collection ends, rebuild and validate the revised collector
+on the first-touch kernel with the actual owner/carrier registered. Use fresh
+output paths for a new latency and PMU collection, for example:
 
 ```sh
-sudo ./run_full_evaluation.sh
+sudo env LATENCY_CSV=first-touch-new.csv LOG_DIR=first-touch-new.logs \
+  PMC_CSV=pmc-new.csv PMC_LOG_DIR=pmc-new.logs COMBINED_CSV=combined-new.csv \
+  CPU=2 TASKSET_CPU=2 ./run_full_evaluation.sh
 ```
 
 This executes:
 
-1. `run_benchmarks.sh`, which writes `first_touch_results.csv`.
-2. `run_pmc_matrix.sh`, which writes `pmc_results.csv` and `pmc_logs/`.
-3. `merge_latency_pmu.py`, which writes `first_touch_pmu_combined.csv`.
+1. `run_benchmarks.sh`, which writes `LATENCY_CSV` and the full latency records in `LOG_DIR`.
+2. `run_pmc_matrix.sh`, which writes `PMC_CSV` and `PMC_LOG_DIR`.
+3. `merge_latency_pmu.py`, which writes `COMBINED_CSV`.
 
 The combined CSV is the main table source for the paper:
 
@@ -141,7 +179,7 @@ first_touch_pmu_table.md
 Run latency only:
 
 ```sh
-sudo ./run_benchmarks.sh
+sudo env CSV_FILE=first-touch-new.csv LOG_DIR=first-touch-new.logs CPU=2 ./run_benchmarks.sh
 ```
 
 Run PMU only:
@@ -180,6 +218,9 @@ The scripts accept environment variables:
 | `NATIVE_DSO` | `../so/libclone_xxh32.so` | all | Native DSO path. |
 | `CONDITIONS_OVERRIDE` | `hot pte-cold post-drop` | latency, PMU | Restrict conditions, for example `CONDITIONS_OVERRIDE='hot pte-cold'`. |
 | `NUM_RUNS` | `100` | latency | Samples per latency batch. |
+| `CPU` | `2` | latency | Enforced benchmark CPU affinity. |
+| `CSV_FILE` | `first_touch_results.csv` | latency | New aggregate output path. |
+| `LOG_DIR` | CSV stem plus `.logs` | latency | New directory for all attempts and configuration. |
 | `TARGET_SUCCESSES` | `5` | latency | Number of accepted latency batches per group. |
 | `MAX_ATTEMPTS` | `20` | latency | Maximum latency batch attempts per group. |
 | `PMC_RUNS` | `30` | PMU | Samples per PMU group. |

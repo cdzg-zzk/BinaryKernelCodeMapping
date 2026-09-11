@@ -302,7 +302,7 @@ VKSO 的目标是让两个 execution domains 复用同一 resident implementatio
 
 ## Experimental Setup and Measurement
 
-实验运行在 Intel Core i7-1165G7（4 physical cores，SMT disabled）上，测量线程固定 CPU 2，使用 GCC 11.4.0。First-touch、PGOT、LZ4、BCH 和 XZ 使用 Linux 5.15.0-119-generic；clocktime 使用 Linux 5.15.198 及相同硬件，并通过 isolcpus、nohz_full 和 rcu_nocbs 隔离 CPU 2。固定执行位置用于降低迁移和 cache locality 变化对短路径的干扰。PGOT 另外比较 retpoline/no-retpoline builds，clocktime 比较 Normal/no-retpoline builds，以观察受保护间接分支相关的构建差异。
+实验运行在 Intel Core i7-1165G7（4 physical cores，SMT disabled）上，使用 GCC 11.4.0。PGOT、LZ4、BCH、XZ 和 clocktime 的测量线程固定 CPU 2。First-touch、PGOT、LZ4、BCH 和 XZ 使用 Linux 5.15.0-119-generic；clocktime 使用 Linux 5.15.198 及相同硬件，并通过 isolcpus、nohz_full 和 rcu_nocbs 隔离 CPU 2。固定执行位置用于降低迁移和 cache locality 变化对短路径的干扰。PGOT 另外比较 retpoline/no-retpoline builds，clocktime 比较 Normal/no-retpoline builds，以观察受保护间接分支相关的构建差异。
 
 PGOT 使用轮内 paired delta；LZ4、BCH 和 XZ 先在相同 outer round 内形成 kernel-backed/native ratio，再汇总跨轮次分布。各算法的这些轮次均在一次 owner module 装载和页面注册内完成。LZ4 为每个 round/block/backend 启动一个 benchmark 进程；BCH 和 XZ 则在单个进程中加载各 backend，再循环执行所有轮次。因此，这些分布描述一次部署内的变化。Clocktime 的 Raw/VKSO 分别启动对应内核镜像，比较各自多轮测量的汇总值，不视作同轮配对实验。其每个 backend/build 的正式批次来自一次启动，31/15 轮重复描述的是该次启动内的变化。表 2 列出各组的重复层次与主指标。
 
@@ -315,7 +315,7 @@ PGOT 使用轮内 paired delta；LZ4、BCH 和 XZ 先在相同 outer round 内�
 
 | Experiment       | Primary comparison                                 | Repetitions and statistic                     | Primary metric               |
 | ---------------- | -------------------------------------------------- | --------------------------------------------- | ---------------------------- |
-| First touch      | Native DSO vs. kernel-backed Stub DSO              | 5 accepted batches × 100 calls; median        | TSC cycles and fault type    |
+| First touch      | Native DSO vs. kernel-backed Stub DSO              | 5 accepted batches; mean of batch medians | TSC cycles and fault type    |
 | Data-PGOT | Independent loads vs. dependent chains; direct/PGOT | 3,100 raw paired samples per configuration | paired cycles/access, IQR |
 | Func-PGOT | Stable target; direct/PGOT, two builds | 310 raw paired samples per build | paired cycles/call, IQR |
 | Work placement | Before/inside/after target, varied useful work | 3 outer runs × 15 repeats | paired cycles/iteration, IQR |
@@ -334,9 +334,9 @@ Page grafting 改变对象的物理后备，而应用仍通过标准 DSO 调用�
 
 三种状态分别隔离不同成本。Hot 保留已有 PTE，用于检查稳态调用是否引入额外路径；PTE cold 通过 MADV_DONTNEED 移除 PTE、保留 resident backing，用于比较按需安装页表的成本；Post drop-caches 进一步清理普通 file cache，用于检验内核页面既有 residency 在文件缓存被逐出后是否仍可利用。每个样本记录 minor/major-fault counters，先按预期 fault class 筛选，再执行基准的 IQR filtering，避免将实际不同的缺页状态混入同一组。
 
-**Table 3: First-touch latency and observed fault class.** Latency is measured around one target call after loading and symbol resolution. P25–P75 gives the interquartile interval. Fault counts are per measured call.
+**Table 3: First-touch latency and retained fault class.** Latency columns average the within-batch median and P25/P75 order statistics over five accepted batches after fault-class and IQR filtering. Fault counts describe retained calls. Timing covers one target call after loading and symbol resolution.
 
-| 状态 | Backend | Median cycles | P25–P75 cycles | Minor / major faults |
+| 状态 | Backend | Mean batch median (cycles) | Mean batch P25–P75 (cycles) | Minor / major faults |
 | --- | --- | --- | --- | --- |
 | hot | Native | 71 | 69–71 | 0 / 0 |
 | hot | Stub | 71 | 69–71 | 0 / 0 |
@@ -345,7 +345,7 @@ Page grafting 改变对象的物理后备，而应用仍通过标准 DSO 调用�
 | post-drop | Native | 701069 | 669200–708383 | 0 / 1 |
 | post-drop | Stub | 13094 | 12319–13882 | 1 / 0 |
 
-表 3 中，两种 DSO 的 hot call 均为 71 cycles；PTE cold 时均触发一个 minor fault，延迟差不足 1%。这与 grafting 不增加稳态执行步骤、首次访问继续使用原生 fault path 的设计一致。Post drop-caches 改变的是后备驻留状态：Native 需要 disk-backed major fault，Stub 则仍通过 minor fault 安装 resident kernel page。此时延迟分别为 701,069 和 13,094 cycles，受控 first-touch 延迟比为 53.5×。该收益来自既有 residency，hot call 无需这一步工作。
+表 3 中，两种 DSO 的 hot call 批次中位数均值均为 71 cycles；PTE cold 保留的单次 minor-fault 样本对应均值相差不足 1%。这与 grafting 不增加稳态执行步骤、首次访问继续使用原生 fault path 的设计一致。Post drop-caches 下，Native 的 major-fault 样本与 Stub 的 resident-page minor-fault 样本对应均值分别为 701,069 和 13,094 cycles，受控 first-touch 延迟比为 53.5×。该差异反映既有 residency 在所选 fault class 下的收益。
 
 为解释 fault latency，我们另行采集 PMU 和 function-graph trace，避免其插桩影响主要延迟测量。Stub 从 PTE cold 到 Post drop-caches 的 retired instructions 仅由 5,729 增至 5,797，而 L1D/LLC misses 由 1.00/0 增至 62.79/17.61。这支持残余 13K cycles 与更冷的 cache/metadata 状态有关，而非大量新增软件工作；PMU 的 on-CPU cycles 与包含等待时间的 elapsed TSC latency 分开解释。Function-graph tracing 确认两种 PTE-cold case 都进入标准 file-backed minor-fault path，仅用于路径分析。
 
@@ -360,7 +360,7 @@ Page grafting 改变对象的物理后备，而应用仍通过标准 DSO 调用�
 | post-drop | Native | 26725.86 | 774.83 | 96.97 |
 | post-drop | Stub | 5797.14 | 62.79 | 17.61 |
 
-**Takeaway.** Page grafting 对 hot call 和 resident minor fault 不增加可测成本；其启动收益来自 kernel code 的既有 residency，而不是一条特殊的用户态 fast path。
+**Takeaway.** Hot call 的批次中位数均值相同，resident minor fault 的对应均值接近；受控 first-touch 的差异来自 kernel code 的既有 residency。
 
 ## Dependency Adaptation Overhead
 

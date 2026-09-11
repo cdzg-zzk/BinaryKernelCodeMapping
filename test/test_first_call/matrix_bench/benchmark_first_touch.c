@@ -38,6 +38,7 @@ struct sample {
     uint64_t cycles;
     long minflt;
     long majflt;
+    int preparation_status;
 };
 
 static volatile uint32_t result_sink;
@@ -79,12 +80,13 @@ static inline uint64_t rdtsc_end(void)
 static void usage(const char *prog)
 {
     fprintf(stderr,
-            "Usage: %s -t <stub|native> -s <hot|pte-cold|post-drop> [-n runs]\n"
+            "Usage: %s -t <stub|native> -s <hot|pte-cold|post-drop> [-n runs] [-o samples.csv]\n"
             "\n"
             "Conditions:\n"
             "  hot        PTE is present before the measured call.\n"
             "  pte-cold   Function PTE is removed with madvise; backing page remains resident.\n"
             "  post-drop  Function PTE is removed, then sync+drop_caches is executed.\n"
+            "  -o         Save all attempted samples in acquisition order; file must be new.\n"
             "\n"
             "DSO paths can be overridden with STUB_DSO and NATIVE_DSO.\n",
             prog);
@@ -148,14 +150,16 @@ static int sample_has_expected_faults(const struct target_spec *target,
     return 0;
 }
 
-static void evict_func_page(void *func_ptr)
+static int evict_func_page(void *func_ptr)
 {
     long page_size = sysconf(_SC_PAGESIZE);
     void *aligned = (void *)((uintptr_t)func_ptr & ~((uintptr_t)page_size - 1));
 
     if (madvise(aligned, (size_t)page_size, MADV_DONTNEED) != 0) {
         perror("madvise(MADV_DONTNEED)");
+        return -1;
     }
+    return 0;
 }
 
 static int drop_page_cache(void)
@@ -181,11 +185,11 @@ static int prepare_condition(enum condition_kind condition, xxh32_func func,
     case COND_HOT:
         return 0;
     case COND_PTE_COLD:
-        evict_func_page((void *)func);
-        return 0;
+        return evict_func_page((void *)func);
     case COND_POST_DROP:
-        evict_func_page((void *)func);
-        return drop_page_cache();
+        if (evict_func_page((void *)func) != 0)
+            return -1;
+        return drop_page_cache() == 0 ? 0 : -2;
     }
     return -1;
 }
@@ -197,7 +201,8 @@ static struct sample measure_once(enum condition_kind condition, xxh32_func func
     struct rusage before;
     struct rusage after;
 
-    if (prepare_condition(condition, func, input, length, seed) != 0) {
+    s.preparation_status = prepare_condition(condition, func, input, length, seed);
+    if (s.preparation_status != 0) {
         s.cycles = UINT64_MAX;
         return s;
     }
@@ -212,6 +217,31 @@ static struct sample measure_once(enum condition_kind condition, xxh32_func func
     s.minflt = after.ru_minflt - before.ru_minflt;
     s.majflt = after.ru_majflt - before.ru_majflt;
     return s;
+}
+
+/* Called after sampling and before print_statistics sorts its input. */
+static int write_samples(FILE *stream, const struct target_spec *target,
+                         enum condition_kind condition,
+                         const struct sample *samples, int count)
+{
+    if (!stream)
+        return 0;
+    fprintf(stream, "sample,target,condition,preparation_status,cycles,minflt,majflt\n");
+    for (int i = 0; i < count; i++) {
+        const struct sample *s = &samples[i];
+        fprintf(stream, "%d,%s,%s,%d,", i, target->name,
+                condition_name(condition), s->preparation_status);
+        if (s->preparation_status == 0)
+            fprintf(stream, "%lu,%ld,%ld\n", s->cycles, s->minflt, s->majflt);
+        else
+            fputs(",,\n", stream);
+    }
+    int failed = ferror(stream);
+    if (fclose(stream) != 0)
+        failed = 1;
+    if (failed)
+        fprintf(stderr, "failed to save raw samples\n");
+    return failed ? -1 : 0;
 }
 
 static int compare_sample_cycles(const void *a, const void *b)
@@ -330,9 +360,10 @@ int main(int argc, char **argv)
     enum condition_kind condition = COND_HOT;
     int have_condition = 0;
     int runs = 100;
+    const char *raw_path = NULL;
 
     int opt;
-    while ((opt = getopt(argc, argv, "t:s:n:h")) != -1) {
+    while ((opt = getopt(argc, argv, "t:s:n:o:h")) != -1) {
         switch (opt) {
         case 't':
             target = find_target(optarg);
@@ -342,6 +373,9 @@ int main(int argc, char **argv)
             break;
         case 'n':
             runs = atoi(optarg);
+            break;
+        case 'o':
+            raw_path = optarg;
             break;
         case 'h':
         default:
@@ -353,6 +387,15 @@ int main(int argc, char **argv)
     if (!target || !have_condition || runs <= 0) {
         usage(argv[0]);
         return 1;
+    }
+
+    FILE *raw = NULL;
+    if (raw_path) {
+        raw = fopen(raw_path, "wx");
+        if (!raw) {
+            perror("open raw sample output (must be a new file)");
+            return 1;
+        }
     }
 
     const char *path = getenv(target->path_env);
@@ -390,6 +433,7 @@ int main(int argc, char **argv)
     for (int i = 0; i < runs; i++) {
         samples[i] = measure_once(condition, func, input, length, seed);
         if (samples[i].cycles == UINT64_MAX) {
+            write_samples(raw, target, condition, samples, i + 1);
             free(input);
             free(samples);
             dlclose(handle);
@@ -397,6 +441,12 @@ int main(int argc, char **argv)
         }
     }
 
+    if (write_samples(raw, target, condition, samples, runs) != 0) {
+        free(input);
+        free(samples);
+        dlclose(handle);
+        return 1;
+    }
     print_statistics(target, condition, samples, runs);
 
     free(input);

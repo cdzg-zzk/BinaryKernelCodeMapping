@@ -147,6 +147,12 @@ Evaluation 的 Experimental Setup and Measurement 已补入实际 owner 生命�
 
 first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛选，适合估计给定 fault class 的条件延迟。应一并报告总尝试数、各原因剔除数和未筛选分布；不能用过滤后的结果来声称真实 p99 或“永不发生某种 fault”。若原始日志没有保留被丢弃样本，后续采集需补记录，不能反推。
 
+**first-touch 原始证据已核对：** `Grand_Median` 实为合格批次中位数的算术平均，`Avg_P25/P75/P95` 也是批次分位数的平均，并非所有调用合并后的分位数。已修正正文表 2/3 和实验 Markdown 表的统计标签，数值不变。C 程序未输出逐样本记录，shell runner 未保存每次 stdout 或被拒批次，因此现有归档无法重建未筛选分布、总尝试数及各原因剔除数。后续 B 采样须保存所有调用及准备结果、每批次筛选/接受记录和实际亲和性，详见[first-touch 证据与采集修改](../test/evaluation/first-touch-evidence.md)。当前 latency runner 本身不绑核，归档也未记录外层亲和性；不能据此确认或否定历史 CPU-2 配置。该项需在新采集元数据中闭合，未修改计时体或启动补测。
+
+正文现将 CPU-2 配置限定到其他已列明实验；first-touch 表 2 保留 CSV 可证实的五个合格批次，不再把默认每批次 100 calls 写成已归档的运行参数。这些修订不推定历史运行使用了不同参数，而是保留可核验的描述范围。
+
+**first-touch 留档工具已准备：** C collector 新增筛选前的逐样本导出，保留准备失败状态；runner 保存全部尝试的 raw/stdout/stderr、筛选和接受记录、配置与实际亲和性，并保留所执行二进制。已有输出不覆盖，未达到合格批次数返回 incomplete，benchmark 错误保留记录并停止。三项合成输出测试及 shell 语法检查通过；这些检查不加载 DSO、不计时。C 编译和真实注册会话验证待 Clocktime 结束，未启动补测、未加入系统服务。无筛选/条件筛选/批次筛选的结果视图及 B 类整套会话集成仍待完成。
+
 当前 53.5× 是 Native 已被逐出文件缓存而 kernel backing 仍驻留的受控比例。正文已经写明这一点，无须再把它当成尚未修正的夸大。若将 residency 作为重要收益，再用受控内存压力测实际驻留、minor/major fault 发生率和未经延迟裁剪的 first-use 分布，并记账额外 pinned memory。可加入正常用户 DSO 的预取/常驻策略作为 residency 对照，连同其代价一起报告；不必把特权驻留策略当成默认应用配置。
 
 本类完成时：同一注册会话能关联阶段耗时、kernel/user PFN、共享/私有页计费和释放结果；setup 全程与机制阶段不重复相加；正常路径与针对性边界测试结果分开记录；first-touch 保留筛选前样本和剔除原因。内存压力是该 runner 的一种场景，依是否主张实际 residency 收益决定采集范围，不单独再建部署工具。PFN/权限诊断与无插桩性能采集分开执行。

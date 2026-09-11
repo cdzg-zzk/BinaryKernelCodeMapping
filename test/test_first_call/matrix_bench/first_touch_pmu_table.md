@@ -1,6 +1,6 @@
 # First-Touch Latency and PMU Results
 
-| Target | Condition | Faults (min/maj) | Lat. median cyc | Lat. P25-P75 | Lat. P95 | PMU TSC median cyc | Perf cycles | Instr. | L1I miss | L1D miss | LLC miss | iTLB miss |
+| Target | Condition | Retained faults (min/maj) | Mean batch median cyc | Mean batch P25-P75 | Mean batch P95 | PMU TSC median cyc | Perf cycles | Instr. | L1I miss | L1D miss | LLC miss | iTLB miss |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | native | hot | 0 / 0 | 71 | 69-71 | 73 | 69 | 4249.52 | 3918.00 | 37.38 | 0.10 | 0.00 | 8.21 |
 | stub | hot | 0 / 0 | 71 | 69-71 | 73 | 69 | 4271.21 | 3918.00 | 37.79 | 0.04 | 0.00 | 8.07 |
@@ -12,5 +12,6 @@
 Notes:
 
 - Latency columns come from `first_touch_results.csv`.
+- `Grand_Median`, `Avg_P25`, `Avg_P75` and `Avg_P95` are arithmetic means of the corresponding statistics from five accepted batches. They are not quantiles of pooled calls. Each batch first retains the expected fault class, then applies 1.5-IQR filtering; fault counts describe those retained calls.
 - PMU columns come from `pmc_results.csv`; all six groups have `Expected_Fault_Runs=30` and `Fault_Mismatches=0`.
 - `Perf cycles` are hardware counted on-CPU cycles. They are not identical to elapsed TSC latency, especially for major faults where the process may wait off-CPU.
