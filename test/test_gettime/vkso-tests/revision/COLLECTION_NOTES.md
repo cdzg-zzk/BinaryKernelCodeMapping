@@ -4,6 +4,23 @@ These notes document observed evidence and interpretation constraints. They do
 not change the frozen collection or remove any samples. The campaign remains
 in progress; these are not final multi-boot performance conclusions.
 
+## Independent normalized coverage audit
+
+`audit_coverage.py CAMPAIGN` checks completed boots against the full expected
+interface/scenario/metric/round matrix from the frozen protocol, including units,
+measurement protocol names, method and image identities. It also checks the
+completion records through `campaign.pending()`. It reads results only and is
+not part of the frozen collector or timed workload. Exit status 2 means the
+completed prefix passed but the campaign is still incomplete; 0 requires all
+planned boots to pass. Raw writer records, concurrency timing and PFN evidence
+still need their separate audits.
+
+The first three completed boots passed: 713 Raw READ rows, 1,426 combined
+VKSO/code-copy READ rows, and 3,300 Raw UPDATE rows. In-memory changes to real
+READ records verified rejection of a missing row, duplicate row, wrong round,
+wrong boot, unknown API and nonfinite value. These checks did not alter any
+collected data.
+
 ## Ordinary kernel reader targets
 
 The supplied VKSO `kernel/time/timekeeping.c` routes `ktime_get_ts64()`,
