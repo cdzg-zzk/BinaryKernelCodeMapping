@@ -31,6 +31,27 @@ therefore exercises the ordinary kernel entry paths into the adapted time
 implementation, including their entry/fallback logic, rather than timing a
 standalone arithmetic substitute.
 
+## Completed first block and second READ pair
+
+The campaign advanced automatically through step-005. The independent coverage
+audit passed all six completed, distinct boots (14,178 normalized rows). The
+first VKSO UPDATE boot, step-003, contains all 6,600 expected rows for VKSO and
+the code-copy comparison. The second READ pair, steps 004 and 005, used the
+planned reversed method/backend order. These are still partial-campaign data.
+
+For the completed step-003 code-copy method, its 285 writer summaries contain
+926,282 action-zero samples and zero other-action samples. All 270 concurrent
+windows (540 reader records) satisfy the reader/writer overlap check. The 270
+paced reader records range from 999,997.689 to 1,000,000.535 calls/s/reader, with
+zero late batches. Its ABI matrix passed, and the measured declared-page union
+is five PFNs, compared with three for VKSO. Both sequence diagnostic readers
+completed 100 million iterations for each method in steps 003 through 005.
+
+This check used the completed writer summaries and reader/diagnostic records;
+the code-copy writer CSVs still require a full raw-record audit of CPU placement,
+header counts and drops before the final report. No measurements were removed
+or collection parameters changed.
+
 ## First Raw and VKSO UPDATE measurements
 
 Audited on 2026-09-11 between the VKSO measurement and its code-copy comparison:
