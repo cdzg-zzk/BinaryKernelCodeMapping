@@ -130,3 +130,22 @@ core, and runtime `smt/active` is zero. Keep the log and topology evidence;
 substring matching `WARNING:` alone is insufficient to classify this as a
 runtime kernel fault. The collector separately rejects the kernel's WARN/oops
 taint bits. No kernel code was changed to suppress the diagnostic.
+
+## Reusable raw writer audit
+
+`audit_writer_records.py` is separate postprocessing, outside the frozen
+collector. It checks each completed UPDATE method's writer-file coverage,
+recorder header counts and drops, consecutive sample indices, actual CPU/action
+distributions, and recomputed statistics against both JSON summaries and
+normalized measurements. It keeps every action-zero sample in the main result;
+CPU0-only statistics for affected windows are sensitivity diagnostics.
+
+During step 006 collection, validation was limited to two closed step-003
+code-copy windows, with the validation process pinned to CPU 0. The paced
+monotonic/two-reader round 00 had 3,250 records, all on CPU 0. The saturated
+monotonic_raw/three-reader round 13 had 3,250 records, including one on CPU 2;
+the audit retained that record. A temporary one-window integration fixture
+passed. Temporary mutations of the header count, sample numbering, JSON mean
+and normalized mean were each rejected. The fixtures were removed without
+changing campaign data. Full method scans are deferred until timed collection
+ends; these checks do not constitute full-campaign validation.

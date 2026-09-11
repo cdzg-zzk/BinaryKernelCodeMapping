@@ -142,6 +142,24 @@ returns to the original ordinary kernel. `summary.csv` is the numeric analysis;
 the final experiment report still needs to inspect individual regressions,
 achieved fixed rates, writer CPU records, diagnostic output and footprint scope.
 
+After timed collection ends, run the independent coverage audit and the raw
+writer audit for every UPDATE method directory, for example:
+
+```sh
+python3 revision/audit_coverage.py revision/results/normal-campaign
+python3 revision/audit_writer_records.py revision/results/normal-campaign/step-003/compact-split
+```
+
+The coverage audit returns exit code 2 when the completed prefix passes but the
+campaign is still incomplete. The writer audit checks raw-file coverage against
+normalized observations, recorder counts, dropped samples, sample numbering,
+and recomputed statistics against both per-window JSON and normalized CSV.
+It reports actual CPU/action distributions and retains all action=0 observations
+in the main statistics. For windows containing other CPUs it also emits CPU0-only
+statistics as a sensitivity diagnostic; action=0 does not identify a unique
+caller. These postprocessing tools do not change the frozen collector. Reader
+window/rate checks, ABI diagnostics and PFN evidence still require separate review.
+
 To stop an active campaign, remove its `armed` file and stop the service before
 any next reboot. Retain partial output and inspect `failed.json`; do not convert
 an interrupted run into a completed sample. If completion requires a change to
