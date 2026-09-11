@@ -304,11 +304,11 @@ VKSO 的目标是让两个 execution domains 复用同一 resident implementatio
 
 实验运行在 Intel Core i7-1165G7（4 physical cores，SMT disabled）上，测量线程固定 CPU 2，使用 GCC 11.4.0。First-touch、PGOT、LZ4、BCH 和 XZ 使用 Linux 5.15.0-119-generic；clocktime 使用 Linux 5.15.198 及相同硬件，并通过 isolcpus、nohz_full 和 rcu_nocbs 隔离 CPU 2。固定执行位置用于降低迁移和 cache locality 变化对短路径的干扰。PGOT 另外比较 retpoline/no-retpoline builds，clocktime 比较 Normal/no-retpoline builds，以观察受保护间接分支相关的构建差异。
 
-PGOT 使用轮内 paired delta；LZ4、BCH 和 XZ 先在相同 outer run 内形成 kernel-backed/native ratio，再汇总跨轮次分布。Clocktime 的 Raw/VKSO 则分别启动对应内核镜像，比较各自多轮测量的汇总值，不视作同轮配对实验。其每个 backend/build 的正式批次来自一次启动，31/15 轮重复描述的是该次启动内的变化。表 2 列出各组的重复层次与主指标。
+PGOT 使用轮内 paired delta；LZ4、BCH 和 XZ 先在相同 outer round 内形成 kernel-backed/native ratio，再汇总跨轮次分布。各算法的这些轮次均在一次 owner module 装载和页面注册内完成。LZ4 为每个 round/block/backend 启动一个 benchmark 进程；BCH 和 XZ 则在单个进程中加载各 backend，再循环执行所有轮次。因此，这些分布描述一次部署内的变化。Clocktime 的 Raw/VKSO 分别启动对应内核镜像，比较各自多轮测量的汇总值，不视作同轮配对实验。其每个 backend/build 的正式批次来自一次启动，31/15 轮重复描述的是该次启动内的变化。表 2 列出各组的重复层次与主指标。
 
 计时前的功能校验用于确认两侧完成相同工作：PGOT copied closures 比较返回值、输出长度和字节；LZ4 交叉验证 compressor/decompressor；BCH 检查错误位置及 codeword recovery；XZ 检查完整输出；clocktime 对各镜像执行相同 ABI matrix。各节说明计时窗口，区分部署准备、目标调用和诊断插桩。表中的 IQR width 为 P75−P25，P25–P75 则列出区间端点；P10–P90 描述跨轮次比值的变化，这些统计量均不作为置信区间。延迟比值大于 1 表示 VKSO 更慢，吞吐比值大于 1 表示更快；百分比变化为相应比值减 1 后乘以 100%。
 
-**Table 2: Evaluation workloads, comparisons, and measurement units.** An outer run repeats a benchmark configuration. Inner calls amortize timing overhead and are not independent trials.
+**Table 2: Evaluation workloads, comparisons, and measurement units.** Algorithm outer rounds repeat measurements within one deployment. LZ4 starts a process per round/block/backend; BCH and XZ retain one process across rounds. Inner calls amortize timing overhead and are not independent trials.
 
 
 | Experiment       | Primary comparison                                 | Repetitions and statistic                     | Primary metric               |
@@ -318,9 +318,9 @@ PGOT 使用轮内 paired delta；LZ4、BCH 和 XZ 先在相同 outer run 内形�
 | Func-PGOT | Stable target; direct/PGOT, two builds | 310 raw paired samples per build | paired cycles/call, IQR |
 | Work placement | Before/inside/after target, varied useful work | 3 outer runs × 15 repeats | paired cycles/iteration, IQR |
 | Copied closures  | Origin vs. PGOT closure                            | 3 outer runs × 31 repeats                     | paired cycle delta           |
-| LZ4              | Kernel-backed vs. same-source/upstream DSO         | 7 outer runs; paired median, P10–P90          | MB/s ratio                   |
-| BCH              | Kernel-backed vs. same-source/author DSO           | 11 outer runs; paired median, P10–P90         | latency ratio                |
-| XZ Embedded      | Kernel-backed vs. same-source DSO                  | 3 inputs × 7 outer runs × 20 decodes          | MiB/s ratio                  |
+| LZ4              | Kernel-backed vs. same-source/upstream DSO         | 1 deployment, 7 rounds; paired median, P10–P90 | MB/s ratio                   |
+| BCH              | Kernel-backed vs. same-source/author DSO           | 1 deployment, 11 rounds; paired median, P10–P90 | latency ratio                |
+| XZ Embedded      | Kernel-backed vs. same-source DSO                  | 1 deployment; 3 inputs × 7 rounds × 20 decodes | MiB/s ratio                  |
 | Clocktime        | Shared-code design vs. native split implementation | 31 reader rounds; 15 writer/concurrent rounds | cycles/call or cycles/update |
 
 
@@ -426,9 +426,9 @@ Work-placement 实验的每个 work unit 是一段作用于同一 64-bit 值的�
 
 ## Same-source Kernel Algorithms
 
-本组实验将控制范围从同域 PGOT transformation 扩展到实际 resident-page export。LZ4 覆盖不同 block sizes 下的压缩与解压；BCH 通过纠错强度、错误数及 decode 阶段改变计算工作量；XZ 则覆盖带状态的完整流解析、解码、过滤和校验。三者共同检验不同 closure shapes 下的同源性能，计时对象均为内存中的算法组件。
+本组实验将控制范围从同域 PGOT transformation 扩展到实际 resident-page export。LZ4 覆盖不同 block sizes 下的压缩与解压；BCH 通过纠错强度、错误数及 decode 阶段改变计算工作量；XZ 则覆盖带状态的完整流解析、解码、过滤和校验。三者共同检验不同 closure shapes 下的同源性能，计时对象均为内存中的算法组件。专用 owner modules 承载可导出实现，系统原有算法仍保留，因此本组衡量导出后的执行成本。
 
-主对照采用同一 Linux source 构建的普通 user-space DSO，使算法版本保持一致；独立 upstream/author implementations 只提供用户态性能参照。每次正式 run 都重新加载 owner module、解析 runtime addresses、执行 closure checks、构造 sparse DSO、替换页面，并在退出后恢复。该流程确认被测调用确实使用 resident kernel pages，但部署与恢复在计时窗口之外，以下结果衡量装载后的算法性能。
+主对照采用同一 Linux source 及对应适配代码构建的普通 user-space DSO，使算法版本保持一致；独立 upstream/author implementations 提供用户态性能参照。每次完整 runner 执行加载一次 owner module、解析 runtime addresses、检查闭包、构造 sparse DSO 并注册页面，随后在该部署中完成所有 outer rounds，退出时恢复映射并卸载 owner。输出校验、运行时符号地址和 page-map 记录分别检查功能与部署目标。部署与恢复在计时窗口之外，以下结果衡量一次部署内装载后的算法性能。
 
 ### LZ4
 
@@ -500,13 +500,13 @@ Kernel-backed 与 same-source native 使用相同 adapted source；author standa
 | decode-precomputed | 7 | 2781.25 | 2953.63 | 1.065 | 1.061–1.078 | 1.095 |
 | decode-precomputed | 8 | 3620.21 | 3882.10 | 1.078 | 1.071–1.086 | 1.095 |
 
-表 10–11 将 initialization、encode 和两种 decode 路径分开呈现。Encode 接近同源 native；full decode 在 t=4 时略快，在 t=8 时慢约 0.3%–5.4%。较短的 precomputed path 对 t 更敏感：t=4 大多更快或接近，而 t=8 的 1–8 error cases 均变慢，配对增量约为 5.5%–20.9%，其中 2-error case 最大。该变化并非所有 BCH 路径共有，但也不止一个孤立慢点。分阶段结果将需要进一步分析的成本定位到较强纠错配置的 precomputed decode，而不是整个初始化或编码流程。
+表 10–11 将 initialization、encode 和两种 decode 路径分开呈现。Encode 接近同源 native；full decode 在 t=4 时略快，在 t=8 时慢约 0.3%–5.4%。较短的 precomputed path 对 t 更敏感：t=4 大多更快或接近，而 t=8 的 1–8 error cases 均变慢，配对增量约为 5.5%–20.9%，其中 2-error case 最大。该例在 11 轮中均较慢，各轮比值为 1.078–1.519。该变化并非所有 BCH 路径共有，但也不止一个孤立慢点。分阶段结果将需要进一步分析的成本定位到较强纠错配置的 precomputed decode，而不是整个初始化或编码流程。
 
 ### XZ Embedded
 
 XZ 使用完整 Linux 5.15 XZ Embedded single-call decoder，闭包覆盖 LZMA2、x86 BCJ 和 CRC32。相比单个 transform，它将 format parsing、range decoding、dictionary、filter 和 integrity check 放在同一调用中。输入选择 bash、libc.so.6 和 python3 三个真实二进制文件，统一预先压缩为启用 x86 BCJ、CRC32 和 1 MiB LZMA2 dictionary 的流，使两侧面对完全相同的字节与解码配置。
 
-Same-source native DSO 与 kernel-backed DSO 各先完成一次不计时解压，再执行 20 次 timed decodes。压缩、decoder allocation 和 CRC-table initialization 均在计时之外；每次 timed iteration 包含 xz_dec_reset 和一次完整 xz_dec_run。七个 outer runs 轮换 backend 顺序，共形成 21 组 matched pairs。每组均验证 consumed/produced lengths、全部 output bytes 以及两侧 guard regions；DSO audit 确认四个 reusable pages、五个 exports 和 `__kmalloc`、`kfree`、`memcpy`、`memmove` 四类 private helper relocations。后者描述完整导出依赖，性能窗口则聚焦已经初始化的 decoder。
+Same-source native DSO 与 kernel-backed DSO 各先完成一次不计时解压，再执行 20 次 timed decodes。压缩、decoder allocation 和 CRC-table initialization 均在计时之外；每次 timed iteration 包含 xz_dec_reset 和一次完整 xz_dec_run。七个 outer rounds 轮换 backend 顺序，共形成 21 组 matched pairs。每组均验证 consumed/produced lengths、全部 output bytes 以及两侧 guard regions；DSO audit 确认四个 reusable pages、五个 exports 和 `__kmalloc`、`kfree`、`memcpy`、`memmove` 四类 private helper relocations。后者描述完整导出依赖，性能窗口则聚焦已经初始化的 decoder。
 
 **Table 12: XZ Embedded decoding throughput.** Absolute throughput is in MiB/s. Each ratio is the median of seven matched-run ratios. P10–P90 describes their across-run variation. Higher ratios favor VKSO.
 
