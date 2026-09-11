@@ -4,6 +4,16 @@ These notes document observed evidence and interpretation constraints. They do
 not change the frozen collection or remove any samples. The campaign remains
 in progress; these are not final multi-boot performance conclusions.
 
+## Ordinary kernel reader targets
+
+The supplied VKSO `kernel/time/timekeeping.c` routes `ktime_get_ts64()`,
+`ktime_get_raw_ts64()` and `ktime_get_coarse_ts64()` through
+`vkso_time_get_root()` for monotonic, raw and coarse clocks respectively. These
+are the three actual exported APIs called by the new test module. The module
+therefore exercises the ordinary kernel entry paths into the adapted time
+implementation, including their entry/fallback logic, rather than timing a
+standalone arithmetic substitute.
+
 ## First Raw and VKSO UPDATE measurements
 
 Audited on 2026-09-11 between the VKSO measurement and its code-copy comparison:
