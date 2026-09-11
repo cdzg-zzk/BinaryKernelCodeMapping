@@ -151,7 +151,9 @@ first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛�
 
 正文现将 CPU-2 配置限定到其他已列明实验；first-touch 表 2 保留 CSV 可证实的五个合格批次，不再把默认每批次 100 calls 写成已归档的运行参数。这些修订不推定历史运行使用了不同参数，而是保留可核验的描述范围。
 
-**first-touch 留档工具已准备：** C collector 新增筛选前的逐样本导出，保留准备失败状态；runner 保存全部尝试的 raw/stdout/stderr、筛选和接受记录、配置与实际亲和性，并保留所执行二进制。已有输出不覆盖，未达到合格批次数返回 incomplete，benchmark 错误保留记录并停止。三项合成输出测试及 shell 语法检查通过；这些检查不加载 DSO、不计时。C 编译和真实注册会话验证待 Clocktime 结束，未启动补测、未加入系统服务。无筛选/条件筛选/批次筛选的结果视图及 B 类整套会话集成仍待完成。
+**first-touch 留档工具已准备：** C collector 新增筛选前的逐样本导出，保留准备失败状态；runner 保存全部尝试的 raw/stdout/stderr、筛选和接受记录、配置与实际亲和性，并保留所执行二进制。已有输出不覆盖，未达到合格批次数返回 incomplete，benchmark 错误保留记录并停止。三项合成输出测试及 shell 语法检查通过；这些检查不加载 DSO、不计时。C 编译和真实注册会话验证待 Clocktime 结束，未启动补测、未加入系统服务。结果视图已在下述离线分析中补齐，B 类整套会话集成仍待完成。
+
+**first-touch 离线结果视图已补齐：** [分析脚本](../test/test_first_call/matrix_bench/analyze_first_touch.py)从 raw 独立重建 fault-class 和 IQR 筛选，并与批次 stdout、接受记录互相核对；分别给出全部已准备调用、预期 fault class、IQR 保留及合格批次样本的描述分布，另列批次统计量均值。准备失败不作为零延迟样本，未记入 ledger 的 raw 文件会报错。新增六项分析测试，连同三项留档测试共九项通过；测试发现并修复了 shell 统计解析提前关闭管道导致的偶发 exit 141。以上均使用合成输出验证，C 编译、真实会话验证、B 类集成和新实验数据仍待完成。
 
 当前 53.5× 是 Native 已被逐出文件缓存而 kernel backing 仍驻留的受控比例。正文已经写明这一点，无须再把它当成尚未修正的夸大。若将 residency 作为重要收益，再用受控内存压力测实际驻留、minor/major fault 发生率和未经延迟裁剪的 first-use 分布，并记账额外 pinned memory。可加入正常用户 DSO 的预取/常驻策略作为 residency 对照，连同其代价一起报告；不必把特权驻留策略当成默认应用配置。
 

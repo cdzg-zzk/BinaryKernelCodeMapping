@@ -102,7 +102,22 @@ overwriting existing results. Shell syntax validation also passed. These tests
 do not load either DSO or measure performance. C compilation and an actual
 registered-carrier validation are deferred until Clocktime collection ends.
 
-The postprocessing views in item 3, integration with the full group B session,
+`analyze_first_touch.py` now supplies the postprocessing views in item 3. It
+reconstructs filtering independently from raw samples, checks the decision
+ledger and stdout statistics, and separates pooled call distributions from
+mean batch statistics. The all-prepared view includes observed calls from
+rejected batches and counts each observed fault class; preparation failures
+are recorded separately. Missing raw/ledger coverage cannot silently pass.
+
+Six analysis tests and the three archiving tests passed. Synthetic archives
+demonstrate that rejected-batch long latencies survive in the unfiltered view,
+while fault and IQR exclusions remain explicit. They also exercise failed and
+incomplete collections and modified/missing observations. A test exposed an
+intermittent exit 141 caused by the shell parser closing its input early under
+`pipefail`; its extraction functions now consume the complete input. This fix
+does not change the acceptance criterion or numerical statistics.
+
+Integration with the full group B session, C compilation, live validation,
 and real collection remain pending. Any future figures must identify the
 revised protocol; the new code does not supply missing evidence for the old
 table. Whole-session costs, normal release and the separately planned boundary

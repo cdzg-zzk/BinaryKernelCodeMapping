@@ -71,7 +71,7 @@ echo "=========================================================="
 
 extract_value() {
   local label=$1
-  awk -F': ' -v label="$label" '$1 == label {print $2; exit}'
+  awk -F': ' -v label="$label" '!found && $1 == label {print $2; found=1}'
 }
 
 for target in "${TARGETS[@]}"; do
@@ -112,7 +112,7 @@ for target in "${TARGETS[@]}"; do
       expected=$(printf '%s\n' "$output" | extract_value "Expected-Fault Runs" | awk '{print $1}')
       filtered=$(printf '%s\n' "$output" | extract_value "Valid Runs (IQR)" | awk '{print $1}')
       mismatches=$(printf '%s\n' "$output" | extract_value "Fault Mismatches")
-      retained=$(printf '%s\n' "$output" | grep -oP '(?<=\()[0-9.]+(?=% retained)' | head -n1 || true)
+      retained=$(printf '%s\n' "$output" | extract_value "Valid Runs (IQR)" | awk '{gsub(/[()%]/, "", $2); print $2}')
 
       if [[ -z "$retained" || ! "$total" =~ ^[0-9]+$ || ! "$expected" =~ ^[0-9]+$ || \
             ! "$filtered" =~ ^[0-9]+$ || ! "$mismatches" =~ ^[0-9]+$ ]]; then
@@ -135,8 +135,8 @@ for target in "${TARGETS[@]}"; do
       p25=$(printf '%s\n' "$output" | extract_value "P25 Cycles")
       p75=$(printf '%s\n' "$output" | extract_value "P75 Cycles")
       p95=$(printf '%s\n' "$output" | extract_value "P95 Cycles")
-      minor=$(printf '%s\n' "$output" | awk -F': ' '$1 == "Avg Minor Faults" {print $2; exit}' | awk '{print $1}')
-      major=$(printf '%s\n' "$output" | awk -F': ' '$1 == "Avg Major Faults" {print $2; exit}' | awk '{print $1}')
+      minor=$(printf '%s\n' "$output" | extract_value "Avg Minor Faults" | awk '{print $1}')
+      major=$(printf '%s\n' "$output" | extract_value "Avg Major Faults" | awk '{print $1}')
 
       sum_median=$(awk "BEGIN {print $sum_median + $median}")
       sum_mean=$(awk "BEGIN {print $sum_mean + $mean}")

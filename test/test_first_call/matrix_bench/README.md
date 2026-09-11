@@ -77,6 +77,30 @@ collection, failure retention and existing-file preservation. C compilation
 and real Native/Stub validation of this revised protocol remain pending until
 the active Clocktime campaign ends. No new latency results have been collected.
 
+Analyze a saved latency collection without loading either DSO:
+
+```sh
+python3 analyze_first_touch.py first-touch-new.logs > first-touch-new.analysis.json
+```
+
+The analyzer reconstructs fault-class and per-batch IQR filtering from raw
+records, checking both the attempt ledger and printed batch statistics. It
+reports call counts, fault frequencies, exclusion counts and descriptive
+distributions for all prepared calls, expected-fault calls, IQR-retained calls
+and accepted-batch calls. Mean accepted-batch statistics appear separately
+from pooled call quantiles. Failed preparations are counted without assigning
+them zero latency. Exit 2 denotes an incomplete collection; exit 1 denotes
+inconsistent or unreadable evidence. It rejects unlogged raw files rather than
+silently omitting them. These are within-collection distributions, not
+independent-deployment confidence intervals.
+
+Six analysis tests passed with synthetic archives, including retained long
+latencies from rejected batches, fault-class exclusions, preparation failure,
+incomplete collection and changed/missing records. Together with the three
+archiving tests, the nine tests passed. Testing also exposed an occasional
+SIGPIPE/exit-141 failure in the old shell statistics parser; consuming the
+whole input fixed that pipeline behavior under `pipefail`.
+
 ### 2. PMU
 
 `benchmark_pmc` measures the same target/condition matrix, but enables hardware

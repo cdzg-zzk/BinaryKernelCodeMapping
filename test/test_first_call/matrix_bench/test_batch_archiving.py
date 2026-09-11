@@ -34,22 +34,27 @@ print('P25 Cycles: 20\\nP75 Cycles: 20\\nP95 Cycles: 20')
 '''
 
 
+def fixture_environment(root):
+    binary = root / 'benchmark_first_touch'
+    binary.write_text(FIXTURE)
+    binary.chmod(0o755)
+    environment = dict(os.environ, STUB_DSO='/synthetic/stub',
+                                NATIVE_DSO='/synthetic/native', CONDITIONS_OVERRIDE='hot',
+                                NUM_RUNS='10', TARGET_SUCCESSES='1', MAX_ATTEMPTS='2',
+                                THRESHOLD_PCT='90', CPU=str(min(os.sched_getaffinity(0))),
+                                CSV_FILE=str(root / 'result.csv'), LOG_DIR=str(root / 'records'))
+    environment.pop('FIXTURE_FAIL', None)
+    return environment
+
+
 class BatchArchivingTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
-        binary = self.root / 'benchmark_first_touch'
-        binary.write_text(FIXTURE)
-        binary.chmod(0o755)
         self.logs = self.root / 'records'
         self.output = self.root / 'result.csv'
-        self.environment = dict(os.environ, STUB_DSO='/synthetic/stub',
-                                NATIVE_DSO='/synthetic/native', CONDITIONS_OVERRIDE='hot',
-                                NUM_RUNS='10', TARGET_SUCCESSES='1', MAX_ATTEMPTS='2',
-                                THRESHOLD_PCT='90', CPU=str(min(os.sched_getaffinity(0))),
-                                CSV_FILE=str(self.output), LOG_DIR=str(self.logs))
-        self.environment.pop('FIXTURE_FAIL', None)
+        self.environment = fixture_environment(self.root)
 
     def run_fixture(self, **updates):
         return subprocess.run(['bash', str(RUNNER)], cwd=self.root,
