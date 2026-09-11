@@ -127,8 +127,14 @@ def resume(root, plan, config):
         requested += [(p, 'performance') for p in base.glob('cpufreq/policy*/scaling_governor')]
         for path, value in requested:
             if path.exists():
-                settings[path] = path.read_text()
-                path.write_text(value + '\n')
+                previous = path.read_text()
+                # Firmware-disabled turbo already reports 1 and rejects even
+                # an identical write. Preserve already satisfied settings.
+                if previous.strip() != value:
+                    path.write_text(value + '\n')
+                    settings[path] = previous
+                if path.read_text().strip() != value:
+                    raise ValueError(f'frequency setting did not take effect: {path}')
         # Allow boot services to finish before the collector's per-method stabilization.
         time.sleep(60)
         with (root / f"step-{step['index']:03d}.log").open('x') as log:
