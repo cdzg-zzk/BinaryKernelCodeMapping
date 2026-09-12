@@ -1,0 +1,85 @@
+make: Entering directory '/usr/src/linux-headers-5.15.0-119-generic'
+warning: the compiler differs from the one used to build the kernel
+  The kernel was built by: gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+  You are using:           gcc-11 (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_setStreamDecode()+0x22: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe()+0x10c: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe()+0x121: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe()+0x24b: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast()+0xd9: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast()+0xf0: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast()+0x1ca: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: LZ4_decompress_safe_withPrefix64k()+0x111: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: LZ4_decompress_safe_withPrefix64k()+0x126: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: LZ4_decompress_safe_withPrefix64k()+0x23e: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: LZ4_decompress_safe_withSmallPrefix()+0x117: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: LZ4_decompress_safe_withSmallPrefix()+0x12c: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: LZ4_decompress_safe_withSmallPrefix()+0x258: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_partial()+0x101: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_partial()+0x1b2: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_partial()+0x256: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_partial()+0x28e: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_partial()+0x3e8: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: LZ4_decompress_fast_extDict()+0xf8: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: LZ4_decompress_fast_extDict()+0x13e: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: LZ4_decompress_fast_extDict()+0x15d: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: LZ4_decompress_fast_extDict()+0x271: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: LZ4_decompress_fast_extDict()+0x2d1: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: LZ4_decompress_fast_extDict()+0x2fd: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_usingDict()+0x1b: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_usingDict()+0x23: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_continue()+0x68: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_continue()+0x170: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_continue()+0x1bd: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_continue()+0x1ee: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_continue()+0x220: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_continue()+0x3af: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_continue()+0x411: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_forceExtDict()+0xf4: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_forceExtDict()+0x10a: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_forceExtDict()+0x29c: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_forceExtDict()+0x308: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_forceExtDict()+0x32b: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_continue()+0x74: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_continue()+0x18b: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_continue()+0x1bc: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_continue()+0x289: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_continue()+0x2d3: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_continue()+0x423: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_usingDict()+0x1e: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_usingDict()+0x2d: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_usingDict()+0x35: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_usingDict()+0x40: 'naked' return found in RETHUNK build
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/module_meta.o
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_loadDict()+0xc1: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_loadDict()+0xd4: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_loadDict()+0x100: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_saveDict()+0x5a: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_saveDict()+0x75: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: LZ4_compress_fast_extState()+0x33: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: LZ4_compress_fast_extState()+0x19a: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: LZ4_compress_fast_extState()+0x1b1: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: LZ4_compress_fast_extState()+0x31f: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: LZ4_compress_fast_extState()+0x74e: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_compress_fast()+0x24: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_compress_default()+0x27: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_compress_fast_continue()+0x21b: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_compress_fast_continue()+0x255: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_compress_fast_continue()+0x677: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_compress_fast_continue()+0x8c7: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: LZ4_compress_destSize_generic()+0x22b: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: LZ4_compress_destSize_generic()+0x24f: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_compress_destSize()+0x2c: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_compress_destSize()+0x8a: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_compress_destSize()+0xb5: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_resetStream()+0x12: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/lz4_compress.o: warning: objtool: vkso_LZ4_resetStream()+0x15: 'naked' return found in RETHUNK build
+  LD [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/vkso_lz4.o
+  MODPOST /home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/Module.symvers
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/vkso_lz4.mod.o
+  LD [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/vkso_lz4.ko
+  BTF [M] /home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/vkso_lz4.ko
+Skipping BTF generation for /home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed/vkso_lz4.ko due to unavailability of vmlinux
+make: Leaving directory '/usr/src/linux-headers-5.15.0-119-generic'

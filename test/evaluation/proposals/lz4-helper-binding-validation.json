@@ -1,0 +1,1274 @@
+{
+  "scope": "complete-owner isolated compilation and ELF inspection only; no module load, guest, modified application execution or performance observation",
+  "source_sha256": {
+    "Makefile": "c6164d88ccfeb58badbcf89df45ef670df4049acc18f0d7501386ef4797a757f",
+    "lz4defs.h": "816aebc7ad56ac4093706a5351495bc7f8541750005d8d1802778b3f01305c9f",
+    "lz4_compress.c": "1968cc47508e2597ac9c13a2df4b4d7e2a686086255f604686e6149adf8fde3e",
+    "lz4_decompress.c": "180151929d358dfa7692e5e28758457d7185ab50fdbb8faf375641c26a92f875",
+    "module_meta.c": "3f961a83c5d5032b6ec5c172fe5c4d122dc818b37d7ae70dfc3cbf4405733b49"
+  },
+  "variants": {
+    "original": {
+      "module_sha256": "6db7a25f7b660b02cac0dbe3424469a22b85884263615df6ffe6382e116ad6b6",
+      "text_bytes": 21266,
+      "function_count": 21,
+      "functions": {
+        "LZ4_compress_destSize_generic": {
+          "bytes": 1386,
+          "offset": 6368,
+          "section": ".text"
+        },
+        "LZ4_compress_fast_extState": {
+          "bytes": 3837,
+          "offset": 7760,
+          "section": ".text"
+        },
+        "LZ4_decompress_safe_withPrefix64k": {
+          "bytes": 866,
+          "offset": 14544,
+          "section": ".text"
+        },
+        "LZ4_decompress_safe_withSmallPrefix": {
+          "bytes": 924,
+          "offset": 15424,
+          "section": ".text"
+        },
+        "LZ4_decompress_fast_extDict": {
+          "bytes": 920,
+          "offset": 16352,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_fast": {
+          "bytes": 653,
+          "offset": 13888,
+          "section": ".text"
+        },
+        "vkso_LZ4_compress_destSize": {
+          "bytes": 167,
+          "offset": 11696,
+          "section": ".text"
+        },
+        "vkso_LZ4_compress_fast_continue": {
+          "bytes": 5972,
+          "offset": 112,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_safe_forceExtDict": {
+          "bytes": 1179,
+          "offset": 18544,
+          "section": ".text"
+        },
+        "vkso_LZ4_compress_fast": {
+          "bytes": 38,
+          "offset": 11600,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_safe_continue": {
+          "bytes": 1463,
+          "offset": 19728,
+          "section": ".text"
+        },
+        "vkso_LZ4_resetStream": {
+          "bytes": 19,
+          "offset": 11872,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_safe_partial": {
+          "bytes": 999,
+          "offset": 12880,
+          "section": ".text"
+        },
+        "vkso_LZ4_setStreamDecode": {
+          "bytes": 36,
+          "offset": 11904,
+          "section": ".text"
+        },
+        "vkso_LZ4_loadDict": {
+          "bytes": 258,
+          "offset": 6096,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_fast_usingDict": {
+          "bytes": 37,
+          "offset": 17280,
+          "section": ".text"
+        },
+        "vkso_LZ4_saveDict": {
+          "bytes": 111,
+          "offset": 0,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_fast_continue": {
+          "bytes": 1202,
+          "offset": 17328,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_safe": {
+          "bytes": 917,
+          "offset": 11952,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_safe_usingDict": {
+          "bytes": 66,
+          "offset": 21200,
+          "section": ".text"
+        },
+        "vkso_LZ4_compress_default": {
+          "bytes": 41,
+          "offset": 11648,
+          "section": ".text"
+        }
+      },
+      "selected_three_function_body_text_pages": [
+        1,
+        2,
+        3
+      ],
+      "slots": [],
+      "executable_memory_helper_relocations": [
+        {
+          "section": ".text",
+          "offset": 82,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_saveDict",
+          "instruction": "call",
+          "operands": "0x56"
+        },
+        {
+          "section": ".text",
+          "offset": 645,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_fast_continue",
+          "instruction": "call",
+          "operands": "0x289"
+        },
+        {
+          "section": ".text",
+          "offset": 1753,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_fast_continue",
+          "instruction": "call",
+          "operands": "0x6dd"
+        },
+        {
+          "section": ".text",
+          "offset": 2339,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_fast_continue",
+          "instruction": "call",
+          "operands": "0x927"
+        },
+        {
+          "section": ".text",
+          "offset": 6290,
+          "type": 4,
+          "target": "memset",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_loadDict",
+          "instruction": "call",
+          "operands": "0x1896"
+        },
+        {
+          "section": ".text",
+          "offset": 6915,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "LZ4_compress_destSize_generic",
+          "instruction": "call",
+          "operands": "0x1b07"
+        },
+        {
+          "section": ".text",
+          "offset": 7801,
+          "type": 4,
+          "target": "memset",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "LZ4_compress_fast_extState",
+          "instruction": "call",
+          "operands": "0x1e7d"
+        },
+        {
+          "section": ".text",
+          "offset": 8154,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "LZ4_compress_fast_extState",
+          "instruction": "call",
+          "operands": "0x1fde"
+        },
+        {
+          "section": ".text",
+          "offset": 8490,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "LZ4_compress_fast_extState",
+          "instruction": "call",
+          "operands": "0x212e"
+        },
+        {
+          "section": ".text",
+          "offset": 11729,
+          "type": 4,
+          "target": "memset",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_destSize",
+          "instruction": "call",
+          "operands": "0x2dd5"
+        },
+        {
+          "section": ".text",
+          "offset": 11884,
+          "type": 4,
+          "target": "memset",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_resetStream",
+          "instruction": "call",
+          "operands": "0x2e70"
+        },
+        {
+          "section": ".text",
+          "offset": 12214,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe",
+          "instruction": "call",
+          "operands": "0x2fba"
+        },
+        {
+          "section": ".text",
+          "offset": 13308,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_partial",
+          "instruction": "call",
+          "operands": "0x3400"
+        },
+        {
+          "section": ".text",
+          "offset": 13468,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_partial",
+          "instruction": "call",
+          "operands": "0x34a0"
+        },
+        {
+          "section": ".text",
+          "offset": 13857,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_partial",
+          "instruction": "call",
+          "operands": "0x3625"
+        },
+        {
+          "section": ".text",
+          "offset": 14099,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_fast",
+          "instruction": "call",
+          "operands": "0x3717"
+        },
+        {
+          "section": ".text",
+          "offset": 14811,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "LZ4_decompress_safe_withPrefix64k",
+          "instruction": "call",
+          "operands": "0x39df"
+        },
+        {
+          "section": ".text",
+          "offset": 15697,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "LZ4_decompress_safe_withSmallPrefix",
+          "instruction": "call",
+          "operands": "0x3d55"
+        },
+        {
+          "section": ".text",
+          "offset": 16584,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "LZ4_decompress_fast_extDict",
+          "instruction": "call",
+          "operands": "0x40cc"
+        },
+        {
+          "section": ".text",
+          "offset": 16643,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "LZ4_decompress_fast_extDict",
+          "instruction": "call",
+          "operands": "0x4107"
+        },
+        {
+          "section": ".text",
+          "offset": 16934,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "LZ4_decompress_fast_extDict",
+          "instruction": "call",
+          "operands": "0x422a"
+        },
+        {
+          "section": ".text",
+          "offset": 16986,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "LZ4_decompress_fast_extDict",
+          "instruction": "call",
+          "operands": "0x425e"
+        },
+        {
+          "section": ".text",
+          "offset": 17690,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_fast_continue",
+          "instruction": "call",
+          "operands": "0x451e"
+        },
+        {
+          "section": ".text",
+          "offset": 17862,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_fast_continue",
+          "instruction": "call",
+          "operands": "0x45ca"
+        },
+        {
+          "section": ".text",
+          "offset": 18253,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_fast_continue",
+          "instruction": "call",
+          "operands": "0x4751"
+        },
+        {
+          "section": ".text",
+          "offset": 18313,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_fast_continue",
+          "instruction": "call",
+          "operands": "0x478d"
+        },
+        {
+          "section": ".text",
+          "offset": 18782,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_forceExtDict",
+          "instruction": "call",
+          "operands": "0x4962"
+        },
+        {
+          "section": ".text",
+          "offset": 19180,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_forceExtDict",
+          "instruction": "call",
+          "operands": "0x4af0"
+        },
+        {
+          "section": ".text",
+          "offset": 19294,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_forceExtDict",
+          "instruction": "call",
+          "operands": "0x4b62"
+        },
+        {
+          "section": ".text",
+          "offset": 19374,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_forceExtDict",
+          "instruction": "call",
+          "operands": "0x4bb2"
+        },
+        {
+          "section": ".text",
+          "offset": 20381,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_continue",
+          "instruction": "call",
+          "operands": "0x4fa1"
+        },
+        {
+          "section": ".text",
+          "offset": 20451,
+          "type": 4,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_continue",
+          "instruction": "call",
+          "operands": "0x4fe7"
+        },
+        {
+          "section": ".text",
+          "offset": 20840,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_continue",
+          "instruction": "call",
+          "operands": "0x516c"
+        },
+        {
+          "section": ".text",
+          "offset": 20913,
+          "type": 4,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_continue",
+          "instruction": "call",
+          "operands": "0x51b5"
+        }
+      ],
+      "executable_slot_references": [],
+      "data_memory_helper_relocations": [],
+      "other_undefined_executable_relocations": [
+        {
+          "section": ".text",
+          "offset": 3083,
+          "type": 4,
+          "target": "__ubsan_handle_out_of_bounds",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_fast_continue",
+          "instruction": "call",
+          "operands": "0xc0f"
+        },
+        {
+          "section": ".text",
+          "offset": 3429,
+          "type": 4,
+          "target": "__ubsan_handle_out_of_bounds",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_fast_continue",
+          "instruction": "call",
+          "operands": "0xd69"
+        },
+        {
+          "section": ".text",
+          "offset": 3495,
+          "type": 4,
+          "target": "__ubsan_handle_out_of_bounds",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_fast_continue",
+          "instruction": "call",
+          "operands": "0xdab"
+        }
+      ],
+      "command": [
+        "make",
+        "-C",
+        "/usr/src/linux-headers-5.15.0-119-generic",
+        "M=/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/original",
+        "CC=gcc-11",
+        "-j2",
+        "modules"
+      ]
+    },
+    "proposed": {
+      "module_sha256": "49ad6a6179f82fc09eacf7b5917efa19915936483ff11e0ce953b0591433501a",
+      "text_bytes": 21426,
+      "function_count": 21,
+      "functions": {
+        "LZ4_compress_fast_extState": {
+          "bytes": 3834,
+          "offset": 416,
+          "section": ".text"
+        },
+        "LZ4_compress_destSize_generic": {
+          "bytes": 1397,
+          "offset": 10352,
+          "section": ".text"
+        },
+        "LZ4_decompress_safe_withPrefix64k": {
+          "bytes": 870,
+          "offset": 13632,
+          "section": ".text"
+        },
+        "LZ4_decompress_safe_withSmallPrefix": {
+          "bytes": 928,
+          "offset": 14512,
+          "section": ".text"
+        },
+        "LZ4_decompress_fast_extDict": {
+          "bytes": 982,
+          "offset": 16464,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_fast": {
+          "bytes": 657,
+          "offset": 12960,
+          "section": ".text"
+        },
+        "vkso_LZ4_compress_destSize": {
+          "bytes": 183,
+          "offset": 11760,
+          "section": ".text"
+        },
+        "vkso_LZ4_compress_fast_continue": {
+          "bytes": 5985,
+          "offset": 4352,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_safe_forceExtDict": {
+          "bytes": 1185,
+          "offset": 18736,
+          "section": ".text"
+        },
+        "vkso_LZ4_compress_fast": {
+          "bytes": 38,
+          "offset": 4256,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_safe_continue": {
+          "bytes": 1419,
+          "offset": 19936,
+          "section": ".text"
+        },
+        "vkso_LZ4_resetStream": {
+          "bytes": 23,
+          "offset": 11952,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_safe_partial": {
+          "bytes": 1020,
+          "offset": 15440,
+          "section": ".text"
+        },
+        "vkso_LZ4_setStreamDecode": {
+          "bytes": 36,
+          "offset": 11984,
+          "section": ".text"
+        },
+        "vkso_LZ4_loadDict": {
+          "bytes": 276,
+          "offset": 0,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_fast_usingDict": {
+          "bytes": 37,
+          "offset": 17456,
+          "section": ".text"
+        },
+        "vkso_LZ4_saveDict": {
+          "bytes": 119,
+          "offset": 288,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_fast_continue": {
+          "bytes": 1223,
+          "offset": 17504,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_safe": {
+          "bytes": 921,
+          "offset": 12032,
+          "section": ".text"
+        },
+        "vkso_LZ4_decompress_safe_usingDict": {
+          "bytes": 66,
+          "offset": 21360,
+          "section": ".text"
+        },
+        "vkso_LZ4_compress_default": {
+          "bytes": 41,
+          "offset": 4304,
+          "section": ".text"
+        }
+      },
+      "selected_three_function_body_text_pages": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "slots": [
+        {
+          "name": "vkso_lz4_memset_slot",
+          "bytes": 8,
+          "section": ".data",
+          "offset": 128
+        },
+        {
+          "name": "vkso_lz4_memcpy_slot",
+          "bytes": 8,
+          "section": ".data",
+          "offset": 144
+        },
+        {
+          "name": "vkso_lz4_memmove_slot",
+          "bytes": 8,
+          "section": ".data",
+          "offset": 136
+        }
+      ],
+      "executable_memory_helper_relocations": [],
+      "executable_slot_references": [
+        {
+          "section": ".text",
+          "offset": 200,
+          "type": 2,
+          "target": "vkso_lz4_memset_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_loadDict",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 212,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 374,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_saveDict",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 378,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 459,
+          "type": 2,
+          "target": "vkso_lz4_memset_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "LZ4_compress_fast_extState",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 467,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 822,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "LZ4_compress_fast_extState",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 826,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 2273,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "LZ4_compress_fast_extState",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 2286,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 4878,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_fast_continue",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 4891,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 5997,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_fast_continue",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 6007,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 6589,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_fast_continue",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 6599,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 10894,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "LZ4_compress_destSize_generic",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 10907,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 11764,
+          "type": 2,
+          "target": "vkso_lz4_memset_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_destSize",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 11804,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 11956,
+          "type": 2,
+          "target": "vkso_lz4_memset_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_resetStream",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 11970,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 12290,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 12300,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 13167,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_fast",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 13177,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 13895,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "LZ4_decompress_safe_withPrefix64k",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 13905,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 14781,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "LZ4_decompress_safe_withSmallPrefix",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 14791,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 15867,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_partial",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 15874,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 16011,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_partial",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 16038,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 16433,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_partial",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 16440,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 16697,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "LZ4_decompress_fast_extDict",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 16712,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 16774,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "LZ4_decompress_fast_extDict",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 16782,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 17066,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "LZ4_decompress_fast_extDict",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 17089,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 17173,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "LZ4_decompress_fast_extDict",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 17185,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 17857,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_fast_continue",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 17872,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 18040,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_fast_continue",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 18048,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 18423,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_fast_continue",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 18447,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 18530,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_fast_continue",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 18545,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 18970,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_forceExtDict",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 18980,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 19375,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_forceExtDict",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 19404,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 19522,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_forceExtDict",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 19547,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 19678,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_forceExtDict",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [
+            19703
+          ],
+          "indirect_transfer_offset": 19547,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 20560,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_continue",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 20585,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 20652,
+          "type": 2,
+          "target": "vkso_lz4_memmove_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_continue",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 20659,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 20966,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_continue",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [],
+          "indirect_transfer_offset": 20995,
+          "indirect_transfer": "call rax"
+        },
+        {
+          "section": ".text",
+          "offset": 21137,
+          "type": 2,
+          "target": "vkso_lz4_memcpy_slot",
+          "target_undefined": false,
+          "addend": -4,
+          "function": "vkso_LZ4_decompress_safe_continue",
+          "instruction": "mov",
+          "operands": "rax, qword ptr [rip]",
+          "local_direct_jumps_before_transfer": [
+            21151
+          ],
+          "indirect_transfer_offset": 20585,
+          "indirect_transfer": "call rax"
+        }
+      ],
+      "data_memory_helper_relocations": [
+        {
+          "section": ".data",
+          "offset": 128,
+          "type": 1,
+          "target": "memset",
+          "target_undefined": true,
+          "addend": 0
+        },
+        {
+          "section": ".data",
+          "offset": 136,
+          "type": 1,
+          "target": "memmove",
+          "target_undefined": true,
+          "addend": 0
+        },
+        {
+          "section": ".data",
+          "offset": 144,
+          "type": 1,
+          "target": "memcpy",
+          "target_undefined": true,
+          "addend": 0
+        }
+      ],
+      "other_undefined_executable_relocations": [
+        {
+          "section": ".text",
+          "offset": 7336,
+          "type": 4,
+          "target": "__ubsan_handle_out_of_bounds",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_fast_continue",
+          "instruction": "call",
+          "operands": "0x1cac"
+        },
+        {
+          "section": ".text",
+          "offset": 7682,
+          "type": 4,
+          "target": "__ubsan_handle_out_of_bounds",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_fast_continue",
+          "instruction": "call",
+          "operands": "0x1e06"
+        },
+        {
+          "section": ".text",
+          "offset": 7748,
+          "type": 4,
+          "target": "__ubsan_handle_out_of_bounds",
+          "target_undefined": true,
+          "addend": -4,
+          "function": "vkso_LZ4_compress_fast_continue",
+          "instruction": "call",
+          "operands": "0x1e48"
+        }
+      ],
+      "command": [
+        "make",
+        "-C",
+        "/usr/src/linux-headers-5.15.0-119-generic",
+        "M=/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/proposed",
+        "CC=gcc-11",
+        "-j2",
+        "modules"
+      ]
+    }
+  },
+  "source_unchanged": true,
+  "user_abi_bridge": {
+    "command": [
+      "gcc-11",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "/home/zzk/BinaryKernelCodeMapping/make_dll/shim.c",
+      "/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-user-bridge.c",
+      "-ldl",
+      "-o",
+      "/home/zzk/BinaryKernelCodeMapping/test/evaluation/proposals/lz4-helper-binding-validation/libshim-proposed.so"
+    ],
+    "original_shim_sha256": "d0da4d0b3b6e384d43562d83fd6f6e25dddd008e58d02ae920abafb648b11075",
+    "addition_sha256": "8d3a18f1f9a54e26ffe3a52e4b6d40b81c7069d5f8b7e91047707b68e04830cb",
+    "library_sha256": "5afebd3c3de50a2d9ba8739da17732113b9a4a75a04bb6d96422479eec83de90",
+    "unique_entry_count": 3,
+    "all_entries_align_rsp_to_16_before_indirect_libc_call": true,
+    "original_shim_unchanged": true,
+    "scope": "linked and disassembled only; constructors and wrappers were not executed"
+  },
+  "status": "compile-and-relocation-shape-pass; runtime binding remains unverified",
+  "limits": [
+    "No new live KRG/DSO was generated; old guest KRG cannot describe the changed module.",
+    "Native kernel slot initialization and actual user target/ABI require runtime verification.",
+    "Existing sanitizer/instrumentation references are listed, not silently removed.",
+    "No performance or correctness claim follows from this compilation."
+  ],
+  "validation_note": "Initial ELF audit incorrectly required a memory-operand indirect call at each slot relocation and stopped after both complete owners compiled. The corrected audit verifies each actual RIP-relative load into rax reaches an indirect call/jump through rax, following local unconditional jumps and rejecting other intervening control transfers or a write to that register. The preserved build outputs were re-inspected without rebuilding."
+}

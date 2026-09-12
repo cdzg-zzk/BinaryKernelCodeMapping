@@ -1,0 +1,80 @@
+--- a/test/test_lz4/kmod/lz4defs.h
++++ b/test/test_lz4/kmod/lz4defs.h
+@@ -148,8 +148,29 @@
+  * as-if it were standard compliant, so it can inline it in freestanding
+  * environments. This is needed when decompressing the Linux Kernel, for example.
+  */
++#ifdef VKSO_LZ4_USERSPACE
+ #define LZ4_memcpy(dst, src, size) __builtin_memcpy(dst, src, size)
+ #define LZ4_memmove(dst, src, size) __builtin_memmove(dst, src, size)
++#define LZ4_memset(dst, value, size) memset(dst, value, size)
++#else
++/* Runtime-loaded kernel pointers become private DSO data relocations.
++ * Preserve the small constant copies used by the full algorithm's hot loop;
++ * the exact supported Kbuild output must contain no out-of-line helper call
++ * from the builtin arm. Dynamic and large operations use the private slots.
++ */
++extern void *(*vkso_lz4_memcpy_slot)(void *, const void *, size_t);
++extern void *(*vkso_lz4_memmove_slot)(void *, const void *, size_t);
++extern void *(*vkso_lz4_memset_slot)(void *, int, size_t);
++#define LZ4_memcpy(dst, src, size) \
++	((__builtin_constant_p(size) && \
++	  ((size) == 2 || (size) == 4 || (size) == 8 || (size) == 16)) \
++	 ? __builtin_memcpy((dst), (src), (size)) \
++	 : vkso_lz4_memcpy_slot((dst), (src), (size)))
++#define LZ4_memmove(dst, src, size) \
++	vkso_lz4_memmove_slot((dst), (src), (size))
++#define LZ4_memset(dst, value, size) \
++	vkso_lz4_memset_slot((dst), (value), (size))
++#endif
+ 
+ static FORCE_INLINE void LZ4_copy8(void *dst, const void *src)
+ {
+--- a/test/test_lz4/kmod/lz4_compress.c
++++ b/test/test_lz4/kmod/lz4_compress.c
+@@ -774,7 +774,7 @@
+  ********************************/
+ void LZ4_resetStream(LZ4_stream_t *LZ4_stream)
+ {
+-	memset(LZ4_stream, 0, sizeof(LZ4_stream_t));
++	LZ4_memset(LZ4_stream, 0, sizeof(LZ4_stream_t));
+ }
+ 
+ int LZ4_loadDict(LZ4_stream_t *LZ4_dict,
+@@ -850,7 +850,7 @@
+ 	if ((U32)dictSize > dict->dictSize)
+ 		dictSize = dict->dictSize;
+ 
+-	memmove(safeBuffer, previousDictEnd - dictSize, dictSize);
++	LZ4_memmove(safeBuffer, previousDictEnd - dictSize, dictSize);
+ 
+ 	dict->dictionary = (const BYTE *)safeBuffer;
+ 	dict->dictSize = (U32)dictSize;
+--- a/test/test_lz4/kmod/lz4_decompress.c
++++ b/test/test_lz4/kmod/lz4_decompress.c
+@@ -361,7 +361,7 @@
+ 				 * match fits entirely within external
+ 				 * dictionary : just copy
+ 				 */
+-				memmove(op, dictEnd - (lowPrefix - match),
++				LZ4_memmove(op, dictEnd - (lowPrefix - match),
+ 					length);
+ 				op += length;
+ 			} else {
+--- a/test/test_lz4/kmod/module_meta.c
++++ b/test/test_lz4/kmod/module_meta.c
+@@ -1,4 +1,14 @@
+ #include <linux/module.h>
++#include <linux/string.h>
++
++/* The normal module uses native kernel helpers. build_PIC_so converts these
++ * pointer initializers into explicit dynamic relocations in private data.
++ * Actual user helper/ABI identity is checked by the deployment observer;
++ * a dependency's name alone does not identify the implementation selected.
++ */
++void *(*vkso_lz4_memcpy_slot)(void *, const void *, size_t) = memcpy;
++void *(*vkso_lz4_memmove_slot)(void *, const void *, size_t) = memmove;
++void *(*vkso_lz4_memset_slot)(void *, int, size_t) = memset;
+ 
+ MODULE_LICENSE("Dual BSD/GPL");
+ MODULE_DESCRIPTION("Kbuild-compiled Linux 5.15 LZ4 code for vkso benchmarking");
