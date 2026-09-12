@@ -2,7 +2,7 @@
 
 ## Abstract
 
-操作系统内核和用户态经常重复实现 checksum、compression、format parsing 以及只读状态转换等计算。让应用通过 syscall 请求内核执行可以避免代码复制，却为高频短函数保留 privilege-crossing cost；重新维护一份用户态实现则会带来代码重复和 semantic drift。我们提出 VKSO，一种将**当前运行内核中已经驻留的机器码页**零拷贝重宿主为标准 user-space shared object 的机制。VKSO 从最终机器码出发，以 state、control 和 code-shape constraints 界定可复用的 binary closure；standard carrier 保留 ELF/loader 语义，page grafting 复用 resident physical pages，Shim 则显式承接 kernel/user execution environments 之间的依赖。Linux 5.15 原型的 microbenchmarks 表明，page grafting 对装载后的 hot path 没有可测开销，代表性 same-source kernel algorithms 在重宿主后保持相近性能。作为端到端案例，我们重构 Linux clocktime 子系统，使 kernel timekeeping entry 与用户态 fast path 共享同一 resident implementation，并以 VKSO 替换原生 x86-64 vDSO time/getcpu implementation；该改造将完整 product source 减少 13.29%，reader machine-code closure 减少 22.13%，20 个公开 READ 入口的等权平均开销约为 0.92%，同时观察到短路径代价与较大的 writer 启动间变化。这些结果说明，经过显式状态和环境解耦的内核计算可以由 kernel and user space 共享同一执行体，其代价取决于具体入口与使用负载。
+操作系统内核和用户态经常重复实现 checksum、compression、format parsing 以及只读状态转换等计算。让应用通过 syscall 请求内核执行可以避免代码复制，却为高频短函数保留 privilege-crossing cost；重新维护一份用户态实现则会带来代码重复和 semantic drift。我们提出 VKSO，一种将**当前运行内核中已经驻留的机器码页**零拷贝重宿主为标准 user-space shared object 的机制。VKSO 从最终机器码出发，以 state、control 和 code-shape constraints 界定可复用的 binary closure；standard carrier 保留 ELF/loader 语义，page grafting 复用 resident physical pages，Shim 则显式承接 kernel/user execution environments 之间的依赖。Linux 5.15 原型的字节一致 XXH32 对照得到相同的 hot-call 批次中位数均值；同源算法多数结果接近，但一个 BCH decode 配置的配对延迟增加约 20.9%。作为端到端案例，我们重构 Linux clocktime 子系统，使 kernel timekeeping entry 与用户态 fast path 共享同一 resident implementation，并以 VKSO 替换原生 x86-64 vDSO time/getcpu implementation；该改造将完整 product source 减少 13.29%，reader machine-code closure 减少 22.13%，20 个公开 READ 入口的等权平均开销约为 0.92%，同时观察到短路径代价与较大的 writer 启动间变化。这些结果说明，经过显式状态和环境解耦的内核计算可以由 kernel and user space 共享同一执行体，其代价取决于具体入口与使用负载。
 
 # Introduction
 
@@ -14,11 +14,11 @@ VKSO 的关键洞察是把三个通常耦合的问题分开处理。最终机器
 
 本文作出三项贡献：
 
-- 提出一组面向最终机器码的 state、control 和 code-shape constraints，将“可否复用”归结为可审核的 binary-closure eligibility problem；无法满足约束的目标不会进入重宿主流程。
+- 提出一组面向最终机器码的 state、control 和 code-shape constraints，将“可否复用”归结为可审核的 binary-closure eligibility problem，并规定目标需要满足的复用条件。
 - 设计并实现函数级 resident binary rehosting mechanism：构造可跨地址空间执行的代码闭包，以标准 Stub DSO 保留对象语义，通过 page grafting 复用同一物理执行体，并以 Shim 分离 kernel/user execution environments。
-- 用机制级 microbenchmarks、代表性 kernel algorithms 和完整 Linux clocktime case study 验证这一路径：first-touch 实验证明稳态调用不承担页面复用成本，copied closures 和同源算法给出适配开销的边界，clocktime 则检验共享状态与并发 publisher/readers 下的端到端行为。
+- 用机制级 microbenchmarks、代表性 kernel algorithms 和完整 Linux clocktime case study 评估这一路径：XXH32 hot-call 基准比较字节一致的两种代码后备，copied closures 和同源算法给出所测配置的适配成本，clocktime 则检验共享状态与并发 publisher/readers 下的端到端行为。
 
-在 Linux 5.15 原型上，hot call 保持在测量误差内，同源算法大多落在约 ±5% 内；clocktime 改造将完整 product source 和 reader closure 分别减少 13.29% 与 22.13%，20 个独立 READ 入口的等权平均开销为 0.92%。我们同时报告 first-touch、短入口、普通内核 coarse reader 和并发吞吐的代价，以及跨启动 writer 变化，区分代码复用与性能收益。
+在 Linux 5.15 原型的 XXH32 基准中，两种后备的 hot-call 批次中位数均值均为 71 cycles。同源算法多数结果接近，但 BCH 的 t=8、两错误预计算 decode 配对延迟比中位数为 1.209，即慢约 20.9%。Clocktime 改造将完整 product source 和 reader closure 分别减少 13.29% 与 22.13%，20 个公开 READ 入口的等权平均开销为 0.92%。我们同时报告 first-touch、短入口、普通内核 coarse reader 和并发吞吐的代价，以及跨启动 writer 变化，区分代码复用与性能收益。
 
 # Background and Motivation
 
@@ -293,12 +293,14 @@ Provider failure 发生在 shared core 读取 counter 时，由 context callback
 
 # Evaluation
 
-VKSO 的目标是让两个 execution domains 复用同一 resident implementation，同时保留普通用户态调用的性能。Evaluation 因此需要同时检验复用机制的成本、依赖适配的成本，以及消除双重实现后的系统收益。我们围绕四个问题组织实验：
+VKSO 的目标是让两个 execution domains 复用同一 resident implementation，同时保留普通用户态调用的性能。Evaluation 因此需要检验物理共享及其支持资源、调用与依赖适配的成本，以及完整功能和生命周期行为。我们围绕六个问题组织实验：
 
+- **物理共享能带来多少资源收益？** 用运行时 PFN 区分目标页共享与完整驻留成本，并计入普通 DSO 已有的进程间共享及 VKSO 的 owner、私有数据和支持页。
 - **页面重宿主是否改变调用与缺页成本？** 用字节一致的 Native/Stub DSO，分别测量 hot call、resident minor fault 和 cache eviction 后的 first touch。
 - **显式依赖绑定的稳态代价有多大？** 从 Data/Func-PGOT primitives 到完整 copied closures，测量间接访问、依赖链及 retpoline 对适配成本的影响。
-- **真实 kernel closures 能否保持同源实现的功能与性能？** 通过 LZ4、BCH 和 XZ 的实际 resident-page export，对照普通同源用户态 DSO，覆盖不同工作粒度、控制流和 helper dependencies。
-- **共享动态状态的完整子系统是否值得重构？** 以 clocktime 为案例，同时测量源码与机器码规模、公开 READ 入口、内核 UPDATE 和持续读写并存时双方的成本。
+- **真实 kernel closures 及其应用能否正确运行并保持性能？** 通过 LZ4、BCH 和 XZ 的实际 resident-page export，对照普通同源用户态 DSO，并以完整 LZ4 CLI 检查应用调用链与工作流。
+- **共享动态状态的完整子系统是否值得重构？** 以 clocktime 为案例，同时测量源码与机器码规模、公开 READ 入口、普通内核 reader、UPDATE 和持续读写并存时双方的成本。
+- **注册、保护与释放的实际行为是什么？** 检查映射权限、COW、正常恢复、owner 引用与部分失败，分别记录内核结果和管理器报告。
 
 ## Experimental Setup and Measurement
 
@@ -307,6 +309,8 @@ VKSO 的目标是让两个 execution domains 复用同一 resident implementatio
 PGOT 使用轮内 paired delta；LZ4、BCH 和 XZ 先在相同 outer round 内形成 kernel-backed/native ratio，再汇总跨轮次分布。各算法的这些轮次均在一次 owner module 装载和页面注册内完成。LZ4 为每个 round/block/backend 启动一个 benchmark 进程；BCH 和 XZ 则在单个进程中加载各 backend，再循环执行所有轮次。因此，这些分布描述一次部署内的变化。Clocktime 的 READ/UPDATE 各使用 Raw/VKSO 两类内核，每类五次启动，共 20 次；每次 VKSO 启动内测量共享与完整代码复制两种方法，并交替方法顺序。各指标先取启动内轮次中位数，再以启动为单位汇总。Raw 比较采用独立启动的中位数之比，VKSO/Copy 采用同启动比值的中位数。95% percentile bootstrap 区间重采样启动 10,000 次，配对比较保留同启动关系；这些逐项区间不作为等效性检验。表 2 列出各组的重复层次与主指标。
 
 算法测试由 runner 先加载 owner module，再注册 carrier 并运行 benchmark；benchmark 退出后，管理器执行映射恢复，runner 随后卸载 owner。Owner 在整个测量期间保持加载。当前管理器在发送注册和恢复请求后各等待两秒，算法表中的计时窗口位于目标计算内部，均不包含这些等待、carrier 构造和页面注册。First-touch 实验则从装载及符号解析完成后计时。因此，调用成本与完整部署耗时属于不同的测量范围。
+
+补充的映射、资源和功能验证使用各节注明的独立 KVM guest，并保留实际构建与 boot identity。Guest 中的计时字段用于验证采集流程，不加入物理机性能比较。
 
 计时前的功能校验用于确认两侧完成相同工作：PGOT copied closures 比较返回值、输出长度和字节；LZ4 交叉验证 compressor/decompressor；BCH 检查错误位置及 codeword recovery；XZ 检查完整输出；clocktime 对各镜像执行相同 ABI matrix。各节说明计时窗口，区分部署准备、目标调用和诊断插桩。表中的 IQR width 为 P75−P25，P25–P75 则列出区间端点；P10–P90 描述跨轮次比值的变化，这些统计量均不作为置信区间。延迟比值大于 1 表示 VKSO 更慢，吞吐比值大于 1 表示更快；百分比变化为相应比值减 1 后乘以 100%。
 
@@ -767,6 +771,8 @@ First-touch、PGOT、LZ4、BCH 和 XZ 均提供单命令入口，正式参数和
 
 表 3–8 来自 first-touch 汇总及 PGOT 各层的 paper tables；表 9–12 来自 LZ4、BCH 的配对结果及 XZ 的正式解码结果；表 13–14 来自 clocktime 的完整代码规模审计；表 15–20 来自 Normal 20-boot campaign 及[三方法结果报告](../../test/test_gettime/vkso-tests/revision/NORMAL_RESULTS.md)。历史 no-retpoline 单启动诊断按原归档身份保留。配对比值与差值直接沿用对应统计字段，不从已舍入的两侧中位数反推。复现时按各 README 的正式参数重新建立 owner module、Stub DSO 和页面映射，保留 closure checks，再生成相同口径的统计。
 
+表 21 来自[注册与恢复记录](../../test/evaluation/registration-evidence.md)，表 22 来自[BCH 多进程资源记录](../../test/evaluation/results/bch_resource-qemu-20260912-attempt03/README.md)。新增 BCH/XZ 功能、BCH 内核端对照和 LZ4 应用诊断分别保留实际输入、构建和完整输出检查；这些验证与表 9–12 的旧性能部署分开归档，未合并为新的性能重复。
+
 # Related Work
 
 **Shared objects, loaders, and binary transformation.** 传统 shared-library systems 通过位置无关代码、动态符号解析和 copy-on-demand mappings 在进程间共享文件后备代码；SunOS shared libraries 和后续 safe dynamic linking 工作奠定了这一对象语义与保护边界。[26,27] Luci 将普通 shared objects 用于 off-the-shelf 软件的动态更新，iFed 则把 dynamic loader 组织为可组合的 transformation passes，并在用户态 library 上优化 hugepage 和 relocation cost。[28,36] 这些工作改变的是用户态对象的版本或装载过程，仍以一份用户态 payload 为执行体。VKSO 沿用 loader-visible object semantics，却把 selected logical pages 重绑定到当前运行内核已经驻留的页；其核心问题因此不是设计另一种动态链接器，而是验证跨 privilege domain 的 backing、state 与 control-flow closure。
@@ -783,7 +789,7 @@ First-touch、PGOT、LZ4、BCH 和 XZ 均提供单命令入口，正式参数和
 
 VKSO 不是自动的 arbitrary-kernel-function exporter。当前 Analyzer 提供 ELF 依赖与引用检查，page identity 则由独立的运行时 PFN 观测验证。静态 PASS 不保证完整控制流或 helper 绑定，高层语义等价、数据可公开性和 helper 副作用也需要 export author 给出明确契约及相应验证。因而 VKSO 最适合计算密集或调用频繁、状态依赖能够收敛为少量显式输入的目标，不适合直接操作 kernel objects、devices、per-CPU state 或 privileged synchronization domains 的功能。
 
-Manifest 与 Stub DSO 绑定到一个确定的 final kernel build。Kernel update、module relink、compiler mitigation 或 boot-time rewriting 只要改变 closure hash、symbol layout 或 executable targets，都需要重新分析和构建；运行端拒绝 build identity 不匹配的 carrier。这一限制牺牲了“一份 DSO 跨任意内核版本”的可移植性，但避免了把 kernel internal ABI 假装成稳定接口。面向应用的 exported symbol version 仍可独立保持稳定，并由新 carrier 适配新的 kernel build。
+Carrier 的部署依赖指定的内核和 owner 构建及其运行地址。Kernel update、module relink、compiler mitigation 或 boot-time rewriting 改变代码、布局或调用目标后，需要重新分析和构建。当前 `vkso replace/exec` 在注册前从给定输入重新生成 carrier；注册端尚未实现独立的 build identity 匹配与拒绝机制。面向应用的 exported symbol version 可由新 carrier 保持，但 kernel internal ABI 及其运行地址仍是每次部署需要核实的输入。
 
 本文在 Linux/x86-64 上实现并评估完整原型。Design 所需的 shared-object carrier、object-backed mapping 和 first-touch installation 在主流 general-purpose OS 中普遍存在，但将 grafting hook、page lifetime 与 loader metadata 移植到其他内核仍需要系统特定实现；本文不把 Linux 原型的代码量或性能数字外推到其他 OS。类似地，当前数据只覆盖一台 x86-64 微架构，retpoline/ITS 的成本和不同 cache hierarchy 下的 first-touch 行为需要在更多硬件上复核。
 
@@ -799,7 +805,7 @@ Manifest 与 Stub DSO 绑定到一个确定的 final kernel build。Kernel updat
 
 # Conclusion
 
-VKSO 将跨 privilege domain 的代码复用转化为一个有明确边界的 binary-closure problem：state、control 和 code-shape constraints 决定什么可以复用，PIC-compatible construction、standard carrier、page grafting 和 Shim 决定如何复用。Linux 原型表明，经过这种解耦后，稳态调用不承担可测的页面复用开销；完整 clocktime 改造进一步说明，有状态子系统可以减少 source and machine-code duplication，并以约 0.92% 的公开入口等权平均开销共享执行体；短 reader 的代价和 writer 的跨启动变化决定了更具体的性能结论。无法隔离状态、闭合控制流或验证最终机器码的目标仍位于 reuse boundary 之外，这一边界是系统可部署性的组成部分。
+VKSO 将跨 privilege domain 的代码复用转化为一个有明确边界的 binary-closure problem：state、control 和 code-shape constraints 决定什么可以复用，PIC-compatible construction、standard carrier、page grafting 和 Shim 决定如何复用。字节一致的 XXH32 对照得到相同的 hot-call 批次中位数均值，真实算法的成本则随适配和构建条件变化。完整 clocktime 改造说明，有状态子系统可以减少 source and machine-code duplication，并以约 0.92% 的公开入口等权平均开销共享执行体；短 reader 的代价和 writer 的跨启动变化决定了更具体的性能结论。物理页共享也需要与支持资源一起计费，BCH 所测库与 owner 范围没有显示净节省。
 
 # References
 

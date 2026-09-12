@@ -221,6 +221,8 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 
 正文 Implementation 与 Applicability 已同步撤回“Analyzer 自动证明完整 binding/page identity、所有未解析间接跳转均拒绝”的断言。实际 checker 的 FAIL/INCOMPLETE/PASS 条件已从源码核实；间接控制流、插桩和 Shim 命中分开记录，PFN 验证属于运行时观测。完整依赖绑定仍是实现与验收要求，文字修正不代替该项工作。
 
+**构建身份表述已修正（2026-09-12）：** 当前 [`vkso`](../vkso) 的 replace/exec 会先重新构建 workspace；KRG 缓存指纹使用 boot ID 以及 vmlinux/模块的路径、大小、mtime，显式 `--krg` 则可复用给定图。它们不是 carrier 与当前内核的独立运行时身份校验。[manager](../page_cache_replace/manager.cpp) 的 page-map 检查关注语法、对齐、范围和文件内偏移；内核请求也没有 build identity 字段。实验 guest 固定检查内核 release，只能证明相应会话的前置条件。正文已删除“运行端拒绝 build identity 不匹配 carrier”的完成式，保留每次部署需核实构建及运行地址的要求。此核对没有修改工具或注册机制。
+
 **分析器性能方案待确认：** hex_dump_to_buffer 的未裁剪检查已超过 30 分钟，源码定位到直接目标查询反复解析整个 ELF 符号表。[缓存补丁方案](../test/evaluation/proposals/README.md)已准备并通过边界/实际镜像查询对照，尚未应用；已向用户请求允许这项基础分析器调整。保持符号顺序、首匹配及全部判定规则，若获准将保留原记录并在新目录重检固定八例。等待答复期间，原分析器继续运行，不以超时或删减候选替代完整检查。
 
 **执行更新（2026-09-12）：** 已启动固定 8 个 API 的普通账户顺序静态检查，输出 `test/evaluation/results/applicability-static-20260912/`；xxh32、crc32_le、sha256 的结果已落盘，完整矩阵仍在执行。[语义核查记录](../test/evaluation/applicability-semantics.md)已区分八例的 caller-owned state、只读依赖、callback 与 kernel-private state。当前 `/proc/kallsyms` 地址均被屏蔽为零，checker 的 runtime 展示列不可用；源码确认其只影响地址展示，静态判定仍使用配置 ELF。该 ELF 的 `.rodata` 带 WA 标志，不能把 checker 的 WRITABLE 标签当作内核运行时可写证据。未构造/注册 carrier，也未改变 checker 或访问限制。
@@ -262,6 +264,8 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 共同修改位置：[当前完整草稿](../paper/paper_content/Paper%20Draft.md)和各实验的结果报告。每一类完成后更新其对应段落，最后统一全文口径。A–E 的工作分类用于执行，不要求论文也照这个顺序组织。当前已修改正文中可由现有证据确定的算法重复单位、Table 2 和部署说明；数值表保留原归档身份。
 
 A 完成后，正文已更新重复单位与隔离核配置、Normal 三方法定义、普通内核 reader、多 reader/固定负载、writer action-zero 统计范围和 PFN 计费说明。表 13–14 保留已有代码规模证据，表 15–20 改用完整新 Normal 数据。摘要、Introduction 与 Conclusion 同步改为约 0.92% 的接口等权平均开销，并保留短入口代价和 writer 启动间变化；不再概括“不牺牲稳态性能”或“稳定降低 UPDATE 长尾”。B–E 的后续证据尚未补齐，F 整体验收仍待完成。
+
+**新增证据的整体口径核对（2026-09-12）：** 引言已将“无法满足约束的目标不会进入流程”改为设计条件，避免与当前 LZ4 错误放行相冲突。摘要、引言和结论的零开销表述限定到字节一致的 XXH32 hot-call 对照；摘要/引言保留 BCH 20.9% 的具体退化，结论明确 BCH 所测库/owner 范围没有净节省。Evaluation 的问题组织纳入资源账本、完整应用及注册行为，setup 与复现说明区分 KVM 功能/采集验证和旧物理机性能，补上表 21–22 的来源。性能表数据未改，新增内核端工具通过不视为物理机内核成本已经测得。
 
 正文的实验组织建议是：先列 RQ 与候选/闭包特征，再用简洁案例说明去重复的实际收益；接着给 setup 和机制成本、真实算法与 baseline、Clocktime 两端性能和并发，最后给边界验证表。正文保留 first-touch 三状态、Data/Func-PGOT、完整 copied closures、LZ4/BCH/XZ 和 Clocktime 的关键结果。work-placement sweep、细 PMU 表、sequence diagnostic 与重叠 SLOC 口径适合附录；此处仅建议，没有移动或删除现有内容。
 
