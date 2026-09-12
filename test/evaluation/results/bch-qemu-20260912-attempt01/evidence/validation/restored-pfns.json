@@ -1,0 +1,30 @@
+{
+  "library": "/work/validation/export/vkso/lib/libvkso_bch.so",
+  "pages": [
+    {
+      "file_offset": 4096,
+      "source_pfn": 1136691,
+      "restored_user_pfn": 1260106,
+      "source_backing_removed": true
+    },
+    {
+      "file_offset": 8192,
+      "source_pfn": 1136692,
+      "restored_user_pfn": 1161031,
+      "source_backing_removed": true
+    },
+    {
+      "file_offset": 12288,
+      "source_pfn": 1136694,
+      "restored_user_pfn": 1228736,
+      "source_backing_removed": true
+    },
+    {
+      "file_offset": 16384,
+      "source_pfn": 1137193,
+      "restored_user_pfn": 1228738,
+      "source_backing_removed": true
+    }
+  ],
+  "status": "pass"
+}

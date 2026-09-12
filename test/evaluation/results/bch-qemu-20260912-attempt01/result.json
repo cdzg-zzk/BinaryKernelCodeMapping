@@ -1,0 +1,19 @@
+{
+  "status": "pass",
+  "started_unix": 1789188728.4196675,
+  "qemu_returncode": 0,
+  "kernel_failure": false,
+  "guest_status_zero": true,
+  "guest_record": {
+    "scope": "exact119 private KVM; full BCH export and correctness only",
+    "kernel": "5.15.0-119-generic",
+    "uid": 0,
+    "boot_id": "0678fa45-6ef4-45f1-85ed-ce7f093a989e",
+    "stage": "normal-release",
+    "status": "pass",
+    "owner_text": "0xffffffffc0008000",
+    "restoration_verified": true,
+    "modules_after": "virtio_blk 20480 1 - Live 0xffffffffc0002000\n"
+  },
+  "finished_unix": 1789188773.2328022
+}

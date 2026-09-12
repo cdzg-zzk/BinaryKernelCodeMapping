@@ -1,0 +1,12 @@
+make: Entering directory '/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source'
+mkdir -p /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/binaries
+cc -O2 -g -std=gnu11 -Wall -Wextra src/bch_bench.c -ldl -o /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/binaries/bch-bench
+cc -O2 -g -fPIC -fno-stack-protector -fno-tree-vectorize -fno-tree-slp-vectorize -mno-sse -mno-sse2 -mno-mmx -mno-avx -mno-red-zone -mfunction-return=keep -mindirect-branch=keep -std=gnu11 -Wall -Wextra -include userspace/kernel_compat.h -Ivendor/linux-5.15/include -Ivendor/parrot-bch/standalone -shared \
+	adapted/bch.c -Wl,-Bsymbolic-functions \
+	-Wl,--version-script=userspace/kernel-native.map \
+	-Wl,-soname,libbch-kernel-native.so -o /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/binaries/libbch-kernel-native.so
+cc -O3 -g -fPIC -mtune=native -std=gnu11 -Wall -Wextra -Ivendor/parrot-bch/standalone -Ivendor/parrot-bch/include -shared \
+	vendor/parrot-bch/lib/bch.c -Wl,-Bsymbolic-functions \
+	-Wl,--version-script=userspace/standalone.map \
+	-Wl,-soname,libbch-author-standalone.so -o /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/binaries/libbch-author-standalone.so
+make: Leaving directory '/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source'

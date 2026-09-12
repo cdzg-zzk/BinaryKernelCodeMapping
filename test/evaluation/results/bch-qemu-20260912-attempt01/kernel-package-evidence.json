@@ -1,0 +1,12 @@
+{
+  "package": "linux-image-5.15.0-119-generic_5.15.0-119.129_amd64.deb",
+  "version": "5.15.0-119.129",
+  "source_uri": "http://archive.ubuntu.com/ubuntu/pool/main/l/linux-signed/linux-image-5.15.0-119-generic_5.15.0-119.129_amd64.deb",
+  "deb_sha256": "e64a8d87787574b972f7e9a739fcd256cc67de57bb7e1db84bccda8060e4de01",
+  "kernel_path": "/tmp/vkso-guest-kernel-119/extracted/boot/vmlinuz-5.15.0-119-generic",
+  "kernel_sha256": "6f8b2d5065ad56cb3c1652e88752817ccedf60ec9472be561972434b00ed27f5",
+  "kernel_size": 11704712,
+  "kernel_file": "/tmp/vkso-guest-kernel-119/extracted/boot/vmlinuz-5.15.0-119-generic: Linux kernel x86 boot executable bzImage, version 5.15.0-119-generic (buildd@lcy02-amd64-075) #129-Ubuntu SMP Fri Aug 2 19:25:20 UTC 2024, RO-rootFS, swap_dev 0XB, Normal VGA",
+  "installed_package": "linux-image-5.15.0-119-generic\t5.15.0-119.129\tinstall ok installed",
+  "operation": "apt-get download exact installed version; dpkg-deb extract locally; no install or host /boot read"
+}

@@ -1,0 +1,9 @@
+{
+  global:
+    init_bch;
+    free_bch;
+    encode_bch;
+    decode_bch;
+  local:
+    *;
+};

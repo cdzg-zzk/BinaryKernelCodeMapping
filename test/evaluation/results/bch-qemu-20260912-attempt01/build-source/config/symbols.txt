@@ -1,0 +1,5 @@
+# Linux 5.15 BCH public API, namespaced by the owner LKM.
+vkso_bch_init
+vkso_bch_free
+vkso_bch_encode
+vkso_bch_decode

@@ -1,0 +1,55 @@
+{
+  "library": "/work/validation/export/vkso/lib/libvkso_bch.so",
+  "pages": [
+    {
+      "file_offset": 4096,
+      "kernel_address": "0xffffffffc0008000",
+      "kind": "text",
+      "section": ".text",
+      "virtual_address": "0x7fe1c2e8a000",
+      "permissions": "r-xp",
+      "pagemap_entry": "0xa180000000115833",
+      "user_pfn": 1136691,
+      "kernel_pfn": 1136691,
+      "shared": true
+    },
+    {
+      "file_offset": 8192,
+      "kernel_address": "0xffffffffc0009000",
+      "kind": "text",
+      "section": ".text",
+      "virtual_address": "0x7fe1c2e8b000",
+      "permissions": "r-xp",
+      "pagemap_entry": "0xa180000000115834",
+      "user_pfn": 1136692,
+      "kernel_pfn": 1136692,
+      "shared": true
+    },
+    {
+      "file_offset": 12288,
+      "kernel_address": "0xffffffffc000a000",
+      "kind": "text",
+      "section": ".text",
+      "virtual_address": "0x7fe1c2e8c000",
+      "permissions": "r-xp",
+      "pagemap_entry": "0xa180000000115836",
+      "user_pfn": 1136694,
+      "kernel_pfn": 1136694,
+      "shared": true
+    },
+    {
+      "file_offset": 16384,
+      "kernel_address": "0xffffffffc000b000",
+      "kind": "rodata",
+      "section": ".rodata",
+      "virtual_address": "0x7fe1c2e8d000",
+      "permissions": "r--p",
+      "pagemap_entry": "0xa180000000115a29",
+      "user_pfn": 1137193,
+      "kernel_pfn": 1137193,
+      "shared": true
+    }
+  ],
+  "status": "pass",
+  "pagemap_read": "os.pread after each fault; no buffered stale adjacent entries"
+}

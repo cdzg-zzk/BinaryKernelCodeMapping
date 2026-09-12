@@ -1,0 +1,359 @@
+{
+  "scope": "full unchanged BCH correctness-only; no paper performance samples",
+  "host_euid": 1000,
+  "host_command": [
+    "test/evaluation/bch_qemu.py",
+    "--output",
+    "test/evaluation/results/bch-qemu-20260912-attempt01"
+  ],
+  "prepared_environment": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06",
+  "components": [
+    {
+      "source": "/tmp/vkso-guest-kernel-119/evidence.json",
+      "target": "kernel-package-evidence.json",
+      "sha256": "fa4c16970e724871acbaab60da56e92d56134f2b8d8ab2b03cc7ba27e72bdd79",
+      "bytes": 1002
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/adapted/bch.c",
+      "target": "build-source/adapted/bch.c",
+      "sha256": "b594b197dd5806fd9ad3204f2dab5b73e5d09b4a47852c1b1feb6fe627f8e4d7",
+      "bytes": 40766
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/Makefile",
+      "target": "build-source/kmod/Makefile",
+      "sha256": "936987e4b42a7d6e1dc62a22cc8ff6caf549fdfc1d3da02cd38b424307d3aad3",
+      "bytes": 882
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/module_meta.c",
+      "target": "build-source/kmod/module_meta.c",
+      "sha256": "e429056df1b1f643221067c2af5353d9688099d7779d775f94b517068003e4bc",
+      "bytes": 759
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/bch_impl.c",
+      "target": "build-source/kmod/bch_impl.c",
+      "sha256": "0d470aa957134a7734c31c1cead093f1dff8f7ddd7f05921211d00b0a8d87d35",
+      "bytes": 534
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/src/bch_bench.c",
+      "target": "build-source/src/bch_bench.c",
+      "sha256": "4d8581c01cacf6221a29b8c188a3ad5497c534578b3c07157245467751e181c6",
+      "bytes": 20265
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/userspace/standalone.map",
+      "target": "build-source/userspace/standalone.map",
+      "sha256": "b848596622fd57ed42b3bc67269580164556a43a9d2b798235c6fe00cfac7067",
+      "bytes": 91
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/userspace/kernel_compat.h",
+      "target": "build-source/userspace/kernel_compat.h",
+      "sha256": "f0e40c04d28c36622db8ea8a38380d4a0f9b07dae2ef83d6b79c0b5052c09a2b",
+      "bytes": 291
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/userspace/kernel-native.map",
+      "target": "build-source/userspace/kernel-native.map",
+      "sha256": "402ba4456afaaece6a3a5250ae4a212ca7b31a1306e75537988c163eb65cba6e",
+      "bytes": 91
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/linux-5.15/lib/bch.c",
+      "target": "build-source/vendor/linux-5.15/lib/bch.c",
+      "sha256": "3551caec7906dc9a768fe6b26d22ffaa35072ff819bf1edac3a1ca2665c139ff",
+      "bytes": 39266
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/linux-5.15/include/linux/bch.h",
+      "target": "build-source/vendor/linux-5.15/include/linux/bch.h",
+      "sha256": "4ccd9352123676facafc59fa0ee29673be62e8e597e65a495e0bd414f3187c22",
+      "bytes": 2152
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/parrot-bch/Documentation/bch/tu_bench.c",
+      "target": "build-source/vendor/parrot-bch/Documentation/bch/tu_bench.c",
+      "sha256": "93ef242c870af3655f9e8178a0103362bbbdadc0f91a293a6dcd9ffdd6382d16",
+      "bytes": 6908
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/parrot-bch/lib/bch.c",
+      "target": "build-source/vendor/parrot-bch/lib/bch.c",
+      "sha256": "2d41fa578fac4136cc58d34c9173d00f3d220502e1ac1406dd01c26a14882dcc",
+      "bytes": 36469
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/parrot-bch/standalone/asm/byteorder.h",
+      "target": "build-source/vendor/parrot-bch/standalone/asm/byteorder.h",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/parrot-bch/standalone/linux/slab.h",
+      "target": "build-source/vendor/parrot-bch/standalone/linux/slab.h",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/parrot-bch/standalone/linux/types.h",
+      "target": "build-source/vendor/parrot-bch/standalone/linux/types.h",
+      "sha256": "dd1e65241020275e480c9f023566ad3d27cad42dfac5d4d1b9c176732d1eede5",
+      "bytes": 20
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/parrot-bch/standalone/linux/init.h",
+      "target": "build-source/vendor/parrot-bch/standalone/linux/init.h",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/parrot-bch/standalone/linux/kernel.h",
+      "target": "build-source/vendor/parrot-bch/standalone/linux/kernel.h",
+      "sha256": "e202ce00935a78ac9f14f270de137dc758591e98555c0edf2e3927bd4afb29e8",
+      "bytes": 683
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/parrot-bch/standalone/linux/bch.h",
+      "target": "build-source/vendor/parrot-bch/standalone/linux/bch.h",
+      "sha256": "053248c68d1fa72d97680a9c99530ed4a3c920008bf6ff9d32ae709f512b6265",
+      "bytes": 2725
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/parrot-bch/standalone/linux/module.h",
+      "target": "build-source/vendor/parrot-bch/standalone/linux/module.h",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/parrot-bch/standalone/linux/bitops.h",
+      "target": "build-source/vendor/parrot-bch/standalone/linux/bitops.h",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/parrot-bch/include/linux/bch.h",
+      "target": "build-source/vendor/parrot-bch/include/linux/bch.h",
+      "sha256": "053248c68d1fa72d97680a9c99530ed4a3c920008bf6ff9d32ae709f512b6265",
+      "bytes": 2725
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/config/symbols.txt",
+      "target": "build-source/config/symbols.txt",
+      "sha256": "5b11fdff81610fff02c0de39baa12c2066f073a2f1e904ddea87065c88bc2383",
+      "bytes": 118
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/Makefile",
+      "target": "build-source/Makefile",
+      "sha256": "32a5160646d8ca5114d6919da4d44c7fa2c709d25701c118e673d543badc0c43",
+      "bytes": 1542
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/vkso",
+      "target": "payload/repo/vkso",
+      "sha256": "fb5e7a6d70d0abed8d55f7ab804cdbb134e453200935796928c377be6ea91d0f",
+      "bytes": 28779
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/kernel_cgd/function_checker/functions_checker.py",
+      "target": "payload/repo/kernel_cgd/function_checker/functions_checker.py",
+      "sha256": "d3780a8c7781c29d417313e066596c1f6249b5b05077e792446dbe0db37e100f",
+      "bytes": 36089
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/kernel_cgd/src/krg.cpp",
+      "target": "payload/repo/kernel_cgd/src/krg.cpp",
+      "sha256": "ef3e54459d37118105406b5c0b2dc7c7162eb140cdacf8ef589bc3b5b4028dee",
+      "bytes": 69090
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/kernel_cgd/src/krg",
+      "target": "payload/repo/kernel_cgd/src/krg",
+      "sha256": "584a689e1e8b1f20b892f992f639f8f4568b062306e66f945a844bb7d7bad6db",
+      "bytes": 252576
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/kernel_cgd/kerne_type/vkso_gen_types.py",
+      "target": "payload/repo/kernel_cgd/kerne_type/vkso_gen_types.py",
+      "sha256": "94ca24843566f5f533697032ab4df256923ea27295c3441fb6cbb527827e9e89",
+      "bytes": 33930
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/make_dll/build_PIC_so.py",
+      "target": "payload/repo/make_dll/build_PIC_so.py",
+      "sha256": "1efd26152cd34f5a2c6967a51631e0cec2affbeecaeb6f6b0d3982e581d1d580",
+      "bytes": 92883
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/make_dll/shim.c",
+      "target": "payload/repo/make_dll/shim.c",
+      "sha256": "d0da4d0b3b6e384d43562d83fd6f6e25dddd008e58d02ae920abafb648b11075",
+      "bytes": 4634
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/make_dll/shim.txt",
+      "target": "payload/repo/make_dll/shim.txt",
+      "sha256": "7b94c8a750d69fe23c3cd9afa000fc056b07a0948627840efceccb2b93125a6c",
+      "bytes": 969
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/page_cache_replace/page_cache_replace.ko",
+      "target": "payload/repo/page_cache_replace/page_cache_replace.ko",
+      "sha256": "adb851ea93db68b6abb4691e71ed738e77e8a594a4d5c5744a198f4247581d59",
+      "bytes": 597320
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/page_cache_replace/manager.cpp",
+      "target": "payload/repo/page_cache_replace/manager.cpp",
+      "sha256": "42ac22aa4130fb971e15ecca37137fe9ab3b8a31ca78eff5568c4b50fb520680",
+      "bytes": 27805
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/page_cache_replace/manager",
+      "target": "payload/repo/page_cache_replace/manager",
+      "sha256": "587c9826cad9655620f66a66f61b1cbf52cc4a69a5b148d1ba0d99b030ef9706",
+      "bytes": 2456768
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/helpers/footprint.py",
+      "target": "payload/helpers/footprint.py",
+      "sha256": "35017ef68a2d7ae028a6dc8e6ca0ebfe7b8d89c3b0398e3ae7fd5c19ecc728f5",
+      "bytes": 3654
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/helpers/vkso_kernel_reader.ko",
+      "target": "payload/helpers/vkso_kernel_reader.ko",
+      "sha256": "5f659b4a2d6edf95beafc890268266e3070658914a41f70f9a399559a2931a91",
+      "bytes": 252456
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/helpers/carrier.py",
+      "target": "payload/helpers/carrier.py",
+      "sha256": "0bf1ac5325ba90bfe94c0809e7c6a503e69c70ac64a1b710dbdebc83886197e9",
+      "bytes": 2825
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/vmlinux-5.15.0-119-generic",
+      "target": "payload/vmlinux-5.15.0-119-generic",
+      "sha256": "2bedb90c602a9ed82ceff21a11d3113c6b39bee59b8c6fa5c2dac005db9a6c98",
+      "bytes": 753608976
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/vkso_bch.ko",
+      "target": "payload/owner/vkso_bch.ko",
+      "sha256": "5a2e14f02c6f4b0f9e0ca0e5f7e6e7736bfaa64626e9f223fd6edfa6d4b85ffd",
+      "bytes": 187272
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/config/symbols.txt",
+      "target": "payload/symbols.txt",
+      "sha256": "5b11fdff81610fff02c0de39baa12c2066f073a2f1e904ddea87065c88bc2383",
+      "bytes": 118
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/binaries/bch-bench",
+      "target": "payload/binaries/bch-bench",
+      "sha256": "e537b260dfbfef8e1fc8ac4ca3641e4444c96ee449100b157a212ddbd6e1a159",
+      "bytes": 60624
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/binaries/libbch-kernel-native.so",
+      "target": "payload/binaries/libbch-kernel-native.so",
+      "sha256": "4989ce355356a9d080a095987aa69ea5a829dd8a9574f6bafe532ddf3f8a7194",
+      "bytes": 79568
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/binaries/libbch-author-standalone.so",
+      "target": "payload/binaries/libbch-author-standalone.so",
+      "sha256": "99b6383f4d8616d19cbfd27d928292e7ac755ab61e1780043d7f27106df89a35",
+      "bytes": 92816
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/bch_guest.py",
+      "target": "payload/guest.py",
+      "sha256": "a56bf0fef6cbf36276212e7662576c0644daa7af3be0bef1336bb5fd3d7e2d0f",
+      "bytes": 6236
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/lz4_guest.py",
+      "target": "payload/lz4_guest_helpers.py",
+      "sha256": "7421818d904f5eed9b08662e390848a717adcf898c72920b4215116f12ba3bae",
+      "bytes": 15499
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/bch_qemu.py",
+      "target": "bch_qemu.py",
+      "sha256": "153658f9327f9b2c5d9751de687ed59ae556b9dbf73717a27d1ef01ad8fca1ed",
+      "bytes": 8243
+    }
+  ],
+  "host_commands": [
+    {
+      "argv": [
+        "make",
+        "-C",
+        "/lib/modules/5.15.0-119-generic/build",
+        "M=/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod",
+        "-j2",
+        "modules"
+      ],
+      "log": "owner-build.log",
+      "returncode": 0
+    },
+    {
+      "argv": [
+        "pahole",
+        "-J",
+        "--btf_base",
+        "/sys/kernel/btf/vmlinux",
+        "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/vkso_bch.ko"
+      ],
+      "log": "owner-btf.log",
+      "returncode": 0
+    },
+    {
+      "argv": [
+        "modinfo",
+        "-F",
+        "vermagic",
+        "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/vkso_bch.ko"
+      ],
+      "log": "owner-vermagic.log",
+      "returncode": 0
+    },
+    {
+      "argv": [
+        "make",
+        "-C",
+        "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source",
+        "BUILD_DIR=/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/binaries",
+        "-j2",
+        "all"
+      ],
+      "log": "userspace-build.log",
+      "returncode": 0
+    },
+    {
+      "argv": [
+        "mkfs.ext4",
+        "-q",
+        "-F",
+        "-d",
+        "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/payload",
+        "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/guest.ext4"
+      ],
+      "log": "disk-build.log",
+      "returncode": 0
+    }
+  ],
+  "host_kernel_for_btf": "5.15.0-119-generic",
+  "kernel": "/tmp/vkso-guest-kernel-119/extracted/boot/vmlinuz-5.15.0-119-generic",
+  "kernel_sha256": "6f8b2d5065ad56cb3c1652e88752817ccedf60ec9472be561972434b00ed27f5",
+  "initramfs": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt06/initramfs.cpio.gz",
+  "initramfs_sha256": "910d8f5e0605faf4bad3a3fd42376dd48b2e7915c8216308ae11f8db6cf6abbc",
+  "initramfs_status_marker": "lz4_guest_status (inherited generic /work/guest.py wrapper)"
+}

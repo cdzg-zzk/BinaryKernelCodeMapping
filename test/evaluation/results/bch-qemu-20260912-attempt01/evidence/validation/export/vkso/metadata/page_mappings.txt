@@ -1,0 +1,5 @@
+# file_offset,kernel_vaddr,kind,section
+0x1000,0xffffffffc0008000,text,.text
+0x2000,0xffffffffc0009000,text,.text
+0x3000,0xffffffffc000a000,text,.text
+0x4000,0xffffffffc000b000,rodata,.rodata

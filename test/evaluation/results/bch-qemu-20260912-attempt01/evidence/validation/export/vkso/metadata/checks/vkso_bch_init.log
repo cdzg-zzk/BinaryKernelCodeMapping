@@ -1,0 +1,410 @@
+[1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+[*] 已加载 1 个模块对象。
+    - vkso_bch.ko
+[*] 已加载 34 个 Shim 平替规则。
+[*] 正在解析 vmlinux: /work/vmlinux-5.15.0-119-generic
+[*] vmlinux 解析完成。
+[*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+[*] 已载入 138220 个活体内核符号。
+[1m[*] 开始构建依赖闭包并执行扫描...[0m
+  [96m├─ [Trace] 深入分析: vkso_bch.ko -> vkso_bch_init (剩余队列: 0)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .rodata:.rodata+0x0 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x7c -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_memset_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x9b -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0xd7 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0xf6 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x125 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x145 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x161 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x181 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x1ab -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x1cb -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x1f4 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x22e -> call rax[0m
+  [96m├─ [Trace] 加入待分析队列: vkso_bch_free <- vkso_bch_init -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x329 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x345 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x36b -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_memset_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x399 -> call rax[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x57a -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x589 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x595 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x5a1 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x5c3 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x5cf -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_memset_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x619 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x70f -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_memset_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x79a -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_init -> .data:vkso_bch_memset_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_init +0x869 -> call rax[0m
+  [96m├─ [Trace] 深入分析: vkso_bch.ko -> vkso_bch_free (剩余队列: 0)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_free -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_free +0x2d -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_free -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_free +0x3b -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_free -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_free +0x49 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_free -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_free +0x57 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_free -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_free +0x65 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_free -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_free +0x73 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_free -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_free +0x81 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_free -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_free +0x8f -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_free -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_free +0x9d -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_free -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_free +0xad -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_free -> .data:vkso_bch_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_free +0xbe -> call rax[0m
+
+[1m[94m========================================================================[0m
+[1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+[1m[94m========================================================================[0m
+
+[1m[摘要][0m
+  - 已访问函数: 2
+  - Shim 命中数: 0
+  - 静态数据/地址引用数: 37
+  - 间接控制流命中数: 37
+  - 编译器插桩命中数: 0
+  - 致命失败数: 0
+  - 丢失符号数: 0
+  - 不可分析函数数: 0
+
+[92m[ℹ️ 基础检查][0m 未发现特权指令、控制寄存器访问或绝对地址重定位。
+  [92m闭包路径在当前输入范围内是完整的。[0m
+
+[96m[📦 静态数据 / 地址引用事实][0m
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x5c | 运行基址: [1m0xffffffffc0008d0c[0m)
+    └─ 指令事实: lea rdx, [rip] (目标: .rodata+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x6b | 运行基址: [1m0xffffffffc0008d1b[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x94 | 运行基址: [1m0xffffffffc0008d44[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memset_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0xd0 | 运行基址: [1m0xffffffffc0008d80[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0xec | 运行基址: [1m0xffffffffc0008d9c[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x111 | 运行基址: [1m0xffffffffc0008dc1[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x133 | 运行基址: [1m0xffffffffc0008de3[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x156 | 运行基址: [1m0xffffffffc0008e06[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x172 | 运行基址: [1m0xffffffffc0008e22[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x19a | 运行基址: [1m0xffffffffc0008e4a[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x1c0 | 运行基址: [1m0xffffffffc0008e70[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x1e9 | 运行基址: [1m0xffffffffc0008e99[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x222 | 运行基址: [1m0xffffffffc0008ed2[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x322 | 运行基址: [1m0xffffffffc0008fd2[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x33a | 运行基址: [1m0xffffffffc0008fea[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x357 | 运行基址: [1m0xffffffffc0009007[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kmalloc_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x38e | 运行基址: [1m0xffffffffc000903e[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memset_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x582 | 运行基址: [1m0xffffffffc0009232[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x58e | 运行基址: [1m0xffffffffc000923e[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x597 | 运行基址: [1m0xffffffffc0009247[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x5b9 | 运行基址: [1m0xffffffffc0009269[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x5c8 | 运行基址: [1m0xffffffffc0009278[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x60e | 运行基址: [1m0xffffffffc00092be[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memset_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x708 | 运行基址: [1m0xffffffffc00093b8[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x78a | 运行基址: [1m0xffffffffc000943a[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memset_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_init (+0x859 | 运行基址: [1m0xffffffffc0009509[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memset_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_free (+0xa | 运行基址: [1m0xffffffffc00083ba[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_free (+0x34 | 运行基址: [1m0xffffffffc00083e4[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_free (+0x42 | 运行基址: [1m0xffffffffc00083f2[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_free (+0x50 | 运行基址: [1m0xffffffffc0008400[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_free (+0x5e | 运行基址: [1m0xffffffffc000840e[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_free (+0x6c | 运行基址: [1m0xffffffffc000841c[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_free (+0x7a | 运行基址: [1m0xffffffffc000842a[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_free (+0x88 | 运行基址: [1m0xffffffffc0008438[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_free (+0x96 | 运行基址: [1m0xffffffffc0008446[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_free (+0xa6 | 运行基址: [1m0xffffffffc0008456[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_free (+0xb7 | 运行基址: [1m0xffffffffc0008467[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_kfree_slot+0x0)
+
+[96m[🔌 Shim 边界成功拦截][0m
+  - 无或未命中
+
+[96m[🔀 间接控制流 / 盲跳][0m
+  [93m注意: 请在用户态确认这些位置的函数指针或跳转表已被合法初始化。[0m
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x7c | 运行基址: [1m0xffffffffc0008d2c[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x6b | 运行基址: [1m0xffffffffc0008d1b[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x9b | 运行基址: [1m0xffffffffc0008d4b[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x94 | 运行基址: [1m0xffffffffc0008d44[0m | 关联重定位: vkso_bch_memset_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0xd7 | 运行基址: [1m0xffffffffc0008d87[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0xd0 | 运行基址: [1m0xffffffffc0008d80[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0xf6 | 运行基址: [1m0xffffffffc0008da6[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0xec | 运行基址: [1m0xffffffffc0008d9c[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x125 | 运行基址: [1m0xffffffffc0008dd5[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x111 | 运行基址: [1m0xffffffffc0008dc1[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x145 | 运行基址: [1m0xffffffffc0008df5[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x133 | 运行基址: [1m0xffffffffc0008de3[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x161 | 运行基址: [1m0xffffffffc0008e11[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x156 | 运行基址: [1m0xffffffffc0008e06[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x181 | 运行基址: [1m0xffffffffc0008e31[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x172 | 运行基址: [1m0xffffffffc0008e22[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x1ab | 运行基址: [1m0xffffffffc0008e5b[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x19a | 运行基址: [1m0xffffffffc0008e4a[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x1cb | 运行基址: [1m0xffffffffc0008e7b[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x1c0 | 运行基址: [1m0xffffffffc0008e70[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x1f4 | 运行基址: [1m0xffffffffc0008ea4[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x1e9 | 运行基址: [1m0xffffffffc0008e99[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x22e | 运行基址: [1m0xffffffffc0008ede[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x222 | 运行基址: [1m0xffffffffc0008ed2[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x329 | 运行基址: [1m0xffffffffc0008fd9[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x322 | 运行基址: [1m0xffffffffc0008fd2[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x345 | 运行基址: [1m0xffffffffc0008ff5[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x33a | 运行基址: [1m0xffffffffc0008fea[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x36b | 运行基址: [1m0xffffffffc000901b[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x357 | 运行基址: [1m0xffffffffc0009007[0m | 关联重定位: vkso_bch_kmalloc_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x399 | 运行基址: [1m0xffffffffc0009049[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x38e | 运行基址: [1m0xffffffffc000903e[0m | 关联重定位: vkso_bch_memset_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x57a | 运行基址: [1m0xffffffffc000922a[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov eax, ecx @ 0x576 | 运行基址: [1m0xffffffffc0009226[0m | 读取寄存器: rcx
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x589 | 运行基址: [1m0xffffffffc0009239[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x582 | 运行基址: [1m0xffffffffc0009232[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x595 | 运行基址: [1m0xffffffffc0009245[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x58e | 运行基址: [1m0xffffffffc000923e[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x5a1 | 运行基址: [1m0xffffffffc0009251[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x597 | 运行基址: [1m0xffffffffc0009247[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x5c3 | 运行基址: [1m0xffffffffc0009273[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x5b9 | 运行基址: [1m0xffffffffc0009269[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x5cf | 运行基址: [1m0xffffffffc000927f[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x5c8 | 运行基址: [1m0xffffffffc0009278[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x619 | 运行基址: [1m0xffffffffc00092c9[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x60e | 运行基址: [1m0xffffffffc00092be[0m | 关联重定位: vkso_bch_memset_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x70f | 运行基址: [1m0xffffffffc00093bf[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x708 | 运行基址: [1m0xffffffffc00093b8[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x79a | 运行基址: [1m0xffffffffc000944a[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x78a | 运行基址: [1m0xffffffffc000943a[0m | 关联重定位: vkso_bch_memset_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_init (+0x869 | 运行基址: [1m0xffffffffc0009519[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x859 | 运行基址: [1m0xffffffffc0009509[0m | 关联重定位: vkso_bch_memset_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_free (+0x2d | 运行基址: [1m0xffffffffc00083dd[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0xa | 运行基址: [1m0xffffffffc00083ba[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_free (+0x3b | 运行基址: [1m0xffffffffc00083eb[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x34 | 运行基址: [1m0xffffffffc00083e4[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_free (+0x49 | 运行基址: [1m0xffffffffc00083f9[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x42 | 运行基址: [1m0xffffffffc00083f2[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_free (+0x57 | 运行基址: [1m0xffffffffc0008407[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x50 | 运行基址: [1m0xffffffffc0008400[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_free (+0x65 | 运行基址: [1m0xffffffffc0008415[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x5e | 运行基址: [1m0xffffffffc000840e[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_free (+0x73 | 运行基址: [1m0xffffffffc0008423[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x6c | 运行基址: [1m0xffffffffc000841c[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_free (+0x81 | 运行基址: [1m0xffffffffc0008431[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x7a | 运行基址: [1m0xffffffffc000842a[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_free (+0x8f | 运行基址: [1m0xffffffffc000843f[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x88 | 运行基址: [1m0xffffffffc0008438[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_free (+0x9d | 运行基址: [1m0xffffffffc000844d[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x96 | 运行基址: [1m0xffffffffc0008446[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_free (+0xad | 运行基址: [1m0xffffffffc000845d[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0xa6 | 运行基址: [1m0xffffffffc0008456[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_free (+0xbe | 运行基址: [1m0xffffffffc000846e[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0xb7 | 运行基址: [1m0xffffffffc0008467[0m | 关联重定位: vkso_bch_kfree_slot+0x0
+
+[1m[最终结论][0m [92mPASS[0m (exit code: 0)
+[1m[94m=========================== 报告结束 ===========================[0m

@@ -1,0 +1,452 @@
+{
+  "scope": "selected small reproducibility records for BCH functional attempt01",
+  "excluded": [
+    "guest.ext4",
+    "initramfs",
+    "vmlinux",
+    "out.krg",
+    "unneeded intermediate object files"
+  ],
+  "files": [
+    {
+      "path": "bch_qemu.py",
+      "bytes": 8243,
+      "sha256": "153658f9327f9b2c5d9751de687ed59ae556b9dbf73717a27d1ef01ad8fca1ed"
+    },
+    {
+      "path": "build-source/Makefile",
+      "bytes": 1542,
+      "sha256": "32a5160646d8ca5114d6919da4d44c7fa2c709d25701c118e673d543badc0c43"
+    },
+    {
+      "path": "build-source/adapted/bch.c",
+      "bytes": 40766,
+      "sha256": "b594b197dd5806fd9ad3204f2dab5b73e5d09b4a47852c1b1feb6fe627f8e4d7"
+    },
+    {
+      "path": "build-source/config/symbols.txt",
+      "bytes": 118,
+      "sha256": "5b11fdff81610fff02c0de39baa12c2066f073a2f1e904ddea87065c88bc2383"
+    },
+    {
+      "path": "build-source/kmod/Makefile",
+      "bytes": 882,
+      "sha256": "936987e4b42a7d6e1dc62a22cc8ff6caf549fdfc1d3da02cd38b424307d3aad3"
+    },
+    {
+      "path": "build-source/kmod/bch_impl.c",
+      "bytes": 534,
+      "sha256": "0d470aa957134a7734c31c1cead093f1dff8f7ddd7f05921211d00b0a8d87d35"
+    },
+    {
+      "path": "build-source/kmod/module_meta.c",
+      "bytes": 759,
+      "sha256": "e429056df1b1f643221067c2af5353d9688099d7779d775f94b517068003e4bc"
+    },
+    {
+      "path": "build-source/src/bch_bench.c",
+      "bytes": 20265,
+      "sha256": "4d8581c01cacf6221a29b8c188a3ad5497c534578b3c07157245467751e181c6"
+    },
+    {
+      "path": "build-source/userspace/kernel-native.map",
+      "bytes": 91,
+      "sha256": "402ba4456afaaece6a3a5250ae4a212ca7b31a1306e75537988c163eb65cba6e"
+    },
+    {
+      "path": "build-source/userspace/kernel_compat.h",
+      "bytes": 291,
+      "sha256": "f0e40c04d28c36622db8ea8a38380d4a0f9b07dae2ef83d6b79c0b5052c09a2b"
+    },
+    {
+      "path": "build-source/userspace/standalone.map",
+      "bytes": 91,
+      "sha256": "b848596622fd57ed42b3bc67269580164556a43a9d2b798235c6fe00cfac7067"
+    },
+    {
+      "path": "build-source/vendor/linux-5.15/include/linux/bch.h",
+      "bytes": 2152,
+      "sha256": "4ccd9352123676facafc59fa0ee29673be62e8e597e65a495e0bd414f3187c22"
+    },
+    {
+      "path": "build-source/vendor/linux-5.15/lib/bch.c",
+      "bytes": 39266,
+      "sha256": "3551caec7906dc9a768fe6b26d22ffaa35072ff819bf1edac3a1ca2665c139ff"
+    },
+    {
+      "path": "build-source/vendor/parrot-bch/Documentation/bch/tu_bench.c",
+      "bytes": 6908,
+      "sha256": "93ef242c870af3655f9e8178a0103362bbbdadc0f91a293a6dcd9ffdd6382d16"
+    },
+    {
+      "path": "build-source/vendor/parrot-bch/include/linux/bch.h",
+      "bytes": 2725,
+      "sha256": "053248c68d1fa72d97680a9c99530ed4a3c920008bf6ff9d32ae709f512b6265"
+    },
+    {
+      "path": "build-source/vendor/parrot-bch/lib/bch.c",
+      "bytes": 36469,
+      "sha256": "2d41fa578fac4136cc58d34c9173d00f3d220502e1ac1406dd01c26a14882dcc"
+    },
+    {
+      "path": "build-source/vendor/parrot-bch/standalone/asm/byteorder.h",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build-source/vendor/parrot-bch/standalone/linux/bch.h",
+      "bytes": 2725,
+      "sha256": "053248c68d1fa72d97680a9c99530ed4a3c920008bf6ff9d32ae709f512b6265"
+    },
+    {
+      "path": "build-source/vendor/parrot-bch/standalone/linux/bitops.h",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build-source/vendor/parrot-bch/standalone/linux/init.h",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build-source/vendor/parrot-bch/standalone/linux/kernel.h",
+      "bytes": 683,
+      "sha256": "e202ce00935a78ac9f14f270de137dc758591e98555c0edf2e3927bd4afb29e8"
+    },
+    {
+      "path": "build-source/vendor/parrot-bch/standalone/linux/module.h",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build-source/vendor/parrot-bch/standalone/linux/slab.h",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build-source/vendor/parrot-bch/standalone/linux/types.h",
+      "bytes": 20,
+      "sha256": "dd1e65241020275e480c9f023566ad3d27cad42dfac5d4d1b9c176732d1eede5"
+    },
+    {
+      "path": "command.json",
+      "bytes": 764,
+      "sha256": "f9965bd550d7e6f6613c3cff4266d6d5fce21165e408f8d5be71711121f745fd"
+    },
+    {
+      "path": "components.json",
+      "bytes": 16224,
+      "sha256": "6a76d3bb6f3cef988180a2d6745b28e8dc5af60ffba3fd86f9368a3c80c36ad0"
+    },
+    {
+      "path": "console.log",
+      "bytes": 45436,
+      "sha256": "1c48abbffcb4d33dbe678e13041297203af4306091cac3794dfa01380fc68eb5"
+    },
+    {
+      "path": "disk-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/bch-correctness.log",
+      "bytes": 129,
+      "sha256": "db2d04045834aaa7e43eb9de346135a2ba3ab3a4a958731962ac77c884b436f9"
+    },
+    {
+      "path": "evidence/validation/bch-validation.json",
+      "bytes": 1042,
+      "sha256": "f38481715294f3bb5305726bd703c0b80c866efc6a27b7be1a2ccedf3e2092d7"
+    },
+    {
+      "path": "evidence/validation/carrier-process-maps.txt",
+      "bytes": 10977,
+      "sha256": "ccddc67f908bf75212fe54bc4d80715da69d00ae77be8a6e6c84051fb6e9e230"
+    },
+    {
+      "path": "evidence/validation/commands.jsonl",
+      "bytes": 1575,
+      "sha256": "f92366cad6a3a5ff6ede2d46c01a36403f1b9101a398cd35bb865ed684cfb58b"
+    },
+    {
+      "path": "evidence/validation/dmesg.txt",
+      "bytes": 45329,
+      "sha256": "64c53a646a1e8b0257706c065c017df36ec4ee219e64f12c1307392a73d7632c"
+    },
+    {
+      "path": "evidence/validation/export/vkso/include/vkso_types.h",
+      "bytes": 1687,
+      "sha256": "d0fd38c8a3dd04bbb496dea19f48d5c53b6533287d0999e9c36bafb76064f8fa"
+    },
+    {
+      "path": "evidence/validation/export/vkso/lib/libshim.so",
+      "bytes": 16472,
+      "sha256": "76e9702ca88132fd7bc1081472094d8a4f520eb2d50f85948f64d1a5f4d5ae50"
+    },
+    {
+      "path": "evidence/validation/export/vkso/lib/libvkso_bch.so",
+      "bytes": 27208,
+      "sha256": "2637efd73ad93a9106df94a36534dc1e4850ded96a811b1ccc889c430382cdd7"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/checks/vkso_bch_decode.log",
+      "bytes": 22306,
+      "sha256": "30f3437997b416baea321d465d9f938ab7af1607d7c81455fc95d84677c8fe7e"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/checks/vkso_bch_encode.log",
+      "bytes": 12893,
+      "sha256": "2f312a9b3243dc55808cb183817091d719be382aef8eb77ad3a37773fe08656a"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/checks/vkso_bch_free.log",
+      "bytes": 10415,
+      "sha256": "1cc3d2d1104eade33e1608b2512f0f089d74124d3d8f842567f9831f1e984c52"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/checks/vkso_bch_init.log",
+      "bytes": 31663,
+      "sha256": "c61b772f0b2a191b1922d4090732c418ddcdaba029822cb1873de0eec175e71f"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/module_deps.txt",
+      "bytes": 63,
+      "sha256": "f980a28610948f5d111cbe37a649429387a3eda5715dd387845b9c412dd78546"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/out.krg.inputs",
+      "bytes": 65,
+      "sha256": "b78a2d2dcf490386a7230f83d40cca9af1acb7fbfd0a6ff7b838ac721866a793"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/outputs.env",
+      "bytes": 420,
+      "sha256": "12b965096955f3a9481a1031ac328440828119ed80b3275c3f204e9f3603140b"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/page_mappings.txt",
+      "bytes": 192,
+      "sha256": "e710163e9e55116f2557fc2cf578bb4ec7f7f085269fff0e304f8e925a123d5d"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/page_replace.log",
+      "bytes": 3461,
+      "sha256": "d7544dbc2d413b5f25749b4aa9f5bdc3a705e4f547c7e9ce198f3e4a9a5ef7e4"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/resolved_symbol_addresses.txt",
+      "bytes": 1591,
+      "sha256": "7ab9aebf4127a338f0c70e3745e8a24b7ae53f3e4dacb4008beb7dccd909c317"
+    },
+    {
+      "path": "evidence/validation/export/vkso/shared_data.txt",
+      "bytes": 49,
+      "sha256": "9de5a8bf4efd0ca3f0c3566472aa7d2e0312360486679284cfbeefb4e660a958"
+    },
+    {
+      "path": "evidence/validation/export-and-correctness.log",
+      "bytes": 78565,
+      "sha256": "67ecde1906c5f4131b2f8e2e0225a870a951669292caac68b373f58a68ae2456"
+    },
+    {
+      "path": "evidence/validation/load-page_cache_replace.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/load-vkso_bch.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/load-vkso_kernel_reader.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/registered-pfns.json",
+      "bytes": 1505,
+      "sha256": "052aeaf714eae7e6138494d2ed4553d628cd2069dbcbb3082a20181774e0d1f8"
+    },
+    {
+      "path": "evidence/validation/restored-pfns.json",
+      "bytes": 674,
+      "sha256": "7ee64f357c9c1671b9be22984af2169bfb00b8d454e92b76955bd5e4fde5f553"
+    },
+    {
+      "path": "evidence/validation/source-pages.csv",
+      "bytes": 139,
+      "sha256": "0b68751fdc97ad3ebf4f172d74b9a478f5099d9f481785ebae23fda204be846f"
+    },
+    {
+      "path": "evidence/validation/status.json",
+      "bytes": 363,
+      "sha256": "b22c7bc654809c83bcb5aff02433ca288d6a7e22bcae996240e05db761464327"
+    },
+    {
+      "path": "evidence/validation/unload-page_cache_replace.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/unload-vkso_bch.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/unload-vkso_kernel_reader.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/workspace-init.log",
+      "bytes": 160,
+      "sha256": "8a0f3743356f480d5730ef035d631513a8838c60d105ca6d6219f3fafd30517d"
+    },
+    {
+      "path": "evidence-consistency.json",
+      "bytes": 526,
+      "sha256": "535bb336ea9e0ce22177e0f5f15540c993aad9789790de4f42baa9c3e53a79d7"
+    },
+    {
+      "path": "extraction.log",
+      "bytes": 7817,
+      "sha256": "f70e1c01370e010c8df18d2506a8e7d229761133fd267a3d8c7ff53274673307"
+    },
+    {
+      "path": "kernel-package-evidence.json",
+      "bytes": 1002,
+      "sha256": "fa4c16970e724871acbaab60da56e92d56134f2b8d8ab2b03cc7ba27e72bdd79"
+    },
+    {
+      "path": "owner-btf.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-build.log",
+      "bytes": 14605,
+      "sha256": "a2636b68fae229285ce8fcdaf44ab05140573ca35e455f3e6754ec84981994b2"
+    },
+    {
+      "path": "owner-vermagic.log",
+      "bytes": 47,
+      "sha256": "fa9c6f2bf3096ab3004b6dda7780ba6e9f8ad9e8d5bc5f65e315dbfd4e687e7d"
+    },
+    {
+      "path": "payload/binaries/bch-bench",
+      "bytes": 60624,
+      "sha256": "e537b260dfbfef8e1fc8ac4ca3641e4444c96ee449100b157a212ddbd6e1a159"
+    },
+    {
+      "path": "payload/binaries/libbch-author-standalone.so",
+      "bytes": 92816,
+      "sha256": "99b6383f4d8616d19cbfd27d928292e7ac755ab61e1780043d7f27106df89a35"
+    },
+    {
+      "path": "payload/binaries/libbch-kernel-native.so",
+      "bytes": 79568,
+      "sha256": "4989ce355356a9d080a095987aa69ea5a829dd8a9574f6bafe532ddf3f8a7194"
+    },
+    {
+      "path": "payload/guest.py",
+      "bytes": 6236,
+      "sha256": "a56bf0fef6cbf36276212e7662576c0644daa7af3be0bef1336bb5fd3d7e2d0f"
+    },
+    {
+      "path": "payload/helpers/carrier.py",
+      "bytes": 2825,
+      "sha256": "0bf1ac5325ba90bfe94c0809e7c6a503e69c70ac64a1b710dbdebc83886197e9"
+    },
+    {
+      "path": "payload/helpers/footprint.py",
+      "bytes": 3654,
+      "sha256": "35017ef68a2d7ae028a6dc8e6ca0ebfe7b8d89c3b0398e3ae7fd5c19ecc728f5"
+    },
+    {
+      "path": "payload/helpers/vkso_kernel_reader.ko",
+      "bytes": 252456,
+      "sha256": "5f659b4a2d6edf95beafc890268266e3070658914a41f70f9a399559a2931a91"
+    },
+    {
+      "path": "payload/lz4_guest_helpers.py",
+      "bytes": 15499,
+      "sha256": "7421818d904f5eed9b08662e390848a717adcf898c72920b4215116f12ba3bae"
+    },
+    {
+      "path": "payload/owner/vkso_bch.ko",
+      "bytes": 187272,
+      "sha256": "5a2e14f02c6f4b0f9e0ca0e5f7e6e7736bfaa64626e9f223fd6edfa6d4b85ffd"
+    },
+    {
+      "path": "payload/repo/kernel_cgd/function_checker/functions_checker.py",
+      "bytes": 36089,
+      "sha256": "d3780a8c7781c29d417313e066596c1f6249b5b05077e792446dbe0db37e100f"
+    },
+    {
+      "path": "payload/repo/kernel_cgd/kerne_type/vkso_gen_types.py",
+      "bytes": 33930,
+      "sha256": "94ca24843566f5f533697032ab4df256923ea27295c3441fb6cbb527827e9e89"
+    },
+    {
+      "path": "payload/repo/kernel_cgd/src/krg",
+      "bytes": 252576,
+      "sha256": "584a689e1e8b1f20b892f992f639f8f4568b062306e66f945a844bb7d7bad6db"
+    },
+    {
+      "path": "payload/repo/kernel_cgd/src/krg.cpp",
+      "bytes": 69090,
+      "sha256": "ef3e54459d37118105406b5c0b2dc7c7162eb140cdacf8ef589bc3b5b4028dee"
+    },
+    {
+      "path": "payload/repo/make_dll/build_PIC_so.py",
+      "bytes": 92883,
+      "sha256": "1efd26152cd34f5a2c6967a51631e0cec2affbeecaeb6f6b0d3982e581d1d580"
+    },
+    {
+      "path": "payload/repo/make_dll/shim.c",
+      "bytes": 4634,
+      "sha256": "d0da4d0b3b6e384d43562d83fd6f6e25dddd008e58d02ae920abafb648b11075"
+    },
+    {
+      "path": "payload/repo/make_dll/shim.txt",
+      "bytes": 969,
+      "sha256": "7b94c8a750d69fe23c3cd9afa000fc056b07a0948627840efceccb2b93125a6c"
+    },
+    {
+      "path": "payload/repo/page_cache_replace/manager",
+      "bytes": 2456768,
+      "sha256": "587c9826cad9655620f66a66f61b1cbf52cc4a69a5b148d1ba0d99b030ef9706"
+    },
+    {
+      "path": "payload/repo/page_cache_replace/manager.cpp",
+      "bytes": 27805,
+      "sha256": "42ac22aa4130fb971e15ecca37137fe9ab3b8a31ca78eff5568c4b50fb520680"
+    },
+    {
+      "path": "payload/repo/page_cache_replace/page_cache_replace.ko",
+      "bytes": 597320,
+      "sha256": "adb851ea93db68b6abb4691e71ed738e77e8a594a4d5c5744a198f4247581d59"
+    },
+    {
+      "path": "payload/repo/vkso",
+      "bytes": 28779,
+      "sha256": "fb5e7a6d70d0abed8d55f7ab804cdbb134e453200935796928c377be6ea91d0f"
+    },
+    {
+      "path": "payload/symbols.txt",
+      "bytes": 118,
+      "sha256": "5b11fdff81610fff02c0de39baa12c2066f073a2f1e904ddea87065c88bc2383"
+    },
+    {
+      "path": "result.json",
+      "bytes": 582,
+      "sha256": "e04343536dd7e1c3f78b4882460b80111fbfdffafa7229db69403188c629776e"
+    },
+    {
+      "path": "userspace-build.log",
+      "bytes": 1475,
+      "sha256": "e309c2ceb0a03dd5e18b9986dc2270802af290c93809c34d69f9c8a396c3e2ec"
+    }
+  ]
+}

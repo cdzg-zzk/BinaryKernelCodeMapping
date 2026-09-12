@@ -1,0 +1,1 @@
+/work/owner/vkso_bch.ko -> shim: __kmalloc kfree memcpy memset

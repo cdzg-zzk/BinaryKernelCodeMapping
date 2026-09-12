@@ -1,0 +1,55 @@
+{
+  "scope": "unchanged BCH correctness-only mode; no performance samples",
+  "status": "pass",
+  "correctness_vectors": 128,
+  "library": "/work/validation/export/vkso/lib/libvkso_bch.so",
+  "shared_pages": 4,
+  "owner_refcnt_during_registration": 0,
+  "coverage": {
+    "parameters": [
+      {
+        "m": 13,
+        "t": 4,
+        "errors": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "m": 13,
+        "t": 8,
+        "errors": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      }
+    ],
+    "data_length_bytes": 512,
+    "backends": [
+      "kernel-vkso",
+      "kernel-native",
+      "author-standalone"
+    ],
+    "decode_modes": [
+      "decode-precomputed",
+      "decode-full"
+    ],
+    "checks": [
+      "equal BCH geometry",
+      "equal parity bytes",
+      "exact error locations",
+      "corrected codeword equals original"
+    ],
+    "decode_checks_from_unchanged_loop": 10752
+  }
+}

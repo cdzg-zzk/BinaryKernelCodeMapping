@@ -1,0 +1,80 @@
+make: Entering directory '/usr/src/linux-headers-5.15.0-119-generic'
+warning: the compiler differs from the one used to build the kernel
+  The kernel was built by: gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+  You are using:           gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/module_meta.o
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/module_meta.o: warning: objtool: vkso_bch_module_init()+0x2: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/module_meta.o: warning: objtool: vkso_bch_module_exit()+0x0: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: bch_encode_unaligned()+0xc7: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: load_ecc8()+0xe6: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: load_ecc8()+0x150: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: gf_poly_logrep()+0x55: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: gf_poly_mod()+0xdb: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0x2d: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0x3b: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0x49: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0x57: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0x65: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0x73: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0x81: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0x8f: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0x9d: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0xad: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0xbe: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0xc6: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_free()+0xc8: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_encode()+0xdd: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_encode()+0x253: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_encode()+0x3d6: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_encode()+0x3e9: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_encode()+0x3fb: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: solve_linear_system.constprop.0.isra.0()+0x1fe: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: solve_linear_system.constprop.0.isra.0()+0x210: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: find_affine4_roots()+0x153: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x7c: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x9b: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0xd7: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0xf6: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x125: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x145: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x161: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x181: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x1ab: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x1cb: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x1f4: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x22e: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x2e5: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x329: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x345: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x36b: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x399: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x57a: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x589: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x595: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x5a1: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x5c3: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x5cf: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x619: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x70f: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x79a: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_init()+0x869: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: find_poly_roots()+0x5b: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: find_poly_roots()+0x5e1: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: find_poly_roots()+0x7fe: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: find_poly_roots()+0x8a2: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: find_poly_roots()+0x8ca: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: find_poly_roots()+0x8ea: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_decode()+0x7f: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_decode()+0x90: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_decode()+0x1a2: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_decode()+0x1d2: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_decode()+0x28c: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/bch_impl.o: warning: objtool: vkso_bch_decode()+0x396: indirect call found in RETPOLINE build
+  LD [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/vkso_bch.o
+  MODPOST /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/Module.symvers
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/vkso_bch.mod.o
+  LD [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/vkso_bch.ko
+  BTF [M] /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/vkso_bch.ko
+Skipping BTF generation for /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch-qemu-20260912-attempt01/build-source/kmod/vkso_bch.ko due to unavailability of vmlinux
+make: Leaving directory '/usr/src/linux-headers-5.15.0-119-generic'

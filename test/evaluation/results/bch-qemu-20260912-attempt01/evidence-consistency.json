@@ -1,0 +1,15 @@
+{
+  "status": "pass",
+  "scope": "offline archive consistency; no guest rerun",
+  "source_components_checked": 46,
+  "closure_pass_logs": 4,
+  "matched_pages": 4,
+  "fresh_restored_mapping_checks": 4,
+  "actual_parameter_pass_lines": 2,
+  "decode_checks_derived_from_loops": 10752,
+  "limitations": [
+    "PFNs observed in a separate loader process, not the benchmark process",
+    "restore checks only fresh mapping PFNs, not byte identity or live old mappings",
+    "no performance samples or net-memory measurements"
+  ]
+}

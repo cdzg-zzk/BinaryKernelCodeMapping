@@ -1,0 +1,288 @@
+[1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+[*] 已加载 1 个模块对象。
+    - vkso_bch.ko
+[*] 已加载 34 个 Shim 平替规则。
+[*] 正在解析 vmlinux: /work/vmlinux-5.15.0-119-generic
+[*] vmlinux 解析完成。
+[*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+[*] 已载入 138220 个活体内核符号。
+[1m[*] 开始构建依赖闭包并执行扫描...[0m
+  [96m├─ [Trace] 深入分析: vkso_bch.ko -> vkso_bch_decode (剩余队列: 0)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_decode -> .data:vkso_bch_memset_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_decode +0x7f -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_decode -> .data:vkso_bch_memset_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_decode +0x90 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_decode -> .data:vkso_bch_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_decode +0x1d2 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_decode -> .data:vkso_bch_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_decode +0x28c -> call rax[0m
+  [96m├─ [Trace] 加入待分析队列: find_poly_roots <- vkso_bch_decode -> 同节直接跳转[0m
+  [96m├─ [Trace] 加入待分析队列: load_ecc8 <- vkso_bch_decode -> 同节直接跳转[0m
+  [96m├─ [Trace] 加入待分析队列: vkso_bch_encode <- vkso_bch_decode -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_decode -> .data:vkso_bch_memset_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_decode +0x396 -> call rax[0m
+  [96m├─ [Trace] 深入分析: vkso_bch.ko -> find_poly_roots (剩余队列: 2)[0m
+  [96m├─ [Trace] 加入待分析队列: find_affine4_roots <- find_poly_roots -> 同节直接跳转[0m
+  [96m├─ [Trace] 记录静态引用事实: find_poly_roots -> .data:vkso_bch_memset_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: find_poly_roots +0x5e1 -> call rax[0m
+  [96m├─ [Trace] 加入待分析队列: gf_poly_logrep <- find_poly_roots -> 同节直接跳转[0m
+  [96m├─ [Trace] 加入待分析队列: gf_poly_mod <- find_poly_roots -> 同节直接跳转[0m
+  [96m├─ [Trace] 记录静态引用事实: find_poly_roots -> .data:vkso_bch_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: find_poly_roots +0x7fe -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: find_poly_roots -> .data:vkso_bch_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: find_poly_roots +0x8a2 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: find_poly_roots -> .data:vkso_bch_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: find_poly_roots +0x8ca -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: find_poly_roots -> .data:vkso_bch_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: find_poly_roots +0x8ea -> call rax[0m
+  [96m├─ [Trace] 深入分析: vkso_bch.ko -> load_ecc8 (剩余队列: 4)[0m
+  [96m├─ [Trace] 记录静态引用事实: load_ecc8 -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: load_ecc8 -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: load_ecc8 -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: load_ecc8 -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: load_ecc8 -> .data:vkso_bch_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: load_ecc8 +0xe6 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: load_ecc8 -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: load_ecc8 -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: load_ecc8 -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: load_ecc8 -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 深入分析: vkso_bch.ko -> vkso_bch_encode (剩余队列: 3)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .data:vkso_bch_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_encode +0xdd -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .data:vkso_bch_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_encode +0x253 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .data:vkso_bch_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_encode +0x3d6 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_bch_encode -> .data:vkso_bch_memset_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_bch_encode +0x3fb -> call rax[0m
+  [96m├─ [Trace] 加入待分析队列: bch_encode_unaligned <- vkso_bch_encode -> 同节直接跳转[0m
+  [96m├─ [Trace] 深入分析: vkso_bch.ko -> find_affine4_roots (剩余队列: 3)[0m
+  [96m├─ [Trace] 加入待分析队列: solve_linear_system.constprop.0.isra.0 <- find_affine4_roots -> 同节直接跳转[0m
+  [96m├─ [Trace] 深入分析: vkso_bch.ko -> gf_poly_logrep (剩余队列: 3)[0m
+  [96m├─ [Trace] 深入分析: vkso_bch.ko -> gf_poly_mod (剩余队列: 2)[0m
+  [96m├─ [Trace] 深入分析: vkso_bch.ko -> bch_encode_unaligned (剩余队列: 1)[0m
+  [96m├─ [Trace] 记录静态引用事实: bch_encode_unaligned -> .rodata:.rodata+0x40 (reloc=2)[0m
+  [96m├─ [Trace] 深入分析: vkso_bch.ko -> solve_linear_system.constprop.0.isra.0 (剩余队列: 0)[0m
+
+[1m[94m========================================================================[0m
+[1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+[1m[94m========================================================================[0m
+
+[1m[摘要][0m
+  - 已访问函数: 9
+  - Shim 命中数: 0
+  - 静态数据/地址引用数: 36
+  - 间接控制流命中数: 15
+  - 编译器插桩命中数: 0
+  - 致命失败数: 0
+  - 丢失符号数: 0
+  - 不可分析函数数: 0
+
+[92m[ℹ️ 基础检查][0m 未发现特权指令、控制寄存器访问或绝对地址重定位。
+  [92m闭包路径在当前输入范围内是完整的。[0m
+
+[96m[📦 静态数据 / 地址引用事实][0m
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_decode (+0x75 | 运行基址: [1m0xffffffffc0009ef5[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memset_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_decode (+0x81 | 运行基址: [1m0xffffffffc0009f01[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memset_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_decode (+0x1cb | 运行基址: [1m0xffffffffc000a04b[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memcpy_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_decode (+0x285 | 运行基址: [1m0xffffffffc000a105[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memcpy_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_decode (+0x388 | 运行基址: [1m0xffffffffc000a208[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memset_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: find_poly_roots (+0x5da | 运行基址: [1m0xffffffffc0009b0a[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memset_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: find_poly_roots (+0x7f7 | 运行基址: [1m0xffffffffc0009d27[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memcpy_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: find_poly_roots (+0x89b | 运行基址: [1m0xffffffffc0009dcb[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memcpy_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: find_poly_roots (+0x8c3 | 运行基址: [1m0xffffffffc0009df3[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memcpy_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: find_poly_roots (+0x8e3 | 运行基址: [1m0xffffffffc0009e13[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memcpy_slot+0x0)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: load_ecc8 (+0x45 | 运行基址: [1m0xffffffffc0008115[0m)
+    └─ 指令事实: lea r14, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: load_ecc8 (+0x4c | 运行基址: [1m0xffffffffc000811c[0m)
+    └─ 指令事实: lea rax, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: load_ecc8 (+0x53 | 运行基址: [1m0xffffffffc0008123[0m)
+    └─ 指令事实: lea r11, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: load_ecc8 (+0x75 | 运行基址: [1m0xffffffffc0008145[0m)
+    └─ 指令事实: lea rdx, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: load_ecc8 (+0xdf | 运行基址: [1m0xffffffffc00081af[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memcpy_slot+0x0)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: load_ecc8 (+0xf5 | 运行基址: [1m0xffffffffc00081c5[0m)
+    └─ 指令事实: lea rsi, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: load_ecc8 (+0xfc | 运行基址: [1m0xffffffffc00081cc[0m)
+    └─ 指令事实: lea rdi, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: load_ecc8 (+0x103 | 运行基址: [1m0xffffffffc00081d3[0m)
+    └─ 指令事实: lea rcx, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: load_ecc8 (+0x12b | 运行基址: [1m0xffffffffc00081fb[0m)
+    └─ 指令事实: lea rcx, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0xd0 | 运行基址: [1m0xffffffffc0008550[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memcpy_slot+0x0)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x149 | 运行基址: [1m0xffffffffc00085c9[0m)
+    └─ 指令事实: lea rsi, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x150 | 运行基址: [1m0xffffffffc00085d0[0m)
+    └─ 指令事实: lea rcx, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x157 | 运行基址: [1m0xffffffffc00085d7[0m)
+    └─ 指令事实: lea rdi, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x187 | 运行基址: [1m0xffffffffc0008607[0m)
+    └─ 指令事实: lea rcx, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x24c | 运行基址: [1m0xffffffffc00086cc[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memcpy_slot+0x0)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x2a4 | 运行基址: [1m0xffffffffc0008724[0m)
+    └─ 指令事实: lea r8, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x2c6 | 运行基址: [1m0xffffffffc0008746[0m)
+    └─ 指令事实: lea r8, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x2ec | 运行基址: [1m0xffffffffc000876c[0m)
+    └─ 指令事实: lea r8, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x313 | 运行基址: [1m0xffffffffc0008793[0m)
+    └─ 指令事实: lea r8, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x366 | 运行基址: [1m0xffffffffc00087e6[0m)
+    └─ 指令事实: lea r10, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x379 | 运行基址: [1m0xffffffffc00087f9[0m)
+    └─ 指令事实: lea r8, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x390 | 运行基址: [1m0xffffffffc0008810[0m)
+    └─ 指令事实: lea rsi, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x3a7 | 运行基址: [1m0xffffffffc0008827[0m)
+    └─ 指令事实: lea rsi, [rip] (目标: .rodata+0x40)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x3c3 | 运行基址: [1m0xffffffffc0008843[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memcpy_slot+0x0)
+  [vkso_bch.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_bch_encode (+0x3f2 | 运行基址: [1m0xffffffffc0008872[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_bch_memset_slot+0x0)
+  [vkso_bch.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: bch_encode_unaligned (+0x61 | 运行基址: [1m0xffffffffc0008061[0m)
+    └─ 指令事实: lea rdx, [rip] (目标: .rodata+0x40)
+
+[96m[🔌 Shim 边界成功拦截][0m
+  - 无或未命中
+
+[96m[🔀 间接控制流 / 盲跳][0m
+  [93m注意: 请在用户态确认这些位置的函数指针或跳转表已被合法初始化。[0m
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_decode (+0x7f | 运行基址: [1m0xffffffffc0009eff[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x75 | 运行基址: [1m0xffffffffc0009ef5[0m | 关联重定位: vkso_bch_memset_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_decode (+0x90 | 运行基址: [1m0xffffffffc0009f10[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x81 | 运行基址: [1m0xffffffffc0009f01[0m | 关联重定位: vkso_bch_memset_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_decode (+0x1d2 | 运行基址: [1m0xffffffffc000a052[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x1cb | 运行基址: [1m0xffffffffc000a04b[0m | 关联重定位: vkso_bch_memcpy_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_decode (+0x28c | 运行基址: [1m0xffffffffc000a10c[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x285 | 运行基址: [1m0xffffffffc000a105[0m | 关联重定位: vkso_bch_memcpy_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_decode (+0x396 | 运行基址: [1m0xffffffffc000a216[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x388 | 运行基址: [1m0xffffffffc000a208[0m | 关联重定位: vkso_bch_memset_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: find_poly_roots (+0x5e1 | 运行基址: [1m0xffffffffc0009b11[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x5da | 运行基址: [1m0xffffffffc0009b0a[0m | 关联重定位: vkso_bch_memset_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: find_poly_roots (+0x7fe | 运行基址: [1m0xffffffffc0009d2e[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x7f7 | 运行基址: [1m0xffffffffc0009d27[0m | 关联重定位: vkso_bch_memcpy_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: find_poly_roots (+0x8a2 | 运行基址: [1m0xffffffffc0009dd2[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x89b | 运行基址: [1m0xffffffffc0009dcb[0m | 关联重定位: vkso_bch_memcpy_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: find_poly_roots (+0x8ca | 运行基址: [1m0xffffffffc0009dfa[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x8c3 | 运行基址: [1m0xffffffffc0009df3[0m | 关联重定位: vkso_bch_memcpy_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: find_poly_roots (+0x8ea | 运行基址: [1m0xffffffffc0009e1a[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x8e3 | 运行基址: [1m0xffffffffc0009e13[0m | 关联重定位: vkso_bch_memcpy_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: load_ecc8 (+0xe6 | 运行基址: [1m0xffffffffc00081b6[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0xdf | 运行基址: [1m0xffffffffc00081af[0m | 关联重定位: vkso_bch_memcpy_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_encode (+0xdd | 运行基址: [1m0xffffffffc000855d[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0xd0 | 运行基址: [1m0xffffffffc0008550[0m | 关联重定位: vkso_bch_memcpy_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_encode (+0x253 | 运行基址: [1m0xffffffffc00086d3[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x24c | 运行基址: [1m0xffffffffc00086cc[0m | 关联重定位: vkso_bch_memcpy_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_encode (+0x3d6 | 运行基址: [1m0xffffffffc0008856[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x3c3 | 运行基址: [1m0xffffffffc0008843[0m | 关联重定位: vkso_bch_memcpy_slot+0x0
+  [vkso_bch.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_bch_encode (+0x3fb | 运行基址: [1m0xffffffffc000887b[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x3f2 | 运行基址: [1m0xffffffffc0008872[0m | 关联重定位: vkso_bch_memset_slot+0x0
+
+[1m[最终结论][0m [92mPASS[0m (exit code: 0)
+[1m[94m=========================== 报告结束 ===========================[0m
