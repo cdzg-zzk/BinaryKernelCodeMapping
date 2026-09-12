@@ -207,6 +207,8 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 
 **新确认的导出边界（2026-09-12）：** 完整 LZ4 CLI 运行证明，当前 checker 会把共享 text 中对 Shim 的直接相对引用判为成功，而实际 PIC exporter 仅声明 import、没有绑定该指令或保留目标页。[具体未应用补丁](../test/evaluation/proposals/export-direct-calls.md)已通过机器码案例和真实 owner/KRG 离线重放，纠正这类错误放行；它只提供准确拒绝，尚不实现完整 native helper 闭包，也不能代替 E 的完整应用验收。基础工具修改仍待明确确认，固定八例原检查继续运行。
 
+正文 Implementation 与 Applicability 已同步撤回“Analyzer 自动证明完整 binding/page identity、所有未解析间接跳转均拒绝”的断言。实际 checker 的 FAIL/INCOMPLETE/PASS 条件已从源码核实；间接控制流、插桩和 Shim 命中分开记录，PFN 验证属于运行时观测。完整依赖绑定仍是实现与验收要求，文字修正不代替该项工作。
+
 **分析器性能方案待确认：** hex_dump_to_buffer 的未裁剪检查已超过 30 分钟，源码定位到直接目标查询反复解析整个 ELF 符号表。[缓存补丁方案](../test/evaluation/proposals/README.md)已准备并通过边界/实际镜像查询对照，尚未应用；已向用户请求允许这项基础分析器调整。保持符号顺序、首匹配及全部判定规则，若获准将保留原记录并在新目录重检固定八例。等待答复期间，原分析器继续运行，不以超时或删减候选替代完整检查。
 
 **执行更新（2026-09-12）：** 已启动全部 8 个固定 API 的普通账户静态检查，输出 `test/evaluation/results/applicability-static-20260912/`；xxh32、crc32_le、sha256 的结果已落盘，完整矩阵仍在执行。[语义核查记录](../test/evaluation/applicability-semantics.md)已区分八例的 caller-owned state、只读依赖、callback 与 kernel-private state。当前 `/proc/kallsyms` 地址均被屏蔽为零，checker 的 runtime 展示列不可用；源码确认其只影响地址展示，静态判定仍使用配置 ELF。该 ELF 的 `.rodata` 带 WA 标志，不能把 checker 的 WRITABLE 标签当作内核运行时可写证据。未构造/注册 carrier，也未改变 checker 或访问限制。

@@ -8,17 +8,27 @@ they do not enable or restart a service.
 This directory implements the grouped work in
 [evaluation-review.md](../../ccfa-review-reports/evaluation-review.md).
 The [registration evidence audit](registration-evidence.md) records group B's
-call path and two completed KVM functional sessions: multi-process PFN sharing,
+call path and completed KVM functional sessions: multi-process PFN sharing,
 private COW, ordinary-user file/mapping operations and ordered normal release.
 The tested owner refcount remains zero throughout registration and use.
-Independent owner pinning, completion acknowledgement and partial-failure
-handling remain open, alongside real-closure setup and resource accounting.
+The separate partial-failure session confirms that an earlier binding remains
+visible after a later page fails and that manager success does not propagate
+the kernel error. Independent owner pinning, completion acknowledgement and
+transactional recovery remain open, alongside real-closure setup and resource
+accounting. The [registration proposal](proposals/registration-transactions.md)
+is unapplied.
 
 Group D now has a [fixed candidate set and inspection driver](applicability.md).
 Group E has a [complete LZ4 CLI workflow](lz4-cli/README.md) prepared for the
 same owner-registration sessions as group C. Both CLIs have compiled and passed
-48 full-input ordinary-DSO functional cases. Live-carrier application validation
-and the complete deployment measurements remain outstanding.
+48 full-input ordinary-DSO functional cases. The
+[registered LZ4 application](lz4-application-evidence.md) fails on its first
+compression call: an unchanged direct helper call reaches an unmapped target.
+The [exporter proposal](proposals/export-direct-calls.md) corrects the erroneous
+acceptance but is unapplied and does not complete the binding method.
+The [fresh BCH session](bch-functional-evidence.md) passes the full existing
+correctness matrix and four declared source/user PFN matches. These are
+functional observations; complete deployment performance remains outstanding.
 
 ## Isolated registration fixture
 

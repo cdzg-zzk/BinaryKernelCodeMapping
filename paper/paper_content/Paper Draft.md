@@ -175,13 +175,13 @@ Closure construction、初始 environment binding 和 physical-backing setup 均
 
 ## Build-time Closure and Carrier Generation
 
-Builder 为每组开发者选择的 final-binary entries 生成两个耦合产物：描述 source pages、依赖和权限的 closure manifest，以及提供 ELF object semantics 的 Stub DSO。它先在已链接 kernel/LKM ELF 上闭合 code、data and control dependencies，再根据跨布局地址约束构造 carrier；该过程只接受满足 reuse contract 的结果，不尝试从任意 kernel function 自动推断高层语义。
+Builder 为每组开发者选择的 final-binary entries 生成两个耦合产物：描述 source pages、依赖和权限的 closure manifest，以及提供 ELF object semantics 的 Stub DSO。它先分析已链接 kernel/LKM ELF 上的 code、data and control dependencies，再根据跨布局地址约束构造 carrier。Export author 提供入口与环境契约；静态结果和实际绑定需要结合运行验证核对。
 
-### Fail-Closed Final-Binary Closure Analysis
+### ELF Closure Analysis and Runtime Validation
 
-构建器不从源码中推断可复用性，而是以已链接 ELF 的 symbol、section、relocation 和 disassembly 为输入。它从每个导出入口出发，递归收集 direct calls、tail jumps、可解析的 indirect targets、PC-relative data references 和 relocation targets，并为每项依赖标记为 shared page、domain-local relocation、approved Shim 或 synthetic target。任何未解析符号、指向 privileged state 的重定位、超出可表示范围的分支，以及无法证明目标集合的间接跳转都会使构建失败。
+原型以已链接 ELF 的 symbol、section、relocation 和 disassembly 为输入，从导出入口收集可解析的 code/data dependencies。Checker 分别记录静态引用、Shim 命中、间接控制流和编译插桩；致命指令或地址检查失败产生 FAIL，缺失依赖或无法分析的函数产生 INCOMPLETE。间接控制流与插桩记录本身不必使结果失败，因此 PASS 表示当前检查项通过，不能单独证明所有执行目标已经闭合。
 
-分析结果以 manifest 形式记录每个 reusable region 的原始地址、长度、权限、Stub DSO file offset 和 backing 类型。后续构建和装载两端都检查这份 manifest，因此“分析的对象”与“实际映射的页”不能静默偏离。这一 fail-closed 边界将原本会表现为用户态非法跳转或缺页的问题，提前为可定位的构建或装载错误。
+Builder 按依赖分类形成共享 regions、私有数据重定位、Shim imports 和 synthetic targets，并输出 source addresses、file offsets 与 backing 类型。ELF 分析使用镜像中的指令，运行时地址用于确定布局；它没有全面重建装载及启动期改写后的控制流。Evaluation 因而分别核对静态检查、实际 carrier、PFN 和完整调用结果。LZ4 应用验证发现，当前路径会放行没有重绑定位置的直接 Shim 调用，说明这一检查边界仍需完善。
 
 ### PIC-Compatible Code Shape
 
@@ -760,7 +760,7 @@ First-touch、PGOT、LZ4、BCH 和 XZ 均提供单命令入口，正式参数和
 
 ## Applicability and Limitations
 
-VKSO 不是自动的 arbitrary-kernel-function exporter。Analyzer 能证明 binary closure、relocation range、page identity 和 declared binding 是否完整，但不能从机器码自动证明高层语义等价、数据是否可公开或一个 user helper 是否与 kernel helper 具有相同副作用。Export author 仍需声明允许的数据与 helper contract，系统再对声明执行 fail-closed validation。因而 VKSO 最适合计算密集或调用频繁、状态依赖能够收敛为少量显式输入的目标，不适合直接操作 kernel objects、devices、per-CPU state 或 privileged synchronization domains 的功能。
+VKSO 不是自动的 arbitrary-kernel-function exporter。当前 Analyzer 提供 ELF 依赖与引用检查，page identity 则由独立的运行时 PFN 观测验证。静态 PASS 不保证完整控制流或 helper 绑定，高层语义等价、数据可公开性和 helper 副作用也需要 export author 给出明确契约及相应验证。因而 VKSO 最适合计算密集或调用频繁、状态依赖能够收敛为少量显式输入的目标，不适合直接操作 kernel objects、devices、per-CPU state 或 privileged synchronization domains 的功能。
 
 Manifest 与 Stub DSO 绑定到一个确定的 final kernel build。Kernel update、module relink、compiler mitigation 或 boot-time rewriting 只要改变 closure hash、symbol layout 或 executable targets，都需要重新分析和构建；运行端拒绝 build identity 不匹配的 carrier。这一限制牺牲了“一份 DSO 跨任意内核版本”的可移植性，但避免了把 kernel internal ABI 假装成稳定接口。面向应用的 exported symbol version 仍可独立保持稳定，并由新 carrier 适配新的 kernel build。
 
