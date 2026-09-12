@@ -9,7 +9,7 @@
 | 工作组 | 本轮进展 | 下一步具体交付 |
 | --- | --- | --- |
 | A：Clocktime | 20 次采集、全量原始记录核验、三方法结果报告及正文更新已完成 | 保留 writer 不确定性；如需解释其原因，另定诊断，不追逐有利重复 |
-| B：页面复用与装载 | 两次 KVM 会话完成多进程 PFN、只读/COW、非特权文件操作及正常释放观察；活跃期 owner refcnt 为 0，正文已校正 | 补实际闭包的时间/资源账本及剩余边界；owner pinning、完成确认、事务回滚的基础方案仍须明确 |
+| B：页面复用与装载 | 多进程 PFN、只读/COW、非特权文件操作及正常释放已观察；另复现部分失败仍 ready、内核错误未传回 manager | 实际闭包的时间/资源账本及剩余边界；[统一注册修订方案](../test/evaluation/proposals/registration-transactions.md)待审阅，未实施 |
 | C：PGOT 与真实算法 | 已核实三算法的部署/进程/轮次关系，修正报告生成器，复算 BCH 对照点；完整部署采集入口已准备 | Clocktime 结束后执行完整部署重复，分析 BCH 及实际 owner 内核成本 |
 | D：适用范围与导出工具 | 固定 8 例的原分析器正在执行；前三例已落盘，hex_dump_to_buffer 仍在展开依赖；缓存方案未获确认、未应用 | 完成固定全集，导入既有适配证据，完成分类与可运行性验证 |
 | E：真实应用集成 | 完整 CLI 已编译；普通 upstream/同源 DSO 在全 Silesia、两块大小的 48 个功能案例通过 | 验证真实 registered carrier，再在 C 的注册会话内采集应用结果 |
@@ -150,6 +150,10 @@ Clocktime 的声明闭包运行时 PFN 检查已经补入 A；B 应复用其方�
 **隔离执行更新（2026-09-12）：** [完整记录和验证矩阵](../test/evaluation/registration-evidence.md#isolated-runtime-observations-2026-09-12)保存两次独立 KVM guest 的实际结果。使用既有完整 5.15.198 镜像、owner、manager 与页注册模块，将一张 source text page 注册到合成文件偏移。首次会话有三个 reader；第二次增加 UID/GID 65534、无有效 capabilities 的 reader，四个进程均匹配源 PFN。只读 store 触发 SIGSEGV；私有 mprotect(RW) 后写入产生独立 COW，源内容不变。非特权用户对其拥有的 0666 文件在 ready 后进行写打开和 truncate，均得到 EPERM；只读 fd 的 MAP_SHARED 转 RW 得到 EACCES。关闭全部 reader 后恢复原文件内容，随后正常卸载 owner。两次会话的 owner refcnt 全程均为 0，未尝试活跃卸载，也未注入部分注册失败。两台 guest 均结束，无内核 panic/BUG/WARNING，未加载 host 模块。
 
 Evaluation 新增 Registration and Mapping Behavior 和表 21；Implementation 按实际页引用、runner owner 顺序及逐页失败处理改写，撤回独立 module 引用和事务式完整撤销的断言。Discussion 明确所测操作及其时间区间，不将 closure 分析描述成进程级控制流限制。此处使用合成文件验证完整注册机制，不计入算法性能或 setup 数据。三个真实闭包、规模扫描、页引用平衡、全系统净计费、注册前已有可写描述符和剩余生命周期/失败路径仍是 B 的待办；不能因文字校正而删除这些要求。
+
+**部分失败已复现：** 第三个私有 guest 使用同批次“有效源页 + 无 present PTE 的源地址”。内核在第二项报 -ENOMEM，但 manager 仍打印 SUCCESS 并建立 ready，首个注册 PFN 仍可访问。显式恢复先恢复首项，再因第二项无备份报 -ENOENT；manager 仍打印恢复成功并退出 0。该 fixture 的两页最终都恢复原内容，owner 正常卸载；不能把这一局部恢复推为任意跨批次错误均可恢复。结果及两侧日志见[部分失败证据](../test/evaluation/registration-evidence.md#partial-registration-and-completion-reporting)，已补入表 21。此处的 observation complete 表示记录完成，失败原子性并未通过。
+
+[统一修订方案](../test/evaluation/proposals/registration-transactions.md)已列出 owner descriptor/pin、完整计划 stage/commit、真实完成响应、回滚和最终释放顺序，以及共同修改文件和验收项。可用内核 API 的核查发现 owner-from-address 私有接口不能由现有 LKM 直接调用；方案采用公开导出接口和显式 owner 合作，不使用私有符号地址调用。它涉及基础机制，尚未实施；三算法元数据改变后必须以新构建重新生成 carrier 并测量相应 B/C/E。
 
 first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛选，适合估计给定 fault class 的条件延迟。应一并报告总尝试数、各原因剔除数和未筛选分布；不能用过滤后的结果来声称真实 p99 或“永不发生某种 fault”。若原始日志没有保留被丢弃样本，后续采集需补记录，不能反推。
 

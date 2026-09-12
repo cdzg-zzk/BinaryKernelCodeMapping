@@ -1,0 +1,3 @@
+# file_offset,kernel_vaddr,kind,section
+0x1000,0xffffffffc0010000,text,.fixture_text
+0x2000,0xffffe7fffffff000,text,.unresolved_fixture_page

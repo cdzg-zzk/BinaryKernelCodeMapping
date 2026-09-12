@@ -1,0 +1,28 @@
+{
+  "command": [
+    "qemu-system-x86_64",
+    "-accel",
+    "kvm",
+    "-cpu",
+    "host",
+    "-m",
+    "1024",
+    "-smp",
+    "2",
+    "-kernel",
+    "/home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/baremetal/artifacts/reader-load-v4-normal/vkso-bzImage",
+    "-initrd",
+    "/home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/revision/results/qemu-read-final/initramfs.cpio.gz",
+    "-drive",
+    "file=/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/guest.ext4,if=ide,format=raw",
+    "-nic",
+    "none",
+    "-append",
+    "console=ttyS0 init=/init panic=-1 oops=panic nokaslr clocksource=tsc tsc=reliable",
+    "-nographic",
+    "-no-reboot"
+  ],
+  "package": "/home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/baremetal/artifacts/reader-load-v4-normal",
+  "case": "partial-failure",
+  "scope": "disposable guest mechanism validation; no host module load or performance measurement"
+}

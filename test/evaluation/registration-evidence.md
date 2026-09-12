@@ -104,6 +104,45 @@ three matching source PFNs, private COW and successful ordered cleanup.
 
 These results establish the exercised mapping and normal-release behavior.
 They confirm that this registration path does not increase the tested owner's
-module refcount; no active-owner unload was attempted. Partial-registration
-failure, other owners, page-reference balance, page-co-location policy and
-whole-session time/resource accounting remain separate B requirements.
+module refcount; no active-owner unload was attempted. Other owners,
+page-reference balance, page-co-location policy and whole-session
+time/resource accounting remain separate B requirements.
+
+## Partial registration and completion reporting
+
+The [partial-failure session](results/registration-qemu-20260912-partial01/evidence/validation/observations.json)
+uses the same complete packaged implementation in a fresh guest. Its plan has
+two offsets: the first names an existing owner text page; the second names a
+canonical, non-present vmalloc-range address. The existing kernel PFN observer
+checks that the second address has no present mapping before submission. No
+module or kernel source is modified to inject the failure.
+
+The manager's plan validation accepts both aligned entries. The kernel
+registers the first page, fails to resolve the second and logs `-ENOMEM`
+(-12). Nevertheless, the manager prints replacement success and creates its
+ready file. At that point the first file offset still maps source PFN 26135,
+while the second retains the original file bytes. This is an observed partial
+carrier exposed at ready, rather than just a source-derived rollback concern.
+Owner refcount is 0 before submission and at ready.
+
+On orderly termination, the kernel restores the first offset, then reports
+`-ENOENT` (-2) because the second offset has no backup. The manager again
+prints success and exits 0. Both offsets contain their original bytes after
+this particular cleanup, and owner unload succeeds. Thus this case shows
+successful recovery of the one installed binding, but inaccurate registration
+and restoration completion reporting. It does not establish recovery of
+arbitrary partially completed multi-batch sessions.
+
+| Contract question | Exercised path | Actual result | Interpretation |
+| --- | --- | --- | --- |
+| Failed registration is withheld from use | Existing source page followed by an unresolved page in one batch | Kernel error -12, manager ready and success message, first source PFN still accessible | Current failure-atomicity contract is not met |
+| Manager completion reflects kernel outcome | Restore the same two-offset plan | Kernel restores offset 4096, errors -2 at offset 8192; manager reports success and exits 0 | Fixed wait/send success does not propagate kernel completion errors |
+| Controlled cleanup preserves original contents | Close mappings before requesting restore | Both original page contents present; ordered owner unload succeeds | Observed recovery of this fixture only |
+
+The [guest console](results/registration-qemu-20260912-partial01/console.log)
+and [manager log](results/registration-qemu-20260912-partial01/evidence/validation/manager-hold.log)
+retain both sides of these outcomes. The fixture prints
+`registration_observation=complete`; it deliberately does not label the
+atomicity contract as passing. No kernel panic, BUG or WARNING occurred.
+Acknowledged operations and transaction rollback remain implementation work
+requiring the concrete foundational-change review described above.

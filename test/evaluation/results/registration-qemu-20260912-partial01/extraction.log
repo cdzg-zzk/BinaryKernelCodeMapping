@@ -1,0 +1,13 @@
+debugfs 1.46.5 (30-Dec-2021)
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/evidence/validation/load-vkso_m09_clock.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/evidence/validation/load-vkso_kernel_reader.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/evidence/validation/load-page_cache_replace.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/evidence/validation/source-pages.csv
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/evidence/validation/fixture.bin
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/evidence/validation/page_mappings.txt
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/evidence/validation/validate.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/evidence/validation/observations.json
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/evidence/validation/manager-hold.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/evidence/validation/kernel-at-ready.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/evidence/validation/normal-owner-unload.log
+rdump: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/registration-qemu-20260912-partial01/evidence/validation

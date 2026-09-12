@@ -37,6 +37,21 @@ measure API performance or complete group B's setup/net-memory requirements.
 The recorded cases and untested boundaries are listed in
 [registration-evidence.md](registration-evidence.md#isolated-runtime-observations-2026-09-12).
 
+To observe the current partial-registration and error-reporting behavior in
+another fresh guest:
+
+```sh
+python3 test/evaluation/registration_qemu.py --case partial-failure \
+  --output test/evaluation/results/registration-qemu-partial-new
+```
+
+This observation completes when both the kernel and manager outcomes are
+recorded and the controlled file is restored. Completion is not a passing
+atomicity result: the recorded current implementation exposes the first
+registered binding even when its second page fails, and the manager reports
+success despite kernel errors. See the
+[partial-failure evidence](registration-evidence.md#partial-registration-and-completion-reporting).
+
 ## Algorithm deployments
 
 `algorithm_deployments.py` invokes the complete existing LZ4, BCH, and XZ

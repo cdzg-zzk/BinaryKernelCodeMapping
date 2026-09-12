@@ -1,0 +1,51 @@
+{
+  "scope": "KVM partial-registration observation; unchanged packaged implementation",
+  "kernel": "5.15.198",
+  "boot_id": "a047fd23-5a3d-4334-9911-37989db7b149",
+  "complete": true,
+  "source_address": 18446744072635875328,
+  "source_pfn": 26135,
+  "unresolved_address": 18446717685430480896,
+  "unresolved_has_present_pte": false,
+  "owner_refcnt_before": 0,
+  "manager_ready_file": true,
+  "manager_alive_at_ready": true,
+  "owner_refcnt_at_ready": 0,
+  "kernel_resolution_error_observed": true,
+  "kernel_batch_error_minus12_observed": true,
+  "first_mapping_at_ready": {
+    "pid": 141,
+    "address": 139693510377472,
+    "pfn": 26135,
+    "bytes_sha256": "ca8d9370c131adbcd1334e2d494ae20731e892a2f5f2d942d15217469669de9f"
+  },
+  "second_mapping_at_ready": {
+    "pid": 141,
+    "address": 139693510373376,
+    "pfn": 9710,
+    "bytes_sha256": "caef6174fb1bfe5ad1fb7626745a41377eea7ea5602b541feaf44f0fd8070db9"
+  },
+  "first_binding_remains": true,
+  "second_original_bytes": true,
+  "partial_carrier_exposed_at_ready": true,
+  "manager_exit_code": 0,
+  "after_restore": [
+    {
+      "pid": 141,
+      "address": 139693510377472,
+      "pfn": 260070,
+      "bytes_sha256": "f302957da5220938a7e3e51a8718c79b9e00dc13ab2119e8cfc978f041720382",
+      "file_offset": 4096,
+      "original_bytes": true
+    },
+    {
+      "pid": 141,
+      "address": 139693510377472,
+      "pfn": 9710,
+      "bytes_sha256": "caef6174fb1bfe5ad1fb7626745a41377eea7ea5602b541feaf44f0fd8070db9",
+      "file_offset": 8192,
+      "original_bytes": true
+    }
+  ],
+  "owner_absent_after_ordered_unload": true
+}

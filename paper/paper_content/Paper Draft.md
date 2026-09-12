@@ -229,7 +229,7 @@ Indirect Target Selection（ITS）说明了这项检查的必要性：编译时�
 
 `ld.so` 装载 Stub DSO 后，reusable `PT_LOAD` ranges 形成普通 file-backed VMAs。每个 logical page 可由 Stub DSO file offset 转换为 `pgoff_t`，并经 inode 定位到相应 `address_space` entry。Manager 检查页面计划的地址对齐、类别标签、重复项和文件范围，再把该 file offset 注册为指向对应 kernel/LKM resident `struct page`。用户映射权限由 carrier segments 和原生 loader 路径决定。应用可见的 VMA、symbol address and shared-object identity 均不改变。
 
-注册路径为复用页获取 page references，并在备份记录中保存 file-offset bindings。LKM owner 装载后，runner 才开始注册并运行应用；应用结束后 manager 请求恢复绑定，runner 随后卸载 owner。当前路径不获取独立的 owner module references。逐页注册遇错时停止处理后续页面，此前成功的绑定留在备份记录中，由后续恢复请求处理。
+注册路径为复用页获取 page references，并在备份记录中保存 file-offset bindings。LKM owner 装载后，runner 才开始注册并运行应用；应用结束后 manager 请求恢复绑定，runner 随后卸载 owner。当前路径不获取独立的 owner module references。逐页注册遇错时停止处理后续页面，此前成功的绑定留在备份记录中，由后续恢复请求处理。管理器以发送结果和固定等待推进会话，不接收内核逐批次的完成结果。
 
 ### Fault-Driven PTE Installation and Execution
 
@@ -721,8 +721,12 @@ VKSO/Copy 的成功 snapshot 约为 45.158 cycles，Raw 约为 43.151。Hres ret
 | 新文件操作 | 非特权 owner 对已注册文件执行 open(RDWR) 和 truncate | 均为 EPERM |
 | 正常释放 | 关闭全部 reader，恢复绑定，再卸载 owner | 原文件内容恢复，manager 正常退出，owner 卸载成功 |
 | Owner 引用 | 注册前、ready 后、活跃 reader 期间及恢复后读取 module refcnt | 七个观察点均为 0 |
+| 部分注册失败 | 同批次先注册有效页，再提交无 PTE 的源地址 | 内核返回 ENOMEM；manager 仍报告成功并进入 ready，首个绑定仍可访问 |
+| 恢复结果传递 | 恢复上述两页计划 | 内核恢复首个绑定，在第二页报告 ENOENT；manager 仍报告成功并退出 0 |
 
 这些结果表明，所测私有写入通过 COW 保持源页内容，正常退出顺序能够恢复文件后备。注册没有增加该 owner 的 module refcount，因此本组生命周期结果依赖 runner 保持 owner 驻留并按顺序清理。首次会话中的三个 reader 也观察到相同的共享、COW 和正常释放行为。
+
+部分失败检查使用另一独立会话：提交前确认第二个源地址没有 present PTE，再观察 kernel 日志、manager ready 状态和两个用户映射。失败后首个绑定仍可访问，说明当前注册不具备事务式回滚；manager 的成功状态也未反映内核结果。显式恢复后，这两个文件页均恢复原内容，owner 可按顺序卸载。
 
 ## Reproducibility
 

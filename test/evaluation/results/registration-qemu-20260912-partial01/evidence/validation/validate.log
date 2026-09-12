@@ -1,0 +1,7 @@
+=== ELF Section Replace Tool ===
+Command: validate
+
+Target file: /work/validation/fixture.bin
+Page map: /work/validation/page_mappings.txt
+Loaded 2 explicit reusable page mappings from /work/validation/page_mappings.txt
+SUCCESS: page map is valid for the generated DSO

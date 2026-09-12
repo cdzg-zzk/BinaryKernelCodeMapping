@@ -15,6 +15,7 @@ PACKAGE = REVISION.parent / 'baremetal/artifacts/reader-load-v4-normal'
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--output', required=True, type=Path)
+    p.add_argument('--case', choices=('normal', 'partial-failure'), default='normal')
     args = p.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -24,7 +25,11 @@ def main():
     for name in ['manager', 'page_cache_replace.ko', 'vkso_m09_clock.ko']:
         shutil.copy2(PACKAGE / name, payload / name)
     shutil.copy2(REVISION / 'build/kernel-reader/vkso_kernel_reader.ko', payload)
-    shutil.copy2(Path(__file__).with_name('registration_guest.py'), payload / 'revision/qemu-guest.py')
+    guest = Path(__file__).with_name('registration_guest.py')
+    if args.case == 'partial-failure':
+        shutil.copy2(guest, payload / 'revision/registration_guest.py')
+        guest = Path(__file__).with_name('registration_partial_guest.py')
+    shutil.copy2(guest, payload / 'revision/qemu-guest.py')
     disk = output / 'guest.ext4'
     with disk.open('xb') as f:
         f.truncate(128 * 1024 * 1024)
@@ -35,7 +40,7 @@ def main():
                '-drive', f'file={disk},if=ide,format=raw', '-nic', 'none',
                '-append', 'console=ttyS0 init=/init panic=-1 oops=panic nokaslr clocksource=tsc tsc=reliable',
                '-nographic', '-no-reboot']
-    (output / 'run.json').write_text(json.dumps({'command': command, 'package': str(PACKAGE),
+    (output / 'run.json').write_text(json.dumps({'command': command, 'package': str(PACKAGE), 'case': args.case,
         'scope': 'disposable guest mechanism validation; no host module load or performance measurement'}, indent=2) + '\n')
     evidence = output / 'evidence'
     try:
@@ -47,7 +52,8 @@ def main():
             subprocess.run(['debugfs', '-R', f'rdump /validation {evidence}', str(disk)],
                            stdout=f, stderr=subprocess.STDOUT, check=True)
     content = (output / 'console.log').read_text()
-    if process.returncode or 'registration_fixture=pass' not in content or 'revision_guest_status=0' not in content:
+    marker = 'registration_fixture=pass' if args.case == 'normal' else 'registration_observation=complete'
+    if process.returncode or marker not in content or 'revision_guest_status=0' not in content:
         raise RuntimeError('guest fixture did not complete; console and extracted evidence retained')
     if re.search(r'Kernel panic|BUG:|WARNING:', content):
         raise RuntimeError('guest kernel diagnostic requires inspection; evidence retained')
