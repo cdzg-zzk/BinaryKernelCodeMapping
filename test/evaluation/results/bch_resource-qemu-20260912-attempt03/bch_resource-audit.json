@@ -1,0 +1,1549 @@
+{
+  "status": "pass",
+  "boot_id": "d8069aa3-7c4f-4a1f-8d48-c3904c0ede8f",
+  "groups": [
+    {
+      "role": "native-before-owner",
+      "loaders": 1,
+      "target_library_and_shim_pfn_union_pages": 7,
+      "declared_user_pfn_union_pages": 0,
+      "declared_kernel_user_union_pages": null,
+      "target_plus_owner_core_union_pages": null,
+      "all_loader_vma_union_pages": 5432,
+      "VmPTE_kb_per_loader": [
+        96
+      ],
+      "VmPTE_delta_kb_per_loader": [
+        0
+      ],
+      "VmPTE_kb_sum": 96,
+      "VmPTE_delta_kb_sum": 0,
+      "categories": {
+        "native-readonly": {
+          "mapping_count": 3,
+          "pfn_union": [
+            1150894,
+            1150924,
+            1150946
+          ],
+          "distinct_pfns": 3,
+          "pfn_distinct_process_count": {
+            "1150894": 1,
+            "1150924": 1,
+            "1150946": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1150946
+          ],
+          "owner_core_overlap_pfns": []
+        },
+        "native-executable": {
+          "mapping_count": 3,
+          "pfn_union": [
+            1150895,
+            1150896,
+            1150897
+          ],
+          "distinct_pfns": 3,
+          "pfn_distinct_process_count": {
+            "1150895": 1,
+            "1150896": 1,
+            "1150897": 1
+          },
+          "private_vma_nonfile_pfns": [],
+          "owner_core_overlap_pfns": []
+        },
+        "native-writable": {
+          "mapping_count": 1,
+          "pfn_union": [
+            1150939
+          ],
+          "distinct_pfns": 1,
+          "pfn_distinct_process_count": {
+            "1150939": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1150939
+          ],
+          "owner_core_overlap_pfns": []
+        }
+      },
+      "pagemap_unread_ranges": 1
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 4,
+      "target_library_and_shim_pfn_union_pages": 13,
+      "declared_user_pfn_union_pages": 0,
+      "declared_kernel_user_union_pages": null,
+      "target_plus_owner_core_union_pages": null,
+      "all_loader_vma_union_pages": 15279,
+      "VmPTE_kb_per_loader": [
+        92,
+        92,
+        92,
+        88
+      ],
+      "VmPTE_delta_kb_per_loader": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "VmPTE_kb_sum": 364,
+      "VmPTE_delta_kb_sum": 0,
+      "categories": {
+        "native-readonly": {
+          "mapping_count": 12,
+          "pfn_union": [
+            1150894,
+            1150924,
+            1160578,
+            1160590,
+            1160755,
+            1160791
+          ],
+          "distinct_pfns": 6,
+          "pfn_distinct_process_count": {
+            "1150894": 4,
+            "1150924": 4,
+            "1160578": 1,
+            "1160590": 1,
+            "1160755": 1,
+            "1160791": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1160578,
+            1160590,
+            1160755,
+            1160791
+          ],
+          "owner_core_overlap_pfns": []
+        },
+        "native-executable": {
+          "mapping_count": 12,
+          "pfn_union": [
+            1150895,
+            1150896,
+            1150897
+          ],
+          "distinct_pfns": 3,
+          "pfn_distinct_process_count": {
+            "1150895": 4,
+            "1150896": 4,
+            "1150897": 4
+          },
+          "private_vma_nonfile_pfns": [],
+          "owner_core_overlap_pfns": []
+        },
+        "native-writable": {
+          "mapping_count": 4,
+          "pfn_union": [
+            1160577,
+            1160589,
+            1160754,
+            1160790
+          ],
+          "distinct_pfns": 4,
+          "pfn_distinct_process_count": {
+            "1160577": 1,
+            "1160589": 1,
+            "1160754": 1,
+            "1160790": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1160577,
+            1160589,
+            1160754,
+            1160790
+          ],
+          "owner_core_overlap_pfns": []
+        }
+      },
+      "pagemap_unread_ranges": 4
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 16,
+      "target_library_and_shim_pfn_union_pages": 37,
+      "declared_user_pfn_union_pages": 0,
+      "declared_kernel_user_union_pages": null,
+      "target_plus_owner_core_union_pages": null,
+      "all_loader_vma_union_pages": 53574,
+      "VmPTE_kb_per_loader": [
+        92,
+        92,
+        96,
+        92,
+        96,
+        92,
+        88,
+        88,
+        92,
+        88,
+        96,
+        92,
+        92,
+        96,
+        96,
+        92
+      ],
+      "VmPTE_delta_kb_per_loader": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "VmPTE_kb_sum": 1480,
+      "VmPTE_delta_kb_sum": 0,
+      "categories": {
+        "native-readonly": {
+          "mapping_count": 48,
+          "pfn_union": [
+            1150894,
+            1150924,
+            1198791,
+            1199312,
+            1199387,
+            1199413,
+            1199428,
+            1199553,
+            1199579,
+            1199605,
+            1199677,
+            1199883,
+            1199909,
+            1199998,
+            1200024,
+            1200050,
+            1200265,
+            1200342
+          ],
+          "distinct_pfns": 18,
+          "pfn_distinct_process_count": {
+            "1150894": 16,
+            "1150924": 16,
+            "1198791": 1,
+            "1199312": 1,
+            "1199387": 1,
+            "1199413": 1,
+            "1199428": 1,
+            "1199553": 1,
+            "1199579": 1,
+            "1199605": 1,
+            "1199677": 1,
+            "1199883": 1,
+            "1199909": 1,
+            "1199998": 1,
+            "1200024": 1,
+            "1200050": 1,
+            "1200265": 1,
+            "1200342": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1198791,
+            1199312,
+            1199387,
+            1199413,
+            1199428,
+            1199553,
+            1199579,
+            1199605,
+            1199677,
+            1199883,
+            1199909,
+            1199998,
+            1200024,
+            1200050,
+            1200265,
+            1200342
+          ],
+          "owner_core_overlap_pfns": []
+        },
+        "native-executable": {
+          "mapping_count": 48,
+          "pfn_union": [
+            1150895,
+            1150896,
+            1150897
+          ],
+          "distinct_pfns": 3,
+          "pfn_distinct_process_count": {
+            "1150895": 16,
+            "1150896": 16,
+            "1150897": 16
+          },
+          "private_vma_nonfile_pfns": [],
+          "owner_core_overlap_pfns": []
+        },
+        "native-writable": {
+          "mapping_count": 16,
+          "pfn_union": [
+            1198790,
+            1199311,
+            1199386,
+            1199412,
+            1199427,
+            1199552,
+            1199578,
+            1199604,
+            1199676,
+            1199882,
+            1199908,
+            1199997,
+            1200023,
+            1200049,
+            1200264,
+            1200341
+          ],
+          "distinct_pfns": 16,
+          "pfn_distinct_process_count": {
+            "1198790": 1,
+            "1199311": 1,
+            "1199386": 1,
+            "1199412": 1,
+            "1199427": 1,
+            "1199552": 1,
+            "1199578": 1,
+            "1199604": 1,
+            "1199676": 1,
+            "1199882": 1,
+            "1199908": 1,
+            "1199997": 1,
+            "1200023": 1,
+            "1200049": 1,
+            "1200264": 1,
+            "1200341": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1198790,
+            1199311,
+            1199386,
+            1199412,
+            1199427,
+            1199552,
+            1199578,
+            1199604,
+            1199676,
+            1199882,
+            1199908,
+            1199997,
+            1200023,
+            1200049,
+            1200264,
+            1200341
+          ],
+          "owner_core_overlap_pfns": []
+        }
+      },
+      "pagemap_unread_ranges": 16
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 1,
+      "target_library_and_shim_pfn_union_pages": 7,
+      "declared_user_pfn_union_pages": 0,
+      "declared_kernel_user_union_pages": null,
+      "target_plus_owner_core_union_pages": 13,
+      "all_loader_vma_union_pages": 5509,
+      "VmPTE_kb_per_loader": [
+        92
+      ],
+      "VmPTE_delta_kb_per_loader": [
+        0
+      ],
+      "VmPTE_kb_sum": 92,
+      "VmPTE_delta_kb_sum": 0,
+      "categories": {
+        "native-readonly": {
+          "mapping_count": 3,
+          "pfn_union": [
+            1150894,
+            1150924,
+            1168019
+          ],
+          "distinct_pfns": 3,
+          "pfn_distinct_process_count": {
+            "1150894": 1,
+            "1150924": 1,
+            "1168019": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1168019
+          ],
+          "owner_core_overlap_pfns": []
+        },
+        "native-executable": {
+          "mapping_count": 3,
+          "pfn_union": [
+            1150895,
+            1150896,
+            1150897
+          ],
+          "distinct_pfns": 3,
+          "pfn_distinct_process_count": {
+            "1150895": 1,
+            "1150896": 1,
+            "1150897": 1
+          },
+          "private_vma_nonfile_pfns": [],
+          "owner_core_overlap_pfns": []
+        },
+        "native-writable": {
+          "mapping_count": 1,
+          "pfn_union": [
+            1168018
+          ],
+          "distinct_pfns": 1,
+          "pfn_distinct_process_count": {
+            "1168018": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1168018
+          ],
+          "owner_core_overlap_pfns": []
+        }
+      },
+      "pagemap_unread_ranges": 1
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 4,
+      "target_library_and_shim_pfn_union_pages": 13,
+      "declared_user_pfn_union_pages": 0,
+      "declared_kernel_user_union_pages": null,
+      "target_plus_owner_core_union_pages": 19,
+      "all_loader_vma_union_pages": 15293,
+      "VmPTE_kb_per_loader": [
+        92,
+        96,
+        92,
+        96
+      ],
+      "VmPTE_delta_kb_per_loader": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "VmPTE_kb_sum": 376,
+      "VmPTE_delta_kb_sum": 0,
+      "categories": {
+        "native-readonly": {
+          "mapping_count": 12,
+          "pfn_union": [
+            1148507,
+            1150894,
+            1150924,
+            1170226,
+            1174080,
+            1176316
+          ],
+          "distinct_pfns": 6,
+          "pfn_distinct_process_count": {
+            "1148507": 1,
+            "1150894": 4,
+            "1150924": 4,
+            "1170226": 1,
+            "1174080": 1,
+            "1176316": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1148507,
+            1170226,
+            1174080,
+            1176316
+          ],
+          "owner_core_overlap_pfns": []
+        },
+        "native-executable": {
+          "mapping_count": 12,
+          "pfn_union": [
+            1150895,
+            1150896,
+            1150897
+          ],
+          "distinct_pfns": 3,
+          "pfn_distinct_process_count": {
+            "1150895": 4,
+            "1150896": 4,
+            "1150897": 4
+          },
+          "private_vma_nonfile_pfns": [],
+          "owner_core_overlap_pfns": []
+        },
+        "native-writable": {
+          "mapping_count": 4,
+          "pfn_union": [
+            1148506,
+            1156223,
+            1170225,
+            1176315
+          ],
+          "distinct_pfns": 4,
+          "pfn_distinct_process_count": {
+            "1148506": 1,
+            "1156223": 1,
+            "1170225": 1,
+            "1176315": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1148506,
+            1156223,
+            1170225,
+            1176315
+          ],
+          "owner_core_overlap_pfns": []
+        }
+      },
+      "pagemap_unread_ranges": 4
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 16,
+      "target_library_and_shim_pfn_union_pages": 37,
+      "declared_user_pfn_union_pages": 0,
+      "declared_kernel_user_union_pages": null,
+      "target_plus_owner_core_union_pages": 43,
+      "all_loader_vma_union_pages": 53592,
+      "VmPTE_kb_per_loader": [
+        100,
+        88,
+        96,
+        96,
+        88,
+        88,
+        92,
+        88,
+        88,
+        96,
+        88,
+        92,
+        88,
+        100,
+        92,
+        96
+      ],
+      "VmPTE_delta_kb_per_loader": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "VmPTE_kb_sum": 1476,
+      "VmPTE_delta_kb_sum": 0,
+      "categories": {
+        "native-readonly": {
+          "mapping_count": 48,
+          "pfn_union": [
+            1150894,
+            1150924,
+            1196947,
+            1196973,
+            1197003,
+            1203223,
+            1203298,
+            1203536,
+            1203612,
+            1203633,
+            1203709,
+            1203784,
+            1203876,
+            1203952,
+            1204048,
+            1204124,
+            1204199,
+            1204280
+          ],
+          "distinct_pfns": 18,
+          "pfn_distinct_process_count": {
+            "1150894": 16,
+            "1150924": 16,
+            "1196947": 1,
+            "1196973": 1,
+            "1197003": 1,
+            "1203223": 1,
+            "1203298": 1,
+            "1203536": 1,
+            "1203612": 1,
+            "1203633": 1,
+            "1203709": 1,
+            "1203784": 1,
+            "1203876": 1,
+            "1203952": 1,
+            "1204048": 1,
+            "1204124": 1,
+            "1204199": 1,
+            "1204280": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1196947,
+            1196973,
+            1197003,
+            1203223,
+            1203298,
+            1203536,
+            1203612,
+            1203633,
+            1203709,
+            1203784,
+            1203876,
+            1203952,
+            1204048,
+            1204124,
+            1204199,
+            1204280
+          ],
+          "owner_core_overlap_pfns": []
+        },
+        "native-executable": {
+          "mapping_count": 48,
+          "pfn_union": [
+            1150895,
+            1150896,
+            1150897
+          ],
+          "distinct_pfns": 3,
+          "pfn_distinct_process_count": {
+            "1150895": 16,
+            "1150896": 16,
+            "1150897": 16
+          },
+          "private_vma_nonfile_pfns": [],
+          "owner_core_overlap_pfns": []
+        },
+        "native-writable": {
+          "mapping_count": 16,
+          "pfn_union": [
+            1196946,
+            1196972,
+            1197002,
+            1203222,
+            1203297,
+            1203535,
+            1203611,
+            1203632,
+            1203708,
+            1203783,
+            1203875,
+            1203951,
+            1204047,
+            1204123,
+            1204198,
+            1204279
+          ],
+          "distinct_pfns": 16,
+          "pfn_distinct_process_count": {
+            "1196946": 1,
+            "1196972": 1,
+            "1197002": 1,
+            "1203222": 1,
+            "1203297": 1,
+            "1203535": 1,
+            "1203611": 1,
+            "1203632": 1,
+            "1203708": 1,
+            "1203783": 1,
+            "1203875": 1,
+            "1203951": 1,
+            "1204047": 1,
+            "1204123": 1,
+            "1204198": 1,
+            "1204279": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1196946,
+            1196972,
+            1197002,
+            1203222,
+            1203297,
+            1203535,
+            1203611,
+            1203632,
+            1203708,
+            1203783,
+            1203875,
+            1203951,
+            1204047,
+            1204123,
+            1204198,
+            1204279
+          ],
+          "owner_core_overlap_pfns": []
+        }
+      },
+      "pagemap_unread_ranges": 16
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 1,
+      "target_library_and_shim_pfn_union_pages": 11,
+      "declared_user_pfn_union_pages": 4,
+      "declared_kernel_user_union_pages": 4,
+      "target_plus_owner_core_union_pages": 13,
+      "all_loader_vma_union_pages": 5531,
+      "VmPTE_kb_per_loader": [
+        96
+      ],
+      "VmPTE_delta_kb_per_loader": [
+        0
+      ],
+      "VmPTE_kb_sum": 96,
+      "VmPTE_delta_kb_sum": 0,
+      "categories": {
+        "declared-text": {
+          "mapping_count": 3,
+          "pfn_union": [
+            1138591,
+            1142947,
+            1142977
+          ],
+          "distinct_pfns": 3,
+          "pfn_distinct_process_count": {
+            "1138591": 1,
+            "1142947": 1,
+            "1142977": 1
+          },
+          "private_vma_nonfile_pfns": [],
+          "owner_core_overlap_pfns": [
+            1138591,
+            1142947,
+            1142977
+          ]
+        },
+        "declared-rodata": {
+          "mapping_count": 1,
+          "pfn_union": [
+            1143033
+          ],
+          "distinct_pfns": 1,
+          "pfn_distinct_process_count": {
+            "1143033": 1
+          },
+          "private_vma_nonfile_pfns": [],
+          "owner_core_overlap_pfns": [
+            1143033
+          ]
+        },
+        "carrier-support-writable": {
+          "mapping_count": 2,
+          "pfn_union": [
+            1185644,
+            1185647
+          ],
+          "distinct_pfns": 2,
+          "pfn_distinct_process_count": {
+            "1185644": 1,
+            "1185647": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1185644,
+            1185647
+          ],
+          "owner_core_overlap_pfns": []
+        },
+        "shim-readonly": {
+          "mapping_count": 4,
+          "pfn_union": [
+            1185646,
+            1209196,
+            1282070,
+            1285278
+          ],
+          "distinct_pfns": 4,
+          "pfn_distinct_process_count": {
+            "1185646": 1,
+            "1209196": 1,
+            "1282070": 1,
+            "1285278": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1185646
+          ],
+          "owner_core_overlap_pfns": []
+        },
+        "shim-writable": {
+          "mapping_count": 1,
+          "pfn_union": [
+            1185645
+          ],
+          "distinct_pfns": 1,
+          "pfn_distinct_process_count": {
+            "1185645": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1185645
+          ],
+          "owner_core_overlap_pfns": []
+        }
+      },
+      "pagemap_unread_ranges": 1,
+      "manager": {
+        "pid": 289,
+        "observed_vma_union_pages": 304,
+        "VmPTE_kb": 28,
+        "VmRSS_kb": 1216,
+        "RssAnon_kb": 76,
+        "RssFile_kb": 1140,
+        "Pss_kb": 1212,
+        "loader_manager_union_pages": 5834
+      }
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 4,
+      "target_library_and_shim_pfn_union_pages": 23,
+      "declared_user_pfn_union_pages": 4,
+      "declared_kernel_user_union_pages": 4,
+      "target_plus_owner_core_union_pages": 25,
+      "all_loader_vma_union_pages": 15373,
+      "VmPTE_kb_per_loader": [
+        92,
+        88,
+        92,
+        92
+      ],
+      "VmPTE_delta_kb_per_loader": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "VmPTE_kb_sum": 364,
+      "VmPTE_delta_kb_sum": 0,
+      "categories": {
+        "declared-text": {
+          "mapping_count": 12,
+          "pfn_union": [
+            1138591,
+            1142947,
+            1142977
+          ],
+          "distinct_pfns": 3,
+          "pfn_distinct_process_count": {
+            "1138591": 4,
+            "1142947": 4,
+            "1142977": 4
+          },
+          "private_vma_nonfile_pfns": [],
+          "owner_core_overlap_pfns": [
+            1138591,
+            1142947,
+            1142977
+          ]
+        },
+        "declared-rodata": {
+          "mapping_count": 4,
+          "pfn_union": [
+            1143033
+          ],
+          "distinct_pfns": 1,
+          "pfn_distinct_process_count": {
+            "1143033": 4
+          },
+          "private_vma_nonfile_pfns": [],
+          "owner_core_overlap_pfns": [
+            1143033
+          ]
+        },
+        "carrier-support-writable": {
+          "mapping_count": 8,
+          "pfn_union": [
+            1222107,
+            1222110,
+            1231702,
+            1231705,
+            1240020,
+            1240023,
+            1257298,
+            1257301
+          ],
+          "distinct_pfns": 8,
+          "pfn_distinct_process_count": {
+            "1222107": 1,
+            "1222110": 1,
+            "1231702": 1,
+            "1231705": 1,
+            "1240020": 1,
+            "1240023": 1,
+            "1257298": 1,
+            "1257301": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1222107,
+            1222110,
+            1231702,
+            1231705,
+            1240020,
+            1240023,
+            1257298,
+            1257301
+          ],
+          "owner_core_overlap_pfns": []
+        },
+        "shim-readonly": {
+          "mapping_count": 16,
+          "pfn_union": [
+            1209196,
+            1222109,
+            1231704,
+            1240022,
+            1257300,
+            1282070,
+            1285278
+          ],
+          "distinct_pfns": 7,
+          "pfn_distinct_process_count": {
+            "1209196": 4,
+            "1222109": 1,
+            "1231704": 1,
+            "1240022": 1,
+            "1257300": 1,
+            "1282070": 4,
+            "1285278": 4
+          },
+          "private_vma_nonfile_pfns": [
+            1222109,
+            1231704,
+            1240022,
+            1257300
+          ],
+          "owner_core_overlap_pfns": []
+        },
+        "shim-writable": {
+          "mapping_count": 4,
+          "pfn_union": [
+            1222108,
+            1231703,
+            1240021,
+            1257299
+          ],
+          "distinct_pfns": 4,
+          "pfn_distinct_process_count": {
+            "1222108": 1,
+            "1231703": 1,
+            "1240021": 1,
+            "1257299": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1222108,
+            1231703,
+            1240021,
+            1257299
+          ],
+          "owner_core_overlap_pfns": []
+        }
+      },
+      "pagemap_unread_ranges": 4,
+      "manager": {
+        "pid": 289,
+        "observed_vma_union_pages": 304,
+        "VmPTE_kb": 28,
+        "VmRSS_kb": 1216,
+        "RssAnon_kb": 76,
+        "RssFile_kb": 1140,
+        "Pss_kb": 1212,
+        "loader_manager_union_pages": 15676
+      }
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 16,
+      "target_library_and_shim_pfn_union_pages": 71,
+      "declared_user_pfn_union_pages": 4,
+      "declared_kernel_user_union_pages": 4,
+      "target_plus_owner_core_union_pages": 73,
+      "all_loader_vma_union_pages": 53879,
+      "VmPTE_kb_per_loader": [
+        92,
+        96,
+        96,
+        96,
+        88,
+        96,
+        92,
+        92,
+        92,
+        92,
+        92,
+        88,
+        96,
+        100,
+        96,
+        96
+      ],
+      "VmPTE_delta_kb_per_loader": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "VmPTE_kb_sum": 1500,
+      "VmPTE_delta_kb_sum": 0,
+      "categories": {
+        "declared-text": {
+          "mapping_count": 48,
+          "pfn_union": [
+            1138591,
+            1142947,
+            1142977
+          ],
+          "distinct_pfns": 3,
+          "pfn_distinct_process_count": {
+            "1138591": 16,
+            "1142947": 16,
+            "1142977": 16
+          },
+          "private_vma_nonfile_pfns": [],
+          "owner_core_overlap_pfns": [
+            1138591,
+            1142947,
+            1142977
+          ]
+        },
+        "declared-rodata": {
+          "mapping_count": 16,
+          "pfn_union": [
+            1143033
+          ],
+          "distinct_pfns": 1,
+          "pfn_distinct_process_count": {
+            "1143033": 16
+          },
+          "private_vma_nonfile_pfns": [],
+          "owner_core_overlap_pfns": [
+            1143033
+          ]
+        },
+        "carrier-support-writable": {
+          "mapping_count": 32,
+          "pfn_union": [
+            1149316,
+            1149319,
+            1151665,
+            1151668,
+            1181088,
+            1181091,
+            1181134,
+            1181137,
+            1195408,
+            1195411,
+            1195496,
+            1195499,
+            1236621,
+            1236624,
+            1243080,
+            1243083,
+            1243694,
+            1243697,
+            1246313,
+            1246316,
+            1246933,
+            1246936,
+            1249427,
+            1249430,
+            1250755,
+            1250758,
+            1250802,
+            1250805,
+            1262326,
+            1262329,
+            1281434,
+            1281437
+          ],
+          "distinct_pfns": 32,
+          "pfn_distinct_process_count": {
+            "1149316": 1,
+            "1149319": 1,
+            "1151665": 1,
+            "1151668": 1,
+            "1181088": 1,
+            "1181091": 1,
+            "1181134": 1,
+            "1181137": 1,
+            "1195408": 1,
+            "1195411": 1,
+            "1195496": 1,
+            "1195499": 1,
+            "1236621": 1,
+            "1236624": 1,
+            "1243080": 1,
+            "1243083": 1,
+            "1243694": 1,
+            "1243697": 1,
+            "1246313": 1,
+            "1246316": 1,
+            "1246933": 1,
+            "1246936": 1,
+            "1249427": 1,
+            "1249430": 1,
+            "1250755": 1,
+            "1250758": 1,
+            "1250802": 1,
+            "1250805": 1,
+            "1262326": 1,
+            "1262329": 1,
+            "1281434": 1,
+            "1281437": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1149316,
+            1149319,
+            1151665,
+            1151668,
+            1181088,
+            1181091,
+            1181134,
+            1181137,
+            1195408,
+            1195411,
+            1195496,
+            1195499,
+            1236621,
+            1236624,
+            1243080,
+            1243083,
+            1243694,
+            1243697,
+            1246313,
+            1246316,
+            1246933,
+            1246936,
+            1249427,
+            1249430,
+            1250755,
+            1250758,
+            1250802,
+            1250805,
+            1262326,
+            1262329,
+            1281434,
+            1281437
+          ],
+          "owner_core_overlap_pfns": []
+        },
+        "shim-readonly": {
+          "mapping_count": 64,
+          "pfn_union": [
+            1149318,
+            1151667,
+            1181090,
+            1181136,
+            1195410,
+            1195498,
+            1209196,
+            1236623,
+            1243082,
+            1243696,
+            1246315,
+            1246935,
+            1249429,
+            1250757,
+            1250804,
+            1262328,
+            1281436,
+            1282070,
+            1285278
+          ],
+          "distinct_pfns": 19,
+          "pfn_distinct_process_count": {
+            "1149318": 1,
+            "1151667": 1,
+            "1181090": 1,
+            "1181136": 1,
+            "1195410": 1,
+            "1195498": 1,
+            "1209196": 16,
+            "1236623": 1,
+            "1243082": 1,
+            "1243696": 1,
+            "1246315": 1,
+            "1246935": 1,
+            "1249429": 1,
+            "1250757": 1,
+            "1250804": 1,
+            "1262328": 1,
+            "1281436": 1,
+            "1282070": 16,
+            "1285278": 16
+          },
+          "private_vma_nonfile_pfns": [
+            1149318,
+            1151667,
+            1181090,
+            1181136,
+            1195410,
+            1195498,
+            1236623,
+            1243082,
+            1243696,
+            1246315,
+            1246935,
+            1249429,
+            1250757,
+            1250804,
+            1262328,
+            1281436
+          ],
+          "owner_core_overlap_pfns": []
+        },
+        "shim-writable": {
+          "mapping_count": 16,
+          "pfn_union": [
+            1149317,
+            1151666,
+            1181089,
+            1181135,
+            1195409,
+            1195497,
+            1236622,
+            1243081,
+            1243695,
+            1246314,
+            1246934,
+            1249428,
+            1250756,
+            1250803,
+            1262327,
+            1281435
+          ],
+          "distinct_pfns": 16,
+          "pfn_distinct_process_count": {
+            "1149317": 1,
+            "1151666": 1,
+            "1181089": 1,
+            "1181135": 1,
+            "1195409": 1,
+            "1195497": 1,
+            "1236622": 1,
+            "1243081": 1,
+            "1243695": 1,
+            "1246314": 1,
+            "1246934": 1,
+            "1249428": 1,
+            "1250756": 1,
+            "1250803": 1,
+            "1262327": 1,
+            "1281435": 1
+          },
+          "private_vma_nonfile_pfns": [
+            1149317,
+            1151666,
+            1181089,
+            1181135,
+            1195409,
+            1195497,
+            1236622,
+            1243081,
+            1243695,
+            1246314,
+            1246934,
+            1249428,
+            1250756,
+            1250803,
+            1262327,
+            1281435
+          ],
+          "owner_core_overlap_pfns": []
+        }
+      },
+      "pagemap_unread_ranges": 16,
+      "manager": {
+        "pid": 289,
+        "observed_vma_union_pages": 304,
+        "VmPTE_kb": 28,
+        "VmRSS_kb": 1216,
+        "RssAnon_kb": 76,
+        "RssFile_kb": 1140,
+        "Pss_kb": 1212,
+        "loader_manager_union_pages": 54182
+      }
+    }
+  ],
+  "module_core": {
+    "vkso_bch": {
+      "core_bytes": 24576,
+      "pfns": [
+        1138591,
+        1142947,
+        1142977,
+        1143033,
+        1143296,
+        1143463
+      ],
+      "pages": 6,
+      "coverage": "all coresize pages observed; init size zero",
+      "section_annotations": [
+        {
+          "address": 18446744072635842560,
+          "pfn": 1142977,
+          "overlapping_sections": [
+            ".text"
+          ]
+        },
+        {
+          "address": 18446744072635846656,
+          "pfn": 1142947,
+          "overlapping_sections": [
+            ".text"
+          ]
+        },
+        {
+          "address": 18446744072635850752,
+          "pfn": 1138591,
+          "overlapping_sections": [
+            ".text",
+            ".exit.text"
+          ]
+        },
+        {
+          "address": 18446744072635854848,
+          "pfn": 1143033,
+          "overlapping_sections": [
+            ".note.gnu.build-id",
+            ".note.Linux",
+            "__ksymtab_gpl",
+            "__kcrctab_gpl",
+            ".rodata",
+            "__ksymtab_strings",
+            ".rodata.str1.8"
+          ]
+        },
+        {
+          "address": 18446744072635858944,
+          "pfn": 1143296,
+          "overlapping_sections": [
+            "__bug_table",
+            ".data",
+            ".gnu.linkonce.this_module"
+          ]
+        },
+        {
+          "address": 18446744072635863040,
+          "pfn": 1143463,
+          "overlapping_sections": []
+        }
+      ]
+    },
+    "vkso_kernel_reader": {
+      "core_bytes": 16384,
+      "pfns": [
+        1138270,
+        1138316,
+        1142993,
+        1142994
+      ],
+      "pages": 4,
+      "coverage": "all coresize pages observed; init size zero",
+      "section_annotations": [
+        {
+          "address": 18446744072635883520,
+          "pfn": 1138316,
+          "overlapping_sections": [
+            ".text",
+            ".altinstr_replacement",
+            ".text.unlikely",
+            ".exit.text"
+          ]
+        },
+        {
+          "address": 18446744072635887616,
+          "pfn": 1138270,
+          "overlapping_sections": [
+            ".note.gnu.build-id",
+            ".note.Linux",
+            ".altinstructions",
+            ".rodata.str1.1",
+            ".parainstructions",
+            ".rodata.str1.8",
+            ".rodata",
+            ".return_sites"
+          ]
+        },
+        {
+          "address": 18446744072635891712,
+          "pfn": 1142994,
+          "overlapping_sections": [
+            ".data",
+            ".gnu.linkonce.this_module",
+            ".bss"
+          ]
+        },
+        {
+          "address": 18446744072635895808,
+          "pfn": 1142993,
+          "overlapping_sections": []
+        }
+      ]
+    },
+    "page_cache_replace": {
+      "core_bytes": 49152,
+      "pfns": [
+        1049334,
+        1049335,
+        1137944,
+        1137945,
+        1138340,
+        1138341,
+        1142951,
+        1142962,
+        1142963,
+        1142966,
+        1143004,
+        1143005
+      ],
+      "pages": 12,
+      "coverage": "all coresize pages observed; init size zero",
+      "section_annotations": [
+        {
+          "address": 18446744072635916288,
+          "pfn": 1142951,
+          "overlapping_sections": [
+            ".text",
+            ".text.unlikely"
+          ]
+        },
+        {
+          "address": 18446744072635920384,
+          "pfn": 1142962,
+          "overlapping_sections": [
+            ".text.unlikely"
+          ]
+        },
+        {
+          "address": 18446744072635924480,
+          "pfn": 1142963,
+          "overlapping_sections": [
+            ".text.unlikely",
+            ".altinstr_replacement",
+            ".altinstr_aux",
+            ".exit.text"
+          ]
+        },
+        {
+          "address": 18446744072635928576,
+          "pfn": 1143004,
+          "overlapping_sections": [
+            ".note.gnu.build-id",
+            ".note.Linux",
+            ".altinstructions",
+            ".parainstructions",
+            ".smp_locks",
+            "__mcount_loc",
+            ".rodata.str1.8"
+          ]
+        },
+        {
+          "address": 18446744072635932672,
+          "pfn": 1143005,
+          "overlapping_sections": [
+            ".rodata.str1.8",
+            ".rodata.str1.1",
+            ".rodata",
+            ".return_sites"
+          ]
+        },
+        {
+          "address": 18446744072635936768,
+          "pfn": 1049334,
+          "overlapping_sections": [
+            "__jump_table"
+          ]
+        },
+        {
+          "address": 18446744072635940864,
+          "pfn": 1049335,
+          "overlapping_sections": [
+            ".data",
+            ".gnu.linkonce.this_module",
+            ".bss"
+          ]
+        },
+        {
+          "address": 18446744072635944960,
+          "pfn": 1137944,
+          "overlapping_sections": [
+            ".bss"
+          ]
+        },
+        {
+          "address": 18446744072635949056,
+          "pfn": 1137945,
+          "overlapping_sections": [
+            ".bss"
+          ]
+        },
+        {
+          "address": 18446744072635953152,
+          "pfn": 1138340,
+          "overlapping_sections": [
+            ".bss"
+          ]
+        },
+        {
+          "address": 18446744072635957248,
+          "pfn": 1138341,
+          "overlapping_sections": []
+        },
+        {
+          "address": 18446744072635961344,
+          "pfn": 1142966,
+          "overlapping_sections": []
+        }
+      ]
+    }
+  },
+  "scope": "same-session loader PFN accounting; no timing and no whole-system net-saving claim",
+  "total_distinct_loaders": 63,
+  "declared_source_pfns": [
+    1138591,
+    1142947,
+    1142977,
+    1143033
+  ],
+  "correctness_status": "pass",
+  "limitations": [
+    "controlled preloaded-owner baseline does not imply original kernel need",
+    "loader support excludes BCH control/heap objects used by separate correctness process",
+    "PTE values are per-process VmPTE, not independently enumerated page-table PFNs",
+    "whole owner core excludes external allocator/slab/vmalloc metadata and freed init allocation",
+    "snapshots are sequential and include generic Python/runtime instrumentation overhead",
+    "restoration check covers fresh file-offset mappings only"
+  ]
+}

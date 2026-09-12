@@ -1,0 +1,43 @@
+{
+  "status": "confirmed from exact119 debug ELF and DWARF",
+  "kernel": "5.15.0-119-generic",
+  "package_version": "5.15.0-119.129",
+  "field_offsets_hex": {
+    "module.list": "0x8",
+    "module.core_layout.base": "0x140",
+    "module.core_layout.size": "0x148",
+    "module.init_layout.base": "0x190",
+    "module.init_layout.size": "0x198",
+    "module_kobject.mod": "0x40"
+  },
+  "proc_modules": {
+    "size": "core_layout.size + init_layout.size, unsigned decimal bytes",
+    "address": "core_layout.base, or zero under the m_show address-hiding branch",
+    "disassembly": "m_show rsi points to module.list (module+0x8); loads [rsi+0x140] and adds [rsi+0x190], therefore module+0x148 and module+0x198; when addresses are shown, loads [r13+0x138], therefore module+0x140",
+    "function_address": "0xffffffff8119bb80",
+    "size_instruction_addresses": [
+      "0xffffffff8119bbb0",
+      "0xffffffff8119bbbd"
+    ],
+    "core_base_instruction_address": "0xffffffff8119bce3",
+    "formats": [
+      "%s %u",
+      " 0x%px"
+    ]
+  },
+  "sysfs": {
+    "coresize": "show_coresize reads *(module+0x148), formats %u newline",
+    "initsize": "show_initsize reads *(module+0x198), formats %u newline",
+    "bindings": "modinfo_coresize.attr.name=coresize and .show=show_coresize; corresponding initsize binding also confirmed"
+  },
+  "successful_initialization": {
+    "function": "do_init_module",
+    "function_address": "0xffffffff8119f010",
+    "init_base_zero_instruction": "0xffffffff8119f12e: movq $0,0x190(%r12)",
+    "init_size_and_text_size_zero_instruction": "0xffffffff8119f13a: movq $0,0x198(%r12)",
+    "interpretation": "successful initialization clears init_layout.base and init_layout.size before returning; stable completed loads should have initsize=0 and proc size=coresize",
+    "limit": "binary control flow is not a sample of any particular guest module state; retain actual initstate and sysfs/proc cross-checks"
+  },
+  "resource_observer_interpretation": "Use the actual visible core base and sysfs coresize for the core-layout interval. The proc total does not provide the init base and must not be treated as a contiguous allocation from the core base. Never infer or probe a freed init extent from that total.",
+  "scope": "code+data core-layout field interpretation only; no runtime guest, host module operation, source download, core code change, or whole-module memory accounting"
+}

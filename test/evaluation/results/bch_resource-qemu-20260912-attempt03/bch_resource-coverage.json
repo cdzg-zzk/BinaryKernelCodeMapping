@@ -1,0 +1,191 @@
+{
+  "status": "pass",
+  "boot_id": "d8069aa3-7c4f-4a1f-8d48-c3904c0ede8f",
+  "groups": [
+    {
+      "role": "native-before-owner",
+      "loaders": 1,
+      "complete_target_virtual_pages": 7,
+      "distinct_target_pfns": 7,
+      "VmPTE_delta_kb_per_loader": [
+        0
+      ]
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 4,
+      "complete_target_virtual_pages": 28,
+      "distinct_target_pfns": 13,
+      "VmPTE_delta_kb_per_loader": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 16,
+      "complete_target_virtual_pages": 112,
+      "distinct_target_pfns": 37,
+      "VmPTE_delta_kb_per_loader": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 1,
+      "complete_target_virtual_pages": 7,
+      "distinct_target_pfns": 7,
+      "VmPTE_delta_kb_per_loader": [
+        0
+      ]
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 4,
+      "complete_target_virtual_pages": 28,
+      "distinct_target_pfns": 13,
+      "VmPTE_delta_kb_per_loader": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 16,
+      "complete_target_virtual_pages": 112,
+      "distinct_target_pfns": 37,
+      "VmPTE_delta_kb_per_loader": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 1,
+      "complete_target_virtual_pages": 11,
+      "distinct_target_pfns": 11,
+      "VmPTE_delta_kb_per_loader": [
+        0
+      ]
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 4,
+      "complete_target_virtual_pages": 44,
+      "distinct_target_pfns": 23,
+      "VmPTE_delta_kb_per_loader": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 16,
+      "complete_target_virtual_pages": 176,
+      "distinct_target_pfns": 71,
+      "VmPTE_delta_kb_per_loader": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "scope": "independent offline ELF coverage, raw PFN/category and manager/PTE checks",
+  "raw_loader_snapshots_checked": 189,
+  "loader_count": 63,
+  "module_censuses_checked_against_raw_csv": 6,
+  "unread_ranges": {
+    "[vsyscall]": 189
+  },
+  "manager_groups": [
+    {
+      "loaders": 1,
+      "manager_pfns": 304,
+      "manager_loader_intersection_pfns": 1,
+      "loader_manager_union_pfns": 5834,
+      "manager_VmPTE_kb": 28,
+      "unread_ranges": [
+        "[vsyscall]"
+      ]
+    },
+    {
+      "loaders": 4,
+      "manager_pfns": 304,
+      "manager_loader_intersection_pfns": 1,
+      "loader_manager_union_pfns": 15676,
+      "manager_VmPTE_kb": 28,
+      "unread_ranges": [
+        "[vsyscall]"
+      ]
+    },
+    {
+      "loaders": 16,
+      "manager_pfns": 304,
+      "manager_loader_intersection_pfns": 1,
+      "loader_manager_union_pfns": 54182,
+      "manager_VmPTE_kb": 28,
+      "unread_ranges": [
+        "[vsyscall]"
+      ]
+    }
+  ],
+  "complete_PT_LOAD_coverage": "all 63 loader target sets equal independently reconstructed ELF pages",
+  "sparse_bias": "actual file-offset VMA minus page-rounded first PT_LOAD virtual address",
+  "categories": "mapping counts, PFN unions and per-PFN distinct-process counts recomputed",
+  "limits": [
+    "read-only artifact check; no guest or target code execution",
+    "read-only loader pages exclude BCH control objects and workload heaps",
+    "conditional owner preloading does not prove original kernel demand",
+    "VmPTE is a separate process metric; zero delta does not mean zero PTE cost",
+    "PFN observations are sequential; no atomic whole-system memory claim"
+  ],
+  "verifier_sha256": "f4807e57b4a37b90cc6e110cdaa32bc829a6c68e6187c78857a7c284b2700f10"
+}

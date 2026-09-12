@@ -18,6 +18,14 @@ transactional recovery remain open, alongside real-closure setup and resource
 accounting. The [registration proposal](proposals/registration-transactions.md)
 is unapplied.
 
+The [BCH resource session](results/bch_resource-qemu-20260912-attempt03/README.md)
+adds raw PFN unions across 1/4/16 simultaneous loaders, full dedicated-owner
+core coverage and separate manager/page-table observations. Its measured
+library/shim/owner scope is equal to the owner-loaded native comparison for
+one loader and larger for four or sixteen. Shared target pages alone therefore
+do not establish net savings. Control/workload heaps and full allocator costs
+remain outside this measurement.
+
 Group D now has a [fixed candidate set and inspection driver](applicability.md).
 Group E has a [complete LZ4 CLI workflow](lz4-cli/README.md) prepared for the
 same owner-registration sessions as group C. Both CLIs have compiled and passed
@@ -82,8 +90,8 @@ python3 test/evaluation/algorithm_deployments.py \
   --with-lz4-workflow
 ```
 
-After Clocktime has completed and the machine has returned to
-`5.15.0-119-generic`, execute the same plan:
+After the registered LZ4 binding is corrected and its full functional matrix
+passes, with the machine on `5.15.0-119-generic`, execute the same plan:
 
 ```sh
 sudo python3 test/evaluation/algorithm_deployments.py \

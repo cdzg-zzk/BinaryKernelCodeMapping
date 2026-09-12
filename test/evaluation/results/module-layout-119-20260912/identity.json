@@ -1,0 +1,26 @@
+{
+  "scope": "exact119 debug ELF and DWARF disassembly only; no process inferior, guest, host module, source download or core edit",
+  "elf": "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic",
+  "elf_bytes": 753608976,
+  "elf_sha256": "2bedb90c602a9ed82ceff21a11d3113c6b39bee59b8c6fa5c2dac005db9a6c98",
+  "dpkg_file_owner": "linux-image-unsigned-5.15.0-119-generic-dbgsym: /usr/lib/debug/boot/vmlinux-5.15.0-119-generic\n",
+  "dpkg_file_owner_returncode": 0,
+  "bindings_argv": [
+    "gdb",
+    "-nx",
+    "-batch",
+    "-x",
+    "test/evaluation/results/module-layout-119-20260912/bindings.gdb",
+    "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic"
+  ],
+  "bindings_returncode": 0,
+  "header": {
+    "path": "/usr/src/linux-headers-5.15.0-119/include/linux/module.h",
+    "sha256": "64fcee4bd083161300b1b9970a7ddf50ed0711b198977f74b8e3ab2d050f4ca4",
+    "excerpt_lines": [
+      324,
+      339
+    ]
+  },
+  "elf_build_id": "822098bf89027e54e3aa301e90cc5b8e5c80f479"
+}

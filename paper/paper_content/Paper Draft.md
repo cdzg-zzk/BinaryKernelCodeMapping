@@ -458,7 +458,7 @@ LZ4 使用未修改的 upstream 1.9.3 official benchmark core 和 Silesia corpus
 
 BCH 测试 Linux 5.15 scalar implementation，沿用作者 benchmark 的 m=13、t∈{4,8} 和 512-byte data 定义。两种 t 分别提供不同纠错能力，注入 0 到 t 个错误则改变实际 decode 工作量。我们分别计时 encode、包含 syndrome 计算的 full decode，以及输入预计算 ECC difference 的 decode；这种分解能够观察去掉前段工作后，较短剩余路径是否更容易暴露适配成本。
 
-Kernel-backed 与 same-source native 使用相同 adapted source；author standalone 用于展示跨实现差异。计时使用 CLOCK_PROCESS_CPUTIME_ID，每个样本自适应运行至少约 10 ms，以摊薄定时器读取成本；11 个 outer runs 形成配对 latency ratios。每组参数对 128 个随机 vectors、0 到 t 个注入错误以及 full/precomputed decode paths 验证错误位置和完整 codeword recovery，所有检查及 DSO relocation/page-map audit 均通过。
+Kernel-backed 与 same-source native 使用相同 adapted source；author standalone 用于展示跨实现差异。计时使用 CLOCK_PROCESS_CPUTIME_ID，每个样本自适应运行至少约 10 ms，以摊薄定时器读取成本；11 个 outer runs 形成配对 latency ratios。每组参数使用一个固定种子的 512-byte data payload，附加 parity 后形成 codeword；128 轮错误位置试验各自覆盖 0 到 t 个错误，分别验证 full/precomputed decode 的错误位置和完整 codeword recovery，所有检查及 DSO relocation/page-map audit 均通过。
 
 初始化成本单独计量，表中的 init 包含 BCH 控制结构及查找表的创建与随后释放，不包含 owner module 或 DSO 的部署时间。该行与 encode/decode 分列，以区分算法对象的建立/回收和后续调用成本。
 
@@ -506,7 +506,7 @@ Kernel-backed 与 same-source native 使用相同 adapted source；author standa
 
 表 10–11 将 initialization、encode 和两种 decode 路径分开呈现。Encode 接近同源 native；full decode 在 t=4 时略快，在 t=8 时慢约 0.3%–5.4%。较短的 precomputed path 对 t 更敏感：t=4 大多更快或接近，而 t=8 的 1–8 error cases 均变慢，配对增量约为 5.5%–20.9%，其中 2-error case 最大。该例在 11 轮中均较慢，各轮比值为 1.078–1.519。该变化并非所有 BCH 路径共有，但也不止一个孤立慢点。分阶段结果将需要进一步分析的成本定位到较强纠错配置的 precomputed decode，而不是整个初始化或编码流程。
 
-另一次独立的 5.15.0-119 guest 会话重新构建完整 BCH owner 和两种普通 DSO，并通过实际导出器建立注册。原有功能矩阵在两种 t、各 128 vectors、全部错误数、三个 backend 和两种 decode 路径上再次通过。单独 loader 进程确认三个 RX text 页与一个只读 rodata 页的 user/source PFN 一致；恢复后的四个新映射均使用不同于源页的 PFN，随后模块卸载成功。该[功能会话](../../test/evaluation/bch-functional-evidence.md)补充了新构建和物理共享的证据，没有增加表 10–11 的性能样本。
+另一次独立的 5.15.0-119 guest 会话重新构建完整 BCH owner 和两种普通 DSO，并通过实际导出器建立注册。原有功能矩阵在两种 t、各 128 轮错误位置试验、全部错误数、三个 backend 和两种 decode 路径上再次通过。单独 loader 进程确认三个 RX text 页与一个只读 rodata 页的 user/source PFN 一致；恢复后的四个新映射均使用不同于源页的 PFN，随后模块卸载成功。该[功能会话](../../test/evaluation/bch-functional-evidence.md)补充了新构建和物理共享的证据，没有增加表 10–11 的性能样本。
 
 ### XZ Embedded
 
@@ -733,6 +733,23 @@ VKSO/Copy 的成功 snapshot 约为 45.158 cycles，Raw 约为 43.151。Hres ret
 这些结果表明，所测私有写入通过 COW 保持源页内容，正常退出顺序能够恢复文件后备。注册没有增加该 owner 的 module refcount，因此本组生命周期结果依赖 runner 保持 owner 驻留并按顺序清理。首次会话中的三个 reader 也观察到相同的共享、COW 和正常释放行为。
 
 部分失败检查使用另一独立会话：提交前确认第二个源地址没有 present PTE，再观察 kernel 日志、manager ready 状态和两个用户映射。失败后首个绑定仍可访问，说明当前注册不具备事务式回滚；manager 的成功状态也未反映内核结果。显式恢复后，这两个文件页均恢复原内容，owner 可按顺序卸载。
+
+## Resident Pages and Per-process Support
+
+我们在同一 5.15.0-119 guest 中比较 BCH 普通同源 DSO 与完整 registered carrier 的页面占用，分别启动 1、4、16 个独立 loader。每组 loader 同时存活，在装载后触达目标及所需 shim 的全部可读 PT_LOAD 页，再从原始 pagemap 按 PFN 求并集。三个场景分别为装载专用 owner 前的普通 DSO、owner 已装载时的普通 DSO，以及保持注册的 VKSO。完整 BCH 功能矩阵由同一注册会话中的另一进程执行；这里的 loader 观测不包含 BCH control objects 和算法工作堆。
+
+**Table 22: Observed BCH library and owner page unions after touching all readable PT_LOAD pages.** Counts are distinct 4 KiB PFNs across simultaneous loaders. Library scope includes code, read-only content, relocated private data and metadata. The table excludes manager, page tables and allocations outside the module core and selected libraries.
+
+| 观测范围 | 1 loader | 4 loaders | 16 loaders |
+| --- | ---: | ---: | ---: |
+| 普通 DSO，owner 装载前 | 7 | 13 | 37 |
+| 普通 DSO ∪ 已装载的完整 owner core | 13 | 19 | 43 |
+| Registered carrier ∪ 所需 shim | 11 | 23 | 71 |
+| Registered carrier ∪ shim ∪ 完整 owner core | 13 | 25 | 73 |
+
+全部 registered loader 的三个 text 页和一个 rodata 页均匹配源 PFN，kernel/user 并集始终为四页。普通 DSO 的三个 executable PFN 也在进程间共享。普通 DSO 有五个组内共享 PFN，加上每 loader 两个不同 PFN；registered carrier 与 shim 合计有七个组内共享 PFN，加上每 loader 四个不同 PFN。计入相同的六页 owner core 后，两者在单 loader 时均为 13 页，VKSO 在 4 和 16 loaders 时分别多六页和三十页。该结果表明，所测小闭包的支持页成本抵消了目标页共享的空间收益。Owner 已装载这一场景是受控条件，专用模块在实际内核工作中是否必需仍需单独说明。
+
+完整 owner core 为 24 KiB，其中四页用于共享、两页用于其他 core 内容；page-cache 模块 core 为 48 KiB，PFN observer 为 16 KiB。活动 manager 的 VmRSS 为 1,216 KiB、PSS 为 1,212 KiB、VmPTE 为 28 KiB。Loader 的 VmPTE 为 88–100 KiB，本次布局中装载前后的增量为零，反映已有页表分配粒度。这些进程指标与库的 PFN 并集可能重叠，故分别呈现。模块外分配、BCH 工作对象和完整 allocator/slab 成本尚未归入表 22；本组报告明确范围内的驻留成本，不推定全系统净节省。原始记录与重建步骤见[BCH 资源证据](../../test/evaluation/results/bch_resource-qemu-20260912-attempt03/README.md)。
 
 ## Application Integration
 

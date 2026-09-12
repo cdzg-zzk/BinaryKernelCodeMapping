@@ -1,0 +1,293 @@
+0xffffffff82200200 <linux_banner>:	"Linux version 5.15.0-119-generic (buildd@lcy02-amd64-075) (gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0, GNU ld (GNU Binutils for Ubuntu) 2.38) #129-Ubuntu SMP Fri Aug 2 19:25:20 UTC 2024 (Ubuntu 5.15.0-"...
+$1 = 0x140
+$2 = 0x190
+$3 = 0x140
+$4 = 0x148
+$5 = 0x190
+$6 = 0x198
+/* offset      |    size */  type = struct module_layout {
+/*      0      |       8 */    void *base;
+/*      8      |       4 */    unsigned int size;
+/*     12      |       4 */    unsigned int text_size;
+/*     16      |       4 */    unsigned int ro_size;
+/*     20      |       4 */    unsigned int ro_after_init_size;
+/*     24      |      56 */    struct mod_tree_node {
+/*     24      |       8 */        struct module *mod;
+/*     32      |      48 */        struct latch_tree_node {
+/*     32      |      48 */            struct rb_node node[2];
+
+                                       /* total size (bytes):   48 */
+                                   } node;
+
+                                   /* total size (bytes):   56 */
+                               } mtn;
+
+                               /* total size (bytes):   80 */
+                             }
+Dump of assembler code for function m_show:
+   0xffffffff8119bb80 <+0>:	e8 7b 65 ef ff	call   0xffffffff81092100 <__fentry__>
+   0xffffffff8119bb85 <+5>:	55	push   %rbp
+   0xffffffff8119bb86 <+6>:	48 89 e5	mov    %rsp,%rbp
+   0xffffffff8119bb89 <+9>:	41 56	push   %r14
+   0xffffffff8119bb8b <+11>:	41 55	push   %r13
+   0xffffffff8119bb8d <+13>:	41 54	push   %r12
+   0xffffffff8119bb8f <+15>:	53	push   %rbx
+   0xffffffff8119bb90 <+16>:	48 83 ec 20	sub    $0x20,%rsp
+   0xffffffff8119bb94 <+20>:	65 48 8b 04 25 28 00 00 00	mov    %gs:0x28,%rax
+   0xffffffff8119bb9d <+29>:	48 89 45 d8	mov    %rax,-0x28(%rbp)
+   0xffffffff8119bba1 <+33>:	31 c0	xor    %eax,%eax
+   0xffffffff8119bba3 <+35>:	83 7e f8 03	cmpl   $0x3,-0x8(%rsi)
+   0xffffffff8119bba7 <+39>:	0f 84 ef 00 00 00	je     0xffffffff8119bc9c <m_show+284>
+   0xffffffff8119bbad <+45>:	49 89 f5	mov    %rsi,%r13
+   0xffffffff8119bbb0 <+48>:	8b 8e 40 01 00 00	mov    0x140(%rsi),%ecx
+   0xffffffff8119bbb6 <+54>:	48 8d 56 10	lea    0x10(%rsi),%rdx
+   0xffffffff8119bbba <+58>:	49 89 fc	mov    %rdi,%r12
+   0xffffffff8119bbbd <+61>:	03 8e 90 01 00 00	add    0x190(%rsi),%ecx
+   0xffffffff8119bbc3 <+67>:	48 c7 c6 a6 9a 5e 82	mov    $0xffffffff825e9aa6,%rsi
+   0xffffffff8119bbca <+74>:	4d 8d b5 10 03 00 00	lea    0x310(%r13),%r14
+   0xffffffff8119bbd1 <+81>:	e8 ea 4f 23 00	call   0xffffffff813d0bc0 <seq_printf>
+   0xffffffff8119bbd6 <+86>:	41 8b 95 38 03 00 00	mov    0x338(%r13),%edx
+   0xffffffff8119bbdd <+93>:	48 c7 c6 ac 9a 5e 82	mov    $0xffffffff825e9aac,%rsi
+   0xffffffff8119bbe4 <+100>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119bbe7 <+103>:	83 ea 01	sub    $0x1,%edx
+   0xffffffff8119bbea <+106>:	e8 d1 4f 23 00	call   0xffffffff813d0bc0 <seq_printf>
+   0xffffffff8119bbef <+111>:	49 8b 9d 10 03 00 00	mov    0x310(%r13),%rbx
+   0xffffffff8119bbf6 <+118>:	4c 39 f3	cmp    %r14,%rbx
+   0xffffffff8119bbf9 <+121>:	0f 84 ed 00 00 00	je     0xffffffff8119bcec <m_show+364>
+   0xffffffff8119bbff <+127>:	48 8b 43 20	mov    0x20(%rbx),%rax
+   0xffffffff8119bc03 <+131>:	48 c7 c6 b1 9a 5e 82	mov    $0xffffffff825e9ab1,%rsi
+   0xffffffff8119bc0a <+138>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119bc0d <+141>:	48 8d 50 18	lea    0x18(%rax),%rdx
+   0xffffffff8119bc11 <+145>:	e8 aa 4f 23 00	call   0xffffffff813d0bc0 <seq_printf>
+   0xffffffff8119bc16 <+150>:	48 8b 1b	mov    (%rbx),%rbx
+   0xffffffff8119bc19 <+153>:	4c 39 f3	cmp    %r14,%rbx
+   0xffffffff8119bc1c <+156>:	75 e1	jne    0xffffffff8119bbff <m_show+127>
+   0xffffffff8119bc1e <+158>:	49 83 bd 30 01 00 00 00	cmpq   $0x0,0x130(%r13)
+   0xffffffff8119bc26 <+166>:	74 0e	je     0xffffffff8119bc36 <m_show+182>
+   0xffffffff8119bc28 <+168>:	49 83 bd 30 03 00 00 00	cmpq   $0x0,0x330(%r13)
+   0xffffffff8119bc30 <+176>:	0f 84 ca 00 00 00	je     0xffffffff8119bd00 <m_show+384>
+   0xffffffff8119bc36 <+182>:	41 8b 45 f8	mov    -0x8(%r13),%eax
+   0xffffffff8119bc3a <+186>:	48 c7 c2 94 9a 5e 82	mov    $0xffffffff825e9a94,%rdx
+   0xffffffff8119bc41 <+193>:	83 f8 02	cmp    $0x2,%eax
+   0xffffffff8119bc44 <+196>:	74 15	je     0xffffffff8119bc5b <m_show+219>
+   0xffffffff8119bc46 <+198>:	83 f8 01	cmp    $0x1,%eax
+   0xffffffff8119bc49 <+201>:	48 c7 c2 9e 9a 5e 82	mov    $0xffffffff825e9a9e,%rdx
+   0xffffffff8119bc50 <+208>:	48 c7 c0 8f 9a 5e 82	mov    $0xffffffff825e9a8f,%rax
+   0xffffffff8119bc57 <+215>:	48 0f 45 d0	cmovne %rax,%rdx
+   0xffffffff8119bc5b <+219>:	48 c7 c6 f3 32 5e 82	mov    $0xffffffff825e32f3,%rsi
+   0xffffffff8119bc62 <+226>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119bc65 <+229>:	e8 56 4f 23 00	call   0xffffffff813d0bc0 <seq_printf>
+   0xffffffff8119bc6a <+234>:	31 d2	xor    %edx,%edx
+   0xffffffff8119bc6c <+236>:	49 83 7c 24 70 00	cmpq   $0x0,0x70(%r12)
+   0xffffffff8119bc72 <+242>:	74 6f	je     0xffffffff8119bce3 <m_show+355>
+   0xffffffff8119bc74 <+244>:	48 c7 c6 c2 9a 5e 82	mov    $0xffffffff825e9ac2,%rsi
+   0xffffffff8119bc7b <+251>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119bc7e <+254>:	e8 3d 4f 23 00	call   0xffffffff813d0bc0 <seq_printf>
+   0xffffffff8119bc83 <+259>:	49 83 bd d8 01 00 00 00	cmpq   $0x0,0x1d8(%r13)
+   0xffffffff8119bc8b <+267>:	75 35	jne    0xffffffff8119bcc2 <m_show+322>
+   0xffffffff8119bc8d <+269>:	48 c7 c6 41 f9 6b 82	mov    $0xffffffff826bf941,%rsi
+   0xffffffff8119bc94 <+276>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119bc97 <+279>:	e8 14 46 23 00	call   0xffffffff813d02b0 <seq_puts>
+   0xffffffff8119bc9c <+284>:	48 8b 45 d8	mov    -0x28(%rbp),%rax
+   0xffffffff8119bca0 <+288>:	65 48 2b 04 25 28 00 00 00	sub    %gs:0x28,%rax
+   0xffffffff8119bca9 <+297>:	0f 85 8d 00 00 00	jne    0xffffffff8119bd3c <m_show+444>
+   0xffffffff8119bcaf <+303>:	48 83 c4 20	add    $0x20,%rsp
+   0xffffffff8119bcb3 <+307>:	31 c0	xor    %eax,%eax
+   0xffffffff8119bcb5 <+309>:	5b	pop    %rbx
+   0xffffffff8119bcb6 <+310>:	41 5c	pop    %r12
+   0xffffffff8119bcb8 <+312>:	41 5d	pop    %r13
+   0xffffffff8119bcba <+314>:	41 5e	pop    %r14
+   0xffffffff8119bcbc <+316>:	5d	pop    %rbp
+   0xffffffff8119bcbd <+317>:	e9 be 68 e6 00	jmp    0xffffffff82002580 <__x86_return_thunk>
+   0xffffffff8119bcc2 <+322>:	49 8d 7d f8	lea    -0x8(%r13),%rdi
+   0xffffffff8119bcc6 <+326>:	48 8d 75 c2	lea    -0x3e(%rbp),%rsi
+   0xffffffff8119bcca <+330>:	e8 11 fe ff ff	call   0xffffffff8119bae0 <module_flags>
+   0xffffffff8119bccf <+335>:	48 c7 c6 f3 32 5e 82	mov    $0xffffffff825e32f3,%rsi
+   0xffffffff8119bcd6 <+342>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119bcd9 <+345>:	48 89 c2	mov    %rax,%rdx
+   0xffffffff8119bcdc <+348>:	e8 df 4e 23 00	call   0xffffffff813d0bc0 <seq_printf>
+   0xffffffff8119bce1 <+353>:	eb aa	jmp    0xffffffff8119bc8d <m_show+269>
+   0xffffffff8119bce3 <+355>:	49 8b 95 38 01 00 00	mov    0x138(%r13),%rdx
+   0xffffffff8119bcea <+362>:	eb 88	jmp    0xffffffff8119bc74 <m_show+244>
+   0xffffffff8119bcec <+364>:	49 83 bd 30 01 00 00 00	cmpq   $0x0,0x130(%r13)
+   0xffffffff8119bcf4 <+372>:	74 1e	je     0xffffffff8119bd14 <m_show+404>
+   0xffffffff8119bcf6 <+374>:	49 83 bd 30 03 00 00 00	cmpq   $0x0,0x330(%r13)
+   0xffffffff8119bcfe <+382>:	75 14	jne    0xffffffff8119bd14 <m_show+404>
+   0xffffffff8119bd00 <+384>:	48 c7 c6 b5 9a 5e 82	mov    $0xffffffff825e9ab5,%rsi
+   0xffffffff8119bd07 <+391>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119bd0a <+394>:	e8 a1 45 23 00	call   0xffffffff813d02b0 <seq_puts>
+   0xffffffff8119bd0f <+399>:	e9 22 ff ff ff	jmp    0xffffffff8119bc36 <m_show+182>
+   0xffffffff8119bd14 <+404>:	48 c7 c6 a3 f0 5e 82	mov    $0xffffffff825ef0a3,%rsi
+   0xffffffff8119bd1b <+411>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119bd1e <+414>:	e8 8d 45 23 00	call   0xffffffff813d02b0 <seq_puts>
+   0xffffffff8119bd23 <+419>:	41 8b 45 f8	mov    -0x8(%r13),%eax
+   0xffffffff8119bd27 <+423>:	48 c7 c2 94 9a 5e 82	mov    $0xffffffff825e9a94,%rdx
+   0xffffffff8119bd2e <+430>:	83 f8 02	cmp    $0x2,%eax
+   0xffffffff8119bd31 <+433>:	0f 85 0f ff ff ff	jne    0xffffffff8119bc46 <m_show+198>
+   0xffffffff8119bd37 <+439>:	e9 1f ff ff ff	jmp    0xffffffff8119bc5b <m_show+219>
+   0xffffffff8119bd3c <+444>:	e8 8f f9 c2 00	call   0xffffffff81dcb6d0 <__stack_chk_fail>
+End of assembler dump.
+Dump of assembler code for function show_coresize:
+   0xffffffff8119a580 <+0>:	e8 7b 7b ef ff	call   0xffffffff81092100 <__fentry__>
+   0xffffffff8119a585 <+5>:	55	push   %rbp
+   0xffffffff8119a586 <+6>:	48 8b 46 40	mov    0x40(%rsi),%rax
+   0xffffffff8119a58a <+10>:	48 89 d7	mov    %rdx,%rdi
+   0xffffffff8119a58d <+13>:	48 c7 c6 5e 88 5f 82	mov    $0xffffffff825f885e,%rsi
+   0xffffffff8119a594 <+20>:	8b 90 48 01 00 00	mov    0x148(%rax),%edx
+   0xffffffff8119a59a <+26>:	48 89 e5	mov    %rsp,%rbp
+   0xffffffff8119a59d <+29>:	e8 9e 8d 51 00	call   0xffffffff816b3340 <sprintf>
+   0xffffffff8119a5a2 <+34>:	5d	pop    %rbp
+   0xffffffff8119a5a3 <+35>:	48 98	cltq   
+   0xffffffff8119a5a5 <+37>:	e9 d6 7f e6 00	jmp    0xffffffff82002580 <__x86_return_thunk>
+End of assembler dump.
+Dump of assembler code for function show_initsize:
+   0xffffffff8119a550 <+0>:	e8 ab 7b ef ff	call   0xffffffff81092100 <__fentry__>
+   0xffffffff8119a555 <+5>:	55	push   %rbp
+   0xffffffff8119a556 <+6>:	48 8b 46 40	mov    0x40(%rsi),%rax
+   0xffffffff8119a55a <+10>:	48 89 d7	mov    %rdx,%rdi
+   0xffffffff8119a55d <+13>:	48 c7 c6 5e 88 5f 82	mov    $0xffffffff825f885e,%rsi
+   0xffffffff8119a564 <+20>:	8b 90 98 01 00 00	mov    0x198(%rax),%edx
+   0xffffffff8119a56a <+26>:	48 89 e5	mov    %rsp,%rbp
+   0xffffffff8119a56d <+29>:	e8 ce 8d 51 00	call   0xffffffff816b3340 <sprintf>
+   0xffffffff8119a572 <+34>:	5d	pop    %rbp
+   0xffffffff8119a573 <+35>:	48 98	cltq   
+   0xffffffff8119a575 <+37>:	e9 06 80 e6 00	jmp    0xffffffff82002580 <__x86_return_thunk>
+End of assembler dump.
+Dump of assembler code for function do_init_module:
+Address range 0xffffffff8119f010 to 0xffffffff8119f264:
+   0xffffffff8119f010 <+0>:	e8 eb 30 ef ff	call   0xffffffff81092100 <__fentry__>
+   0xffffffff8119f015 <+5>:	55	push   %rbp
+   0xffffffff8119f016 <+6>:	ba 10 00 00 00	mov    $0x10,%edx
+   0xffffffff8119f01b <+11>:	be c0 0c 00 00	mov    $0xcc0,%esi
+   0xffffffff8119f020 <+16>:	48 89 e5	mov    %rsp,%rbp
+   0xffffffff8119f023 <+19>:	41 56	push   %r14
+   0xffffffff8119f025 <+21>:	41 55	push   %r13
+   0xffffffff8119f027 <+23>:	41 54	push   %r12
+   0xffffffff8119f029 <+25>:	49 89 fc	mov    %rdi,%r12
+   0xffffffff8119f02c <+28>:	48 8b 3d ad b5 56 01	mov    0x156b5ad(%rip),%rdi        # 0xffffffff8270a5e0 <kmalloc_caches+32>
+   0xffffffff8119f033 <+35>:	e8 e8 32 1c 00	call   0xffffffff81362320 <kmem_cache_alloc_trace>
+   0xffffffff8119f038 <+40>:	48 85 c0	test   %rax,%rax
+   0xffffffff8119f03b <+43>:	0f 84 1b 02 00 00	je     0xffffffff8119f25c <do_init_module+588>
+   0xffffffff8119f041 <+49>:	49 89 c5	mov    %rax,%r13
+   0xffffffff8119f044 <+52>:	49 8b bc 24 38 01 00 00	mov    0x138(%r12),%rdi
+   0xffffffff8119f04c <+60>:	49 8b 84 24 90 01 00 00	mov    0x190(%r12),%rax
+   0xffffffff8119f054 <+68>:	49 89 45 08	mov    %rax,0x8(%r13)
+   0xffffffff8119f058 <+72>:	48 85 ff	test   %rdi,%rdi
+   0xffffffff8119f05b <+75>:	74 16	je     0xffffffff8119f073 <do_init_module+99>
+   0xffffffff8119f05d <+77>:	e8 5e 49 e6 ff	call   0xffffffff810039c0 <do_one_initcall>
+   0xffffffff8119f062 <+82>:	41 89 c6	mov    %eax,%r14d
+   0xffffffff8119f065 <+85>:	85 c0	test   %eax,%eax
+   0xffffffff8119f067 <+87>:	0f 88 8c 01 00 00	js     0xffffffff8119f1f9 <do_init_module+489>
+   0xffffffff8119f06d <+93>:	0f 85 1d 0d b9 00	jne    0xffffffff81d2fd90 <do_init_module+12127616>
+   0xffffffff8119f073 <+99>:	41 c7 04 24 00 00 00 00	movl   $0x0,(%r12)
+   0xffffffff8119f07b <+107>:	4c 89 e2	mov    %r12,%rdx
+   0xffffffff8119f07e <+110>:	31 f6	xor    %esi,%esi
+   0xffffffff8119f080 <+112>:	48 c7 c7 00 f6 fc 82	mov    $0xffffffff82fcf600,%rdi
+   0xffffffff8119f087 <+119>:	e8 a4 7c f5 ff	call   0xffffffff810f6d30 <blocking_notifier_call_chain>
+   0xffffffff8119f08c <+124>:	49 8d 7c 24 50	lea    0x50(%r12),%rdi
+   0xffffffff8119f091 <+129>:	31 f6	xor    %esi,%esi
+   0xffffffff8119f093 <+131>:	e8 e8 7e 50 00	call   0xffffffff816a6f80 <kobject_uevent>
+   0xffffffff8119f098 <+136>:	45 0f b6 b4 24 2a 01 00 00	movzbl 0x12a(%r12),%r14d
+   0xffffffff8119f0a1 <+145>:	41 80 fe 01	cmp    $0x1,%r14b
+   0xffffffff8119f0a5 <+149>:	0f 87 d0 0c b9 00	ja     0xffffffff81d2fd7b <do_init_module.cold>
+   0xffffffff8119f0ab <+155>:	41 83 e6 01	and    $0x1,%r14d
+   0xffffffff8119f0af <+159>:	0f 84 3a 01 00 00	je     0xffffffff8119f1ef <do_init_module+479>
+   0xffffffff8119f0b5 <+165>:	49 8b b4 24 90 01 00 00	mov    0x190(%r12),%rsi
+   0xffffffff8119f0bd <+173>:	41 8b 94 24 98 01 00 00	mov    0x198(%r12),%edx
+   0xffffffff8119f0c5 <+181>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119f0c8 <+184>:	48 01 f2	add    %rsi,%rdx
+   0xffffffff8119f0cb <+187>:	e8 00 5d 05 00	call   0xffffffff811f4dd0 <ftrace_free_mem>
+   0xffffffff8119f0d0 <+192>:	48 c7 c7 a0 f6 fc 82	mov    $0xffffffff82fcf6a0,%rdi
+   0xffffffff8119f0d7 <+199>:	e8 a4 6e c3 00	call   0xffffffff81dd5f80 <mutex_lock>
+   0xffffffff8119f0dc <+204>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119f0df <+207>:	e8 0c cf ff ff	call   0xffffffff8119bff0 <module_put>
+   0xffffffff8119f0e4 <+212>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119f0e7 <+215>:	e8 84 40 50 00	call   0xffffffff816a3170 <trim_init_extable>
+   0xffffffff8119f0ec <+220>:	49 8d 84 24 10 02 00 00	lea    0x210(%r12),%rax
+   0xffffffff8119f0f4 <+228>:	49 89 84 24 08 02 00 00	mov    %rax,0x208(%r12)
+   0xffffffff8119f0fc <+236>:	be 01 00 00 00	mov    $0x1,%esi
+   0xffffffff8119f101 <+241>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119f104 <+244>:	e8 37 ef ff ff	call   0xffffffff8119e040 <module_enable_ro>
+   0xffffffff8119f109 <+249>:	41 8b 84 24 98 01 00 00	mov    0x198(%r12),%eax
+   0xffffffff8119f111 <+257>:	85 c0	test   %eax,%eax
+   0xffffffff8119f113 <+259>:	0f 85 9b 00 00 00	jne    0xffffffff8119f1b4 <do_init_module+420>
+   0xffffffff8119f119 <+265>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119f11c <+268>:	e8 1f fa ff ff	call   0xffffffff8119eb40 <module_arch_freeing_init>
+   0xffffffff8119f121 <+273>:	48 c7 c2 00 53 2a 84	mov    $0xffffffff842a5300,%rdx
+   0xffffffff8119f128 <+280>:	4c 89 ee	mov    %r13,%rsi
+   0xffffffff8119f12b <+283>:	4c 89 ef	mov    %r13,%rdi
+   0xffffffff8119f12e <+286>:	49 c7 84 24 90 01 00 00 00 00 00 00	movq   $0x0,0x190(%r12)
+   0xffffffff8119f13a <+298>:	49 c7 84 24 98 01 00 00 00 00 00 00	movq   $0x0,0x198(%r12)
+   0xffffffff8119f146 <+310>:	49 c7 84 24 a0 01 00 00 00 00 00 00	movq   $0x0,0x1a0(%r12)
+   0xffffffff8119f152 <+322>:	49 c7 84 24 98 02 00 00 00 00 00 00	movq   $0x0,0x298(%r12)
+   0xffffffff8119f15e <+334>:	e8 4d d2 4b 00	call   0xffffffff8165c3b0 <llist_add_batch>
+   0xffffffff8119f163 <+339>:	84 c0	test   %al,%al
+   0xffffffff8119f165 <+341>:	75 33	jne    0xffffffff8119f19a <do_init_module+394>
+   0xffffffff8119f167 <+343>:	48 c7 c7 a0 f6 fc 82	mov    $0xffffffff82fcf6a0,%rdi
+   0xffffffff8119f16e <+350>:	45 31 f6	xor    %r14d,%r14d
+   0xffffffff8119f171 <+353>:	e8 fa 67 c3 00	call   0xffffffff81dd5970 <mutex_unlock>
+   0xffffffff8119f176 <+358>:	31 c9	xor    %ecx,%ecx
+   0xffffffff8119f178 <+360>:	31 d2	xor    %edx,%edx
+   0xffffffff8119f17a <+362>:	be 03 00 00 00	mov    $0x3,%esi
+   0xffffffff8119f17f <+367>:	48 c7 c7 30 f6 fc 82	mov    $0xffffffff82fcf630,%rdi
+   0xffffffff8119f186 <+374>:	e8 e5 f4 f8 ff	call   0xffffffff8112e670 <__wake_up>
+   0xffffffff8119f18b <+379>:	41 5c	pop    %r12
+   0xffffffff8119f18d <+381>:	44 89 f0	mov    %r14d,%eax
+   0xffffffff8119f190 <+384>:	41 5d	pop    %r13
+   0xffffffff8119f192 <+386>:	41 5e	pop    %r14
+   0xffffffff8119f194 <+388>:	5d	pop    %rbp
+   0xffffffff8119f195 <+389>:	e9 e6 33 e6 00	jmp    0xffffffff82002580 <__x86_return_thunk>
+   0xffffffff8119f19a <+394>:	48 8b 35 f7 ef 09 02	mov    0x209eff7(%rip),%rsi        # 0xffffffff8323e198 <system_wq>
+   0xffffffff8119f1a1 <+401>:	48 c7 c2 60 f6 fc 82	mov    $0xffffffff82fcf660,%rdx
+   0xffffffff8119f1a8 <+408>:	bf 00 20 00 00	mov    $0x2000,%edi
+   0xffffffff8119f1ad <+413>:	e8 9e 98 f4 ff	call   0xffffffff810e8a50 <queue_work_on>
+   0xffffffff8119f1b2 <+418>:	eb b3	jmp    0xffffffff8119f167 <do_init_module+343>
+   0xffffffff8119f1b4 <+420>:	83 05 c5 88 c6 01 01	addl   $0x1,0x1c688c5(%rip)        # 0xffffffff82e07a80 <mod_tree>
+   0xffffffff8119f1bb <+427>:	48 c7 c6 88 7a e0 82	mov    $0xffffffff82e07a88,%rsi
+   0xffffffff8119f1c2 <+434>:	49 8d bc 24 b0 01 00 00	lea    0x1b0(%r12),%rdi
+   0xffffffff8119f1ca <+442>:	e8 b1 ac 50 00	call   0xffffffff816a9e80 <rb_erase>
+   0xffffffff8119f1cf <+447>:	83 05 aa 88 c6 01 01	addl   $0x1,0x1c688aa(%rip)        # 0xffffffff82e07a80 <mod_tree>
+   0xffffffff8119f1d6 <+454>:	48 c7 c6 90 7a e0 82	mov    $0xffffffff82e07a90,%rsi
+   0xffffffff8119f1dd <+461>:	49 8d bc 24 c8 01 00 00	lea    0x1c8(%r12),%rdi
+   0xffffffff8119f1e5 <+469>:	e8 96 ac 50 00	call   0xffffffff816a9e80 <rb_erase>
+   0xffffffff8119f1ea <+474>:	e9 2a ff ff ff	jmp    0xffffffff8119f119 <do_init_module+265>
+   0xffffffff8119f1ef <+479>:	e8 4c a1 f5 ff	call   0xffffffff810f9340 <async_synchronize_full>
+   0xffffffff8119f1f4 <+484>:	e9 bc fe ff ff	jmp    0xffffffff8119f0b5 <do_init_module+165>
+   0xffffffff8119f1f9 <+489>:	4c 89 ef	mov    %r13,%rdi
+   0xffffffff8119f1fc <+492>:	e8 9f 05 1c 00	call   0xffffffff8135f7a0 <kfree>
+   0xffffffff8119f201 <+497>:	41 c7 04 24 02 00 00 00	movl   $0x2,(%r12)
+   0xffffffff8119f209 <+505>:	e8 f2 b1 fc ff	call   0xffffffff8116a400 <synchronize_rcu>
+   0xffffffff8119f20e <+510>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119f211 <+513>:	e8 da cd ff ff	call   0xffffffff8119bff0 <module_put>
+   0xffffffff8119f216 <+518>:	4c 89 e2	mov    %r12,%rdx
+   0xffffffff8119f219 <+521>:	be 02 00 00 00	mov    $0x2,%esi
+   0xffffffff8119f21e <+526>:	48 c7 c7 00 f6 fc 82	mov    $0xffffffff82fcf600,%rdi
+   0xffffffff8119f225 <+533>:	e8 06 7b f5 ff	call   0xffffffff810f6d30 <blocking_notifier_call_chain>
+   0xffffffff8119f22a <+538>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119f22d <+541>:	e8 4e f6 fc ff	call   0xffffffff8116e880 <klp_module_going>
+   0xffffffff8119f232 <+546>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119f235 <+549>:	e8 46 54 05 00	call   0xffffffff811f4680 <ftrace_release_mod>
+   0xffffffff8119f23a <+554>:	4c 89 e7	mov    %r12,%rdi
+   0xffffffff8119f23d <+557>:	e8 0e f9 ff ff	call   0xffffffff8119eb50 <free_module>
+   0xffffffff8119f242 <+562>:	31 c9	xor    %ecx,%ecx
+   0xffffffff8119f244 <+564>:	31 d2	xor    %edx,%edx
+   0xffffffff8119f246 <+566>:	be 03 00 00 00	mov    $0x3,%esi
+   0xffffffff8119f24b <+571>:	48 c7 c7 30 f6 fc 82	mov    $0xffffffff82fcf630,%rdi
+   0xffffffff8119f252 <+578>:	e8 19 f4 f8 ff	call   0xffffffff8112e670 <__wake_up>
+   0xffffffff8119f257 <+583>:	e9 2f ff ff ff	jmp    0xffffffff8119f18b <do_init_module+379>
+   0xffffffff8119f25c <+588>:	41 be f4 ff ff ff	mov    $0xfffffff4,%r14d
+   0xffffffff8119f262 <+594>:	eb 9d	jmp    0xffffffff8119f201 <do_init_module+497>
+Address range 0xffffffff81d2fd7b to 0xffffffff81d2fdb7:
+   0xffffffff81d2fd7b <+12127595>:	41 0f b6 f6	movzbl %r14b,%esi
+   0xffffffff81d2fd7f <+12127599>:	48 c7 c7 80 ed fc 82	mov    $0xffffffff82fced80,%rdi
+   0xffffffff81d2fd86 <+12127606>:	e8 a5 e9 96 ff	call   0xffffffff8169e730 <__ubsan_handle_load_invalid_value>
+   0xffffffff81d2fd8b <+12127611>:	e9 1b f3 46 ff	jmp    0xffffffff8119f0ab <do_init_module+155>
+   0xffffffff81d2fd90 <+12127616>:	49 c7 c0 f8 85 22 82	mov    $0xffffffff822285f8,%r8
+   0xffffffff81d2fd97 <+12127623>:	49 8d 54 24 18	lea    0x18(%r12),%rdx
+   0xffffffff81d2fd9c <+12127628>:	89 c1	mov    %eax,%ecx
+   0xffffffff81d2fd9e <+12127630>:	48 c7 c7 70 a6 5e 82	mov    $0xffffffff825ea670,%rdi
+   0xffffffff81d2fda5 <+12127637>:	4c 89 c6	mov    %r8,%rsi
+   0xffffffff81d2fda8 <+12127640>:	e8 67 95 ff ff	call   0xffffffff81d29314 <_printk>
+   0xffffffff81d2fdad <+12127645>:	e8 88 d7 02 00	call   0xffffffff81d5d53a <dump_stack>
+   0xffffffff81d2fdb2 <+12127650>:	e9 bc f2 46 ff	jmp    0xffffffff8119f073 <do_init_module+99>
+End of assembler dump.

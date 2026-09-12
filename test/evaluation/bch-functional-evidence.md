@@ -36,7 +36,8 @@ The following detailed counts are derived from the consumed benchmark's
 | m=13, t=8 | 0–8 | 128 | 3 | precomputed, full | 6,912 |
 | Total | Both cases | — | — | — | 10,752 |
 
-Each parameter case uses its existing seeded 512-byte data codeword. The 128
+Each parameter case uses one seeded 512-byte data payload, with parity appended
+to form the codeword. The 128
 trials vary error-vector generation within each error count; they are not 128
 independently generated data buffers. All three backends share the generated
 error vectors. Existing checks compare BCH geometry and encoded parity,

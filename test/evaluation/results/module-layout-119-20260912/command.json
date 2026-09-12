@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "gdb",
+    "-nx",
+    "-batch",
+    "-x",
+    "test/evaluation/results/module-layout-119-20260912/inspect.gdb",
+    "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic"
+  ],
+  "scope": "read-only exact119 debug ELF fields/disassembly; no inferior or guest execution"
+}

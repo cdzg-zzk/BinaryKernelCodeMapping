@@ -1,0 +1,16 @@
+324: struct module_layout {
+325: 	/* The actual code + data. */
+326: 	void *base;
+327: 	/* Total size. */
+328: 	unsigned int size;
+329: 	/* The size of the executable code.  */
+330: 	unsigned int text_size;
+331: 	/* Size of RO section of the module (text+rodata) */
+332: 	unsigned int ro_size;
+333: 	/* Size of RO after init section */
+334: 	unsigned int ro_after_init_size;
+335: 
+336: #ifdef CONFIG_MODULES_TREE_LOOKUP
+337: 	struct mod_tree_node mtn;
+338: #endif
+339: };
