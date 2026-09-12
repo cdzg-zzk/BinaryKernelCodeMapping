@@ -1,0 +1,13 @@
+{
+  "captured_utc": "2026-09-12T06:56:34.988269+00:00",
+  "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/hex_dump_to_buffer/checker-hex_dump_to_buffer.log",
+  "snapshot_local": "/tmp/vkso-applicability-path-20260912-z1ah8tpq/checker-hex_dump_to_buffer.log",
+  "bytes": 1782655,
+  "sha256": "cee9f4cbca832c764cc10ca1a172e3d2f180cbdd4ca9aaf22216296450302f8d",
+  "source_size_at_open": 1782655,
+  "source_inode": 13249452,
+  "source_mtime_ns": 1789196144576261888,
+  "complete_lines": 17053,
+  "trailing_partial_line": false,
+  "scope": "Prefix of a still-running checker log; no terminal fourth-candidate result implied."
+}

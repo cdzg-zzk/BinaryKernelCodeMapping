@@ -1,0 +1,34 @@
+{
+  "path": "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/function_checker/functions_checker.py",
+  "sha256": "d3780a8c7781c29d417313e066596c1f6249b5b05077e792446dbe0db37e100f",
+  "bytes": 36089,
+  "campaign_start_commit": "7a261cc4beecb578fe76a05c54e1d165005e19ea",
+  "start_commit_file_sha256": "d3780a8c7781c29d417313e066596c1f6249b5b05077e792446dbe0db37e100f",
+  "current_matches_campaign_start_commit": true,
+  "source_ranges": [
+    [
+      118,
+      132
+    ],
+    [
+      471,
+      496
+    ],
+    [
+      517,
+      539
+    ],
+    [
+      543,
+      560
+    ],
+    [
+      616,
+      625
+    ],
+    [
+      628,
+      704
+    ]
+  ]
+}

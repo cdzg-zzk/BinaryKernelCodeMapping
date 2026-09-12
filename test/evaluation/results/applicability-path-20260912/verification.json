@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "scope": "Read-only path reconstruction and eight static ELF edge checks only; fourth candidate has no terminal result in captured campaign records.",
+  "path_edges": 44,
+  "path_matches_archived_excerpt": true,
+  "checker_matches_start_commit": true,
+  "enqueue_events_in_complete_local_snapshot": 1608,
+  "analysis_entry_events_in_complete_local_snapshot": 1578,
+  "last_analysis_entry": "  \u001b[96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> rpm_resume (剩余队列: 31)\u001b[0m",
+  "fourth_candidate_status_at_capture": "running",
+  "completed_candidate_ids": [
+    "xxh32",
+    "crc32_le",
+    "sha256"
+  ]
+}

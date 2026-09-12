@@ -1,0 +1,365 @@
+{
+  "snapshot": "snapshot.json",
+  "start": "hex_dump_to_buffer",
+  "target": "blkg_create",
+  "first_discovery_edges_in_snapshot": 1608,
+  "reason_counts": {
+    "本 ELF 可执行符号": 1089,
+    "同节直接跳转": 519
+  },
+  "path": [
+    {
+      "target": "snprintf",
+      "source": "hex_dump_to_buffer",
+      "reason": "本 ELF 可执行符号",
+      "line": 23,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: snprintf <- hex_dump_to_buffer -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: snprintf <- hex_dump_to_buffer -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "vsnprintf",
+      "source": "snprintf",
+      "reason": "本 ELF 可执行符号",
+      "line": 39,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: vsnprintf <- snprintf -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: vsnprintf <- snprintf -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "format_decode",
+      "source": "vsnprintf",
+      "reason": "同节直接跳转",
+      "line": 43,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: format_decode <- vsnprintf -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: format_decode <- vsnprintf -> 同节直接跳转"
+    },
+    {
+      "target": "__warn_printk",
+      "source": "format_decode",
+      "reason": "本 ELF 可执行符号",
+      "line": 65,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: __warn_printk <- format_decode -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: __warn_printk <- format_decode -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "vprintk",
+      "source": "__warn_printk",
+      "reason": "本 ELF 可执行符号",
+      "line": 142,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: vprintk <- __warn_printk -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: vprintk <- __warn_printk -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "vprintk_deferred",
+      "source": "vprintk",
+      "reason": "本 ELF 可执行符号",
+      "line": 481,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: vprintk_deferred <- vprintk -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: vprintk_deferred <- vprintk -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "vprintk_emit",
+      "source": "vprintk_deferred",
+      "reason": "本 ELF 可执行符号",
+      "line": 661,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: vprintk_emit <- vprintk_deferred -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: vprintk_emit <- vprintk_deferred -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "console_unlock",
+      "source": "vprintk_emit",
+      "reason": "本 ELF 可执行符号",
+      "line": 948,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: console_unlock <- vprintk_emit -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: console_unlock <- vprintk_emit -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "__cond_resched",
+      "source": "console_unlock",
+      "reason": "本 ELF 可执行符号",
+      "line": 1264,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: __cond_resched <- console_unlock -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: __cond_resched <- console_unlock -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "__schedule",
+      "source": "__cond_resched",
+      "reason": "同节直接跳转",
+      "line": 1706,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: __schedule <- __cond_resched -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: __schedule <- __cond_resched -> 同节直接跳转"
+    },
+    {
+      "target": "panic",
+      "source": "__schedule",
+      "reason": "本 ELF 可执行符号",
+      "line": 2057,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: panic <- __schedule -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: panic <- __schedule -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "unblank_screen",
+      "source": "panic",
+      "reason": "本 ELF 可执行符号",
+      "line": 2399,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: unblank_screen <- panic -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: unblank_screen <- panic -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "do_unblank_screen",
+      "source": "unblank_screen",
+      "reason": "本 ELF 可执行符号",
+      "line": 2797,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: do_unblank_screen <- unblank_screen -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: do_unblank_screen <- unblank_screen -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "redraw_screen",
+      "source": "do_unblank_screen",
+      "reason": "本 ELF 可执行符号",
+      "line": 3176,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: redraw_screen <- do_unblank_screen -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: redraw_screen <- do_unblank_screen -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "sysfs_notify",
+      "source": "redraw_screen",
+      "reason": "本 ELF 可执行符号",
+      "line": 3942,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: sysfs_notify <- redraw_screen -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: sysfs_notify <- redraw_screen -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "kernfs_find_and_get_ns",
+      "source": "sysfs_notify",
+      "reason": "本 ELF 可执行符号",
+      "line": 4786,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: kernfs_find_and_get_ns <- sysfs_notify -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: kernfs_find_and_get_ns <- sysfs_notify -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "down_read",
+      "source": "kernfs_find_and_get_ns",
+      "reason": "本 ELF 可执行符号",
+      "line": 5367,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: down_read <- kernfs_find_and_get_ns -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: down_read <- kernfs_find_and_get_ns -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "rwsem_down_read_slowpath",
+      "source": "down_read",
+      "reason": "同节直接跳转",
+      "line": 5964,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: rwsem_down_read_slowpath <- down_read -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: rwsem_down_read_slowpath <- down_read -> 同节直接跳转"
+    },
+    {
+      "target": "wake_up_q",
+      "source": "rwsem_down_read_slowpath",
+      "reason": "本 ELF 可执行符号",
+      "line": 6295,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: wake_up_q <- rwsem_down_read_slowpath -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: wake_up_q <- rwsem_down_read_slowpath -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "__put_task_struct",
+      "source": "wake_up_q",
+      "reason": "本 ELF 可执行符号",
+      "line": 6546,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: __put_task_struct <- wake_up_q -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: __put_task_struct <- wake_up_q -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "task_numa_free",
+      "source": "__put_task_struct",
+      "reason": "本 ELF 可执行符号",
+      "line": 6728,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: task_numa_free <- __put_task_struct -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: task_numa_free <- __put_task_struct -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "kvfree_call_rcu",
+      "source": "task_numa_free",
+      "reason": "本 ELF 可执行符号",
+      "line": 6967,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: kvfree_call_rcu <- task_numa_free -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: kvfree_call_rcu <- task_numa_free -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "__get_free_pages",
+      "source": "kvfree_call_rcu",
+      "reason": "本 ELF 可执行符号",
+      "line": 7427,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: __get_free_pages <- kvfree_call_rcu -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: __get_free_pages <- kvfree_call_rcu -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "alloc_pages",
+      "source": "__get_free_pages",
+      "reason": "本 ELF 可执行符号",
+      "line": 8011,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: alloc_pages <- __get_free_pages -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: alloc_pages <- __get_free_pages -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "__alloc_pages",
+      "source": "alloc_pages",
+      "reason": "本 ELF 可执行符号",
+      "line": 8488,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: __alloc_pages <- alloc_pages -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: __alloc_pages <- alloc_pages -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "get_page_from_freelist",
+      "source": "__alloc_pages",
+      "reason": "同节直接跳转",
+      "line": 9324,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: get_page_from_freelist <- __alloc_pages -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: get_page_from_freelist <- __alloc_pages -> 同节直接跳转"
+    },
+    {
+      "target": "node_reclaim",
+      "source": "get_page_from_freelist",
+      "reason": "本 ELF 可执行符号",
+      "line": 9845,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: node_reclaim <- get_page_from_freelist -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: node_reclaim <- get_page_from_freelist -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "__node_reclaim",
+      "source": "node_reclaim",
+      "reason": "同节直接跳转",
+      "line": 10436,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: __node_reclaim <- node_reclaim -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: __node_reclaim <- node_reclaim -> 同节直接跳转"
+    },
+    {
+      "target": "shrink_node",
+      "source": "__node_reclaim",
+      "reason": "同节直接跳转",
+      "line": 11187,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: shrink_node <- __node_reclaim -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: shrink_node <- __node_reclaim -> 同节直接跳转"
+    },
+    {
+      "target": "shrink_node_memcgs",
+      "source": "shrink_node",
+      "reason": "同节直接跳转",
+      "line": 11679,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: shrink_node_memcgs <- shrink_node -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: shrink_node_memcgs <- shrink_node -> 同节直接跳转"
+    },
+    {
+      "target": "shrink_lruvec",
+      "source": "shrink_node_memcgs",
+      "reason": "同节直接跳转",
+      "line": 12375,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: shrink_lruvec <- shrink_node_memcgs -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: shrink_lruvec <- shrink_node_memcgs -> 同节直接跳转"
+    },
+    {
+      "target": "shrink_inactive_list",
+      "source": "shrink_lruvec",
+      "reason": "同节直接跳转",
+      "line": 12891,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: shrink_inactive_list <- shrink_lruvec -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: shrink_inactive_list <- shrink_lruvec -> 同节直接跳转"
+    },
+    {
+      "target": "shrink_page_list",
+      "source": "shrink_inactive_list",
+      "reason": "同节直接跳转",
+      "line": 13303,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: shrink_page_list <- shrink_inactive_list -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: shrink_page_list <- shrink_inactive_list -> 同节直接跳转"
+    },
+    {
+      "target": "add_to_swap",
+      "source": "shrink_page_list",
+      "reason": "本 ELF 可执行符号",
+      "line": 13985,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: add_to_swap <- shrink_page_list -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: add_to_swap <- shrink_page_list -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "get_swap_page",
+      "source": "add_to_swap",
+      "reason": "本 ELF 可执行符号",
+      "line": 14643,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: get_swap_page <- add_to_swap -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: get_swap_page <- add_to_swap -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "get_swap_pages",
+      "source": "get_swap_page",
+      "reason": "本 ELF 可执行符号",
+      "line": 15153,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: get_swap_pages <- get_swap_page -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: get_swap_pages <- get_swap_page -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "scan_swap_map_slots",
+      "source": "get_swap_pages",
+      "reason": "同节直接跳转",
+      "line": 15620,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: scan_swap_map_slots <- get_swap_pages -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: scan_swap_map_slots <- get_swap_pages -> 同节直接跳转"
+    },
+    {
+      "target": "scan_swap_map_try_ssd_cluster",
+      "source": "scan_swap_map_slots",
+      "reason": "同节直接跳转",
+      "line": 15932,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: scan_swap_map_try_ssd_cluster <- scan_swap_map_slots -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: scan_swap_map_try_ssd_cluster <- scan_swap_map_slots -> 同节直接跳转"
+    },
+    {
+      "target": "swap_do_scheduled_discard",
+      "source": "scan_swap_map_try_ssd_cluster",
+      "reason": "同节直接跳转",
+      "line": 16097,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: swap_do_scheduled_discard <- scan_swap_map_try_ssd_cluster -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: swap_do_scheduled_discard <- scan_swap_map_try_ssd_cluster -> 同节直接跳转"
+    },
+    {
+      "target": "blkdev_issue_discard",
+      "source": "swap_do_scheduled_discard",
+      "reason": "本 ELF 可执行符号",
+      "line": 16278,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: blkdev_issue_discard <- swap_do_scheduled_discard -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: blkdev_issue_discard <- swap_do_scheduled_discard -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "__blkdev_issue_discard",
+      "source": "blkdev_issue_discard",
+      "reason": "本 ELF 可执行符号",
+      "line": 16414,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: __blkdev_issue_discard <- blkdev_issue_discard -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: __blkdev_issue_discard <- blkdev_issue_discard -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "bio_associate_blkg",
+      "source": "__blkdev_issue_discard",
+      "reason": "本 ELF 可执行符号",
+      "line": 16523,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: bio_associate_blkg <- __blkdev_issue_discard -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: bio_associate_blkg <- __blkdev_issue_discard -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "bio_associate_blkg_from_css",
+      "source": "bio_associate_blkg",
+      "reason": "本 ELF 可执行符号",
+      "line": 16648,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: bio_associate_blkg_from_css <- bio_associate_blkg -> 本 ELF 可执行符号\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: bio_associate_blkg_from_css <- bio_associate_blkg -> 本 ELF 可执行符号"
+    },
+    {
+      "target": "blkg_create",
+      "source": "bio_associate_blkg_from_css",
+      "reason": "同节直接跳转",
+      "line": 16818,
+      "raw": "  \u001b[96m├─ [Trace] 加入待分析队列: blkg_create <- bio_associate_blkg_from_css -> 同节直接跳转\u001b[0m",
+      "text": "  ├─ [Trace] 加入待分析队列: blkg_create <- bio_associate_blkg_from_css -> 同节直接跳转"
+    }
+  ],
+  "semantics": "First-enqueue ancestry from one incomplete static-analysis log, not a dynamic execution trace or complete call graph."
+}

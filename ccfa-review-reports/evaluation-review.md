@@ -225,6 +225,8 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 
 **分析器性能方案待确认：** hex_dump_to_buffer 的未裁剪检查已超过 30 分钟，源码定位到直接目标查询反复解析整个 ELF 符号表。[缓存补丁方案](../test/evaluation/proposals/README.md)已准备并通过边界/实际镜像查询对照，尚未应用；已向用户请求允许这项基础分析器调整。保持符号顺序、首匹配及全部判定规则，若获准将保留原记录并在新目录重检固定八例。等待答复期间，原分析器继续运行，不以超时或删减候选替代完整检查。
 
+**第 4 例依赖展开已解释（2026-09-12 06:56 UTC）：** 对原进程日志的只读快照恢复了 `hex_dump_to_buffer → snprintf → vsnprintf → format_decode → __warn_printk → vprintk`，继而沿调度、错误处理、回收及 swap/discard 扩展到 `blkg_create` 的 44 条首次入队祖先边。精确 119 ELF 的八条关键边核对确认，入口传入固定格式，而后续包含通用格式警告和调度器损坏检查分支。分析器逐条扫描整个函数、不按调用参数专化；已在 vmlinux 中定义的 `vprintk` 也不会被仅对 undefined symbol 生效的 Shim 规则截断。这解释了静态依赖规模的扩张，不说明这些分支在同一次运行中可达，也不是第 4 例的最终结果。见[原始摘录与独立重建](../test/evaluation/results/applicability-path-20260912/README.md)。原检查继续运行，固定八例、源码和 Shim 未改。
+
 **执行更新（2026-09-12）：** 已启动固定 8 个 API 的普通账户顺序静态检查，输出 `test/evaluation/results/applicability-static-20260912/`；xxh32、crc32_le、sha256 的结果已落盘，完整矩阵仍在执行。[语义核查记录](../test/evaluation/applicability-semantics.md)已区分八例的 caller-owned state、只读依赖、callback 与 kernel-private state。当前 `/proc/kallsyms` 地址均被屏蔽为零，checker 的 runtime 展示列不可用；源码确认其只影响地址展示，静态判定仍使用配置 ELF。该 ELF 的 `.rodata` 带 WA 标志，不能把 checker 的 WRITABLE 标签当作内核运行时可写证据。未构造/注册 carrier，也未改变 checker 或访问限制。
 
 **实际执行更新（2026-09-11 17:51 UTC）：** [固定清单](../test/evaluation/applicability-candidates.json)纳入 `xxh32`、`crc32_le`、`sha256`、`hex_dump_to_buffer`、`string_escape_mem`、`sort`、`rhashtable_insert_slow`、`get_random_bytes` 八个本批待检查 API，按显式输入、只读表、内部闭包、可变输出、callback、同步环境和私有状态等差异选择；LZ4/BCH/XZ/Clocktime 四个已知集成单独作为回顾性案例。该清单是有意选择的分层案例，不能用总成功率估计 Linux 整体可复用比例。“本批待检查”不表示仓库从未探索过 xxHash 或 copied closures。

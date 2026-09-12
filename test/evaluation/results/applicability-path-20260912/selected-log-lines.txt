@@ -1,0 +1,246 @@
+1: [1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+2: [93m[*] 未提供模块列表，将只在 vmlinux 中解析符号。[0m
+3: [*] 已加载 34 个 Shim 平替规则。
+4: [*] 正在解析 vmlinux: /usr/lib/debug/boot/vmlinux-5.15.0-119-generic
+5: [*] vmlinux 解析完成。
+6: [*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+7: [*] 已载入 191674 个活体内核符号。
+8: [1m[*] 开始构建依赖闭包并执行扫描...[0m
+9:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> hex_dump_to_buffer (剩余队列: 0)[0m
+10:   [96m├─ [Trace] 记录静态引用事实: hex_dump_to_buffer -> .rodata:hex_asc+0x0 (reloc=11)[0m
+11:   [93m├─ [Warn] 命中绝对地址重定位: hex_dump_to_buffer +0xa0 -> movzx edx, byte ptr [rdx - 0x7dd7c680][0m
+12:   [96m├─ [Trace] 记录静态引用事实: hex_dump_to_buffer -> .rodata:hex_asc+0x0 (reloc=11)[0m
+13:   [93m├─ [Warn] 命中绝对地址重定位: hex_dump_to_buffer +0x113 -> movzx edx, byte ptr [rdx - 0x7dd7c680][0m
+14:   [96m├─ [Trace] 记录静态引用事实: hex_dump_to_buffer -> .rodata:hex_asc+0x0 (reloc=11)[0m
+15:   [93m├─ [Warn] 命中绝对地址重定位: hex_dump_to_buffer +0x12f -> movzx eax, byte ptr [rax - 0x7dd7c680][0m
+16:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+17:   [96m├─ [Trace] 记录静态引用事实: hex_dump_to_buffer -> .rodata:.rodata+0x4337bf (reloc=11)[0m
+18:   [93m├─ [Warn] 命中绝对地址重定位: hex_dump_to_buffer +0x1f8 -> mov rcx, 0xffffffff826337bf[0m
+19:   [96m├─ [Trace] 记录静态引用事实: hex_dump_to_buffer -> .rodata:.rodata+0x476c35 (reloc=11)[0m
+20:   [93m├─ [Warn] 命中绝对地址重定位: hex_dump_to_buffer +0x21c -> mov rcx, 0xffffffff82676c35[0m
+21:   [96m├─ [Trace] 记录静态引用事实: hex_dump_to_buffer -> .rodata:.rodata+0x43f0fe (reloc=11)[0m
+22:   [93m├─ [Warn] 命中绝对地址重定位: hex_dump_to_buffer +0x22d -> mov rdx, 0xffffffff8263f0fe[0m
+23:   [96m├─ [Trace] 加入待分析队列: snprintf <- hex_dump_to_buffer -> 本 ELF 可执行符号[0m
+24:   [96m├─ [Trace] 记录静态引用事实: hex_dump_to_buffer -> .rodata:_ctype+0x0 (reloc=11)[0m
+25:   [93m├─ [Warn] 命中绝对地址重定位: hex_dump_to_buffer +0x2ee -> test byte ptr [rsi - 0x7dd6c820], 0x97[0m
+26:   [96m├─ [Trace] 记录静态引用事实: hex_dump_to_buffer -> .rodata:.rodata+0x4337bf (reloc=11)[0m
+27:   [93m├─ [Warn] 命中绝对地址重定位: hex_dump_to_buffer +0x396 -> mov rcx, 0xffffffff826337bf[0m
+28:   [96m├─ [Trace] 记录静态引用事实: hex_dump_to_buffer -> .rodata:.rodata+0x476c35 (reloc=11)[0m
+29:   [93m├─ [Warn] 命中绝对地址重定位: hex_dump_to_buffer +0x3b6 -> mov rcx, 0xffffffff82676c35[0m
+30:   [96m├─ [Trace] 记录静态引用事实: hex_dump_to_buffer -> .rodata:.rodata+0x43f10a (reloc=11)[0m
+31:   [93m├─ [Warn] 命中绝对地址重定位: hex_dump_to_buffer +0x3c7 -> mov rdx, 0xffffffff8263f10a[0m
+32:   [96m├─ [Trace] 记录静态引用事实: hex_dump_to_buffer -> .rodata:.rodata+0x4337bf (reloc=11)[0m
+37:   [93m├─ [Warn] 命中绝对地址重定位: hex_dump_to_buffer +0x454 -> mov rdx, 0xffffffff8263f112[0m
+38:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> snprintf (剩余队列: 0)[0m
+39:   [96m├─ [Trace] 加入待分析队列: vsnprintf <- snprintf -> 本 ELF 可执行符号[0m
+40:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+41:   [93m├─ [Trace] 截获编译器插桩: __stack_chk_fail[0m
+42:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> vsnprintf (剩余队列: 0)[0m
+43:   [96m├─ [Trace] 加入待分析队列: format_decode <- vsnprintf -> 同节直接跳转[0m
+44:   [96m├─ [Trace] 加入待分析队列: set_field_width <- vsnprintf -> 同节直接跳转[0m
+45:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+63:   [93m├─ [Warn] 命中绝对地址重定位: format_decode +0x383 -> mov rdi, 0xffffffff82643ff0[0m
+64:   [96m├─ [Trace] 记录静态引用事实: format_decode -> .data:.data+0x3f29de (reloc=2)[0m
+65:   [96m├─ [Trace] 加入待分析队列: __warn_printk <- format_decode -> 本 ELF 可执行符号[0m
+66:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> set_field_width (剩余队列: 7)[0m
+67:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+140:   [93m├─ [Warn] 命中绝对地址重定位: __warn_printk +0xe -> mov rdi, 0xffffffff825d8140[0m
+141:   [96m├─ [Trace] 加入待分析队列: _printk <- __warn_printk -> 本 ELF 可执行符号[0m
+142:   [96m├─ [Trace] 加入待分析队列: vprintk <- __warn_printk -> 本 ELF 可执行符号[0m
+143:   [93m├─ [Trace] 截获编译器插桩: __stack_chk_fail[0m
+144:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+479:   [96m├─ [Trace] 记录静态引用事实: vprintk -> .data..percpu:.data..percpu+0x205a0 (reloc=2)[0m
+480:   [96m├─ [Trace] 记录静态引用事实: vprintk -> .data..percpu:__preempt_count+0x0 (reloc=2)[0m
+481:   [96m├─ [Trace] 加入待分析队列: vprintk_deferred <- vprintk -> 本 ELF 可执行符号[0m
+482:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+483:   [96m├─ [Trace] 加入待分析队列: vprintk_default <- vprintk -> 本 ELF 可执行符号[0m
+659:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> vprintk_deferred (剩余队列: 16)[0m
+660:   [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+661:   [96m├─ [Trace] 加入待分析队列: vprintk_emit <- vprintk_deferred -> 本 ELF 可执行符号[0m
+662:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+663:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> vprintk_default (剩余队列: 16)[0m
+946:   [96m├─ [Trace] 记录静态引用事实: vprintk_emit -> .data:jiffies+0x0 (reloc=2)[0m
+947:   [96m├─ [Trace] 加入待分析队列: console_trylock <- vprintk_emit -> 本 ELF 可执行符号[0m
+948:   [96m├─ [Trace] 加入待分析队列: console_unlock <- vprintk_emit -> 本 ELF 可执行符号[0m
+949:   [96m├─ [Trace] 记录静态引用事实: vprintk_emit -> .data:pv_ops+0xf0 (reloc=11)[0m
+950:   [93m├─ [Warn] 命中绝对地址重定位: vprintk_emit +0x12d -> call qword ptr [0xffffffff82e62f90][0m
+1262:   [96m├─ [Trace] 记录静态引用事实: console_unlock -> .data:pv_ops+0x100 (reloc=11)[0m
+1263:   [93m├─ [Warn] 命中绝对地址重定位: console_unlock +0x21e -> call qword ptr [0xffffffff82e62fa0][0m
+1264:   [96m├─ [Trace] 加入待分析队列: __cond_resched <- console_unlock -> 本 ELF 可执行符号[0m
+1265:   [96m├─ [Trace] 记录静态引用事实: console_unlock -> .bss:.bss+0xcbc798 (reloc=2)[0m
+1266:   [96m├─ [Trace] 记录静态引用事实: console_unlock -> .bss:.bss+0xcbc798 (reloc=2)[0m
+1704:   [96m├─ [Trace] 记录静态引用事实: __cond_resched -> .data..percpu:current_task+0x0 (reloc=11)[0m
+1705:   [93m├─ [Warn] 命中绝对地址重定位: __cond_resched +0x26 -> mov rbx, qword ptr gs:[0x1fbc0][0m
+1706:   [96m├─ [Trace] 加入待分析队列: __schedule <- __cond_resched -> 同节直接跳转[0m
+1707:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+1708:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> info_print_ext_header.constprop.0 (剩余队列: 36)[0m
+2055:   [96m├─ [Trace] 记录静态引用事实: __schedule -> .rodata:.rodata+0x3dcf70 (reloc=11)[0m
+2056:   [93m├─ [Warn] 命中绝对地址重定位: __schedule +0x582 -> mov rdi, 0xffffffff825dcf70[0m
+2057:   [96m├─ [Trace] 加入待分析队列: panic <- __schedule -> 本 ELF 可执行符号[0m
+2058:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> scnprintf (剩余队列: 29)[0m
+2059:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+2397:   [96m├─ [Trace] 加入待分析队列: atomic_notifier_call_chain <- panic -> 本 ELF 可执行符号[0m
+2398:   [96m├─ [Trace] 加入待分析队列: kmsg_dump <- panic -> 本 ELF 可执行符号[0m
+2399:   [96m├─ [Trace] 加入待分析队列: unblank_screen <- panic -> 本 ELF 可执行符号[0m
+2400:   [96m├─ [Trace] 加入待分析队列: console_unblank <- panic -> 本 ELF 可执行符号[0m
+2401:   [96m├─ [Trace] 加入待分析队列: debug_locks_off <- panic -> 本 ELF 可执行符号[0m
+2795:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> unblank_screen (剩余队列: 31)[0m
+2796:   [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+2797:   [96m├─ [Trace] 加入待分析队列: do_unblank_screen <- unblank_screen -> 本 ELF 可执行符号[0m
+2798:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+2799:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> console_unblank (剩余队列: 31)[0m
+3174:   [96m├─ [Trace] 加入待分析队列: is_console_locked <- do_unblank_screen -> 本 ELF 可执行符号[0m
+3175:   [96m├─ [Trace] 记录静态引用事实: do_unblank_screen -> .bss:oops_in_progress+0x0 (reloc=2)[0m
+3176:   [96m├─ [Trace] 加入待分析队列: redraw_screen <- do_unblank_screen -> 本 ELF 可执行符号[0m
+3177:   [96m├─ [Trace] 记录静态引用事实: do_unblank_screen -> .data:jiffies+0x0 (reloc=2)[0m
+3178:   [96m├─ [Trace] 记录静态引用事实: do_unblank_screen -> .data:.data+0x301080 (reloc=11)[0m
+3940:   [96m├─ [Trace] 记录静态引用事实: redraw_screen -> .rodata:.rodata+0x4a6a6d (reloc=11)[0m
+3941:   [93m├─ [Warn] 命中绝对地址重定位: redraw_screen +0xc8 -> mov rdx, 0xffffffff826a6a6d[0m
+3942:   [96m├─ [Trace] 加入待分析队列: sysfs_notify <- redraw_screen -> 本 ELF 可执行符号[0m
+3943:   [96m├─ [Trace] 加入待分析队列: set_origin <- redraw_screen -> 同节直接跳转[0m
+3944:   [93m├─ [Trace] 截获 Retpoline 间接跳: __x86_indirect_thunk_rax[0m
+4784:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> sysfs_notify (剩余队列: 64)[0m
+4785:   [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+4786:   [96m├─ [Trace] 加入待分析队列: kernfs_find_and_get_ns <- sysfs_notify -> 本 ELF 可执行符号[0m
+4787:   [96m├─ [Trace] 加入待分析队列: kernfs_notify <- sysfs_notify -> 本 ELF 可执行符号[0m
+4788:   [96m├─ [Trace] 加入待分析队列: kernfs_put <- sysfs_notify -> 本 ELF 可执行符号[0m
+5365:   [96m├─ [Trace] 记录静态引用事实: kernfs_find_and_get_ns -> .data:kernfs_rwsem+0x0 (reloc=11)[0m
+5366:   [93m├─ [Warn] 命中绝对地址重定位: kernfs_find_and_get_ns +0x18 -> mov rdi, 0xffffffff830651a0[0m
+5367:   [96m├─ [Trace] 加入待分析队列: down_read <- kernfs_find_and_get_ns -> 本 ELF 可执行符号[0m
+5368:   [96m├─ [Trace] 加入待分析队列: kernfs_find_ns <- kernfs_find_and_get_ns -> 同节直接跳转[0m
+5369:   [96m├─ [Trace] 记录静态引用事实: kernfs_find_and_get_ns -> .data:kernfs_rwsem+0x0 (reloc=11)[0m
+5962:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> down_read (剩余队列: 37)[0m
+5963:   [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+5964:   [96m├─ [Trace] 加入待分析队列: rwsem_down_read_slowpath <- down_read -> 同节直接跳转[0m
+5965:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+5966:   [96m├─ [Trace] 记录静态引用事实: down_read -> .data..percpu:current_task+0x0 (reloc=11)[0m
+6293:   [96m├─ [Trace] 记录静态引用事实: rwsem_down_read_slowpath -> .data:pv_ops+0x100 (reloc=11)[0m
+6294:   [93m├─ [Warn] 命中绝对地址重定位: rwsem_down_read_slowpath +0x110 -> call qword ptr [0xffffffff82e62fa0][0m
+6295:   [96m├─ [Trace] 加入待分析队列: wake_up_q <- rwsem_down_read_slowpath -> 本 ELF 可执行符号[0m
+6296:   [96m├─ [Trace] 记录静态引用事实: rwsem_down_read_slowpath -> .data..percpu:current_task+0x0 (reloc=11)[0m
+6297:   [93m├─ [Warn] 命中绝对地址重定位: rwsem_down_read_slowpath +0x123 -> mov r15, qword ptr gs:[0x1fbc0][0m
+6544:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> wake_up_q (剩余队列: 22)[0m
+6545:   [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+6546:   [96m├─ [Trace] 加入待分析队列: __put_task_struct <- wake_up_q -> 本 ELF 可执行符号[0m
+6547:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+6548:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> schedule_preempt_disabled (剩余队列: 22)[0m
+6726:   [96m├─ [Trace] 加入待分析队列: __io_uring_free <- __put_task_struct -> 本 ELF 可执行符号[0m
+6727:   [96m├─ [Trace] 加入待分析队列: cgroup_free <- __put_task_struct -> 本 ELF 可执行符号[0m
+6728:   [96m├─ [Trace] 加入待分析队列: task_numa_free <- __put_task_struct -> 本 ELF 可执行符号[0m
+6729:   [96m├─ [Trace] 加入待分析队列: security_task_free <- __put_task_struct -> 本 ELF 可执行符号[0m
+6730:   [96m├─ [Trace] 加入待分析队列: exit_creds <- __put_task_struct -> 本 ELF 可执行符号[0m
+6965:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+6966:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+6967:   [96m├─ [Trace] 加入待分析队列: kvfree_call_rcu <- task_numa_free -> 本 ELF 可执行符号[0m
+6968:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> security_task_free (剩余队列: 44)[0m
+6969:   [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+7425:   [96m├─ [Trace] 加入待分析队列: synchronize_rcu <- kvfree_call_rcu -> 本 ELF 可执行符号[0m
+7426:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+7427:   [96m├─ [Trace] 加入待分析队列: __get_free_pages <- kvfree_call_rcu -> 本 ELF 可执行符号[0m
+7428:   [96m├─ [Trace] 记录静态引用事实: kvfree_call_rcu -> .data:pv_ops+0xf0 (reloc=11)[0m
+7429:   [93m├─ [Warn] 命中绝对地址重定位: kvfree_call_rcu +0x256 -> call qword ptr [0xffffffff82e62f90][0m
+8009:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> __get_free_pages (剩余队列: 48)[0m
+8010:   [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+8011:   [96m├─ [Trace] 加入待分析队列: alloc_pages <- __get_free_pages -> 本 ELF 可执行符号[0m
+8012:   [96m├─ [Trace] 记录静态引用事实: __get_free_pages -> .rodata:vmemmap_base+0x0 (reloc=2)[0m
+8013:   [96m├─ [Trace] 记录静态引用事实: __get_free_pages -> .rodata:page_offset_base+0x0 (reloc=2)[0m
+8486:   [96m├─ [Trace] 加入待分析队列: policy_nodemask <- alloc_pages -> 本 ELF 可执行符号[0m
+8487:   [96m├─ [Trace] 记录静态引用事实: alloc_pages -> .data..percpu:numa_node+0x0 (reloc=2)[0m
+8488:   [96m├─ [Trace] 加入待分析队列: __alloc_pages <- alloc_pages -> 本 ELF 可执行符号[0m
+8489:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+8490:   [96m├─ [Trace] 记录静态引用事实: alloc_pages -> .data..percpu:numa_node+0x0 (reloc=2)[0m
+9322:   [96m├─ [Trace] 加入待分析队列: should_fail_alloc_page <- __alloc_pages -> 本 ELF 可执行符号[0m
+9323:   [96m├─ [Trace] 记录静态引用事实: __alloc_pages -> .data:nr_online_nodes-0x1 (reloc=2)[0m
+9324:   [96m├─ [Trace] 加入待分析队列: get_page_from_freelist <- __alloc_pages -> 同节直接跳转[0m
+9325:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+9326:   [96m├─ [Trace] 记录静态引用事实: __alloc_pages -> .data..percpu:__preempt_count+0x0 (reloc=2)[0m
+9843:   [96m├─ [Trace] 加入待分析队列: __node_distance <- get_page_from_freelist -> 本 ELF 可执行符号[0m
+9844:   [96m├─ [Trace] 记录静态引用事实: get_page_from_freelist -> .data:node_reclaim_distance+0x0 (reloc=2)[0m
+9845:   [96m├─ [Trace] 加入待分析队列: node_reclaim <- get_page_from_freelist -> 本 ELF 可执行符号[0m
+9846:   [96m├─ [Trace] 加入待分析队列: __cpuset_node_allowed <- get_page_from_freelist -> 本 ELF 可执行符号[0m
+9847:   [93m├─ [Warn] 函数无法继续分析: vmlinux-5.15.0-119-generic:get_page_from_freelist -> 无法从节内偏移解析目标函数 (symbol=.text, target_offset=0xd3ba0d)[0m
+10434:   [93m├─ [Warn] 命中绝对地址重定位: node_reclaim +0x2e -> mov rax, qword ptr gs:[0x1fbc0][0m
+10435:   [96m├─ [Trace] 记录静态引用事实: node_reclaim -> .data:node_states+0x200 (reloc=2)[0m
+10436:   [96m├─ [Trace] 加入待分析队列: __node_reclaim <- node_reclaim -> 同节直接跳转[0m
+10437:   [96m├─ [Trace] 记录静态引用事实: node_reclaim -> .data..percpu:vm_event_states+0x120 (reloc=2)[0m
+10438:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+11185:   [93m├─ [Warn] 命中绝对地址重定位: __node_reclaim +0x144 -> mov rdx, qword ptr gs:[0x1fbc0][0m
+11186:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+11187:   [96m├─ [Trace] 加入待分析队列: shrink_node <- __node_reclaim -> 同节直接跳转[0m
+11188:   [96m├─ [Trace] 记录静态引用事实: __node_reclaim -> .data..percpu:cpu_number+0x0 (reloc=2)[0m
+11189:   [96m├─ [Trace] 记录静态引用事实: __node_reclaim -> .data:__cpu_online_mask+0x0 (reloc=2)[0m
+11677:   [93m├─ [Warn] 命中绝对地址重定位: shrink_node +0xdb -> call qword ptr [0xffffffff82e62fa0][0m
+11678:   [93m├─ [Warn] 函数无法继续分析: vmlinux-5.15.0-119-generic:shrink_node -> 无法从节内偏移解析目标函数 (symbol=.text, target_offset=0xd38915)[0m
+11679:   [96m├─ [Trace] 加入待分析队列: shrink_node_memcgs <- shrink_node -> 同节直接跳转[0m
+11680:   [96m├─ [Trace] 加入待分析队列: vmpressure <- shrink_node -> 本 ELF 可执行符号[0m
+11681:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+12373:   [96m├─ [Trace] 记录静态引用事实: shrink_node_memcgs -> .data:cgrp_dfl_root+0x967 (reloc=2)[0m
+12374:   [96m├─ [Trace] 记录静态引用事实: shrink_node_memcgs -> .data:root_mem_cgroup+0x0 (reloc=2)[0m
+12375:   [96m├─ [Trace] 加入待分析队列: shrink_lruvec <- shrink_node_memcgs -> 同节直接跳转[0m
+12376:   [96m├─ [Trace] 加入待分析队列: shrink_slab <- shrink_node_memcgs -> 同节直接跳转[0m
+12377:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+12889:   [96m├─ [Trace] 记录静态引用事实: shrink_lruvec -> .bss:total_swap_pages-0x1 (reloc=2)[0m
+12890:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+12891:   [96m├─ [Trace] 加入待分析队列: shrink_inactive_list <- shrink_lruvec -> 同节直接跳转[0m
+12892:   [96m├─ [Trace] 加入待分析队列: shrink_active_list <- shrink_lruvec -> 同节直接跳转[0m
+12893:   [96m├─ [Trace] 记录静态引用事实: shrink_lruvec -> .data..percpu:current_task+0x0 (reloc=11)[0m
+13301:   [93m├─ [Warn] 命中绝对地址重定位: shrink_inactive_list +0x11f -> call qword ptr [0xffffffff82e62fa0][0m
+13302:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+13303:   [96m├─ [Trace] 加入待分析队列: shrink_page_list <- shrink_inactive_list -> 同节直接跳转[0m
+13304:   [96m├─ [Trace] 加入待分析队列: move_pages_to_lru <- shrink_inactive_list -> 同节直接跳转[0m
+13305:   [96m├─ [Trace] 记录静态引用事实: shrink_inactive_list -> .data..percpu:current_task+0x0 (reloc=11)[0m
+13983:   [96m├─ [Trace] 加入待分析队列: try_to_unmap_flush_dirty <- shrink_page_list -> 本 ELF 可执行符号[0m
+13984:   [96m├─ [Trace] 加入待分析队列: pageout <- shrink_page_list -> 同节直接跳转[0m
+13985:   [96m├─ [Trace] 加入待分析队列: add_to_swap <- shrink_page_list -> 本 ELF 可执行符号[0m
+13986:   [96m├─ [Trace] 记录静态引用事实: shrink_page_list -> .data..percpu:vm_event_states+0x2e0 (reloc=2)[0m
+13987:   [96m├─ [Trace] 加入待分析队列: inc_node_page_state <- shrink_page_list -> 本 ELF 可执行符号[0m
+14641:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> add_to_swap (剩余队列: 63)[0m
+14642:   [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+14643:   [96m├─ [Trace] 加入待分析队列: get_swap_page <- add_to_swap -> 本 ELF 可执行符号[0m
+14644:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+14645:   [96m├─ [Trace] 加入待分析队列: add_to_swap_cache <- add_to_swap -> 本 ELF 可执行符号[0m
+15151:   [93m├─ [Warn] 函数无法继续分析: vmlinux-5.15.0-119-generic:get_swap_page -> 无法从节内偏移解析目标函数 (symbol=.text, target_offset=0xd3cf02)[0m
+15152:   [93m├─ [Warn] 函数无法继续分析: vmlinux-5.15.0-119-generic:get_swap_page -> 无法从节内偏移解析目标函数 (symbol=.text, target_offset=0xd3ceee)[0m
+15153:   [96m├─ [Trace] 加入待分析队列: get_swap_pages <- get_swap_page -> 本 ELF 可执行符号[0m
+15154:   [96m├─ [Trace] 加入待分析队列: __mem_cgroup_try_charge_swap <- get_swap_page -> 本 ELF 可执行符号[0m
+15155:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+15618:   [96m├─ [Trace] 记录静态引用事实: get_swap_pages -> .data:pv_ops+0x278 (reloc=11)[0m
+15619:   [93m├─ [Warn] 命中绝对地址重定位: get_swap_pages +0x1fe -> call qword ptr [0xffffffff82e63118][0m
+15620:   [96m├─ [Trace] 加入待分析队列: scan_swap_map_slots <- get_swap_pages -> 同节直接跳转[0m
+15621:   [96m├─ [Trace] 记录静态引用事实: get_swap_pages -> .rodata:.rodata+0x4072c8 (reloc=11)[0m
+15622:   [93m├─ [Warn] 命中绝对地址重定位: get_swap_pages +0x230 -> mov rsi, 0xffffffff826072c8[0m
+15930:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> scan_swap_map_slots (剩余队列: 15)[0m
+15931:   [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+15932:   [96m├─ [Trace] 加入待分析队列: scan_swap_map_try_ssd_cluster <- scan_swap_map_slots -> 同节直接跳转[0m
+15933:   [96m├─ [Trace] 记录静态引用事实: scan_swap_map_slots -> .bss:nr_swap_pages+0x0 (reloc=2)[0m
+15934:   [96m├─ [Trace] 记录静态引用事实: scan_swap_map_slots -> .bss:total_swap_pages+0x0 (reloc=2)[0m
+16095:   [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+16096:   [96m├─ [Trace] 记录静态引用事实: scan_swap_map_try_ssd_cluster -> .data..percpu:this_cpu_off+0x0 (reloc=2)[0m
+16097:   [96m├─ [Trace] 加入待分析队列: swap_do_scheduled_discard <- scan_swap_map_try_ssd_cluster -> 同节直接跳转[0m
+16098:   [96m├─ [Trace] 记录静态引用事实: scan_swap_map_try_ssd_cluster -> .data:pv_ops+0x278 (reloc=11)[0m
+16099:   [93m├─ [Warn] 命中绝对地址重定位: scan_swap_map_try_ssd_cluster +0x106 -> call qword ptr [0xffffffff82e63118][0m
+16276:   [96m├─ [Trace] 记录静态引用事实: swap_do_scheduled_discard -> .data:pv_ops+0x278 (reloc=11)[0m
+16277:   [93m├─ [Warn] 命中绝对地址重定位: swap_do_scheduled_discard +0x7d -> call qword ptr [0xffffffff82e63118][0m
+16278:   [96m├─ [Trace] 加入待分析队列: blkdev_issue_discard <- swap_do_scheduled_discard -> 本 ELF 可执行符号[0m
+16279:   [96m├─ [Trace] 记录静态引用事实: swap_do_scheduled_discard -> .data:pv_ops+0x278 (reloc=11)[0m
+16280:   [93m├─ [Warn] 命中绝对地址重定位: swap_do_scheduled_discard +0x1d3 -> call qword ptr [0xffffffff82e63118][0m
+16412:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> blkdev_issue_discard (剩余队列: 13)[0m
+16413:   [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+16414:   [96m├─ [Trace] 加入待分析队列: __blkdev_issue_discard <- blkdev_issue_discard -> 本 ELF 可执行符号[0m
+16415:   [96m├─ [Trace] 加入待分析队列: submit_bio_wait <- blkdev_issue_discard -> 本 ELF 可执行符号[0m
+16416:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+16521:   [96m├─ [Trace] 加入待分析队列: bio_chain <- __blkdev_issue_discard -> 本 ELF 可执行符号[0m
+16522:   [96m├─ [Trace] 加入待分析队列: submit_bio <- __blkdev_issue_discard -> 本 ELF 可执行符号[0m
+16523:   [96m├─ [Trace] 加入待分析队列: bio_associate_blkg <- __blkdev_issue_discard -> 本 ELF 可执行符号[0m
+16524:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+16525:   [96m├─ [Trace] 加入待分析队列: bdevname <- __blkdev_issue_discard -> 本 ELF 可执行符号[0m
+16646:   [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> bio_associate_blkg (剩余队列: 20)[0m
+16647:   [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+16648:   [96m├─ [Trace] 加入待分析队列: bio_associate_blkg_from_css <- bio_associate_blkg -> 本 ELF 可执行符号[0m
+16649:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+16650:   [96m├─ [Trace] 加入待分析队列: kthread_blkcg <- bio_associate_blkg -> 本 ELF 可执行符号[0m
+16816:   [96m├─ [Trace] 记录静态引用事实: bio_associate_blkg_from_css -> .bss:blkcg_root+0x0 (reloc=11)[0m
+16817:   [93m├─ [Warn] 命中绝对地址重定位: bio_associate_blkg_from_css +0x126 -> cmp r13, -0x7bbeb320[0m
+16818:   [96m├─ [Trace] 加入待分析队列: blkg_create <- bio_associate_blkg_from_css -> 同节直接跳转[0m
+16819:   [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+16820:   [93m├─ [Trace] 截获 Retpoline 间接跳: __x86_indirect_thunk_rax[0m

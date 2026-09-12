@@ -1,0 +1,169 @@
+118:     def resolve_func_by_offset(self, sec_idx, offset):
+119:         for sym in self.symtab.iter_symbols():
+120:             if sym['st_info']['type'] != 'STT_FUNC':
+121:                 continue
+122:             if sym['st_shndx'] != sec_idx:
+123:                 continue
+124: 
+125:             start = sym['st_value']
+126:             end = start + sym['st_size']
+127:             if sym['st_size'] == 0 and start == offset:
+128:                 return sym.name
+129:             if start <= offset < end:
+130:                 return sym.name
+131:         return None
+132: 
+471:     def queue_func(self, name, reason=''):
+472:         if not name:
+473:             return
+474:         if name in self.visited or name in self.queue:
+475:             return
+476:         self.queue.append(name)
+477:         if reason:
+478:             self._trace(f'加入待分析队列: {name} <- {reason}')
+479: 
+480:     def analyze(self):
+481:         print(f'{C.BOLD}[*] 开始构建依赖闭包并执行扫描...{C.RESET}')
+482:         while self.queue:
+483:             func_name = self.queue.pop(0)
+484:             if func_name in self.visited:
+485:                 continue
+486: 
+487:             self.visited.add(func_name)
+488:             owner = self.resolve_symbol_owner(func_name)
+489:             if not owner:
+490:                 self._record_missing_dep(func_name)
+491:                 continue
+492: 
+493:             queue_left = len(self.queue)
+494:             self._trace(f'深入分析: {owner.name} -> {func_name} (剩余队列: {queue_left})')
+495:             self.analysis_trace.append((owner.name, func_name))
+496:             self._analyze_function(func_name, owner)
+517:         size = sym['st_size']
+518:         section_data = sec.data()
+519:         data_len = len(section_data)
+520:         tag = f'[{owner_elf.name}]'
+521: 
+522:         if size == 0:
+523:             self._record_unanalyzable(owner_elf, func_name, '函数 size 为 0', f'symbol={hex(sym["st_value"])}')
+524:             return
+525: 
+526:         if offset < 0 or offset + size > data_len:
+527:             detail = f'offset={offset}, size={size}, section_size={data_len}, sh_addr={hex(sec["sh_addr"])}'
+528:             self._record_unanalyzable(owner_elf, func_name, '节区切片越界', detail)
+529:             return
+530: 
+531:         code = section_data[offset:offset + size]
+532:         relocs = owner_elf.get_relocations(sec.name)
+533:         insn_count = 0
+534: 
+535:         instructions = list(self.cs.disasm(code, disasm_base))
+536:         for instr_index, instr in enumerate(instructions):
+537:             insn_count += 1
+538:             local_offset_val = instr.address - disasm_base
+539:             local_offset = hex(local_offset_val)
+543:             is_priv = instr.mnemonic in PRIV_INSNS
+544:             if not is_priv:
+545:                 for operand in instr.operands:
+546:                     if operand.type == X86_OP_REG and operand.reg in CR_REGS:
+547:                         is_priv = True
+548:                         break
+549: 
+550:             if is_priv:
+551:                 self.hard_fails.append({
+552:                     'mod': tag,
+553:                     'func': func_name,
+554:                     'addr': local_offset,
+555:                     'run_addr': addr_display,
+556:                     'asm': asm_str,
+557:                     'type': '特权指令 / 控制寄存器访问',
+558:                 })
+559:                 self._warn(f'命中特权指令: {func_name} +{local_offset} -> {asm_str}')
+560:                 return
+616:                 if r_type in ABSOLUTE_RELOC_TYPES:
+617:                     self.hard_fails.append({
+618:                         'mod': tag,
+619:                         'func': func_name,
+620:                         'addr': local_offset,
+621:                         'run_addr': addr_display,
+622:                         'asm': asm_str,
+623:                         'type': f'绝对地址寻址 ({target_desc})',
+624:                     })
+625:                     self._warn(f'命中绝对地址重定位: {func_name} +{local_offset} -> {asm_str}')
+628:                 if r_type in PC_REL_RELOC_TYPES:
+629:                     if self._is_instrumentation_symbol(target_name):
+630:                         self._trace(f'截获编译器插桩: {target_name}', C.YELLOW)
+631:                         self.manifest_instrumentation.append({
+632:                             'mod': owner_elf.name,
+633:                             'func': func_name,
+634:                             'addr': local_offset,
+635:                             'run_addr': addr_display,
+636:                             'asm': asm_str,
+637:                             'sym': target_name,
+638:                         })
+639:                         continue
+640: 
+641:                     if target_name and target_name.startswith(RETPOLINE_INDIRECT):
+642:                         self._trace(f'截获 Retpoline 间接跳: {target_name}', C.YELLOW)
+643:                         source_regs, sources = self._explain_retpoline_branch(
+644:                             owner_elf,
+645:                             func_name,
+646:                             disasm_base,
+647:                             instructions,
+648:                             instr_index,
+649:                             relocs,
+650:                             target_name,
+651:                         )
+652:                         self.manifest_got.append({
+653:                             'mod': owner_elf.name,
+654:                             'func': func_name,
+655:                             'addr': local_offset,
+656:                             'run_addr': addr_display,
+657:                             'asm': asm_str,
+658:                             'type': 'Retpoline 包装的盲跳',
+659:                             'sym': target_name,
+660:                             'source_regs': source_regs,
+661:                             'sources': sources,
+662:                         })
+663:                         continue
+664: 
+665:                     if target_name and target_name.startswith(RETPOLINE_RETURN):
+666:                         self._trace(f'截获 Retpoline 安全返回: {target_name} (忽略)')
+667:                         continue
+668: 
+669:                     if target_sym['st_shndx'] == 'SHN_UNDEF':
+670:                         if target_name in self.shims:
+671:                             self.shim_hits[target_name].append({
+672:                                 'func': func_name,
+673:                                 'addr': local_offset,
+674:                                 'run_addr': addr_display,
+675:                                 'asm': asm_str,
+676:                             })
+677:                             self._trace(f'Shim 截断成功: {func_name} -> {target_name}', C.GREEN)
+678:                         else:
+679:                             self.queue_func(target_name, f'{func_name} -> 外部符号')
+680:                     else:
+681:                         if target_sec is None:
+682:                             self._record_unanalyzable(owner_elf, func_name, '重定位目标节区缺失', target_name or '<anonymous>')
+683:                             continue
+684: 
+685:                         is_exec = (target_sec['sh_flags'] & 4) != 0
+686:                         if not is_exec:
+687:                             continue
+688:                         else:
+689:                             if target_sym['st_info']['type'] == 'STT_FUNC' and target_sym.name:
+690:                                 self.queue_func(target_sym.name, f'{func_name} -> 本 ELF 可执行符号')
+691:                             else:
+692:                                 target_offset = reloc['r_addend'] - reloc['r_offset'] + instr.address + instr.size
+693:                                 resolved_func = owner_elf.resolve_func_by_offset(target_sym['st_shndx'], target_offset)
+694:                                 if resolved_func:
+695:                                     self.queue_func(resolved_func, f'{func_name} -> 节内偏移解析')
+696:                                 else:
+697:                                     detail = f'symbol={target_name or "<anonymous>"}, target_offset={hex(target_offset)}'
+698:                                     self._record_unanalyzable(owner_elf, func_name, '无法从节内偏移解析目标函数', detail)
+699:             else:
+700:                 if is_branch and not is_indirect and instr.operands:
+701:                     target_addr = self._normalize_imm_target(instr.operands[0].imm)
+702:                     resolved_func = owner_elf.resolve_func_by_offset(sec_idx, target_addr)
+703:                     if resolved_func and resolved_func != func_name:
+704:                         self.queue_func(resolved_func, f'{func_name} -> 同节直接跳转')
