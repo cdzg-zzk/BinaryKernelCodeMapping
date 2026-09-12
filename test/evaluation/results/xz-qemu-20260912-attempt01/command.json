@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "qemu-system-x86_64",
+    "-no-user-config",
+    "-nodefaults",
+    "-accel",
+    "kvm",
+    "-cpu",
+    "host",
+    "-m",
+    "4096",
+    "-smp",
+    "2",
+    "-kernel",
+    "/tmp/vkso-guest-kernel-119/extracted/boot/vmlinuz-5.15.0-119-generic",
+    "-initrd",
+    "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/initramfs.cpio.gz",
+    "-drive",
+    "file=/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/guest.ext4,if=virtio,format=raw",
+    "-append",
+    "console=ttyS0 init=/init panic=-1 oops=panic nokaslr",
+    "-display",
+    "none",
+    "-serial",
+    "stdio",
+    "-monitor",
+    "none",
+    "-nic",
+    "none",
+    "-no-reboot"
+  ],
+  "timeout": 1800
+}

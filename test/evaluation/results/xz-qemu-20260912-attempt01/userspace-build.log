@@ -1,0 +1,7 @@
+make: Entering directory '/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source'
+mkdir -p /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/binaries
+cc -O2 -g -std=gnu11 -Wall -Wextra -Ikmod src/xz-bench.c -ldl -o /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/binaries/xz-bench
+cc -O2 -g -std=gnu11 -Wall -Wextra -fPIC -shared -Iuserspace -Ikmod \
+	kmod/xz_dec_stream.c kmod/xz_dec_lzma2.c kmod/xz_dec_bcj.c kmod/xz_crc32.c -Wl,--version-script=userspace/exports.map \
+	-Wl,-soname,libxz-native.so -o /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/binaries/libxz-native.so
+make: Leaving directory '/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source'

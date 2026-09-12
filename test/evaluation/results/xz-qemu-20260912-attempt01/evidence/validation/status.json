@@ -1,0 +1,11 @@
+{
+  "scope": "exact119 private KVM; full XZ export and functional decoding; guest timings are diagnostic only",
+  "kernel": "5.15.0-119-generic",
+  "uid": 0,
+  "boot_id": "6b3c6ea2-f5c2-44bd-ae26-35001ac8e544",
+  "stage": "normal-release",
+  "status": "pass",
+  "owner_text": "0xffffffffc0008000",
+  "restoration_verified": true,
+  "modules_after": "virtio_blk 20480 1 - Live 0xffffffffc0002000\n"
+}

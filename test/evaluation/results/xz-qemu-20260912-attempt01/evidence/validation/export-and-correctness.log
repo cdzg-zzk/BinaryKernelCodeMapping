@@ -1,0 +1,438 @@
+[vkso] building KRG (sudo is used to resolve runtime kernel addresses)
+Built SAFE graph: nodes=64621 edges=237035 -> /work/validation/export/vkso/metadata/out.krg.new.180
+[vkso] checking dependency closure for vkso_xz_crc32_init
+[1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+[*] 已加载 1 个模块对象。
+    - vkso_xz.ko
+[*] 已加载 34 个 Shim 平替规则。
+[*] 正在解析 vmlinux: /work/vmlinux-5.15.0-119-generic
+[*] vmlinux 解析完成。
+[*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+[*] 已载入 138211 个活体内核符号。
+[1m[*] 开始构建依赖闭包并执行扫描...[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_crc32_init (剩余队列: 0)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_crc32_init -> .bss:.bss+0x0 (reloc=2)[0m
+
+[1m[94m========================================================================[0m
+[1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+[1m[94m========================================================================[0m
+
+[1m[摘要][0m
+  - 已访问函数: 1
+  - Shim 命中数: 0
+  - 静态数据/地址引用数: 1
+  - 间接控制流命中数: 0
+  - 编译器插桩命中数: 0
+  - 致命失败数: 0
+  - 丢失符号数: 0
+  - 不可分析函数数: 0
+
+[92m[ℹ️ 基础检查][0m 未发现特权指令、控制寄存器访问或绝对地址重定位。
+  [92m闭包路径在当前输入范围内是完整的。[0m
+
+[96m[📦 静态数据 / 地址引用事实][0m
+  [vkso_xz.ko] [93m[WRITABLE][0m .bss | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_crc32_init (+0x2 | 运行基址: [1m0xffffffffc000a5e2[0m)
+    └─ 指令事实: lea rdi, [rip] (目标: .bss+0x0)
+
+[96m[🔌 Shim 边界成功拦截][0m
+  - 无或未命中
+
+[96m[🔀 间接控制流 / 盲跳][0m
+  [93m注意: 请在用户态确认这些位置的函数指针或跳转表已被合法初始化。[0m
+  - 无间接跳转
+
+[1m[最终结论][0m [92mPASS[0m (exit code: 0)
+[1m[94m=========================== 报告结束 ===========================[0m
+[vkso] checking dependency closure for vkso_xz_dec_init
+[1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+[*] 已加载 1 个模块对象。
+    - vkso_xz.ko
+[*] 已加载 34 个 Shim 平替规则。
+[*] 正在解析 vmlinux: /work/vmlinux-5.15.0-119-generic
+[*] vmlinux 解析完成。
+[*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+[*] 已载入 138211 个活体内核符号。
+[1m[*] 开始构建依赖闭包并执行扫描...[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_init (剩余队列: 0)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_init -> .data:vkso_xz_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_init +0x21 -> call rax[0m
+  [96m├─ [Trace] 加入待分析队列: vkso_xz_dec_bcj_create <- vkso_xz_dec_init -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 加入待分析队列: vkso_xz_dec_lzma2_create <- vkso_xz_dec_init -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 加入待分析队列: vkso_xz_dec_reset <- vkso_xz_dec_init -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_init -> .data:vkso_xz_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_init +0x85 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_init -> .data:vkso_xz_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_init +0x94 -> call rax[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_bcj_create (剩余队列: 2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_bcj_create -> .data:vkso_xz_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_bcj_create +0x18 -> call rax[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_lzma2_create (剩余队列: 1)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_lzma2_create -> .data:vkso_xz_kmalloc_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_lzma2_create +0x1d -> call rax[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_reset (剩余队列: 0)[0m
+
+[1m[94m========================================================================[0m
+[1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+[1m[94m========================================================================[0m
+
+[1m[摘要][0m
+  - 已访问函数: 4
+  - Shim 命中数: 0
+  - 静态数据/地址引用数: 5
+  - 间接控制流命中数: 5
+  - 编译器插桩命中数: 0
+  - 致命失败数: 0
+  - 丢失符号数: 0
+  - 不可分析函数数: 0
+
+[92m[ℹ️ 基础检查][0m 未发现特权指令、控制寄存器访问或绝对地址重定位。
+  [92m闭包路径在当前输入范围内是完整的。[0m
+
+[96m[📦 静态数据 / 地址引用事实][0m
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_init (+0x1 | 运行基址: [1m0xffffffffc0008ae1[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_kmalloc_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_init (+0x7e | 运行基址: [1m0xffffffffc0008b5e[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_kfree_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_init (+0x8d | 运行基址: [1m0xffffffffc0008b6d[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_kfree_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_bcj_create (+0x1 | 运行基址: [1m0xffffffffc000a581[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_kmalloc_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_lzma2_create (+0x1 | 运行基址: [1m0xffffffffc000a091[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_kmalloc_slot+0x0)
+
+[96m[🔌 Shim 边界成功拦截][0m
+  - 无或未命中
+
+[96m[🔀 间接控制流 / 盲跳][0m
+  [93m注意: 请在用户态确认这些位置的函数指针或跳转表已被合法初始化。[0m
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_init (+0x21 | 运行基址: [1m0xffffffffc0008b01[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x1 | 运行基址: [1m0xffffffffc0008ae1[0m | 关联重定位: vkso_xz_kmalloc_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_init (+0x85 | 运行基址: [1m0xffffffffc0008b65[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x7e | 运行基址: [1m0xffffffffc0008b5e[0m | 关联重定位: vkso_xz_kfree_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_init (+0x94 | 运行基址: [1m0xffffffffc0008b74[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x8d | 运行基址: [1m0xffffffffc0008b6d[0m | 关联重定位: vkso_xz_kfree_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_bcj_create (+0x18 | 运行基址: [1m0xffffffffc000a598[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x1 | 运行基址: [1m0xffffffffc000a581[0m | 关联重定位: vkso_xz_kmalloc_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_lzma2_create (+0x1d | 运行基址: [1m0xffffffffc000a0ad[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x1 | 运行基址: [1m0xffffffffc000a091[0m | 关联重定位: vkso_xz_kmalloc_slot+0x0
+
+[1m[最终结论][0m [92mPASS[0m (exit code: 0)
+[1m[94m=========================== 报告结束 ===========================[0m
+[vkso] checking dependency closure for vkso_xz_dec_run
+[1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+[*] 已加载 1 个模块对象。
+    - vkso_xz.ko
+[*] 已加载 34 个 Shim 平替规则。
+[*] 正在解析 vmlinux: /work/vmlinux-5.15.0-119-generic
+[*] vmlinux 解析完成。
+[*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+[*] 已载入 138211 个活体内核符号。
+[1m[*] 开始构建依赖闭包并执行扫描...[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_run (剩余队列: 0)[0m
+  [96m├─ [Trace] 加入待分析队列: fill_temp <- vkso_xz_dec_run -> 同节直接跳转[0m
+  [96m├─ [Trace] 加入待分析队列: vkso_xz_crc32 <- vkso_xz_dec_run -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 加入待分析队列: vkso_xz_dec_lzma2_reset <- vkso_xz_dec_run -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 加入待分析队列: vkso_xz_dec_lzma2_run <- vkso_xz_dec_run -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 加入待分析队列: vkso_xz_dec_reset <- vkso_xz_dec_run -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 加入待分析队列: vkso_xz_dec_bcj_run <- vkso_xz_dec_run -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 加入待分析队列: dec_vli <- vkso_xz_dec_run -> 同节直接跳转[0m
+  [96m├─ [Trace] 加入待分析队列: vkso_xz_dec_bcj_reset <- vkso_xz_dec_run -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> fill_temp (剩余队列: 7)[0m
+  [96m├─ [Trace] 记录静态引用事实: fill_temp -> .data:vkso_xz_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: fill_temp +0x48 -> call rax[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_crc32 (剩余队列: 6)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_crc32 -> .bss:.bss+0x0 (reloc=2)[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_lzma2_reset (剩余队列: 5)[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_lzma2_run (剩余队列: 4)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_lzma2_run -> .data:vkso_xz_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_lzma2_run +0xa7 -> call rax[0m
+  [96m├─ [Trace] 加入待分析队列: lzma_main <- vkso_xz_dec_lzma2_run -> 同节直接跳转[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_lzma2_run -> .data:vkso_xz_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_lzma2_run +0x15c -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_lzma2_run -> .data:vkso_xz_memmove_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_lzma2_run +0x2a7 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_lzma2_run -> .data:vkso_xz_memmove_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_lzma2_run +0x7d4 -> call rax[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_reset (剩余队列: 4)[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_bcj_run (剩余队列: 3)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_bcj_run -> .data:vkso_xz_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_bcj_run +0x59 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_bcj_run -> .data:vkso_xz_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_bcj_run +0xc4 -> call rax[0m
+  [96m├─ [Trace] 加入待分析队列: bcj_flush <- vkso_xz_dec_bcj_run -> 同节直接跳转[0m
+  [96m├─ [Trace] 加入待分析队列: bcj_x86 <- vkso_xz_dec_bcj_run -> 同节直接跳转[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> dec_vli (剩余队列: 4)[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_bcj_reset (剩余队列: 3)[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> lzma_main (剩余队列: 2)[0m
+  [96m├─ [Trace] 加入待分析队列: dict_repeat <- lzma_main -> 同节直接跳转[0m
+  [96m├─ [Trace] 加入待分析队列: lzma_len <- lzma_main -> 同节直接跳转[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> bcj_flush (剩余队列: 3)[0m
+  [96m├─ [Trace] 记录静态引用事实: bcj_flush -> .data:vkso_xz_memcpy_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: bcj_flush +0x3e -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: bcj_flush -> .data:vkso_xz_memmove_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: bcj_flush +0x64 -> call rax[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> bcj_x86 (剩余队列: 2)[0m
+  [96m├─ [Trace] 记录静态引用事实: bcj_x86 -> .rodata:.rodata+0x8 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: bcj_x86 -> .rodata:.rodata+0x0 (reloc=2)[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> dict_repeat (剩余队列: 1)[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> lzma_len (剩余队列: 0)[0m
+
+[1m[94m========================================================================[0m
+[1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+[1m[94m========================================================================[0m
+
+[1m[摘要][0m
+  - 已访问函数: 14
+  - Shim 命中数: 0
+  - 静态数据/地址引用数: 12
+  - 间接控制流命中数: 9
+  - 编译器插桩命中数: 0
+  - 致命失败数: 0
+  - 丢失符号数: 0
+  - 不可分析函数数: 0
+
+[92m[ℹ️ 基础检查][0m 未发现特权指令、控制寄存器访问或绝对地址重定位。
+  [92m闭包路径在当前输入范围内是完整的。[0m
+
+[96m[📦 静态数据 / 地址引用事实][0m
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: fill_temp (+0x3a | 运行基址: [1m0xffffffffc000803a[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_memcpy_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .bss | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_crc32 (+0x4 | 运行基址: [1m0xffffffffc000a624[0m)
+    └─ 指令事实: lea rcx, [rip] (目标: .bss+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_lzma2_run (+0xa0 | 运行基址: [1m0xffffffffc0009870[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_memcpy_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_lzma2_run (+0x14e | 运行基址: [1m0xffffffffc000991e[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_memcpy_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_lzma2_run (+0x28a | 运行基址: [1m0xffffffffc0009a5a[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_memmove_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_lzma2_run (+0x7c7 | 运行基址: [1m0xffffffffc0009f97[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_memmove_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_bcj_run (+0x4c | 运行基址: [1m0xffffffffc000a39c[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_memcpy_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_bcj_run (+0xb1 | 运行基址: [1m0xffffffffc000a401[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_memcpy_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: bcj_flush (+0x31 | 运行基址: [1m0xffffffffc000a311[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_memcpy_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: bcj_flush (+0x55 | 运行基址: [1m0xffffffffc000a335[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_memmove_slot+0x0)
+  [vkso_xz.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: bcj_x86 (+0xf | 运行基址: [1m0xffffffffc000a13f[0m)
+    └─ 指令事实: lea r14, [rip] (目标: .rodata+0x8)
+  [vkso_xz.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: bcj_x86 (+0x16 | 运行基址: [1m0xffffffffc000a146[0m)
+    └─ 指令事实: lea r15, [rip] (目标: .rodata+0x0)
+
+[96m[🔌 Shim 边界成功拦截][0m
+  - 无或未命中
+
+[96m[🔀 间接控制流 / 盲跳][0m
+  [93m注意: 请在用户态确认这些位置的函数指针或跳转表已被合法初始化。[0m
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: fill_temp (+0x48 | 运行基址: [1m0xffffffffc0008048[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x3a | 运行基址: [1m0xffffffffc000803a[0m | 关联重定位: vkso_xz_memcpy_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_lzma2_run (+0xa7 | 运行基址: [1m0xffffffffc0009877[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0xa0 | 运行基址: [1m0xffffffffc0009870[0m | 关联重定位: vkso_xz_memcpy_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_lzma2_run (+0x15c | 运行基址: [1m0xffffffffc000992c[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x14e | 运行基址: [1m0xffffffffc000991e[0m | 关联重定位: vkso_xz_memcpy_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_lzma2_run (+0x2a7 | 运行基址: [1m0xffffffffc0009a77[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x28a | 运行基址: [1m0xffffffffc0009a5a[0m | 关联重定位: vkso_xz_memmove_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_lzma2_run (+0x7d4 | 运行基址: [1m0xffffffffc0009fa4[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x7c7 | 运行基址: [1m0xffffffffc0009f97[0m | 关联重定位: vkso_xz_memmove_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_bcj_run (+0x59 | 运行基址: [1m0xffffffffc000a3a9[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x4c | 运行基址: [1m0xffffffffc000a39c[0m | 关联重定位: vkso_xz_memcpy_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_bcj_run (+0xc4 | 运行基址: [1m0xffffffffc000a414[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0xb1 | 运行基址: [1m0xffffffffc000a401[0m | 关联重定位: vkso_xz_memcpy_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: bcj_flush (+0x3e | 运行基址: [1m0xffffffffc000a31e[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x31 | 运行基址: [1m0xffffffffc000a311[0m | 关联重定位: vkso_xz_memcpy_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: bcj_flush (+0x64 | 运行基址: [1m0xffffffffc000a344[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x55 | 运行基址: [1m0xffffffffc000a335[0m | 关联重定位: vkso_xz_memmove_slot+0x0
+
+[1m[最终结论][0m [92mPASS[0m (exit code: 0)
+[1m[94m=========================== 报告结束 ===========================[0m
+[vkso] checking dependency closure for vkso_xz_dec_reset
+[1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+[*] 已加载 1 个模块对象。
+    - vkso_xz.ko
+[*] 已加载 34 个 Shim 平替规则。
+[*] 正在解析 vmlinux: /work/vmlinux-5.15.0-119-generic
+[*] vmlinux 解析完成。
+[*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+[*] 已载入 138211 个活体内核符号。
+[1m[*] 开始构建依赖闭包并执行扫描...[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_reset (剩余队列: 0)[0m
+
+[1m[94m========================================================================[0m
+[1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+[1m[94m========================================================================[0m
+
+[1m[摘要][0m
+  - 已访问函数: 1
+  - Shim 命中数: 0
+  - 静态数据/地址引用数: 0
+  - 间接控制流命中数: 0
+  - 编译器插桩命中数: 0
+  - 致命失败数: 0
+  - 丢失符号数: 0
+  - 不可分析函数数: 0
+
+[92m[ℹ️ 基础检查][0m 未发现特权指令、控制寄存器访问或绝对地址重定位。
+  [92m闭包路径在当前输入范围内是完整的。[0m
+
+[96m[📦 静态数据 / 地址引用事实][0m
+  - 无静态数据 / 地址引用事实
+
+[96m[🔌 Shim 边界成功拦截][0m
+  - 无或未命中
+
+[96m[🔀 间接控制流 / 盲跳][0m
+  [93m注意: 请在用户态确认这些位置的函数指针或跳转表已被合法初始化。[0m
+  - 无间接跳转
+
+[1m[最终结论][0m [92mPASS[0m (exit code: 0)
+[1m[94m=========================== 报告结束 ===========================[0m
+[vkso] checking dependency closure for vkso_xz_dec_end
+[1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+[*] 已加载 1 个模块对象。
+    - vkso_xz.ko
+[*] 已加载 34 个 Shim 平替规则。
+[*] 正在解析 vmlinux: /work/vmlinux-5.15.0-119-generic
+[*] vmlinux 解析完成。
+[*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+[*] 已载入 138211 个活体内核符号。
+[1m[*] 开始构建依赖闭包并执行扫描...[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_end (剩余队列: 0)[0m
+  [96m├─ [Trace] 加入待分析队列: vkso_xz_dec_lzma2_end <- vkso_xz_dec_end -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_end -> .data:vkso_xz_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_end +0x29 -> call rax[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_end -> .data:vkso_xz_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_end +0x35 -> call rax[0m
+  [96m├─ [Trace] 深入分析: vkso_xz.ko -> vkso_xz_dec_lzma2_end (剩余队列: 0)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_xz_dec_lzma2_end -> .data:vkso_xz_kfree_slot+0x0 (reloc=2)[0m
+  [93m├─ [Trace] 捕获盲跳: vkso_xz_dec_lzma2_end +0xb -> call rax[0m
+
+[1m[94m========================================================================[0m
+[1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+[1m[94m========================================================================[0m
+
+[1m[摘要][0m
+  - 已访问函数: 2
+  - Shim 命中数: 0
+  - 静态数据/地址引用数: 3
+  - 间接控制流命中数: 3
+  - 编译器插桩命中数: 0
+  - 致命失败数: 0
+  - 丢失符号数: 0
+  - 不可分析函数数: 0
+
+[92m[ℹ️ 基础检查][0m 未发现特权指令、控制寄存器访问或绝对地址重定位。
+  [92m闭包路径在当前输入范围内是完整的。[0m
+
+[96m[📦 静态数据 / 地址引用事实][0m
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_end (+0x22 | 运行基址: [1m0xffffffffc0008bb2[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_kfree_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_end (+0x2e | 运行基址: [1m0xffffffffc0008bbe[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_kfree_slot+0x0)
+  [vkso_xz.ko] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=2
+    ├─ 所在函数: vkso_xz_dec_lzma2_end (+0x1 | 运行基址: [1m0xffffffffc000a121[0m)
+    └─ 指令事实: mov rax, qword ptr [rip] (目标: vkso_xz_kfree_slot+0x0)
+
+[96m[🔌 Shim 边界成功拦截][0m
+  - 无或未命中
+
+[96m[🔀 间接控制流 / 盲跳][0m
+  [93m注意: 请在用户态确认这些位置的函数指针或跳转表已被合法初始化。[0m
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_end (+0x29 | 运行基址: [1m0xffffffffc0008bb9[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x22 | 运行基址: [1m0xffffffffc0008bb2[0m | 关联重定位: vkso_xz_kfree_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_end (+0x35 | 运行基址: [1m0xffffffffc0008bc5[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x2e | 运行基址: [1m0xffffffffc0008bbe[0m | 关联重定位: vkso_xz_kfree_slot+0x0
+  [vkso_xz.ko] 控制流: 原生函数指针 / 寄存器盲跳
+    ├─ 所在函数: vkso_xz_dec_lzma2_end (+0xb | 运行基址: [1m0xffffffffc000a12b[0m)
+    ├─ 执行指令: call rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rip] @ 0x1 | 运行基址: [1m0xffffffffc000a121[0m | 关联重定位: vkso_xz_kfree_slot+0x0
+
+[1m[最终结论][0m [92mPASS[0m (exit code: 0)
+[1m[94m=========================== 报告结束 ===========================[0m
+[vkso] generating minimal API header
+INFO: func=vkso_xz_crc32_init auto-resolved to BTF source 'vkso_xz'
+INFO: func=vkso_xz_dec_init auto-resolved to BTF source 'vkso_xz'
+INFO: func=vkso_xz_dec_run auto-resolved to BTF source 'vkso_xz'
+INFO: func=vkso_xz_dec_reset auto-resolved to BTF source 'vkso_xz'
+INFO: func=vkso_xz_dec_end auto-resolved to BTF source 'vkso_xz'
+INFO: BTF source 'vkso_xz' matched 5 functions
+[vkso] building sparse shared object
+[vkso] libshim.so is required by the generated DSO; building it
+[vkso] build complete
+[vkso]   library: /work/validation/export/vkso/lib/libvkso_xz.so
+[vkso]   shim:    /work/validation/export/vkso/lib/libshim.so
+[vkso]   header:  /work/validation/export/vkso/include/vkso_types.h
+[vkso]   metadata: /work/validation/export/vkso/metadata
+[vkso] page_cache_replace is already loaded
+[vkso] starting guarded page replacement
+[vkso] running: python3 /work/guest.py --validate-xz
+[vkso] program finished; restoring pages

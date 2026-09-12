@@ -1,0 +1,594 @@
+{
+  "scope": "selected reproducibility records for one full XZ functional guest deployment",
+  "excluded": [
+    "guest.ext4",
+    "initramfs tree/archive",
+    "large debug vmlinux",
+    "runtime-kallsyms.txt",
+    "out.krg and cache inputs",
+    "duplicate plaintext corpus/binaries/sources",
+    "intermediate build objects"
+  ],
+  "files": [
+    {
+      "path": "build-source/Makefile",
+      "bytes": 766,
+      "sha256": "3932aa4d460638c4f168ac91a4744c9299581630873d1b839ae65903a3eb6487"
+    },
+    {
+      "path": "build-source/config/symbols.txt",
+      "bytes": 86,
+      "sha256": "eaf72a17e90b9c51636c1d520776a1e77e8b455a9194b16c85cd6bcae1dafa52"
+    },
+    {
+      "path": "build-source/kmod/.Module.symvers.cmd",
+      "bytes": 440,
+      "sha256": "1e07c0e8b11fd58a7629101bc8e32908d55e4b0974625c6a6f59f24745cef39a"
+    },
+    {
+      "path": "build-source/kmod/.module_meta.o.cmd",
+      "bytes": 31776,
+      "sha256": "b0c71b7adc3e0a6672381e9607cc3762f9f710a765c20adcff30c2e675a3074a"
+    },
+    {
+      "path": "build-source/kmod/.modules.order.cmd",
+      "bytes": 392,
+      "sha256": "da9cc28e0881bb5496372af63e5939cab2822036cdb6b9de59f6140128bf5830"
+    },
+    {
+      "path": "build-source/kmod/.vkso_xz.ko.cmd",
+      "bytes": 549,
+      "sha256": "392317422e3da6aa9399a57b986df9007b11852d9ba5aa918593020eb398ab2c"
+    },
+    {
+      "path": "build-source/kmod/.vkso_xz.mod.cmd",
+      "bytes": 841,
+      "sha256": "9e9b57976bd8759e8cdf5e850e87b7b01056d75e82db4962a1a9deca0c7cdfea"
+    },
+    {
+      "path": "build-source/kmod/.vkso_xz.mod.o.cmd",
+      "bytes": 31781,
+      "sha256": "4116a0f7a4367ec3f91b054bc4dbeed99a3ab50df73a07ba6855eb452da3cb21"
+    },
+    {
+      "path": "build-source/kmod/.vkso_xz.o.cmd",
+      "bytes": 857,
+      "sha256": "129f273a7047de8cef85a00e53c10584fa8463f8d61412be3e1a776da2d99828"
+    },
+    {
+      "path": "build-source/kmod/.xz_crc32.o.cmd",
+      "bytes": 29834,
+      "sha256": "b114b51fae5f84fd357dc6be9af243d2303ed0a6a347e1d52150c19e573649a2"
+    },
+    {
+      "path": "build-source/kmod/.xz_dec_bcj.o.cmd",
+      "bytes": 29856,
+      "sha256": "ed48a882a87eb5b947ca3b7b0d577aedc108286b3e228d81921b1bef393ce6da"
+    },
+    {
+      "path": "build-source/kmod/.xz_dec_lzma2.o.cmd",
+      "bytes": 29996,
+      "sha256": "a30041b12fd7cf6ed21f4396c718bb83939fa7ebea2e53a54b32e403509d3b4b"
+    },
+    {
+      "path": "build-source/kmod/.xz_dec_stream.o.cmd",
+      "bytes": 30008,
+      "sha256": "c8ac3c1bf0ac3b0d20c6f6f6082fcdf2da44dc458e4977c4a2cd9dd961284ca1"
+    },
+    {
+      "path": "build-source/kmod/Makefile",
+      "bytes": 1378,
+      "sha256": "90a7fa3661939aa874f0a66b0e42177962671fa9b06851a06534464464c7ceae"
+    },
+    {
+      "path": "build-source/kmod/module_meta.c",
+      "bytes": 986,
+      "sha256": "95c98c3cd94b3eaf3c409f5ff02c89ae7cbcf76f7e0e515739fcd7e1f7355b83"
+    },
+    {
+      "path": "build-source/kmod/vkso_xz.mod.c",
+      "bytes": 899,
+      "sha256": "5c4e455927567f9964661450c2f848f4af74fcb5d39f0101ed9af54e9a9edc66"
+    },
+    {
+      "path": "build-source/kmod/xz.h",
+      "bytes": 11427,
+      "sha256": "6a260759278ed4f3cbac9feaa1e35c3212f257c45f9d9be520c9e3714406b085"
+    },
+    {
+      "path": "build-source/kmod/xz_crc32.c",
+      "bytes": 1769,
+      "sha256": "3f38448691b308092ee0399ec8383bd4f2e9349d2e60d65ed3feee5548029cbf"
+    },
+    {
+      "path": "build-source/kmod/xz_dec_bcj.c",
+      "bytes": 14465,
+      "sha256": "cad7c940744301109ab00a76c87f81d77fcb26e5ce7ccd29bfcd3551206660db"
+    },
+    {
+      "path": "build-source/kmod/xz_dec_lzma2.c",
+      "bytes": 29802,
+      "sha256": "aa32c0f61f17d6211b9529102e63d9740fd9470cc5a1a85ba79a87515d38fa03"
+    },
+    {
+      "path": "build-source/kmod/xz_dec_stream.c",
+      "bytes": 19878,
+      "sha256": "2bbe132a973b3405522f735897fb6973fab15bd9397a56d1b5b8ba9eb031795c"
+    },
+    {
+      "path": "build-source/kmod/xz_lzma2.h",
+      "bytes": 6113,
+      "sha256": "9212655a1eac8a24a9fedb618d10b30dfa9a3fca19e36d738b7d06ea3e90c80a"
+    },
+    {
+      "path": "build-source/kmod/xz_private.h",
+      "bytes": 5550,
+      "sha256": "94e8834ac9bad0cb3022d8f8c090f3fb901a2bbc778ad9fa4bc00ff676ac718c"
+    },
+    {
+      "path": "build-source/kmod/xz_stream.h",
+      "bytes": 1470,
+      "sha256": "aafcd37de278a70b490237321a6e3ae65f76827aea22d5ef4822027a1de64ca0"
+    },
+    {
+      "path": "build-source/run.sh",
+      "bytes": 4520,
+      "sha256": "f1f60e740def9cb8f22302b5fa1ccf5545c3309bd339dbf6b340eed1f60e49ab"
+    },
+    {
+      "path": "build-source/run_under_replacement.sh",
+      "bytes": 2451,
+      "sha256": "78c030c05a07bf36d84f1c13b725c9a1b92dbd51a24a014125a9af51d1a9654c"
+    },
+    {
+      "path": "build-source/scripts/audit_kernel_dso.py",
+      "bytes": 2432,
+      "sha256": "d30f30aeb47196d4b90e11b5d595c9f86d698363babe4c05ab9c3d7329b59fa8"
+    },
+    {
+      "path": "build-source/scripts/prepare_corpus.sh",
+      "bytes": 756,
+      "sha256": "094f4eebb83475e849afb1073a85d0394cd7cc7fc452288750862fc6a691d25a"
+    },
+    {
+      "path": "build-source/scripts/summarize.py",
+      "bytes": 3715,
+      "sha256": "17dedece4b960e29e1e37cf9b5e250ed78728fd20e8c0d42dd515e5d7225742a"
+    },
+    {
+      "path": "build-source/scripts/test_summarize.py",
+      "bytes": 1825,
+      "sha256": "5e72b50bd6444073da88c25538b70dd6520e53edfdab95d9b491300db365f699"
+    },
+    {
+      "path": "build-source/src/xz-bench.c",
+      "bytes": 7273,
+      "sha256": "a290b68ccf042281327e02600f8a5df48278b68e4ae3ac902fe4fa2f4c6f42ad"
+    },
+    {
+      "path": "build-source/userspace/exports.map",
+      "bytes": 101,
+      "sha256": "4a72da21bdda3af25687d44f3e8f26c5874588e19beb5000687140c7b1d5bdd4"
+    },
+    {
+      "path": "build-source/userspace/xz_config.h",
+      "bytes": 1688,
+      "sha256": "58e7ddbff0c14d061fe8caaeedc014bbe3c937ffef39e800188b76eafa41dd95"
+    },
+    {
+      "path": "command.json",
+      "bytes": 758,
+      "sha256": "15463c1637a66c85aae7f986115c2986f10fbe860d6a7f05a5febfa7a54537f7"
+    },
+    {
+      "path": "components.json",
+      "bytes": 20116,
+      "sha256": "658a68ed6e6b3d14a90398ce71c3861e7e1805e40bb50263c5bec4f3bc9bd157"
+    },
+    {
+      "path": "console.log",
+      "bytes": 45471,
+      "sha256": "ff1e6e2241a48cf3451fa21034d833b82cbfa429908ab33e9506261c259beaf8"
+    },
+    {
+      "path": "disk-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "environment-evidence/command.json",
+      "bytes": 889,
+      "sha256": "63663bd0da3f8f5ba2d134720f8b7c8d72fc818d7c1f4a3014078cf90c3b6e37"
+    },
+    {
+      "path": "environment-evidence/components.json",
+      "bytes": 1508,
+      "sha256": "bc3b9426a1f1a3803f73a1e364bd7d89293fdfaa044019c977e2272c75b8c756"
+    },
+    {
+      "path": "environment-evidence/console.log",
+      "bytes": 30515,
+      "sha256": "0ac7df0e90c9a582788416583370484b39c533da6c3ab27cbb46ad2075c4e0fb"
+    },
+    {
+      "path": "environment-evidence/evidence/validation/observations.json",
+      "bytes": 1384,
+      "sha256": "70c6a3665b5cfb856cc3466de945417521d0110dbd3e5aef28f69d983ade0308"
+    },
+    {
+      "path": "environment-evidence/result.json",
+      "bytes": 178,
+      "sha256": "347fddba09f220b0b8c04d3c97e235a593760879e53ff75875f40ebcc115a2fa"
+    },
+    {
+      "path": "evidence/validation/carrier-process-maps.txt",
+      "bytes": 11023,
+      "sha256": "378aae982fb8d1d38835ef6d263ed84124f8a7342b812f145a51fea98c7d5b78"
+    },
+    {
+      "path": "evidence/validation/commands.jsonl",
+      "bytes": 2358,
+      "sha256": "f1e5ab4a68778429ee77f13d0a6424b30f63530672a231dbc35825ab550bd619"
+    },
+    {
+      "path": "evidence/validation/corpus/case-00-bash.xz",
+      "bytes": 519536,
+      "sha256": "164e4c70e9a5b94d58de50921e7d0f5f16b110073d638857730f8aa74b1dd93d"
+    },
+    {
+      "path": "evidence/validation/corpus/case-01-python3.xz",
+      "bytes": 1920196,
+      "sha256": "c43024e2484fce180b3ba510b6f9d9a7cb95e44ad3dde5a37b9fa548b6e5492f"
+    },
+    {
+      "path": "evidence/validation/corpus/case-02-libc.so.6.xz",
+      "bytes": 726804,
+      "sha256": "0eacbff184ede9677c94aa01741d74d3adf8d1ae52bd8233085dd46e10f5952c"
+    },
+    {
+      "path": "evidence/validation/corpus/manifest.csv",
+      "bytes": 270,
+      "sha256": "c1f3d509776a5b4d2d947d0e498ae14123ef1a605cd6e1f34b62df54097bfb23"
+    },
+    {
+      "path": "evidence/validation/corpus-prepare.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/dmesg.txt",
+      "bytes": 45365,
+      "sha256": "5459ce4fad2f0b447f442ce0aa7cc16ce854538e72b00695ecd0ebda6572c61c"
+    },
+    {
+      "path": "evidence/validation/export/vkso/include/vkso_types.h",
+      "bytes": 5596,
+      "sha256": "f8f1be74d27e524af3ac3025d8571859524c3480c09e94cc4f8e5d123911de62"
+    },
+    {
+      "path": "evidence/validation/export/vkso/lib/libshim.so",
+      "bytes": 16472,
+      "sha256": "76e9702ca88132fd7bc1081472094d8a4f520eb2d50f85948f64d1a5f4d5ae50"
+    },
+    {
+      "path": "evidence/validation/export/vkso/lib/libvkso_xz.so",
+      "bytes": 27656,
+      "sha256": "f75f4511fa4c0d38d1ac2be2c75b4e8cb77e56e6310309e45bfb107f91581578"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/checks/vkso_xz_crc32_init.log",
+      "bytes": 1904,
+      "sha256": "19437d50b388a9cb8171f932d19bf3aa02276cc2b3641fe896c1614eb3a19b4d"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/checks/vkso_xz_dec_end.log",
+      "bytes": 4215,
+      "sha256": "e2623cf2585daed9bfc876cba331dd48db41740a53bc534f41f80099aba69f8e"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/checks/vkso_xz_dec_init.log",
+      "bytes": 6325,
+      "sha256": "54730976fdc805d4cbe2af36224d7172c20baeaf575adcf3d67006e011279ce2"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/checks/vkso_xz_dec_reset.log",
+      "bytes": 1623,
+      "sha256": "90493d3cb4e1377c2141ddbabf485770bf11982ce9e5baed862ad9680dd7535a"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/checks/vkso_xz_dec_run.log",
+      "bytes": 12384,
+      "sha256": "8029ff3bfe560b336de39d446a56d632203c4a7dd7bb397587ecc53475355b50"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/module_deps.txt",
+      "bytes": 63,
+      "sha256": "20503a941b1c24a87b93a034495919e953fdd108a2c89d5a566e16c797f0a341"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/outputs.env",
+      "bytes": 419,
+      "sha256": "441a8c2e2107a6f7f68bf9c0defc52fb332df8b4f581841ef9b54c69048218eb"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/page_mappings.txt",
+      "bytes": 192,
+      "sha256": "e710163e9e55116f2557fc2cf578bb4ec7f7f085269fff0e304f8e925a123d5d"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/page_replace.log",
+      "bytes": 3456,
+      "sha256": "2c8506f95e14179f4f262cc4d31a4ed058d001fe39cf8bb5ef843a31d11c95b8"
+    },
+    {
+      "path": "evidence/validation/export/vkso/metadata/resolved_symbol_addresses.txt",
+      "bytes": 2277,
+      "sha256": "ee870daa2036d5cd4e490d243fc43d24bf842f30ff12a3e256d459adcef062c3"
+    },
+    {
+      "path": "evidence/validation/export/vkso/shared_data.txt",
+      "bytes": 49,
+      "sha256": "9de5a8bf4efd0ca3f0c3566472aa7d2e0312360486679284cfbeefb4e660a958"
+    },
+    {
+      "path": "evidence/validation/export-and-correctness.log",
+      "bytes": 27872,
+      "sha256": "f51b120067d7a52f95e26ef6170bdb5893fb7d6be02cb1d062324e4bebcdc038"
+    },
+    {
+      "path": "evidence/validation/kernel-dso-audit.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/kernel-dso-audit.md",
+      "bytes": 244,
+      "sha256": "7512598e8478dbebc01d69ed31cca7199ae52f2cd1c58d9bec49f850e828a0c2"
+    },
+    {
+      "path": "evidence/validation/load-page_cache_replace.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/load-vkso_kernel_reader.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/load-vkso_xz.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/raw-diagnostic.csv",
+      "bytes": 2968,
+      "sha256": "623c9b275858c283d4014c002dddb52af3e247b23079dab7789a34a6c6decb1e"
+    },
+    {
+      "path": "evidence/validation/registered-pfns-before-workload.json",
+      "bytes": 1504,
+      "sha256": "0c350c2e0bd9a6890e9bf3e4e915a873657545487c6b9a14438cb7b42efd5452"
+    },
+    {
+      "path": "evidence/validation/registered-pfns.json",
+      "bytes": 1504,
+      "sha256": "0c350c2e0bd9a6890e9bf3e4e915a873657545487c6b9a14438cb7b42efd5452"
+    },
+    {
+      "path": "evidence/validation/restored-pfns.json",
+      "bytes": 673,
+      "sha256": "d7fd6b2eb7435d400275ca2074341885b3d4b72a75e0345438599130510ed4e8"
+    },
+    {
+      "path": "evidence/validation/source-pages.csv",
+      "bytes": 139,
+      "sha256": "ee16582ca887334e25479bae6ca2edcf341bc1b5324581e4fecdc239d449292b"
+    },
+    {
+      "path": "evidence/validation/status.json",
+      "bytes": 400,
+      "sha256": "2ba310131f2d04b621ed1db06369e69dc91d4125072d3d7d715ffd26a5adc800"
+    },
+    {
+      "path": "evidence/validation/unload-page_cache_replace.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/unload-vkso_kernel_reader.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/unload-vkso_xz.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/validation/workspace-init.log",
+      "bytes": 160,
+      "sha256": "8a0f3743356f480d5730ef035d631513a8838c60d105ca6d6219f3fafd30517d"
+    },
+    {
+      "path": "evidence/validation/xz-validation.json",
+      "bytes": 1973,
+      "sha256": "61db8a7cf39db7c6341f83554fbbaab8a4f3605ba2949cc8fb88457181e86970"
+    },
+    {
+      "path": "evidence-consistency.json",
+      "bytes": 1224,
+      "sha256": "5a28f9c64b3b9cd3ce1701fc1c73eb3eb1f7a50c6ad1985fc7129715ef10b079"
+    },
+    {
+      "path": "extraction.log",
+      "bytes": 10468,
+      "sha256": "fbdbc642ac38ba21747adbd5bef52eb955310c17e7c1179abf77ec49a7531ffc"
+    },
+    {
+      "path": "functional-summary.json",
+      "bytes": 4883,
+      "sha256": "ff5dcea98ee93cf1df6962416e6d11d3b2a665c088bd0734ab57cdc8bd4de92b"
+    },
+    {
+      "path": "kernel-package-evidence/apt-package-metadata.txt",
+      "bytes": 1495,
+      "sha256": "b04c906bef412daecb157204136f924b5265c4ae9e9619ac9e13dbc8fb041caf"
+    },
+    {
+      "path": "kernel-package-evidence/installed-package.txt",
+      "bytes": 67,
+      "sha256": "d1af6cb4e75e9dd44ed8c3ba0f32fb5c9b10ed2ce572bc05b16b38acc35341ce"
+    },
+    {
+      "path": "kernel-package-evidence.json",
+      "bytes": 1002,
+      "sha256": "fa4c16970e724871acbaab60da56e92d56134f2b8d8ab2b03cc7ba27e72bdd79"
+    },
+    {
+      "path": "owner-btf.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-build.log",
+      "bytes": 11566,
+      "sha256": "e09cd75847949f7499f9d90ad03b114c03e56f0c683ef1e577e3d7765f1bbf44"
+    },
+    {
+      "path": "owner-vermagic.log",
+      "bytes": 47,
+      "sha256": "fa9c6f2bf3096ab3004b6dda7780ba6e9f8ad9e8d5bc5f65e315dbfd4e687e7d"
+    },
+    {
+      "path": "payload/benchmark-source/src/xz-bench.c",
+      "bytes": 7273,
+      "sha256": "a290b68ccf042281327e02600f8a5df48278b68e4ae3ac902fe4fa2f4c6f42ad"
+    },
+    {
+      "path": "payload/binaries/libxz-native.so",
+      "bytes": 69832,
+      "sha256": "db5c437f64550b4a6a67b1cab90bb9d488349a7bd1c4f8e635ec33921c8d16ec"
+    },
+    {
+      "path": "payload/binaries/xz-bench",
+      "bytes": 33800,
+      "sha256": "135dc04572dfa68f5f63b726072779f3faabe9669d570fa09013f93a5afd5b2a"
+    },
+    {
+      "path": "payload/guest.py",
+      "bytes": 8577,
+      "sha256": "bc9f5ed4ede7883ff15a573427c5fc936806486af0cd8c6ab44e6e28def584f9"
+    },
+    {
+      "path": "payload/helpers/carrier.py",
+      "bytes": 2825,
+      "sha256": "0bf1ac5325ba90bfe94c0809e7c6a503e69c70ac64a1b710dbdebc83886197e9"
+    },
+    {
+      "path": "payload/helpers/footprint.py",
+      "bytes": 3654,
+      "sha256": "35017ef68a2d7ae028a6dc8e6ca0ebfe7b8d89c3b0398e3ae7fd5c19ecc728f5"
+    },
+    {
+      "path": "payload/helpers/vkso_kernel_reader.ko",
+      "bytes": 252456,
+      "sha256": "5f659b4a2d6edf95beafc890268266e3070658914a41f70f9a399559a2931a91"
+    },
+    {
+      "path": "payload/lz4_guest_helpers.py",
+      "bytes": 15499,
+      "sha256": "7421818d904f5eed9b08662e390848a717adcf898c72920b4215116f12ba3bae"
+    },
+    {
+      "path": "payload/owner/vkso_xz.ko",
+      "bytes": 181368,
+      "sha256": "9c4afc0d8233a9ee3678b77feca346582ce9bcc4b9a79ff41ef03e9c94a932d6"
+    },
+    {
+      "path": "payload/repo/kernel_cgd/function_checker/functions_checker.py",
+      "bytes": 36089,
+      "sha256": "d3780a8c7781c29d417313e066596c1f6249b5b05077e792446dbe0db37e100f"
+    },
+    {
+      "path": "payload/repo/kernel_cgd/kerne_type/vkso_gen_types.py",
+      "bytes": 33930,
+      "sha256": "94ca24843566f5f533697032ab4df256923ea27295c3441fb6cbb527827e9e89"
+    },
+    {
+      "path": "payload/repo/kernel_cgd/src/krg",
+      "bytes": 252576,
+      "sha256": "584a689e1e8b1f20b892f992f639f8f4568b062306e66f945a844bb7d7bad6db"
+    },
+    {
+      "path": "payload/repo/kernel_cgd/src/krg.cpp",
+      "bytes": 69090,
+      "sha256": "ef3e54459d37118105406b5c0b2dc7c7162eb140cdacf8ef589bc3b5b4028dee"
+    },
+    {
+      "path": "payload/repo/make_dll/build_PIC_so.py",
+      "bytes": 92883,
+      "sha256": "1efd26152cd34f5a2c6967a51631e0cec2affbeecaeb6f6b0d3982e581d1d580"
+    },
+    {
+      "path": "payload/repo/make_dll/shim.c",
+      "bytes": 4634,
+      "sha256": "d0da4d0b3b6e384d43562d83fd6f6e25dddd008e58d02ae920abafb648b11075"
+    },
+    {
+      "path": "payload/repo/make_dll/shim.txt",
+      "bytes": 969,
+      "sha256": "7b94c8a750d69fe23c3cd9afa000fc056b07a0948627840efceccb2b93125a6c"
+    },
+    {
+      "path": "payload/repo/page_cache_replace/manager",
+      "bytes": 2456768,
+      "sha256": "587c9826cad9655620f66a66f61b1cbf52cc4a69a5b148d1ba0d99b030ef9706"
+    },
+    {
+      "path": "payload/repo/page_cache_replace/manager.cpp",
+      "bytes": 27805,
+      "sha256": "42ac22aa4130fb971e15ecca37137fe9ab3b8a31ca78eff5568c4b50fb520680"
+    },
+    {
+      "path": "payload/repo/page_cache_replace/page_cache_replace.ko",
+      "bytes": 597320,
+      "sha256": "adb851ea93db68b6abb4691e71ed738e77e8a594a4d5c5744a198f4247581d59"
+    },
+    {
+      "path": "payload/repo/vkso",
+      "bytes": 28779,
+      "sha256": "fb5e7a6d70d0abed8d55f7ab804cdbb134e453200935796928c377be6ea91d0f"
+    },
+    {
+      "path": "payload/scripts/audit_kernel_dso.py",
+      "bytes": 2432,
+      "sha256": "d30f30aeb47196d4b90e11b5d595c9f86d698363babe4c05ab9c3d7329b59fa8"
+    },
+    {
+      "path": "payload/scripts/prepare_corpus.sh",
+      "bytes": 756,
+      "sha256": "094f4eebb83475e849afb1073a85d0394cd7cc7fc452288750862fc6a691d25a"
+    },
+    {
+      "path": "payload/symbols.txt",
+      "bytes": 86,
+      "sha256": "eaf72a17e90b9c51636c1d520776a1e77e8b455a9194b16c85cd6bcae1dafa52"
+    },
+    {
+      "path": "result.json",
+      "bytes": 619,
+      "sha256": "2a5a3effd36a578484e6676b99ef7922f80757af97a681e20355b79769af4489"
+    },
+    {
+      "path": "userspace-build.log",
+      "bytes": 853,
+      "sha256": "13bf90f1661ecf692b716363ef7adf0f528895440483266b0a000188ea5ed1ab"
+    },
+    {
+      "path": "xz_qemu.py",
+      "bytes": 11092,
+      "sha256": "d022a4555a1e587876246b37a86910c0c713e0d3289bb8969f8f7b4192063b77"
+    }
+  ]
+}

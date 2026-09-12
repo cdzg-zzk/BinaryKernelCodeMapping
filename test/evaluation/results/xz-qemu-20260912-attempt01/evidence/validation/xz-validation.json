@@ -1,0 +1,63 @@
+{
+  "scope": "unchanged complete XZ workload; guest timing fields are diagnostic only",
+  "status": "pass",
+  "repeats": 20,
+  "outer_runs": 7,
+  "library": "/work/validation/export/vkso/lib/libvkso_xz.so",
+  "shared_pages": 4,
+  "owner_refcnt_during_registration": 0,
+  "inputs": [
+    {
+      "label": "bash",
+      "plain": "/work/validation/corpus/case-00-bash",
+      "compressed": "/work/validation/corpus/case-00-bash.xz",
+      "bytes": 1396520,
+      "compressed_bytes": 519536,
+      "source_sha256": "59474588a312b6b6e73e5a42a59bf71e62b55416b6c9d5e4a6e1c630c2a9ecd4"
+    },
+    {
+      "label": "python3",
+      "plain": "/work/validation/corpus/case-01-python3",
+      "compressed": "/work/validation/corpus/case-01-python3.xz",
+      "bytes": 5917224,
+      "compressed_bytes": 1920196,
+      "source_sha256": "7d51cd6b48b521277f5caa4610a82126e315fa2be4df069823a8b1eeb5bd4a86"
+    },
+    {
+      "label": "libc.so.6",
+      "plain": "/work/validation/corpus/case-02-libc.so.6",
+      "compressed": "/work/validation/corpus/case-02-libc.so.6.xz",
+      "bytes": 2220400,
+      "compressed_bytes": 726804,
+      "source_sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50"
+    }
+  ],
+  "coverage": {
+    "inputs": 3,
+    "backends": [
+      "native",
+      "kernel-vkso"
+    ],
+    "completed_rows": 42,
+    "complete_decodes": 882,
+    "kernel_backed_complete_decodes": 441,
+    "full_output_checks": 84,
+    "guard_pairs_checked": 42,
+    "checks_in_unchanged_benchmark": [
+      "XZ_STREAM_END for every decode",
+      "entire compressed input consumed",
+      "entire original output produced",
+      "full memcmp after warm-up and repeat loop",
+      "both 64-byte output guards"
+    ],
+    "api": [
+      "crc32_init",
+      "dec_init",
+      "dec_run",
+      "dec_reset",
+      "dec_end"
+    ],
+    "source": "/work/benchmark-source/src/xz-bench.c",
+    "page_observation": "all declared pages before and after full workload"
+  }
+}

@@ -1,0 +1,5 @@
+vkso_xz_crc32_init
+vkso_xz_dec_init
+vkso_xz_dec_run
+vkso_xz_dec_reset
+vkso_xz_dec_end

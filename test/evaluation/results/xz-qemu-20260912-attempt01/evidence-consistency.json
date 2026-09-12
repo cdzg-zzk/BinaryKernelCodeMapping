@@ -1,0 +1,30 @@
+{
+  "status": "pass",
+  "all_recorded_commands_returned_zero": true,
+  "original_export_checks": 5,
+  "complete_input_archives": [
+    {
+      "input": "bash",
+      "archive": "evidence/validation/corpus/case-00-bash.xz",
+      "decompressed_bytes": 1396520,
+      "decompressed_sha256": "59474588a312b6b6e73e5a42a59bf71e62b55416b6c9d5e4a6e1c630c2a9ecd4",
+      "matches_complete_guest_original": true
+    },
+    {
+      "input": "python3",
+      "archive": "evidence/validation/corpus/case-01-python3.xz",
+      "decompressed_bytes": 5917224,
+      "decompressed_sha256": "7d51cd6b48b521277f5caa4610a82126e315fa2be4df069823a8b1eeb5bd4a86",
+      "matches_complete_guest_original": true
+    },
+    {
+      "input": "libc.so.6",
+      "archive": "evidence/validation/corpus/case-02-libc.so.6.xz",
+      "decompressed_bytes": 2220400,
+      "decompressed_sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "matches_complete_guest_original": true
+    }
+  ],
+  "full_output_evidence": "unchanged full benchmark returned zero; complete 42-row matrix; loop-derived memcmp/guard counts in xz-validation.json",
+  "scope": "offline archive consistency only; no additional guest or performance run"
+}

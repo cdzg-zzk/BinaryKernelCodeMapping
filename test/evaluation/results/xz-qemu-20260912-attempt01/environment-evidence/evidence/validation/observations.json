@@ -1,0 +1,62 @@
+{
+  "scope": "exact119 guest boot and module load/unload only; no registration or performance",
+  "uname": [
+    "Linux",
+    "(none)",
+    "5.15.0-119-generic",
+    "#129-Ubuntu SMP Fri Aug 2 19:25:20 UTC 2024",
+    "x86_64"
+  ],
+  "uid": 0,
+  "operations": [
+    {
+      "argv": [
+        "insmod",
+        "/work/modules/vkso_bch.ko"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "insmod",
+        "/work/modules/page_cache_replace.ko"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "rmmod",
+        "page_cache_replace"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "rmmod",
+        "vkso_bch"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "modules_before": "virtio_blk 20480 1 - Live 0xffffffffc0002000\n",
+  "vkso_bch": {
+    "refcnt": "0",
+    "text": "0xffffffffc0008000"
+  },
+  "page_cache_replace": {
+    "refcnt": "0",
+    "text": "0xffffffffc0012000"
+  },
+  "modules_loaded": "page_cache_replace 49152 0 - Live 0xffffffffc0012000 (OE)\nvkso_bch 24576 0 - Live 0xffffffffc0008000 (OE)\nvirtio_blk 20480 1 - Live 0xffffffffc0002000\n",
+  "body_status": "pass",
+  "modules_after": "virtio_blk 20480 1 - Live 0xffffffffc0002000\n",
+  "status": "pass"
+}

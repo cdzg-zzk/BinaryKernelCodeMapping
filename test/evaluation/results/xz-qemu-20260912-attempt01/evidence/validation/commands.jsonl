@@ -1,0 +1,11 @@
+{"argv": ["insmod", "/work/owner/vkso_xz.ko"], "log": "/work/validation/load-vkso_xz.log", "returncode": 0}
+{"argv": ["insmod", "/work/helpers/vkso_kernel_reader.ko"], "log": "/work/validation/load-vkso_kernel_reader.log", "returncode": 0}
+{"argv": ["insmod", "/work/repo/page_cache_replace/page_cache_replace.ko"], "log": "/work/validation/load-page_cache_replace.log", "returncode": 0}
+{"argv": ["/work/scripts/prepare_corpus.sh", "/work/validation/corpus", "/work/validation/corpus/manifest.csv", "/work/inputs/bash", "/work/inputs/python3", "/work/inputs/libc.so.6"], "log": "/work/validation/corpus-prepare.log", "returncode": 0}
+{"argv": ["/work/repo/vkso", "init", "/work/validation/export", "--symbols", "/work/symbols.txt"], "log": "/work/validation/workspace-init.log", "returncode": 0}
+{"argv": ["python3", "/work/scripts/audit_kernel_dso.py", "--library", "/work/validation/export/vkso/lib/libvkso_xz.so", "--page-map", "/work/validation/export/vkso/metadata/page_mappings.txt", "--report", "/work/validation/kernel-dso-audit.md"], "log": "/work/validation/kernel-dso-audit.log", "returncode": 0}
+{"argv": ["taskset", "-c", "0", "/work/binaries/xz-bench", "--native", "/work/binaries/libxz-native.so", "--kernel", "/work/validation/export/vkso/lib/libvkso_xz.so", "--repeats", "20", "--outer-runs", "7", "--", "bash", "/work/validation/corpus/case-00-bash", "/work/validation/corpus/case-00-bash.xz", "python3", "/work/validation/corpus/case-01-python3", "/work/validation/corpus/case-01-python3.xz", "libc.so.6", "/work/validation/corpus/case-02-libc.so.6", "/work/validation/corpus/case-02-libc.so.6.xz"], "log": "/work/validation/raw-diagnostic.csv", "returncode": 0}
+{"argv": ["/work/repo/vkso", "exec", "/work/validation/export", "--symbols", "/work/symbols.txt", "--module", "/work/owner/vkso_xz.ko", "--owner-ko", "/work/owner/vkso_xz.ko", "--vmlinux", "/work/vmlinux-5.15.0-119-generic", "--", "python3", "/work/guest.py", "--validate-xz"], "log": "/work/validation/export-and-correctness.log", "returncode": 0}
+{"argv": ["rmmod", "page_cache_replace"], "log": "/work/validation/unload-page_cache_replace.log", "returncode": 0}
+{"argv": ["rmmod", "vkso_kernel_reader"], "log": "/work/validation/unload-vkso_kernel_reader.log", "returncode": 0}
+{"argv": ["rmmod", "vkso_xz"], "log": "/work/validation/unload-vkso_xz.log", "returncode": 0}

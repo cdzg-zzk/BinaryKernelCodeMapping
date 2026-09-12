@@ -1,0 +1,65 @@
+make: Entering directory '/usr/src/linux-headers-5.15.0-119-generic'
+warning: the compiler differs from the one used to build the kernel
+  The kernel was built by: gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+  You are using:           gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/module_meta.o
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/module_meta.o: warning: objtool: vkso_xz_init()+0xc: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/module_meta.o: warning: objtool: vkso_xz_exit()+0x0: 'naked' return found in RETHUNK build
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: fill_temp()+0x48: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: fill_temp()+0x70: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: fill_temp()+0x87: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: dec_vli()+0x4d: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: dec_vli()+0x5d: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: dec_vli()+0x6b: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: vkso_xz_dec_reset()+0x83: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: vkso_xz_dec_run()+0x25e: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: vkso_xz_dec_init()+0x21: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: vkso_xz_dec_init()+0x74: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: vkso_xz_dec_init()+0x85: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: vkso_xz_dec_init()+0x94: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: vkso_xz_dec_init()+0xa0: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: vkso_xz_dec_end()+0x29: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: vkso_xz_dec_end()+0x35: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: vkso_xz_dec_end()+0x3c: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_stream.o: warning: objtool: vkso_xz_dec_end()+0x3e: 'naked' return found in RETHUNK build
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: dict_repeat()+0x84: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: lzma_len()+0x129: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: lzma_main()+0x24d: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: vkso_xz_dec_lzma2_run()+0xa7: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: vkso_xz_dec_lzma2_run()+0x15c: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: vkso_xz_dec_lzma2_run()+0x2a7: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: vkso_xz_dec_lzma2_run()+0x2f9: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: vkso_xz_dec_lzma2_run()+0x475: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: vkso_xz_dec_lzma2_run()+0x7d4: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: vkso_xz_dec_lzma2_create()+0x1d: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: vkso_xz_dec_lzma2_create()+0x2f: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: vkso_xz_dec_lzma2_reset()+0x3f: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: vkso_xz_dec_lzma2_end()+0xb: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_lzma2.o: warning: objtool: vkso_xz_dec_lzma2_end()+0xe: 'naked' return found in RETHUNK build
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_crc32.o
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: bcj_x86()+0x16c: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: bcj_flush()+0x3e: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: bcj_flush()+0x64: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: bcj_flush()+0x6e: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: vkso_xz_dec_bcj_run()+0x59: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: vkso_xz_dec_bcj_run()+0xc4: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: vkso_xz_dec_bcj_run()+0xf2: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: vkso_xz_dec_bcj_run()+0x1a1: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: vkso_xz_dec_bcj_run()+0x1cb: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: vkso_xz_dec_bcj_create()+0x18: indirect call found in RETPOLINE build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: vkso_xz_dec_bcj_create()+0x27: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: vkso_xz_dec_bcj_reset()+0xb: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_dec_bcj.o: warning: objtool: vkso_xz_dec_bcj_reset()+0x2e: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_crc32.o: warning: objtool: vkso_xz_crc32_init()+0x35: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_crc32.o: warning: objtool: vkso_xz_crc32()+0x2c: 'naked' return found in RETHUNK build
+/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/xz_crc32.o: warning: objtool: vkso_xz_crc32()+0x30: 'naked' return found in RETHUNK build
+  LD [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/vkso_xz.o
+  MODPOST /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/Module.symvers
+  CC [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/vkso_xz.mod.o
+  LD [M]  /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/vkso_xz.ko
+  BTF [M] /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/vkso_xz.ko
+Skipping BTF generation for /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/xz-qemu-20260912-attempt01/build-source/kmod/vkso_xz.ko due to unavailability of vmlinux
+make: Leaving directory '/usr/src/linux-headers-5.15.0-119-generic'

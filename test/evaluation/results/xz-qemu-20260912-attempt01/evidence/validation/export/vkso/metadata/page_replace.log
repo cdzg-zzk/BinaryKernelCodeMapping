@@ -1,0 +1,72 @@
+=== ELF Section Replace Tool ===
+Command: replace --hold
+
+Target file: /work/validation/export/vkso/lib/libvkso_xz.so
+Page map: /work/validation/export/vkso/metadata/page_mappings.txt
+Loaded 4 explicit reusable page mappings from /work/validation/export/vkso/metadata/page_mappings.txt
+File size: 27656 bytes
+page 1: 7faee0455001
+page 4097: 7faee0456001
+page 8193: 7faee0457001
+page 12289: 7faee0458001
+page 16385: 7faee0459001
+page 20481: 7faee045a001
+page 24577: 7faee045b001
+
+=== Using builder-generated replacement plan ===
+Target file: /work/validation/export/vkso/lib/libvkso_xz.so
+Reusable pages: 4
+  [000] file_offset=0x1000 kernel_vaddr=0xffffffffc0008000 kind=text section=.text
+  [001] file_offset=0x2000 kernel_vaddr=0xffffffffc0009000 kind=text section=.text
+  [002] file_offset=0x3000 kernel_vaddr=0xffffffffc000a000 kind=text section=.text
+  [003] file_offset=0x4000 kernel_vaddr=0xffffffffc000b000 kind=rodata section=.rodata
+Total unique pages to replace: 4
+Planned replace mappings (page_count=4)
+  [000] file_offset=0x1000 kernel_vaddr=0xffffffffc0008000
+  [001] file_offset=0x2000 kernel_vaddr=0xffffffffc0009000
+  [002] file_offset=0x3000 kernel_vaddr=0xffffffffc000a000
+  [003] file_offset=0x4000 kernel_vaddr=0xffffffffc000b000
+
+=== Sending replace batches ===
+Sending replace batch 1/1 (4 pages)
+Netlink replace payload (page_count=4)
+  [000] file_offset=0x1000 kernel_vaddr=0xffffffffc0008000
+  [001] file_offset=0x2000 kernel_vaddr=0xffffffffc0009000
+  [002] file_offset=0x3000 kernel_vaddr=0xffffffffc000a000
+  [003] file_offset=0x4000 kernel_vaddr=0xffffffffc000b000
+Sent netlink message with protocol 30
+Waiting for kernel to process replace request...
+SUCCESS: ELF section replace completed
+
+=== ELF section replace completed successfully ===
+Set immutable flag on /work/validation/export/vkso/lib/libvkso_xz.so
+Wrote manager state: /work/repo/page_cache_replace/runtime/manager.state
+Holding active replacement session. Send SIGTERM/SIGINT/SIGHUP to restore.
+Restore signal received; restoring active replacement session...
+
+=== Using builder-generated restore plan ===
+Target file: /work/validation/export/vkso/lib/libvkso_xz.so
+Reusable pages: 4
+  [000] file_offset=0x1000 kernel_vaddr=0xffffffffc0008000 kind=text section=.text
+  [001] file_offset=0x2000 kernel_vaddr=0xffffffffc0009000 kind=text section=.text
+  [002] file_offset=0x3000 kernel_vaddr=0xffffffffc000a000 kind=text section=.text
+  [003] file_offset=0x4000 kernel_vaddr=0xffffffffc000b000 kind=rodata section=.rodata
+Total unique pages to restore: 4
+Planned restore mappings (page_count=4)
+  [000] file_offset=0x1000 kernel_vaddr=0xffffffffc0008000
+  [001] file_offset=0x2000 kernel_vaddr=0xffffffffc0009000
+  [002] file_offset=0x3000 kernel_vaddr=0xffffffffc000a000
+  [003] file_offset=0x4000 kernel_vaddr=0xffffffffc000b000
+
+=== Sending restore batches ===
+Sending restore batch 1/1 (4 pages)
+Netlink restore payload (addresses shown for reference) (page_count=4)
+  [000] file_offset=0x1000 kernel_vaddr=0xffffffffc0008000
+  [001] file_offset=0x2000 kernel_vaddr=0xffffffffc0009000
+  [002] file_offset=0x3000 kernel_vaddr=0xffffffffc000a000
+  [003] file_offset=0x4000 kernel_vaddr=0xffffffffc000b000
+Sent netlink message with protocol 29
+Waiting for kernel to process restore request...
+SUCCESS: ELF section restore completed
+Cleared manager-added immutable flag on /work/validation/export/vkso/lib/libvkso_xz.so
+Manager hold session restored and exiting.

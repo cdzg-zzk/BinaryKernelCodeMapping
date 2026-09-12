@@ -1,0 +1,8 @@
+{
+  "qemu_returncode": 0,
+  "guest_status_zero": true,
+  "guest_pass_marker": true,
+  "kernel_failure_marker": false,
+  "finished_unix": 1789187324.9594913,
+  "status": "pass"
+}

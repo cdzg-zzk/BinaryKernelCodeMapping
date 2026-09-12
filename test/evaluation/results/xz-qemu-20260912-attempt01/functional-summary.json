@@ -1,0 +1,144 @@
+{
+  "status": "pass",
+  "scope": "fresh exact119 private KVM functional validation; no baremetal performance result",
+  "original_workload": "complete bash, python3 and libc.so.6 inputs; CRC32 + x86 BCJ + LZMA2 dict 1MiB; unchanged benchmark with 20 repeats and 7 rounds",
+  "validation": {
+    "inputs": 3,
+    "backends": [
+      "native",
+      "kernel-vkso"
+    ],
+    "completed_rows": 42,
+    "complete_decodes": 882,
+    "kernel_backed_complete_decodes": 441,
+    "full_output_checks": 84,
+    "guard_pairs_checked": 42,
+    "checks_in_unchanged_benchmark": [
+      "XZ_STREAM_END for every decode",
+      "entire compressed input consumed",
+      "entire original output produced",
+      "full memcmp after warm-up and repeat loop",
+      "both 64-byte output guards"
+    ],
+    "api": [
+      "crc32_init",
+      "dec_init",
+      "dec_run",
+      "dec_reset",
+      "dec_end"
+    ],
+    "source": "/work/benchmark-source/src/xz-bench.c",
+    "page_observation": "all declared pages before and after full workload"
+  },
+  "declared_pages": {
+    "text": 3,
+    "rodata": 1,
+    "before_workload_all_shared": true,
+    "after_workload_all_shared": true,
+    "all_nonwritable": true,
+    "after_restore_all_source_backing_removed": true
+  },
+  "actual_path": [
+    "fresh unchanged owner build using exact119 headers and BTF",
+    "vkso init",
+    "vkso exec",
+    "fresh current guest KRG",
+    "original function checker",
+    "original build_PIC_so.py",
+    "original XZ generated-DSO audit",
+    "manager registration",
+    "unchanged full xz-bench",
+    "manager cleanup",
+    "fresh PFN restore verification",
+    "ordered module unload"
+  ],
+  "owner_residency_limitation": {
+    "observed_owner_refcnt": 0,
+    "module_deps": "only a shim-summary line; no source-module pin record",
+    "test_lifetime": "harness kept owner loaded until fresh PFN restoration proved every declared source mapping removed",
+    "does_not_establish": "automatic owner pinning or partial-registration failure safety"
+  },
+  "environment": {
+    "kernel": "5.15.0-119-generic",
+    "public_package_version": "5.15.0-119.129",
+    "host_uid": 1000,
+    "network": "none",
+    "host_sharing": "none",
+    "qemu_returncode": 0,
+    "kernel_failure": false,
+    "modules_after": "virtio_blk 20480 1 - Live 0xffffffffc0002000\n"
+  },
+  "observer": "fresh os.pread after each fault; buffered pagemap failure rationale is independently retained at test/evaluation/results/pagemap-freshness-20260912/observation.json",
+  "unchanged_core_components": [
+    {
+      "path": "vkso",
+      "sha256": "fb5e7a6d70d0abed8d55f7ab804cdbb134e453200935796928c377be6ea91d0f",
+      "unchanged": true
+    },
+    {
+      "path": "kernel_cgd/function_checker/functions_checker.py",
+      "sha256": "d3780a8c7781c29d417313e066596c1f6249b5b05077e792446dbe0db37e100f",
+      "unchanged": true
+    },
+    {
+      "path": "kernel_cgd/src/krg.cpp",
+      "sha256": "ef3e54459d37118105406b5c0b2dc7c7162eb140cdacf8ef589bc3b5b4028dee",
+      "unchanged": true
+    },
+    {
+      "path": "kernel_cgd/src/krg",
+      "sha256": "584a689e1e8b1f20b892f992f639f8f4568b062306e66f945a844bb7d7bad6db",
+      "unchanged": true
+    },
+    {
+      "path": "kernel_cgd/kerne_type/vkso_gen_types.py",
+      "sha256": "94ca24843566f5f533697032ab4df256923ea27295c3441fb6cbb527827e9e89",
+      "unchanged": true
+    },
+    {
+      "path": "make_dll/build_PIC_so.py",
+      "sha256": "1efd26152cd34f5a2c6967a51631e0cec2affbeecaeb6f6b0d3982e581d1d580",
+      "unchanged": true
+    },
+    {
+      "path": "make_dll/shim.c",
+      "sha256": "d0da4d0b3b6e384d43562d83fd6f6e25dddd008e58d02ae920abafb648b11075",
+      "unchanged": true
+    },
+    {
+      "path": "make_dll/shim.txt",
+      "sha256": "7b94c8a750d69fe23c3cd9afa000fc056b07a0948627840efceccb2b93125a6c",
+      "unchanged": true
+    },
+    {
+      "path": "page_cache_replace/page_cache_replace.ko",
+      "sha256": "adb851ea93db68b6abb4691e71ed738e77e8a594a4d5c5744a198f4247581d59",
+      "unchanged": true
+    },
+    {
+      "path": "page_cache_replace/manager.cpp",
+      "sha256": "42ac22aa4130fb971e15ecca37137fe9ab3b8a31ca78eff5568c4b50fb520680",
+      "unchanged": true
+    },
+    {
+      "path": "page_cache_replace/manager",
+      "sha256": "587c9826cad9655620f66a66f61b1cbf52cc4a69a5b148d1ba0d99b030ef9706",
+      "unchanged": true
+    }
+  ],
+  "evidence": [
+    "result.json",
+    "components.json",
+    "command.json",
+    "console.log",
+    "kernel-package-evidence.json",
+    "environment-evidence/console.log",
+    "evidence/validation/xz-validation.json",
+    "evidence/validation/registered-pfns-before-workload.json",
+    "evidence/validation/registered-pfns.json",
+    "evidence/validation/restored-pfns.json",
+    "evidence/validation/kernel-dso-audit.md",
+    "evidence/validation/raw-diagnostic.csv",
+    "evidence/validation/export-and-correctness.log"
+  ]
+}

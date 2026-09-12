@@ -1,0 +1,30 @@
+{
+  "library": "/work/validation/export/vkso/lib/libvkso_xz.so",
+  "pages": [
+    {
+      "file_offset": 4096,
+      "source_pfn": 1136537,
+      "restored_user_pfn": 1157323,
+      "source_backing_removed": true
+    },
+    {
+      "file_offset": 8192,
+      "source_pfn": 1136538,
+      "restored_user_pfn": 1152192,
+      "source_backing_removed": true
+    },
+    {
+      "file_offset": 12288,
+      "source_pfn": 1136539,
+      "restored_user_pfn": 1148401,
+      "source_backing_removed": true
+    },
+    {
+      "file_offset": 16384,
+      "source_pfn": 1136540,
+      "restored_user_pfn": 1236781,
+      "source_backing_removed": true
+    }
+  ],
+  "status": "pass"
+}

@@ -1,0 +1,3 @@
+bash,/work/validation/corpus/case-00-bash,/work/validation/corpus/case-00-bash.xz
+python3,/work/validation/corpus/case-01-python3,/work/validation/corpus/case-01-python3.xz
+libc.so.6,/work/validation/corpus/case-02-libc.so.6,/work/validation/corpus/case-02-libc.so.6.xz

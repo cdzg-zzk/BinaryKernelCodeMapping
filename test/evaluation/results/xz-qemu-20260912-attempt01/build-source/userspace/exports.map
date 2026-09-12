@@ -1,0 +1,9 @@
+{
+	global:
+		xz_crc32_init;
+		xz_dec_init;
+		xz_dec_run;
+		xz_dec_reset;
+		xz_dec_end;
+	local: *;
+};

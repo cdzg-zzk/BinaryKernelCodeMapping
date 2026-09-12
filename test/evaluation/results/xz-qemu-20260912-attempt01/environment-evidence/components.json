@@ -1,0 +1,35 @@
+{
+  "kernel": {
+    "source": "/tmp/vkso-guest-kernel-119/extracted/boot/vmlinuz-5.15.0-119-generic",
+    "sha256": "6f8b2d5065ad56cb3c1652e88752817ccedf60ec9472be561972434b00ed27f5",
+    "bytes": 11704712
+  },
+  "base_initramfs": {
+    "source": "/home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/revision/results/qemu-read-final/initramfs.cpio.gz",
+    "sha256": "3e4701f1cc5fea6825f97abd4a47e0e0a89c88f7a93704790e28115f1397aac0",
+    "bytes": 24466662
+  },
+  "virtio_blk": {
+    "source": "/lib/modules/5.15.0-119-generic/kernel/drivers/block/virtio_blk.ko",
+    "sha256": "60c5f13b972b3e83083761d266414366af25a569d1dff0c219aa170b031736f3",
+    "bytes": 42081,
+    "vermagic": "5.15.0-119-generic SMP mod_unload modversions"
+  },
+  "vkso_bch": {
+    "source": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/vkso_bch.ko",
+    "sha256": "64c10ae53274f2724ecc8a33c83d46e591d984626375387ec38fc4c5118160dc",
+    "bytes": 186848,
+    "vermagic": "5.15.0-119-generic SMP mod_unload modversions"
+  },
+  "page_cache_replace": {
+    "source": "/home/zzk/BinaryKernelCodeMapping/page_cache_replace/page_cache_replace.ko",
+    "sha256": "adb851ea93db68b6abb4691e71ed738e77e8a594a4d5c5744a198f4247581d59",
+    "bytes": 597320,
+    "vermagic": "5.15.0-119-generic SMP mod_unload modversions"
+  },
+  "driver_dependencies": {
+    "virtio_blk": "insmod /lib/modules/5.15.0-119-generic/kernel/drivers/block/virtio_blk.ko \n",
+    "virtio_pci": "builtin virtio_pci\n",
+    "ext4": "builtin ext4\n"
+  }
+}
