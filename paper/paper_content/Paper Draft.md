@@ -508,6 +508,8 @@ Kernel-backed 与 same-source native 使用相同 adapted source；author standa
 
 另一次独立的 5.15.0-119 guest 会话重新构建完整 BCH owner 和两种普通 DSO，并通过实际导出器建立注册。原有功能矩阵在两种 t、各 128 轮错误位置试验、全部错误数、三个 backend 和两种 decode 路径上再次通过。单独 loader 进程确认三个 RX text 页与一个只读 rodata 页的 user/source PFN 一致；恢复后的四个新映射均使用不同于源页的 PFN，随后模块卸载成功。该[功能会话](../../test/evaluation/bch-functional-evidence.md)补充了新构建和物理共享的证据，没有增加表 10–11 的性能样本。
 
+[内核端对照](../../test/evaluation/bch-kernel-evidence.md)进一步直接调用发行版 BCH、完整未适配源码的匹配编译版本，以及实际适配 owner 的公开 API。未适配版本与 owner 的算法编译命令除命名和构建路径外一致，发行版构建条件单列。两次私有 119 guest 会话各完成相同参数范围的 10,752 次 decode 检查，错误位置与整个 codeword 恢复均通过；其中一次还验证了完整计时采集矩阵。该结果建立了内核端的功能对照，正式内核成本仍需物理机测量。
+
 ### XZ Embedded
 
 XZ 使用完整 Linux 5.15 XZ Embedded single-call decoder，闭包覆盖 LZMA2、x86 BCJ 和 CRC32。相比单个 transform，它将 format parsing、range decoding、dictionary、filter 和 integrity check 放在同一调用中。输入选择 bash、libc.so.6 和 python3 三个真实二进制文件，统一预先压缩为启用 x86 BCJ、CRC32 和 1 MiB LZMA2 dictionary 的流，使两侧面对完全相同的字节与解码配置。

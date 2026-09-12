@@ -1,0 +1,4 @@
+0xa0238232	vkso_bch_encode	/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch_resource-qemu-20260912-attempt03/build-source/kmod/vkso_bch	EXPORT_SYMBOL_GPL	
+0x7661efcc	vkso_bch_init	/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch_resource-qemu-20260912-attempt03/build-source/kmod/vkso_bch	EXPORT_SYMBOL_GPL	
+0xda11ea29	vkso_bch_decode	/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch_resource-qemu-20260912-attempt03/build-source/kmod/vkso_bch	EXPORT_SYMBOL_GPL	
+0xef89e59a	vkso_bch_free	/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch_resource-qemu-20260912-attempt03/build-source/kmod/vkso_bch	EXPORT_SYMBOL_GPL	

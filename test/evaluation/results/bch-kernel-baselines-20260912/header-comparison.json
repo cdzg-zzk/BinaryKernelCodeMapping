@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "exact119": {
+    "path": "/usr/src/linux-headers-5.15.0-119/include/linux/bch.h",
+    "resolved": "/usr/src/linux-headers-5.15.0-119/include/linux/bch.h",
+    "bytes": 2152,
+    "sha256": "4ccd9352123676facafc59fa0ee29673be62e8e597e65a495e0bd414f3187c22"
+  },
+  "vendored": {
+    "path": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/linux-5.15/include/linux/bch.h",
+    "resolved": "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/linux-5.15/include/linux/bch.h",
+    "bytes": 2152,
+    "sha256": "4ccd9352123676facafc59fa0ee29673be62e8e597e65a495e0bd414f3187c22"
+  },
+  "bytes_identical": true
+}

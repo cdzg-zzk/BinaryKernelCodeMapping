@@ -1,0 +1,315 @@
+{
+  "method": "Every SHF_ALLOC section, including SHT_NOBITS zero contents; compare names, types, flags, sizes and bytes.",
+  "expected_sections": 17,
+  "compared_sections": 17,
+  "build_ids_equal": true,
+  "status": "PASS",
+  "sections": [
+    {
+      "name": ".bss",
+      "stock": {
+        "name": ".bss",
+        "type": "SHT_NOBITS",
+        "size": 0,
+        "flags": 3,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "debug": {
+        "name": ".bss",
+        "type": "SHT_NOBITS",
+        "size": 0,
+        "flags": 3,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "identical": true
+    },
+    {
+      "name": ".data",
+      "stock": {
+        "name": ".data",
+        "type": "SHT_PROGBITS",
+        "size": 2078,
+        "flags": 3,
+        "sha256": "f88525e2b3e2550648181f22416f3517f1eb720d9471fecace894a76a5187413"
+      },
+      "debug": {
+        "name": ".data",
+        "type": "SHT_PROGBITS",
+        "size": 2078,
+        "flags": 3,
+        "sha256": "f88525e2b3e2550648181f22416f3517f1eb720d9471fecace894a76a5187413"
+      },
+      "identical": true
+    },
+    {
+      "name": ".gnu.linkonce.this_module",
+      "stock": {
+        "name": ".gnu.linkonce.this_module",
+        "type": "SHT_PROGBITS",
+        "size": 896,
+        "flags": 3,
+        "sha256": "b11f57d3b12ef52e781bb757765ad1a89a8a410b48340d321357a286221a9f88"
+      },
+      "debug": {
+        "name": ".gnu.linkonce.this_module",
+        "type": "SHT_PROGBITS",
+        "size": 896,
+        "flags": 3,
+        "sha256": "b11f57d3b12ef52e781bb757765ad1a89a8a410b48340d321357a286221a9f88"
+      },
+      "identical": true
+    },
+    {
+      "name": ".modinfo",
+      "stock": {
+        "name": ".modinfo",
+        "type": "SHT_PROGBITS",
+        "size": 225,
+        "flags": 2,
+        "sha256": "1cc9e797f7a5b885afb50ae9525c56c54e4edb30f0c192b34fb534d529f86697"
+      },
+      "debug": {
+        "name": ".modinfo",
+        "type": "SHT_PROGBITS",
+        "size": 225,
+        "flags": 2,
+        "sha256": "1cc9e797f7a5b885afb50ae9525c56c54e4edb30f0c192b34fb534d529f86697"
+      },
+      "identical": true
+    },
+    {
+      "name": ".note.Linux",
+      "stock": {
+        "name": ".note.Linux",
+        "type": "SHT_NOTE",
+        "size": 48,
+        "flags": 2,
+        "sha256": "9eaee5ea5e5544e6132fa275cdb07ebdb072cbef6755b11ec50c8ed71b0800ba"
+      },
+      "debug": {
+        "name": ".note.Linux",
+        "type": "SHT_NOTE",
+        "size": 48,
+        "flags": 2,
+        "sha256": "9eaee5ea5e5544e6132fa275cdb07ebdb072cbef6755b11ec50c8ed71b0800ba"
+      },
+      "identical": true
+    },
+    {
+      "name": ".note.gnu.build-id",
+      "stock": {
+        "name": ".note.gnu.build-id",
+        "type": "SHT_NOTE",
+        "size": 36,
+        "flags": 2,
+        "sha256": "4c07c24a69b0682d89a2662f3ffd779f80553791991b2ba651339a4e7f2f5337"
+      },
+      "debug": {
+        "name": ".note.gnu.build-id",
+        "type": "SHT_NOTE",
+        "size": 36,
+        "flags": 2,
+        "sha256": "4c07c24a69b0682d89a2662f3ffd779f80553791991b2ba651339a4e7f2f5337"
+      },
+      "identical": true
+    },
+    {
+      "name": ".return_sites",
+      "stock": {
+        "name": ".return_sites",
+        "type": "SHT_PROGBITS",
+        "size": 100,
+        "flags": 2,
+        "sha256": "cd00e292c5970d3c5e2f0ffa5171e555bc46bfc4faddfb4a418b6840b86e79a3"
+      },
+      "debug": {
+        "name": ".return_sites",
+        "type": "SHT_PROGBITS",
+        "size": 100,
+        "flags": 2,
+        "sha256": "cd00e292c5970d3c5e2f0ffa5171e555bc46bfc4faddfb4a418b6840b86e79a3"
+      },
+      "identical": true
+    },
+    {
+      "name": ".rodata",
+      "stock": {
+        "name": ".rodata",
+        "type": "SHT_PROGBITS",
+        "size": 320,
+        "flags": 2,
+        "sha256": "3d8aa2dfaefc46a1ae049c36963af030641711ce8b31a09e019ed5f71010199d"
+      },
+      "debug": {
+        "name": ".rodata",
+        "type": "SHT_PROGBITS",
+        "size": 320,
+        "flags": 2,
+        "sha256": "3d8aa2dfaefc46a1ae049c36963af030641711ce8b31a09e019ed5f71010199d"
+      },
+      "identical": true
+    },
+    {
+      "name": ".rodata.str1.1",
+      "stock": {
+        "name": ".rodata.str1.1",
+        "type": "SHT_PROGBITS",
+        "size": 10,
+        "flags": 50,
+        "sha256": "0b2d1f79ed80c258c0f03b940422036c68d249d3dd69da890e71b9b753cee219"
+      },
+      "debug": {
+        "name": ".rodata.str1.1",
+        "type": "SHT_PROGBITS",
+        "size": 10,
+        "flags": 50,
+        "sha256": "0b2d1f79ed80c258c0f03b940422036c68d249d3dd69da890e71b9b753cee219"
+      },
+      "identical": true
+    },
+    {
+      "name": ".rodata.str1.8",
+      "stock": {
+        "name": ".rodata.str1.8",
+        "type": "SHT_PROGBITS",
+        "size": 43,
+        "flags": 50,
+        "sha256": "780928e9ff30dec481ae2dd6a378604af9572830c6fabe55647436c38cd10792"
+      },
+      "debug": {
+        "name": ".rodata.str1.8",
+        "type": "SHT_PROGBITS",
+        "size": 43,
+        "flags": 50,
+        "sha256": "780928e9ff30dec481ae2dd6a378604af9572830c6fabe55647436c38cd10792"
+      },
+      "identical": true
+    },
+    {
+      "name": ".text",
+      "stock": {
+        "name": ".text",
+        "type": "SHT_PROGBITS",
+        "size": 12043,
+        "flags": 6,
+        "sha256": "e3045adbdac3982205033fc799da75aa7bfebce5203949b44ec64921e4118c90"
+      },
+      "debug": {
+        "name": ".text",
+        "type": "SHT_PROGBITS",
+        "size": 12043,
+        "flags": 6,
+        "sha256": "e3045adbdac3982205033fc799da75aa7bfebce5203949b44ec64921e4118c90"
+      },
+      "identical": true
+    },
+    {
+      "name": ".text.unlikely",
+      "stock": {
+        "name": ".text.unlikely",
+        "type": "SHT_PROGBITS",
+        "size": 2293,
+        "flags": 6,
+        "sha256": "edc1a79b1763be1cbba37ee56eb0abd61ad7736d596213027dbdfa11cbb65dcd"
+      },
+      "debug": {
+        "name": ".text.unlikely",
+        "type": "SHT_PROGBITS",
+        "size": 2293,
+        "flags": 6,
+        "sha256": "edc1a79b1763be1cbba37ee56eb0abd61ad7736d596213027dbdfa11cbb65dcd"
+      },
+      "identical": true
+    },
+    {
+      "name": "__bug_table",
+      "stock": {
+        "name": "__bug_table",
+        "type": "SHT_PROGBITS",
+        "size": 12,
+        "flags": 3,
+        "sha256": "bb1543cde3b76d2f9795470fc73f42f2e3b55a00ea4df98d85c0e1944ae504e8"
+      },
+      "debug": {
+        "name": "__bug_table",
+        "type": "SHT_PROGBITS",
+        "size": 12,
+        "flags": 3,
+        "sha256": "bb1543cde3b76d2f9795470fc73f42f2e3b55a00ea4df98d85c0e1944ae504e8"
+      },
+      "identical": true
+    },
+    {
+      "name": "__kcrctab_gpl",
+      "stock": {
+        "name": "__kcrctab_gpl",
+        "type": "SHT_PROGBITS",
+        "size": 16,
+        "flags": 2,
+        "sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb"
+      },
+      "debug": {
+        "name": "__kcrctab_gpl",
+        "type": "SHT_PROGBITS",
+        "size": 16,
+        "flags": 2,
+        "sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb"
+      },
+      "identical": true
+    },
+    {
+      "name": "__ksymtab_gpl",
+      "stock": {
+        "name": "__ksymtab_gpl",
+        "type": "SHT_PROGBITS",
+        "size": 48,
+        "flags": 2,
+        "sha256": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1"
+      },
+      "debug": {
+        "name": "__ksymtab_gpl",
+        "type": "SHT_PROGBITS",
+        "size": 48,
+        "flags": 2,
+        "sha256": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1"
+      },
+      "identical": true
+    },
+    {
+      "name": "__ksymtab_strings",
+      "stock": {
+        "name": "__ksymtab_strings",
+        "type": "SHT_PROGBITS",
+        "size": 44,
+        "flags": 50,
+        "sha256": "e2c2c938d388b4b78b285482823d99b914e338f7dc28d5f76aabf8997edccd20"
+      },
+      "debug": {
+        "name": "__ksymtab_strings",
+        "type": "SHT_PROGBITS",
+        "size": 44,
+        "flags": 50,
+        "sha256": "e2c2c938d388b4b78b285482823d99b914e338f7dc28d5f76aabf8997edccd20"
+      },
+      "identical": true
+    },
+    {
+      "name": "__versions",
+      "stock": {
+        "name": "__versions",
+        "type": "SHT_PROGBITS",
+        "size": 832,
+        "flags": 2,
+        "sha256": "f342fe40d1a205351ffd8049aa5ec370500b3ded0a7c5aeb040835b9a9449d85"
+      },
+      "debug": {
+        "name": "__versions",
+        "type": "SHT_PROGBITS",
+        "size": 832,
+        "flags": 2,
+        "sha256": "f342fe40d1a205351ffd8049aa5ec370500b3ded0a7c5aeb040835b9a9449d85"
+      },
+      "identical": true
+    }
+  ]
+}

@@ -1,7 +1,8 @@
 # Algorithm evidence and repetition audit
 
-Verified 2026-09-11 against the current runners and the archives listed below.
-No new algorithm performance measurements have been collected in this stage.
+Existing archive audit: 2026-09-11; subsequent source and kernel-driver checks:
+2026-09-12. No new formal bare-metal algorithm performance samples have been
+collected. The new private-guest kernel timings validate the collector only.
 
 ## Existing result identity
 
@@ -93,6 +94,9 @@ diagnostic must reuse identical payloads and error positions across both
 decode modes, and record their exact vectors and invocation order. Runtime
 path evidence should distinguish syndrome work, error-locator construction
 and the degree-two root branch without treating t=8 as a higher-degree case.
-Actual
-in-kernel execution cost of an adapted owner remains a separate group C
-deliverable; the existing user-side and copied-closure results do not supply it.
+The [actual-owner kernel comparison](bch-kernel-evidence.md) now directly calls
+stock BCH, a complete unadapted source module compiled with the owner's
+algorithm flags, and the actual adapted owner. Complete correctness and the
+1,056-row collection path pass in private exact119 guests. Actual bare-metal
+in-kernel execution cost remains a group C deliverable; neither those guest
+timings nor the old copied-closure results provide that result.

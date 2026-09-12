@@ -1,0 +1,96 @@
+[
+  {
+    "output": "package-owners.txt",
+    "argv": [
+      "dpkg-query",
+      "-S",
+      "/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko",
+      "/usr/lib/debug/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko",
+      "/usr/src/linux-headers-5.15.0-119/include/linux/bch.h",
+      "/usr/src/linux-headers-5.15.0-119-generic/Module.symvers"
+    ],
+    "cwd": "/home/zzk/BinaryKernelCodeMapping",
+    "returncode": 0,
+    "stderr": ""
+  },
+  {
+    "output": "package-versions.txt",
+    "argv": [
+      "dpkg-query",
+      "-W",
+      "-f=${Package}\t${Version}\t${db:Status-Abbrev}\n",
+      "linux-modules-5.15.0-119-generic",
+      "linux-image-unsigned-5.15.0-119-generic-dbgsym",
+      "linux-headers-5.15.0-119",
+      "linux-headers-5.15.0-119-generic"
+    ],
+    "cwd": "/home/zzk/BinaryKernelCodeMapping",
+    "returncode": 0,
+    "stderr": ""
+  },
+  {
+    "output": "stock-modinfo.txt",
+    "argv": [
+      "modinfo",
+      "/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko"
+    ],
+    "cwd": "/home/zzk/BinaryKernelCodeMapping",
+    "returncode": 0,
+    "stderr": ""
+  },
+  {
+    "output": "owner-modinfo.txt",
+    "argv": [
+      "modinfo",
+      "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch_resource-qemu-20260912-attempt03/build-source/kmod/vkso_bch.ko"
+    ],
+    "cwd": "/home/zzk/BinaryKernelCodeMapping",
+    "returncode": 0,
+    "stderr": ""
+  },
+  {
+    "output": "stock-notes.txt",
+    "argv": [
+      "readelf",
+      "-n",
+      "/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko"
+    ],
+    "cwd": "/home/zzk/BinaryKernelCodeMapping",
+    "returncode": 0,
+    "stderr": "readelf: Warning: Separate debug info file /usr/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko found, but CRC does not match - ignoring\n"
+  },
+  {
+    "output": "debug-notes.txt",
+    "argv": [
+      "readelf",
+      "-n",
+      "/usr/lib/debug/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko"
+    ],
+    "cwd": "/home/zzk/BinaryKernelCodeMapping",
+    "returncode": 0,
+    "stderr": ""
+  },
+  {
+    "output": "owner-notes.txt",
+    "argv": [
+      "readelf",
+      "-n",
+      "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/bch_resource-qemu-20260912-attempt03/build-source/kmod/vkso_bch.ko"
+    ],
+    "cwd": "/home/zzk/BinaryKernelCodeMapping",
+    "returncode": 0,
+    "stderr": ""
+  },
+  {
+    "output": "vendor-to-adapted.diff",
+    "argv": [
+      "diff",
+      "-u",
+      "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/vendor/linux-5.15/lib/bch.c",
+      "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/adapted/bch.c"
+    ],
+    "cwd": "/home/zzk/BinaryKernelCodeMapping",
+    "returncode": 1,
+    "stderr": ""
+  }
+]

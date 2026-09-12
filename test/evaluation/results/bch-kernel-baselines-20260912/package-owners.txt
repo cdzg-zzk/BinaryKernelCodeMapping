@@ -1,0 +1,4 @@
+linux-modules-5.15.0-119-generic: /lib/modules/5.15.0-119-generic/kernel/lib/bch.ko
+linux-image-unsigned-5.15.0-119-generic-dbgsym: /usr/lib/debug/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko
+linux-headers-5.15.0-119: /usr/src/linux-headers-5.15.0-119/include/linux/bch.h
+linux-headers-5.15.0-119-generic: /usr/src/linux-headers-5.15.0-119-generic/Module.symvers

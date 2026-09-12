@@ -156,6 +156,14 @@ alone does not prove active PFN identity or a performance conclusion.
 
 ## Verified existing evidence
 
+The [BCH kernel-side comparison](bch-kernel-evidence.md) adds a separate driver
+that directly imports the stock, matched-source and actual owner APIs. The
+matched-source control uses the complete unadapted source and the owner's
+algorithm compiler arguments. Private exact119 guests pass all 10,752 decode
+checks and the full 1,056-row collection path. Guest timings remain diagnostic;
+formal kernel-side costs still require the planned bare-metal measurements.
+The original owner and registration/export implementation are unchanged.
+
 The [algorithm evidence note](algorithm-evidence.md) records the old
 deployment boundaries, comparison identities, and BCH diagnostic targets.
 The canonical manuscript and generated summaries now describe their existing

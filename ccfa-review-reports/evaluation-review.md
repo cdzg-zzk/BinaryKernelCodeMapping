@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | A：Clocktime | 20 次采集、全量原始记录核验、三方法结果报告及正文更新已完成 | 保留 writer 不确定性；如需解释其原因，另定诊断，不追逐有利重复 |
 | B：页面复用与装载 | 已验证映射/释放及部分失败问题；BCH 63 个 loader 的 PFN、完整 owner core 与支持页账本完成，所测范围未显示净节省 | 完整 setup、工作堆/allocator 归因及剩余边界；[统一注册修订方案](../test/evaluation/proposals/registration-transactions.md)待审阅，未实施 |
-| C：PGOT 与真实算法 | 已核实重复层次、BCH 对照点及 decode 计时边界；全新 BCH/XZ owner 在精确 119 guest 中通过完整原有功能矩阵及各四页 PFN 验证 | 完整部署重复、BCH 退化的指令/布局原因及实际 owner 内核成本；核实 LZ4 实际 helper 路径 |
+| C：PGOT 与真实算法 | 已核实重复层次及 BCH decode 边界；BCH/XZ 完整导出功能与 PFN 通过；BCH 内核端三后端的完整功能和计时采集入口通过 | 完整部署重复、BCH 退化的指令/布局原因及实际 owner 的物理机内核成本；核实 LZ4 实际 helper 路径 |
 | D：适用范围与导出工具 | 固定 8 例的原分析器正在执行；前三例已落盘，hex_dump_to_buffer 仍在展开依赖；缓存方案未获确认、未应用 | 完成固定全集，导入既有适配证据，完成分类与可运行性验证 |
 | E：真实应用集成 | 普通 upstream/同源 DSO 全 Silesia 功能案例通过；真实注册的四页 PFN 匹配；首次 CLI 压缩因未绑定的直接 helper 调用崩溃，GDB 已确认 | 审阅基础导出器方案并完成实际绑定，再验证全矩阵及采集 C 会话内应用性能 |
 | F：论文与结果呈现 | 已更新 Clocktime、注册行为表 21、BCH 资源表 22、BCH/XZ 功能证据及 LZ4 应用失败；修正 helper 身份与静态分析能力断言 | 随 B–E 的剩余结果继续更新，再做全文一致性验收 |
@@ -179,6 +179,8 @@ first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛�
 
 **C 类：PGOT、LZ4、BCH、XZ 算法实验。**
 
+**实际 owner 内核端对照已准备并验证（2026-09-12）：** 新增独立 GPL 实验 driver，通过十二个公开导入直接调用 Ubuntu119 stock BCH、完整未适配源码的匹配编译模块，以及现有完整 `vkso_bch` owner。Matched 与 owner 的实际算法编译命令除命名和构建路径外逐 token 一致；stock 的 stack protector、UBSAN、FORTIFY、thunks、内联策略及 compiler package 差异单列，不能冒充同编译条件。两次精确 119 guest 会话各通过两种 t、各 128 轮、全部错误数、三个后端与两种 decode 的 10,752 次完整检查；另一次完整 measure 模式产生并核验 1,056 行。实际 API 指针及模块归属已核对，driver 正常依赖产生的 refcnt 0→1→0 不作为注册 pin 修复证据。首次 BusyBox 参数失败完整保留；没有修改原 owner/core 或装载 host 模块。详见[内核端记录](../test/evaluation/bch-kernel-evidence.md)。Guest 时间只用于采集工具验证，实际内核成本仍待物理机正式重复。
+
 **新增完整功能验证（2026-09-12）：** BCH 使用全新独立构建的未修改 owner、benchmark 和两个普通 DSO，在精确 `5.15.0-119-generic` 私有 guest 中执行实际 `vkso init/exec`；四个导出入口的原 closure checks 均通过。原有 `--correctness-only` 矩阵完整覆盖 m=13、t=4/8、各 128 轮错误位置试验、全部 0..t 错误数、三个 backend 与两种 decode 路径，并通过完整输出/错误位置检查。单独 loader 进程观察到三个 RX text 页和一个只读 rodata 页的 user/source PFN 一致；恢复后的四个新映射均不再使用源 PFN，随后模块正常卸载。该会话没有性能采样，不能作为部署重复、BCH 退化解释或净内存结果。证据见 [BCH 功能记录](../test/evaluation/bch-functional-evidence.md)。
 
 **XZ 完整功能与运行时 PFN 已通过：** 另一精确 119 guest 使用全新构建的未修改完整 XZ owner，经过原 checker/exporter 和 DSO audit，对全部 bash、python3、libc.so.6 输入执行原有 CRC32/x86 BCJ/1 MiB LZMA2 工作流。两 backend × 三输入 × 七轮形成 42 行，含 warm-up 共 882 次完整解码、84 次完整输出比较、42 对 guard 检查，五个接口均覆盖；所有检查通过。单独 loader 进程在工作负载前后均确认四个声明页的 source/user PFN 一致，恢复后的四个新映射不再使用源 PFN，再正常卸载模块。原有 benchmark 的 guest 计时字段仅作诊断，未加入正式性能表。Owner refcnt 仍为 0，生命周期和全系统净内存要求仍未闭合。详见 [XZ 功能记录](../test/evaluation/xz-functional-evidence.md)。
@@ -195,7 +197,7 @@ first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛�
 
 **前次已发现：算法的 outer run 也未必是重新部署。** 草稿第 431 行说每次正式 run 都重新加载 owner module；但 [XZ run.sh](../test/test_xz/run.sh)在进入 benchmark 前只部署一次，[xz-bench.c](../test/test_xz/src/xz-bench.c)第 244–259 行先加载两个 DSO，再在同一进程中循环七个 outer runs。LZ4/BCH 的顶层脚本也把多个 outer runs 交给一次部署下的 runner。因此要明确区分“一次完整脚本运行”和“程序内 outer round”，不能把后者描述为重新注册、重新分配布局或独立启动。现有比值可保留为该次部署内重复；需要部署泛化的结论应另做少量完整部署重复。
 
-对一个经较多改造的算法，比较原内核实现与实际 export owner 的内核执行；两侧语义、工作量和可比构建条件一致，另列 stock 与 export-required 编译条件造成的差异。现有 copied closures 保留为同域 PGOT 机制对照，但不能替代实际 export owner 在内核端的验证。
+实际 export owner 的内核执行对照已选用 BCH，完整语义与输入验证、匹配编译 baseline 和采集入口均已通过上述 guest 验收；后续在物理机上正式测量，并与 stock 发行构建分列。现有 copied closures 保留为同域 PGOT 机制对照，不能替代该实际 owner 对照的正式成本结果。
 
 前次直接从 [BCH raw.csv](../test/test_BCH/results/raw.csv)重算 `t=8 / errors=2 / decode-precomputed` 的 11 个轮内比值，中位数为 `1.209496`，即约慢 20.95%；全部比值范围约为 `1.0777–1.5187`。这支持已报告的负收益方向，同时表明不能只用一个 20.9% 代表所有运行的幅度。这个范围不是置信区间。
 

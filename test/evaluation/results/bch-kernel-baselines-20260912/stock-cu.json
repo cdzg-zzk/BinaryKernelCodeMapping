@@ -1,0 +1,61 @@
+[
+  {
+    "DW_AT_name": "/build/linux-3OY0c7/linux-5.15.0/lib/bch.c",
+    "DW_AT_comp_dir": "/build/linux-3OY0c7/linux-5.15.0/debian/build/build-generic",
+    "DW_AT_producer": "GNU C89 11.4.0 -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -m64 -mno-80387 -mno-fp-ret-in-387 -mpreferred-stack-boundary=3 -mskip-rax-setup -mtune=generic -mno-red-zone -mcmodel=kernel -mindirect-branch=thunk-extern -mindirect-branch-register -mindirect-branch-cs-prefix -mfunction-return=thunk-extern -mharden-sls=all -march=x86-64 -g -gdwarf-5 -O2 -std=gnu90 -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE -fcf-protection=none -falign-jumps=1 -falign-loops=1 -fno-asynchronous-unwind-tables -fno-jump-tables -fno-delete-null-pointer-checks -fno-allow-store-data-races -fstack-protector-strong -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-stack-clash-protection -fno-inline-functions-called-once -falign-functions=16 -fno-strict-overflow -fstack-check=no -fconserve-stack -fsanitize=bounds -fsanitize=shift -fsanitize=bool -fsanitize=enum -fstack-protector-strong",
+    "dwarf_version": 5,
+    "line_file_fields": [
+      {
+        "content_type": "DW_LNCT_path",
+        "form": "DW_FORM_line_strp"
+      },
+      {
+        "content_type": "DW_LNCT_directory_index",
+        "form": "DW_FORM_udata"
+      }
+    ],
+    "api_declarations": [
+      {
+        "name": "bch_free",
+        "DW_AT_decl_line": 1421,
+        "DW_AT_decl_file": 1,
+        "DW_AT_external": true
+      },
+      {
+        "name": "bch_init",
+        "DW_AT_decl_line": 1319,
+        "DW_AT_decl_file": 1,
+        "DW_AT_external": true
+      },
+      {
+        "name": "bch_decode",
+        "DW_AT_decl_line": 1053,
+        "DW_AT_decl_file": 1,
+        "DW_AT_external": true
+      },
+      {
+        "name": "bch_encode",
+        "DW_AT_decl_line": 241,
+        "DW_AT_decl_file": 1,
+        "DW_AT_external": true
+      }
+    ]
+  },
+  {
+    "DW_AT_name": "lib/bch.mod.c",
+    "DW_AT_comp_dir": "/build/linux-3OY0c7/linux-5.15.0/debian/build/build-generic",
+    "DW_AT_producer": "GNU C89 11.4.0 -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -m64 -mno-80387 -mno-fp-ret-in-387 -mpreferred-stack-boundary=3 -mskip-rax-setup -mtune=generic -mno-red-zone -mcmodel=kernel -mindirect-branch=thunk-extern -mindirect-branch-register -mindirect-branch-cs-prefix -mfunction-return=thunk-extern -mharden-sls=all -mrecord-mcount -mfentry -march=x86-64 -g -gdwarf-5 -O2 -std=gnu90 -p -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE -fcf-protection=none -falign-jumps=1 -falign-loops=1 -fno-asynchronous-unwind-tables -fno-jump-tables -fno-delete-null-pointer-checks -fno-allow-store-data-races -fstack-protector-strong -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-stack-clash-protection -fno-inline-functions-called-once -falign-functions=16 -fno-strict-overflow -fstack-check=no -fconserve-stack -fsanitize=bounds -fsanitize=shift -fsanitize=bool -fsanitize=enum -fstack-protector-strong",
+    "dwarf_version": 5,
+    "line_file_fields": [
+      {
+        "content_type": "DW_LNCT_path",
+        "form": "DW_FORM_line_strp"
+      },
+      {
+        "content_type": "DW_LNCT_directory_index",
+        "form": "DW_FORM_udata"
+      }
+    ],
+    "api_declarations": []
+  }
+]

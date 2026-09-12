@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "checks": {
+    "stock_debug_allocated_sections": true,
+    "stock_debug_build_id": true,
+    "public_header_identical": true,
+    "consumed_owner_source_matches_current": true
+  },
+  "scope": "Installed binary/interface/build provenance only; no new runtime or performance result.",
+  "stock119_source_content_identity": "Not established: DWARF source paths/lines have no content checksum."
+}

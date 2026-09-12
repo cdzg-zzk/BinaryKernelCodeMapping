@@ -1,0 +1,130 @@
+{
+  "build_ids": [
+    "2d154e07f6fbff4d2c13d17ca83fdd3771586bef"
+  ],
+  "allocated_sections": [
+    {
+      "name": ".note.gnu.build-id",
+      "type": "SHT_NOTE",
+      "size": 36,
+      "flags": 2,
+      "sha256": "8d740dc12467377a585645ea4114dd8a89004a4bb0150184ccab0330c194daaf"
+    },
+    {
+      "name": ".note.Linux",
+      "type": "SHT_NOTE",
+      "size": 48,
+      "flags": 2,
+      "sha256": "9eaee5ea5e5544e6132fa275cdb07ebdb072cbef6755b11ec50c8ed71b0800ba"
+    },
+    {
+      "name": ".text",
+      "type": "SHT_PROGBITS",
+      "size": 9114,
+      "flags": 6,
+      "sha256": "da5a66f310bb07237a1da45ffa967a57abf67ffbb66cded6fcbca776176903b5"
+    },
+    {
+      "name": ".init.text",
+      "type": "SHT_PROGBITS",
+      "size": 4,
+      "flags": 6,
+      "sha256": "77970cdc981f1ee2e9825b464468d85f8e64938ae014636a23a5fd2696009c82"
+    },
+    {
+      "name": ".exit.text",
+      "type": "SHT_PROGBITS",
+      "size": 2,
+      "flags": 6,
+      "sha256": "56de62c1837575efee31915828000fde2932e3c34c06b498f648ecaf6bae8d7c"
+    },
+    {
+      "name": "__ksymtab_gpl",
+      "type": "SHT_PROGBITS",
+      "size": 48,
+      "flags": 2,
+      "sha256": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1"
+    },
+    {
+      "name": "__kcrctab_gpl",
+      "type": "SHT_PROGBITS",
+      "size": 16,
+      "flags": 2,
+      "sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb"
+    },
+    {
+      "name": ".rodata",
+      "type": "SHT_PROGBITS",
+      "size": 320,
+      "flags": 2,
+      "sha256": "384f95c8e14e648dfb1a83f2b3af448fdd30cfebac224b3a2f99c108b1315d3b"
+    },
+    {
+      "name": "__ksymtab_strings",
+      "type": "SHT_PROGBITS",
+      "size": 64,
+      "flags": 50,
+      "sha256": "304eb6ed7693b52760d2d8f2b58b90d972483182507ce8a9331a1698774efa16"
+    },
+    {
+      "name": ".rodata.str1.8",
+      "type": "SHT_PROGBITS",
+      "size": 130,
+      "flags": 50,
+      "sha256": "676f646732412d6554117e5d2929f0f12afcb3857ecccc33f014e73bfcd1ccd9"
+    },
+    {
+      "name": ".modinfo",
+      "type": "SHT_PROGBITS",
+      "size": 221,
+      "flags": 2,
+      "sha256": "080a2e3a30a5344a5479e8ea45f1974343839133174958813bd98d9a1ff5aeb7"
+    },
+    {
+      "name": "__versions",
+      "type": "SHT_PROGBITS",
+      "size": 320,
+      "flags": 2,
+      "sha256": "797977e25ae11c22f65303a95eb93d11d3f9300aea0bebf89800e8909f5b2e03"
+    },
+    {
+      "name": "__bug_table",
+      "type": "SHT_PROGBITS",
+      "size": 12,
+      "flags": 3,
+      "sha256": "1ed99270dc4c84305cab0a3bb0718a8d816e917c8f3a39ef4af3e049d143cc9c"
+    },
+    {
+      "name": ".data",
+      "type": "SHT_PROGBITS",
+      "size": 32,
+      "flags": 3,
+      "sha256": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+    },
+    {
+      "name": ".gnu.linkonce.this_module",
+      "type": "SHT_PROGBITS",
+      "size": 896,
+      "flags": 3,
+      "sha256": "7e678f7e26da08d10705dcd654c5414edbcd8ccb7c3a0420e68e3645b4f34b9d"
+    },
+    {
+      "name": ".bss",
+      "type": "SHT_NOBITS",
+      "size": 0,
+      "flags": 3,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "undefined_symbols": [
+    "__kmalloc",
+    "kfree",
+    "memcpy",
+    "memset"
+  ],
+  "compiler_comments": [
+    "GCC: (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "GCC: (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "GCC: (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0"
+  ]
+}

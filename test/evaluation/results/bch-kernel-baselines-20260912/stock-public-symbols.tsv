@@ -1,0 +1,4 @@
+0x0c303f52	bch_encode	lib/bch	EXPORT_SYMBOL_GPL	
+0x1a267fa8	bch_init	lib/bch	EXPORT_SYMBOL_GPL	
+0x860a2eab	bch_decode	lib/bch	EXPORT_SYMBOL_GPL	
+0x0d3e3481	bch_free	lib/bch	EXPORT_SYMBOL_GPL	
