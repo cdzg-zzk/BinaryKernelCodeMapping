@@ -5,6 +5,13 @@ implementation. The VKSO kernel, public wrapper, original READ executable and
 page-registration implementation are unchanged. Work branch:
 `experiment/clocktime-evaluation-revision`, based on paper commit `849ecf6`.
 
+The Normal 20-boot campaign completed on 2026-09-12. Full raw reader/writer,
+ABI/PFN and coverage checks are complete; all 729 comparisons and bootstrap
+intervals reproduce from the archived rows. See [results and interpretation](NORMAL_RESULTS.md).
+Public READ's equal-weight increase is 0.922%; writer boot variation prevents
+a claim of consistently lower mean/tail cost. The current manuscript uses these
+complete results and retains historical no-retpoline diagnostics separately.
+
 ## Experiment groups
 
 | Shared work | Collection | Interpretation |

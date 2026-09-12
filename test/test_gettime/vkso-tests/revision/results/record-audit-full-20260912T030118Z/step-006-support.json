@@ -1,0 +1,52 @@
+{
+  "step": {
+    "index": 6,
+    "block": 1,
+    "role": "update",
+    "backend": "vkso",
+    "methods": [
+      "compact-split",
+      "vkso"
+    ]
+  },
+  "boot_id": "38edd2c5-75d7-4b44-a582-04e1f78efe68",
+  "methods": [
+    {
+      "method": "compact-split",
+      "abi": {
+        "pass_records": 51,
+        "path_records": 49,
+        "thread_count": 1,
+        "multiple_cpus_exercised": false,
+        "scope": "default ABI matrix, including namespace exec/setns; event modes are separate"
+      },
+      "footprint": {
+        "distinct_source_pfns": 3,
+        "distinct_user_pfns": 3,
+        "source_user_union_pfns": 5,
+        "shared_pages": 1,
+        "copied_pages": 2,
+        "scope": "declared closure only; normal loader mapping permissions"
+      }
+    },
+    {
+      "method": "vkso",
+      "abi": {
+        "pass_records": 51,
+        "path_records": 49,
+        "thread_count": 1,
+        "multiple_cpus_exercised": false,
+        "scope": "default ABI matrix, including namespace exec/setns; event modes are separate"
+      },
+      "footprint": {
+        "distinct_source_pfns": 3,
+        "distinct_user_pfns": 3,
+        "source_user_union_pfns": 3,
+        "shared_pages": 3,
+        "copied_pages": 0,
+        "scope": "declared closure only; normal loader mapping permissions"
+      }
+    }
+  ],
+  "scope": "saved ABI and PFN observations in one completed step; no live runtime probes"
+}

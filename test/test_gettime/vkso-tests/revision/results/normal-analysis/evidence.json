@@ -1,0 +1,26 @@
+{
+  "campaign": "/home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/revision/results/normal-campaign",
+  "record_audits": "test/test_gettime/vkso-tests/revision/results/record-audit-full-20260912T030118Z",
+  "writer_audits": "test/evaluation/results/post-clocktime-20260911",
+  "boots": 20,
+  "normalized_rows": 60195,
+  "comparisons": 729,
+  "reconstructed_reader_values": 43095,
+  "writer_windows": 4275,
+  "writer_samples": 13893682,
+  "writer_cpu_counts": {
+    "0": 13893551,
+    "2": 49,
+    "1": 58,
+    "3": 24
+  },
+  "cpu0_patched_values": 160,
+  "max_cpu0_ratio_change": 0.0018604934645323201,
+  "summary_reproduced_byte_for_byte": true,
+  "fixed_rate_ratio_min": 0.9999968367868655,
+  "fixed_rate_ratio_max": 1.0000032182188345,
+  "late_batches": 0,
+  "minimum_observed_fairness": 0.9222315542150307,
+  "abi_logs": 30,
+  "pfn_observations": 20
+}

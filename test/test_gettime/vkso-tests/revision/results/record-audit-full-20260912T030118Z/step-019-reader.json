@@ -1,0 +1,1551 @@
+{
+  "scope": "one completed step: reader CSVs, normalized values and sequence counters",
+  "step": {
+    "index": 19,
+    "block": 4,
+    "role": "update",
+    "backend": "vkso",
+    "methods": [
+      "vkso",
+      "compact-split"
+    ]
+  },
+  "boot_id": "9cb244fc-a7b6-48eb-b144-26022ed1b8de",
+  "methods": [
+    {
+      "method": "vkso",
+      "normalized_reader_values": 2160,
+      "reader_files": 270,
+      "scenarios": [
+        {
+          "scenario": "monotonic/readers-1/rate-0",
+          "windows": 15,
+          "reader_observations": 15,
+          "actual_calls_per_second_per_reader": {
+            "min": 51387589.507208884,
+            "median": 52627145.82995008,
+            "max": 52687054.16557181
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 51387589.507208884,
+            "median": 52627145.82995008,
+            "max": 52687054.16557181
+          },
+          "fairness": {
+            "min": 1.0,
+            "median": 1.0,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 23155,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012008333,
+            "median": 13.014603039,
+            "max": 13.01577352
+          },
+          "leading_margin_seconds": {
+            "min": 1.000014484,
+            "median": 1.000017391,
+            "max": 1.000090796
+          },
+          "trailing_margin_seconds": {
+            "min": 0.984878367,
+            "median": 0.990116252,
+            "max": 0.994017562
+          }
+        },
+        {
+          "scenario": "monotonic/readers-1/rate-1000000",
+          "windows": 15,
+          "reader_observations": 15,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.9794721411,
+            "median": 1000000.0178619038,
+            "max": 1000000.0382564664
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999999794721411,
+            "median": 1.0000000178619037,
+            "max": 1.0000000382564664
+          },
+          "total_calls_per_second": {
+            "min": 999999.9794721411,
+            "median": 1000000.0178619038,
+            "max": 1000000.0382564664
+          },
+          "fairness": {
+            "min": 1.0,
+            "median": 1.0,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 20460,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012092505,
+            "median": 13.014304981,
+            "max": 13.015897962
+          },
+          "leading_margin_seconds": {
+            "min": 1.000016123,
+            "median": 1.000017594,
+            "max": 1.00004221
+          },
+          "trailing_margin_seconds": {
+            "min": 0.988071134,
+            "median": 0.989678715,
+            "max": 0.991886674
+          }
+        },
+        {
+          "scenario": "monotonic/readers-2/rate-0",
+          "windows": 15,
+          "reader_observations": 30,
+          "actual_calls_per_second_per_reader": {
+            "min": 51512497.87190892,
+            "median": 52663615.833229505,
+            "max": 52712721.677034065
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 104146310.01147813,
+            "median": 105285444.89601395,
+            "max": 105391457.0731674
+          },
+          "fairness": {
+            "min": 0.9998774422027499,
+            "median": 0.9999997738400129,
+            "max": 0.9999999999899252
+          },
+          "late_batches": 0,
+          "measured_batches": 46389,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012844503,
+            "median": 13.0133857,
+            "max": 13.015884835
+          },
+          "leading_margin_seconds": {
+            "min": 1.000016336,
+            "median": 1.000016757,
+            "max": 1.000029416
+          },
+          "trailing_margin_seconds": {
+            "min": 0.98413017,
+            "median": 0.989798629,
+            "max": 0.993731934
+          }
+        },
+        {
+          "scenario": "monotonic/readers-2/rate-1000000",
+          "windows": 15,
+          "reader_observations": 30,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.9898027193,
+            "median": 1000000.0230271933,
+            "max": 1000000.193148531
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999999898027193,
+            "median": 1.0000000230271933,
+            "max": 1.000000193148531
+          },
+          "total_calls_per_second": {
+            "min": 1999999.9796054387,
+            "median": 2000000.0049320182,
+            "max": 2000000.357771325
+          },
+          "fairness": {
+            "min": 0.9999999999999996,
+            "median": 1.0,
+            "max": 1.0000000000000002
+          },
+          "late_batches": 0,
+          "measured_batches": 40920,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012057469,
+            "median": 13.014247437,
+            "max": 13.015939327
+          },
+          "leading_margin_seconds": {
+            "min": 1.000016106,
+            "median": 1.000017077,
+            "max": 1.00003169
+          },
+          "trailing_margin_seconds": {
+            "min": 0.988028118,
+            "median": 0.989735108,
+            "max": 0.991909684
+          }
+        },
+        {
+          "scenario": "monotonic/readers-3/rate-0",
+          "windows": 15,
+          "reader_observations": 45,
+          "actual_calls_per_second_per_reader": {
+            "min": 51378999.08286448,
+            "median": 52649729.14876376,
+            "max": 52708568.512763806
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 155887148.7297086,
+            "median": 157682287.29387385,
+            "max": 158015126.64020753
+          },
+          "fairness": {
+            "min": 0.9998632747375907,
+            "median": 0.9999990873907021,
+            "max": 0.9999999371272762
+          },
+          "late_batches": 0,
+          "measured_batches": 69503,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012517749,
+            "median": 13.014007257,
+            "max": 13.017272944
+          },
+          "leading_margin_seconds": {
+            "min": 1.000016199,
+            "median": 1.000018366,
+            "max": 1.000029465
+          },
+          "trailing_margin_seconds": {
+            "min": 0.984113667,
+            "median": 0.987963562,
+            "max": 0.992284582
+          }
+        },
+        {
+          "scenario": "monotonic/readers-3/rate-1000000",
+          "windows": 15,
+          "reader_observations": 45,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.9592775276,
+            "median": 1000000.0187949884,
+            "max": 1000000.0677819294
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999999592775276,
+            "median": 1.0000000187949885,
+            "max": 1.0000000677819294
+          },
+          "total_calls_per_second": {
+            "min": 2999999.877832583,
+            "median": 2999999.930618503,
+            "max": 2999999.966209011
+          },
+          "fairness": {
+            "min": 0.9999999999999987,
+            "median": 0.9999999999999993,
+            "max": 1.0000000000000002
+          },
+          "late_batches": 0,
+          "measured_batches": 61380,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012122585,
+            "median": 13.014572428,
+            "max": 13.021225695
+          },
+          "leading_margin_seconds": {
+            "min": 1.000016233,
+            "median": 1.000018168,
+            "max": 1.000035473
+          },
+          "trailing_margin_seconds": {
+            "min": 0.98275727,
+            "median": 0.989408844,
+            "max": 0.991841018
+          }
+        },
+        {
+          "scenario": "monotonic_raw/readers-1/rate-0",
+          "windows": 15,
+          "reader_observations": 15,
+          "actual_calls_per_second_per_reader": {
+            "min": 50346442.80090624,
+            "median": 51472142.48204825,
+            "max": 51880581.45705699
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 50346442.80090624,
+            "median": 51472142.48204825,
+            "max": 51880581.45705699
+          },
+          "fairness": {
+            "min": 1.0,
+            "median": 1.0,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 22672,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012390226,
+            "median": 13.013841309,
+            "max": 13.015700147
+          },
+          "leading_margin_seconds": {
+            "min": 1.00001632,
+            "median": 1.000017497,
+            "max": 1.000033649
+          },
+          "trailing_margin_seconds": {
+            "min": 0.986818545,
+            "median": 0.988634899,
+            "max": 0.995002076
+          }
+        },
+        {
+          "scenario": "monotonic_raw/readers-1/rate-1000000",
+          "windows": 15,
+          "reader_observations": 15,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.8946281102,
+            "median": 1000000.0253932291,
+            "max": 1000000.3172488343
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999998946281102,
+            "median": 1.000000025393229,
+            "max": 1.0000003172488343
+          },
+          "total_calls_per_second": {
+            "min": 999999.8946281102,
+            "median": 1000000.0253932291,
+            "max": 1000000.3172488343
+          },
+          "fairness": {
+            "min": 1.0,
+            "median": 1.0,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 20460,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012747013,
+            "median": 13.013707165,
+            "max": 13.0159836
+          },
+          "leading_margin_seconds": {
+            "min": 1.000012285,
+            "median": 1.000017929,
+            "max": 1.000038764
+          },
+          "trailing_margin_seconds": {
+            "min": 0.987999164,
+            "median": 0.990270208,
+            "max": 0.991235942
+          }
+        },
+        {
+          "scenario": "monotonic_raw/readers-2/rate-0",
+          "windows": 15,
+          "reader_observations": 30,
+          "actual_calls_per_second_per_reader": {
+            "min": 51127216.606640026,
+            "median": 51492079.01702784,
+            "max": 52186002.287815675
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 102314918.66629681,
+            "median": 102925602.59767184,
+            "max": 103686882.80026676
+          },
+          "fairness": {
+            "min": 0.9999579488796272,
+            "median": 0.9999965862513086,
+            "max": 0.9999999036221364
+          },
+          "late_batches": 0,
+          "measured_batches": 45484,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.011974634,
+            "median": 13.013929165,
+            "max": 13.019965495
+          },
+          "leading_margin_seconds": {
+            "min": 1.000016017,
+            "median": 1.000017497,
+            "max": 1.003166838
+          },
+          "trailing_margin_seconds": {
+            "min": 0.982459802,
+            "median": 0.987391498,
+            "max": 0.994755229
+          }
+        },
+        {
+          "scenario": "monotonic_raw/readers-2/rate-1000000",
+          "windows": 15,
+          "reader_observations": 30,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.9892695282,
+            "median": 1000000.0173953616,
+            "max": 1000000.1227006282
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999999892695282,
+            "median": 1.0000000173953616,
+            "max": 1.0000001227006283
+          },
+          "total_calls_per_second": {
+            "min": 1999999.9785390564,
+            "median": 2000000.0002665955,
+            "max": 2000000.197680638
+          },
+          "fairness": {
+            "min": 0.9999999999999996,
+            "median": 0.9999999999999999,
+            "max": 1.0000000000000002
+          },
+          "late_batches": 0,
+          "measured_batches": 40920,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012313479,
+            "median": 13.014848066,
+            "max": 13.015872251
+          },
+          "leading_margin_seconds": {
+            "min": 1.000016302,
+            "median": 1.00001739,
+            "max": 1.000035017
+          },
+          "trailing_margin_seconds": {
+            "min": 0.988091038,
+            "median": 0.989134391,
+            "max": 0.991666815
+          }
+        },
+        {
+          "scenario": "monotonic_raw/readers-3/rate-0",
+          "windows": 15,
+          "reader_observations": 45,
+          "actual_calls_per_second_per_reader": {
+            "min": 51047478.64813656,
+            "median": 51489523.649667636,
+            "max": 52122711.10778275
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 153520657.75707746,
+            "median": 154460472.83496943,
+            "max": 155469498.8863197
+          },
+          "fairness": {
+            "min": 0.9999471494130796,
+            "median": 0.9999975402879248,
+            "max": 0.9999998707298091
+          },
+          "late_batches": 0,
+          "measured_batches": 68176,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012708734,
+            "median": 13.014416909,
+            "max": 13.015982372
+          },
+          "leading_margin_seconds": {
+            "min": 1.000015994,
+            "median": 1.000017245,
+            "max": 1.000036136
+          },
+          "trailing_margin_seconds": {
+            "min": 0.984400698,
+            "median": 0.987605042,
+            "max": 0.991599838
+          }
+        },
+        {
+          "scenario": "monotonic_raw/readers-3/rate-1000000",
+          "windows": 15,
+          "reader_observations": 45,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.5991737144,
+            "median": 1000000.0259264203,
+            "max": 1000000.0973073941
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999995991737144,
+            "median": 1.0000000259264203,
+            "max": 1.0000000973073941
+          },
+          "total_calls_per_second": {
+            "min": 2999998.778926117,
+            "median": 2999999.9582111444,
+            "max": 3000000.196747547
+          },
+          "fairness": {
+            "min": 0.9999999999999909,
+            "median": 0.9999999999999998,
+            "max": 1.0000000000000002
+          },
+          "late_batches": 0,
+          "measured_batches": 61380,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012151553,
+            "median": 13.013710951,
+            "max": 13.015980408
+          },
+          "leading_margin_seconds": {
+            "min": 0.999992159,
+            "median": 1.000018182,
+            "max": 1.000031806
+          },
+          "trailing_margin_seconds": {
+            "min": 0.98799914,
+            "median": 0.990271211,
+            "max": 0.991828507
+          }
+        },
+        {
+          "scenario": "monotonic_coarse/readers-1/rate-0",
+          "windows": 15,
+          "reader_observations": 15,
+          "actual_calls_per_second_per_reader": {
+            "min": 244316306.88669,
+            "median": 264638697.26919708,
+            "max": 270351631.758713
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 244316306.88669,
+            "median": 264638697.26919708,
+            "max": 270351631.758713
+          },
+          "fairness": {
+            "min": 1.0,
+            "median": 1.0,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 115109,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012044132,
+            "median": 13.014499887,
+            "max": 13.015874307
+          },
+          "leading_margin_seconds": {
+            "min": 1.000016257,
+            "median": 1.000018078,
+            "max": 1.000023936
+          },
+          "trailing_margin_seconds": {
+            "min": 0.984564193,
+            "median": 0.986644423,
+            "max": 0.989446555
+          }
+        },
+        {
+          "scenario": "monotonic_coarse/readers-1/rate-1000000",
+          "windows": 15,
+          "reader_observations": 15,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.9938683019,
+            "median": 1000000.0217941887,
+            "max": 1000000.344241654
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999999938683019,
+            "median": 1.0000000217941887,
+            "max": 1.000000344241654
+          },
+          "total_calls_per_second": {
+            "min": 999999.9938683019,
+            "median": 1000000.0217941887,
+            "max": 1000000.344241654
+          },
+          "fairness": {
+            "min": 1.0,
+            "median": 1.0,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 20460,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012440371,
+            "median": 13.013594529,
+            "max": 13.015650187
+          },
+          "leading_margin_seconds": {
+            "min": 1.000016335,
+            "median": 1.000017093,
+            "max": 1.000037834
+          },
+          "trailing_margin_seconds": {
+            "min": 0.988330003,
+            "median": 0.990367014,
+            "max": 0.991541965
+          }
+        },
+        {
+          "scenario": "monotonic_coarse/readers-2/rate-0",
+          "windows": 15,
+          "reader_observations": 30,
+          "actual_calls_per_second_per_reader": {
+            "min": 236970357.53260776,
+            "median": 259284449.53910944,
+            "max": 269775627.36173654
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 488728616.1166931,
+            "median": 518507039.6112928,
+            "max": 534147371.9586441
+          },
+          "fairness": {
+            "min": 0.9984195792773978,
+            "median": 0.999520460095667,
+            "max": 0.9999994286838229
+          },
+          "late_batches": 0,
+          "measured_batches": 228301,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012592111,
+            "median": 13.014297188,
+            "max": 13.018462622
+          },
+          "leading_margin_seconds": {
+            "min": 1.00001613,
+            "median": 1.000017986,
+            "max": 1.000044294
+          },
+          "trailing_margin_seconds": {
+            "min": 0.981692054,
+            "median": 0.986776002,
+            "max": 0.990030388
+          }
+        },
+        {
+          "scenario": "monotonic_coarse/readers-2/rate-1000000",
+          "windows": 15,
+          "reader_observations": 30,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.764662812,
+            "median": 1000000.0206944819,
+            "max": 1000000.0620501238
+          },
+          "actual_to_target_ratio": {
+            "min": 0.999999764662812,
+            "median": 1.000000020694482,
+            "max": 1.0000000620501237
+          },
+          "total_calls_per_second": {
+            "min": 1999999.5207945695,
+            "median": 1999999.9998667021,
+            "max": 2000000.0791788888
+          },
+          "fairness": {
+            "min": 0.9999999999999996,
+            "median": 0.9999999999999999,
+            "max": 1.0000000000000002
+          },
+          "late_batches": 0,
+          "measured_batches": 40920,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012087011,
+            "median": 13.014101266,
+            "max": 13.015489672
+          },
+          "leading_margin_seconds": {
+            "min": 1.000016299,
+            "median": 1.00001779,
+            "max": 1.000033548
+          },
+          "trailing_margin_seconds": {
+            "min": 0.988490821,
+            "median": 0.989878068,
+            "max": 0.991895665
+          }
+        },
+        {
+          "scenario": "monotonic_coarse/readers-3/rate-0",
+          "windows": 15,
+          "reader_observations": 45,
+          "actual_calls_per_second_per_reader": {
+            "min": 196736233.78511295,
+            "median": 261587601.60797617,
+            "max": 271041663.2085392
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 719564389.8903924,
+            "median": 779495708.7774979,
+            "max": 802436658.59931
+          },
+          "fairness": {
+            "min": 0.9830567995736409,
+            "median": 0.9996844984421662,
+            "max": 0.9999975259649609
+          },
+          "late_batches": 0,
+          "measured_batches": 340376,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012196738,
+            "median": 13.013211408,
+            "max": 13.015682158
+          },
+          "leading_margin_seconds": {
+            "min": 1.000016394,
+            "median": 1.000017023,
+            "max": 1.00271074
+          },
+          "trailing_margin_seconds": {
+            "min": 0.984263733,
+            "median": 0.986774038,
+            "max": 0.988867086
+          }
+        },
+        {
+          "scenario": "monotonic_coarse/readers-3/rate-1000000",
+          "windows": 15,
+          "reader_observations": 45,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.9731404966,
+            "median": 1000000.0191948818,
+            "max": 1000000.2145428347
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999999731404966,
+            "median": 1.0000000191948817,
+            "max": 1.0000002145428346
+          },
+          "total_calls_per_second": {
+            "min": 2999999.9192215432,
+            "median": 2999999.9396161037,
+            "max": 3000000.4880699273
+          },
+          "fairness": {
+            "min": 0.9999999999999984,
+            "median": 0.9999999999999996,
+            "max": 1.0000000000000002
+          },
+          "late_batches": 0,
+          "measured_batches": 61380,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012308244,
+            "median": 13.014714009,
+            "max": 13.015988367
+          },
+          "leading_margin_seconds": {
+            "min": 1.000016289,
+            "median": 1.000018822,
+            "max": 1.000031298
+          },
+          "trailing_margin_seconds": {
+            "min": 0.987987291,
+            "median": 0.989268829,
+            "max": 0.99167171
+          }
+        }
+      ],
+      "sequence_diagnostics": [
+        {
+          "backend": "vkso",
+          "reader": "hres_protocol",
+          "completed": "100000000",
+          "retries": "5411",
+          "odd_seq": "5033",
+          "changed_seq": "378",
+          "retries_per_million": "54.110000000",
+          "cycles_per_read": "45.157748"
+        },
+        {
+          "backend": "vkso",
+          "reader": "raw_protocol",
+          "completed": "100000000",
+          "retries": "4778",
+          "odd_seq": "4403",
+          "changed_seq": "375",
+          "retries_per_million": "47.780000000",
+          "cycles_per_read": "45.157922"
+        }
+      ]
+    },
+    {
+      "method": "compact-split",
+      "normalized_reader_values": 2160,
+      "reader_files": 270,
+      "scenarios": [
+        {
+          "scenario": "monotonic/readers-1/rate-0",
+          "windows": 15,
+          "reader_observations": 15,
+          "actual_calls_per_second_per_reader": {
+            "min": 50398466.67789739,
+            "median": 52629884.759318955,
+            "max": 52685102.672559805
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 50398466.67789739,
+            "median": 52629884.759318955,
+            "max": 52685102.672559805
+          },
+          "fairness": {
+            "min": 1.0,
+            "median": 1.0,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 23112,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012339239,
+            "median": 13.014440286,
+            "max": 13.0158938
+          },
+          "leading_margin_seconds": {
+            "min": 1.000023939,
+            "median": 1.000032606,
+            "max": 1.000042711
+          },
+          "trailing_margin_seconds": {
+            "min": 0.985840224,
+            "median": 0.991488836,
+            "max": 0.995993724
+          }
+        },
+        {
+          "scenario": "monotonic/readers-1/rate-1000000",
+          "windows": 15,
+          "reader_observations": 15,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.9364836084,
+            "median": 1000000.041788858,
+            "max": 1000000.1748200785
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999999364836084,
+            "median": 1.000000041788858,
+            "max": 1.0000001748200786
+          },
+          "total_calls_per_second": {
+            "min": 999999.9364836084,
+            "median": 1000000.041788858,
+            "max": 1000000.1748200785
+          },
+          "fairness": {
+            "min": 1.0,
+            "median": 1.0,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 20460,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.01211913,
+            "median": 13.014060187,
+            "max": 13.019248133
+          },
+          "leading_margin_seconds": {
+            "min": 1.000025667,
+            "median": 1.000033467,
+            "max": 1.000281501
+          },
+          "trailing_margin_seconds": {
+            "min": 0.984721952,
+            "median": 0.9899076,
+            "max": 0.991844839
+          }
+        },
+        {
+          "scenario": "monotonic/readers-2/rate-0",
+          "windows": 15,
+          "reader_observations": 30,
+          "actual_calls_per_second_per_reader": {
+            "min": 51195223.44584599,
+            "median": 52676190.1937601,
+            "max": 52687306.41256468
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 103871538.772309,
+            "median": 105294516.87180407,
+            "max": 105372242.12042457
+          },
+          "fairness": {
+            "min": 0.9997937554378172,
+            "median": 0.9999997282924891,
+            "max": 0.9999999999874585
+          },
+          "late_batches": 0,
+          "measured_batches": 46281,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012156761,
+            "median": 13.015023238,
+            "max": 13.016309632
+          },
+          "leading_margin_seconds": {
+            "min": 1.00002406,
+            "median": 1.000030562,
+            "max": 1.000054011
+          },
+          "trailing_margin_seconds": {
+            "min": 0.984963975,
+            "median": 0.987907495,
+            "max": 0.992854189
+          }
+        },
+        {
+          "scenario": "monotonic/readers-2/rate-1000000",
+          "windows": 15,
+          "reader_observations": 30,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.892561995,
+            "median": 1000000.0374566796,
+            "max": 1000001.1114381854
+          },
+          "actual_to_target_ratio": {
+            "min": 0.999999892561995,
+            "median": 1.0000000374566795,
+            "max": 1.0000011114381855
+          },
+          "total_calls_per_second": {
+            "min": 1999999.7800586752,
+            "median": 2000000.0605171972,
+            "max": 2000002.1795544946
+          },
+          "fairness": {
+            "min": 0.9999999999999991,
+            "median": 0.9999999999999999,
+            "max": 1.0000000000000002
+          },
+          "late_batches": 0,
+          "measured_batches": 40920,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012039456,
+            "median": 13.01358366,
+            "max": 13.018885901
+          },
+          "leading_margin_seconds": {
+            "min": 1.00002384,
+            "median": 1.000032646,
+            "max": 1.000044863
+          },
+          "trailing_margin_seconds": {
+            "min": 0.985087534,
+            "median": 0.990371168,
+            "max": 0.991928164
+          }
+        },
+        {
+          "scenario": "monotonic/readers-3/rate-0",
+          "windows": 15,
+          "reader_observations": 45,
+          "actual_calls_per_second_per_reader": {
+            "min": 51000616.59779444,
+            "median": 52619101.34989232,
+            "max": 52687699.71227586
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 154870626.55079752,
+            "median": 156975783.92604086,
+            "max": 158026243.29474825
+          },
+          "fairness": {
+            "min": 0.9998649319947844,
+            "median": 0.9999131505593778,
+            "max": 0.9999999982175412
+          },
+          "late_batches": 0,
+          "measured_batches": 69267,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012110415,
+            "median": 13.015160069,
+            "max": 13.022725127
+          },
+          "leading_margin_seconds": {
+            "min": 1.000024979,
+            "median": 1.000032126,
+            "max": 1.000041315
+          },
+          "trailing_margin_seconds": {
+            "min": 0.982850587,
+            "median": 0.98796772,
+            "max": 0.992366931
+          }
+        },
+        {
+          "scenario": "monotonic/readers-3/rate-1000000",
+          "windows": 15,
+          "reader_observations": 45,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.959677421,
+            "median": 1000000.0417222092,
+            "max": 1000000.2032791668
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999999596774211,
+            "median": 1.0000000417222092,
+            "max": 1.0000002032791668
+          },
+          "total_calls_per_second": {
+            "min": 2999999.8266462376,
+            "median": 3000000.0115969074,
+            "max": 3000000.558851077
+          },
+          "fairness": {
+            "min": 0.9999999999999991,
+            "median": 0.9999999999999996,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 61380,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012094261,
+            "median": 13.013682896,
+            "max": 13.015893546
+          },
+          "leading_margin_seconds": {
+            "min": 1.000027479,
+            "median": 1.000033115,
+            "max": 1.000036759
+          },
+          "trailing_margin_seconds": {
+            "min": 0.988073606,
+            "median": 0.990283436,
+            "max": 0.99187043
+          }
+        },
+        {
+          "scenario": "monotonic_raw/readers-1/rate-0",
+          "windows": 15,
+          "reader_observations": 15,
+          "actual_calls_per_second_per_reader": {
+            "min": 51235707.65978788,
+            "median": 51377832.228211775,
+            "max": 52097567.67865158
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 51235707.65978788,
+            "median": 51377832.228211775,
+            "max": 52097567.67865158
+          },
+          "fairness": {
+            "min": 1.0,
+            "median": 1.0,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 22716,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012251038,
+            "median": 13.013857894,
+            "max": 13.018034465
+          },
+          "leading_margin_seconds": {
+            "min": 1.000025895,
+            "median": 1.000031811,
+            "max": 1.000042621
+          },
+          "trailing_margin_seconds": {
+            "min": 0.985852374,
+            "median": 0.991386183,
+            "max": 0.996527817
+          }
+        },
+        {
+          "scenario": "monotonic_raw/readers-1/rate-1000000",
+          "windows": 15,
+          "reader_observations": 15,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.89642763,
+            "median": 1000000.0793121897,
+            "max": 1000000.2078779425
+          },
+          "actual_to_target_ratio": {
+            "min": 0.99999989642763,
+            "median": 1.0000000793121897,
+            "max": 1.0000002078779424
+          },
+          "total_calls_per_second": {
+            "min": 999999.89642763,
+            "median": 1000000.0793121897,
+            "max": 1000000.2078779425
+          },
+          "fairness": {
+            "min": 1.0,
+            "median": 1.0,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 20460,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012026295,
+            "median": 13.014363924,
+            "max": 13.018076656
+          },
+          "leading_margin_seconds": {
+            "min": 1.000002055,
+            "median": 1.000031232,
+            "max": 1.000035117
+          },
+          "trailing_margin_seconds": {
+            "min": 0.985893215,
+            "median": 0.989601067,
+            "max": 0.991943521
+          }
+        },
+        {
+          "scenario": "monotonic_raw/readers-2/rate-0",
+          "windows": 15,
+          "reader_observations": 30,
+          "actual_calls_per_second_per_reader": {
+            "min": 50967859.57600922,
+            "median": 51416183.4480695,
+            "max": 52201754.6642247
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 102449126.04065545,
+            "median": 102848517.35866296,
+            "max": 103621839.41852191
+          },
+          "fairness": {
+            "min": 0.9999419402932015,
+            "median": 0.9999903588411598,
+            "max": 0.9999998630724929
+          },
+          "late_batches": 0,
+          "measured_batches": 45452,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.003964046,
+            "median": 13.01451707,
+            "max": 13.016147249
+          },
+          "leading_margin_seconds": {
+            "min": 1.00002686,
+            "median": 1.000033679,
+            "max": 1.008940698
+          },
+          "trailing_margin_seconds": {
+            "min": 0.984147022,
+            "median": 0.98903084,
+            "max": 0.995639716
+          }
+        },
+        {
+          "scenario": "monotonic_raw/readers-2/rate-1000000",
+          "windows": 15,
+          "reader_observations": 30,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.8161157363,
+            "median": 1000000.0325246612,
+            "max": 1000001.7238099563
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999998161157363,
+            "median": 1.0000000325246612,
+            "max": 1.0000017238099563
+          },
+          "total_calls_per_second": {
+            "min": 1999999.6322314725,
+            "median": 2000000.047720609,
+            "max": 2000003.423359632
+          },
+          "fairness": {
+            "min": 0.9999999999999994,
+            "median": 1.0,
+            "max": 1.0000000000000002
+          },
+          "late_batches": 0,
+          "measured_batches": 40920,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012246997,
+            "median": 13.014211002,
+            "max": 13.018565791
+          },
+          "leading_margin_seconds": {
+            "min": 1.000026298,
+            "median": 1.000032228,
+            "max": 1.000036196
+          },
+          "trailing_margin_seconds": {
+            "min": 0.985400482,
+            "median": 0.989762509,
+            "max": 0.991720341
+          }
+        },
+        {
+          "scenario": "monotonic_raw/readers-3/rate-0",
+          "windows": 15,
+          "reader_observations": 45,
+          "actual_calls_per_second_per_reader": {
+            "min": 50925606.30710334,
+            "median": 51477255.30074411,
+            "max": 52187423.93133822
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 154022780.46551114,
+            "median": 154371808.0035961,
+            "max": 155044449.6161054
+          },
+          "fairness": {
+            "min": 0.9999534582030596,
+            "median": 0.9999976493805809,
+            "max": 0.9999994898628934
+          },
+          "late_batches": 0,
+          "measured_batches": 68175,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012193692,
+            "median": 13.014727173,
+            "max": 13.027762279
+          },
+          "leading_margin_seconds": {
+            "min": 1.000022196,
+            "median": 1.000031972,
+            "max": 1.002191775
+          },
+          "trailing_margin_seconds": {
+            "min": 0.973287289,
+            "median": 0.986756053,
+            "max": 0.99161902
+          }
+        },
+        {
+          "scenario": "monotonic_raw/readers-3/rate-1000000",
+          "windows": 15,
+          "reader_observations": 45,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.873433767,
+            "median": 1000000.0481205035,
+            "max": 1000000.526259941
+          },
+          "actual_to_target_ratio": {
+            "min": 0.999999873433767,
+            "median": 1.0000000481205036,
+            "max": 1.000000526259941
+          },
+          "total_calls_per_second": {
+            "min": 2999999.620301301,
+            "median": 2999999.9976006397,
+            "max": 3000001.4554125965
+          },
+          "fairness": {
+            "min": 0.9999999999999984,
+            "median": 0.9999999999999996,
+            "max": 1.0000000000000002
+          },
+          "late_batches": 0,
+          "measured_batches": 61380,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012361808,
+            "median": 13.013549071,
+            "max": 13.015095312
+          },
+          "leading_margin_seconds": {
+            "min": 1.000018873,
+            "median": 1.000033043,
+            "max": 1.000037028
+          },
+          "trailing_margin_seconds": {
+            "min": 0.988869121,
+            "median": 0.990419826,
+            "max": 0.991601502
+          }
+        },
+        {
+          "scenario": "monotonic_coarse/readers-1/rate-0",
+          "windows": 15,
+          "reader_observations": 15,
+          "actual_calls_per_second_per_reader": {
+            "min": 210866604.47075385,
+            "median": 264165874.6808486,
+            "max": 269603767.5885195
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 210866604.47075385,
+            "median": 264165874.6808486,
+            "max": 269603767.5885195
+          },
+          "fairness": {
+            "min": 1.0,
+            "median": 1.0,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 114099,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012274767,
+            "median": 13.014058636,
+            "max": 13.015779579
+          },
+          "leading_margin_seconds": {
+            "min": 1.000006269,
+            "median": 1.000033206,
+            "max": 1.000041833
+          },
+          "trailing_margin_seconds": {
+            "min": 0.98547152,
+            "median": 0.986747273,
+            "max": 0.98931602
+          }
+        },
+        {
+          "scenario": "monotonic_coarse/readers-1/rate-1000000",
+          "windows": 15,
+          "reader_observations": 15,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.9894028261,
+            "median": 1000000.0305251942,
+            "max": 1000000.0758464467
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999999894028261,
+            "median": 1.0000000305251942,
+            "max": 1.0000000758464467
+          },
+          "total_calls_per_second": {
+            "min": 999999.9894028261,
+            "median": 1000000.0305251942,
+            "max": 1000000.0758464467
+          },
+          "fairness": {
+            "min": 1.0,
+            "median": 1.0,
+            "max": 1.0
+          },
+          "late_batches": 0,
+          "measured_batches": 20460,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012176303,
+            "median": 13.013290866,
+            "max": 13.017146989
+          },
+          "leading_margin_seconds": {
+            "min": 1.000027248,
+            "median": 1.000033299,
+            "max": 1.000036513
+          },
+          "trailing_margin_seconds": {
+            "min": 0.986825847,
+            "median": 0.990675005,
+            "max": 0.99179591
+          }
+        },
+        {
+          "scenario": "monotonic_coarse/readers-2/rate-0",
+          "windows": 15,
+          "reader_observations": 30,
+          "actual_calls_per_second_per_reader": {
+            "min": 245030919.79890162,
+            "median": 256368933.84665608,
+            "max": 269865313.4869158
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 501967243.0995224,
+            "median": 513206779.4969132,
+            "max": 525588025.51117647
+          },
+          "fairness": {
+            "min": 0.9992785252071326,
+            "median": 0.9997905980496978,
+            "max": 0.9999999873175758
+          },
+          "late_batches": 0,
+          "measured_batches": 227098,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.011963104,
+            "median": 13.014035373,
+            "max": 13.01927596
+          },
+          "leading_margin_seconds": {
+            "min": 1.000025957,
+            "median": 1.000033646,
+            "max": 1.001285122
+          },
+          "trailing_margin_seconds": {
+            "min": 0.981215113,
+            "median": 0.986759928,
+            "max": 0.988611991
+          }
+        },
+        {
+          "scenario": "monotonic_coarse/readers-2/rate-1000000",
+          "windows": 15,
+          "reader_observations": 30,
+          "actual_calls_per_second_per_reader": {
+            "min": 999999.990002666,
+            "median": 1000000.0434550806,
+            "max": 1000000.2138096965
+          },
+          "actual_to_target_ratio": {
+            "min": 0.999999990002666,
+            "median": 1.0000000434550804,
+            "max": 1.0000002138096964
+          },
+          "total_calls_per_second": {
+            "min": 1999999.970141296,
+            "median": 2000000.0494534804,
+            "max": 2000000.3810984464
+          },
+          "fairness": {
+            "min": 0.9999999999999992,
+            "median": 0.9999999999999999,
+            "max": 1.0000000000000002
+          },
+          "late_batches": 0,
+          "measured_batches": 40920,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.01231839,
+            "median": 13.014422104,
+            "max": 13.015764629
+          },
+          "leading_margin_seconds": {
+            "min": 1.000024622,
+            "median": 1.000032844,
+            "max": 1.000036747
+          },
+          "trailing_margin_seconds": {
+            "min": 0.988209117,
+            "median": 0.989547031,
+            "max": 0.991646876
+          }
+        },
+        {
+          "scenario": "monotonic_coarse/readers-3/rate-0",
+          "windows": 15,
+          "reader_observations": 45,
+          "actual_calls_per_second_per_reader": {
+            "min": 228325610.16826242,
+            "median": 257374331.82793185,
+            "max": 268904564.28267735
+          },
+          "actual_to_target_ratio": null,
+          "total_calls_per_second": {
+            "min": 736482677.5968895,
+            "median": 767789874.8014765,
+            "max": 789057701.0713629
+          },
+          "fairness": {
+            "min": 0.9966896037157451,
+            "median": 0.999804888941685,
+            "max": 0.9999979221104468
+          },
+          "late_batches": 0,
+          "measured_batches": 339031,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012239048,
+            "median": 13.014380102,
+            "max": 13.015656636
+          },
+          "leading_margin_seconds": {
+            "min": 1.000027861,
+            "median": 1.000034493,
+            "max": 1.000041289
+          },
+          "trailing_margin_seconds": {
+            "min": 0.984451687,
+            "median": 0.986084845,
+            "max": 0.988602113
+          }
+        },
+        {
+          "scenario": "monotonic_coarse/readers-3/rate-1000000",
+          "windows": 15,
+          "reader_observations": 45,
+          "actual_calls_per_second_per_reader": {
+            "min": 999996.8367868655,
+            "median": 1000000.0439216228,
+            "max": 1000000.1424953549
+          },
+          "actual_to_target_ratio": {
+            "min": 0.9999968367868655,
+            "median": 1.0000000439216228,
+            "max": 1.0000001424953548
+          },
+          "total_calls_per_second": {
+            "min": 2999990.5103605962,
+            "median": 3000000.011996801,
+            "max": 3000000.3243135517
+          },
+          "fairness": {
+            "min": 0.9999999999999989,
+            "median": 0.9999999999999998,
+            "max": 1.0000000000000002
+          },
+          "late_batches": 0,
+          "measured_batches": 61380,
+          "observations_with_late_batches": 0,
+          "writer_envelope_seconds": {
+            "min": 13.012047584,
+            "median": 13.014053575,
+            "max": 13.015519363
+          },
+          "leading_margin_seconds": {
+            "min": 1.000025904,
+            "median": 1.000034148,
+            "max": 1.000089055
+          },
+          "trailing_margin_seconds": {
+            "min": 0.988441671,
+            "median": 0.989913957,
+            "max": 0.991919392
+          }
+        }
+      ],
+      "sequence_diagnostics": [
+        {
+          "backend": "vkso",
+          "reader": "hres_protocol",
+          "completed": "100000000",
+          "retries": "6609",
+          "odd_seq": "6228",
+          "changed_seq": "381",
+          "retries_per_million": "66.090000000",
+          "cycles_per_read": "45.157888"
+        },
+        {
+          "backend": "vkso",
+          "reader": "raw_protocol",
+          "completed": "100000000",
+          "retries": "6831",
+          "odd_seq": "6452",
+          "changed_seq": "379",
+          "retries_per_million": "68.310000000",
+          "cycles_per_read": "45.158314"
+        }
+      ]
+    }
+  ],
+  "interpretation": "Rates include conditioning calls. Rate deviations and late batches are retained; ranges describe observations within this boot. Writer timestamps bracket control requests, not exact sample timestamps. ABI/PFN and writer raw audits are separate."
+}

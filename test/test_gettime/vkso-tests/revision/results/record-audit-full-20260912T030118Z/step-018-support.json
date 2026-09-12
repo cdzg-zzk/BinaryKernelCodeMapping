@@ -1,0 +1,26 @@
+{
+  "step": {
+    "index": 18,
+    "block": 4,
+    "role": "update",
+    "backend": "raw",
+    "methods": [
+      "raw"
+    ]
+  },
+  "boot_id": "7839f8eb-81f6-45ef-9429-ffb0443755bc",
+  "methods": [
+    {
+      "method": "raw",
+      "abi": {
+        "pass_records": 51,
+        "path_records": 49,
+        "thread_count": 1,
+        "multiple_cpus_exercised": false,
+        "scope": "default ABI matrix, including namespace exec/setns; event modes are separate"
+      },
+      "footprint": null
+    }
+  ],
+  "scope": "saved ABI and PFN observations in one completed step; no live runtime probes"
+}

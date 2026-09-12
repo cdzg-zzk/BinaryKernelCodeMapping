@@ -87,11 +87,35 @@ Omit `--execute` to print the plan. LZ4 builds both CLIs before its measurement
 phase, runs the original algorithm matrix, and then runs this workflow before
 the same registration is restored. Files appear under each LZ4 deployment's
 `results/cli-workflow/`; the full CLI binaries are included in its artifact
-identity list. Source and adapter builds, active-carrier correctness, and
-full workflow measurements still require execution after the current
-Clocktime campaign. Prepared source or Python validation is not application
-performance evidence.
+identity list. The CLIs now compile; active-carrier correctness and full
+workflow measurements still require an actual registration session.
+Prepared source or functional validation is not application performance evidence.
 
 Before execution, Python/shell syntax, dry build commands, unequal-file
 aggregation fixtures, and the four-position backend rotation were checked.
 These checks do not replace compiling and exercising the actual carrier.
+
+## Build and ordinary-DSO validation — 2026-09-12
+
+After Clocktime stopped, `make -j2` built both complete CLIs successfully.
+The existing Linux-source no-SIMD DSO target also compiled from the actual
+algorithm sources. All 12 complete Silesia files passed both 64 KiB and 1 MiB
+block configurations with the upstream-default user DSO and the Linux-source
+no-SIMD user DSO: 48 input/block/backend cases. Each case checked nonzero
+selected compress/decompress call counts and the selected function's DSO,
+decoded common stock frames, and cross-decoded adapted output with stock CLI.
+Every complete output matched its input. No application performance result
+was taken from these functional invocations.
+
+Records and the exact validation command are under
+`test/evaluation/results/harness-validation-20260912/lz4-cli-ordinary-dsos/`
+from the repository root. The built no-SIMD DSO is preserved there. This
+checks both adapter API signatures through ordinary DSOs; it does not check
+the live registered carrier or its physical backing.
+
+An earlier validation command mistakenly selected `liblz4-nosimd.so` (the
+upstream API) for the kernel-signature mode; the adapter rejected its missing
+`vkso_LZ4_compress_default` symbol before compression. That failed command's
+logs remain in the sibling `lz4-cli/` directory. The corrected validation uses
+`libkernel-userspace-nosimd.so`; the formal workflow already selects that
+library. No adapter or algorithm change was needed.

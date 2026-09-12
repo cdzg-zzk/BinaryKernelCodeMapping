@@ -1,9 +1,19 @@
 # Unattended continuation after Clocktime
 
-Installed and enabled on 2026-09-11:
-`vkso-evaluation-followup.service`. It is currently inactive; no additional
-benchmark is running. The current Clocktime service and its frozen protocol
-were not changed.
+Installed and enabled on 2026-09-11: `vkso-evaluation-followup.service`.
+It triggered after the 20-boot Clocktime campaign completed on 2026-09-12.
+Current terminal state: **failed, MainPID 0, disabled**. It completed coverage
+and all 15 writer audits, then failed before any algorithm build or deployment
+at the initial `git diff HEAD` source-archive command (exit 129, "Not a git
+repository"). The algorithm output contains its plan, with no deployment
+directory; the applicability stage did not run. Original logs and partial
+output remain in `results/post-clocktime-20260911/`.
+
+The existing service disabled itself on entry and will not automatically retry
+on another boot. No service restart, re-enabling or queue expansion has been
+performed. The earlier clarification about this newly installed system-level
+automation remains unanswered; its actual trigger does not constitute additional
+authorization. Clocktime's frozen protocol was unchanged.
 
 At boot, the follow-up unit runs only if the Clocktime campaign completion
 file exists. Its entry point additionally requires the Clocktime service to
@@ -12,7 +22,7 @@ The Clocktime controller already returns to that kernel after collecting and
 summarizing all 20 steps. On entering the follow-up, the service disables
 itself so a later reboot cannot silently repeat the work.
 
-The sequential jobs are:
+The configured sequential jobs were:
 
 1. Complete normalized Clocktime coverage/identity audit.
 2. Raw writer audit of all 15 UPDATE method directories, including counts,

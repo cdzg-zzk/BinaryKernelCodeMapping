@@ -117,8 +117,21 @@ intermittent exit 141 caused by the shell parser closing its input early under
 `pipefail`; its extraction functions now consume the complete input. This fix
 does not change the acceptance criterion or numerical statistics.
 
-Integration with the full group B session, C compilation, live validation,
-and real collection remain pending. Any future figures must identify the
+Integration with the full group B session, registered-Stub validation,
+and formal collection remain pending. Any future figures must identify the
 revised protocol; the new code does not supply missing evidence for the old
 table. Whole-session costs, normal release and the separately planned boundary
 observations remain group B work. This runner has not been added to a service.
+
+## Compiled native-path validation — 2026-09-12
+
+The modified C collector compiled with `-O3 -Wall -Wextra -Werror -std=c11`.
+After the Clocktime service stopped, an actual call to the existing
+`so/libclone_xxh32.so` captured 20 hot-condition native observations in acquisition
+order, all with successful preparation. A second invocation targeting the same
+output file failed and left it byte-identical. Logs and the raw validation file
+are in `test/evaluation/results/harness-validation-20260912/` from the repository
+root. This validates compiled sample capture and exclusive output creation;
+these observations are not a new Native/Stub performance comparison. Registered
+Stub, eviction conditions and full session accounting remain unmeasured by
+this check.

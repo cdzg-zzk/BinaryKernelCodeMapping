@@ -1,0 +1,43 @@
+{
+  "scope": "one completed step: reader CSVs, normalized values and sequence counters",
+  "step": {
+    "index": 0,
+    "block": 0,
+    "role": "read",
+    "backend": "raw",
+    "methods": [
+      "raw"
+    ]
+  },
+  "boot_id": "fdbb2ffe-a0e1-467f-82c6-0d682a57dcb0",
+  "methods": [
+    {
+      "method": "raw",
+      "normalized_reader_values": 713,
+      "reader_files": 8,
+      "sequence_diagnostics": [
+        {
+          "backend": "raw",
+          "reader": "hres_protocol",
+          "completed": "100000000",
+          "retries": "20393",
+          "odd_seq": "20030",
+          "changed_seq": "363",
+          "retries_per_million": "203.930000000",
+          "cycles_per_read": "43.150938"
+        },
+        {
+          "backend": "raw",
+          "reader": "raw_protocol",
+          "completed": "100000000",
+          "retries": "1470",
+          "odd_seq": "1091",
+          "changed_seq": "379",
+          "retries_per_million": "14.700000000",
+          "cycles_per_read": "43.151096"
+        }
+      ]
+    }
+  ],
+  "interpretation": "Rates include conditioning calls. Rate deviations and late batches are retained; ranges describe observations within this boot. Writer timestamps bracket control requests, not exact sample timestamps. ABI/PFN and writer raw audits are separate."
+}

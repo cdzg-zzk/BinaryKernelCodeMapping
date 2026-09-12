@@ -58,7 +58,7 @@ settings actually changed for restoration. The original failure is retained in
 reached `min_perf_pct=100`, `no_turbo=1`, and the `performance` governor. The
 sample allocation and Clocktime implementation are unchanged.
 
-## Formal collection still required
+## Formal collection allocation
 
 The prepared campaign is `results/normal-campaign/plan.json`: five independent
 boots per backend for each of READ and UPDATE, 20 boots in total, with complete
@@ -130,3 +130,63 @@ single-CPU evidence for that check. Historical four-CPU evidence remains in
 `environment.txt` identifies the corresponding Raw/VKSO 5.15.198 image.
 Those historical runs do not include compact-split; their coverage is retained
 under their original build identity. No new multi-CPU test was launched.
+
+## Completed-step record audit — 2026-09-12 01:21 UTC
+
+Both record auditors passed on all 19 completed steps, 000–018. The saved
+JSON reports are in `results/record-audit-20260912T012130Z/`, one reader and
+one support report per step. This short, file-only audit ran on CPU 0 while
+step 019 continued collecting; no benchmark or live mapping probe was started.
+
+The 15 READ and 13 UPDATE method records reconstructed 38,775 normalized reader
+values, all matching the archived measurements. Sequence counts were consistent.
+All audited concurrent writer control envelopes fit inside their reader windows.
+The achieved fixed-rate/target range was 0.9999970703898143–1.0000032182188345;
+no audited reader observation recorded late batches.
+
+All 28 ABI logs had 51 pass records and 49 path records. Each retained the
+single-CPU scope described above. All 18 saved PFN records passed: the declared
+source/user closure union contained three pages for VKSO and five for
+compact-split, with matching same-boot sources and the expected loader permissions.
+
+Step 019, writer raw-record reconstruction and the complete cross-boot performance
+analysis are outside this partial audit. These consistency checks do not establish
+a performance benefit or whole-system memory savings. The frozen collector and
+system services were not modified.
+
+## Full campaign validation — 2026-09-12
+
+All 20 planned boots completed and the controller returned to the original
+5.15.0-119-generic kernel. Coverage checks passed for 60,195 normalized rows.
+The full reader/support audit is saved in
+`results/record-audit-full-20260912T030118Z/`: 43,095 reader values match;
+sequence counts, window containment, 30 default ABI logs and 20 PFN records pass.
+The final step expands the observed fixed-rate/target range to
+0.9999968367868655–1.0000032182188345, with zero late batches. The minimum
+individual-window Jain fairness is 0.9222315542; it is retained in the report.
+
+The automatic follow-up completed all 15 raw writer audits: 4,275 windows,
+13,893,682 samples, no dropped records, and 17,100 normalized writer values
+matching reconstructed statistics. It then stopped at the source-archive step
+before algorithm deployments; see `test/evaluation/FOLLOWUP.md` from the
+repository root. That failure does not invalidate the preceding completed audits.
+
+`report_results.py` regenerated the full 729-row summary, including bootstrap
+intervals, byte for byte. It writes separate tables, boot medians and CPU0-only
+writer sensitivity into `results/normal-analysis/`. All seven principal generated
+tables occur verbatim in the manuscript. The CPU0-only reconstruction changes
+160 values in 40 windows; its largest point-ratio change is 0.001860494.
+All 19 Raw/VKSO writer Mean intervals and all 19 P99 intervals include one
+under both main and sensitivity analyses. This supports reporting uncertainty,
+not the previous stable writer-benefit claim.
+
+The full [result report](NORMAL_RESULTS.md) records reader regressions,
+ordinary kernel API costs, achieved load, fairness, writer boot variation,
+sequence behavior and declared-closure PFNs. Historical footprint and
+no-retpoline evidence retain their original scopes. The campaign collector,
+kernel images, public wrappers and registration implementation were unchanged.
+
+A second run of the final reporter reproduced all 13 derived artifacts byte for
+byte. The updated Evaluation section passed the prose checker with zero issues;
+the full-paper checker only flagged uniform sentence lengths in the unchanged
+bibliography. No citation formatting was altered for that style signal.

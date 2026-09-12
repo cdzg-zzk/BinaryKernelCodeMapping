@@ -1,0 +1,71 @@
+{
+  "scope": "one completed step: reader CSVs, normalized values and sequence counters",
+  "step": {
+    "index": 1,
+    "block": 0,
+    "role": "read",
+    "backend": "vkso",
+    "methods": [
+      "vkso",
+      "compact-split"
+    ]
+  },
+  "boot_id": "449b7895-6107-4b75-8369-7f491013b66f",
+  "methods": [
+    {
+      "method": "vkso",
+      "normalized_reader_values": 713,
+      "reader_files": 8,
+      "sequence_diagnostics": [
+        {
+          "backend": "vkso",
+          "reader": "hres_protocol",
+          "completed": "100000000",
+          "retries": "5411",
+          "odd_seq": "5033",
+          "changed_seq": "378",
+          "retries_per_million": "54.110000000",
+          "cycles_per_read": "45.157930"
+        },
+        {
+          "backend": "vkso",
+          "reader": "raw_protocol",
+          "completed": "100000000",
+          "retries": "6281",
+          "odd_seq": "5906",
+          "changed_seq": "375",
+          "retries_per_million": "62.810000000",
+          "cycles_per_read": "45.158390"
+        }
+      ]
+    },
+    {
+      "method": "compact-split",
+      "normalized_reader_values": 713,
+      "reader_files": 8,
+      "sequence_diagnostics": [
+        {
+          "backend": "vkso",
+          "reader": "hres_protocol",
+          "completed": "100000000",
+          "retries": "8362",
+          "odd_seq": "7985",
+          "changed_seq": "377",
+          "retries_per_million": "83.620000000",
+          "cycles_per_read": "45.157663"
+        },
+        {
+          "backend": "vkso",
+          "reader": "raw_protocol",
+          "completed": "100000000",
+          "retries": "6195",
+          "odd_seq": "5823",
+          "changed_seq": "372",
+          "retries_per_million": "61.950000000",
+          "cycles_per_read": "45.158115"
+        }
+      ]
+    }
+  ],
+  "interpretation": "Rates include conditioning calls. Rate deviations and late batches are retained; ranges describe observations within this boot. Writer timestamps bracket control requests, not exact sample timestamps. ABI/PFN and writer raw audits are separate."
+}

@@ -1,23 +1,23 @@
-本报告评估 VKSO 当前 Evaluation 的证据完整性，并按共同修改对象组织后续工作。更新日期：2026-09-11；原评估基线为 `849ecf6`，实验修订分支为 `experiment/clocktime-evaluation-revision`，Clocktime 无人值守交接基线为 `9a0e3e5`，后续实际执行进展记录在下文。输入为前次评估、[当前完整草稿](../paper/paper_content/Paper%20Draft.md)、已有实验归档，以及新增的 [Clocktime 实验说明](../test/test_gettime/vkso-tests/revision/README.md)、[验证记录](../test/test_gettime/vkso-tests/revision/VALIDATION.md)和[采集核查记录](../test/test_gettime/vkso-tests/revision/COLLECTION_NOTES.md)。`paper/paper_draft.md` 是前半部分大纲，不作为当前 Evaluation。前次修订仅更新评估报告与修改规划；目前按用户授权进入实际执行，并逐组更新论文 Evaluation。
+本报告评估 VKSO 当前 Evaluation 的证据完整性，并按共同修改对象组织后续工作。更新日期：2026-09-12；原评估基线为 `849ecf6`，实验修订分支为 `experiment/clocktime-evaluation-revision`，Clocktime 无人值守交接基线为 `9a0e3e5`，后续实际执行进展记录在下文。输入为前次评估、[当前完整草稿](../paper/paper_content/Paper%20Draft.md)、已有实验归档，以及新增的 [Clocktime 实验说明](../test/test_gettime/vkso-tests/revision/README.md)、[验证记录](../test/test_gettime/vkso-tests/revision/VALIDATION.md)和[采集核查记录](../test/test_gettime/vkso-tests/revision/COLLECTION_NOTES.md)。`paper/paper_draft.md` 是前半部分大纲，不作为当前 Evaluation。前次修订仅更新评估报告与修改规划；目前按用户授权进入实际执行，并逐组更新论文 Evaluation。
 
-**更新结论：Clocktime 的测量工具和对照设计已补齐一批缺口，正式证据仍在采集；整篇 Evaluation 的适用范围、装载成本、净内存和真实使用成本仍需分别闭合。** Clocktime 修订集中在新增 `revision/` 实验目录，没有修改其核心算法、公共 wrapper 或页面注册实现。后续 C/F 工作已修正算法报告及正文的重复单位，尚未用新数据替换旧性能表。因此，应把“实验方法已修订”“功能检查已通过”“正式数据已完成并支持结论”分开，不能把正在运行的实验写成已证明的性能收益。
+**更新结论：Clocktime 完整跨启动数据支持代码共享和具体入口成本的报告，但不支持稳定降低 writer 平均与长尾的概括。** 本轮没有修改 Clocktime 核心算法、公共 wrapper 或页面注册实现。公开 READ 的 20 项等权平均开销为 0.922%，短入口和普通内核 coarse reader 存在可见代价。整篇 Evaluation 的适用范围、装载成本、净内存和真实应用成本仍需 B–E 的实际工作闭合，不能将 A 的完成视为整篇 Evaluation 完成。
 
 评估的目的，是回答：哪些 resident kernel computations 可以复用；真正复用了哪些物理页、维护量减少多少；建立与释放成本是多少；用户端和原有内核使用者分别付出什么代价；这些结论覆盖哪些输入、构建和运行条件。性能接近、收益为零或出现退化都应如实进入结论。已有正确性证据直接复用，只补与具体主张相关的缺口。
 
-**本次状态快照（2026-09-11 16:36 UTC）：** `normal-campaign` 的 20 项计划中，前 11 项有完成记录，第 12 项仍未完成；整轮完成标记尚未生成。这是落盘进度，不等于前 11 项已完成全面原始数据审计，更不等于整轮验收。实验已交给 systemd 无人值守执行，运行方法见 [交接说明](../test/test_gettime/vkso-tests/revision/AUTONOMOUS_RUN.md)。本报告不承担持续监测。
+**本次状态快照（2026-09-12）：** Clocktime 的 20 项采集全部完成，服务 inactive，机器恢复 `5.15.0-119-generic`。60,195 个标准化值覆盖完整，43,095 个 reader 值和 17,100 个 writer 值均从原始记录重算一致，30 份 ABI 与 20 份 PFN 记录通过核验。729 项比较及 bootstrap 区间逐字节重现。已生成[三方法结果报告](../test/test_gettime/vkso-tests/revision/NORMAL_RESULTS.md)，并更新正文 setup、表 2、Clocktime 表 15–20 及摘要/结论。Writer 启动间变化较大，撤回稳定降低平均及长尾成本的概括；A 的完整采集、核验和结果解释已完成，其他工作组仍未完成。
 
 | 工作组 | 本轮进展 | 下一步具体交付 |
 | --- | --- | --- |
-| A：Clocktime | 用户/内核 reader、多 reader、完整代码复制对照、PFN 检查及跨启动采集工具已实现；正式采集中 | 完整结果核验、三种方法的性能表、准确的归因结论 |
+| A：Clocktime | 20 次采集、全量原始记录核验、三方法结果报告及正文更新已完成 | 保留 writer 不确定性；如需解释其原因，另定诊断，不追逐有利重复 |
 | B：页面复用与装载 | 已追踪算法注册/恢复调用链；页引用及顺序清理存在，module 引用、完成确认与失败原子性证据有缺口 | 隔离验证当前契约，再完成同一会话的时间/PFN/资源账本；基础修复另行明确 |
 | C：PGOT 与真实算法 | 已核实三算法的部署/进程/轮次关系，修正报告生成器，复算 BCH 对照点；完整部署采集入口已准备 | Clocktime 结束后执行完整部署重复，分析 BCH 及实际 owner 内核成本 |
 | D：适用范围与导出工具 | 已固定 8 个待检查 API 案例，并将 4 个已有集成单列；静态检查/构造记录工具已准备 | 实际检查固定全集，导入既有适配证据，完成分类与可运行性验证 |
-| E：真实应用集成 | 已准备 upstream LZ4 CLI 完整文件压缩/解压接入及采集程序；尚未编译和运行 | 验证真实 carrier 调用与完整输出，再在 C 的注册会话内采集应用结果 |
-| F：论文与结果呈现 | 已修正算法方法段落、表 2 及部署说明；Clocktime 正文仍使用旧单启动数据 | 各类新证据验收后更新结果表，最后同步摘要与结论 |
+| E：真实应用集成 | 完整 CLI 已编译；普通 upstream/同源 DSO 在全 Silesia、两块大小的 48 个功能案例通过 | 验证真实 registered carrier，再在 C 的注册会话内采集应用结果 |
+| F：论文与结果呈现 | 已修正算法重复单位，并用完整 Normal 跨启动数据更新 Clocktime 正文及摘要/结论 | 随 B–E 的实际结果继续更新，再做全文一致性验收 |
 
-**无人值守接续已安装并启用：** `vkso-evaluation-followup.service` 仅在当前 Clocktime 完成标记存在、服务停止且恢复 `5.15.0-119-generic` 后执行。先做完整覆盖核验和 15 个 UPDATE 方法目录的原始 writer 审计，再运行 C/E 的完整部署与应用采集，最后执行 D 的固定案例静态检查/允许的 carrier 构造。详细状态、日志路径和停止条件见[接续说明](../test/evaluation/FOLLOWUP.md)。当前该服务 inactive、MainPID 为 0，没有启动额外 benchmark；它将在当前 20 次启动完成后的普通内核启动中接续，不额外安排重启。任何阶段失败就保留证据、停止后续阶段。该自动序列不代替尚缺的 B、BCH/owner 诊断、D runtime 和最终 F 验收。
+**自动接续的实际终态（2026-09-12）：** 此前启用的 `vkso-evaluation-followup.service` 在 Clocktime 完成后的原内核启动中触发，已完成覆盖核验及全部 15 个 UPDATE 方法目录的 writer 原始记录审计。随后 `algorithm-and-cli-deployments` 在开始构建/部署之前的 `git diff HEAD` 源码归档步骤失败（exit 129）；算法部署和后续 D 检查没有执行。服务按设计在进入时停用，目前 `ActiveState=failed`、`MainPID=0`、`UnitFileState=disabled`，不会在下次启动自动重试。失败日志和原输出目录保留，详见[接续记录](../test/evaluation/FOLLOWUP.md)。
 
-**接续安排待用户确认（2026-09-11）：** 收到操作边界提醒后，已向用户说明上述系统级自动安排，并询问是否取消新增接续、只保留原来的 20 次 Clocktime 实验。当前尚未收到该问题的答复，也未停用该 unit；`inactive` 只表示尚未运行，不表示取消了未来触发。确认前不扩展接续任务或修改系统服务，继续进行已授权的证据核对和文稿修订。
+此前已向用户说明这项新增系统级安排并询问是否取消，未收到明确答复；上述触发是既有配置的实际行为，不视为新的授权。当前不重启或重新启用该服务，不扩展其队列。继续已授权的结果核对、论文修订和普通构建准备；如需再次安排系统级自动执行，须先明确该边界。
 
 各组先核对现有材料，列清剩余修改对象、运行成本和验收产物，再集中实施。新增性能采集先验证完整实现和测量路径，再安排正式重复；启动次数、候选数量和硬件矩阵是针对主张的预算，不是统一门槛。当前已运行的 Clocktime 计划保持原样，不因更新本报告而重启或扩大。若任何组确实需要改动项目基础功能，先报告具体不一致与原因；不能把“补证据”默认变成基础功能重写。
 
@@ -65,9 +65,11 @@
 
 **A 类：Clocktime 整套实验。**
 
+**完成更新（2026-09-12）：** 下列设计与验收要求已由[结果报告](../test/test_gettime/vkso-tests/revision/NORMAL_RESULTS.md)及其原始/派生记录落实。4,275 个 writer 窗口共 13,893,682 样本、无 dropped；131 个非 CPU0 样本保留，CPU0-only 敏感性的最大点比值变化为 0.1861 个百分点。全部 19 个场景的 writer Mean 与 P99 的 Raw/VKSO 95% 区间均包含 1。定速实际值/目标范围为 0.9999968368–1.0000032182，late batches 为零；最小单窗口 Jain fairness 为 0.922232，已保留并报告。新 Normal 表替换旧单启动主表，no-retpoline 原归档保留为诊断。下面带“前次”“已准备”的条目记录设计和阶段证据，当前终态以本段及结果报告为准。
+
 共同修改位置：[新增实验目录](../test/test_gettime/vkso-tests/revision/)及最终结果报告，复用既有 `baremetal/`、`update-bench/`、`functional/`、`code-size/` 的完整实现和证据。本轮已经集中实现采集工具与对照，不再把内核 reader、多 reader、跨启动控制写成待开发项目。核心 Clocktime、公共 wrapper 和页面注册代码未改，后续首先完成现有采集与分析。
 
-[当前草稿](../paper/paper_content/Paper%20Draft.md)第 307 行和[统一性能报告](../test/test_gettime/vkso-tests/VKSO_READ_UPDATE性能报告_20260801.md)第 570 行明确说，每个 backend/build 正式批次仅来自一次启动。31 个 READ rounds、7 个进程、15 个 UPDATE rounds 都不能估计 boot-to-boot 变化。IQR、P10–P90 目前被正确标注为描述统计，但描述统计不能证明“等效”或小于某阈值。
+前次草稿和[旧统一性能报告](../test/test_gettime/vkso-tests/VKSO_READ_UPDATE性能报告_20260801.md)明确将每个 backend/build 的正式批次限定为一次启动；当前草稿已替换为本轮跨启动结果。31 个 READ rounds、7 个进程、15 个 UPDATE rounds 都不能估计 boot-to-boot 变化。IQR、P10–P90 目前被正确标注为描述统计，但描述统计不能证明“等效”或小于某阈值。
 
 新的 Normal 计划已经固定为 READ/UPDATE 两类镜像 × Raw/VKSO 两种 backend × 5 次独立启动，共 20 次；每次 VKSO 启动内测 VKSO 与完整代码复制对照，并交替方法顺序。每方法每次 UPDATE 测 19 场景 × 15 轮，读负载 15 秒、writer 记录其内部 13 秒；整轮预计约 19 小时加重启时间。该数量是本轮已经采用的预算，不是获得可信结果的硬性门槛，也不是经功效分析证明充分的样本量。后续其他组分别估算完整路径的小规模验证与正式采集成本，再决定分配；不直接套用五次启动。本轮保留已冻结分配，不改参数或追加次数来追逐有利结果。
 
@@ -96,6 +98,8 @@ Clocktime 的既有设计同时改变共享计算、snapshot 字段组织、发�
 本类剩余交付包括：所有计划启动的身份/数据覆盖核验、原始 writer 与汇总值一致性、实际速率/late batches/窗口重叠、ABI/sequence/PFN 记录检查，以及最终三方法结果报告。READ 使用不带 writer recorder 的配置，UPDATE/CONCURRENT 使用 recorder；诊断另采。历史 SLOC/符号规模证据对应既有完整实现，新增测试代码不计入产品缩减。已有 PFN 验证在声明闭包中观察到 VKSO 三个唯一页、复制对照五个唯一页；它证明两张代码页共享关系的差别，不代表全系统净节省两页，也不代替 B 类的开销账本。
 
 **reader 原始记录核验已准备：** [独立审计脚本](../test/test_gettime/vkso-tests/revision/audit_reader_records.py)逐个完成启动核对原始 READ/CONCURRENT CSV 与标准化值，重算调用速率、公平性和 kernel cycles，检查批次计数、CPU、读写窗口及 sequence counters。首个物理实验块 steps 000–003 的三方法共 8,619 个 reader 标准化值全部匹配；该块定速实际值/目标范围为 0.9999970704–1.0000032182，late batches 为零。五项测试确认错误身份、计数、窗口和汇总值会被拒绝，并保留合法的不等速负载及 late batches。全量核验和跨启动解释仍待采集结束；ABI/PFN 不在该脚本覆盖范围。详见[验证记录](../test/test_gettime/vkso-tests/revision/VALIDATION.md#reader-record-auditor-validation--2026-09-11)。尚未把该脚本加入待确认处置的自动接续服务。
+
+**归档核验扩展（2026-09-12 01:21 UTC）：** 已在 CPU 0 对全部 19 个完成启动执行 reader 与独立 ABI/PFN 审计，结果保存在 `revision/results/record-audit-20260912T012130Z/`。15 个 READ 方法记录和 13 个 UPDATE 方法记录的 38,775 个 reader 值重算一致，sequence 计数一致；全部已核验并发窗口满足 writer 控制区间包含关系，定速实际值/目标范围仍为 0.9999970704–1.0000032182，late batches 为零。28 份 ABI 日志各有 51 条 PASS 和 49 条路径记录，均只使用一个允许 CPU；18 份 PFN 记录保持 VKSO/compact-split 的声明闭包并集为 3/5 页。这扩展了归档一致性证据，未产生新性能测量，也未覆盖最后一步或原始 writer 记录；正式三方法性能解释仍待完整数据。
 
 **ABI/PFN 记录核验已准备：** [支持记录审计脚本](../test/test_gettime/vkso-tests/revision/audit_support_records.py)已核对同一首块的六份 ABI 日志和四份 PFN 记录：各 ABI 日志的 51 个 pass 记录、49 个 fast/fallback 路径均符合默认模式；两次 VKSO 启动分别重算出共享方法 3 页、复制方法 5 页的声明闭包并集，源页面 PFN 在同启动两方法间一致，记录的 text/state loader 权限分别为 RX/R--。六项测试验证错误状态、页面关系、权限和计数会被拒绝。这些是首块保存记录的核验，不是新运行的 VM/lifetime 测试或全系统净内存结果。
 
@@ -203,9 +207,11 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 
 **E 类：真实应用集成。**
 
+**实际验证更新（2026-09-12）：** 完整 stock/adapted CLI 编译通过；使用 upstream-default 与实际 Linux-source no-SIMD 普通用户 DSO，在全 12 个 Silesia 输入、64 KiB/1 MiB 两种块大小的 48 个案例中验证了真实 API 调用、目标 DSO、公共 stock 压缩输入的解码及 stock 对 adapted 输出的交叉解码，完整输出均匹配。这些是功能验证，不产生正式吞吐结论。Live registered carrier 和 C 的完整部署仍待执行，详见 [LZ4 CLI 验证记录](../test/evaluation/lz4-cli/README.md#build-and-ordinary-dso-validation--2026-09-12)。
+
 **实际执行更新（2026-09-11 17:51 UTC）：** 已选择[完整 LZ4 CLI 文件工作流](../test/evaluation/lz4-cli/README.md)，沿用 upstream 1.9.3 的 CLI、framing、内容校验及文件 I/O，通过独立块压缩/解压接口接入现有 carrier。四个对照为原版 CLI、upstream DSO、同源 Linux DSO 和 kernel-backed DSO；输入为完整 Silesia 文件，64 KiB/1 MiB 独立块，每部署四轮，使四个后端在每个输入/块配置下各占一次运行位置。解压使用相同的原版编码输入，各编码器输出也经原版解码和完整文件校验；调用计数/目标 DSO 验证单独执行，不混入计时。
 
-编译入口、适配层和采集程序已写好，并以 `--with-lz4-workflow` 接入 C 的三次完整 LZ4 部署。Python/脚本语法、计划配置和不等大小文件的聚合计算已检查；为避免干扰 Clocktime，尚未编译或执行真实应用，因此没有新性能结果。该实验测缓存已热、buffered I/O 的完整进程成本，不主张持久化写入吞吐、支持所有 CLI 选项或删除整个应用中的所有原版代码；实际 PFN 关系仍由 B 的观测补齐。
+编译入口、适配层和采集程序已写好，并以 `--with-lz4-workflow` 接入 C 的三次完整 LZ4 部署。Python/脚本语法、计划配置和不等大小文件的聚合计算已检查；当时为避免干扰 Clocktime，未编译或执行真实应用；2026-09-12 已完成上段所列编译和普通 DSO 功能验证，正式性能结果仍待采集。该实验测缓存已热、buffered I/O 的完整进程成本，不主张持久化写入吞吐、支持所有 CLI 选项或删除整个应用中的所有原版代码；实际 PFN 关系仍由 B 的观测补齐。
 
 共同修改对象是一个选定应用的实际调用链与完整工作流。依赖 A 或 C 中选定接口和构建稳定，不需要等待无关类别完成。选定 Clocktime 或 LZ4 等一条集成路线后，集中处理 API/装载接入、正确性和应用测量。
 
@@ -217,7 +223,7 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 
 共同修改位置：[当前完整草稿](../paper/paper_content/Paper%20Draft.md)和各实验的结果报告。每一类完成后更新其对应段落，最后统一全文口径。A–E 的工作分类用于执行，不要求论文也照这个顺序组织。当前已修改正文中可由现有证据确定的算法重复单位、Table 2 和部署说明；数值表保留原归档身份。
 
-本次核对确认，正文 Experimental Setup 仍声明 Clocktime 每 backend/build 仅一次启动，表 13–20 仍来自旧代码规模与性能归档。这些数字保留其原来的证据身份，不替换为未收齐的新数据。A 验收后，集中修改重复单位/隔离核配置、Normal 三方法定义、普通内核 reader 结果、多 reader/固定负载结果、writer action-zero 的统计范围和 PFN 计费说明，并同步摘要、Introduction 与 Conclusion 中“约 ±1%”“不牺牲性能”“降低 UPDATE 长尾”等概括是否仍被支持。
+A 完成后，正文已更新重复单位与隔离核配置、Normal 三方法定义、普通内核 reader、多 reader/固定负载、writer action-zero 统计范围和 PFN 计费说明。表 13–14 保留已有代码规模证据，表 15–20 改用完整新 Normal 数据。摘要、Introduction 与 Conclusion 同步改为约 0.92% 的接口等权平均开销，并保留短入口代价和 writer 启动间变化；不再概括“不牺牲稳态性能”或“稳定降低 UPDATE 长尾”。B–E 的后续证据尚未补齐，F 整体验收仍待完成。
 
 正文的实验组织建议是：先列 RQ 与候选/闭包特征，再用简洁案例说明去重复的实际收益；接着给 setup 和机制成本、真实算法与 baseline、Clocktime 两端性能和并发，最后给边界验证表。正文保留 first-touch 三状态、Data/Func-PGOT、完整 copied closures、LZ4/BCH/XZ 和 Clocktime 的关键结果。work-placement sweep、细 PMU 表、sequence diagnostic 与重叠 SLOC 口径适合附录；此处仅建议，没有移动或删除现有内容。
 
@@ -227,8 +233,8 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 
 本类完成时：每个主张指向相应完整实现的结果；新表和已有表单位一致；正文/附录分工明确；待验证内容与已完成实验分开。原始数据保持原样，不通过修改数据来适配文字。
 
-当前 A 的采集继续无人值守运行，结束后按本报告完成验收和结果解释。D/E 已准备固定候选清单、检查程序及 LZ4 CLI 完整工作流；在当前测量机器上新增 benchmark 或构建任务，留到采集结束后安排。后续选择一组时，以其具体交付为边界推进，例如 B 围绕同一注册会话完成时间/页面/释放账本，C 围绕重复单位和构建对照完成算法表。用户已授权按六组推进；当前先完成不会干扰 Clocktime 计时的源码核对、工具准备和文稿修正，后续采集按依赖顺序执行。
+当前 A 已完成并更新论文；C/E 自动接续在源码归档时失败，未开始算法构建或性能采集。D/E 的固定候选与 CLI 工作流、B 的 first-touch 原始样本工具仍需实际运行验证。后续以共同修改对象推进：B 完成注册会话时间/页面/释放账本，C 验证完整部署并诊断 BCH，D 分类固定候选，E 验证实际应用调用与输出。涉及项目基础功能或新的系统级自动执行时先说明具体方案和授权边界。
 
 前次核查包括：阅读 Evaluation/Implementation/Discussion，核对 first-touch/PGOT/算法/Clocktime 的材料，复算 first-touch 汇总和 BCH 报告点，检查 XZ 重复层次、Clocktime 功能记录及所列公开文献。本次继承这些证据记录，没有重复执行这些核查或将其视为最新数据。
 
-前次报告修订核查了旧评估、草稿、分支改动、Clocktime 协议及功能/采集记录，并纠正工具缺失、归因、PFN 和预算等判断。当前实际执行又完成 C/F 的重复单位核实与修正，检查三算法旧 raw 矩阵、重算 BCH 四组对照点，并重新核对三篇主要论文的 Evaluation；B 已追踪实际注册及恢复路径，记录 module-reference、完成结果和部分失败处理的证据缺口。D/E 的固定案例、完整 CLI 接入与采集入口也已准备，并已安装完成后的自动接续服务。没有更改 Clocktime 冻结协议，没有启动并行 benchmark；最终跨启动性能、完整部署变化和全系统净内存仍待相应证据。
+前次报告修订核查了旧评估、草稿、分支改动、Clocktime 协议及功能/采集记录，并纠正工具缺失、归因、PFN 和预算等判断。当前实际执行又完成 C/F 的重复单位核实与修正，检查三算法旧 raw 矩阵、重算 BCH 四组对照点，并重新核对三篇主要论文的 Evaluation；B 已追踪实际注册及恢复路径，记录 module-reference、完成结果和部分失败处理的证据缺口。D/E 的固定案例、完整 CLI 接入与采集入口也已准备，并已安装完成后的自动接续服务。此后已完成 Clocktime 全量采集、核验和正文更新，未更改冻结协议。完整算法部署变化、实际应用性能和全系统净内存仍待相应证据。
