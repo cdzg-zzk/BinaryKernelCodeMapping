@@ -427,8 +427,8 @@
     },
     {
       "path": "functional-summary.json",
-      "bytes": 4883,
-      "sha256": "ff5dcea98ee93cf1df6962416e6d11d3b2a665c088bd0734ab57cdc8bd4de92b"
+      "bytes": 4900,
+      "sha256": "25e03502f81a09fc2dc3fdbefbe2d6be94423f1338c1e6fa019493337e4a13d9"
     },
     {
       "path": "kernel-package-evidence/apt-package-metadata.txt",

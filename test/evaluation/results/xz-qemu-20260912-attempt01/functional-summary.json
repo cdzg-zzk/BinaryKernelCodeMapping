@@ -55,7 +55,7 @@
   "owner_residency_limitation": {
     "observed_owner_refcnt": 0,
     "module_deps": "only a shim-summary line; no source-module pin record",
-    "test_lifetime": "harness kept owner loaded until fresh PFN restoration proved every declared source mapping removed",
+    "test_lifetime": "harness kept owner loaded until fresh post-restore mappings at each declared file offset no longer used source PFNs",
     "does_not_establish": "automatic owner pinning or partial-registration failure safety"
   },
   "environment": {
