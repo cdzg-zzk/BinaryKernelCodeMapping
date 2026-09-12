@@ -525,6 +525,8 @@ Same-source native DSO 与 kernel-backed DSO 各先完成一次不计时解压�
 
 表 12 的三个输入得到一致的性能趋势：kernel-backed 吞吐量约为 native 的 98%–99%，等权几何平均为 0.9839×，即低 1.61%。各输入的 P10–P90 范围较窄，差异在重复运行中持续存在。这组结果覆盖完整 decoder 的稳态执行，反映 kernel/user build-domain、code layout 和 private helper binding 的组合效果；结合 first-touch 实验，可将它与不进入 steady-state call path 的 page grafting 区分。
 
+另一次独立的 5.15.0-119 guest 会话以全新构建的同一完整实现重做功能验证，覆盖五个接口、两个 backend 和三个完整输入。七轮中共完成 882 次解码，包括每行 warm-up；所有调用的终止状态与输入/输出长度通过检查，84 次完整输出比较和 42 对 guard 检查也通过。单独 loader 进程在工作负载前后均观察到三个 RX text 页和一个只读 rodata 页与 kernel PFN 相同。该[运行时记录](../../test/evaluation/xz-functional-evidence.md)补充了物理共享证据；guest 中的计时字段仅作诊断，表 12 仍使用原物理机测量。
+
 ## Stateful System Case: Consolidating Kernel and vDSO Time Reads
 
 

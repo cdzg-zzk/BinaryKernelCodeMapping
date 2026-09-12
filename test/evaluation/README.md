@@ -27,8 +27,11 @@ compression call: an unchanged direct helper call reaches an unmapped target.
 The [exporter proposal](proposals/export-direct-calls.md) corrects the erroneous
 acceptance but is unapplied and does not complete the binding method.
 The [fresh BCH session](bch-functional-evidence.md) passes the full existing
-correctness matrix and four declared source/user PFN matches. These are
-functional observations; complete deployment performance remains outstanding.
+correctness matrix and four declared source/user PFN matches. The
+[fresh XZ session](xz-functional-evidence.md) also passes all three complete
+inputs with the original benchmark and four PFN matches before and after the
+workload. These are functional observations; complete deployment performance
+remains outstanding.
 
 ## Isolated registration fixture
 

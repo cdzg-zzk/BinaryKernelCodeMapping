@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | A：Clocktime | 20 次采集、全量原始记录核验、三方法结果报告及正文更新已完成 | 保留 writer 不确定性；如需解释其原因，另定诊断，不追逐有利重复 |
 | B：页面复用与装载 | 多进程 PFN、只读/COW、非特权文件操作及正常释放已观察；另复现部分失败仍 ready、内核错误未传回 manager | 实际闭包的时间/资源账本及剩余边界；[统一注册修订方案](../test/evaluation/proposals/registration-transactions.md)待审阅，未实施 |
-| C：PGOT 与真实算法 | 已核实重复层次并复算 BCH 对照点；全新 BCH owner 在精确 119 guest 中通过完整原有功能矩阵及四页 PFN 验证 | 完整部署重复、BCH 性能退化分析及实际 owner 内核成本；核实 LZ4 实际 helper 路径 |
+| C：PGOT 与真实算法 | 已核实重复层次并复算 BCH 对照点；全新 BCH/XZ owner 在精确 119 guest 中通过完整原有功能矩阵及各四页 PFN 验证 | 完整部署重复、BCH 性能退化分析及实际 owner 内核成本；核实 LZ4 实际 helper 路径 |
 | D：适用范围与导出工具 | 固定 8 例的原分析器正在执行；前三例已落盘，hex_dump_to_buffer 仍在展开依赖；缓存方案未获确认、未应用 | 完成固定全集，导入既有适配证据，完成分类与可运行性验证 |
 | E：真实应用集成 | 普通 upstream/同源 DSO 全 Silesia 功能案例通过；真实注册的四页 PFN 匹配；首次 CLI 压缩因未绑定的直接 helper 调用崩溃，GDB 已确认 | 审阅基础导出器方案并完成实际绑定，再验证全矩阵及采集 C 会话内应用性能 |
 | F：论文与结果呈现 | 已修正算法重复单位，并用完整 Normal 跨启动数据更新 Clocktime 正文及摘要/结论 | 随 B–E 的实际结果继续更新，再做全文一致性验收 |
@@ -147,7 +147,7 @@ Clocktime 的声明闭包运行时 PFN 检查已经补入 A；B 应复用其方�
 
 实际执行已进一步追踪 `run.sh → vkso exec → manager replace --hold → nl_recv_msg → batch_process_pages → add_page_to_cache` 以及恢复路径，见[注册证据记录](../test/evaluation/registration-evidence.md)。当前注册代码获取/释放 page references，但请求、备份记录及该调用链没有获取/释放 owner module references；runner 的先恢复后卸载是正常流程约束，不能代替并发 owner lifetime 保证。逐页注册遇错会退出批次，已成功页面留在备份中，callback 只记录错误；manager 没有接收逐请求结果，仍以等待两秒后的流程作为成功。这些代码事实不足以支撑正文中的完整 module-reference、失败原子性和精确完成确认主张。
 
-该结论来自实际入口、数据结构及清理调用链；活跃映射下的引用变化现已由下述隔离会话观察，失败路径仍需验证，不能把源码问题推演成已经观察到的运行时破坏。已向用户报告这一基础实现边界，当前未修改注册协议、页引用或权限代码。若要补齐明确的 module pinning、内核完成结果和事务回滚，应先提交具体实现方案及原因；不能将正常性能采集的成功当作此类契约验收。普通页面权限也不能证明用户无法跳到所有其他可执行地址，控制闭包保证需保持明确的适用范围。
+该结论来自实际入口、数据结构及清理调用链；活跃映射下的引用变化和特定两页计划的部分失败行为已由下述隔离会话观察。其余失败路径仍需验证，不能将已测触发条件推广为任意运行时破坏。已向用户报告这一基础实现边界，当前未修改注册协议、页引用或权限代码。若要补齐明确的 module pinning、内核完成结果和事务回滚，应先提交具体实现方案及原因；不能将正常性能采集的成功当作此类契约验收。普通页面权限也不能证明用户无法跳到所有其他可执行地址，控制闭包保证需保持明确的适用范围。
 
 **隔离执行更新（2026-09-12）：** [完整记录和验证矩阵](../test/evaluation/registration-evidence.md#isolated-runtime-observations-2026-09-12)保存两次独立 KVM guest 的实际结果。使用既有完整 5.15.198 镜像、owner、manager 与页注册模块，将一张 source text page 注册到合成文件偏移。首次会话有三个 reader；第二次增加 UID/GID 65534、无有效 capabilities 的 reader，四个进程均匹配源 PFN。只读 store 触发 SIGSEGV；私有 mprotect(RW) 后写入产生独立 COW，源内容不变。非特权用户对其拥有的 0666 文件在 ready 后进行写打开和 truncate，均得到 EPERM；只读 fd 的 MAP_SHARED 转 RW 得到 EACCES。关闭全部 reader 后恢复原文件内容，随后正常卸载 owner。两次会话的 owner refcnt 全程均为 0，未尝试活跃卸载，也未注入部分注册失败。两台 guest 均结束，无内核 panic/BUG/WARNING，未加载 host 模块。
 
@@ -174,6 +174,8 @@ first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛�
 **C 类：PGOT、LZ4、BCH、XZ 算法实验。**
 
 **新增完整功能验证（2026-09-12）：** BCH 使用全新独立构建的未修改 owner、benchmark 和两个普通 DSO，在精确 `5.15.0-119-generic` 私有 guest 中执行实际 `vkso init/exec`；四个导出入口的原 closure checks 均通过。原有 `--correctness-only` 矩阵完整覆盖 m=13、t=4/8、各 128 vectors、全部 0..t 错误数、三个 backend 与两种 decode 路径，并通过完整输出/错误位置检查。单独 loader 进程观察到三个 RX text 页和一个只读 rodata 页的 user/source PFN 一致；恢复后的四个新映射均不再使用源 PFN，随后模块正常卸载。该会话没有性能采样，不能作为部署重复、BCH 退化解释或净内存结果。证据见 [BCH 功能记录](../test/evaluation/bch-functional-evidence.md)。
+
+**XZ 完整功能与运行时 PFN 已通过：** 另一精确 119 guest 使用全新构建的未修改完整 XZ owner，经过原 checker/exporter 和 DSO audit，对全部 bash、python3、libc.so.6 输入执行原有 CRC32/x86 BCJ/1 MiB LZMA2 工作流。两 backend × 三输入 × 七轮形成 42 行，含 warm-up 共 882 次完整解码、84 次完整输出比较、42 对 guard 检查，五个接口均覆盖；所有检查通过。单独 loader 进程在工作负载前后均确认四个声明页的 source/user PFN 一致，恢复后的四个新映射不再使用源 PFN，再正常卸载模块。原有 benchmark 的 guest 计时字段仅作诊断，未加入正式性能表。Owner refcnt 仍为 0，生命周期和全系统净内存要求仍未闭合。详见 [XZ 功能记录](../test/evaluation/xz-functional-evidence.md)。
 
 **LZ4 helper 口径修正：** 旧归档包含原生内核 memory helpers 所在页，动态重定位记录也不能证明直接调用经过声明的 Shim。SIMD audit 只覆盖四个普通 DSO，旧记录没有实际 helper 执行地址。因此保留 Table 9 数值，撤回“kernel-backed 与同源 no-SIMD 使用相同 REP helpers”的未经验证断言；当前比值作为具体构建/部署整体对照，补采实际调用路径后再解释差异。详见[导出绑定方案的历史证据核对](../test/evaluation/proposals/export-direct-calls.md#historical-memory-helper-claim)。
 
@@ -257,7 +259,7 @@ A 完成后，正文已更新重复单位与隔离核配置、Normal 三方法�
 
 本类完成时：每个主张指向相应完整实现的结果；新表和已有表单位一致；正文/附录分工明确；待验证内容与已完成实验分开。原始数据保持原样，不通过修改数据来适配文字。
 
-当前 A 已完成并更新论文；B 已完成隔离映射、正常释放和部分失败观察，真实闭包的时间/资源账本仍待采集。C 新增 BCH 完整功能及四页 PFN 验证；C/E 新增正式性能部署尚未开始。E 已定位真实 registered LZ4 CLI 的直接调用绑定失败，完整应用组合尚未通过。D 固定全集仍由原分析器执行。后续以共同修改对象推进：B 补全会话与边界证据，C 采集完整部署并诊断 BCH 性能，D 分类固定候选并完善导出判定，E 完成实际绑定、完整功能及应用性能。注册机制、缓存和导出器基础修订均保留具体方案，未经明确确认不实施。
+当前 A 已完成并更新论文；B 已完成隔离映射、正常释放和部分失败观察，真实闭包的时间/资源账本仍待采集。C 新增 BCH/XZ 完整功能及各四页 PFN 验证；C/E 新增正式性能部署尚未开始。E 已定位真实 registered LZ4 CLI 的直接调用绑定失败，完整应用组合尚未通过。D 固定全集仍由原分析器执行。后续以共同修改对象推进：B 补全会话与边界证据，C 采集完整部署并诊断 BCH 性能，D 分类固定候选并完善导出判定，E 完成实际绑定、完整功能及应用性能。注册机制、缓存和导出器基础修订均保留具体方案，未经明确确认不实施。
 
 前次核查包括：阅读 Evaluation/Implementation/Discussion，核对 first-touch/PGOT/算法/Clocktime 的材料，复算 first-touch 汇总和 BCH 报告点，检查 XZ 重复层次、Clocktime 功能记录及所列公开文献。本次继承这些证据记录，没有重复执行这些核查或将其视为最新数据。
 
