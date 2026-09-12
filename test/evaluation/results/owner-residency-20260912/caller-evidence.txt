@@ -1,0 +1,17 @@
+Source ELF: /usr/lib/debug/boot/vmlinux-5.15.0-119-generic
+Caller function: lz4_uncompress
+  bytes: e8 5e 1c 19 00; call target: LZ4_decompress_safe
+Source ELF: /usr/lib/debug/boot/vmlinux-5.15.0-119-generic
+Caller function: squashfs_xz_uncompress
+  bytes: e8 7f 29 1a 00; call target: xz_dec_reset
+  bytes: e8 ca 29 1a 00; call target: xz_dec_run
+Caller module: /lib/modules/5.15.0-119-generic/kernel/crypto/lz4.ko
+  R_X86_64_PLT32 LZ4_decompress_safe
+  R_X86_64_PLT32 LZ4_decompress_safe
+  R_X86_64_PLT32 LZ4_compress_default
+  R_X86_64_PLT32 LZ4_compress_default
+Caller module: /lib/modules/5.15.0-119-generic/kernel/drivers/mtd/nand/nandcore.ko
+  R_X86_64_PLT32 bch_encode
+  R_X86_64_PLT32 bch_decode
+  R_X86_64_PLT32 bch_init
+  R_X86_64_PLT32 bch_encode

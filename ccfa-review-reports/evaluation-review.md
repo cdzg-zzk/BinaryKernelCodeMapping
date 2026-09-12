@@ -133,6 +133,8 @@ Clocktime 的声明闭包运行时 PFN 检查已经补入 A；B 应复用其方�
 
 尤其检查：测试用 `vkso_xz.ko` 等专用 owner module 是原本就提供内核功能的那一份，还是为了实验新增的驻留副本？如果原有内核实现仍保留，必须把两者一起计入净内存；如果其替换了原实现，需说明并验证原内核使用者仍使用完整适配版本。专用模块仍能证明 export 机制，不能自动证明现有内核/用户重复已被消除。Clocktime 的真实替换案例在这方面更有价值。
 
+**Owner 驻留身份已核实：** [驻留证据](../test/evaluation/residency-evidence.md)结合精确 5.15.0-119 配置、debug ELF、原模块重定位及专用 owner 构建记录确认：LZ4 解压和 XZ 的原实现在非 init kernel text 中保留；BCH 与 LZ4 压缩的原实现为可加载模块，配置不能证明历史会话中已经加载。三个 `vkso_*` owner 使用改名 API，runner 没有替换原内核调用者。正文算法节已明确这一实验对象。B 的新增 owner 场景必须计入整个专用模块；“该适配 owner 已驻留”的边际场景仍可单列，但不能把人为预加载等同于原内核本来需要它。目前没有据此推定净内存节省或具体页数。
+
 建议同时报告两个场景：原有目标已经驻留时的边际内存成本，以及为了启用 VKSO 新增加载/常驻目标时的总成本。这样才能评价附件所说的 residency 收益是否免费获得。
 
 结果表字段：`target / native unique pages / VKSO unique pages / shared PFN matches / private bytes or pages / incremental pinned pages / net difference`。无法干净分离的通用基础设施开销单列，而非隐去。跨进程的普通 DSO 本来可以共享文件后备，因此不能将用户 text 节省按进程数线性相乘；还应允许私有支持页随进程数量增长，使小闭包的净收益为零或负。

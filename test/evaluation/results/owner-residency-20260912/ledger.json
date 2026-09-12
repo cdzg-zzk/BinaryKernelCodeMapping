@@ -1,0 +1,546 @@
+{
+  "scope": "Read-only residency classification; no benchmark or module changes",
+  "started_utc": "2026-09-12T04:39:12.665537+00:00",
+  "kernel_package": "5.15.0-119-generic",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/zzk/BinaryKernelCodeMapping",
+        "rev-parse",
+        "HEAD"
+      ],
+      "started_utc": "2026-09-12T04:39:12.665652+00:00",
+      "finished_utc": "2026-09-12T04:39:12.679020+00:00",
+      "exit_code": 0,
+      "selection": "complete commit identity",
+      "output": "ledger.json",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "uname",
+        "-r"
+      ],
+      "started_utc": "2026-09-12T04:39:12.719695+00:00",
+      "finished_utc": "2026-09-12T04:39:12.720777+00:00",
+      "exit_code": 0,
+      "selection": "complete release string",
+      "output": "module-snapshot.txt",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-SW",
+        "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic"
+      ],
+      "started_utc": "2026-09-12T04:39:12.721185+00:00",
+      "finished_utc": "2026-09-12T04:39:15.170204+00:00",
+      "exit_code": 0,
+      "selection": "section index/name/type for .text, .init.text and .rodata only; no addresses",
+      "output": "elf-sections.tsv",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-Ws",
+        "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic"
+      ],
+      "started_utc": "2026-09-12T04:39:15.170598+00:00",
+      "finished_utc": "2026-09-12T04:39:17.953429+00:00",
+      "exit_code": 0,
+      "selection": "FUNC entries whose names are in ledger elf_symbol_selection; linked addresses omitted",
+      "output": "elf-symbols.tsv",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-n",
+        "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic"
+      ],
+      "started_utc": "2026-09-12T04:39:18.161982+00:00",
+      "finished_utc": "2026-09-12T04:39:22.206875+00:00",
+      "exit_code": 0,
+      "selection": "Build ID lines only",
+      "output": "elf-build-identities.txt",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-SW",
+        "/lib/modules/5.15.0-119-generic/kernel/lib/lz4/lz4_compress.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.207737+00:00",
+      "finished_utc": "2026-09-12T04:39:22.210063+00:00",
+      "exit_code": 0,
+      "selection": "section index/name/type for .text, .init.text and .rodata only; no addresses",
+      "output": "elf-sections.tsv",
+      "stderr": "readelf: Warning: Separate debug info file /usr/lib/modules/5.15.0-119-generic/kernel/lib/lz4/lz4_compress.ko found, but CRC does not match - ignoring\n"
+    },
+    {
+      "argv": [
+        "readelf",
+        "-Ws",
+        "/lib/modules/5.15.0-119-generic/kernel/lib/lz4/lz4_compress.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.210159+00:00",
+      "finished_utc": "2026-09-12T04:39:22.212261+00:00",
+      "exit_code": 0,
+      "selection": "FUNC entries whose names are in ledger elf_symbol_selection; linked addresses omitted",
+      "output": "elf-symbols.tsv",
+      "stderr": "readelf: Warning: Separate debug info file /usr/lib/modules/5.15.0-119-generic/kernel/lib/lz4/lz4_compress.ko found, but CRC does not match - ignoring\n"
+    },
+    {
+      "argv": [
+        "readelf",
+        "-n",
+        "/lib/modules/5.15.0-119-generic/kernel/lib/lz4/lz4_compress.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.212324+00:00",
+      "finished_utc": "2026-09-12T04:39:22.214212+00:00",
+      "exit_code": 0,
+      "selection": "Build ID lines only",
+      "output": "elf-build-identities.txt",
+      "stderr": "readelf: Warning: Separate debug info file /usr/lib/modules/5.15.0-119-generic/kernel/lib/lz4/lz4_compress.ko found, but CRC does not match - ignoring\n"
+    },
+    {
+      "argv": [
+        "readelf",
+        "-SW",
+        "/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.214269+00:00",
+      "finished_utc": "2026-09-12T04:39:22.216751+00:00",
+      "exit_code": 0,
+      "selection": "section index/name/type for .text, .init.text and .rodata only; no addresses",
+      "output": "elf-sections.tsv",
+      "stderr": "readelf: Warning: Separate debug info file /usr/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko found, but CRC does not match - ignoring\n"
+    },
+    {
+      "argv": [
+        "readelf",
+        "-Ws",
+        "/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.216836+00:00",
+      "finished_utc": "2026-09-12T04:39:22.218715+00:00",
+      "exit_code": 0,
+      "selection": "FUNC entries whose names are in ledger elf_symbol_selection; linked addresses omitted",
+      "output": "elf-symbols.tsv",
+      "stderr": "readelf: Warning: Separate debug info file /usr/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko found, but CRC does not match - ignoring\n"
+    },
+    {
+      "argv": [
+        "readelf",
+        "-n",
+        "/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.218797+00:00",
+      "finished_utc": "2026-09-12T04:39:22.220644+00:00",
+      "exit_code": 0,
+      "selection": "Build ID lines only",
+      "output": "elf-build-identities.txt",
+      "stderr": "readelf: Warning: Separate debug info file /usr/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko found, but CRC does not match - ignoring\n"
+    },
+    {
+      "argv": [
+        "readelf",
+        "-SW",
+        "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/vkso_lz4.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.220699+00:00",
+      "finished_utc": "2026-09-12T04:39:22.224106+00:00",
+      "exit_code": 0,
+      "selection": "section index/name/type for .text, .init.text and .rodata only; no addresses",
+      "output": "elf-sections.tsv",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-Ws",
+        "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/vkso_lz4.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.224198+00:00",
+      "finished_utc": "2026-09-12T04:39:22.236072+00:00",
+      "exit_code": 0,
+      "selection": "FUNC entries whose names are in ledger elf_symbol_selection; linked addresses omitted",
+      "output": "elf-symbols.tsv",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-n",
+        "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/vkso_lz4.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.236179+00:00",
+      "finished_utc": "2026-09-12T04:39:22.238485+00:00",
+      "exit_code": 0,
+      "selection": "Build ID lines only",
+      "output": "elf-build-identities.txt",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-SW",
+        "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/vkso_bch.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.238545+00:00",
+      "finished_utc": "2026-09-12T04:39:22.244704+00:00",
+      "exit_code": 0,
+      "selection": "section index/name/type for .text, .init.text and .rodata only; no addresses",
+      "output": "elf-sections.tsv",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-Ws",
+        "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/vkso_bch.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.244811+00:00",
+      "finished_utc": "2026-09-12T04:39:22.246506+00:00",
+      "exit_code": 0,
+      "selection": "FUNC entries whose names are in ledger elf_symbol_selection; linked addresses omitted",
+      "output": "elf-symbols.tsv",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-n",
+        "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/vkso_bch.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.246583+00:00",
+      "finished_utc": "2026-09-12T04:39:22.248113+00:00",
+      "exit_code": 0,
+      "selection": "Build ID lines only",
+      "output": "elf-build-identities.txt",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-SW",
+        "/home/zzk/BinaryKernelCodeMapping/test/test_xz/kmod/vkso_xz.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.248166+00:00",
+      "finished_utc": "2026-09-12T04:39:22.258862+00:00",
+      "exit_code": 0,
+      "selection": "section index/name/type for .text, .init.text and .rodata only; no addresses",
+      "output": "elf-sections.tsv",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-Ws",
+        "/home/zzk/BinaryKernelCodeMapping/test/test_xz/kmod/vkso_xz.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.258961+00:00",
+      "finished_utc": "2026-09-12T04:39:22.268723+00:00",
+      "exit_code": 0,
+      "selection": "FUNC entries whose names are in ledger elf_symbol_selection; linked addresses omitted",
+      "output": "elf-symbols.tsv",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-n",
+        "/home/zzk/BinaryKernelCodeMapping/test/test_xz/kmod/vkso_xz.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:22.268800+00:00",
+      "finished_utc": "2026-09-12T04:39:22.272149+00:00",
+      "exit_code": 0,
+      "selection": "Build ID lines only",
+      "output": "elf-build-identities.txt",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "objdump",
+        "-d",
+        "--disassemble=lz4_uncompress",
+        "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic"
+      ],
+      "started_utc": "2026-09-12T04:39:22.272345+00:00",
+      "finished_utc": "2026-09-12T04:39:27.271497+00:00",
+      "exit_code": 0,
+      "selection": "call instructions to ['LZ4_decompress_safe']; only instruction bytes and target names retained",
+      "output": "caller-evidence.txt",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "objdump",
+        "-d",
+        "--disassemble=squashfs_xz_uncompress",
+        "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic"
+      ],
+      "started_utc": "2026-09-12T04:39:27.272042+00:00",
+      "finished_utc": "2026-09-12T04:39:31.927959+00:00",
+      "exit_code": 0,
+      "selection": "call instructions to ['xz_dec_reset', 'xz_dec_run']; only instruction bytes and target names retained",
+      "output": "caller-evidence.txt",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "readelf",
+        "-rW",
+        "/lib/modules/5.15.0-119-generic/kernel/crypto/lz4.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:31.928384+00:00",
+      "finished_utc": "2026-09-12T04:39:31.942469+00:00",
+      "exit_code": 0,
+      "selection": "relocations to ['LZ4_compress_default', 'LZ4_decompress_safe']; only type and target retained",
+      "output": "caller-evidence.txt",
+      "stderr": "readelf: Warning: Separate debug info file /usr/lib/modules/5.15.0-119-generic/kernel/crypto/lz4.ko found, but CRC does not match - ignoring\n"
+    },
+    {
+      "argv": [
+        "readelf",
+        "-rW",
+        "/lib/modules/5.15.0-119-generic/kernel/drivers/mtd/nand/nandcore.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:31.942599+00:00",
+      "finished_utc": "2026-09-12T04:39:31.957335+00:00",
+      "exit_code": 0,
+      "selection": "relocations to ['bch_decode', 'bch_encode', 'bch_init']; only type and target retained",
+      "output": "caller-evidence.txt",
+      "stderr": "readelf: Warning: Separate debug info file /usr/lib/modules/5.15.0-119-generic/kernel/drivers/mtd/nand/nandcore.ko found, but CRC does not match - ignoring\n"
+    },
+    {
+      "argv": [
+        "modinfo",
+        "-F",
+        "vermagic",
+        "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/vkso_lz4.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:58.168826+00:00",
+      "finished_utc": "2026-09-12T04:39:58.182162+00:00",
+      "exit_code": 0,
+      "selection": "complete vermagic field",
+      "output": "owner-module-metadata.txt",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "modinfo",
+        "-F",
+        "vermagic",
+        "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/vkso_bch.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:58.182281+00:00",
+      "finished_utc": "2026-09-12T04:39:58.190743+00:00",
+      "exit_code": 0,
+      "selection": "complete vermagic field",
+      "output": "owner-module-metadata.txt",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "modinfo",
+        "-F",
+        "vermagic",
+        "/home/zzk/BinaryKernelCodeMapping/test/test_xz/kmod/vkso_xz.ko"
+      ],
+      "started_utc": "2026-09-12T04:39:58.190853+00:00",
+      "finished_utc": "2026-09-12T04:39:58.205123+00:00",
+      "exit_code": 0,
+      "selection": "complete vermagic field",
+      "output": "owner-module-metadata.txt",
+      "stderr": ""
+    }
+  ],
+  "inputs": {
+    "/boot/config-5.15.0-119-generic": {
+      "size": 262072,
+      "mtime_ns": 1722608136000000000
+    },
+    "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic": {
+      "size": 753608976,
+      "mtime_ns": 1722608136000000000
+    },
+    "/lib/modules/5.15.0-119-generic/kernel/lib/lz4/lz4_compress.ko": {
+      "size": 32537,
+      "mtime_ns": 1722608136000000000
+    },
+    "/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko": {
+      "size": 40249,
+      "mtime_ns": 1722608136000000000
+    },
+    "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/vkso_lz4.ko": {
+      "size": 494552,
+      "mtime_ns": 1784150139616518562
+    },
+    "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/vkso_bch.ko": {
+      "size": 186848,
+      "mtime_ns": 1784253382478281690
+    },
+    "/home/zzk/BinaryKernelCodeMapping/test/test_xz/kmod/vkso_xz.ko": {
+      "size": 180744,
+      "mtime_ns": 1785979976212250482
+    },
+    "/lib/modules/5.15.0-119-generic/kernel/crypto/lz4.ko": {
+      "size": 10201,
+      "mtime_ns": 1722608136000000000
+    },
+    "/lib/modules/5.15.0-119-generic/kernel/drivers/mtd/nand/nandcore.ko": {
+      "size": 70209,
+      "mtime_ns": 1722608136000000000
+    },
+    "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/Makefile": {
+      "size": 1677,
+      "mtime_ns": 1784149619037354057
+    },
+    "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/Makefile": {
+      "size": 882,
+      "mtime_ns": 1784253095018580822
+    },
+    "/home/zzk/BinaryKernelCodeMapping/test/test_xz/kmod/Makefile": {
+      "size": 1378,
+      "mtime_ns": 1784211805511108442
+    },
+    "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/run.sh": {
+      "size": 7199,
+      "mtime_ns": 1789149122873526479
+    },
+    "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/run.sh": {
+      "size": 4508,
+      "mtime_ns": 1789147351659125278
+    },
+    "/home/zzk/BinaryKernelCodeMapping/test/test_xz/run.sh": {
+      "size": 4520,
+      "mtime_ns": 1785979885613409166
+    },
+    "/usr/src/linux-source-5.15.0/linux-source-5.15.0/lib/Makefile": {
+      "size": 12352,
+      "mtime_ns": 1772803737000000000
+    },
+    "/usr/src/linux-source-5.15.0/linux-source-5.15.0/lib/lz4/Makefile": {
+      "size": 201,
+      "mtime_ns": 1635713590000000000
+    },
+    "/usr/src/linux-source-5.15.0/linux-source-5.15.0/lib/xz/Makefile": {
+      "size": 218,
+      "mtime_ns": 1635713590000000000
+    },
+    "/usr/src/linux-source-5.15.0/linux-source-5.15.0/drivers/mtd/nand/Makefile": {
+      "size": 315,
+      "mtime_ns": 1635713590000000000
+    },
+    "/usr/src/linux-source-5.15.0/linux-source-5.15.0/fs/squashfs/lz4_wrapper.c": {
+      "size": 2957,
+      "mtime_ns": 1635713590000000000
+    },
+    "/usr/src/linux-source-5.15.0/linux-source-5.15.0/fs/squashfs/xz_wrapper.c": {
+      "size": 3847,
+      "mtime_ns": 1635713590000000000
+    },
+    "/usr/src/linux-source-5.15.0/linux-source-5.15.0/crypto/lz4.c": {
+      "size": 3378,
+      "mtime_ns": 1635713590000000000
+    },
+    "/usr/src/linux-source-5.15.0/linux-source-5.15.0/drivers/mtd/nand/ecc-sw-bch.c": {
+      "size": 11423,
+      "mtime_ns": 1635713590000000000
+    },
+    "/lib/modules/5.15.0-119-generic/modules.builtin": {
+      "size": 10466,
+      "mtime_ns": 1722608136000000000
+    }
+  },
+  "limitations": [
+    "Kernel source snippets explain call/build paths; exact package ELF/config evidence controls the classification.",
+    "CONFIG=m and an installed module file establish availability, not runtime residency.",
+    "The module snapshot describes capture time only, not historical benchmark sessions.",
+    "No runtime kernel addresses are captured; ELF rows omit linked addresses too.",
+    "ELF inspection is limited to named symbols, section identities, two caller functions and selected relocations."
+  ],
+  "repository_head": "cd9d51eee29f33dfe3e70480b9243d12bcaf8456",
+  "module_snapshot": {
+    "captured_utc": "2026-09-12T04:39:12.720788+00:00",
+    "source": "/proc/modules",
+    "uname_release": "5.15.0-119-generic",
+    "present_relevant_names": [],
+    "searched_names": [
+      "bch",
+      "lz4",
+      "lz4_compress",
+      "lz4hc",
+      "lz4hc_compress",
+      "vkso_bch",
+      "vkso_lz4",
+      "vkso_xz",
+      "xz_dec_test"
+    ],
+    "omitted_column": "runtime address (column 6)"
+  },
+  "elf_symbol_selection": [
+    "LZ4_compress_default",
+    "LZ4_compress_fast",
+    "LZ4_decompress_fast",
+    "LZ4_decompress_safe",
+    "LZ4_decompress_safe_partial",
+    "bch_decode",
+    "bch_encode",
+    "bch_free",
+    "bch_init",
+    "vkso_LZ4_compress_fast",
+    "vkso_LZ4_decompress_safe",
+    "vkso_bch_decode",
+    "vkso_bch_encode",
+    "vkso_bch_init",
+    "vkso_xz_dec_init",
+    "vkso_xz_dec_run",
+    "xz_dec_end",
+    "xz_dec_init",
+    "xz_dec_reset",
+    "xz_dec_run"
+  ],
+  "elf_symbol_matches": {
+    "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic": [
+      "LZ4_decompress_fast",
+      "LZ4_decompress_safe",
+      "LZ4_decompress_safe_partial",
+      "xz_dec_end",
+      "xz_dec_init",
+      "xz_dec_reset",
+      "xz_dec_run"
+    ],
+    "/lib/modules/5.15.0-119-generic/kernel/lib/lz4/lz4_compress.ko": [
+      "LZ4_compress_default",
+      "LZ4_compress_fast"
+    ],
+    "/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko": [
+      "bch_decode",
+      "bch_encode",
+      "bch_free",
+      "bch_init"
+    ],
+    "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/vkso_lz4.ko": [
+      "vkso_LZ4_compress_fast",
+      "vkso_LZ4_decompress_safe"
+    ],
+    "/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/vkso_bch.ko": [
+      "vkso_bch_decode",
+      "vkso_bch_encode",
+      "vkso_bch_init"
+    ],
+    "/home/zzk/BinaryKernelCodeMapping/test/test_xz/kmod/vkso_xz.ko": [
+      "vkso_xz_dec_init",
+      "vkso_xz_dec_run"
+    ]
+  },
+  "finished_utc": "2026-09-12T04:39:31.999351+00:00",
+  "metadata_append_finished_utc": "2026-09-12T04:39:58.205284+00:00"
+}

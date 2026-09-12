@@ -428,7 +428,9 @@ Work-placement 实验的每个 work unit 是一段作用于同一 64-bit 值的�
 
 ## Same-source Kernel Algorithms
 
-本组实验将控制范围从同域 PGOT transformation 扩展到实际 resident-page export。LZ4 覆盖不同 block sizes 下的压缩与解压；BCH 通过纠错强度、错误数及 decode 阶段改变计算工作量；XZ 则覆盖带状态的完整流解析、解码、过滤和校验。三者共同检验不同 closure shapes 下的同源性能，计时对象均为内存中的算法组件。专用 owner modules 承载可导出实现，系统原有算法仍保留，因此本组衡量导出后的执行成本。
+这组三项 kernel-backed backend 来自独立装载的 `vkso_*` owner，原内核调用目标保持不变。在所用 5.15.0-119 内核中，原 LZ4 解压与 XZ 实现为 built-in，原 BCH 与 LZ4 压缩实现配置为可加载模块。因此，物理页共享的对象是这些专用 owner；该组结果刻画其适配与用户态导出成本。Clocktime 案例进一步检验原有 kernel/vDSO 实现的替换及两侧使用者成本。
+
+本组实验将控制范围从同域 PGOT transformation 扩展到实际 resident-page export。LZ4 覆盖不同 block sizes 下的压缩与解压；BCH 通过纠错强度、错误数及 decode 阶段改变计算工作量；XZ 则覆盖带状态的完整流解析、解码、过滤和校验。三者共同检验不同 closure shapes 下的同源性能，计时对象均为内存中的算法组件。
 
 主对照采用同一 Linux source 及对应适配代码构建的普通 user-space DSO，使算法版本保持一致；独立 upstream/author implementations 提供用户态性能参照。每次完整 runner 执行加载一次 owner module、解析 runtime addresses、检查闭包、构造 sparse DSO 并注册页面，随后在该部署中完成所有 outer rounds，退出时恢复映射并卸载 owner。输出校验、运行时符号地址和 page-map 记录分别检查功能与部署目标。部署与恢复在计时窗口之外，以下结果衡量一次部署内装载后的算法性能。
 

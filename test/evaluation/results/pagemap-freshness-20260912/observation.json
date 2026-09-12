@@ -1,0 +1,14 @@
+{
+  "scope": "ordinary-process pagemap present-bit freshness; no PFN privilege or timing",
+  "uid": 1000,
+  "first_present": true,
+  "second_before_present": false,
+  "second_buffered_after_fault_present": false,
+  "second_pread_after_fault_present": true,
+  "raw_entries_hex": [
+    "0x8180000000000000",
+    "0x80000000000000",
+    "0x80000000000000",
+    "0x8180000000000000"
+  ]
+}

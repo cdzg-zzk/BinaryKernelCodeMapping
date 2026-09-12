@@ -1,0 +1,17 @@
+/usr/lib/debug/boot/vmlinux-5.15.0-119-generic
+Build ID: 822098bf89027e54e3aa301e90cc5b8e5c80f479
+
+/lib/modules/5.15.0-119-generic/kernel/lib/lz4/lz4_compress.ko
+Build ID: 446efbc049e1362e381e62a66fe4f5019f5ce768
+
+/lib/modules/5.15.0-119-generic/kernel/lib/bch.ko
+Build ID: 225fb9b34102335304f722ae5567ea56ccba70c1
+
+/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/vkso_lz4.ko
+Build ID: 6c552ca5bacabc52046762797e9d9333bf4e3ece
+
+/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/vkso_bch.ko
+Build ID: f22822bec4aae87b2e66aab66af44030222bf955
+
+/home/zzk/BinaryKernelCodeMapping/test/test_xz/kmod/vkso_xz.ko
+Build ID: 6ad3dbc8aba738ead380a1e36c2b62ea1ee754cd

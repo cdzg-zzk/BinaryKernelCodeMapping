@@ -1,0 +1,136 @@
+## /home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/Makefile
+1: obj-m += vkso_lz4.o
+2: vkso_lz4-y := lz4_compress.o lz4_decompress.o module_meta.o
+3: 
+4: # Runtime module pages normally rely on ftrace patching the __fentry__ sites.
+5: # The benchmark DSO does not map the ftrace trampoline, so omit those entry
+6: # calls from the two algorithm objects at compile time.
+7: CFLAGS_REMOVE_lz4_compress.o += -pg -mrecord-mcount -mfentry
+8: CFLAGS_REMOVE_lz4_decompress.o += -pg -mrecord-mcount -mfentry
+9: 
+10: # Rename every externally visible LZ4 API so this benchmark module can coexist
+11: # with the running kernel's built-in decompressor and packaged compressor.
+12: ccflags-y += \
+13: 	-mfunction-return=keep \
+14: 	-mindirect-branch=keep \
+15: 	-DLZ4_compress_fast=vkso_LZ4_compress_fast \
+16: 	-DLZ4_compress_default=vkso_LZ4_compress_default \
+17: 	-DLZ4_compress_destSize=vkso_LZ4_compress_destSize \
+18: 	-DLZ4_resetStream=vkso_LZ4_resetStream \
+19: 	-DLZ4_loadDict=vkso_LZ4_loadDict \
+20: 	-DLZ4_saveDict=vkso_LZ4_saveDict \
+21: 	-DLZ4_compress_fast_continue=vkso_LZ4_compress_fast_continue \
+22: 	-DLZ4_decompress_safe=vkso_LZ4_decompress_safe \
+23: 	-DLZ4_decompress_safe_partial=vkso_LZ4_decompress_safe_partial \
+24: 	-DLZ4_decompress_fast=vkso_LZ4_decompress_fast \
+25: 	-DLZ4_decompress_safe_forceExtDict=vkso_LZ4_decompress_safe_forceExtDict \
+26: 	-DLZ4_decompress_safe_doubleDict=vkso_LZ4_decompress_safe_doubleDict \
+27: 	-DLZ4_decompress_fast_doubleDict=vkso_LZ4_decompress_fast_doubleDict \
+28: 	-DLZ4_setStreamDecode=vkso_LZ4_setStreamDecode \
+29: 	-DLZ4_decompress_safe_continue=vkso_LZ4_decompress_safe_continue \
+30: 	-DLZ4_decompress_fast_continue=vkso_LZ4_decompress_fast_continue \
+31: 	-DLZ4_decompress_safe_usingDict=vkso_LZ4_decompress_safe_usingDict \
+32: 	-DLZ4_decompress_fast_usingDict=vkso_LZ4_decompress_fast_usingDict
+## /home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/Makefile
+1: obj-m += vkso_bch.o
+2: vkso_bch-y := bch_impl.o module_meta.o
+3: 
+4: BCH_EXPORT_RENAMES := \
+5: 	-Dbch_init=vkso_bch_init \
+6: 	-Dbch_free=vkso_bch_free \
+7: 	-Dbch_encode=vkso_bch_encode \
+8: 	-Dbch_decode=vkso_bch_decode
+9: 
+10: # The owner module is compiled as reusable user-mode machine code.  Remove
+11: # kernel-only compiler instrumentation from the algorithm object and keep the
+12: # code scalar.  BCH itself contains no SIMD implementation.
+13: ccflags-y += $(BCH_EXPORT_RENAMES) \
+14: 	-D__NO_FORTIFY -fno-stack-protector -fno-sanitize=all -fno-jump-tables \
+15: 	-mno-sse -mno-sse2 -mno-mmx -mno-avx -mno-red-zone \
+16: 	-mfunction-return=keep -mindirect-branch=keep
+17: 
+18: CFLAGS_REMOVE_bch_impl.o += \
+19: 	-pg -mrecord-mcount -mfentry -fstack-protector-strong \
+20: 	-fsanitize=bounds -fsanitize=shift
+21: CFLAGS_bch_impl.o += -fno-sanitize=all
+22: UBSAN_SANITIZE_bch_impl.o := n
+23: CFLAGS_REMOVE_module_meta.o += -pg -mrecord-mcount -mfentry
+## /home/zzk/BinaryKernelCodeMapping/test/test_xz/kmod/Makefile
+1: obj-m += vkso_xz.o
+2: vkso_xz-y := module_meta.o xz_dec_stream.o xz_dec_lzma2.o xz_dec_bcj.o xz_crc32.o
+3: 
+4: XZ_RENAMES := \
+5: 	-Dxz_dec_init=vkso_xz_dec_init \
+6: 	-Dxz_dec_run=vkso_xz_dec_run \
+7: 	-Dxz_dec_reset=vkso_xz_dec_reset \
+8: 	-Dxz_dec_end=vkso_xz_dec_end \
+9: 	-Dxz_dec_lzma2_create=vkso_xz_dec_lzma2_create \
+10: 	-Dxz_dec_lzma2_reset=vkso_xz_dec_lzma2_reset \
+11: 	-Dxz_dec_lzma2_run=vkso_xz_dec_lzma2_run \
+12: 	-Dxz_dec_lzma2_end=vkso_xz_dec_lzma2_end \
+13: 	-Dxz_dec_bcj_create=vkso_xz_dec_bcj_create \
+14: 	-Dxz_dec_bcj_reset=vkso_xz_dec_bcj_reset \
+15: 	-Dxz_dec_bcj_run=vkso_xz_dec_bcj_run \
+16: 	-Dxz_crc32_init=vkso_xz_crc32_init \
+17: 	-Dxz_crc32=vkso_xz_crc32
+18: 
+19: # XZ Embedded has a documented single-call configuration. The benchmark keeps
+20: # the x86 BCJ filter and the decoder's compact internal CRC32 implementation.
+21: ccflags-y += $(XZ_RENAMES) -DXZ_DEC_SINGLE -DXZ_INTERNAL_CRC32=1 \
+22: 	-fno-stack-protector -fno-sanitize=all -fno-jump-tables \
+23: 	-mno-sse -mno-sse2 -mno-mmx -mno-avx -mno-red-zone \
+24: 	-mfunction-return=keep -mindirect-branch=keep
+25: 
+26: XZ_OBJECTS := xz_dec_stream.o xz_dec_lzma2.o xz_dec_bcj.o xz_crc32.o
+27: $(foreach obj,$(XZ_OBJECTS),$(eval CFLAGS_REMOVE_$(obj) += \
+28: 	-pg -mrecord-mcount -mfentry -fstack-protector-strong \
+29: 	-fsanitize=bounds -fsanitize=shift))
+30: $(foreach obj,$(XZ_OBJECTS),$(eval CFLAGS_$(obj) += -fno-sanitize=all))
+31: $(foreach obj,$(XZ_OBJECTS),$(eval UBSAN_SANITIZE_$(obj) := n))
+## /home/zzk/BinaryKernelCodeMapping/test/test_lz4/run.sh [selection: insmod|rmmod|--owner-ko]
+28:         sudo rmmod vkso_lz4 2>/dev/null || true
+81:     sudo rmmod vkso_lz4
+88: sudo insmod "$MODULE"
+152:     --owner-ko "$MODULE"
+## /home/zzk/BinaryKernelCodeMapping/test/test_BCH/run.sh [selection: insmod|rmmod|--owner-ko]
+29:         sudo_cmd rmmod vkso_bch 2>/dev/null || true
+58:     sudo_cmd rmmod vkso_bch
+62: sudo_cmd insmod "$MODULE"
+111:     --owner-ko "$MODULE"
+## /home/zzk/BinaryKernelCodeMapping/test/test_xz/run.sh [selection: insmod|rmmod|--owner-ko]
+22:         sudo rmmod vkso_xz 2>/dev/null || true
+70:     sudo rmmod vkso_xz
+74: sudo insmod "$MODULE"
+117:     --owner-ko "$MODULE"
+## /usr/src/linux-source-5.15.0/linux-source-5.15.0/lib/Makefile [selection: CONFIG_(BCH|LZ4|XZ_DEC)]
+185: obj-$(CONFIG_BCH) += bch.o
+188: obj-$(CONFIG_LZ4_COMPRESS) += lz4/
+189: obj-$(CONFIG_LZ4HC_COMPRESS) += lz4/
+190: obj-$(CONFIG_LZ4_DECOMPRESS) += lz4/
+193: obj-$(CONFIG_XZ_DEC) += xz/
+## /usr/src/linux-source-5.15.0/linux-source-5.15.0/lib/lz4/Makefile [selection: CONFIG_LZ4]
+4: obj-$(CONFIG_LZ4_COMPRESS) += lz4_compress.o
+5: obj-$(CONFIG_LZ4HC_COMPRESS) += lz4hc_compress.o
+6: obj-$(CONFIG_LZ4_DECOMPRESS) += lz4_decompress.o
+## /usr/src/linux-source-5.15.0/linux-source-5.15.0/lib/xz/Makefile [selection: CONFIG_XZ_DEC]
+2: obj-$(CONFIG_XZ_DEC) += xz_dec.o
+4: xz_dec-$(CONFIG_XZ_DEC_BCJ) += xz_dec_bcj.o
+6: obj-$(CONFIG_XZ_DEC_TEST) += xz_dec_test.o
+## /usr/src/linux-source-5.15.0/linux-source-5.15.0/drivers/mtd/nand/Makefile [selection: ecc-sw-bch]
+12: nandcore-$(CONFIG_MTD_NAND_ECC_SW_BCH) += ecc-sw-bch.o
+## /usr/src/linux-source-5.15.0/linux-source-5.15.0/fs/squashfs/lz4_wrapper.c [selection: LZ4_decompress_safe]
+111: 	res = LZ4_decompress_safe(stream->input, stream->output,
+## /usr/src/linux-source-5.15.0/linux-source-5.15.0/fs/squashfs/xz_wrapper.c [selection: xz_dec_(init|run)]
+93: 	stream->state = xz_dec_init(XZ_PREALLOC, comp_opts->dict_size);
+165: 		xz_err = xz_dec_run(stream->state, &stream->buf);
+## /usr/src/linux-source-5.15.0/linux-source-5.15.0/crypto/lz4.c [selection: LZ4_(compress_default|decompress_safe)]
+56: 	int out_len = LZ4_compress_default(src, dst,
+84: 	int out_len = LZ4_decompress_safe(src, dst, slen, *dlen);
+## /usr/src/linux-source-5.15.0/linux-source-5.15.0/drivers/mtd/nand/ecc-sw-bch.c [selection: \bbch_(init|encode|decode)\(]
+30: 	bch_encode(engine_conf->bch, buf, nand->ecc.ctx.conf.step_size, code);
+57: 	count = bch_decode(engine_conf->bch, NULL, step_size, read_ecc,
+120: 	engine_conf->bch = bch_init(m, t, 0, false);
+140: 	bch_encode(engine_conf->bch, erased_page, eccsize,
+## /lib/modules/5.15.0-119-generic/modules.builtin [selection: lib/lz4/ or lib/xz/]
+92: kernel/lib/lz4/lz4_decompress.ko
+94: kernel/lib/xz/xz_dec.ko

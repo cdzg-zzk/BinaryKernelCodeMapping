@@ -1,0 +1,8 @@
+/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/vkso_lz4.ko
+vermagic: 5.15.0-119-generic SMP mod_unload modversions
+
+/home/zzk/BinaryKernelCodeMapping/test/test_BCH/kmod/vkso_bch.ko
+vermagic: 5.15.0-119-generic SMP mod_unload modversions
+
+/home/zzk/BinaryKernelCodeMapping/test/test_xz/kmod/vkso_xz.ko
+vermagic: 5.15.0-119-generic SMP mod_unload modversions
