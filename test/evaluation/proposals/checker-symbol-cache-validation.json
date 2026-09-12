@@ -1,0 +1,58 @@
+{
+  "scope": "unapplied proposal validation; symbol resolver only, not campaign results",
+  "fixture_queries": 40,
+  "image_queries": 9,
+  "query_results": [
+    "xxh32",
+    "xxh32",
+    "sha256",
+    "sha256",
+    "sort",
+    "sort",
+    "get_random_bytes",
+    "get_random_bytes",
+    null
+  ],
+  "original_query_seconds": 35.647345018000124,
+  "indexed_query_seconds": 0.05064835299981496,
+  "queries": [
+    [
+      1,
+      18446744071585583920
+    ],
+    [
+      1,
+      18446744071585584090
+    ],
+    [
+      1,
+      18446744071585556896
+    ],
+    [
+      1,
+      18446744071585557044
+    ],
+    [
+      1,
+      18446744071585472800
+    ],
+    [
+      1,
+      18446744071585472810
+    ],
+    [
+      1,
+      18446744071587574944
+    ],
+    [
+      1,
+      18446744071587574959
+    ],
+    [
+      999,
+      0
+    ]
+  ],
+  "equal": true,
+  "core_source_modified": false
+}

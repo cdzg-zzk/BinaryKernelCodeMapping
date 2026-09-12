@@ -1,0 +1,49 @@
+--- a/kernel_cgd/function_checker/functions_checker.py
++++ b/kernel_cgd/function_checker/functions_checker.py
+@@ -90,9 +90,14 @@
+             raise ValueError(f'[{self.name}] 未找到符号表，文件可能已被 strip。')
+ 
+         self.sym_dict = {}
++        self.function_ranges = {}
++        self.function_lookup_cache = {}
+         for sym in self.symtab.iter_symbols():
+             if sym.name and sym['st_shndx'] != 'SHN_UNDEF':
+                 self.sym_dict[sym.name] = sym
++            if sym['st_info']['type'] == 'STT_FUNC':
++                self.function_ranges.setdefault(sym['st_shndx'], []).append(
++                    (sym['st_value'], sym['st_size'], sym.name))
+ 
+         self.reloc_cache = {}
+ 
+@@ -116,19 +121,18 @@
+         return relocs
+ 
+     def resolve_func_by_offset(self, sec_idx, offset):
+-        for sym in self.symtab.iter_symbols():
+-            if sym['st_info']['type'] != 'STT_FUNC':
+-                continue
+-            if sym['st_shndx'] != sec_idx:
+-                continue
+-
+-            start = sym['st_value']
+-            end = start + sym['st_size']
+-            if sym['st_size'] == 0 and start == offset:
+-                return sym.name
+-            if start <= offset < end:
+-                return sym.name
+-        return None
++        key = (sec_idx, offset)
++        if key in self.function_lookup_cache:
++            return self.function_lookup_cache[key]
++        result = None
++        # Preserve symbol-table order, including overlapping aliases and zero sizes.
++        for start, size, name in self.function_ranges.get(sec_idx, ()):
++            if (size == 0 and start == offset) or start <= offset < start + size:
++                result = name
++                break
++        self.function_lookup_cache[key] = result
++        return result
++
+ 
+ 
+ class AcademicReuseEngine:

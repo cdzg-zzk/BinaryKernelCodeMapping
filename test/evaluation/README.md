@@ -1,8 +1,9 @@
 # Evaluation execution evidence
 
-For the current run, [unattended continuation is already scheduled](FOLLOWUP.md)
-after Clocktime returns to the original kernel. The manual commands below
-describe standalone use; follow the scheduled run's logs for this campaign.
+The Clocktime campaign and its full result audit are complete. The previous
+[automatic follow-up](FOLLOWUP.md) stopped before algorithm deployment and is
+disabled. The manual commands below describe a separate foreground collection;
+they do not enable or restart a service.
 
 This directory implements the grouped work in
 [evaluation-review.md](../../ccfa-review-reports/evaluation-review.md).
@@ -14,8 +15,9 @@ contracts that still need isolated validation.
 
 Group D now has a [fixed candidate set and inspection driver](applicability.md).
 Group E has a [complete LZ4 CLI workflow](lz4-cli/README.md) prepared for the
-same owner-registration sessions as group C. These additions have not been
-built or run on the live carrier while Clocktime is measuring.
+same owner-registration sessions as group C. Both CLIs have compiled and passed
+48 full-input ordinary-DSO functional cases. Live-carrier application validation
+and the complete deployment measurements remain outstanding.
 
 ## Algorithm deployments
 
@@ -30,7 +32,8 @@ Print the plan without building or running anything:
 
 ```sh
 python3 test/evaluation/algorithm_deployments.py \
-  --output test/evaluation/results/algorithm-deployments-20260911
+  --output test/evaluation/results/algorithm-deployments-20260912 \
+  --with-lz4-workflow
 ```
 
 After Clocktime has completed and the machine has returned to
@@ -38,7 +41,8 @@ After Clocktime has completed and the machine has returned to
 
 ```sh
 sudo python3 test/evaluation/algorithm_deployments.py \
-  --output test/evaluation/results/algorithm-deployments-20260911 --execute
+  --output test/evaluation/results/algorithm-deployments-20260912 \
+  --with-lz4-workflow --execute
 ```
 
 The script refuses to run while the Clocktime service is active, on another
@@ -47,6 +51,17 @@ or restart the machine. Each deployment retains its own build, workspace,
 results, full runner log, owner object, boot identity, and normalized
 observations. A failure stops the sequence and preserves its files; there is
 no automatic retry or overwrite. Existing algorithm archives remain intact.
+
+Run this command from the repository owner's terminal after other active
+analysis/measurement jobs finish. It needs module-load/page-registration
+privileges. The current Codex account has no noninteractive sudo credential;
+do not send a password in the conversation. The runner now checks Git access
+before creating the output directory, preserving the original Git refusal if
+source capture fails. No repository trust setting is changed. The local
+`git-config(1)` documentation describes how a normal sudo session retains the
+invoking owner's UID for Git ownership checks; a root system service need not
+have that context. The earlier service failure is consistent with this
+distinction, but has not been independently reproduced under root here.
 
 The initial allocation is three complete deployments per algorithm, all on
 the original algorithm kernel, using the archived full workload sizes:

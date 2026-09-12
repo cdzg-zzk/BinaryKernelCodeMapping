@@ -165,6 +165,8 @@ first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛�
 
 **C 类：PGOT、LZ4、BCH、XZ 算法实验。**
 
+**部署入口更新（2026-09-12）：** 已将 Git 源码归档检查提前到创建 campaign 目录之前，并保留 Git 的原始拒绝原因及实际/仓库 owner UID。普通 owner 会话的归档通过；真实无凭据执行检查在创建目录和模块操作之前被拒绝。当前账户 `sudo -n` 返回需要密码，未启动新模块装载/注册。已复核[前台采集指令](../test/evaluation/README.md#algorithm-deployments)：原 5.15.0-119 内核、CPU 2、三算法各三次完整部署并包含 LZ4 CLI。需要仓库 owner 在其终端通过正常 sudo 会话启动；不重新启用已停用的服务，也不修改 Git trust 或系统权限。
+
 **实际执行更新（2026-09-11 17:23 UTC）：** [算法证据记录](../test/evaluation/algorithm-evidence.md)已列出基线身份、部署与进程边界、现有原始矩阵和 BCH 诊断目标。三份旧 raw 分别核验 210/1,056/42 行，缺行/重复行变体均被拒绝；四份报告重新生成后，五份数值 CSV 与全部 Markdown 数值表保持不变。LZ4/BCH runner 补齐新工作目录初始化，BCH 修正 root 执行时误把 `-v` 当命令的问题；均为实验 harness 改动，未改项目基础功能。
 
 [完整部署入口](../test/evaluation/algorithm_deployments.py)已准备，每算法先安排三次完整部署，保留原始全量配置，按部署块轮换算法顺序，并为每次 owner 装载/注册保留单独目录、boot identity 和逐行重复身份。三次用于检查重新部署敏感性，不能当作独立启动或等效性证明。当前真实服务检查确认 Clocktime 仍 active，入口按预期拒绝启动算法；待采集结束、恢复原算法内核后执行。该入口尚未经完整部署验收，PMU 诊断及实际 owner 内核端对照也尚未完成。
@@ -190,6 +192,10 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 本类完成时：每个结果能定位到 deployment/process/round；同源 baseline、用户实际 baseline 与实际内核执行对照区分清楚；BCH 退化有原始分布及针对性解释；保留 PGOT primitive 和完整 copied closures；算法适配记录交给 D 类直接复用。诊断代码若引入持久运行时修改，正式结果需要在修改后的完整实现上重新采集。
 
 **D 类：适用范围、闭包特征和导出改造。**
+
+**分析器性能方案待确认：** hex_dump_to_buffer 的未裁剪检查已超过 30 分钟，源码定位到直接目标查询反复解析整个 ELF 符号表。[缓存补丁方案](../test/evaluation/proposals/README.md)已准备并通过边界/实际镜像查询对照，尚未应用；已向用户请求允许这项基础分析器调整。保持符号顺序、首匹配及全部判定规则，若获准将保留原记录并在新目录重检固定八例。等待答复期间，原分析器继续运行，不以超时或删减候选替代完整检查。
+
+**执行更新（2026-09-12）：** 已启动全部 8 个固定 API 的普通账户静态检查，输出 `test/evaluation/results/applicability-static-20260912/`；xxh32、crc32_le、sha256 的结果已落盘，完整矩阵仍在执行。[语义核查记录](../test/evaluation/applicability-semantics.md)已区分八例的 caller-owned state、只读依赖、callback 与 kernel-private state。当前 `/proc/kallsyms` 地址均被屏蔽为零，checker 的 runtime 展示列不可用；源码确认其只影响地址展示，静态判定仍使用配置 ELF。该 ELF 的 `.rodata` 带 WA 标志，不能把 checker 的 WRITABLE 标签当作内核运行时可写证据。未构造/注册 carrier，也未改变 checker 或访问限制。
 
 **实际执行更新（2026-09-11 17:51 UTC）：** [固定清单](../test/evaluation/applicability-candidates.json)纳入 `xxh32`、`crc32_le`、`sha256`、`hex_dump_to_buffer`、`string_escape_mem`、`sort`、`rhashtable_insert_slow`、`get_random_bytes` 八个本批待检查 API，按显式输入、只读表、内部闭包、可变输出、callback、同步环境和私有状态等差异选择；LZ4/BCH/XZ/Clocktime 四个已知集成单独作为回顾性案例。该清单是有意选择的分层案例，不能用总成功率估计 Linux 整体可复用比例。“本批待检查”不表示仓库从未探索过 xxHash 或 copied closures。
 

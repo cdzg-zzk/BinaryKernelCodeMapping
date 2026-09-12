@@ -41,6 +41,27 @@ def write_json(path, value):
     path.write_text(json.dumps(value, indent=2) + "\n")
 
 
+def source_snapshot():
+    """Check Git access before creating a campaign or starting a deployment."""
+    def git(*arguments):
+        try:
+            return subprocess.check_output(["git", *arguments], cwd=ROOT,
+                                           stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError as error:
+            detail = error.stderr.decode(errors="replace").strip()
+            raise RuntimeError(
+                f"Git source capture failed before deployment (euid={os.geteuid()}, "
+                f"repository owner uid={ROOT.stat().st_uid}): {detail}. "
+                "Use the repository owner's normal terminal/sudo session; "
+                "repository trust settings are not changed by this runner.") from error
+
+    top = Path(git("rev-parse", "--show-toplevel").decode().strip()).resolve()
+    if top != ROOT:
+        raise RuntimeError(f"expected repository {ROOT}, Git selected {top}")
+    return git("diff", "HEAD", "--", "test/test_lz4", "test/test_BCH", "test/test_xz",
+               "test/evaluation", "vkso", "make_dll", "page_cache_replace")
+
+
 def host_ready(kernel):
     state = subprocess.run(
         ["systemctl", "show", "vkso-clocktime-revision.service",
@@ -156,13 +177,12 @@ def execute(plan, output):
     host_ready(plan["kernel"])
     if plan["cpu"] not in os.sched_getaffinity(0):
         raise RuntimeError("requested benchmark CPU is outside current affinity")
+    changes = source_snapshot()
     if os.geteuid() != 0:
         subprocess.run(["sudo", "-n", "true"], check=True)
     output.mkdir(parents=True, exist_ok=False)
     write_json(output / "plan.json", plan)
-    (output / "source-changes.patch").write_bytes(subprocess.check_output([
-        "git", "diff", "HEAD", "--", "test/test_lz4", "test/test_BCH", "test/test_xz",
-        "test/evaluation", "vkso", "make_dll", "page_cache_replace"], cwd=ROOT))
+    (output / "source-changes.patch").write_bytes(changes)
     for entry in plan["entries"]:
         host_ready(plan["kernel"])
         directory = Path(entry["directory"])
