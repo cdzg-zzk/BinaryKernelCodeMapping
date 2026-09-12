@@ -87,8 +87,10 @@ Omit `--execute` to print the plan. LZ4 builds both CLIs before its measurement
 phase, runs the original algorithm matrix, and then runs this workflow before
 the same registration is restored. Files appear under each LZ4 deployment's
 `results/cli-workflow/`; the full CLI binaries are included in its artifact
-identity list. The CLIs now compile; active-carrier correctness and full
-workflow measurements still require an actual registration session.
+identity list. The CLIs now compile. Actual registered sessions have reached
+the first compression call and failed because an unchanged direct relative
+helper call targets an omitted mapping; see the evidence update below. Full
+registered correctness and workflow measurements remain incomplete.
 Prepared source or functional validation is not application performance evidence.
 
 Before execution, Python/shell syntax, dry build commands, unequal-file
@@ -119,3 +121,19 @@ upstream API) for the kernel-signature mode; the adapter rejected its missing
 logs remain in the sibling `lz4-cli/` directory. The corrected validation uses
 `libkernel-userspace-nosimd.so`; the formal workflow already selects that
 library. No adapter or algorithm change was needed.
+
+## Registered-carrier validation — 2026-09-12
+
+The exact-version private guest ran the full `vkso init/exec` path, including
+runtime KRG, static checks, carrier construction and registration. A separate
+loader process confirmed all four declared source/user PFN matches. The
+complete CLI then failed on its first `dickens`/64 KiB compression call, so
+zero of the 24 registered input/block pairs completed. GDB confirmed that an
+unchanged direct relative call to kernel `memset` reached an unmapped user
+address; the exporter had classified that dependency as a shim import.
+
+The [application evidence note](../lz4-application-evidence.md) preserves the
+six-attempt ledger, actual call-address calculation, build identities,
+mapping observations and cleanup scope. The exporter proposal remains
+unapplied. This failure must be resolved before executing the complete
+registered correctness matrix and the planned performance deployments.

@@ -1,0 +1,1068 @@
+
+test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/vkso_lz4.ko:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000001e50 <LZ4_compress_fast_extState>:
+    1e50:	55                   	push   %rbp
+			52: R_X86_64_PLT32	memmove-0x4
+			285: R_X86_64_PLT32	memcpy-0x4
+			6d9: R_X86_64_PLT32	memcpy-0x4
+			923: R_X86_64_PLT32	memcpy-0x4
+			bec: R_X86_64_32S	.data+0x40
+			c0b: R_X86_64_PLT32	__ubsan_handle_out_of_bounds-0x4
+			d49: R_X86_64_32S	.data
+			d65: R_X86_64_PLT32	__ubsan_handle_out_of_bounds-0x4
+			d8b: R_X86_64_32S	.data+0x20
+			da7: R_X86_64_PLT32	__ubsan_handle_out_of_bounds-0x4
+			1892: R_X86_64_PLT32	memset-0x4
+			1b03: R_X86_64_PLT32	memcpy-0x4
+    1e51:	48 89 e5             	mov    %rsp,%rbp
+    1e54:	41 57                	push   %r15
+    1e56:	41 56                	push   %r14
+    1e58:	41 55                	push   %r13
+    1e5a:	45 89 cd             	mov    %r9d,%r13d
+    1e5d:	41 54                	push   %r12
+    1e5f:	49 89 f4             	mov    %rsi,%r12
+    1e62:	31 f6                	xor    %esi,%esi
+    1e64:	53                   	push   %rbx
+    1e65:	89 cb                	mov    %ecx,%ebx
+    1e67:	48 83 ec 48          	sub    $0x48,%rsp
+    1e6b:	48 89 55 d0          	mov    %rdx,-0x30(%rbp)
+    1e6f:	ba 20 40 00 00       	mov    $0x4020,%edx
+    1e74:	44 89 45 c8          	mov    %r8d,-0x38(%rbp)
+    1e78:	e8 00 00 00 00       	call   1e7d <LZ4_compress_fast_extState+0x2d>
+			1e79: R_X86_64_PLT32	memset-0x4
+    1e7d:	45 85 ed             	test   %r13d,%r13d
+    1e80:	48 89 c7             	mov    %rax,%rdi
+    1e83:	b8 01 00 00 00       	mov    $0x1,%eax
+    1e88:	41 0f 4f c5          	cmovg  %r13d,%eax
+    1e8c:	41 89 c1             	mov    %eax,%r9d
+    1e8f:	81 fb 00 00 00 7e    	cmp    $0x7e000000,%ebx
+    1e95:	0f 87 5a 01 00 00    	ja     1ff5 <LZ4_compress_fast_extState+0x1a5>
+    1e9b:	48 63 d3             	movslq %ebx,%rdx
+    1e9e:	89 d9                	mov    %ebx,%ecx
+    1ea0:	48 69 c2 81 80 80 80 	imul   $0xffffffff80808081,%rdx,%rax
+    1ea7:	c1 f9 1f             	sar    $0x1f,%ecx
+    1eaa:	48 c1 e8 20          	shr    $0x20,%rax
+    1eae:	01 d8                	add    %ebx,%eax
+    1eb0:	c1 f8 07             	sar    $0x7,%eax
+    1eb3:	29 c8                	sub    %ecx,%eax
+    1eb5:	8d 44 03 10          	lea    0x10(%rbx,%rax,1),%eax
+    1eb9:	49 8d 34 14          	lea    (%r12,%rdx,1),%rsi
+    1ebd:	48 89 75 c0          	mov    %rsi,-0x40(%rbp)
+    1ec1:	4c 8d 7e f4          	lea    -0xc(%rsi),%r15
+    1ec5:	48 83 ee 05          	sub    $0x5,%rsi
+    1ec9:	48 89 75 b8          	mov    %rsi,-0x48(%rbp)
+    1ecd:	3b 45 c8             	cmp    -0x38(%rbp),%eax
+    1ed0:	0f 8f 6f 02 00 00    	jg     2145 <LZ4_compress_fast_extState+0x2f5>
+    1ed6:	81 fb 0a 00 01 00    	cmp    $0x1000a,%ebx
+    1edc:	0f 8f 1d 01 00 00    	jg     1fff <LZ4_compress_fast_extState+0x1af>
+    1ee2:	81 fb 00 00 00 7e    	cmp    $0x7e000000,%ebx
+    1ee8:	0f 87 7a 02 00 00    	ja     2168 <LZ4_compress_fast_extState+0x318>
+    1eee:	83 fb 0c             	cmp    $0xc,%ebx
+    1ef1:	0f 8e 49 05 00 00    	jle    2440 <LZ4_compress_fast_extState+0x5f0>
+    1ef7:	48 8b 5d c0          	mov    -0x40(%rbp),%rbx
+    1efb:	31 c9                	xor    %ecx,%ecx
+    1efd:	41 c1 e1 06          	shl    $0x6,%r9d
+    1f01:	49 8d 74 24 01       	lea    0x1(%r12),%rsi
+    1f06:	41 69 04 24 b1 79 37 	imul   $0x9e3779b1,(%r12),%eax
+    1f0d:	9e 
+    1f0e:	44 89 4d c8          	mov    %r9d,-0x38(%rbp)
+    1f12:	4d 89 e5             	mov    %r12,%r13
+    1f15:	48 8d 53 f8          	lea    -0x8(%rbx),%rdx
+    1f19:	48 83 eb 06          	sub    $0x6,%rbx
+    1f1d:	48 89 55 b0          	mov    %rdx,-0x50(%rbp)
+    1f21:	c1 e8 13             	shr    $0x13,%eax
+    1f24:	48 89 5d a8          	mov    %rbx,-0x58(%rbp)
+    1f28:	66 89 0c 47          	mov    %cx,(%rdi,%rax,2)
+    1f2c:	48 8b 45 d0          	mov    -0x30(%rbp),%rax
+    1f30:	45 69 54 24 01 b1 79 	imul   $0x9e3779b1,0x1(%r12),%r10d
+    1f37:	37 9e 
+    1f39:	49 89 c1             	mov    %rax,%r9
+    1f3c:	48 83 c0 01          	add    $0x1,%rax
+    1f40:	41 c1 ea 13          	shr    $0x13,%r10d
+    1f44:	44 8b 5d c8          	mov    -0x38(%rbp),%r11d
+    1f48:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+    1f4e:	eb 29                	jmp    1f79 <LZ4_compress_fast_extState+0x129>
+    1f50:	4a 8d 1c 57          	lea    (%rdi,%r10,2),%rbx
+    1f54:	49 89 d6             	mov    %rdx,%r14
+    1f57:	0f b7 0b             	movzwl (%rbx),%ecx
+    1f5a:	44 69 16 b1 79 37 9e 	imul   $0x9e3779b1,(%rsi),%r10d
+    1f61:	4d 29 e6             	sub    %r12,%r14
+    1f64:	66 44 89 33          	mov    %r14w,(%rbx)
+    1f68:	8b 1a                	mov    (%rdx),%ebx
+    1f6a:	4c 01 e1             	add    %r12,%rcx
+    1f6d:	41 c1 ea 13          	shr    $0x13,%r10d
+    1f71:	39 19                	cmp    %ebx,(%rcx)
+    1f73:	0f 84 62 04 00 00    	je     23db <LZ4_compress_fast_extState+0x58b>
+    1f79:	48 89 f2             	mov    %rsi,%rdx
+    1f7c:	4a 8d 34 06          	lea    (%rsi,%r8,1),%rsi
+    1f80:	45 89 d8             	mov    %r11d,%r8d
+    1f83:	41 83 c3 01          	add    $0x1,%r11d
+    1f87:	41 c1 e8 06          	shr    $0x6,%r8d
+    1f8b:	4c 39 fe             	cmp    %r15,%rsi
+    1f8e:	76 c0                	jbe    1f50 <LZ4_compress_fast_extState+0x100>
+    1f90:	48 8b 5d c0          	mov    -0x40(%rbp),%rbx
+    1f94:	48 89 c1             	mov    %rax,%rcx
+    1f97:	4c 29 eb             	sub    %r13,%rbx
+    1f9a:	48 83 fb 0e          	cmp    $0xe,%rbx
+    1f9e:	0f 86 8f 04 00 00    	jbe    2433 <LZ4_compress_fast_extState+0x5e3>
+    1fa4:	48 8d 43 f1          	lea    -0xf(%rbx),%rax
+    1fa8:	41 c6 01 f0          	movb   $0xf0,(%r9)
+    1fac:	48 3d fe 00 00 00    	cmp    $0xfe,%rax
+    1fb2:	76 16                	jbe    1fca <LZ4_compress_fast_extState+0x17a>
+    1fb4:	48 2d ff 00 00 00    	sub    $0xff,%rax
+    1fba:	48 83 c1 01          	add    $0x1,%rcx
+    1fbe:	c6 41 ff ff          	movb   $0xff,-0x1(%rcx)
+    1fc2:	48 3d fe 00 00 00    	cmp    $0xfe,%rax
+    1fc8:	77 ea                	ja     1fb4 <LZ4_compress_fast_extState+0x164>
+    1fca:	88 01                	mov    %al,(%rcx)
+    1fcc:	48 83 c1 01          	add    $0x1,%rcx
+    1fd0:	48 89 da             	mov    %rbx,%rdx
+    1fd3:	4c 89 ee             	mov    %r13,%rsi
+    1fd6:	48 89 cf             	mov    %rcx,%rdi
+    1fd9:	e8 00 00 00 00       	call   1fde <LZ4_compress_fast_extState+0x18e>
+			1fda: R_X86_64_PLT32	memcpy-0x4
+    1fde:	48 8d 04 18          	lea    (%rax,%rbx,1),%rax
+    1fe2:	2b 45 d0             	sub    -0x30(%rbp),%eax
+    1fe5:	48 83 c4 48          	add    $0x48,%rsp
+    1fe9:	5b                   	pop    %rbx
+    1fea:	41 5c                	pop    %r12
+    1fec:	41 5d                	pop    %r13
+    1fee:	41 5e                	pop    %r14
+    1ff0:	41 5f                	pop    %r15
+    1ff2:	5d                   	pop    %rbp
+    1ff3:	c3                   	ret    
+    1ff4:	cc                   	int3   
+    1ff5:	31 c0                	xor    %eax,%eax
+    1ff7:	48 63 d3             	movslq %ebx,%rdx
+    1ffa:	e9 ba fe ff ff       	jmp    1eb9 <LZ4_compress_fast_extState+0x69>
+    1fff:	81 fb 00 00 00 7e    	cmp    $0x7e000000,%ebx
+    2005:	0f 87 5d 01 00 00    	ja     2168 <LZ4_compress_fast_extState+0x318>
+    200b:	49 8b 04 24          	mov    (%r12),%rax
+    200f:	49 8d 4c 24 01       	lea    0x1(%r12),%rcx
+    2014:	4d 89 e6             	mov    %r12,%r14
+    2017:	49 bd 00 00 00 bb dc 	movabs $0xcf1bbcdcbb000000,%r13
+    201e:	bc 1b cf 
+    2021:	49 0f af c5          	imul   %r13,%rax
+    2025:	48 c1 e8 34          	shr    $0x34,%rax
+    2029:	c7 04 87 00 00 00 00 	movl   $0x0,(%rdi,%rax,4)
+    2030:	44 89 c8             	mov    %r9d,%eax
+    2033:	4d 8b 44 24 01       	mov    0x1(%r12),%r8
+    2038:	41 81 e1 ff ff ff 03 	and    $0x3ffffff,%r9d
+    203f:	c1 e0 06             	shl    $0x6,%eax
+    2042:	44 89 4d a8          	mov    %r9d,-0x58(%rbp)
+    2046:	83 c0 01             	add    $0x1,%eax
+    2049:	4d 0f af c5          	imul   %r13,%r8
+    204d:	89 45 b0             	mov    %eax,-0x50(%rbp)
+    2050:	48 8b 45 d0          	mov    -0x30(%rbp),%rax
+    2054:	48 89 c3             	mov    %rax,%rbx
+    2057:	48 83 c0 01          	add    $0x1,%rax
+    205b:	49 c1 e8 34          	shr    $0x34,%r8
+    205f:	48 89 45 c8          	mov    %rax,-0x38(%rbp)
+    2063:	48 8b 45 c0          	mov    -0x40(%rbp),%rax
+    2067:	48 8d 70 f8          	lea    -0x8(%rax),%rsi
+    206b:	48 83 e8 06          	sub    $0x6,%rax
+    206f:	48 89 75 a0          	mov    %rsi,-0x60(%rbp)
+    2073:	48 89 45 98          	mov    %rax,-0x68(%rbp)
+    2077:	48 8d 71 01          	lea    0x1(%rcx),%rsi
+    207b:	4c 39 fe             	cmp    %r15,%rsi
+    207e:	77 5f                	ja     20df <LZ4_compress_fast_extState+0x28f>
+    2080:	8b 55 a8             	mov    -0x58(%rbp),%edx
+    2083:	44 8b 55 b0          	mov    -0x50(%rbp),%r10d
+    2087:	eb 06                	jmp    208f <LZ4_compress_fast_extState+0x23f>
+    2089:	45 89 ca             	mov    %r9d,%r10d
+    208c:	48 89 c6             	mov    %rax,%rsi
+    208f:	45 89 c0             	mov    %r8d,%r8d
+    2092:	49 89 cb             	mov    %rcx,%r11
+    2095:	4e 8d 0c 87          	lea    (%rdi,%r8,4),%r9
+    2099:	4c 8b 06             	mov    (%rsi),%r8
+    209c:	4d 29 e3             	sub    %r12,%r11
+    209f:	41 8b 01             	mov    (%r9),%eax
+    20a2:	45 89 19             	mov    %r11d,(%r9)
+    20a5:	4d 0f af c5          	imul   %r13,%r8
+    20a9:	4c 01 e0             	add    %r12,%rax
+    20ac:	4c 8d 88 ff ff 00 00 	lea    0xffff(%rax),%r9
+    20b3:	49 c1 e8 34          	shr    $0x34,%r8
+    20b7:	4c 39 c9             	cmp    %r9,%rcx
+    20ba:	77 0c                	ja     20c8 <LZ4_compress_fast_extState+0x278>
+    20bc:	44 8b 19             	mov    (%rcx),%r11d
+    20bf:	44 39 18             	cmp    %r11d,(%rax)
+    20c2:	0f 84 1b 07 00 00    	je     27e3 <LZ4_compress_fast_extState+0x993>
+    20c8:	89 d0                	mov    %edx,%eax
+    20ca:	44 89 d2             	mov    %r10d,%edx
+    20cd:	45 8d 4a 01          	lea    0x1(%r10),%r9d
+    20d1:	48 89 f1             	mov    %rsi,%rcx
+    20d4:	48 01 f0             	add    %rsi,%rax
+    20d7:	c1 ea 06             	shr    $0x6,%edx
+    20da:	4c 39 f8             	cmp    %r15,%rax
+    20dd:	76 aa                	jbe    2089 <LZ4_compress_fast_extState+0x239>
+    20df:	4c 8b 65 c0          	mov    -0x40(%rbp),%r12
+    20e3:	48 8b 4d c8          	mov    -0x38(%rbp),%rcx
+    20e7:	4d 29 f4             	sub    %r14,%r12
+    20ea:	49 83 fc 0e          	cmp    $0xe,%r12
+    20ee:	0f 86 32 03 00 00    	jbe    2426 <LZ4_compress_fast_extState+0x5d6>
+    20f4:	49 8d 44 24 f1       	lea    -0xf(%r12),%rax
+    20f9:	c6 03 f0             	movb   $0xf0,(%rbx)
+    20fc:	48 3d fe 00 00 00    	cmp    $0xfe,%rax
+    2102:	76 16                	jbe    211a <LZ4_compress_fast_extState+0x2ca>
+    2104:	48 2d ff 00 00 00    	sub    $0xff,%rax
+    210a:	48 83 c1 01          	add    $0x1,%rcx
+    210e:	c6 41 ff ff          	movb   $0xff,-0x1(%rcx)
+    2112:	48 3d fe 00 00 00    	cmp    $0xfe,%rax
+    2118:	77 ea                	ja     2104 <LZ4_compress_fast_extState+0x2b4>
+    211a:	88 01                	mov    %al,(%rcx)
+    211c:	48 83 c1 01          	add    $0x1,%rcx
+    2120:	4c 89 e2             	mov    %r12,%rdx
+    2123:	4c 89 f6             	mov    %r14,%rsi
+    2126:	48 89 cf             	mov    %rcx,%rdi
+    2129:	e8 00 00 00 00       	call   212e <LZ4_compress_fast_extState+0x2de>
+			212a: R_X86_64_PLT32	memcpy-0x4
+    212e:	4a 8d 04 20          	lea    (%rax,%r12,1),%rax
+    2132:	2b 45 d0             	sub    -0x30(%rbp),%eax
+    2135:	48 83 c4 48          	add    $0x48,%rsp
+    2139:	5b                   	pop    %rbx
+    213a:	41 5c                	pop    %r12
+    213c:	41 5d                	pop    %r13
+    213e:	41 5e                	pop    %r14
+    2140:	41 5f                	pop    %r15
+    2142:	5d                   	pop    %rbp
+    2143:	c3                   	ret    
+    2144:	cc                   	int3   
+    2145:	48 63 45 c8          	movslq -0x38(%rbp),%rax
+    2149:	4c 8b 5d d0          	mov    -0x30(%rbp),%r11
+    214d:	4c 01 d8             	add    %r11,%rax
+    2150:	48 89 45 b0          	mov    %rax,-0x50(%rbp)
+    2154:	81 fb 0a 00 01 00    	cmp    $0x1000a,%ebx
+    215a:	7f 1e                	jg     217a <LZ4_compress_fast_extState+0x32a>
+    215c:	81 fb 00 00 00 7e    	cmp    $0x7e000000,%ebx
+    2162:	0f 86 5b 01 00 00    	jbe    22c3 <LZ4_compress_fast_extState+0x473>
+    2168:	48 83 c4 48          	add    $0x48,%rsp
+    216c:	31 c0                	xor    %eax,%eax
+    216e:	5b                   	pop    %rbx
+    216f:	41 5c                	pop    %r12
+    2171:	41 5d                	pop    %r13
+    2173:	41 5e                	pop    %r14
+    2175:	41 5f                	pop    %r15
+    2177:	5d                   	pop    %rbp
+    2178:	c3                   	ret    
+    2179:	cc                   	int3   
+    217a:	81 fb 00 00 00 7e    	cmp    $0x7e000000,%ebx
+    2180:	77 e6                	ja     2168 <LZ4_compress_fast_extState+0x318>
+    2182:	49 8b 04 24          	mov    (%r12),%rax
+    2186:	4c 8b 5d d0          	mov    -0x30(%rbp),%r11
+    218a:	49 8d 74 24 01       	lea    0x1(%r12),%rsi
+    218f:	4d 89 e5             	mov    %r12,%r13
+    2192:	49 be 00 00 00 bb dc 	movabs $0xcf1bbcdcbb000000,%r14
+    2199:	bc 1b cf 
+    219c:	49 0f af c6          	imul   %r14,%rax
+    21a0:	48 c1 e8 34          	shr    $0x34,%rax
+    21a4:	c7 04 87 00 00 00 00 	movl   $0x0,(%rdi,%rax,4)
+    21ab:	44 89 c8             	mov    %r9d,%eax
+    21ae:	49 8b 54 24 01       	mov    0x1(%r12),%rdx
+    21b3:	41 81 e1 ff ff ff 03 	and    $0x3ffffff,%r9d
+    21ba:	c1 e0 06             	shl    $0x6,%eax
+    21bd:	44 89 4d a0          	mov    %r9d,-0x60(%rbp)
+    21c1:	83 c0 01             	add    $0x1,%eax
+    21c4:	49 0f af d6          	imul   %r14,%rdx
+    21c8:	89 45 a8             	mov    %eax,-0x58(%rbp)
+    21cb:	48 8b 45 c0          	mov    -0x40(%rbp),%rax
+    21cf:	48 8d 58 f8          	lea    -0x8(%rax),%rbx
+    21d3:	48 83 e8 06          	sub    $0x6,%rax
+    21d7:	48 c1 ea 34          	shr    $0x34,%rdx
+    21db:	48 89 5d 98          	mov    %rbx,-0x68(%rbp)
+    21df:	48 89 45 90          	mov    %rax,-0x70(%rbp)
+    21e3:	4c 8d 46 01          	lea    0x1(%rsi),%r8
+    21e7:	4d 39 f8             	cmp    %r15,%r8
+    21ea:	77 5c                	ja     2248 <LZ4_compress_fast_extState+0x3f8>
+    21ec:	8b 45 a0             	mov    -0x60(%rbp),%eax
+    21ef:	44 8b 55 a8          	mov    -0x58(%rbp),%r10d
+    21f3:	eb 06                	jmp    21fb <LZ4_compress_fast_extState+0x3ab>
+    21f5:	45 89 ca             	mov    %r9d,%r10d
+    21f8:	49 89 c8             	mov    %rcx,%r8
+    21fb:	89 d2                	mov    %edx,%edx
+    21fd:	48 89 f3             	mov    %rsi,%rbx
+    2200:	4c 8d 0c 97          	lea    (%rdi,%rdx,4),%r9
+    2204:	49 8b 10             	mov    (%r8),%rdx
+    2207:	4c 29 e3             	sub    %r12,%rbx
+    220a:	41 8b 09             	mov    (%r9),%ecx
+    220d:	41 89 19             	mov    %ebx,(%r9)
+    2210:	49 0f af d6          	imul   %r14,%rdx
+    2214:	4c 01 e1             	add    %r12,%rcx
+    2217:	4c 8d 89 ff ff 00 00 	lea    0xffff(%rcx),%r9
+    221e:	48 c1 ea 34          	shr    $0x34,%rdx
+    2222:	4c 39 ce             	cmp    %r9,%rsi
+    2225:	77 0a                	ja     2231 <LZ4_compress_fast_extState+0x3e1>
+    2227:	8b 1e                	mov    (%rsi),%ebx
+    2229:	39 19                	cmp    %ebx,(%rcx)
+    222b:	0f 84 73 07 00 00    	je     29a4 <LZ4_compress_fast_extState+0xb54>
+    2231:	89 c1                	mov    %eax,%ecx
+    2233:	44 89 d0             	mov    %r10d,%eax
+    2236:	45 8d 4a 01          	lea    0x1(%r10),%r9d
+    223a:	4c 89 c6             	mov    %r8,%rsi
+    223d:	4c 01 c1             	add    %r8,%rcx
+    2240:	c1 e8 06             	shr    $0x6,%eax
+    2243:	4c 39 f9             	cmp    %r15,%rcx
+    2246:	76 ad                	jbe    21f5 <LZ4_compress_fast_extState+0x3a5>
+    2248:	48 8b 5d c0          	mov    -0x40(%rbp),%rbx
+    224c:	4c 89 d8             	mov    %r11,%rax
+    224f:	48 2b 45 d0          	sub    -0x30(%rbp),%rax
+    2253:	48 be 81 80 80 80 80 	movabs $0x8080808080808081,%rsi
+    225a:	80 80 80 
+    225d:	44 8b 7d c8          	mov    -0x38(%rbp),%r15d
+    2261:	4c 29 eb             	sub    %r13,%rbx
+    2264:	48 8d 93 f0 00 00 00 	lea    0xf0(%rbx),%rdx
+    226b:	48 8d 4c 03 01       	lea    0x1(%rbx,%rax,1),%rcx
+    2270:	48 89 d0             	mov    %rdx,%rax
+    2273:	48 f7 e6             	mul    %rsi
+    2276:	48 c1 ea 07          	shr    $0x7,%rdx
+    227a:	48 01 d1             	add    %rdx,%rcx
+    227d:	4c 39 f9             	cmp    %r15,%rcx
+    2280:	0f 87 e2 fe ff ff    	ja     2168 <LZ4_compress_fast_extState+0x318>
+    2286:	49 8d 4b 01          	lea    0x1(%r11),%rcx
+    228a:	48 83 fb 0e          	cmp    $0xe,%rbx
+    228e:	0f 86 e3 02 00 00    	jbe    2577 <LZ4_compress_fast_extState+0x727>
+    2294:	48 8d 43 f1          	lea    -0xf(%rbx),%rax
+    2298:	41 c6 03 f0          	movb   $0xf0,(%r11)
+    229c:	48 3d fe 00 00 00    	cmp    $0xfe,%rax
+    22a2:	0f 86 22 fd ff ff    	jbe    1fca <LZ4_compress_fast_extState+0x17a>
+    22a8:	48 2d ff 00 00 00    	sub    $0xff,%rax
+    22ae:	48 83 c1 01          	add    $0x1,%rcx
+    22b2:	c6 41 ff ff          	movb   $0xff,-0x1(%rcx)
+    22b6:	48 3d fe 00 00 00    	cmp    $0xfe,%rax
+    22bc:	77 ea                	ja     22a8 <LZ4_compress_fast_extState+0x458>
+    22be:	e9 07 fd ff ff       	jmp    1fca <LZ4_compress_fast_extState+0x17a>
+    22c3:	83 fb 0c             	cmp    $0xc,%ebx
+    22c6:	0f 8e 87 01 00 00    	jle    2453 <LZ4_compress_fast_extState+0x603>
+    22cc:	41 69 04 24 b1 79 37 	imul   $0x9e3779b1,(%r12),%eax
+    22d3:	9e 
+    22d4:	31 d2                	xor    %edx,%edx
+    22d6:	45 89 ce             	mov    %r9d,%r14d
+    22d9:	4d 89 e5             	mov    %r12,%r13
+    22dc:	4d 8d 44 24 01       	lea    0x1(%r12),%r8
+    22e1:	41 c1 e6 06          	shl    $0x6,%r14d
+    22e5:	c1 e8 13             	shr    $0x13,%eax
+    22e8:	66 89 14 47          	mov    %dx,(%rdi,%rax,2)
+    22ec:	48 8b 45 c0          	mov    -0x40(%rbp),%rax
+    22f0:	41 69 74 24 01 b1 79 	imul   $0x9e3779b1,0x1(%r12),%esi
+    22f7:	37 9e 
+    22f9:	48 8d 58 f8          	lea    -0x8(%rax),%rbx
+    22fd:	48 83 e8 06          	sub    $0x6,%rax
+    2301:	48 89 5d a8          	mov    %rbx,-0x58(%rbp)
+    2305:	48 89 45 a0          	mov    %rax,-0x60(%rbp)
+    2309:	c1 ee 13             	shr    $0x13,%esi
+    230c:	45 89 f1             	mov    %r14d,%r9d
+    230f:	ba 01 00 00 00       	mov    $0x1,%edx
+    2314:	eb 29                	jmp    233f <LZ4_compress_fast_extState+0x4ef>
+    2316:	4c 8d 14 77          	lea    (%rdi,%rsi,2),%r10
+    231a:	48 89 cb             	mov    %rcx,%rbx
+    231d:	41 69 30 b1 79 37 9e 	imul   $0x9e3779b1,(%r8),%esi
+    2324:	41 0f b7 02          	movzwl (%r10),%eax
+    2328:	4c 29 e3             	sub    %r12,%rbx
+    232b:	66 41 89 1a          	mov    %bx,(%r10)
+    232f:	8b 19                	mov    (%rcx),%ebx
+    2331:	4c 01 e0             	add    %r12,%rax
+    2334:	c1 ee 13             	shr    $0x13,%esi
+    2337:	39 18                	cmp    %ebx,(%rax)
+    2339:	0f 84 af 02 00 00    	je     25ee <LZ4_compress_fast_extState+0x79e>
+    233f:	4c 89 c1             	mov    %r8,%rcx
+    2342:	49 01 d0             	add    %rdx,%r8
+    2345:	44 89 ca             	mov    %r9d,%edx
+    2348:	41 83 c1 01          	add    $0x1,%r9d
+    234c:	c1 ea 06             	shr    $0x6,%edx
+    234f:	4d 39 f8             	cmp    %r15,%r8
+    2352:	76 c2                	jbe    2316 <LZ4_compress_fast_extState+0x4c6>
+    2354:	4c 89 de             	mov    %r11,%rsi
+    2357:	4d 89 ec             	mov    %r13,%r12
+    235a:	48 2b 75 d0          	sub    -0x30(%rbp),%rsi
+    235e:	48 b9 81 80 80 80 80 	movabs $0x8080808080808081,%rcx
+    2365:	80 80 80 
+    2368:	48 8b 5d c0          	mov    -0x40(%rbp),%rbx
+    236c:	4c 29 e3             	sub    %r12,%rbx
+    236f:	48 8d 93 f0 00 00 00 	lea    0xf0(%rbx),%rdx
+    2376:	48 89 d0             	mov    %rdx,%rax
+    2379:	48 f7 e1             	mul    %rcx
+    237c:	48 8d 44 33 01       	lea    0x1(%rbx,%rsi,1),%rax
+    2381:	48 c1 ea 07          	shr    $0x7,%rdx
+    2385:	48 01 c2             	add    %rax,%rdx
+    2388:	8b 45 c8             	mov    -0x38(%rbp),%eax
+    238b:	48 39 c2             	cmp    %rax,%rdx
+    238e:	0f 87 d4 fd ff ff    	ja     2168 <LZ4_compress_fast_extState+0x318>
+    2394:	49 8d 4b 01          	lea    0x1(%r11),%rcx
+    2398:	48 83 fb 0e          	cmp    $0xe,%rbx
+    239c:	0f 86 e2 01 00 00    	jbe    2584 <LZ4_compress_fast_extState+0x734>
+    23a2:	48 8d 43 f1          	lea    -0xf(%rbx),%rax
+    23a6:	41 c6 03 f0          	movb   $0xf0,(%r11)
+    23aa:	48 3d fe 00 00 00    	cmp    $0xfe,%rax
+    23b0:	76 16                	jbe    23c8 <LZ4_compress_fast_extState+0x578>
+    23b2:	48 2d ff 00 00 00    	sub    $0xff,%rax
+    23b8:	48 83 c1 01          	add    $0x1,%rcx
+    23bc:	c6 41 ff ff          	movb   $0xff,-0x1(%rcx)
+    23c0:	48 3d fe 00 00 00    	cmp    $0xfe,%rax
+    23c6:	77 ea                	ja     23b2 <LZ4_compress_fast_extState+0x562>
+    23c8:	88 01                	mov    %al,(%rcx)
+    23ca:	48 83 c1 01          	add    $0x1,%rcx
+    23ce:	e9 b9 01 00 00       	jmp    258c <LZ4_compress_fast_extState+0x73c>
+    23d3:	48 83 ea 01          	sub    $0x1,%rdx
+    23d7:	48 83 e9 01          	sub    $0x1,%rcx
+    23db:	4c 39 ea             	cmp    %r13,%rdx
+    23de:	76 0e                	jbe    23ee <LZ4_compress_fast_extState+0x59e>
+    23e0:	49 39 cc             	cmp    %rcx,%r12
+    23e3:	73 09                	jae    23ee <LZ4_compress_fast_extState+0x59e>
+    23e5:	0f b6 59 ff          	movzbl -0x1(%rcx),%ebx
+    23e9:	38 5a ff             	cmp    %bl,-0x1(%rdx)
+    23ec:	74 e5                	je     23d3 <LZ4_compress_fast_extState+0x583>
+    23ee:	48 89 d6             	mov    %rdx,%rsi
+    23f1:	4c 29 ee             	sub    %r13,%rsi
+    23f4:	83 fe 0e             	cmp    $0xe,%esi
+    23f7:	0f 87 e5 07 00 00    	ja     2be2 <LZ4_compress_fast_extState+0xd92>
+    23fd:	41 89 f0             	mov    %esi,%r8d
+    2400:	41 c1 e0 04          	shl    $0x4,%r8d
+    2404:	45 88 01             	mov    %r8b,(%r9)
+    2407:	89 f6                	mov    %esi,%esi
+    2409:	48 01 c6             	add    %rax,%rsi
+    240c:	4d 8b 45 00          	mov    0x0(%r13),%r8
+    2410:	48 83 c0 08          	add    $0x8,%rax
+    2414:	49 83 c5 08          	add    $0x8,%r13
+    2418:	4c 89 40 f8          	mov    %r8,-0x8(%rax)
+    241c:	48 39 c6             	cmp    %rax,%rsi
+    241f:	77 eb                	ja     240c <LZ4_compress_fast_extState+0x5bc>
+    2421:	e9 a2 00 00 00       	jmp    24c8 <LZ4_compress_fast_extState+0x678>
+    2426:	44 89 e0             	mov    %r12d,%eax
+    2429:	c1 e0 04             	shl    $0x4,%eax
+    242c:	88 03                	mov    %al,(%rbx)
+    242e:	e9 ed fc ff ff       	jmp    2120 <LZ4_compress_fast_extState+0x2d0>
+    2433:	89 d8                	mov    %ebx,%eax
+    2435:	c1 e0 04             	shl    $0x4,%eax
+    2438:	41 88 01             	mov    %al,(%r9)
+    243b:	e9 90 fb ff ff       	jmp    1fd0 <LZ4_compress_fast_extState+0x180>
+    2440:	48 8b 45 d0          	mov    -0x30(%rbp),%rax
+    2444:	4d 89 e5             	mov    %r12,%r13
+    2447:	49 89 c1             	mov    %rax,%r9
+    244a:	48 83 c0 01          	add    $0x1,%rax
+    244e:	e9 3d fb ff ff       	jmp    1f90 <LZ4_compress_fast_extState+0x140>
+    2453:	4c 8b 5d d0          	mov    -0x30(%rbp),%r11
+    2457:	31 f6                	xor    %esi,%esi
+    2459:	e9 00 ff ff ff       	jmp    235e <LZ4_compress_fast_extState+0x50e>
+    245e:	01 c1                	add    %eax,%ecx
+    2460:	41 88 09             	mov    %cl,(%r9)
+    2463:	4d 89 c1             	mov    %r8,%r9
+    2466:	49 8d 41 01          	lea    0x1(%r9),%rax
+    246a:	48 89 c6             	mov    %rax,%rsi
+    246d:	4c 39 fa             	cmp    %r15,%rdx
+    2470:	0f 87 58 07 00 00    	ja     2bce <LZ4_compress_fast_extState+0xd7e>
+    2476:	69 4a fe b1 79 37 9e 	imul   $0x9e3779b1,-0x2(%rdx),%ecx
+    247d:	4c 8d 42 fe          	lea    -0x2(%rdx),%r8
+    2481:	49 89 d2             	mov    %rdx,%r10
+    2484:	4d 29 e0             	sub    %r12,%r8
+    2487:	4d 29 e2             	sub    %r12,%r10
+    248a:	c1 e9 13             	shr    $0x13,%ecx
+    248d:	66 44 89 04 4f       	mov    %r8w,(%rdi,%rcx,2)
+    2492:	69 0a b1 79 37 9e    	imul   $0x9e3779b1,(%rdx),%ecx
+    2498:	c1 e9 13             	shr    $0x13,%ecx
+    249b:	4c 8d 04 4f          	lea    (%rdi,%rcx,2),%r8
+    249f:	41 0f b7 08          	movzwl (%r8),%ecx
+    24a3:	66 45 89 10          	mov    %r10w,(%r8)
+    24a7:	4c 01 e1             	add    %r12,%rcx
+    24aa:	4c 8d 81 ff ff 00 00 	lea    0xffff(%rcx),%r8
+    24b1:	4c 39 c2             	cmp    %r8,%rdx
+    24b4:	0f 87 e0 06 00 00    	ja     2b9a <LZ4_compress_fast_extState+0xd4a>
+    24ba:	8b 1a                	mov    (%rdx),%ebx
+    24bc:	39 19                	cmp    %ebx,(%rcx)
+    24be:	0f 85 d6 06 00 00    	jne    2b9a <LZ4_compress_fast_extState+0xd4a>
+    24c4:	41 c6 01 00          	movb   $0x0,(%r9)
+    24c8:	48 89 d0             	mov    %rdx,%rax
+    24cb:	4c 8d 5a 04          	lea    0x4(%rdx),%r11
+    24cf:	4c 8d 46 02          	lea    0x2(%rsi),%r8
+    24d3:	48 29 c8             	sub    %rcx,%rax
+    24d6:	48 83 c1 04          	add    $0x4,%rcx
+    24da:	66 89 06             	mov    %ax,(%rsi)
+    24dd:	4c 89 d8             	mov    %r11,%rax
+    24e0:	4d 39 fb             	cmp    %r15,%r11
+    24e3:	0f 83 bf 00 00 00    	jae    25a8 <LZ4_compress_fast_extState+0x758>
+    24e9:	4c 8b 11             	mov    (%rcx),%r10
+    24ec:	48 8b 18             	mov    (%rax),%rbx
+    24ef:	49 39 da             	cmp    %rbx,%r10
+    24f2:	0f 84 9f 00 00 00    	je     2597 <LZ4_compress_fast_extState+0x747>
+    24f8:	49 31 da             	xor    %rbx,%r10
+    24fb:	f3 4d 0f bc d2       	tzcnt  %r10,%r10
+    2500:	49 c1 ea 03          	shr    $0x3,%r10
+    2504:	44 01 d0             	add    %r10d,%eax
+    2507:	44 29 d8             	sub    %r11d,%eax
+    250a:	8d 48 04             	lea    0x4(%rax),%ecx
+    250d:	48 01 ca             	add    %rcx,%rdx
+    2510:	41 0f b6 09          	movzbl (%r9),%ecx
+    2514:	83 f8 0e             	cmp    $0xe,%eax
+    2517:	0f 86 41 ff ff ff    	jbe    245e <LZ4_compress_fast_extState+0x60e>
+    251d:	83 c1 0f             	add    $0xf,%ecx
+    2520:	83 e8 0f             	sub    $0xf,%eax
+    2523:	41 88 09             	mov    %cl,(%r9)
+    2526:	c7 46 02 ff ff ff ff 	movl   $0xffffffff,0x2(%rsi)
+    252d:	3d fb 03 00 00       	cmp    $0x3fb,%eax
+    2532:	76 17                	jbe    254b <LZ4_compress_fast_extState+0x6fb>
+    2534:	2d fc 03 00 00       	sub    $0x3fc,%eax
+    2539:	49 83 c0 04          	add    $0x4,%r8
+    253d:	41 c7 00 ff ff ff ff 	movl   $0xffffffff,(%r8)
+    2544:	3d fb 03 00 00       	cmp    $0x3fb,%eax
+    2549:	77 e9                	ja     2534 <LZ4_compress_fast_extState+0x6e4>
+    254b:	89 c1                	mov    %eax,%ecx
+    254d:	bb 81 80 80 80       	mov    $0x80808081,%ebx
+    2552:	48 0f af cb          	imul   %rbx,%rcx
+    2556:	48 c1 e9 27          	shr    $0x27,%rcx
+    255a:	89 ce                	mov    %ecx,%esi
+    255c:	4c 01 c6             	add    %r8,%rsi
+    255f:	41 89 c8             	mov    %ecx,%r8d
+    2562:	41 c1 e0 08          	shl    $0x8,%r8d
+    2566:	4c 8d 4e 01          	lea    0x1(%rsi),%r9
+    256a:	41 29 c8             	sub    %ecx,%r8d
+    256d:	44 29 c0             	sub    %r8d,%eax
+    2570:	88 06                	mov    %al,(%rsi)
+    2572:	e9 ef fe ff ff       	jmp    2466 <LZ4_compress_fast_extState+0x616>
+    2577:	89 d8                	mov    %ebx,%eax
+    2579:	c1 e0 04             	shl    $0x4,%eax
+    257c:	41 88 03             	mov    %al,(%r11)
+    257f:	e9 4c fa ff ff       	jmp    1fd0 <LZ4_compress_fast_extState+0x180>
+    2584:	89 d8                	mov    %ebx,%eax
+    2586:	c1 e0 04             	shl    $0x4,%eax
+    2589:	41 88 03             	mov    %al,(%r11)
+    258c:	48 89 da             	mov    %rbx,%rdx
+    258f:	4c 89 e6             	mov    %r12,%rsi
+    2592:	e9 3f fa ff ff       	jmp    1fd6 <LZ4_compress_fast_extState+0x186>
+    2597:	48 83 c0 08          	add    $0x8,%rax
+    259b:	48 83 c1 08          	add    $0x8,%rcx
+    259f:	4c 39 f8             	cmp    %r15,%rax
+    25a2:	0f 82 41 ff ff ff    	jb     24e9 <LZ4_compress_fast_extState+0x699>
+    25a8:	48 3b 45 b0          	cmp    -0x50(%rbp),%rax
+    25ac:	73 0e                	jae    25bc <LZ4_compress_fast_extState+0x76c>
+    25ae:	8b 18                	mov    (%rax),%ebx
+    25b0:	39 19                	cmp    %ebx,(%rcx)
+    25b2:	75 08                	jne    25bc <LZ4_compress_fast_extState+0x76c>
+    25b4:	48 83 c0 04          	add    $0x4,%rax
+    25b8:	48 83 c1 04          	add    $0x4,%rcx
+    25bc:	48 3b 45 a8          	cmp    -0x58(%rbp),%rax
+    25c0:	73 10                	jae    25d2 <LZ4_compress_fast_extState+0x782>
+    25c2:	0f b7 18             	movzwl (%rax),%ebx
+    25c5:	66 39 19             	cmp    %bx,(%rcx)
+    25c8:	75 08                	jne    25d2 <LZ4_compress_fast_extState+0x782>
+    25ca:	48 83 c0 02          	add    $0x2,%rax
+    25ce:	48 83 c1 02          	add    $0x2,%rcx
+    25d2:	48 3b 45 b8          	cmp    -0x48(%rbp),%rax
+    25d6:	73 0e                	jae    25e6 <LZ4_compress_fast_extState+0x796>
+    25d8:	0f b6 18             	movzbl (%rax),%ebx
+    25db:	38 19                	cmp    %bl,(%rcx)
+    25dd:	0f 94 c1             	sete   %cl
+    25e0:	0f b6 c9             	movzbl %cl,%ecx
+    25e3:	48 01 c8             	add    %rcx,%rax
+    25e6:	44 29 d8             	sub    %r11d,%eax
+    25e9:	e9 1c ff ff ff       	jmp    250a <LZ4_compress_fast_extState+0x6ba>
+    25ee:	49 39 c4             	cmp    %rax,%r12
+    25f1:	73 12                	jae    2605 <LZ4_compress_fast_extState+0x7b5>
+    25f3:	4c 39 e9             	cmp    %r13,%rcx
+    25f6:	76 0d                	jbe    2605 <LZ4_compress_fast_extState+0x7b5>
+    25f8:	0f b6 58 ff          	movzbl -0x1(%rax),%ebx
+    25fc:	38 59 ff             	cmp    %bl,-0x1(%rcx)
+    25ff:	0f 84 ec 06 00 00    	je     2cf1 <LZ4_compress_fast_extState+0xea1>
+    2605:	48 89 ce             	mov    %rcx,%rsi
+    2608:	41 b9 81 80 80 80    	mov    $0x80808081,%r9d
+    260e:	49 8d 53 01          	lea    0x1(%r11),%rdx
+    2612:	4c 29 ee             	sub    %r13,%rsi
+    2615:	41 89 f0             	mov    %esi,%r8d
+    2618:	4d 0f af c8          	imul   %r8,%r9
+    261c:	49 c1 e9 27          	shr    $0x27,%r9
+    2620:	4f 8d 4c 08 08       	lea    0x8(%r8,%r9,1),%r9
+    2625:	49 01 d1             	add    %rdx,%r9
+    2628:	4c 39 4d b0          	cmp    %r9,-0x50(%rbp)
+    262c:	0f 82 36 fb ff ff    	jb     2168 <LZ4_compress_fast_extState+0x318>
+    2632:	83 fe 0e             	cmp    $0xe,%esi
+    2635:	0f 87 10 06 00 00    	ja     2c4b <LZ4_compress_fast_extState+0xdfb>
+    263b:	c1 e6 04             	shl    $0x4,%esi
+    263e:	41 88 33             	mov    %sil,(%r11)
+    2641:	49 01 d0             	add    %rdx,%r8
+    2644:	49 8b 75 00          	mov    0x0(%r13),%rsi
+    2648:	48 83 c2 08          	add    $0x8,%rdx
+    264c:	49 83 c5 08          	add    $0x8,%r13
+    2650:	48 89 72 f8          	mov    %rsi,-0x8(%rdx)
+    2654:	49 39 d0             	cmp    %rdx,%r8
+    2657:	77 eb                	ja     2644 <LZ4_compress_fast_extState+0x7f4>
+    2659:	4c 8b 55 b0          	mov    -0x50(%rbp),%r10
+    265d:	eb 64                	jmp    26c3 <LZ4_compress_fast_extState+0x873>
+    265f:	01 c2                	add    %eax,%edx
+    2661:	41 88 13             	mov    %dl,(%r11)
+    2664:	49 89 f3             	mov    %rsi,%r11
+    2667:	4c 39 f9             	cmp    %r15,%rcx
+    266a:	0f 87 72 06 00 00    	ja     2ce2 <LZ4_compress_fast_extState+0xe92>
+    2670:	69 41 fe b1 79 37 9e 	imul   $0x9e3779b1,-0x2(%rcx),%eax
+    2677:	48 8d 51 fe          	lea    -0x2(%rcx),%rdx
+    267b:	48 89 ce             	mov    %rcx,%rsi
+    267e:	4c 29 e2             	sub    %r12,%rdx
+    2681:	4c 29 e6             	sub    %r12,%rsi
+    2684:	c1 e8 13             	shr    $0x13,%eax
+    2687:	66 89 14 47          	mov    %dx,(%rdi,%rax,2)
+    268b:	69 01 b1 79 37 9e    	imul   $0x9e3779b1,(%rcx),%eax
+    2691:	c1 e8 13             	shr    $0x13,%eax
+    2694:	48 8d 14 47          	lea    (%rdi,%rax,2),%rdx
+    2698:	0f b7 02             	movzwl (%rdx),%eax
+    269b:	66 89 32             	mov    %si,(%rdx)
+    269e:	4c 01 e0             	add    %r12,%rax
+    26a1:	48 8d 90 ff ff 00 00 	lea    0xffff(%rax),%rdx
+    26a8:	48 39 d1             	cmp    %rdx,%rcx
+    26ab:	0f 87 cb 05 00 00    	ja     2c7c <LZ4_compress_fast_extState+0xe2c>
+    26b1:	8b 19                	mov    (%rcx),%ebx
+    26b3:	39 18                	cmp    %ebx,(%rax)
+    26b5:	0f 85 c1 05 00 00    	jne    2c7c <LZ4_compress_fast_extState+0xe2c>
+    26bb:	41 c6 03 00          	movb   $0x0,(%r11)
+    26bf:	4d 8d 43 01          	lea    0x1(%r11),%r8
+    26c3:	48 89 ca             	mov    %rcx,%rdx
+    26c6:	48 8d 59 04          	lea    0x4(%rcx),%rbx
+    26ca:	49 8d 70 02          	lea    0x2(%r8),%rsi
+    26ce:	48 29 c2             	sub    %rax,%rdx
+    26d1:	66 41 89 10          	mov    %dx,(%r8)
+    26d5:	48 8d 50 04          	lea    0x4(%rax),%rdx
+    26d9:	48 89 d8             	mov    %rbx,%rax
+    26dc:	4c 39 fb             	cmp    %r15,%rbx
+    26df:	0f 83 b3 00 00 00    	jae    2798 <LZ4_compress_fast_extState+0x948>
+    26e5:	4c 8b 0a             	mov    (%rdx),%r9
+    26e8:	4c 8b 28             	mov    (%rax),%r13
+    26eb:	4d 39 e9             	cmp    %r13,%r9
+    26ee:	0f 84 93 00 00 00    	je     2787 <LZ4_compress_fast_extState+0x937>
+    26f4:	4d 31 e9             	xor    %r13,%r9
+    26f7:	f3 4d 0f bc c9       	tzcnt  %r9,%r9
+    26fc:	49 c1 e9 03          	shr    $0x3,%r9
+    2700:	44 01 c8             	add    %r9d,%eax
+    2703:	29 d8                	sub    %ebx,%eax
+    2705:	8d 50 04             	lea    0x4(%rax),%edx
+    2708:	48 01 d1             	add    %rdx,%rcx
+    270b:	89 c2                	mov    %eax,%edx
+    270d:	c1 ea 08             	shr    $0x8,%edx
+    2710:	83 c2 06             	add    $0x6,%edx
+    2713:	48 01 f2             	add    %rsi,%rdx
+    2716:	49 39 d2             	cmp    %rdx,%r10
+    2719:	0f 82 49 fa ff ff    	jb     2168 <LZ4_compress_fast_extState+0x318>
+    271f:	41 0f b6 13          	movzbl (%r11),%edx
+    2723:	83 f8 0e             	cmp    $0xe,%eax
+    2726:	0f 86 33 ff ff ff    	jbe    265f <LZ4_compress_fast_extState+0x80f>
+    272c:	83 c2 0f             	add    $0xf,%edx
+    272f:	83 e8 0f             	sub    $0xf,%eax
+    2732:	41 88 13             	mov    %dl,(%r11)
+    2735:	41 c7 40 02 ff ff ff 	movl   $0xffffffff,0x2(%r8)
+    273c:	ff 
+    273d:	3d fb 03 00 00       	cmp    $0x3fb,%eax
+    2742:	76 16                	jbe    275a <LZ4_compress_fast_extState+0x90a>
+    2744:	2d fc 03 00 00       	sub    $0x3fc,%eax
+    2749:	48 83 c6 04          	add    $0x4,%rsi
+    274d:	c7 06 ff ff ff ff    	movl   $0xffffffff,(%rsi)
+    2753:	3d fb 03 00 00       	cmp    $0x3fb,%eax
+    2758:	77 ea                	ja     2744 <LZ4_compress_fast_extState+0x8f4>
+    275a:	89 c2                	mov    %eax,%edx
+    275c:	bb 81 80 80 80       	mov    $0x80808081,%ebx
+    2761:	48 0f af d3          	imul   %rbx,%rdx
+    2765:	48 c1 ea 27          	shr    $0x27,%rdx
+    2769:	41 89 d0             	mov    %edx,%r8d
+    276c:	4c 01 c6             	add    %r8,%rsi
+    276f:	41 89 d0             	mov    %edx,%r8d
+    2772:	41 c1 e0 08          	shl    $0x8,%r8d
+    2776:	4c 8d 5e 01          	lea    0x1(%rsi),%r11
+    277a:	41 29 d0             	sub    %edx,%r8d
+    277d:	44 29 c0             	sub    %r8d,%eax
+    2780:	88 06                	mov    %al,(%rsi)
+    2782:	e9 e0 fe ff ff       	jmp    2667 <LZ4_compress_fast_extState+0x817>
+    2787:	48 83 c0 08          	add    $0x8,%rax
+    278b:	48 83 c2 08          	add    $0x8,%rdx
+    278f:	4c 39 f8             	cmp    %r15,%rax
+    2792:	0f 82 4d ff ff ff    	jb     26e5 <LZ4_compress_fast_extState+0x895>
+    2798:	48 3b 45 a8          	cmp    -0x58(%rbp),%rax
+    279c:	73 10                	jae    27ae <LZ4_compress_fast_extState+0x95e>
+    279e:	44 8b 08             	mov    (%rax),%r9d
+    27a1:	44 39 0a             	cmp    %r9d,(%rdx)
+    27a4:	75 08                	jne    27ae <LZ4_compress_fast_extState+0x95e>
+    27a6:	48 83 c0 04          	add    $0x4,%rax
+    27aa:	48 83 c2 04          	add    $0x4,%rdx
+    27ae:	48 3b 45 a0          	cmp    -0x60(%rbp),%rax
+    27b2:	73 12                	jae    27c6 <LZ4_compress_fast_extState+0x976>
+    27b4:	44 0f b7 08          	movzwl (%rax),%r9d
+    27b8:	66 44 39 0a          	cmp    %r9w,(%rdx)
+    27bc:	75 08                	jne    27c6 <LZ4_compress_fast_extState+0x976>
+    27be:	48 83 c0 02          	add    $0x2,%rax
+    27c2:	48 83 c2 02          	add    $0x2,%rdx
+    27c6:	48 3b 45 b8          	cmp    -0x48(%rbp),%rax
+    27ca:	73 10                	jae    27dc <LZ4_compress_fast_extState+0x98c>
+    27cc:	44 0f b6 08          	movzbl (%rax),%r9d
+    27d0:	44 38 0a             	cmp    %r9b,(%rdx)
+    27d3:	0f 94 c2             	sete   %dl
+    27d6:	0f b6 d2             	movzbl %dl,%edx
+    27d9:	48 01 d0             	add    %rdx,%rax
+    27dc:	29 d8                	sub    %ebx,%eax
+    27de:	e9 22 ff ff ff       	jmp    2705 <LZ4_compress_fast_extState+0x8b5>
+    27e3:	49 39 ce             	cmp    %rcx,%r14
+    27e6:	73 13                	jae    27fb <LZ4_compress_fast_extState+0x9ab>
+    27e8:	49 39 c4             	cmp    %rax,%r12
+    27eb:	73 0e                	jae    27fb <LZ4_compress_fast_extState+0x9ab>
+    27ed:	0f b6 70 ff          	movzbl -0x1(%rax),%esi
+    27f1:	40 38 71 ff          	cmp    %sil,-0x1(%rcx)
+    27f5:	0f 84 15 05 00 00    	je     2d10 <LZ4_compress_fast_extState+0xec0>
+    27fb:	48 89 ce             	mov    %rcx,%rsi
+    27fe:	48 8b 55 c8          	mov    -0x38(%rbp),%rdx
+    2802:	4c 29 f6             	sub    %r14,%rsi
+    2805:	83 fe 0e             	cmp    $0xe,%esi
+    2808:	0f 87 09 04 00 00    	ja     2c17 <LZ4_compress_fast_extState+0xdc7>
+    280e:	41 89 f0             	mov    %esi,%r8d
+    2811:	41 c1 e0 04          	shl    $0x4,%r8d
+    2815:	44 88 03             	mov    %r8b,(%rbx)
+    2818:	89 f6                	mov    %esi,%esi
+    281a:	48 01 d6             	add    %rdx,%rsi
+    281d:	4d 8b 06             	mov    (%r14),%r8
+    2820:	48 83 c2 08          	add    $0x8,%rdx
+    2824:	49 83 c6 08          	add    $0x8,%r14
+    2828:	4c 89 42 f8          	mov    %r8,-0x8(%rdx)
+    282c:	48 39 d6             	cmp    %rdx,%rsi
+    282f:	77 ec                	ja     281d <LZ4_compress_fast_extState+0x9cd>
+    2831:	eb 6b                	jmp    289e <LZ4_compress_fast_extState+0xa4e>
+    2833:	01 c2                	add    %eax,%edx
+    2835:	88 13                	mov    %dl,(%rbx)
+    2837:	4c 89 c3             	mov    %r8,%rbx
+    283a:	48 8d 53 01          	lea    0x1(%rbx),%rdx
+    283e:	48 89 d6             	mov    %rdx,%rsi
+    2841:	4c 39 f9             	cmp    %r15,%rcx
+    2844:	0f 87 8c 03 00 00    	ja     2bd6 <LZ4_compress_fast_extState+0xd86>
+    284a:	48 8b 41 fe          	mov    -0x2(%rcx),%rax
+    284e:	4c 8d 41 fe          	lea    -0x2(%rcx),%r8
+    2852:	49 89 c9             	mov    %rcx,%r9
+    2855:	4d 29 e0             	sub    %r12,%r8
+    2858:	4d 29 e1             	sub    %r12,%r9
+    285b:	49 0f af c5          	imul   %r13,%rax
+    285f:	48 c1 e8 34          	shr    $0x34,%rax
+    2863:	44 89 04 87          	mov    %r8d,(%rdi,%rax,4)
+    2867:	48 8b 01             	mov    (%rcx),%rax
+    286a:	49 0f af c5          	imul   %r13,%rax
+    286e:	48 c1 e8 34          	shr    $0x34,%rax
+    2872:	4c 8d 04 87          	lea    (%rdi,%rax,4),%r8
+    2876:	41 8b 00             	mov    (%r8),%eax
+    2879:	45 89 08             	mov    %r9d,(%r8)
+    287c:	4c 01 e0             	add    %r12,%rax
+    287f:	4c 8d 80 ff ff 00 00 	lea    0xffff(%rax),%r8
+    2886:	4c 39 c1             	cmp    %r8,%rcx
+    2889:	0f 87 23 03 00 00    	ja     2bb2 <LZ4_compress_fast_extState+0xd62>
+    288f:	44 8b 31             	mov    (%rcx),%r14d
+    2892:	44 39 30             	cmp    %r14d,(%rax)
+    2895:	0f 85 17 03 00 00    	jne    2bb2 <LZ4_compress_fast_extState+0xd62>
+    289b:	c6 03 00             	movb   $0x0,(%rbx)
+    289e:	48 89 ca             	mov    %rcx,%rdx
+    28a1:	4c 8d 51 04          	lea    0x4(%rcx),%r10
+    28a5:	4c 8d 46 02          	lea    0x2(%rsi),%r8
+    28a9:	48 29 c2             	sub    %rax,%rdx
+    28ac:	66 89 16             	mov    %dx,(%rsi)
+    28af:	48 8d 50 04          	lea    0x4(%rax),%rdx
+    28b3:	4c 89 d0             	mov    %r10,%rax
+    28b6:	4d 39 fa             	cmp    %r15,%r10
+    28b9:	0f 83 99 00 00 00    	jae    2958 <LZ4_compress_fast_extState+0xb08>
+    28bf:	4c 8b 0a             	mov    (%rdx),%r9
+    28c2:	4c 8b 18             	mov    (%rax),%r11
+    28c5:	4d 39 d9             	cmp    %r11,%r9
+    28c8:	74 7d                	je     2947 <LZ4_compress_fast_extState+0xaf7>
+    28ca:	4d 31 d9             	xor    %r11,%r9
+    28cd:	f3 4d 0f bc c9       	tzcnt  %r9,%r9
+    28d2:	49 c1 e9 03          	shr    $0x3,%r9
+    28d6:	44 01 c8             	add    %r9d,%eax
+    28d9:	44 29 d0             	sub    %r10d,%eax
+    28dc:	8d 50 04             	lea    0x4(%rax),%edx
+    28df:	48 01 d1             	add    %rdx,%rcx
+    28e2:	0f b6 13             	movzbl (%rbx),%edx
+    28e5:	83 f8 0e             	cmp    $0xe,%eax
+    28e8:	0f 86 45 ff ff ff    	jbe    2833 <LZ4_compress_fast_extState+0x9e3>
+    28ee:	83 c2 0f             	add    $0xf,%edx
+    28f1:	83 e8 0f             	sub    $0xf,%eax
+    28f4:	88 13                	mov    %dl,(%rbx)
+    28f6:	c7 46 02 ff ff ff ff 	movl   $0xffffffff,0x2(%rsi)
+    28fd:	3d fb 03 00 00       	cmp    $0x3fb,%eax
+    2902:	76 17                	jbe    291b <LZ4_compress_fast_extState+0xacb>
+    2904:	2d fc 03 00 00       	sub    $0x3fc,%eax
+    2909:	49 83 c0 04          	add    $0x4,%r8
+    290d:	41 c7 00 ff ff ff ff 	movl   $0xffffffff,(%r8)
+    2914:	3d fb 03 00 00       	cmp    $0x3fb,%eax
+    2919:	77 e9                	ja     2904 <LZ4_compress_fast_extState+0xab4>
+    291b:	89 c2                	mov    %eax,%edx
+    291d:	bb 81 80 80 80       	mov    $0x80808081,%ebx
+    2922:	48 0f af d3          	imul   %rbx,%rdx
+    2926:	48 c1 ea 27          	shr    $0x27,%rdx
+    292a:	89 d6                	mov    %edx,%esi
+    292c:	4c 01 c6             	add    %r8,%rsi
+    292f:	41 89 d0             	mov    %edx,%r8d
+    2932:	41 c1 e0 08          	shl    $0x8,%r8d
+    2936:	48 8d 5e 01          	lea    0x1(%rsi),%rbx
+    293a:	41 29 d0             	sub    %edx,%r8d
+    293d:	44 29 c0             	sub    %r8d,%eax
+    2940:	88 06                	mov    %al,(%rsi)
+    2942:	e9 f3 fe ff ff       	jmp    283a <LZ4_compress_fast_extState+0x9ea>
+    2947:	48 83 c0 08          	add    $0x8,%rax
+    294b:	48 83 c2 08          	add    $0x8,%rdx
+    294f:	4c 39 f8             	cmp    %r15,%rax
+    2952:	0f 82 67 ff ff ff    	jb     28bf <LZ4_compress_fast_extState+0xa6f>
+    2958:	48 3b 45 a0          	cmp    -0x60(%rbp),%rax
+    295c:	73 10                	jae    296e <LZ4_compress_fast_extState+0xb1e>
+    295e:	44 8b 30             	mov    (%rax),%r14d
+    2961:	44 39 32             	cmp    %r14d,(%rdx)
+    2964:	75 08                	jne    296e <LZ4_compress_fast_extState+0xb1e>
+    2966:	48 83 c0 04          	add    $0x4,%rax
+    296a:	48 83 c2 04          	add    $0x4,%rdx
+    296e:	48 3b 45 98          	cmp    -0x68(%rbp),%rax
+    2972:	73 12                	jae    2986 <LZ4_compress_fast_extState+0xb36>
+    2974:	44 0f b7 30          	movzwl (%rax),%r14d
+    2978:	66 44 39 32          	cmp    %r14w,(%rdx)
+    297c:	75 08                	jne    2986 <LZ4_compress_fast_extState+0xb36>
+    297e:	48 83 c0 02          	add    $0x2,%rax
+    2982:	48 83 c2 02          	add    $0x2,%rdx
+    2986:	48 3b 45 b8          	cmp    -0x48(%rbp),%rax
+    298a:	73 10                	jae    299c <LZ4_compress_fast_extState+0xb4c>
+    298c:	44 0f b6 30          	movzbl (%rax),%r14d
+    2990:	44 38 32             	cmp    %r14b,(%rdx)
+    2993:	0f 94 c2             	sete   %dl
+    2996:	0f b6 d2             	movzbl %dl,%edx
+    2999:	48 01 d0             	add    %rdx,%rax
+    299c:	44 29 d0             	sub    %r10d,%eax
+    299f:	e9 38 ff ff ff       	jmp    28dc <LZ4_compress_fast_extState+0xa8c>
+    29a4:	49 39 cc             	cmp    %rcx,%r12
+    29a7:	73 12                	jae    29bb <LZ4_compress_fast_extState+0xb6b>
+    29a9:	49 39 f5             	cmp    %rsi,%r13
+    29ac:	73 0d                	jae    29bb <LZ4_compress_fast_extState+0xb6b>
+    29ae:	0f b6 41 ff          	movzbl -0x1(%rcx),%eax
+    29b2:	38 46 ff             	cmp    %al,-0x1(%rsi)
+    29b5:	0f 84 73 03 00 00    	je     2d2e <LZ4_compress_fast_extState+0xede>
+    29bb:	48 89 f2             	mov    %rsi,%rdx
+    29be:	41 b8 81 80 80 80    	mov    $0x80808081,%r8d
+    29c4:	49 8d 43 01          	lea    0x1(%r11),%rax
+    29c8:	4c 29 ea             	sub    %r13,%rdx
+    29cb:	41 89 d1             	mov    %edx,%r9d
+    29ce:	4d 0f af c1          	imul   %r9,%r8
+    29d2:	49 c1 e8 27          	shr    $0x27,%r8
+    29d6:	4f 8d 44 01 08       	lea    0x8(%r9,%r8,1),%r8
+    29db:	49 01 c0             	add    %rax,%r8
+    29de:	4c 39 45 b0          	cmp    %r8,-0x50(%rbp)
+    29e2:	0f 82 80 f7 ff ff    	jb     2168 <LZ4_compress_fast_extState+0x318>
+    29e8:	83 fa 0e             	cmp    $0xe,%edx
+    29eb:	0f 87 a5 02 00 00    	ja     2c96 <LZ4_compress_fast_extState+0xe46>
+    29f1:	c1 e2 04             	shl    $0x4,%edx
+    29f4:	41 88 13             	mov    %dl,(%r11)
+    29f7:	49 01 c1             	add    %rax,%r9
+    29fa:	49 8b 55 00          	mov    0x0(%r13),%rdx
+    29fe:	48 83 c0 08          	add    $0x8,%rax
+    2a02:	49 83 c5 08          	add    $0x8,%r13
+    2a06:	48 89 50 f8          	mov    %rdx,-0x8(%rax)
+    2a0a:	49 39 c1             	cmp    %rax,%r9
+    2a0d:	77 eb                	ja     29fa <LZ4_compress_fast_extState+0xbaa>
+    2a0f:	4c 8b 55 b0          	mov    -0x50(%rbp),%r10
+    2a13:	eb 65                	jmp    2a7a <LZ4_compress_fast_extState+0xc2a>
+    2a15:	01 c1                	add    %eax,%ecx
+    2a17:	41 88 0b             	mov    %cl,(%r11)
+    2a1a:	49 89 d3             	mov    %rdx,%r11
+    2a1d:	4c 39 fe             	cmp    %r15,%rsi
+    2a20:	0f 87 00 03 00 00    	ja     2d26 <LZ4_compress_fast_extState+0xed6>
+    2a26:	48 8b 46 fe          	mov    -0x2(%rsi),%rax
+    2a2a:	48 8d 56 fe          	lea    -0x2(%rsi),%rdx
+    2a2e:	4c 29 e2             	sub    %r12,%rdx
+    2a31:	49 0f af c6          	imul   %r14,%rax
+    2a35:	48 c1 e8 34          	shr    $0x34,%rax
+    2a39:	89 14 87             	mov    %edx,(%rdi,%rax,4)
+    2a3c:	48 8b 06             	mov    (%rsi),%rax
+    2a3f:	48 89 f2             	mov    %rsi,%rdx
+    2a42:	4c 29 e2             	sub    %r12,%rdx
+    2a45:	49 0f af c6          	imul   %r14,%rax
+    2a49:	48 c1 e8 34          	shr    $0x34,%rax
+    2a4d:	48 8d 04 87          	lea    (%rdi,%rax,4),%rax
+    2a51:	8b 08                	mov    (%rax),%ecx
+    2a53:	89 10                	mov    %edx,(%rax)
+    2a55:	4c 01 e1             	add    %r12,%rcx
+    2a58:	48 8d 81 ff ff 00 00 	lea    0xffff(%rcx),%rax
+    2a5f:	48 39 c6             	cmp    %rax,%rsi
+    2a62:	0f 87 5e 02 00 00    	ja     2cc6 <LZ4_compress_fast_extState+0xe76>
+    2a68:	8b 06                	mov    (%rsi),%eax
+    2a6a:	39 01                	cmp    %eax,(%rcx)
+    2a6c:	0f 85 54 02 00 00    	jne    2cc6 <LZ4_compress_fast_extState+0xe76>
+    2a72:	41 c6 03 00          	movb   $0x0,(%r11)
+    2a76:	4d 8d 4b 01          	lea    0x1(%r11),%r9
+    2a7a:	48 89 f0             	mov    %rsi,%rax
+    2a7d:	48 8d 5e 04          	lea    0x4(%rsi),%rbx
+    2a81:	49 8d 51 02          	lea    0x2(%r9),%rdx
+    2a85:	48 29 c8             	sub    %rcx,%rax
+    2a88:	48 83 c1 04          	add    $0x4,%rcx
+    2a8c:	66 41 89 01          	mov    %ax,(%r9)
+    2a90:	48 89 d8             	mov    %rbx,%rax
+    2a93:	4c 39 fb             	cmp    %r15,%rbx
+    2a96:	0f 83 b3 00 00 00    	jae    2b4f <LZ4_compress_fast_extState+0xcff>
+    2a9c:	4c 8b 01             	mov    (%rcx),%r8
+    2a9f:	4c 8b 28             	mov    (%rax),%r13
+    2aa2:	4d 39 e8             	cmp    %r13,%r8
+    2aa5:	0f 84 93 00 00 00    	je     2b3e <LZ4_compress_fast_extState+0xcee>
+    2aab:	4d 31 e8             	xor    %r13,%r8
+    2aae:	f3 4d 0f bc c0       	tzcnt  %r8,%r8
+    2ab3:	49 c1 e8 03          	shr    $0x3,%r8
+    2ab7:	44 01 c0             	add    %r8d,%eax
+    2aba:	29 d8                	sub    %ebx,%eax
+    2abc:	8d 48 04             	lea    0x4(%rax),%ecx
+    2abf:	48 01 ce             	add    %rcx,%rsi
+    2ac2:	89 c1                	mov    %eax,%ecx
+    2ac4:	c1 e9 08             	shr    $0x8,%ecx
+    2ac7:	83 c1 06             	add    $0x6,%ecx
+    2aca:	48 01 d1             	add    %rdx,%rcx
+    2acd:	49 39 ca             	cmp    %rcx,%r10
+    2ad0:	0f 82 92 f6 ff ff    	jb     2168 <LZ4_compress_fast_extState+0x318>
+    2ad6:	41 0f b6 0b          	movzbl (%r11),%ecx
+    2ada:	83 f8 0e             	cmp    $0xe,%eax
+    2add:	0f 86 32 ff ff ff    	jbe    2a15 <LZ4_compress_fast_extState+0xbc5>
+    2ae3:	83 c1 0f             	add    $0xf,%ecx
+    2ae6:	83 e8 0f             	sub    $0xf,%eax
+    2ae9:	41 88 0b             	mov    %cl,(%r11)
+    2aec:	41 c7 41 02 ff ff ff 	movl   $0xffffffff,0x2(%r9)
+    2af3:	ff 
+    2af4:	3d fb 03 00 00       	cmp    $0x3fb,%eax
+    2af9:	76 16                	jbe    2b11 <LZ4_compress_fast_extState+0xcc1>
+    2afb:	2d fc 03 00 00       	sub    $0x3fc,%eax
+    2b00:	48 83 c2 04          	add    $0x4,%rdx
+    2b04:	c7 02 ff ff ff ff    	movl   $0xffffffff,(%rdx)
+    2b0a:	3d fb 03 00 00       	cmp    $0x3fb,%eax
+    2b0f:	77 ea                	ja     2afb <LZ4_compress_fast_extState+0xcab>
+    2b11:	89 c1                	mov    %eax,%ecx
+    2b13:	bb 81 80 80 80       	mov    $0x80808081,%ebx
+    2b18:	48 0f af cb          	imul   %rbx,%rcx
+    2b1c:	48 c1 e9 27          	shr    $0x27,%rcx
+    2b20:	41 89 c8             	mov    %ecx,%r8d
+    2b23:	4c 01 c2             	add    %r8,%rdx
+    2b26:	41 89 c8             	mov    %ecx,%r8d
+    2b29:	41 c1 e0 08          	shl    $0x8,%r8d
+    2b2d:	4c 8d 5a 01          	lea    0x1(%rdx),%r11
+    2b31:	41 29 c8             	sub    %ecx,%r8d
+    2b34:	44 29 c0             	sub    %r8d,%eax
+    2b37:	88 02                	mov    %al,(%rdx)
+    2b39:	e9 df fe ff ff       	jmp    2a1d <LZ4_compress_fast_extState+0xbcd>
+    2b3e:	48 83 c0 08          	add    $0x8,%rax
+    2b42:	48 83 c1 08          	add    $0x8,%rcx
+    2b46:	4c 39 f8             	cmp    %r15,%rax
+    2b49:	0f 82 4d ff ff ff    	jb     2a9c <LZ4_compress_fast_extState+0xc4c>
+    2b4f:	48 3b 45 98          	cmp    -0x68(%rbp),%rax
+    2b53:	73 10                	jae    2b65 <LZ4_compress_fast_extState+0xd15>
+    2b55:	44 8b 00             	mov    (%rax),%r8d
+    2b58:	44 39 01             	cmp    %r8d,(%rcx)
+    2b5b:	75 08                	jne    2b65 <LZ4_compress_fast_extState+0xd15>
+    2b5d:	48 83 c0 04          	add    $0x4,%rax
+    2b61:	48 83 c1 04          	add    $0x4,%rcx
+    2b65:	48 3b 45 90          	cmp    -0x70(%rbp),%rax
+    2b69:	73 12                	jae    2b7d <LZ4_compress_fast_extState+0xd2d>
+    2b6b:	44 0f b7 00          	movzwl (%rax),%r8d
+    2b6f:	66 44 39 01          	cmp    %r8w,(%rcx)
+    2b73:	75 08                	jne    2b7d <LZ4_compress_fast_extState+0xd2d>
+    2b75:	48 83 c0 02          	add    $0x2,%rax
+    2b79:	48 83 c1 02          	add    $0x2,%rcx
+    2b7d:	48 3b 45 b8          	cmp    -0x48(%rbp),%rax
+    2b81:	73 10                	jae    2b93 <LZ4_compress_fast_extState+0xd43>
+    2b83:	44 0f b6 00          	movzbl (%rax),%r8d
+    2b87:	44 38 01             	cmp    %r8b,(%rcx)
+    2b8a:	0f 94 c1             	sete   %cl
+    2b8d:	0f b6 c9             	movzbl %cl,%ecx
+    2b90:	48 01 c8             	add    %rcx,%rax
+    2b93:	29 d8                	sub    %ebx,%eax
+    2b95:	e9 22 ff ff ff       	jmp    2abc <LZ4_compress_fast_extState+0xc6c>
+    2b9a:	44 69 52 01 b1 79 37 	imul   $0x9e3779b1,0x1(%rdx),%r10d
+    2ba1:	9e 
+    2ba2:	48 8d 72 01          	lea    0x1(%rdx),%rsi
+    2ba6:	49 89 d5             	mov    %rdx,%r13
+    2ba9:	41 c1 ea 13          	shr    $0x13,%r10d
+    2bad:	e9 92 f3 ff ff       	jmp    1f44 <LZ4_compress_fast_extState+0xf4>
+    2bb2:	4c 8b 41 01          	mov    0x1(%rcx),%r8
+    2bb6:	49 89 ce             	mov    %rcx,%r14
+    2bb9:	48 89 55 c8          	mov    %rdx,-0x38(%rbp)
+    2bbd:	48 83 c1 01          	add    $0x1,%rcx
+    2bc1:	4d 0f af c5          	imul   %r13,%r8
+    2bc5:	49 c1 e8 34          	shr    $0x34,%r8
+    2bc9:	e9 a9 f4 ff ff       	jmp    2077 <LZ4_compress_fast_extState+0x227>
+    2bce:	49 89 d5             	mov    %rdx,%r13
+    2bd1:	e9 ba f3 ff ff       	jmp    1f90 <LZ4_compress_fast_extState+0x140>
+    2bd6:	48 89 55 c8          	mov    %rdx,-0x38(%rbp)
+    2bda:	49 89 ce             	mov    %rcx,%r14
+    2bdd:	e9 fd f4 ff ff       	jmp    20df <LZ4_compress_fast_extState+0x28f>
+    2be2:	44 8d 46 f1          	lea    -0xf(%rsi),%r8d
+    2be6:	41 c6 01 f0          	movb   $0xf0,(%r9)
+    2bea:	41 81 f8 fe 00 00 00 	cmp    $0xfe,%r8d
+    2bf1:	7e 18                	jle    2c0b <LZ4_compress_fast_extState+0xdbb>
+    2bf3:	41 81 e8 ff 00 00 00 	sub    $0xff,%r8d
+    2bfa:	48 83 c0 01          	add    $0x1,%rax
+    2bfe:	c6 40 ff ff          	movb   $0xff,-0x1(%rax)
+    2c02:	41 81 f8 fe 00 00 00 	cmp    $0xfe,%r8d
+    2c09:	7f e8                	jg     2bf3 <LZ4_compress_fast_extState+0xda3>
+    2c0b:	44 88 00             	mov    %r8b,(%rax)
+    2c0e:	48 83 c0 01          	add    $0x1,%rax
+    2c12:	e9 f0 f7 ff ff       	jmp    2407 <LZ4_compress_fast_extState+0x5b7>
+    2c17:	44 8d 46 f1          	lea    -0xf(%rsi),%r8d
+    2c1b:	c6 03 f0             	movb   $0xf0,(%rbx)
+    2c1e:	41 81 f8 fe 00 00 00 	cmp    $0xfe,%r8d
+    2c25:	7e 18                	jle    2c3f <LZ4_compress_fast_extState+0xdef>
+    2c27:	41 81 e8 ff 00 00 00 	sub    $0xff,%r8d
+    2c2e:	48 83 c2 01          	add    $0x1,%rdx
+    2c32:	c6 42 ff ff          	movb   $0xff,-0x1(%rdx)
+    2c36:	41 81 f8 fe 00 00 00 	cmp    $0xfe,%r8d
+    2c3d:	7f e8                	jg     2c27 <LZ4_compress_fast_extState+0xdd7>
+    2c3f:	44 88 02             	mov    %r8b,(%rdx)
+    2c42:	48 83 c2 01          	add    $0x1,%rdx
+    2c46:	e9 cd fb ff ff       	jmp    2818 <LZ4_compress_fast_extState+0x9c8>
+    2c4b:	83 ee 0f             	sub    $0xf,%esi
+    2c4e:	41 c6 03 f0          	movb   $0xf0,(%r11)
+    2c52:	81 fe fe 00 00 00    	cmp    $0xfe,%esi
+    2c58:	7e 16                	jle    2c70 <LZ4_compress_fast_extState+0xe20>
+    2c5a:	81 ee ff 00 00 00    	sub    $0xff,%esi
+    2c60:	48 83 c2 01          	add    $0x1,%rdx
+    2c64:	c6 42 ff ff          	movb   $0xff,-0x1(%rdx)
+    2c68:	81 fe fe 00 00 00    	cmp    $0xfe,%esi
+    2c6e:	7f ea                	jg     2c5a <LZ4_compress_fast_extState+0xe0a>
+    2c70:	40 88 32             	mov    %sil,(%rdx)
+    2c73:	48 83 c2 01          	add    $0x1,%rdx
+    2c77:	e9 c5 f9 ff ff       	jmp    2641 <LZ4_compress_fast_extState+0x7f1>
+    2c7c:	69 71 01 b1 79 37 9e 	imul   $0x9e3779b1,0x1(%rcx),%esi
+    2c83:	4c 89 55 b0          	mov    %r10,-0x50(%rbp)
+    2c87:	4c 8d 41 01          	lea    0x1(%rcx),%r8
+    2c8b:	49 89 cd             	mov    %rcx,%r13
+    2c8e:	c1 ee 13             	shr    $0x13,%esi
+    2c91:	e9 76 f6 ff ff       	jmp    230c <LZ4_compress_fast_extState+0x4bc>
+    2c96:	83 ea 0f             	sub    $0xf,%edx
+    2c99:	41 c6 03 f0          	movb   $0xf0,(%r11)
+    2c9d:	81 fa fe 00 00 00    	cmp    $0xfe,%edx
+    2ca3:	7e 16                	jle    2cbb <LZ4_compress_fast_extState+0xe6b>
+    2ca5:	81 ea ff 00 00 00    	sub    $0xff,%edx
+    2cab:	48 83 c0 01          	add    $0x1,%rax
+    2caf:	c6 40 ff ff          	movb   $0xff,-0x1(%rax)
+    2cb3:	81 fa fe 00 00 00    	cmp    $0xfe,%edx
+    2cb9:	7f ea                	jg     2ca5 <LZ4_compress_fast_extState+0xe55>
+    2cbb:	88 10                	mov    %dl,(%rax)
+    2cbd:	48 83 c0 01          	add    $0x1,%rax
+    2cc1:	e9 31 fd ff ff       	jmp    29f7 <LZ4_compress_fast_extState+0xba7>
+    2cc6:	48 8b 56 01          	mov    0x1(%rsi),%rdx
+    2cca:	49 89 f5             	mov    %rsi,%r13
+    2ccd:	4c 89 55 b0          	mov    %r10,-0x50(%rbp)
+    2cd1:	48 83 c6 01          	add    $0x1,%rsi
+    2cd5:	49 0f af d6          	imul   %r14,%rdx
+    2cd9:	48 c1 ea 34          	shr    $0x34,%rdx
+    2cdd:	e9 01 f5 ff ff       	jmp    21e3 <LZ4_compress_fast_extState+0x393>
+    2ce2:	4c 89 de             	mov    %r11,%rsi
+    2ce5:	49 89 cc             	mov    %rcx,%r12
+    2ce8:	48 2b 75 d0          	sub    -0x30(%rbp),%rsi
+    2cec:	e9 6d f6 ff ff       	jmp    235e <LZ4_compress_fast_extState+0x50e>
+    2cf1:	48 83 e9 01          	sub    $0x1,%rcx
+    2cf5:	48 83 e8 01          	sub    $0x1,%rax
+    2cf9:	4c 39 e9             	cmp    %r13,%rcx
+    2cfc:	0f 86 03 f9 ff ff    	jbe    2605 <LZ4_compress_fast_extState+0x7b5>
+    2d02:	49 39 c4             	cmp    %rax,%r12
+    2d05:	0f 82 ed f8 ff ff    	jb     25f8 <LZ4_compress_fast_extState+0x7a8>
+    2d0b:	e9 f5 f8 ff ff       	jmp    2605 <LZ4_compress_fast_extState+0x7b5>
+    2d10:	48 83 e9 01          	sub    $0x1,%rcx
+    2d14:	48 83 e8 01          	sub    $0x1,%rax
+    2d18:	4c 39 f1             	cmp    %r14,%rcx
+    2d1b:	0f 87 c7 fa ff ff    	ja     27e8 <LZ4_compress_fast_extState+0x998>
+    2d21:	e9 d5 fa ff ff       	jmp    27fb <LZ4_compress_fast_extState+0x9ab>
+    2d26:	49 89 f5             	mov    %rsi,%r13
+    2d29:	e9 1a f5 ff ff       	jmp    2248 <LZ4_compress_fast_extState+0x3f8>
+    2d2e:	48 83 ee 01          	sub    $0x1,%rsi
+    2d32:	48 83 e9 01          	sub    $0x1,%rcx
+    2d36:	4c 39 ee             	cmp    %r13,%rsi
+    2d39:	0f 86 7c fc ff ff    	jbe    29bb <LZ4_compress_fast_extState+0xb6b>
+    2d3f:	49 39 cc             	cmp    %rcx,%r12
+    2d42:	0f 82 66 fc ff ff    	jb     29ae <LZ4_compress_fast_extState+0xb5e>
+    2d48:	e9 6e fc ff ff       	jmp    29bb <LZ4_compress_fast_extState+0xb6b>

@@ -1,0 +1,21 @@
+{
+  "started_unix": 1789187827.8610168,
+  "qemu_returncode": 0,
+  "kernel_failure": false,
+  "guest_status_zero": false,
+  "guest_record": {
+    "scope": "exact119 KVM functional export and full CLI; no performance samples",
+    "kernel": "5.15.0-119-generic",
+    "uid": 0,
+    "boot_id": "8ce5e461-f14a-4d31-88ee-0e5adb301398",
+    "stage": "build-export-registration-and-cli",
+    "status": "fail",
+    "owner_text": "0xffffffffc0008000",
+    "error": "Traceback (most recent call last):\n  File \"/work/guest.py\", line 182, in main\n    execute([REPO / 'vkso', 'exec', WORK, '--symbols', ROOT / 'symbols.txt',\n  File \"/work/guest.py\", line 40, in execute\n    raise RuntimeError(f'command returned {result.returncode}; see {log}')\nRuntimeError: command returned 1; see /work/validation/export-and-cli.log\n",
+    "restore_verification_error": "Traceback (most recent call last):\n  File \"/work/guest.py\", line 205, in main\n    verify_restored_pages()\n  File \"/work/guest.py\", line 119, in verify_restored_pages\n    active = json.loads((OUT / 'registered-pfns.json').read_text())\n  File \"/usr/lib/python3.10/pathlib.py\", line 1134, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/usr/lib/python3.10/pathlib.py\", line 1119, in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nFileNotFoundError: [Errno 2] No such file or directory: '/work/validation/registered-pfns.json'\n",
+    "module_cleanup": "Skipped unload because restoration is unverified; private guest powers off.",
+    "modules_after": "page_cache_replace 49152 0 - Live 0xffffffffc001d000 (OE)\nvkso_kernel_reader 16384 0 - Live 0xffffffffc0015000 (OE)\nvkso_lz4 36864 0 - Live 0xffffffffc0008000 (OE)\nvirtio_blk 20480 1 - Live 0xffffffffc0002000\n"
+  },
+  "status": "fail",
+  "finished_unix": 1789187856.341025
+}

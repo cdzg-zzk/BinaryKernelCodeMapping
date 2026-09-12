@@ -1,0 +1,8 @@
+{
+  "category": "PFN-observer-failure-before-CLI",
+  "observed": "both static checks, header, DSO+shim build and four-page registration reached; reused Clocktime footprint observer raised PFN unavailable",
+  "hypothesis": "buffered pagemap can retain nonpresent entries for adjacent text pages before they fault; next observer uses unbuffered reads and saves source PFNs/raw entries",
+  "algorithm_cases_started": 0,
+  "module_cleanup": "unload skipped; isolated VM shut down",
+  "next_action": "fresh full-method attempt with raw PFN observer"
+}

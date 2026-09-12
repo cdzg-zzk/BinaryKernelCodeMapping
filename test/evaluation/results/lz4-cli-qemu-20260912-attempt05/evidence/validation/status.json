@@ -1,0 +1,11 @@
+{
+  "scope": "exact119 KVM functional export and full CLI; no performance samples",
+  "kernel": "5.15.0-119-generic",
+  "uid": 0,
+  "boot_id": "2d19b52c-886a-4be0-a4c0-054de073815b",
+  "stage": "build-export-registration-and-cli",
+  "status": "fail",
+  "owner_text": "0xffffffffc0008000",
+  "error": "Traceback (most recent call last):\n  File \"/work/guest.py\", line 233, in main\n    execute([REPO / 'vkso', 'exec', WORK, '--symbols', ROOT / 'symbols.txt',\n  File \"/work/guest.py\", line 42, in execute\n    raise RuntimeError(f'command returned {result.returncode}; see {log}')\nRuntimeError: command returned 1; see /work/validation/export-and-cli.log\n",
+  "modules_after": "virtio_blk 20480 1 - Live 0xffffffffc0002000\n"
+}

@@ -1,0 +1,6 @@
+{
+  "scope": "full CLI functional validation; no performance observations",
+  "status": "fail",
+  "cases": [],
+  "error": "Traceback (most recent call last):\n  File \"/work/guest.py\", line 54, in validate_cli\n    footprint = observe(library, Path(fields['page_map']), 'vkso')\n  File \"/work/helpers/footprint.py\", line 42, in observe\n    raise ValueError(\"PFN unavailable; root with pagemap access is required\")\nValueError: PFN unavailable; root with pagemap access is required\n"
+}

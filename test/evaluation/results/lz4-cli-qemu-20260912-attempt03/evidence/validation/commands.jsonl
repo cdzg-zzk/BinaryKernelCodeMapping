@@ -1,0 +1,8 @@
+{"argv": ["insmod", "/work/owner/vkso_lz4.ko"], "log": "/work/validation/load-vkso_lz4.log", "returncode": 0}
+{"argv": ["insmod", "/work/helpers/vkso_kernel_reader.ko"], "log": "/work/validation/load-vkso_kernel_reader.log", "returncode": 0}
+{"argv": ["insmod", "/work/repo/page_cache_replace/page_cache_replace.ko"], "log": "/work/validation/load-page_cache_replace.log", "returncode": 0}
+{"argv": ["/work/repo/vkso", "init", "/work/validation/export", "--symbols", "/work/symbols.txt"], "log": "/work/validation/workspace-init.log", "returncode": 0}
+{"argv": ["/work/repo/vkso", "exec", "/work/validation/export", "--symbols", "/work/symbols.txt", "--module", "/work/owner/vkso_lz4.ko", "--owner-ko", "/work/owner/vkso_lz4.ko", "--vmlinux", "/work/vmlinux-5.15.0-119-generic", "--", "python3", "/work/guest.py", "--validate-cli"], "log": "/work/validation/export-and-cli.log", "returncode": 1}
+{"argv": ["rmmod", "page_cache_replace"], "log": "/work/validation/unload-page_cache_replace.log", "returncode": 0}
+{"argv": ["rmmod", "vkso_kernel_reader"], "log": "/work/validation/unload-vkso_kernel_reader.log", "returncode": 0}
+{"argv": ["rmmod", "vkso_lz4"], "log": "/work/validation/unload-vkso_lz4.log", "returncode": 0}

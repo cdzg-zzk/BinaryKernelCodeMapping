@@ -1,0 +1,54 @@
+make: Entering directory '/usr/src/linux-headers-5.15.0-119-generic'
+warning: the compiler differs from the one used to build the kernel
+  The kernel was built by: gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+  You are using:           gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+  CC [M]  /tmp/vkso-lz4-guest-owner-current/lz4_compress.o
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: vkso_LZ4_saveDict()+0x6d: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: vkso_LZ4_compress_fast_continue()+0x250: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: vkso_LZ4_loadDict()+0xb5: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: vkso_LZ4_loadDict()+0xee: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: LZ4_compress_destSize_generic()+0x24c: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: LZ4_compress_fast_extState()+0x1a3: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: LZ4_compress_fast_extState()+0x2f3: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: LZ4_compress_fast_extState()+0x328: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: vkso_LZ4_compress_fast()+0x24: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: vkso_LZ4_compress_default()+0x27: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: vkso_LZ4_compress_destSize()+0x7f: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: vkso_LZ4_compress_destSize()+0xa5: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_compress.o: warning: objtool: vkso_LZ4_resetStream()+0x11: 'naked' return found in RETHUNK build
+  CC [M]  /tmp/vkso-lz4-guest-owner-current/lz4_decompress.o
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_setStreamDecode()+0x22: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe()+0x11d: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe()+0x247: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_partial()+0x101: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_partial()+0x286: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast()+0xec: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast()+0x1c6: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: LZ4_decompress_safe_withPrefix64k()+0x122: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: LZ4_decompress_safe_withPrefix64k()+0x23a: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: LZ4_decompress_safe_withSmallPrefix()+0x128: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: LZ4_decompress_safe_withSmallPrefix()+0x254: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: LZ4_decompress_fast_extDict()+0x144: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: LZ4_decompress_fast_extDict()+0x2a4: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_usingDict()+0x1b: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_usingDict()+0x23: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_continue()+0x68: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_continue()+0x1b9: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_fast_continue()+0x1ea: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_forceExtDict()+0x106: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_forceExtDict()+0x2b1: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_continue()+0x75: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_continue()+0x19a: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_continue()+0x1cb: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_usingDict()+0x1e: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_usingDict()+0x2d: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_usingDict()+0x35: 'naked' return found in RETHUNK build
+/tmp/vkso-lz4-guest-owner-current/lz4_decompress.o: warning: objtool: vkso_LZ4_decompress_safe_usingDict()+0x40: 'naked' return found in RETHUNK build
+  CC [M]  /tmp/vkso-lz4-guest-owner-current/module_meta.o
+  LD [M]  /tmp/vkso-lz4-guest-owner-current/vkso_lz4.o
+  MODPOST /tmp/vkso-lz4-guest-owner-current/Module.symvers
+  CC [M]  /tmp/vkso-lz4-guest-owner-current/vkso_lz4.mod.o
+  LD [M]  /tmp/vkso-lz4-guest-owner-current/vkso_lz4.ko
+  BTF [M] /tmp/vkso-lz4-guest-owner-current/vkso_lz4.ko
+Skipping BTF generation for /tmp/vkso-lz4-guest-owner-current/vkso_lz4.ko due to unavailability of vmlinux
+make: Leaving directory '/usr/src/linux-headers-5.15.0-119-generic'

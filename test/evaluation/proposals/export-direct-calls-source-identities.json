@@ -1,0 +1,8 @@
+{
+  "scope": "unapplied proposal; actual core sources unchanged",
+  "sources": {
+    "make_dll/build_PIC_so.py": "1efd26152cd34f5a2c6967a51631e0cec2affbeecaeb6f6b0d3982e581d1d580",
+    "kernel_cgd/function_checker/functions_checker.py": "d3780a8c7781c29d417313e066596c1f6249b5b05077e792446dbe0db37e100f"
+  },
+  "proposal_copy_directory": "/tmp/vkso-export-direct-calls-proposal"
+}

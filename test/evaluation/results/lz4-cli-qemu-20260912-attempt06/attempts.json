@@ -1,0 +1,116 @@
+[
+  {
+    "attempt": 1,
+    "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01",
+    "status": "fail",
+    "diagnosis": {
+      "category": "guest-environment-preparation",
+      "cause": "/usr/bin/env missing from initramfs; vkso shebang cannot resolve despite script being present",
+      "algorithm_cases_started": 0,
+      "next_action": "include ordinary /usr/bin/env runtime; fresh guest and output directory"
+    }
+  },
+  {
+    "attempt": 2,
+    "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt02",
+    "status": "preparation-superseded",
+    "diagnosis": {
+      "category": "preparation-superseded",
+      "cause": "new verified restore-failure finding requires explicit restored-PFN check before owner unload",
+      "algorithm_cases_started": 0,
+      "next_action": "update guest observer; fresh attempt directory"
+    }
+  },
+  {
+    "attempt": 3,
+    "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03",
+    "status": "fail",
+    "diagnosis": {
+      "category": "guest-environment-preparation",
+      "cause": "/dev/fd symlink missing after devtmpfs mount; Bash process substitution failed",
+      "runtime_krg_built": {
+        "nodes": 64615,
+        "edges": 237028
+      },
+      "algorithm_cases_started": 0,
+      "next_action": "provide normal /dev/fd -> /proc/self/fd guest runtime link; fresh guest"
+    }
+  },
+  {
+    "attempt": 4,
+    "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04",
+    "status": "fail",
+    "diagnosis": {
+      "category": "PFN-observer-failure-before-CLI",
+      "observed": "both static checks, header, DSO+shim build and four-page registration reached; reused Clocktime footprint observer raised PFN unavailable",
+      "hypothesis": "buffered pagemap can retain nonpresent entries for adjacent text pages before they fault; next observer uses unbuffered reads and saves source PFNs/raw entries",
+      "algorithm_cases_started": 0,
+      "module_cleanup": "unload skipped; isolated VM shut down",
+      "next_action": "fresh full-method attempt with raw PFN observer"
+    }
+  },
+  {
+    "attempt": 5,
+    "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05",
+    "status": "fail",
+    "diagnosis": {
+      "category": "runtime-execution-failure",
+      "input": "dickens",
+      "block_bytes": 65536,
+      "operation": "compression",
+      "exit_signal": "SIGSEGV",
+      "complete_input_block_pairs": 0,
+      "registered_pages_verified": 4,
+      "restored_pages_verified": 4,
+      "hypothesis": "direct rel32 call into omitted kernel helper mapping despite shim import declaration",
+      "next_action": "fresh unchanged owner from exact119 headers; full CLI GDB diagnostic; no core fix"
+    }
+  },
+  {
+    "attempt": 6,
+    "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06",
+    "status": "fail",
+    "diagnosis": {
+      "category": "runtime-closure-binding-failure",
+      "scope": "fresh unchanged119 LZ4 owner and full CLI; no performance observations",
+      "first_operation": {
+        "input": "dickens",
+        "block_bytes": 65536,
+        "operation": "compression",
+        "complete_pairs": 0,
+        "selected_cli_exit_signal": "SIGSEGV"
+      },
+      "diagnostic": {
+        "guest_kernel_call_instruction": "0xffffffffc0009e78",
+        "guest_kernel_memset": "0xffffffff816bb8a0",
+        "rel32_displacement": -1049945565,
+        "user_call_instruction": "0x7ffff7d87e78",
+        "predicted_user_destination": "0x7fffb94398a0",
+        "observed_sigsegv_ip": "0x7fffb94398a0",
+        "prediction_matches": true,
+        "target_is_mapped": false,
+        "memset_arguments": {
+          "rsi": 0,
+          "rdx": 16416
+        },
+        "backtrace": "LZ4_compress_fast_extState -> vkso_LZ4_compress_default -> full LZ4 frame/CLI"
+      },
+      "ELF_evidence": {
+        "registered_pages": 4,
+        "layout": "3 module text pages and 1 rodata page; kernel memset target omitted",
+        "helper_symbols": "memset/memcpy/memmove are UND imports",
+        "dynamic_relocations": "9 R_X86_64_64 data relocations; no helper direct-call rebinding"
+      },
+      "restoration": {
+        "source_pfns_verified_before_call": 4,
+        "restored_offsets_not_source_pfn": 4,
+        "modules_unloaded": true
+      },
+      "observer_failure_attempt04": {
+        "classification": "buffered pagemap collection failure",
+        "independent_reproduction": "test/evaluation/results/pagemap-freshness-20260912/observation.json"
+      },
+      "remaining": "Repair/propose correct binding for direct relative helper calls in the full selected export method before rerunning all12filesx2blocksx2operations; no reduced closure or helper substitution used"
+    }
+  }
+]

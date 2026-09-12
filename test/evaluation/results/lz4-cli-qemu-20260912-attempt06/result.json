@@ -1,0 +1,19 @@
+{
+  "started_unix": 1789188294.1253746,
+  "qemu_returncode": 0,
+  "kernel_failure": false,
+  "guest_status_zero": false,
+  "guest_record": {
+    "scope": "exact119 KVM functional export and full CLI; no performance samples",
+    "kernel": "5.15.0-119-generic",
+    "uid": 0,
+    "boot_id": "b8ebd977-e6c6-4ee7-8d48-6bb08e1918b1",
+    "stage": "build-export-registration-and-cli",
+    "status": "fail",
+    "owner_text": "0xffffffffc0008000",
+    "error": "Traceback (most recent call last):\n  File \"/work/guest.py\", line 253, in main\n    execute([REPO / 'vkso', 'exec', WORK, '--symbols', ROOT / 'symbols.txt',\n  File \"/work/guest.py\", line 42, in execute\n    raise RuntimeError(f'command returned {result.returncode}; see {log}')\nRuntimeError: command returned 1; see /work/validation/export-and-cli.log\n",
+    "modules_after": "virtio_blk 20480 1 - Live 0xffffffffc0002000\n"
+  },
+  "status": "fail",
+  "finished_unix": 1789188323.112755
+}

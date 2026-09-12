@@ -1,0 +1,666 @@
+[    0.000000] Linux version 5.15.0-119-generic (buildd@lcy02-amd64-075) (gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0, GNU ld (GNU Binutils for Ubuntu) 2.38) #129-Ubuntu SMP Fri Aug 2 19:25:20 UTC 2024 (Ubuntu 5.15.0-119.129-generic 5.15.160)
+[    0.000000] Command line: console=ttyS0 init=/init panic=-1 oops=panic nokaslr
+[    0.000000] KERNEL supported cpus:
+[    0.000000]   Intel GenuineIntel
+[    0.000000]   AMD AuthenticAMD
+[    0.000000]   Hygon HygonGenuine
+[    0.000000]   Centaur CentaurHauls
+[    0.000000]   zhaoxin   Shanghai  
+[    0.000000] BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
+[    0.000000] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff] reserved
+[    0.000000] BIOS-e820: [mem 0x0000000000100000-0x00000000bffdcfff] usable
+[    0.000000] BIOS-e820: [mem 0x00000000bffdd000-0x00000000bfffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000feffc000-0x00000000feffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x0000000100000000-0x000000013fffffff] usable
+[    0.000000] NX (Execute Disable) protection: active
+[    0.000000] SMBIOS 2.8 present.
+[    0.000000] DMI: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.15.0-1 04/01/2014
+[    0.000000] Hypervisor detected: KVM
+[    0.000000] kvm-clock: Using msrs 4b564d01 and 4b564d00
+[    0.000000] kvm-clock: cpu 0, msr 4601001, primary cpu clock
+[    0.000002] kvm-clock: using sched offset of 318663699 cycles
+[    0.000007] clocksource: kvm-clock: mask: 0xffffffffffffffff max_cycles: 0x1cd42e4dffb, max_idle_ns: 881590591483 ns
+[    0.000018] tsc: Detected 2803.200 MHz processor
+[    0.000345] e820: update [mem 0x00000000-0x00000fff] usable ==> reserved
+[    0.000349] e820: remove [mem 0x000a0000-0x000fffff] usable
+[    0.000357] last_pfn = 0x140000 max_arch_pfn = 0x400000000
+[    0.000420] x86/PAT: Configuration [0-7]: WB  WC  UC- UC  WB  WP  UC- WT  
+[    0.000434] last_pfn = 0xbffdd max_arch_pfn = 0x400000000
+[    0.011337] found SMP MP-table at [mem 0x000f5ba0-0x000f5baf]
+[    0.011379] Using GB pages for direct mapping
+[    0.012333] RAMDISK: [mem 0xb8952000-0xbffcffff]
+[    0.012350] ACPI: Early table checksum verification disabled
+[    0.012381] ACPI: RSDP 0x00000000000F59C0 000014 (v00 BOCHS )
+[    0.012397] ACPI: RSDT 0x00000000BFFE18FE 000034 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.012405] ACPI: FACP 0x00000000BFFE17AA 000074 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.012427] ACPI: DSDT 0x00000000BFFE0040 00176A (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.012432] ACPI: FACS 0x00000000BFFE0000 000040
+[    0.012436] ACPI: APIC 0x00000000BFFE181E 000080 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.012441] ACPI: HPET 0x00000000BFFE189E 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.012446] ACPI: WAET 0x00000000BFFE18D6 000028 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.012449] ACPI: Reserving FACP table memory at [mem 0xbffe17aa-0xbffe181d]
+[    0.012451] ACPI: Reserving DSDT table memory at [mem 0xbffe0040-0xbffe17a9]
+[    0.012453] ACPI: Reserving FACS table memory at [mem 0xbffe0000-0xbffe003f]
+[    0.012454] ACPI: Reserving APIC table memory at [mem 0xbffe181e-0xbffe189d]
+[    0.012455] ACPI: Reserving HPET table memory at [mem 0xbffe189e-0xbffe18d5]
+[    0.012457] ACPI: Reserving WAET table memory at [mem 0xbffe18d6-0xbffe18fd]
+[    0.012780] No NUMA configuration found
+[    0.012781] Faking a node at [mem 0x0000000000000000-0x000000013fffffff]
+[    0.012794] NODE_DATA(0) allocated [mem 0x13ffd4000-0x13fffdfff]
+[    0.013066] Zone ranges:
+[    0.013075]   DMA      [mem 0x0000000000001000-0x0000000000ffffff]
+[    0.013081]   DMA32    [mem 0x0000000001000000-0x00000000ffffffff]
+[    0.013083]   Normal   [mem 0x0000000100000000-0x000000013fffffff]
+[    0.013085]   Device   empty
+[    0.013087] Movable zone start for each node
+[    0.013091] Early memory node ranges
+[    0.013092]   node   0: [mem 0x0000000000001000-0x000000000009efff]
+[    0.013093]   node   0: [mem 0x0000000000100000-0x00000000bffdcfff]
+[    0.013095]   node   0: [mem 0x0000000100000000-0x000000013fffffff]
+[    0.013097] Initmem setup node 0 [mem 0x0000000000001000-0x000000013fffffff]
+[    0.014623] On node 0, zone DMA: 1 pages in unavailable ranges
+[    0.014821] On node 0, zone DMA: 97 pages in unavailable ranges
+[    0.087495] On node 0, zone Normal: 35 pages in unavailable ranges
+[    0.087817] ACPI: PM-Timer IO Port: 0x608
+[    0.087846] ACPI: LAPIC_NMI (acpi_id[0xff] dfl dfl lint[0x1])
+[    0.087892] IOAPIC[0]: apic_id 0, version 17, address 0xfec00000, GSI 0-23
+[    0.087897] ACPI: INT_SRC_OVR (bus 0 bus_irq 0 global_irq 2 dfl dfl)
+[    0.087900] ACPI: INT_SRC_OVR (bus 0 bus_irq 5 global_irq 5 high level)
+[    0.087917] ACPI: INT_SRC_OVR (bus 0 bus_irq 9 global_irq 9 high level)
+[    0.087923] ACPI: INT_SRC_OVR (bus 0 bus_irq 10 global_irq 10 high level)
+[    0.087924] ACPI: INT_SRC_OVR (bus 0 bus_irq 11 global_irq 11 high level)
+[    0.087929] ACPI: Using ACPI (MADT) for SMP configuration information
+[    0.087931] ACPI: HPET id: 0x8086a201 base: 0xfed00000
+[    0.087947] TSC deadline timer available
+[    0.087949] smpboot: Allowing 2 CPUs, 0 hotplug CPUs
+[    0.087979] kvm-guest: KVM setup pv remote TLB flush
+[    0.087985] kvm-guest: setup PV sched yield
+[    0.088000] PM: hibernation: Registered nosave memory: [mem 0x00000000-0x00000fff]
+[    0.088002] PM: hibernation: Registered nosave memory: [mem 0x0009f000-0x0009ffff]
+[    0.088003] PM: hibernation: Registered nosave memory: [mem 0x000a0000-0x000effff]
+[    0.088005] PM: hibernation: Registered nosave memory: [mem 0x000f0000-0x000fffff]
+[    0.088006] PM: hibernation: Registered nosave memory: [mem 0xbffdd000-0xbfffffff]
+[    0.088007] PM: hibernation: Registered nosave memory: [mem 0xc0000000-0xfeffbfff]
+[    0.088009] PM: hibernation: Registered nosave memory: [mem 0xfeffc000-0xfeffffff]
+[    0.088013] PM: hibernation: Registered nosave memory: [mem 0xff000000-0xfffbffff]
+[    0.088014] PM: hibernation: Registered nosave memory: [mem 0xfffc0000-0xffffffff]
+[    0.088016] [mem 0xc0000000-0xfeffbfff] available for PCI devices
+[    0.088017] Booting paravirtualized kernel on KVM
+[    0.088020] clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645519600211568 ns
+[    0.088027] setup_percpu: NR_CPUS:8192 nr_cpumask_bits:2 nr_cpu_ids:2 nr_node_ids:1
+[    0.090036] percpu: Embedded 62 pages/cpu s217088 r8192 d28672 u1048576
+[    0.090044] pcpu-alloc: s217088 r8192 d28672 u1048576 alloc=1*2097152
+[    0.090047] pcpu-alloc: [0] 0 1 
+[    0.090075] kvm-guest: setup async PF for cpu 0
+[    0.090081] kvm-guest: stealtime: cpu 0, msr 13bc34080
+[    0.090086] kvm-guest: PV spinlocks enabled
+[    0.090089] PV qspinlock hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.090101] Built 1 zonelists, mobility grouping on.  Total pages: 1031901
+[    0.090103] Policy zone: Normal
+[    0.090105] Kernel command line: console=ttyS0 init=/init panic=-1 oops=panic nokaslr
+[    0.090346] Unknown kernel command line parameters "nokaslr", will be passed to user space.
+[    0.095200] Dentry cache hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.097823] Inode-cache hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.097893] mem auto-init: stack:off, heap alloc:on, heap free:off
+[    0.156267] Memory: 3875424K/4193772K available (16393K kernel code, 4397K rwdata, 10960K rodata, 3368K init, 18700K bss, 318092K reserved, 0K cma-reserved)
+[    0.158194] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
+[    0.158356] ftrace: allocating 50750 entries in 199 pages
+[    0.187512] ftrace: allocated 199 pages with 5 groups
+[    0.188463] rcu: Hierarchical RCU implementation.
+[    0.188466] rcu: 	RCU restricting CPUs from NR_CPUS=8192 to nr_cpu_ids=2.
+[    0.188468] 	Rude variant of Tasks RCU enabled.
+[    0.188469] 	Tracing variant of Tasks RCU enabled.
+[    0.188470] rcu: RCU calculated value of scheduler-enlistment delay is 25 jiffies.
+[    0.188471] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=2
+[    0.194789] NR_IRQS: 524544, nr_irqs: 440, preallocated irqs: 16
+[    0.195080] random: crng init done
+[    0.195192] Console: colour *CGA 80x25
+[    0.406061] printk: console [ttyS0] enabled
+[    0.408424] ACPI: Core revision 20210730
+[    0.410894] clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604467 ns
+[    0.414155] APIC: Switch to symmetric I/O mode setup
+[    0.415815] x2apic enabled
+[    0.416451] Switched APIC routing to physical x2apic.
+[    0.417068] kvm-guest: setup PV IPIs
+[    0.418717] ..TIMER: vector=0x30 apic1=0 pin1=2 apic2=-1 pin2=-1
+[    0.422026] clocksource: tsc-early: mask: 0xffffffffffffffff max_cycles: 0x28680fa287f, max_idle_ns: 440795281151 ns
+[    0.428056] Calibrating delay loop (skipped) preset value.. 5606.40 BogoMIPS (lpj=11212800)
+[    0.429899] x86/cpu: User Mode Instruction Prevention (UMIP) activated
+[    0.432211] Last level iTLB entries: 4KB 0, 2MB 0, 4MB 0
+[    0.436053] Last level dTLB entries: 4KB 0, 2MB 0, 4MB 0, 1GB 0
+[    0.436790] Spectre V1 : Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+[    0.437848] Spectre V2 : Spectre BHI mitigation: SW BHB clearing on vm exit
+[    0.438647] Spectre V2 : Spectre BHI mitigation: SW BHB clearing on syscall
+[    0.440053] Spectre V2 : Mitigation: Enhanced / Automatic IBRS
+[    0.444053] Spectre V2 : Spectre v2 / SpectreRSB mitigation: Filling RSB on context switch
+[    0.448053] Spectre V2 : Spectre v2 / PBRSB-eIBRS: Retire a single CALL on VMEXIT
+[    0.450168] Spectre V2 : mitigation: Enabling conditional Indirect Branch Prediction Barrier
+[    0.451127] Speculative Store Bypass: Mitigation: Speculative Store Bypass disabled via prctl and seccomp
+[    0.452053] GDS: Unknown: Dependent on hypervisor status
+[    0.457644] x86/fpu: Supporting XSAVE feature 0x001: 'x87 floating point registers'
+[    0.458528] x86/fpu: Supporting XSAVE feature 0x002: 'SSE registers'
+[    0.459264] x86/fpu: Supporting XSAVE feature 0x004: 'AVX registers'
+[    0.460004] x86/fpu: Supporting XSAVE feature 0x020: 'AVX-512 opmask'
+[    0.460053] x86/fpu: Supporting XSAVE feature 0x040: 'AVX-512 Hi256'
+[    0.464053] x86/fpu: Supporting XSAVE feature 0x080: 'AVX-512 ZMM_Hi256'
+[    0.468053] x86/fpu: Supporting XSAVE feature 0x200: 'Protection Keys User registers'
+[    0.468967] x86/fpu: xstate_offset[2]:  576, xstate_sizes[2]:  256
+[    0.469671] x86/fpu: xstate_offset[5]:  832, xstate_sizes[5]:   64
+[    0.470378] x86/fpu: xstate_offset[6]:  896, xstate_sizes[6]:  512
+[    0.472053] x86/fpu: xstate_offset[7]: 1408, xstate_sizes[7]: 1024
+[    0.476053] x86/fpu: xstate_offset[9]: 2432, xstate_sizes[9]:    8
+[    0.479391] x86/fpu: Enabled xstate features 0x2e7, context size is 2440 bytes, using 'compacted' format.
+[    0.506672] Freeing SMP alternatives memory: 44K
+[    0.508054] pid_max: default: 32768 minimum: 301
+[    0.512079] LSM: Security Framework initializing
+[    0.514678] landlock: Up and running.
+[    0.516053] Yama: becoming mindful.
+[    0.518220] AppArmor: AppArmor initialized
+[    0.520104] Mount-cache hash table entries: 8192 (order: 4, 65536 bytes, linear)
+[    0.524058] Mountpoint-cache hash table entries: 8192 (order: 4, 65536 bytes, linear)
+[    0.525363] smpboot: CPU0: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz (family: 0x6, model: 0x8c, stepping: 0x1)
+[    0.526686] Performance Events: Icelake events, full-width counters, Intel PMU driver.
+[    0.528057] ... version:                2
+[    0.530781] ... bit width:              48
+[    0.532055] ... generic registers:      8
+[    0.532517] ... value mask:             0000ffffffffffff
+[    0.533120] ... max period:             00007fffffffffff
+[    0.533735] ... fixed-purpose events:   3
+[    0.534200] ... event mask:             00000007000000ff
+[    0.536135] signal: max sigframe size: 3632
+[    0.538493] rcu: Hierarchical SRCU implementation.
+[    0.540605] smp: Bringing up secondary CPUs ...
+[    0.541245] x86: Booting SMP configuration:
+[    0.541729] .... node  #0, CPUs:      #1
+[    0.229021] kvm-clock: cpu 1, msr 4601041, secondary cpu clock
+[    0.553871] kvm-guest: setup async PF for cpu 1
+[    0.556051] kvm-guest: stealtime: cpu 1, msr 13bd34080
+[    0.556122] smp: Brought up 1 node, 2 CPUs
+[    0.556978] smpboot: Max logical packages: 1
+[    0.557479] smpboot: Total of 2 processors activated (11212.80 BogoMIPS)
+[    0.558689] devtmpfs: initialized
+[    0.560114] x86/mm: Memory block size: 128MB
+[    0.563860] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+[    0.564064] futex hash table entries: 512 (order: 3, 32768 bytes, linear)
+[    0.564889] pinctrl core: initialized pinctrl subsystem
+[    0.567093] PM: RTC time: 04:44:54, date: 2026-09-12
+[    0.568314] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.571956] DMA: preallocated 512 KiB GFP_KERNEL pool for atomic allocations
+[    0.572484] DMA: preallocated 512 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.576331] DMA: preallocated 512 KiB GFP_KERNEL|GFP_DMA32 pool for atomic allocations
+[    0.579263] audit: initializing netlink subsys (disabled)
+[    0.580978] audit: type=2000 audit(1789188294.836:1): state=initialized audit_enabled=0 res=1
+[    0.583127] thermal_sys: Registered thermal governor 'fair_share'
+[    0.583129] thermal_sys: Registered thermal governor 'bang_bang'
+[    0.584057] thermal_sys: Registered thermal governor 'step_wise'
+[    0.585577] thermal_sys: Registered thermal governor 'user_space'
+[    0.586268] thermal_sys: Registered thermal governor 'power_allocator'
+[    0.586994] EISA bus registered
+[    0.588063] cpuidle: using governor ladder
+[    0.590000] cpuidle: using governor menu
+[    0.592189] ACPI: bus type PCI registered
+[    0.594430] acpiphp: ACPI Hot Plug PCI Controller Driver version: 0.5
+[    0.596189] PCI: Using configuration type 1 for base access
+[    0.598153] kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
+[    0.604847] HugeTLB registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.604847] HugeTLB registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.612225] ACPI: Added _OSI(Module Device)
+[    0.612225] ACPI: Added _OSI(Processor Device)
+[    0.614621] ACPI: Added _OSI(3.0 _SCP Extensions)
+[    0.616055] ACPI: Added _OSI(Processor Aggregator Device)
+[    0.617001] ACPI: Added _OSI(Linux-Dell-Video)
+[    0.617538] ACPI: Added _OSI(Linux-Lenovo-NV-HDMI-Audio)
+[    0.618173] ACPI: Added _OSI(Linux-HPI-Hybrid-Graphics)
+[    0.619541] ACPI: 1 ACPI AML tables successfully acquired and loaded
+[    0.621131] ACPI: Interpreter enabled
+[    0.623191] ACPI: PM: (supports S0 S3 S4 S5)
+[    0.624051] ACPI: Using IOAPIC for interrupt routing
+[    0.640080] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+[    0.640080] PCI: Using E820 reservations for host bridge windows
+[    0.641464] ACPI: Enabled 2 GPEs in block 00 to 0F
+[    0.644008] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
+[    0.644051] acpi PNP0A03:00: _OSC: OS supports [ASPM ClockPM Segments MSI EDR HPX-Type3]
+[    0.644051] acpi PNP0A03:00: fail to add MMCONFIG information, can't access extended PCI configuration space under this bridge.
+[    0.644051] acpiphp: Slot [2] registered
+[    0.644085] acpiphp: Slot [3] registered
+[    0.646380] acpiphp: Slot [4] registered
+[    0.648051] acpiphp: Slot [5] registered
+[    0.648051] acpiphp: Slot [6] registered
+[    0.652075] acpiphp: Slot [7] registered
+[    0.654563] acpiphp: Slot [8] registered
+[    0.660088] acpiphp: Slot [9] registered
+[    0.661983] acpiphp: Slot [10] registered
+[    0.662469] acpiphp: Slot [11] registered
+[    0.662960] acpiphp: Slot [12] registered
+[    0.664010] acpiphp: Slot [13] registered
+[    0.664073] acpiphp: Slot [14] registered
+[    0.665754] acpiphp: Slot [15] registered
+[    0.666240] acpiphp: Slot [16] registered
+[    0.666723] acpiphp: Slot [17] registered
+[    0.667206] acpiphp: Slot [18] registered
+[    0.667689] acpiphp: Slot [19] registered
+[    0.668066] acpiphp: Slot [20] registered
+[    0.668546] acpiphp: Slot [21] registered
+[    0.669007] acpiphp: Slot [22] registered
+[    0.670579] acpiphp: Slot [23] registered
+[    0.672074] acpiphp: Slot [24] registered
+[    0.674320] acpiphp: Slot [25] registered
+[    0.680073] acpiphp: Slot [26] registered
+[    0.682261] acpiphp: Slot [27] registered
+[    0.682934] acpiphp: Slot [28] registered
+[    0.683379] acpiphp: Slot [29] registered
+[    0.683827] acpiphp: Slot [30] registered
+[    0.684076] acpiphp: Slot [31] registered
+[    0.686474] PCI host bridge to bus 0000:00
+[    0.687056] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    0.687639] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[    0.688054] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[    0.691166] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[    0.696055] pci_bus 0000:00: root bus resource [mem 0xc0000000-0xfebfffff window]
+[    0.696833] pci_bus 0000:00: root bus resource [mem 0x140000000-0x1bfffffff window]
+[    0.697738] pci 0000:00:00.0: [8086:1237] type 00 class 0x060000
+[    0.699437] pci 0000:00:01.0: [8086:7000] type 00 class 0x060100
+[    0.700885] pci 0000:00:01.1: [8086:7010] type 00 class 0x010180
+[    0.705612] pci 0000:00:01.1: reg 0x20: [io  0xc080-0xc08f]
+[    0.708661] pci 0000:00:01.1: legacy IDE quirk: reg 0x10: [io  0x01f0-0x01f7]
+[    0.712055] pci 0000:00:01.1: legacy IDE quirk: reg 0x14: [io  0x03f6]
+[    0.715747] pci 0000:00:01.1: legacy IDE quirk: reg 0x18: [io  0x0170-0x0177]
+[    0.720055] pci 0000:00:01.1: legacy IDE quirk: reg 0x1c: [io  0x0376]
+[    0.721230] pci 0000:00:01.3: [8086:7113] type 00 class 0x068000
+[    0.724377] pci 0000:00:01.3: quirk: [io  0x0600-0x063f] claimed by PIIX4 ACPI
+[    0.726515] pci 0000:00:01.3: quirk: [io  0x0700-0x070f] claimed by PIIX4 SMB
+[    0.727930] pci 0000:00:02.0: [1af4:1001] type 00 class 0x010000
+[    0.728803] pci 0000:00:02.0: reg 0x10: [io  0xc000-0xc07f]
+[    0.732680] pci 0000:00:02.0: reg 0x14: [mem 0xfebff000-0xfebfffff]
+[    0.738237] pci 0000:00:02.0: reg 0x20: [mem 0xfebf8000-0xfebfbfff 64bit pref]
+[    0.754586] ACPI: PCI: Interrupt link LNKA configured for IRQ 10
+[    0.761074] ACPI: PCI: Interrupt link LNKB configured for IRQ 10
+[    0.764150] ACPI: PCI: Interrupt link LNKC configured for IRQ 11
+[    0.768173] ACPI: PCI: Interrupt link LNKD configured for IRQ 11
+[    0.771574] ACPI: PCI: Interrupt link LNKS configured for IRQ 9
+[    0.778179] iommu: Default domain type: Translated 
+[    0.779796] iommu: DMA domain TLB invalidation policy: lazy mode 
+[    0.780280] SCSI subsystem initialized
+[    0.782632] libata version 3.00 loaded.
+[    0.784056] vgaarb: loaded
+[    0.784093] ACPI: bus type USB registered
+[    0.786261] usbcore: registered new interface driver usbfs
+[    0.786930] usbcore: registered new interface driver hub
+[    0.787545] usbcore: registered new device driver usb
+[    0.788074] pps_core: LinuxPPS API ver. 1 registered
+[    0.789559] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.796061] PTP clock support registered
+[    0.799392] EDAC MC: Ver: 3.0.0
+[    0.804221] NetLabel: Initializing
+[    0.805657] NetLabel:  domain hash size = 128
+[    0.806175] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.806879] NetLabel:  unlabeled traffic allowed by default
+[    0.808126] PCI: Using ACPI for IRQ routing
+[    0.810285] PCI: pci_cache_line_size set to 64 bytes
+[    0.810348] e820: reserve RAM buffer [mem 0x0009fc00-0x0009ffff]
+[    0.810355] e820: reserve RAM buffer [mem 0xbffdd000-0xbfffffff]
+[    0.813040] hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
+[    0.813180] hpet0: 3 comparators, 64-bit 100.000000 MHz counter
+[    0.827524] clocksource: Switched to clocksource kvm-clock
+[    0.866742] VFS: Disk quotas dquot_6.6.0
+[    0.872913] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.876916] AppArmor: AppArmor Filesystem Enabled
+[    0.879725] pnp: PnP ACPI init
+[    0.881624] pnp 00:02: [dma 2]
+[    0.881846] pnp: PnP ACPI: found 5 devices
+[    0.892328] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[    0.897296] NET: Registered PF_INET protocol family
+[    0.900300] IP idents hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.908786] tcp_listen_portaddr_hash hash table entries: 2048 (order: 3, 32768 bytes, linear)
+[    0.909951] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.911001] TCP established hash table entries: 32768 (order: 6, 262144 bytes, linear)
+[    0.912715] TCP bind hash table entries: 32768 (order: 7, 524288 bytes, linear)
+[    0.916110] TCP: Hash tables configured (established 32768 bind 32768)
+[    0.917098] MPTCP token hash table entries: 4096 (order: 4, 98304 bytes, linear)
+[    0.917999] UDP hash table entries: 2048 (order: 4, 65536 bytes, linear)
+[    0.918814] UDP-Lite hash table entries: 2048 (order: 4, 65536 bytes, linear)
+[    0.922611] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.925704] NET: Registered PF_XDP protocol family
+[    0.928437] pci_bus 0000:00: resource 4 [io  0x0000-0x0cf7 window]
+[    0.930104] pci_bus 0000:00: resource 5 [io  0x0d00-0xffff window]
+[    0.930815] pci_bus 0000:00: resource 6 [mem 0x000a0000-0x000bffff window]
+[    0.931604] pci_bus 0000:00: resource 7 [mem 0xc0000000-0xfebfffff window]
+[    0.933942] pci_bus 0000:00: resource 8 [mem 0x140000000-0x1bfffffff window]
+[    0.937742] pci 0000:00:01.0: PIIX3: Enabling Passive Release
+[    0.938393] pci 0000:00:00.0: Limiting direct PCI/PCI transfers
+[    0.939066] pci 0000:00:01.0: Activating ISA DMA hang workarounds
+[    0.939776] PCI: CLS 0 bytes, default 64
+[    0.940274] Trying to unpack rootfs image as initramfs...
+[    0.941046] PCI-DMA: Using software bounce buffering for IO (SWIOTLB)
+[    0.941811] software IO TLB: mapped [mem 0x00000000b4952000-0x00000000b8952000] (64MB)
+[    0.942708] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x28680fa287f, max_idle_ns: 440795281151 ns
+[    0.979318] Initialise system trusted keyrings
+[    0.982112] Key type blacklist registered
+[    0.984354] workingset: timestamp_bits=36 max_order=20 bucket_order=0
+[    0.989944] zbud: loaded
+[    0.991821] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.995307] fuse: init (API version 7.34)
+[    1.034517] integrity: Platform Keyring initialized
+[    1.060045] Key type asymmetric registered
+[    1.067062] Asymmetric key parser 'x509' registered
+[    1.074155] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 243)
+[    1.079172] io scheduler mq-deadline registered
+[    1.118390] shpchp: Standard Hot Plug PCI Controller Driver version: 0.4
+[    1.119318] input: Power Button as /devices/LNXSYSTM:00/LNXPWRBN:00/input/input0
+[    1.120219] ACPI: button: Power Button [PWRF]
+[    1.161418] ACPI: \_SB_.LNKB: Enabled at IRQ 10
+[    1.171144] Serial: 8250/16550 driver, 32 ports, IRQ sharing enabled
+[    1.220081] 00:03: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[    1.227638] Linux agpgart interface v0.103
+[    1.234054] loop: module loaded
+[    1.240397] ata_piix 0000:00:01.1: version 2.13
+[    1.240930] scsi host0: ata_piix
+[    1.253121] scsi host1: ata_piix
+[    1.257326] ata1: PATA max MWDMA2 cmd 0x1f0 ctl 0x3f6 bmdma 0xc080 irq 14
+[    1.261520] ata2: PATA max MWDMA2 cmd 0x170 ctl 0x376 bmdma 0xc088 irq 15
+[    1.265460] tun: Universal TUN/TAP device driver, 1.6
+[    1.266944] PPP generic driver version 2.4.2
+[    1.267493] VFIO - User Level meta-driver version: 0.3
+[    1.268458] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[    1.272029] ehci-pci: EHCI PCI platform driver
+[    1.274912] ehci-platform: EHCI generic platform driver
+[    1.276911] ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver
+[    1.277649] ohci-pci: OHCI PCI platform driver
+[    1.278187] ohci-platform: OHCI generic platform driver
+[    1.278801] uhci_hcd: USB Universal Host Controller Interface driver
+[    1.279597] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+[    1.290748] serio: i8042 KBD port at 0x60,0x64 irq 1
+[    1.291402] serio: i8042 AUX port at 0x60,0x64 irq 12
+[    1.292042] mousedev: PS/2 mouse device common for all mice
+[    1.292886] input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input1
+[    1.293863] rtc_cmos 00:04: RTC can wake from S4
+[    1.312804] rtc_cmos 00:04: registered as rtc0
+[    1.313351] rtc_cmos 00:04: setting system clock to 2026-09-12T04:44:55 UTC (1789188295)
+[    1.314261] rtc_cmos 00:04: alarms up to one day, y3k, 242 bytes nvram, hpet irqs
+[    1.315062] i2c_dev: i2c /dev entries driver
+[    1.315540] device-mapper: core: CONFIG_IMA_DISABLE_HTABLE is disabled. Duplicate IMA measurements will not be recorded in the IMA log.
+[    1.316868] device-mapper: uevent: version 1.0.3
+[    1.317464] device-mapper: ioctl: 4.45.0-ioctl (2021-03-22) initialised: dm-devel@redhat.com
+[    1.323970] platform eisa.0: Probing EISA bus 0
+[    1.324779] platform eisa.0: EISA: Cannot allocate resource for mainboard
+[    1.325484] platform eisa.0: Cannot allocate resource for EISA slot 1
+[    1.326153] platform eisa.0: Cannot allocate resource for EISA slot 2
+[    1.326818] platform eisa.0: Cannot allocate resource for EISA slot 3
+[    1.327479] platform eisa.0: Cannot allocate resource for EISA slot 4
+[    1.332654] platform eisa.0: Cannot allocate resource for EISA slot 5
+[    1.333341] platform eisa.0: Cannot allocate resource for EISA slot 6
+[    1.334010] platform eisa.0: Cannot allocate resource for EISA slot 7
+[    1.334678] platform eisa.0: Cannot allocate resource for EISA slot 8
+[    1.335351] platform eisa.0: EISA: Detected 0 cards
+[    1.335895] intel_pstate: CPU model not supported
+[    1.340363] ledtrig-cpu: registered to indicate activity on CPUs
+[    1.341138] drop_monitor: Initializing network drop monitor service
+[    1.341945] NET: Registered PF_INET6 protocol family
+[    3.458897] Freeing initrd memory: 121336K
+[    3.463486] Segment Routing with IPv6
+[    3.463907] In-situ OAM (IOAM) with IPv6
+[    3.464506] NET: Registered PF_PACKET protocol family
+[    3.465082] Key type dns_resolver registered
+[    3.467689] IPI shorthand broadcast: enabled
+[    3.470870] sched_clock: Marking stable (3245822829, 225021728)->(3526757050, -55912493)
+[    3.477144] registered taskstats version 1
+[    3.480991] Loading compiled-in X.509 certificates
+[    3.484505] Loaded X.509 cert 'Build time autogenerated kernel key: ce5757b48788bd11479e35b6b0f7215086e87bd9'
+[    3.490517] Loaded X.509 cert 'Canonical Ltd. Live Patch Signing: 14df34d1a87cf37625abec039ef2bf521249b969'
+[    3.496106] Loaded X.509 cert 'Canonical Ltd. Kernel Module Signing: 88f752e560a1e0737e31163a466ad7b70a850c19'
+[    3.501274] blacklist: Loading compiled-in revocation X.509 certificates
+[    3.504213] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing: 61482aa2830d0ab2ad5af10b7250da9033ddcef0'
+[    3.508574] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (2017): 242ade75ac4a15e50d50c84b0d45ff3eae707a03'
+[    3.513635] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (ESM 2018): 365188c1d374d6b07c3c8f240f8ef722433d6a8b'
+[    3.518398] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (2019): c0746fd6c5da3ae827864651ad66ae47fe24b3e8'
+[    3.523150] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (2021 v1): a8d54bbb3825cfb94fa13c9f8a594a195c107b8d'
+[    3.527857] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (2021 v2): 4cf046892d6fd3c9a5b03f98d845f90851dc6a8c'
+[    3.532573] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (2021 v3): 100437bb6de6e469b581e61cd66bce3ef4ed53af'
+[    3.537401] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (Ubuntu Core 2019): c1d57b8f6b743f23ee41f4f7ee292f06eecadfb9'
+[    3.542466] zswap: loaded using pool lzo/zbud
+[    3.551317] Key type .fscrypt registered
+[    3.553342] Key type fscrypt-provisioning registered
+[    3.557352] Key type encrypted registered
+[    3.559357] AppArmor: AppArmor sha1 policy hashing enabled
+[    3.562760] ima: No TPM chip found, activating TPM-bypass!
+[    3.565197] Loading compiled-in module X.509 certificates
+[    3.568107] Loaded X.509 cert 'Build time autogenerated kernel key: ce5757b48788bd11479e35b6b0f7215086e87bd9'
+[    3.573289] ima: Allocated hash algorithm: sha1
+[    3.575266] ima: No architecture policies found
+[    3.577326] evm: Initialising EVM extended attributes:
+[    3.579538] evm: security.selinux
+[    3.581345] evm: security.SMACK64
+[    3.582830] evm: security.SMACK64EXEC
+[    3.584394] evm: security.SMACK64TRANSMUTE
+[    3.586236] evm: security.SMACK64MMAP
+[    3.587837] evm: security.apparmor
+[    3.589361] evm: security.ima
+[    3.590657] evm: security.capability
+[    3.592184] evm: HMAC attrs: 0x1
+[    3.595719] PM:   Magic number: 10:27:717
+[    3.599932] RAS: Correctable Errors collector initialized.
+[    3.602598] clk: Disabling unused clocks
+[    3.610078] Freeing unused decrypted memory: 2036K
+[    3.614967] Freeing unused kernel image (initmem) memory: 3368K
+[    3.619589] Write protecting the kernel read-only data: 30720k
+[    3.625252] Freeing unused kernel image (text/rodata gap) memory: 2036K
+[    3.630337] Freeing unused kernel image (rodata/data gap) memory: 1328K
+[    3.647003] x86/mm: Checked W+X mappings: passed, no W+X pages found.
+[    3.651997] Run /init as init process
+[    3.654709]   with arguments:
+[    3.654711]     /init
+[    3.654712]     nokaslr
+[    3.654712]   with environment:
+[    3.654713]     HOME=/
+[    3.654714]     TERM=linux
+[    3.679307] virtio_blk virtio0: [vda] 8388608 512-byte logical blocks (4.29 GB/4.00 GiB)
+[    3.700895] EXT4-fs (vda): mounted filesystem with ordered data mode. Opts: (null). Quota mode: none.
+[    3.888197] vkso_lz4: loading out-of-tree module taints kernel.
+[    3.893015] vkso_lz4: module verification failed: signature and/or required key missing - tainting kernel
+[    3.903611] Initializing Page Replace LKM...
+[    3.906791] Attempting to create Netlink socket with protocol 30
+[    3.911725] Successfully created Netlink socket with protocol 30
+[    3.915041] Attempting to create restore Netlink socket with protocol 29
+[    3.918100] Successfully created restore Netlink socket with protocol 29
+[    3.921135] Page Replace LKM loaded successfully
+[    3.923152] Use protocol 30 for replace/add operations
+[    3.925463] Use protocol 29 for restore operations
+[   23.240115] Received page cache request for file: /work/validation/export/vkso/lib/libvkso_lz4.so, page_count: 4
+[   23.264297] Processing 4 pages for file: /work/validation/export/vkso/lib/libvkso_lz4.so
+[   23.270939] Processing page 0: offset=4096, index=1, kernel_vaddr=0xffffffffc0009000
+[   23.276466] Attempting to get page for kernel virtual address: 0xffffffffc0009000
+[   23.279455] Successfully got page via lookup_address (level=1): 00000000c421cf7e
+[   23.280202] Code page is not reserved: 00000000c421cf7e (vaddr: 0xffffffffc0009000)
+[   23.280981] Code page obtained: 00000000c421cf7e (vaddr: 0xffffffffc0009000)
+[   23.281688] Code page mapping: 0000000000000000
+[   23.282141] Code page index: 0
+[   23.282449] Code page flags: 6755398367313924
+[   23.282884] Code page refcount: 1
+[   23.283218] Code page mapcount: -1
+[   23.283561] Content of page 00000000c421cf7e (PFN: 1114706):
+[   23.284124] 
+[   23.284124] 0000: 85 c0 0f 8e 16 02 00 00 8b 11 81 fa 00 00 00 7e 
+[   23.284124] 0010: 0f 87 08 02 00 00 49 89 fa 48 89 f3 81 fa 0a 00 
+[   23.284124] 0020: 01 00 7e 0a 41 83 f9 02 0f 84 f0 01 00 00 48 63 
+[   23.284124] 0030: c2 48 01 d8 48 89 45 c8 49 63 c0 48 89 45 b0 83 
+[   23.284124] 0040: fa 0c 0f 8e f1 01 00 00 48 8b 45 c0 83 7d bc 01 
+[   23.284124] 0050: 48 8d 73 01 c7 00 00 00 00 00 0f 84 33 04 00 00 
+[   23.284124] 0060: 69 03 b1 79 37 9e 31 d2 c1 e8 13 66 41 89 14 42 
+[   23.284124] 0070: 69 43 01 b1 79 37 9e c1 e8 13 48 8b 7d c8 48 8b 
+[   23.314803] Page not in cache at index 1, adding new page...
+[   23.317633] add_page_to_cache start mapping: 000000009e93885a  i_pages: 00000000246b78c2
+[   23.321243] Backed up page info: index=1, original_page=0000000000000000
+[   23.324199] New page added to cache: 00000000c421cf7e at index 1 (nrpages: 4)
+[   23.327364] get_page_table
+[   23.328631] 7f85ffe86000
+[   23.329804] current->pid is 235   addr: 7f85ffe86000    mm: 000000004f7c2a13
+[   23.333424] PGD found at 000000006eb5c5ab, value: 0x117250067
+[   23.335907] Protection bits: USER RW EXEC
+[   23.338618] if have p4d: 0
+[   23.339831] P4D found at 000000006eb5c5ab, value: 0x117250067
+[   23.342391] Protection bits: USER RW EXEC
+[   23.344116] PUD invalid or not present for address 0x7f85ffe86000
+[   23.346888] new page refcount: 2
+[   23.348313] new page mapcount: -1
+[   23.349804] get_page_table
+[   23.350992] 7f85ffe86000
+[   23.352113] current->pid is 235   addr: 7f85ffe86000    mm: 000000004f7c2a13
+[   23.355247] PGD found at 000000006eb5c5ab, value: 0x117250067
+[   23.357833] Protection bits: USER RW EXEC
+[   23.359557] if have p4d: 0
+[   23.360743] P4D found at 000000006eb5c5ab, value: 0x117250067
+[   23.363231] Protection bits: USER RW EXEC
+[   23.364993] PUD invalid or not present for address 0x7f85ffe86000
+[   23.368038] new page refcount: 2
+[   23.369522] new page mapcount: -1
+[   23.370968] Page addition to cache completed successfully
+[   23.373379] Page cache add: old=NULL, new=00000000c421cf7e at index 1 (验证成功)
+[   23.376937] Processing page 1: offset=8192, index=2, kernel_vaddr=0xffffffffc000a000
+[   23.380360] Attempting to get page for kernel virtual address: 0xffffffffc000a000
+[   23.383686] Successfully got page via lookup_address (level=1): 000000000951695f
+[   23.386936] Code page is not reserved: 000000000951695f (vaddr: 0xffffffffc000a000)
+[   23.390293] Code page obtained: 000000000951695f (vaddr: 0xffffffffc000a000)
+[   23.393595] Code page mapping: 0000000000000000
+[   23.395550] Code page index: 0
+[   23.396879] Code page flags: 6755398367313924
+[   23.399426] Code page refcount: 1
+[   23.400899] Code page mapcount: -1
+[   23.402528] Content of page 000000000951695f (PFN: 1114672):
+[   23.404892] 
+[   23.404892] 0000: 00 00 76 17 2d fc 03 00 00 49 83 c0 04 41 c7 00 
+[   23.404892] 0010: ff ff ff ff 3d fb 03 00 00 77 e9 89 c2 bb 81 80 
+[   23.404892] 0020: 80 80 48 0f af d3 48 c1 ea 27 89 d6 4c 01 c6 41 
+[   23.404892] 0030: 89 d0 41 c1 e0 08 48 8d 5e 01 41 29 d0 44 29 c0 
+[   23.404892] 0040: 88 06 e9 f3 fe ff ff 48 83 c0 08 48 83 c2 08 4c 
+[   23.404892] 0050: 39 f8 0f 82 67 ff ff ff 48 3b 45 a0 73 10 44 8b 
+[   23.404892] 0060: 30 44 39 32 75 08 48 83 c0 04 48 83 c2 04 48 3b 
+[   23.404892] 0070: 45 98 73 12 44 0f b7 30 66 44 39 32 75 08 48 83 
+[   23.428064] Page not in cache at index 2, adding new page...
+[   23.440590] add_page_to_cache start mapping: 000000009e93885a  i_pages: 00000000246b78c2
+[   23.444199] Backed up page info: index=2, original_page=0000000000000000
+[   23.447158] New page added to cache: 000000000951695f at index 2 (nrpages: 5)
+[   23.450399] get_page_table
+[   23.451606] 7f85ffe86000
+[   23.452730] current->pid is 235   addr: 7f85ffe86000    mm: 000000004f7c2a13
+[   23.455805] PGD found at 000000006eb5c5ab, value: 0x117250067
+[   23.458372] Protection bits: USER RW EXEC
+[   23.460105] if have p4d: 0
+[   23.461335] P4D found at 000000006eb5c5ab, value: 0x117250067
+[   23.463798] Protection bits: USER RW EXEC
+[   23.465753] PUD invalid or not present for address 0x7f85ffe86000
+[   23.468369] new page refcount: 2
+[   23.469778] new page mapcount: -1
+[   23.471653] get_page_table
+[   23.472893] 7f85ffe86000
+[   23.474058] current->pid is 235   addr: 7f85ffe86000    mm: 000000004f7c2a13
+[   23.477323] PGD found at 000000006eb5c5ab, value: 0x117250067
+[   23.479756] Protection bits: USER RW EXEC
+[   23.481636] if have p4d: 0
+[   23.482806] P4D found at 000000006eb5c5ab, value: 0x117250067
+[   23.485344] Protection bits: USER RW EXEC
+[   23.487067] PUD invalid or not present for address 0x7f85ffe86000
+[   23.490403] new page refcount: 2
+[   23.491811] new page mapcount: -1
+[   23.493324] Page addition to cache completed successfully
+[   23.495640] Page cache add: old=NULL, new=000000000951695f at index 2 (验证成功)
+[   23.499025] Processing page 2: offset=12288, index=3, kernel_vaddr=0xffffffffc000b000
+[   23.502479] Attempting to get page for kernel virtual address: 0xffffffffc000b000
+[   23.506099] Successfully got page via lookup_address (level=1): 00000000560d8ada
+[   23.509350] Code page is not reserved: 00000000560d8ada (vaddr: 0xffffffffc000b000)
+[   23.512671] Code page obtained: 00000000560d8ada (vaddr: 0xffffffffc000b000)
+[   23.515716] Code page mapping: 0000000000000000
+[   23.517752] Code page index: 0
+[   23.519071] Code page flags: 6755398367313924
+[   23.520971] Code page refcount: 1
+[   23.522439] Code page mapcount: -1
+[   23.523924] Content of page 00000000560d8ada (PFN: 1051503):
+[   23.526379] 
+[   23.526379] 0000: 44 24 28 48 8d 46 f0 48 89 44 24 38 49 8d 40 e0 
+[   23.526379] 0010: 48 89 44 24 30 85 c9 0f 84 ef 01 00 00 85 d2 0f 
+[   23.526379] 0020: 84 01 02 00 00 49 8d 40 f9 4c 8d 5e f1 4c 89 e7 
+[   23.526379] 0030: 4c 89 ca 48 89 44 24 10 49 8d 40 fb 4d 8d 70 f4 
+[   23.526379] 0040: 4d 89 dd 48 89 44 24 08 48 8d 46 fb 48 89 44 24 
+[   23.526379] 0050: 18 48 8d 46 f8 48 89 44 24 20 44 0f b6 12 4c 8d 
+[   23.526379] 0060: 7a 01 44 89 d0 41 c1 ea 04 41 83 fa 0f 0f 85 81 
+[   23.526379] 0070: 00 00 00 4d 39 ef 0f 83 78 01 00 00 41 ba 0f 00 
+[   23.548748] Page not in cache at index 3, adding new page...
+[   23.551259] add_page_to_cache start mapping: 000000009e93885a  i_pages: 00000000246b78c2
+[   23.554875] Backed up page info: index=3, original_page=0000000000000000
+[   23.558812] New page added to cache: 00000000560d8ada at index 3 (nrpages: 6)
+[   23.561884] get_page_table
+[   23.563084] 7f85ffe86000
+[   23.564189] current->pid is 235   addr: 7f85ffe86000    mm: 000000004f7c2a13
+[   23.567288] PGD found at 000000006eb5c5ab, value: 0x117250067
+[   23.570116] Protection bits: USER RW EXEC
+[   23.571855] if have p4d: 0
+[   23.572727] P4D found at 000000006eb5c5ab, value: 0x117250067
+[   23.574265] Protection bits: USER RW EXEC
+[   23.575314] PUD invalid or not present for address 0x7f85ffe86000
+[   23.576891] new page refcount: 2
+[   23.577769] new page mapcount: -1
+[   23.578622] get_page_table
+[   23.579317] 7f85ffe86000
+[   23.579963] current->pid is 235   addr: 7f85ffe86000    mm: 000000004f7c2a13
+[   23.581808] PGD found at 000000006eb5c5ab, value: 0x117250067
+[   23.583303] Protection bits: USER RW EXEC
+[   23.584343] if have p4d: 0
+[   23.585063] P4D found at 000000006eb5c5ab, value: 0x117250067
+[   23.586552] Protection bits: USER RW EXEC
+[   23.587584] PUD invalid or not present for address 0x7f85ffe86000
+[   23.589211] new page refcount: 2
+[   23.590055] new page mapcount: -1
+[   23.590916] Page addition to cache completed successfully
+[   23.592327] Page cache add: old=NULL, new=00000000560d8ada at index 3 (验证成功)
+[   23.594377] Processing page 3: offset=16384, index=4, kernel_vaddr=0xffffffffc000e000
+[   23.596408] Attempting to get page for kernel virtual address: 0xffffffffc000e000
+[   23.598384] Successfully got page via lookup_address (level=1): 000000005ceb71f7
+[   23.600281] Code page is not reserved: 000000005ceb71f7 (vaddr: 0xffffffffc000e000)
+[   23.602282] Code page obtained: 000000005ceb71f7 (vaddr: 0xffffffffc000e000)
+[   23.604494] Code page mapping: 0000000000000000
+[   23.605705] Code page index: 0
+[   23.606496] Code page flags: 6755398367313924
+[   23.607613] Code page refcount: 1
+[   23.608660] Code page mapcount: -1
+[   23.609822] Content of page 000000005ceb71f7 (PFN: 1138171):
+[   23.611297] 
+[   23.611297] 0000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+[   23.611297] 0010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+[   23.611297] 0020: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+[   23.611297] 0030: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+[   23.611297] 0040: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+[   23.611297] 0050: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+[   23.611297] 0060: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+[   23.611297] 0070: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+[   23.624568] Page not in cache at index 4, adding new page...
+[   23.626068] add_page_to_cache start mapping: 000000009e93885a  i_pages: 00000000246b78c2
+[   23.628525] Backed up page info: index=4, original_page=0000000000000000
+[   23.630300] New page added to cache: 000000005ceb71f7 at index 4 (nrpages: 7)
+[   23.632141] get_page_table
+[   23.632854] 7f85ffe86000
+[   23.633553] current->pid is 235   addr: 7f85ffe86000    mm: 000000004f7c2a13
+[   23.635775] PGD found at 000000006eb5c5ab, value: 0x117250067
+[   23.637337] Protection bits: USER RW EXEC
+[   23.638369] if have p4d: 0
+[   23.639078] P4D found at 000000006eb5c5ab, value: 0x117250067
+[   23.640960] Protection bits: USER RW EXEC
+[   23.642032] PUD invalid or not present for address 0x7f85ffe86000
+[   23.643587] new page refcount: 2
+[   23.644415] new page mapcount: -1
+[   23.645315] get_page_table
+[   23.646022] 7f85ffe86000
+[   23.646681] current->pid is 235   addr: 7f85ffe86000    mm: 000000004f7c2a13
+[   23.648518] PGD found at 000000006eb5c5ab, value: 0x117250067
+[   23.650054] Protection bits: USER RW EXEC
+[   23.651102] if have p4d: 0
+[   23.651814] P4D found at 000000006eb5c5ab, value: 0x117250067
+[   23.653394] Protection bits: USER RW EXEC
+[   23.654434] PUD invalid or not present for address 0x7f85ffe86000
+[   23.655994] new page refcount: 2
+[   23.656834] new page mapcount: -1
+[   23.657725] Page addition to cache completed successfully
+[   23.659131] Page cache add: old=NULL, new=000000005ceb71f7 at index 4 (验证成功)
+[   23.661162] Page cache operation completed successfully!
+[   23.662516] Next file access will trigger page fault and establish PTE mapping automatically

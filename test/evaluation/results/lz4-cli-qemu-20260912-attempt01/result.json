@@ -1,0 +1,19 @@
+{
+  "started_unix": 1789187651.285236,
+  "qemu_returncode": 0,
+  "kernel_failure": false,
+  "guest_status_zero": false,
+  "guest_record": {
+    "scope": "exact119 KVM functional export and full CLI; no performance samples",
+    "kernel": "5.15.0-119-generic",
+    "uid": 0,
+    "boot_id": "4dae486a-2faf-4f61-b4b7-9ff6a4858f61",
+    "stage": "build-export-registration-and-cli",
+    "status": "fail",
+    "owner_text": "0xffffffffc0008000",
+    "error": "Traceback (most recent call last):\n  File \"/work/guest.py\", line 137, in main\n    execute([REPO / 'vkso', 'init', WORK, '--symbols', ROOT / 'symbols.txt'],\n  File \"/work/guest.py\", line 32, in execute\n    result = subprocess.run(command, stdout=stream, stderr=subprocess.STDOUT,\n  File \"/usr/lib/python3.10/subprocess.py\", line 503, in run\n    with Popen(*popenargs, **kwargs) as process:\n  File \"/usr/lib/python3.10/subprocess.py\", line 971, in __init__\n    self._execute_child(args, executable, preexec_fn, close_fds,\n  File \"/usr/lib/python3.10/subprocess.py\", line 1863, in _execute_child\n    raise child_exception_type(errno_num, err_msg, err_filename)\nFileNotFoundError: [Errno 2] No such file or directory: '/work/repo/vkso'\n",
+    "modules_after": "virtio_blk 20480 1 - Live 0xffffffffc0002000\n"
+  },
+  "status": "fail",
+  "finished_unix": 1789187654.7614305
+}

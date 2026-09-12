@@ -10,9 +10,9 @@
 | --- | --- | --- |
 | A：Clocktime | 20 次采集、全量原始记录核验、三方法结果报告及正文更新已完成 | 保留 writer 不确定性；如需解释其原因，另定诊断，不追逐有利重复 |
 | B：页面复用与装载 | 多进程 PFN、只读/COW、非特权文件操作及正常释放已观察；另复现部分失败仍 ready、内核错误未传回 manager | 实际闭包的时间/资源账本及剩余边界；[统一注册修订方案](../test/evaluation/proposals/registration-transactions.md)待审阅，未实施 |
-| C：PGOT 与真实算法 | 已核实三算法的部署/进程/轮次关系，修正报告生成器，复算 BCH 对照点；完整部署采集入口已准备 | Clocktime 结束后执行完整部署重复，分析 BCH 及实际 owner 内核成本 |
+| C：PGOT 与真实算法 | 已核实重复层次并复算 BCH 对照点；全新 BCH owner 在精确 119 guest 中通过完整原有功能矩阵及四页 PFN 验证 | 完整部署重复、BCH 性能退化分析及实际 owner 内核成本；核实 LZ4 实际 helper 路径 |
 | D：适用范围与导出工具 | 固定 8 例的原分析器正在执行；前三例已落盘，hex_dump_to_buffer 仍在展开依赖；缓存方案未获确认、未应用 | 完成固定全集，导入既有适配证据，完成分类与可运行性验证 |
-| E：真实应用集成 | 普通 upstream/同源 DSO 的全 Silesia 功能案例通过；精确 119 guest 中四页真实注册 PFN 匹配，但首次 CLI 压缩出现 SIGSEGV，正在定位 | 解决真实注册后的完整 CLI 调用问题，再执行全矩阵及 C 会话内应用测量 |
+| E：真实应用集成 | 普通 upstream/同源 DSO 全 Silesia 功能案例通过；真实注册的四页 PFN 匹配；首次 CLI 压缩因未绑定的直接 helper 调用崩溃，GDB 已确认 | 审阅基础导出器方案并完成实际绑定，再验证全矩阵及采集 C 会话内应用性能 |
 | F：论文与结果呈现 | 已修正算法重复单位，并用完整 Normal 跨启动数据更新 Clocktime 正文及摘要/结论 | 随 B–E 的实际结果继续更新，再做全文一致性验收 |
 
 **自动接续的实际终态（2026-09-12）：** 此前启用的 `vkso-evaluation-followup.service` 在 Clocktime 完成后的原内核启动中触发，已完成覆盖核验及全部 15 个 UPDATE 方法目录的 writer 原始记录审计。随后 `algorithm-and-cli-deployments` 在开始构建/部署之前的 `git diff HEAD` 源码归档步骤失败（exit 129）；算法部署和后续 D 检查没有执行。服务按设计在进入时停用，目前 `ActiveState=failed`、`MainPID=0`、`UnitFileState=disabled`，不会在下次启动自动重试。失败日志和原输出目录保留，详见[接续记录](../test/evaluation/FOLLOWUP.md)。
@@ -173,6 +173,10 @@ first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛�
 
 **C 类：PGOT、LZ4、BCH、XZ 算法实验。**
 
+**新增完整功能验证（2026-09-12）：** BCH 使用全新独立构建的未修改 owner、benchmark 和两个普通 DSO，在精确 `5.15.0-119-generic` 私有 guest 中执行实际 `vkso init/exec`；四个导出入口的原 closure checks 均通过。原有 `--correctness-only` 矩阵完整覆盖 m=13、t=4/8、各 128 vectors、全部 0..t 错误数、三个 backend 与两种 decode 路径，并通过完整输出/错误位置检查。单独 loader 进程观察到三个 RX text 页和一个只读 rodata 页的 user/source PFN 一致；恢复后的四个新映射均不再使用源 PFN，随后模块正常卸载。该会话没有性能采样，不能作为部署重复、BCH 退化解释或净内存结果。证据见 [BCH 功能记录](../test/evaluation/bch-functional-evidence.md)。
+
+**LZ4 helper 口径修正：** 旧归档包含原生内核 memory helpers 所在页，动态重定位记录也不能证明直接调用经过声明的 Shim。SIMD audit 只覆盖四个普通 DSO，旧记录没有实际 helper 执行地址。因此保留 Table 9 数值，撤回“kernel-backed 与同源 no-SIMD 使用相同 REP helpers”的未经验证断言；当前比值作为具体构建/部署整体对照，补采实际调用路径后再解释差异。详见[导出绑定方案的历史证据核对](../test/evaluation/proposals/export-direct-calls.md#historical-memory-helper-claim)。
+
 **部署入口更新（2026-09-12）：** 已将 Git 源码归档检查提前到创建 campaign 目录之前，并保留 Git 的原始拒绝原因及实际/仓库 owner UID。普通 owner 会话的归档通过；真实无凭据执行检查在创建目录和模块操作之前被拒绝。当前账户 `sudo -n` 返回需要密码，未启动新模块装载/注册。已复核[前台采集指令](../test/evaluation/README.md#algorithm-deployments)：原 5.15.0-119 内核、CPU 2、三算法各三次完整部署并包含 LZ4 CLI。需要仓库 owner 在其终端通过正常 sudo 会话启动；不重新启用已停用的服务，也不修改 Git trust 或系统权限。
 
 **实际执行更新（2026-09-11 17:23 UTC）：** [算法证据记录](../test/evaluation/algorithm-evidence.md)已列出基线身份、部署与进程边界、现有原始矩阵和 BCH 诊断目标。三份旧 raw 分别核验 210/1,056/42 行，缺行/重复行变体均被拒绝；四份报告重新生成后，五份数值 CSV 与全部 Markdown 数值表保持不变。LZ4/BCH runner 补齐新工作目录初始化，BCH 修正 root 执行时误把 `-v` 当命令的问题；均为实验 harness 改动，未改项目基础功能。
@@ -201,6 +205,8 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 
 **D 类：适用范围、闭包特征和导出改造。**
 
+**新确认的导出边界（2026-09-12）：** 完整 LZ4 CLI 运行证明，当前 checker 会把共享 text 中对 Shim 的直接相对引用判为成功，而实际 PIC exporter 仅声明 import、没有绑定该指令或保留目标页。[具体未应用补丁](../test/evaluation/proposals/export-direct-calls.md)已通过机器码案例和真实 owner/KRG 离线重放，纠正这类错误放行；它只提供准确拒绝，尚不实现完整 native helper 闭包，也不能代替 E 的完整应用验收。基础工具修改仍待明确确认，固定八例原检查继续运行。
+
 **分析器性能方案待确认：** hex_dump_to_buffer 的未裁剪检查已超过 30 分钟，源码定位到直接目标查询反复解析整个 ELF 符号表。[缓存补丁方案](../test/evaluation/proposals/README.md)已准备并通过边界/实际镜像查询对照，尚未应用；已向用户请求允许这项基础分析器调整。保持符号顺序、首匹配及全部判定规则，若获准将保留原记录并在新目录重检固定八例。等待答复期间，原分析器继续运行，不以超时或删减候选替代完整检查。
 
 **执行更新（2026-09-12）：** 已启动全部 8 个固定 API 的普通账户静态检查，输出 `test/evaluation/results/applicability-static-20260912/`；xxh32、crc32_le、sha256 的结果已落盘，完整矩阵仍在执行。[语义核查记录](../test/evaluation/applicability-semantics.md)已区分八例的 caller-owned state、只读依赖、callback 与 kernel-private state。当前 `/proc/kallsyms` 地址均被屏蔽为零，checker 的 runtime 展示列不可用；源码确认其只影响地址展示，静态判定仍使用配置 ELF。该 ELF 的 `.rodata` 带 WA 标志，不能把 checker 的 WRITABLE 标签当作内核运行时可写证据。未构造/注册 carrier，也未改变 checker 或访问限制。
@@ -221,9 +227,9 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 
 **E 类：真实应用集成。**
 
-**真实 registered carrier 验证进展（2026-09-12）：** 已从公开 Ubuntu 包取得与算法环境一致的 `5.15.0-119-generic=5.15.0-119.129` 镜像，在无网络、无共享 host 目录的私有 guest 中重建实际运行地址对应的 KRG、执行原静态检查、构造完整 sparse DSO 并注册 LZ4 owner。前期 guest 准备和观测工具错误均保留为独立尝试，未计作算法结果。第五次尝试使用逐页 fault 后的新鲜 pagemap 读取，确认三个 text 页和一个 rodata 页的 kernel/user PFN 全部相同；随后完整 CLI 的 dickens/64 KiB 首次压缩以 SIGSEGV 退出，尚无完整压缩/解压组合通过。恢复后四个文件偏移均已不再指向源 PFN，再完成模块卸载。正在核对实际 owner 构建、直接 helper 调用及最终载入布局；尚未修改基础 exporter 或归因为算法性能问题。该次记录位于 `test/evaluation/results/lz4-cli-qemu-20260912-attempt05/`，未形成新应用性能数据。
+**真实 registered carrier 失败已定位（2026-09-12）：** 精确 `5.15.0-119-generic=5.15.0-119.129` 私有 guest 执行实际 KRG、原静态检查、carrier 构造和注册。第六次尝试重新构建未改动的当前 owner，独立 loader 进程逐页确认三个 RX text 页和一个只读 rodata 页的 user/source PFN 一致；完整 CLI 仍在首个 dickens/64 KiB 压缩操作中 SIGSEGV，完成 0/24 个 input/block 组合。GDB 记录证明：内核 memset 直接调用位移 −1049945565 平移到用户 call 地址后，计算出的 `0x7fffb94398a0` 与实际 RIP 完全相同，且目标未映射。Exporter 把该依赖列为 undefined Shim import，却没有重绑定共享 text 中的直接调用或保留目标页。这是已确认的运行时闭包绑定失败，不是性能结论。恢复后的四个新映射 PFN 均不同于源页，随后模块卸载成功；该观测不证明原字节恢复或存活旧映射撤销。[完整证据记录](../test/evaluation/lz4-application-evidence.md)保留六次尝试、构建差异、GDB 与 PFN 原始记录。未修改基础 exporter；准确拒绝的补丁方案已准备，完整调用绑定和应用矩阵仍待完成。
 
-**实际验证更新（2026-09-12）：** 完整 stock/adapted CLI 编译通过；使用 upstream-default 与实际 Linux-source no-SIMD 普通用户 DSO，在全 12 个 Silesia 输入、64 KiB/1 MiB 两种块大小的 48 个案例中验证了真实 API 调用、目标 DSO、公共 stock 压缩输入的解码及 stock 对 adapted 输出的交叉解码，完整输出均匹配。这些是功能验证，不产生正式吞吐结论。Live registered carrier 和 C 的完整部署仍待执行，详见 [LZ4 CLI 验证记录](../test/evaluation/lz4-cli/README.md#build-and-ordinary-dso-validation--2026-09-12)。
+**实际验证更新（2026-09-12）：** 完整 stock/adapted CLI 编译通过；使用 upstream-default 与实际 Linux-source no-SIMD 普通用户 DSO，在全 12 个 Silesia 输入、64 KiB/1 MiB 两种块大小的 48 个案例中验证了真实 API 调用、目标 DSO、公共 stock 压缩输入的解码及 stock 对 adapted 输出的交叉解码，完整输出均匹配。这些是功能验证，不产生正式吞吐结论。Live registered carrier 的后续失败见上方更新，C 的完整性能部署仍待执行，详见 [LZ4 CLI 验证记录](../test/evaluation/lz4-cli/README.md#build-and-ordinary-dso-validation--2026-09-12)。
 
 **实际执行更新（2026-09-11 17:51 UTC）：** 已选择[完整 LZ4 CLI 文件工作流](../test/evaluation/lz4-cli/README.md)，沿用 upstream 1.9.3 的 CLI、framing、内容校验及文件 I/O，通过独立块压缩/解压接口接入现有 carrier。四个对照为原版 CLI、upstream DSO、同源 Linux DSO 和 kernel-backed DSO；输入为完整 Silesia 文件，64 KiB/1 MiB 独立块，每部署四轮，使四个后端在每个输入/块配置下各占一次运行位置。解压使用相同的原版编码输入，各编码器输出也经原版解码和完整文件校验；调用计数/目标 DSO 验证单独执行，不混入计时。
 
@@ -249,7 +255,7 @@ A 完成后，正文已更新重复单位与隔离核配置、Normal 三方法�
 
 本类完成时：每个主张指向相应完整实现的结果；新表和已有表单位一致；正文/附录分工明确；待验证内容与已完成实验分开。原始数据保持原样，不通过修改数据来适配文字。
 
-当前 A 已完成并更新论文；B 已完成上述隔离映射/正常释放观察，真实闭包的时间/资源账本仍待采集。C/E 自动接续在源码归档时失败，未开始正式部署；CLI 的普通 DSO 功能验证已完成。D 固定全集仍由原分析器执行。后续以共同修改对象推进：B 补全会话与边界证据，C 验证完整部署并诊断 BCH，D 分类固定候选，E 验证实际 registered carrier 的应用调用与输出。涉及项目基础功能或新的系统级自动执行时先说明具体方案和授权边界。
+当前 A 已完成并更新论文；B 已完成隔离映射、正常释放和部分失败观察，真实闭包的时间/资源账本仍待采集。C 新增 BCH 完整功能及四页 PFN 验证；C/E 新增正式性能部署尚未开始。E 已定位真实 registered LZ4 CLI 的直接调用绑定失败，完整应用组合尚未通过。D 固定全集仍由原分析器执行。后续以共同修改对象推进：B 补全会话与边界证据，C 采集完整部署并诊断 BCH 性能，D 分类固定候选并完善导出判定，E 完成实际绑定、完整功能及应用性能。注册机制、缓存和导出器基础修订均保留具体方案，未经明确确认不实施。
 
 前次核查包括：阅读 Evaluation/Implementation/Discussion，核对 first-touch/PGOT/算法/Clocktime 的材料，复算 first-touch 汇总和 BCH 报告点，检查 XZ 重复层次、Clocktime 功能记录及所列公开文献。本次继承这些证据记录，没有重复执行这些核查或将其视为最新数据。
 

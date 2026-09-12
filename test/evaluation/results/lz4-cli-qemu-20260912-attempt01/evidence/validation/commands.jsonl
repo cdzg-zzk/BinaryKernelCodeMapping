@@ -1,0 +1,6 @@
+{"argv": ["insmod", "/work/owner/vkso_lz4.ko"], "log": "/work/validation/load-vkso_lz4.log", "returncode": 0}
+{"argv": ["insmod", "/work/helpers/vkso_kernel_reader.ko"], "log": "/work/validation/load-vkso_kernel_reader.log", "returncode": 0}
+{"argv": ["insmod", "/work/repo/page_cache_replace/page_cache_replace.ko"], "log": "/work/validation/load-page_cache_replace.log", "returncode": 0}
+{"argv": ["rmmod", "page_cache_replace"], "log": "/work/validation/unload-page_cache_replace.log", "returncode": 0}
+{"argv": ["rmmod", "vkso_kernel_reader"], "log": "/work/validation/unload-vkso_kernel_reader.log", "returncode": 0}
+{"argv": ["rmmod", "vkso_lz4"], "log": "/work/validation/unload-vkso_lz4.log", "returncode": 0}

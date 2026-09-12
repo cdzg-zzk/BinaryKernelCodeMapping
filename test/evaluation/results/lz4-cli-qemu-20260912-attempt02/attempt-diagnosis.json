@@ -1,0 +1,6 @@
+{
+  "category": "preparation-superseded",
+  "cause": "new verified restore-failure finding requires explicit restored-PFN check before owner unload",
+  "algorithm_cases_started": 0,
+  "next_action": "update guest observer; fresh attempt directory"
+}

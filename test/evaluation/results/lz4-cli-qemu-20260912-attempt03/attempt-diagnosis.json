@@ -1,0 +1,10 @@
+{
+  "category": "guest-environment-preparation",
+  "cause": "/dev/fd symlink missing after devtmpfs mount; Bash process substitution failed",
+  "runtime_krg_built": {
+    "nodes": 64615,
+    "edges": 237028
+  },
+  "algorithm_cases_started": 0,
+  "next_action": "provide normal /dev/fd -> /proc/self/fd guest runtime link; fresh guest"
+}

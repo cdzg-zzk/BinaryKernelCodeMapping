@@ -1,0 +1,22 @@
+debugfs 1.46.5 (30-Dec-2021)
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/load-vkso_lz4.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/commands.jsonl
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/load-vkso_kernel_reader.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/load-page_cache_replace.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/runtime-kallsyms.txt
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/status.json
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/workspace-init.log
+rdump: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/export/vkso/include
+rdump: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/export/vkso/lib
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/export/vkso/metadata/out.krg.inputs
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/export/vkso/metadata/out.krg
+rdump: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/export/vkso/metadata
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/export/vkso/shared_data.txt
+rdump: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/export/vkso
+rdump: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/export
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/export-and-cli.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/unload-page_cache_replace.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/unload-vkso_kernel_reader.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/unload-vkso_lz4.log
+dump_file: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/dmesg.txt
+rdump: Operation not permitted while changing ownership of /home/zzk/BinaryKernelCodeMapping/test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation

@@ -1,0 +1,1 @@
+# One page-aligned shared kernel object per line

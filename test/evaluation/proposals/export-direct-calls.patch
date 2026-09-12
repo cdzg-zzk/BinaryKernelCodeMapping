@@ -1,0 +1,114 @@
+--- a/make_dll/build_PIC_so.py
++++ b/make_dll/build_PIC_so.py
+@@ -1808,6 +1808,78 @@
+ # CLI glue
+ # -----------------------------------------------------------------------------
+ 
++def validate_executable_shim_bindings(
++    ko: KoFile, symbols: Sequence[ResolvedSymbol], owner_module: str,
++) -> None:
++    """Reject Shim bindings that would require rewriting shared owner code.
++
++    This is a module binding check, not certification of the final runtime
++    control closure. Private data-slot relocations are handled separately.
++    """
++    imports = {symbol.name for symbol in symbols
++               if not symbol.defined and symbol.module_name == "shim"}
++    if not imports:
++        return
++    try:
++        from capstone import Cs, CS_ARCH_X86, CS_MODE_64, CS_GRP_CALL, CS_GRP_JUMP
++        from capstone.x86 import X86_OP_IMM
++    except ImportError as error:
++        raise ValueError("capstone is required to validate executable Shim bindings") from error
++    decoder = Cs(CS_ARCH_X86, CS_MODE_64)
++    decoder.detail = True
++    local_imports = [symbol for symbol in ko.symbols
++                     if symbol.name in imports and not symbol.is_undef
++                     and symbol.typ == STT_FUNC]
++    conflicts: List[str] = []
++    for selected in symbols:
++        if (not selected.defined or selected.module_name != owner_module
++                or selected.st_type != STT_FUNC or not selected.replace_from_kernel):
++            continue
++        found = ko.find_symbol(selected.name)
++        if found is None:
++            raise ValueError(f"{ko.path}: cannot locate shared function {selected.name}")
++        _, symbol = found
++        if symbol.is_undef or symbol.st_shndx >= len(ko.sections):
++            raise ValueError(f"{ko.path}: invalid shared function {selected.name}")
++        section = ko.sections[symbol.st_shndx]
++        start, end = symbol.st_value, symbol.st_value + symbol.st_size
++        if (not section.is_exec or not section.is_alloc or symbol.st_size <= 0
++                or end > section.sh_size):
++            raise ValueError(f"{ko.path}: cannot bound shared function {selected.name}")
++        relocations = [relocation for relocation in ko.relocations_for(section)
++                       if start <= relocation.offset < end]
++        for relocation in relocations:
++            if relocation.symbol_name in imports:
++                conflicts.append(f"{selected.name}+0x{relocation.offset - start:x}: "
++                    f"{relocation.symbol_name} (executable relocation type {relocation.r_type})")
++        cursor = start
++        for instruction in decoder.disasm(ko.section_bytes(section)[start:end], start):
++            if instruction.address != cursor:
++                raise ValueError(f"{ko.path}: incomplete decoding of {selected.name}")
++            cursor += instruction.size
++            if (not (instruction.group(CS_GRP_CALL) or instruction.group(CS_GRP_JUMP))
++                    or not instruction.operands or instruction.operands[0].type != X86_OP_IMM):
++                continue
++            if any(instruction.address <= relocation.offset < cursor for relocation in relocations):
++                continue  # A relocation already supplies the target identity above.
++            target = instruction.operands[0].imm
++            for imported in local_imports:
++                if imported.st_shndx != symbol.st_shndx:
++                    continue
++                if (target == imported.st_value or
++                        imported.st_value <= target < imported.st_value + imported.st_size):
++                    conflicts.append(f"{selected.name}+0x{instruction.address - start:x}: "
++                                     f"{imported.name} (resolved local direct branch)")
++        if cursor != end:
++            raise ValueError(f"{ko.path}: incomplete decoding of {selected.name}")
++    if conflicts:
++        raise ValueError(
++            "unsupported executable Shim binding: shared instruction bytes retain "
++            "their native target; an undefined DSO symbol cannot redirect them. "
++            "Provide a supported private data-slot binding or validate a complete "
++            "native dependency closure. " + "; ".join(sorted(set(conflicts)))
++        )
++
+ def infer_default_krg_path() -> Path | None:
+     script_path = Path(__file__).resolve()
+     for parent in script_path.parents:
+@@ -2073,6 +2145,9 @@
+             synthetic_text_pages,
+         )
+ 
++    if ko_path is not None:
++        validate_executable_shim_bindings(ko, resolved, owner_module)
++
+     dep_modules = ["shim"] if LIB_SHIM in needed_libs else []
+     module_deps_path = symbols_path.parent / "module_deps.txt"
+     module_deps_path.write_text("".join(format_module_deps(owner_module, dep_modules, resolved)))
+--- a/kernel_cgd/function_checker/functions_checker.py
++++ b/kernel_cgd/function_checker/functions_checker.py
+@@ -668,13 +668,18 @@
+ 
+                     if target_sym['st_shndx'] == 'SHN_UNDEF':
+                         if target_name in self.shims:
+-                            self.shim_hits[target_name].append({
++                            # A PC-relative reference in shared executable bytes
++                            # keeps its native target. Declaring a DSO import does
++                            # not redirect it to a user-space Shim implementation.
++                            self.hard_fails.append({
++                                'mod': owner_elf.name,
+                                 'func': func_name,
+                                 'addr': local_offset,
+                                 'run_addr': addr_display,
+                                 'asm': asm_str,
++                                'type': f'不支持的共享代码 Shim 绑定 ({target_name})',
+                             })
+-                            self._trace(f'Shim 截断成功: {func_name} -> {target_name}', C.GREEN)
++                            self._warn(f'Shim 无可用重绑定位置: {func_name} -> {target_name}')
+                         else:
+                             self.queue_func(target_name, f'{func_name} -> 外部符号')
+                     else:

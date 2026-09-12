@@ -1,0 +1,18 @@
+{
+  "status": "pass",
+  "scope": "archived failure evidence consistency; application remains failed",
+  "kernel_call": "0xffffffffc0009e78",
+  "kernel_target": "0xffffffff816bb8a0",
+  "displacement": -1049945565,
+  "user_call": "0x7ffff7d87e78",
+  "predicted_target": "0x7fffb94398a0",
+  "observed_rip": "0x7fffb94398a0",
+  "mapped_ranges_checked": 32,
+  "target_mapped": false,
+  "rsi": 0,
+  "rdx": 16416,
+  "separate_loader_pfn_matches": 4,
+  "fresh_restored_mappings_outside_source_pfn_set": 4,
+  "completed_input_block_pairs": 0,
+  "module_unloads_verified": 3
+}

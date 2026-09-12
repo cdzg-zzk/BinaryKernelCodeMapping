@@ -1,0 +1,765 @@
+{
+  "scope": "selected raw LZ4 failure evidence and exact consumed components; full local guest disks/initramfs/corpus/vmlinux retained outside Git",
+  "files": [
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/attempt-diagnosis.json",
+      "bytes": 282
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/command.json",
+      "bytes": 768
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/components.json",
+      "bytes": 41745
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/console.log",
+      "bytes": 31017
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/evidence/validation/commands.jsonl",
+      "bytes": 718
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/evidence/validation/dmesg.txt",
+      "bytes": 31154
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/evidence/validation/load-page_cache_replace.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/evidence/validation/load-vkso_kernel_reader.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/evidence/validation/load-vkso_lz4.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/evidence/validation/status.json",
+      "bytes": 1128
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/evidence/validation/unload-page_cache_replace.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/evidence/validation/unload-vkso_kernel_reader.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/evidence/validation/unload-vkso_lz4.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/evidence/validation/workspace-init.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/extraction.log",
+      "bytes": 2332
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/lz4_qemu.py",
+      "bytes": 10145
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt01/result.json",
+      "bytes": 1347
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt02/attempt-diagnosis.json",
+      "bytes": 250
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt02/lz4_qemu.py",
+      "bytes": 10212
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/attempt-diagnosis.json",
+      "bytes": 337
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/command.json",
+      "bytes": 768
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/components.json",
+      "bytes": 42640
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/console.log",
+      "bytes": 31100
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/commands.jsonl",
+      "bytes": 1224
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/dmesg.txt",
+      "bytes": 31235
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/export/vkso/metadata/out.krg.inputs",
+      "bytes": 65
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/export/vkso/shared_data.txt",
+      "bytes": 49
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/export-and-cli.log",
+      "bytes": 236
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/load-page_cache_replace.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/load-vkso_kernel_reader.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/load-vkso_lz4.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/status.json",
+      "bytes": 733
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/unload-page_cache_replace.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/unload-vkso_kernel_reader.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/unload-vkso_lz4.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/evidence/validation/workspace-init.log",
+      "bytes": 160
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/extraction.log",
+      "bytes": 4057
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/lz4_qemu.py",
+      "bytes": 10212
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt03/result.json",
+      "bytes": 951
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/attempt-diagnosis.json",
+      "bytes": 547
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/command.json",
+      "bytes": 768
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/components.json",
+      "bytes": 42640
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/console.log",
+      "bytes": 45215
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/cli-validation.json",
+      "bytes": 492
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/commands.jsonl",
+      "bytes": 896
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/dmesg.txt",
+      "bytes": 45112
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export/vkso/include/vkso_types.h",
+      "bytes": 370
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export/vkso/lib/libshim.so",
+      "bytes": 16472
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export/vkso/lib/libvkso_lz4.so",
+      "bytes": 26576
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export/vkso/metadata/checks/vkso_LZ4_compress_default.log",
+      "bytes": 2520
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export/vkso/metadata/checks/vkso_LZ4_decompress_safe.log",
+      "bytes": 1853
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export/vkso/metadata/module_deps.txt",
+      "bytes": 55
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export/vkso/metadata/out.krg.inputs",
+      "bytes": 65
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export/vkso/metadata/outputs.env",
+      "bytes": 420
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export/vkso/metadata/page_mappings.txt",
+      "bytes": 192
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export/vkso/metadata/page_replace.log",
+      "bytes": 3461
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export/vkso/metadata/resolved_symbol_addresses.txt",
+      "bytes": 519
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export/vkso/shared_data.txt",
+      "bytes": 49
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/export-and-cli.log",
+      "bytes": 5843
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/load-page_cache_replace.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/load-vkso_kernel_reader.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/load-vkso_lz4.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/status.json",
+      "bytes": 1649
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/evidence/validation/workspace-init.log",
+      "bytes": 160
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/extraction.log",
+      "bytes": 6178
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/lz4_qemu.py",
+      "bytes": 10240
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt04/result.json",
+      "bytes": 1872
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/attempt-diagnosis.json",
+      "bytes": 457
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/command.json",
+      "bytes": 768
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/components.json",
+      "bytes": 42640
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/console.log",
+      "bytes": 45749
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/carrier-process-maps.txt",
+      "bytes": 8637
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/cli-logs/00-dickens-b4-compress.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/cli-logs/00-dickens-b4-stock.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/cli-validation.json",
+      "bytes": 630
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/commands.jsonl",
+      "bytes": 1684
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/dmesg-after-registration.txt",
+      "bytes": 42604
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/dmesg.txt",
+      "bytes": 45638
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export/vkso/include/vkso_types.h",
+      "bytes": 370
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export/vkso/lib/libshim.so",
+      "bytes": 16472
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export/vkso/lib/libvkso_lz4.so",
+      "bytes": 26576
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export/vkso/metadata/checks/vkso_LZ4_compress_default.log",
+      "bytes": 2520
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export/vkso/metadata/checks/vkso_LZ4_decompress_safe.log",
+      "bytes": 1853
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export/vkso/metadata/module_deps.txt",
+      "bytes": 55
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export/vkso/metadata/out.krg.inputs",
+      "bytes": 65
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export/vkso/metadata/outputs.env",
+      "bytes": 420
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export/vkso/metadata/page_mappings.txt",
+      "bytes": 192
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export/vkso/metadata/page_replace.log",
+      "bytes": 3461
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export/vkso/metadata/resolved_symbol_addresses.txt",
+      "bytes": 519
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export/vkso/shared_data.txt",
+      "bytes": 49
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/export-and-cli.log",
+      "bytes": 5857
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/load-page_cache_replace.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/load-vkso_kernel_reader.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/load-vkso_lz4.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/registered-pfns.json",
+      "bytes": 1505
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/restored-pfns.json",
+      "bytes": 674
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/source-pages.csv",
+      "bytes": 139
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/status.json",
+      "bytes": 733
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/unload-page_cache_replace.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/unload-vkso_kernel_reader.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/unload-vkso_lz4.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/evidence/validation/workspace-init.log",
+      "bytes": 160
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/extraction.log",
+      "bytes": 8720
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/lz4_qemu.py",
+      "bytes": 10240
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt05/result.json",
+      "bytes": 953
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/attempts.json",
+      "bytes": 4730
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/carrier-elf.txt",
+      "bytes": 3364
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/command.json",
+      "bytes": 768
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/components.json",
+      "bytes": 56451
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/console.log",
+      "bytes": 45651
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/diagnosis.json",
+      "bytes": 1702
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/environment-evidence/command.json",
+      "bytes": 889
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/environment-evidence/components.json",
+      "bytes": 1508
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/environment-evidence/console.log",
+      "bytes": 30515
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/environment-evidence/evidence/validation/observations.json",
+      "bytes": 1384
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/environment-evidence/result.json",
+      "bytes": 178
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/carrier-process-maps.txt",
+      "bytes": 8588
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/cli-logs/00-dickens-b4-compress.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/cli-logs/00-dickens-b4-stock.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/cli-validation.json",
+      "bytes": 1583
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/commands.jsonl",
+      "bytes": 1684
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/dmesg-after-registration.txt",
+      "bytes": 42508
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/dmesg.txt",
+      "bytes": 45542
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/include/vkso_types.h",
+      "bytes": 370
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/lib/libshim.so",
+      "bytes": 16472
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/lib/libvkso_lz4.so",
+      "bytes": 26648
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/metadata/checks/vkso_LZ4_compress_default.log",
+      "bytes": 2520
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/metadata/checks/vkso_LZ4_decompress_safe.log",
+      "bytes": 2511
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/metadata/module_deps.txt",
+      "bytes": 55
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/metadata/out.krg",
+      "bytes": 3893465
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/metadata/out.krg.inputs",
+      "bytes": 65
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/metadata/outputs.env",
+      "bytes": 420
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/metadata/page_mappings.txt",
+      "bytes": 192
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/metadata/page_replace.log",
+      "bytes": 3461
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/metadata/resolved_symbol_addresses.txt",
+      "bytes": 663
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export/vkso/shared_data.txt",
+      "bytes": 49
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/export-and-cli.log",
+      "bytes": 6515
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/full-cli-gdb-diagnostic.log",
+      "bytes": 8178
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/load-page_cache_replace.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/load-vkso_kernel_reader.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/load-vkso_lz4.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/registered-pfns.json",
+      "bytes": 1505
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/restored-pfns.json",
+      "bytes": 674
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/runtime-kallsyms.txt",
+      "bytes": 6342279
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/source-pages.csv",
+      "bytes": 139
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/status.json",
+      "bytes": 733
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/unload-page_cache_replace.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/unload-vkso_kernel_reader.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/unload-vkso_lz4.log",
+      "bytes": 0
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence/validation/workspace-init.log",
+      "bytes": 160
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/evidence-audit.json",
+      "bytes": 567
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/extraction.log",
+      "bytes": 9122
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/kernel-package-evidence/apt-package-metadata.txt",
+      "bytes": 1495
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/kernel-package-evidence/evidence.json",
+      "bytes": 1002
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/kernel-package-evidence/installed-package.txt",
+      "bytes": 67
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/lz4_qemu.py",
+      "bytes": 10607
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/.lz4_compress.o.cmd",
+      "bytes": 31056
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/.lz4_decompress.o.cmd",
+      "bytes": 31078
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/Makefile",
+      "bytes": 1677
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/binary-comparison.json",
+      "bytes": 13630
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/build.log",
+      "bytes": 6749
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/lz4_compress.c",
+      "bytes": 23491
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/lz4_decompress.c",
+      "bytes": 21676
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/lz4defs.h",
+      "bytes": 6863
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/module_meta.c",
+      "bytes": 141
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/selected-function-comparison.json",
+      "bytes": 1136
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/sources.json",
+      "bytes": 868
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-build-evidence/vkso_lz4.ko",
+      "bytes": 491672
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/owner-compression-disassembly.txt",
+      "bytes": 58506
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/cli/lz4-adapted",
+      "bytes": 1673352
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/cli/lz4-stock",
+      "bytes": 1665168
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/guest.py",
+      "bytes": 15499
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/helpers/carrier.py",
+      "bytes": 2825
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/helpers/footprint.py",
+      "bytes": 3654
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/helpers/vkso_kernel_reader.ko",
+      "bytes": 252456
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/owner/vkso_lz4.ko",
+      "bytes": 491672
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/kernel_cgd/function_checker/functions_checker.py",
+      "bytes": 36089
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/kernel_cgd/kerne_type/vkso_gen_types.py",
+      "bytes": 33930
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/kernel_cgd/src/krg",
+      "bytes": 252576
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/kernel_cgd/src/krg.cpp",
+      "bytes": 69090
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/make_dll/build_PIC_so.py",
+      "bytes": 92883
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/make_dll/shim.c",
+      "bytes": 4634
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/make_dll/shim.txt",
+      "bytes": 969
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/page_cache_replace/manager",
+      "bytes": 2456768
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/page_cache_replace/manager.cpp",
+      "bytes": 27805
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/page_cache_replace/page_cache_replace.ko",
+      "bytes": 597320
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/repo/vkso",
+      "bytes": 28779
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/payload/symbols.txt",
+      "bytes": 204
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/result.json",
+      "bytes": 952
+    },
+    {
+      "path": "test/evaluation/results/lz4-cli-qemu-20260912-attempt06/verify-diagnosis.py",
+      "bytes": 4442
+    }
+  ]
+}

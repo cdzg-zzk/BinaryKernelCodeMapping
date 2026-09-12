@@ -1,0 +1,6 @@
+{
+  "category": "guest-environment-preparation",
+  "cause": "/usr/bin/env missing from initramfs; vkso shebang cannot resolve despite script being present",
+  "algorithm_cases_started": 0,
+  "next_action": "include ordinary /usr/bin/env runtime; fresh guest and output directory"
+}

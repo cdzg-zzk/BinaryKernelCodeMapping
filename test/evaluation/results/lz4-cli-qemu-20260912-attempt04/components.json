@@ -1,0 +1,1073 @@
+{
+  "scope": "KVM full LZ4 CLI functional validation only",
+  "host_euid": 1000,
+  "kernel": "/tmp/vkso-guest-kernel-119/extracted/boot/vmlinuz-5.15.0-119-generic",
+  "kernel_sha256": "6f8b2d5065ad56cb3c1652e88752817ccedf60ec9472be561972434b00ed27f5",
+  "base_initramfs": "/tmp/vkso-guest-kernel-119/functional-environment-01/initramfs-exact119.cpio.gz",
+  "base_initramfs_sha256": "1e69bfb862f243c4880aff8fb70a011d9ed3647783dd9a98b7898e431e1bf291",
+  "components": [
+    {
+      "source": "/tmp/vkso-guest-kernel-119/evidence.json",
+      "destination": "kernel-package-evidence/evidence.json",
+      "sha256": "fa4c16970e724871acbaab60da56e92d56134f2b8d8ab2b03cc7ba27e72bdd79",
+      "bytes": 1002
+    },
+    {
+      "source": "/tmp/vkso-guest-kernel-119/apt-package-metadata.txt",
+      "destination": "kernel-package-evidence/apt-package-metadata.txt",
+      "sha256": "b04c906bef412daecb157204136f924b5265c4ae9e9619ac9e13dbc8fb041caf",
+      "bytes": 1495
+    },
+    {
+      "source": "/tmp/vkso-guest-kernel-119/installed-package.txt",
+      "destination": "kernel-package-evidence/installed-package.txt",
+      "sha256": "d1af6cb4e75e9dd44ed8c3ba0f32fb5c9b10ed2ce572bc05b16b38acc35341ce",
+      "bytes": 67
+    },
+    {
+      "source": "/tmp/vkso-guest-kernel-119/functional-environment-01/command.json",
+      "destination": "environment-evidence/command.json",
+      "sha256": "63663bd0da3f8f5ba2d134720f8b7c8d72fc818d7c1f4a3014078cf90c3b6e37",
+      "bytes": 889
+    },
+    {
+      "source": "/tmp/vkso-guest-kernel-119/functional-environment-01/components.json",
+      "destination": "environment-evidence/components.json",
+      "sha256": "bc3b9426a1f1a3803f73a1e364bd7d89293fdfaa044019c977e2272c75b8c756",
+      "bytes": 1508
+    },
+    {
+      "source": "/tmp/vkso-guest-kernel-119/functional-environment-01/console.log",
+      "destination": "environment-evidence/console.log",
+      "sha256": "0ac7df0e90c9a582788416583370484b39c533da6c3ab27cbb46ad2075c4e0fb",
+      "bytes": 30515
+    },
+    {
+      "source": "/tmp/vkso-guest-kernel-119/functional-environment-01/result.json",
+      "destination": "environment-evidence/result.json",
+      "sha256": "347fddba09f220b0b8c04d3c97e235a593760879e53ff75875f40ebcc115a2fa",
+      "bytes": 178
+    },
+    {
+      "source": "/tmp/vkso-guest-kernel-119/functional-environment-01/evidence/validation/observations.json",
+      "destination": "environment-evidence/evidence/validation/observations.json",
+      "sha256": "70c6a3665b5cfb856cc3466de945417521d0110dbd3e5aef28f69d983ade0308",
+      "bytes": 1384
+    },
+    {
+      "source": "/usr/bin/env",
+      "destination": "initramfs/usr/bin/env",
+      "sha256": "85036540673319c6c2f54233fd2b9e45a8a71246b51cc96c4e6ab8ee6c419eb0",
+      "bytes": 43976
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/bash",
+      "destination": "initramfs/usr/bin/bash",
+      "sha256": "59474588a312b6b6e73e5a42a59bf71e62b55416b6c9d5e4a6e1c630c2a9ecd4",
+      "bytes": 1396520
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libtinfo.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libtinfo.so.6",
+      "sha256": "bcd7edc10f0e3df476c0738280cd60c751c11b5b99fa13ded70f5439cb3a8ce9",
+      "bytes": 200136
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/gcc",
+      "destination": "initramfs/usr/bin/gcc",
+      "sha256": "821af3c74506283c179ca413bb33e6b528805a4dd8a5c09df125e5ad560a9e89",
+      "bytes": 928584
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/as",
+      "destination": "initramfs/usr/bin/as",
+      "sha256": "4e6b50c3faaa834150db32be778fd7d9440a4e1f5fa8beb8a72277b12159d689",
+      "bytes": 467352
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libopcodes-2.38-system.so",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libopcodes-2.38-system.so",
+      "sha256": "5a194dcdcaecff21ae4d7e1bf2982b518cbac554a68371dfd97b5d76e0eba1d5",
+      "bytes": 1292632
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libbfd-2.38-system.so",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libbfd-2.38-system.so",
+      "sha256": "f9ca64d035c483bbfac32ca550074c20398ae2f0bb84dd989059dadb9cea8a1e",
+      "bytes": 1543224
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libz.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libz.so.1",
+      "sha256": "64c206f0146cc58bbddc4f22054436f4ff278f5a554aa3ce6921ddf7e9133370",
+      "bytes": 108936
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/ld",
+      "destination": "initramfs/usr/bin/ld",
+      "sha256": "58937fc20c21e147883b4fdaa0fc7438a8e8f2bb886cfcaa4896100ca91139e7",
+      "bytes": 1736184
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libbfd-2.38-system.so",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libbfd-2.38-system.so",
+      "sha256": "f9ca64d035c483bbfac32ca550074c20398ae2f0bb84dd989059dadb9cea8a1e",
+      "bytes": 1543224
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libctf.so.0",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libctf.so.0",
+      "sha256": "a9100b1d6160d12b3467214831819f557f1e327e65cf55f249e88c2c5d110e06",
+      "bytes": 228576
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libz.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libz.so.1",
+      "sha256": "64c206f0146cc58bbddc4f22054436f4ff278f5a554aa3ce6921ddf7e9133370",
+      "bytes": 108936
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/make",
+      "destination": "initramfs/usr/bin/make",
+      "sha256": "92f646030615cd98490a68a94c0aefd87b552be3158b941c02e43b0bfdb576db",
+      "bytes": 255696
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/readelf",
+      "destination": "initramfs/usr/bin/readelf",
+      "sha256": "04db0000749aff89e4af21429340b00b536fc6f80e811c872c006507881a5560",
+      "bytes": 776640
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libctf-nobfd.so.0",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libctf-nobfd.so.0",
+      "sha256": "d46fc30938410e5fe6861c608f57b5fb60bb34d1f8af9e5b0bbbb0ecbb806792",
+      "bytes": 228376
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libz.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libz.so.1",
+      "sha256": "64c206f0146cc58bbddc4f22054436f4ff278f5a554aa3ce6921ddf7e9133370",
+      "bytes": 108936
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/nm",
+      "destination": "initramfs/usr/bin/nm",
+      "sha256": "ed6565c132d6f20019ff3f050043dc1b2b8bc2e8b3b94c1ffe3f34436431a5a4",
+      "bytes": 44672
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libbfd-2.38-system.so",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libbfd-2.38-system.so",
+      "sha256": "f9ca64d035c483bbfac32ca550074c20398ae2f0bb84dd989059dadb9cea8a1e",
+      "bytes": 1543224
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libz.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libz.so.1",
+      "sha256": "64c206f0146cc58bbddc4f22054436f4ff278f5a554aa3ce6921ddf7e9133370",
+      "bytes": 108936
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/install",
+      "destination": "initramfs/usr/bin/install",
+      "sha256": "519a00d199d07da6028ec5a9800d92c562934582a2ea1793b2cbc378a85c1439",
+      "bytes": 145944
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libselinux.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libselinux.so.1",
+      "sha256": "624eb1e6a7510e0983e9caa1bbf3e1966acb64fd6d3ad4db94528addbe1e7224",
+      "bytes": 166280
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libacl.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libacl.so.1",
+      "sha256": "b35d4bbf00844a585e02502b8a1db17b740a0127e2fb9a4428a83eaa0f23be65",
+      "bytes": 34888
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libattr.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libattr.so.1",
+      "sha256": "5f0471b6d14d4090263ea2f859a07b5bdf56a235335fafab5e0ce1ed2c6815ba",
+      "bytes": 26696
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libpcre2-8.so.0",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libpcre2-8.so.0",
+      "sha256": "f887eed7d0df7073f3d8bdc9e60d35082453b10165cf45359b5019e33ba2b9ec",
+      "bytes": 613064
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/realpath",
+      "destination": "initramfs/usr/bin/realpath",
+      "sha256": "79ecae9071edc0253ba3e17cf2e9883b1ed18bba1b7f355774df231cc409fbea",
+      "bytes": 39336
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/stat",
+      "destination": "initramfs/usr/bin/stat",
+      "sha256": "9b571b54bd2f17f5fbb841e1886c2d364f5138a02533f4ac3dbfbdaf4dddbea3",
+      "bytes": 80400
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libselinux.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libselinux.so.1",
+      "sha256": "624eb1e6a7510e0983e9caa1bbf3e1966acb64fd6d3ad4db94528addbe1e7224",
+      "bytes": 166280
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libpcre2-8.so.0",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libpcre2-8.so.0",
+      "sha256": "f887eed7d0df7073f3d8bdc9e60d35082453b10165cf45359b5019e33ba2b9ec",
+      "bytes": 613064
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/sha256sum",
+      "destination": "initramfs/usr/bin/sha256sum",
+      "sha256": "7645c8e76d75515ccb75c9086bdcf0d4071f2985f380f249253ead7d7c6810b3",
+      "bytes": 51624
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/awk",
+      "destination": "initramfs/usr/bin/awk",
+      "sha256": "1c981f9ff43263708684031b8e2c979a75ecc26a4995b25133d7c3d2a3398c6d",
+      "bytes": 704984
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libsigsegv.so.2",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libsigsegv.so.2",
+      "sha256": "8762f5d6ce036f2ccc6afe676533627d8fc7aedfe018ec512d918eec58a1c8b6",
+      "bytes": 18680
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libreadline.so.8",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libreadline.so.8",
+      "sha256": "57419e3b177639246ecf7ffd2eba170bde779b7369d70e68b9b4c5fc3051cbc1",
+      "bytes": 335936
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libmpfr.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libmpfr.so.6",
+      "sha256": "ce9a4f2b97522cea4a4cf89cbe8a5fd5e1cc44ef25ef71d161ac109eac9bdcc6",
+      "bytes": 2808496
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libgmp.so.10",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libgmp.so.10",
+      "sha256": "4dc20a901c6951e678e216e959da2534bcef7053e6efdf1492509baf142282b0",
+      "bytes": 526896
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libm.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libm.so.6",
+      "sha256": "df621c68dbfed7e843434ef2faedb9f4d4b0543ad161e9a55eaf4d4ce2443176",
+      "bytes": 940560
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libtinfo.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libtinfo.so.6",
+      "sha256": "bcd7edc10f0e3df476c0738280cd60c751c11b5b99fa13ded70f5439cb3a8ce9",
+      "bytes": 200136
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/sed",
+      "destination": "initramfs/usr/bin/sed",
+      "sha256": "42e2ce00721556ff9d371778fc36adcbb7c1697f65c3f996c6c9b28206dba565",
+      "bytes": 113224
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libacl.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libacl.so.1",
+      "sha256": "b35d4bbf00844a585e02502b8a1db17b740a0127e2fb9a4428a83eaa0f23be65",
+      "bytes": 34888
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libselinux.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libselinux.so.1",
+      "sha256": "624eb1e6a7510e0983e9caa1bbf3e1966acb64fd6d3ad4db94528addbe1e7224",
+      "bytes": 166280
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libpcre2-8.so.0",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libpcre2-8.so.0",
+      "sha256": "f887eed7d0df7073f3d8bdc9e60d35082453b10165cf45359b5019e33ba2b9ec",
+      "bytes": 613064
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/grep",
+      "destination": "initramfs/usr/bin/grep",
+      "sha256": "73abb4280520053564fd4917286909ba3b054598b32c9cdfaf1d733e0202cc96",
+      "bytes": 182728
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libpcre.so.3",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libpcre.so.3",
+      "sha256": "baae995e98223eee1afe6c640f21bdbba91b9c170584ce766418b59810d98a93",
+      "bytes": 477296
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/tee",
+      "destination": "initramfs/usr/bin/tee",
+      "sha256": "eb219ccfbdad53064135a4101d4f56f0d9e5f7f1cd20c032b29e3604264cf79b",
+      "bytes": 35336
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/cp",
+      "destination": "initramfs/usr/bin/cp",
+      "sha256": "8da5881bb59f65673bc22b3a09b0d663b19bc0e785cf986b05d41b8222449ec2",
+      "bytes": 141832
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libselinux.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libselinux.so.1",
+      "sha256": "624eb1e6a7510e0983e9caa1bbf3e1966acb64fd6d3ad4db94528addbe1e7224",
+      "bytes": 166280
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libacl.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libacl.so.1",
+      "sha256": "b35d4bbf00844a585e02502b8a1db17b740a0127e2fb9a4428a83eaa0f23be65",
+      "bytes": 34888
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libattr.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libattr.so.1",
+      "sha256": "5f0471b6d14d4090263ea2f859a07b5bdf56a235335fafab5e0ce1ed2c6815ba",
+      "bytes": 26696
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libpcre2-8.so.0",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libpcre2-8.so.0",
+      "sha256": "f887eed7d0df7073f3d8bdc9e60d35082453b10165cf45359b5019e33ba2b9ec",
+      "bytes": 613064
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/mv",
+      "destination": "initramfs/usr/bin/mv",
+      "sha256": "8e2b0545d39a38c2167949bafa943a9d848f363ded3782a9c350fe5e1a66d82c",
+      "bytes": 137752
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libselinux.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libselinux.so.1",
+      "sha256": "624eb1e6a7510e0983e9caa1bbf3e1966acb64fd6d3ad4db94528addbe1e7224",
+      "bytes": 166280
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libacl.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libacl.so.1",
+      "sha256": "b35d4bbf00844a585e02502b8a1db17b740a0127e2fb9a4428a83eaa0f23be65",
+      "bytes": 34888
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libattr.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libattr.so.1",
+      "sha256": "5f0471b6d14d4090263ea2f859a07b5bdf56a235335fafab5e0ce1ed2c6815ba",
+      "bytes": 26696
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libpcre2-8.so.0",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libpcre2-8.so.0",
+      "sha256": "f887eed7d0df7073f3d8bdc9e60d35082453b10165cf45359b5019e33ba2b9ec",
+      "bytes": 613064
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/rm",
+      "destination": "initramfs/usr/bin/rm",
+      "sha256": "7477c0f734a465a39a4fe40f6a9bb9d7431827e0a1d799ad1f25855b5dc63682",
+      "bytes": 59912
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/bin/mktemp",
+      "destination": "initramfs/usr/bin/mktemp",
+      "sha256": "b239a8e9703853fde69bcf2721c1b474eff8f07c4528ae603e2f0f34d8a063a6",
+      "bytes": 39432
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/bin/bash",
+      "destination": "initramfs/bin/bash",
+      "sha256": "59474588a312b6b6e73e5a42a59bf71e62b55416b6c9d5e4a6e1c630c2a9ecd4",
+      "bytes": 1396520
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libtinfo.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libtinfo.so.6",
+      "sha256": "bcd7edc10f0e3df476c0738280cd60c751c11b5b99fa13ded70f5439cb3a8ce9",
+      "bytes": 200136
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/lib/linux-tools/5.15.0-119-generic/bpftool",
+      "destination": "initramfs/usr/bin/bpftool",
+      "sha256": "e1eb6ffccb4e6515e7f88e96afca3e7d792470f87969d326c0f78175caa17345",
+      "bytes": 1596952
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libelf.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libelf.so.1",
+      "sha256": "89a10cfe5c07353235f80dbff50f4602b89811bed7b19621c3a4023157eb1c85",
+      "bytes": 117400
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libz.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libz.so.1",
+      "sha256": "64c206f0146cc58bbddc4f22054436f4ff278f5a554aa3ce6921ddf7e9133370",
+      "bytes": 108936
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libcap.so.2",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libcap.so.2",
+      "sha256": "00e8d9ef4e9c081a3c8d8164cfd06165937c9bcb6d4f9b47c6dcfa53d9e52046",
+      "bytes": 39024
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/lib/gcc/x86_64-linux-gnu/11/cc1",
+      "destination": "initramfs/usr/lib/gcc/x86_64-linux-gnu/11/cc1",
+      "sha256": "31c2233432d9105001eea158b799f7d403dc5a1944c712283dba251f3ab8eb43",
+      "bytes": 25957088
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libisl.so.23",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libisl.so.23",
+      "sha256": "4a5c6ce131566c1adea6c4cf0206f19c7748b5d198e01c3b6463d5dc34ba87a9",
+      "bytes": 1998584
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libmpc.so.3",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libmpc.so.3",
+      "sha256": "5fbbb17e4ff06a9fcb22e3311fcbb022bcfe22eaa9f6f40f2f6676190868e5a0",
+      "bytes": 109848
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libmpfr.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libmpfr.so.6",
+      "sha256": "ce9a4f2b97522cea4a4cf89cbe8a5fd5e1cc44ef25ef71d161ac109eac9bdcc6",
+      "bytes": 2808496
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libgmp.so.10",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libgmp.so.10",
+      "sha256": "4dc20a901c6951e678e216e959da2534bcef7053e6efdf1492509baf142282b0",
+      "bytes": 526896
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libz.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libz.so.1",
+      "sha256": "64c206f0146cc58bbddc4f22054436f4ff278f5a554aa3ce6921ddf7e9133370",
+      "bytes": 108936
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libzstd.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libzstd.so.1",
+      "sha256": "5df4f4df42d76270bb6981fabc7c1fdccd8ad28a23d84d67f73203fb3f537667",
+      "bytes": 841808
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/lib/gcc/x86_64-linux-gnu/11/collect2",
+      "destination": "initramfs/usr/lib/gcc/x86_64-linux-gnu/11/collect2",
+      "sha256": "74da9a263cce4582f98c7995d04fa52110c8366d65cba1c5bc976a00f1b3f14b",
+      "bytes": 299048
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/usr/lib/x86_64-linux-gnu/crti.o",
+      "destination": "initramfs/usr/lib/x86_64-linux-gnu/crti.o",
+      "sha256": "077ccb6c68db1794da3ee262c4a16a3c6f8e902845dd0829110ad4b7065e5aa3",
+      "bytes": 1192
+    },
+    {
+      "source": "/usr/lib/x86_64-linux-gnu/crtn.o",
+      "destination": "initramfs/usr/lib/x86_64-linux-gnu/crtn.o",
+      "sha256": "a2266079f95b84ccc2162ebbf279bcd78858a748aa1882e0bdb912316c76a58f",
+      "bytes": 760
+    },
+    {
+      "source": "/usr/lib/x86_64-linux-gnu/libc.so",
+      "destination": "initramfs/usr/lib/x86_64-linux-gnu/libc.so",
+      "sha256": "fe2a4ce2930fc6b3966aa987fae808375446c8d3823b8c21792e991aad9c75df",
+      "bytes": 283
+    },
+    {
+      "source": "/usr/lib/x86_64-linux-gnu/libc_nonshared.a",
+      "destination": "initramfs/usr/lib/x86_64-linux-gnu/libc_nonshared.a",
+      "sha256": "c281ebc6e90af1184b6797e931429362669d9a9b25443ea1e2431d746c9532e6",
+      "bytes": 5594
+    },
+    {
+      "source": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+      "destination": "initramfs/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+      "sha256": "fc9d43b2f6c20e53b009238f767c5b949d202389e20de9e202ea684b4ba3729a",
+      "bytes": 125488
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/vkso",
+      "destination": "payload/repo/vkso",
+      "sha256": "fb5e7a6d70d0abed8d55f7ab804cdbb134e453200935796928c377be6ea91d0f",
+      "bytes": 28779
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/src/krg",
+      "destination": "payload/repo/kernel_cgd/src/krg",
+      "sha256": "584a689e1e8b1f20b892f992f639f8f4568b062306e66f945a844bb7d7bad6db",
+      "bytes": 252576
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/src/krg.cpp",
+      "destination": "payload/repo/kernel_cgd/src/krg.cpp",
+      "sha256": "ef3e54459d37118105406b5c0b2dc7c7162eb140cdacf8ef589bc3b5b4028dee",
+      "bytes": 69090
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/kerne_type/vkso_gen_types.py",
+      "destination": "payload/repo/kernel_cgd/kerne_type/vkso_gen_types.py",
+      "sha256": "94ca24843566f5f533697032ab4df256923ea27295c3441fb6cbb527827e9e89",
+      "bytes": 33930
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/function_checker/functions_checker.py",
+      "destination": "payload/repo/kernel_cgd/function_checker/functions_checker.py",
+      "sha256": "d3780a8c7781c29d417313e066596c1f6249b5b05077e792446dbe0db37e100f",
+      "bytes": 36089
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/make_dll/build_PIC_so.py",
+      "destination": "payload/repo/make_dll/build_PIC_so.py",
+      "sha256": "1efd26152cd34f5a2c6967a51631e0cec2affbeecaeb6f6b0d3982e581d1d580",
+      "bytes": 92883
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/make_dll/shim.c",
+      "destination": "payload/repo/make_dll/shim.c",
+      "sha256": "d0da4d0b3b6e384d43562d83fd6f6e25dddd008e58d02ae920abafb648b11075",
+      "bytes": 4634
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/make_dll/shim.txt",
+      "destination": "payload/repo/make_dll/shim.txt",
+      "sha256": "7b94c8a750d69fe23c3cd9afa000fc056b07a0948627840efceccb2b93125a6c",
+      "bytes": 969
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/page_cache_replace/manager",
+      "destination": "payload/repo/page_cache_replace/manager",
+      "sha256": "587c9826cad9655620f66a66f61b1cbf52cc4a69a5b148d1ba0d99b030ef9706",
+      "bytes": 2456768
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/page_cache_replace/manager.cpp",
+      "destination": "payload/repo/page_cache_replace/manager.cpp",
+      "sha256": "42ac22aa4130fb971e15ecca37137fe9ab3b8a31ca78eff5568c4b50fb520680",
+      "bytes": 27805
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/page_cache_replace/page_cache_replace.ko",
+      "destination": "payload/repo/page_cache_replace/page_cache_replace.ko",
+      "sha256": "adb851ea93db68b6abb4691e71ed738e77e8a594a4d5c5744a198f4247581d59",
+      "bytes": 597320
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/src/krg",
+      "destination": "payload/repo/kernel_cgd/src/krg",
+      "sha256": "584a689e1e8b1f20b892f992f639f8f4568b062306e66f945a844bb7d7bad6db",
+      "bytes": 252576
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libcapstone.so.4",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libcapstone.so.4",
+      "sha256": "193fb27fe02207055b3d78865c23413db841628970a35e65e65d47c3316a2f57",
+      "bytes": 6601776
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libstdc++.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libstdc++.so.6",
+      "sha256": "ff0825e113603c3866680d5d52216bc6d8eedf3a59f52a0aef67ff01994db128",
+      "bytes": 2260296
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libgcc_s.so.1",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libgcc_s.so.1",
+      "sha256": "fc9d43b2f6c20e53b009238f767c5b949d202389e20de9e202ea684b4ba3729a",
+      "bytes": 125488
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libm.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libm.so.6",
+      "sha256": "df621c68dbfed7e843434ef2faedb9f4d4b0543ad161e9a55eaf4d4ce2443176",
+      "bytes": 940560
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/lz4-cli/build/lz4-stock",
+      "destination": "payload/cli/lz4-stock",
+      "sha256": "e3f758e877821b038e252233bc033de7fdfe05f9cb0770f65e71dcdda1fa7727",
+      "bytes": 1665168
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/lz4-cli/build/lz4-adapted",
+      "destination": "payload/cli/lz4-adapted",
+      "sha256": "ea8318609971ba98debbb958315e89e628025a29d06598f20c2fe5565c364a5b",
+      "bytes": 1673352
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "initramfs/lib/x86_64-linux-gnu/libc.so.6",
+      "sha256": "e01b1ce7be2987f3b8560e26d0df2623f9dd5cec17be923ae28a785bc0d32d50",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "initramfs/lib64/ld-linux-x86-64.so.2",
+      "sha256": "8d06f393f4a93bcf9b81145a259524d66a95522a646bf8d7e05b6ffdf2e63dcc",
+      "bytes": 240936
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/vkso_lz4.ko",
+      "destination": "payload/owner/vkso_lz4.ko",
+      "sha256": "fe5d29164d9514693d0e47be84dae677350f3575f1e8238c913c0ccfd188d292",
+      "bytes": 494552
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/revision/footprint.py",
+      "destination": "payload/helpers/footprint.py",
+      "sha256": "35017ef68a2d7ae028a6dc8e6ca0ebfe7b8d89c3b0398e3ae7fd5c19ecc728f5",
+      "bytes": 3654
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/revision/carrier.py",
+      "destination": "payload/helpers/carrier.py",
+      "sha256": "0bf1ac5325ba90bfe94c0809e7c6a503e69c70ac64a1b710dbdebc83886197e9",
+      "bytes": 2825
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/revision/kernel-reader/vkso_kernel_reader.ko",
+      "destination": "payload/helpers/vkso_kernel_reader.ko",
+      "sha256": "5f659b4a2d6edf95beafc890268266e3070658914a41f70f9a399559a2931a91",
+      "bytes": 252456
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/config/symbols.txt",
+      "destination": "payload/symbols.txt",
+      "sha256": "1d0d565f64ca305aff6b21c3acccc0aff7d1ec78c13d5edb560f4ce27e11c7e6",
+      "bytes": 204
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/manifest.txt",
+      "destination": "payload/corpus/manifest.txt",
+      "sha256": "e6915a15ff729abfa0c885d590b6470d3f891afc516887a76d7767bc980f6710",
+      "bytes": 72
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/dickens",
+      "destination": "payload/corpus/dickens",
+      "sha256": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a",
+      "bytes": 10192446
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/mozilla",
+      "destination": "payload/corpus/mozilla",
+      "sha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b",
+      "bytes": 51220480
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/mr",
+      "destination": "payload/corpus/mr",
+      "sha256": "68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6",
+      "bytes": 9970564
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/nci",
+      "destination": "payload/corpus/nci",
+      "sha256": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635",
+      "bytes": 33553445
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/ooffice",
+      "destination": "payload/corpus/ooffice",
+      "sha256": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb",
+      "bytes": 6152192
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/osdb",
+      "destination": "payload/corpus/osdb",
+      "sha256": "60f027179302ca3ad87c58ac90b6be72ec23588aaa7a3b7fe8ecc0f11def3fa3",
+      "bytes": 10085684
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/reymont",
+      "destination": "payload/corpus/reymont",
+      "sha256": "0eac0114a3dfe6e2ee1f345a0f79d653cb26c3bc9f0ed79238af4933422b7578",
+      "bytes": 6627202
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/samba",
+      "destination": "payload/corpus/samba",
+      "sha256": "93ba07bc44d8267789c1d911992f40b089ffa2140b4a160fac11ccae9a40e7b2",
+      "bytes": 21606400
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/sao",
+      "destination": "payload/corpus/sao",
+      "sha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc",
+      "bytes": 7251944
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/webster",
+      "destination": "payload/corpus/webster",
+      "sha256": "6a68f69b26daf09f9dd84f7470368553194a0b294fcfa80f1604efb11143a383",
+      "bytes": 41458703
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/x-ray",
+      "destination": "payload/corpus/x-ray",
+      "sha256": "7de9fce1405dc44ae5e6813ed21cd5751e761bd4265655a005d39b9685d1c9ad",
+      "bytes": 8474240
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/corpus/silesia/xml",
+      "destination": "payload/corpus/xml",
+      "sha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c",
+      "bytes": 5345280
+    },
+    {
+      "source": "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic",
+      "destination": "payload/vmlinux-5.15.0-119-generic",
+      "sha256": "2bedb90c602a9ed82ceff21a11d3113c6b39bee59b8c6fa5c2dac005db9a6c98",
+      "bytes": 753608976
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/lz4_guest.py",
+      "destination": "payload/guest.py",
+      "sha256": "eaa8b5f9c127cdad32171ab8eb7e80679be6339b987be1ccab5822ca75254a9b",
+      "bytes": 11242
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/lz4_qemu.py",
+      "destination": "lz4_qemu.py",
+      "sha256": "3b41ccc55598971aa820be9c9ebc59677fad013898df90e855df30d8fbca01db",
+      "bytes": 10240
+    }
+  ],
+  "host_command": [
+    "test/evaluation/lz4_qemu.py",
+    "--output",
+    "test/evaluation/results/lz4-cli-qemu-20260912-attempt04",
+    "--kernel",
+    "/tmp/vkso-guest-kernel-119/extracted/boot/vmlinuz-5.15.0-119-generic",
+    "--initramfs",
+    "/tmp/vkso-guest-kernel-119/functional-environment-01/initramfs-exact119.cpio.gz",
+    "--kernel-package-evidence",
+    "/tmp/vkso-guest-kernel-119",
+    "--environment-evidence",
+    "/tmp/vkso-guest-kernel-119/functional-environment-01"
+  ]
+}

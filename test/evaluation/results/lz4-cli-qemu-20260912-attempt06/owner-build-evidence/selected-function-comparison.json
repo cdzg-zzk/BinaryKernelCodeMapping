@@ -1,0 +1,36 @@
+{
+  "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/vkso_lz4.ko": {
+    "LZ4_compress_fast_extState": {
+      "offset": 7760,
+      "size": 3837,
+      "sha256": "a8b30bf34597d28fd2ff270c153b3d7f2265c6d65148cf146aaa197e208cfce9"
+    },
+    "vkso_LZ4_compress_default": {
+      "offset": 11648,
+      "size": 41,
+      "sha256": "758a5f3b70e5a4343309980df061e66df3ca432e45ed07e32f73e530e9a9df72"
+    },
+    "vkso_LZ4_decompress_safe": {
+      "offset": 11952,
+      "size": 949,
+      "sha256": "5fb68bf876287d9795a867407abbf2953d914523e0fa031fd0b24fb8ad501c72"
+    }
+  },
+  "/tmp/vkso-lz4-guest-owner-current/vkso_lz4.ko": {
+    "LZ4_compress_fast_extState": {
+      "offset": 7760,
+      "size": 3837,
+      "sha256": "a8b30bf34597d28fd2ff270c153b3d7f2265c6d65148cf146aaa197e208cfce9"
+    },
+    "vkso_LZ4_compress_default": {
+      "offset": 11648,
+      "size": 41,
+      "sha256": "758a5f3b70e5a4343309980df061e66df3ca432e45ed07e32f73e530e9a9df72"
+    },
+    "vkso_LZ4_decompress_safe": {
+      "offset": 11952,
+      "size": 917,
+      "sha256": "25ee2057fecb6b3aab41fae7f654399ca4f3d7e7f8a104f112a5a998061ed45f"
+    }
+  }
+}

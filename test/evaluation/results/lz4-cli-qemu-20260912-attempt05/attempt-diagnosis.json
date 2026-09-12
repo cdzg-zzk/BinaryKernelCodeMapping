@@ -1,0 +1,12 @@
+{
+  "category": "runtime-execution-failure",
+  "input": "dickens",
+  "block_bytes": 65536,
+  "operation": "compression",
+  "exit_signal": "SIGSEGV",
+  "complete_input_block_pairs": 0,
+  "registered_pages_verified": 4,
+  "restored_pages_verified": 4,
+  "hypothesis": "direct rel32 call into omitted kernel helper mapping despite shim import declaration",
+  "next_action": "fresh unchanged owner from exact119 headers; full CLI GDB diagnostic; no core fix"
+}

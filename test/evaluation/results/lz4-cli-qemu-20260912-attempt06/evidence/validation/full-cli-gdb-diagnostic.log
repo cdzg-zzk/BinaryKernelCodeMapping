@@ -1,0 +1,108 @@
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007fffb94398a0 in ?? ()
+rax            0x1                 1
+rbx            0x10000             65536
+rcx            0x10000             65536
+rdx            0x4020              16416
+rsi            0x0                 0
+rdi            0x55555559a880      93824992520320
+rbp            0x7fffffffe638      0x7fffffffe638
+rsp            0x7fffffffe5c0      0x7fffffffe5c0
+r8             0xffff              65535
+r9             0x1                 1
+r10            0x5555555aaa60      93824992586336
+r11            0x5555555baa74      93824992651892
+r12            0x5555555aaa60      93824992586336
+r13            0x1                 1
+r14            0x5555555aaa60      93824992586336
+r15            0x5555555baa74      93824992651892
+rip            0x7fffb94398a0      0x7fffb94398a0
+eflags         0x10212             [ AF IF RF ]
+cs             0x33                51
+ss             0x2b                43
+ds             0x0                 0
+es             0x0                 0
+fs             0x0                 0
+gs             0x0                 0
+k0             0x80000101          2147483905
+k1             0x0                 0
+k2             0xf                 15
+k3             0x0                 0
+k4             0x0                 0
+k5             0x0                 0
+k6             0x0                 0
+k7             0x0                 0
+
+Thread 1 (process 255 "lz4-adapted"):
+#0  0x00007fffb94398a0 in ?? ()
+#1  0x00007ffff7d87e7d in LZ4_compress_fast_extState () from /work/validation/export/vkso/lib/libvkso_lz4.so
+#2  0x00007ffff7d88da2 in vkso_LZ4_compress_default () from /work/validation/export/vkso/lib/libvkso_lz4.so
+#3  0x00005555555baa70 in ?? ()
+#4  0x0000555555570d10 in LZ4F_makeBlock (crcFlag=LZ4F_blockChecksumEnabled, cdict=<optimized out>, level=<optimized out>, lz4ctx=<optimized out>, compress=<optimized out>, srcSize=93824992586336, src=0x5555555aaa60, dst=0x10000) at vendor/lz4-1.9.3/lib/lz4frame.c:747
+#5  LZ4F_compressUpdate (cctxPtr=0x10000, cctxPtr@entry=0x5555555aa9a0, dstBuffer=dstBuffer@entry=0x5555555baa70, dstCapacity=dstCapacity@entry=65563, srcBuffer=srcBuffer@entry=0x5555555aaa60, srcSize=65536, compressOptionsPtr=0x7fffffffe6c0, compressOptionsPtr@entry=0x0) at vendor/lz4-1.9.3/lib/lz4frame.c:876
+#6  0x000055555558c92a in LZ4IO_compressFilename_extRess (srcFileName=srcFileName@entry=0x7fffffffee5d "/work/corpus/dickens", dstFileName=0x7fffffffee72 "/work/validation/cli-files/diagnostic-output", compressionLevel=1, io_prefs=0x5555555aa950, ress=..., ress=...) at vendor/lz4-1.9.3/programs/lz4io.c:720
+#7  0x000055555558e3a6 in LZ4IO_compressFilename (srcFileName=srcFileName@entry=0x7fffffffee5d "/work/corpus/dickens", dstFileName=dstFileName@entry=0x7fffffffee72 "/work/validation/cli-files/diagnostic-output", compressionLevel=compressionLevel@entry=1, prefs=prefs@entry=0x5555555aa950) at vendor/lz4-1.9.3/programs/lz4io.c:780
+#8  0x0000555555558381 in main (argc=<optimized out>, argv=<optimized out>) at vendor/lz4-1.9.3/programs/lz4cli.c:773
+process 255
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x555555554000     0x555555556000     0x2000        0x0  r--p   /work/cli/lz4-adapted
+      0x555555556000     0x555555590000    0x3a000     0x2000  r-xp   /work/cli/lz4-adapted
+      0x555555590000     0x555555597000     0x7000    0x3c000  r--p   /work/cli/lz4-adapted
+      0x555555597000     0x555555598000     0x1000    0x42000  r--p   /work/cli/lz4-adapted
+      0x555555598000     0x555555599000     0x1000    0x43000  rw-p   /work/cli/lz4-adapted
+      0x555555599000     0x5555555db000    0x42000        0x0  rw-p   [heap]
+      0x7ffff7d82000     0x7ffff7d83000     0x1000        0x0  r--p   /work/validation/export/vkso/lib/libshim.so
+      0x7ffff7d83000     0x7ffff7d84000     0x1000     0x1000  r-xp   /work/validation/export/vkso/lib/libshim.so
+      0x7ffff7d84000     0x7ffff7d85000     0x1000     0x2000  r--p   /work/validation/export/vkso/lib/libshim.so
+      0x7ffff7d85000     0x7ffff7d86000     0x1000     0x2000  r--p   /work/validation/export/vkso/lib/libshim.so
+      0x7ffff7d86000     0x7ffff7d87000     0x1000     0x3000  rw-p   /work/validation/export/vkso/lib/libshim.so
+      0x7ffff7d87000     0x7ffff7d8a000     0x3000     0x1000  r-xp   /work/validation/export/vkso/lib/libvkso_lz4.so
+      0x7ffff7d8a000     0x7ffff7d8c000     0x2000     0x4000  ---p   /work/validation/export/vkso/lib/libvkso_lz4.so
+      0x7ffff7d8c000     0x7ffff7d8d000     0x1000     0x4000  r--p   /work/validation/export/vkso/lib/libvkso_lz4.so
+      0x7ffff7d8d000     0x7ffff7d8f000     0x2000     0x5000  rw-p   /work/validation/export/vkso/lib/libvkso_lz4.so
+      0x7ffff7d8f000     0x7ffff7d92000     0x3000        0x0  rw-p   
+      0x7ffff7d92000     0x7ffff7dba000    0x28000        0x0  r--p   /lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7dba000     0x7ffff7f4f000   0x195000    0x28000  r-xp   /lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7f4f000     0x7ffff7fa7000    0x58000   0x1bd000  r--p   /lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7fa7000     0x7ffff7fa8000     0x1000   0x215000  ---p   /lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7fa8000     0x7ffff7fac000     0x4000   0x215000  r--p   /lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7fac000     0x7ffff7fae000     0x2000   0x219000  rw-p   /lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7fae000     0x7ffff7fbd000     0xf000        0x0  rw-p   
+      0x7ffff7fbd000     0x7ffff7fc1000     0x4000        0x0  r--p   [vvar]
+      0x7ffff7fc1000     0x7ffff7fc3000     0x2000        0x0  r-xp   [vdso]
+      0x7ffff7fc3000     0x7ffff7fc5000     0x2000        0x0  r--p   /lib64/ld-linux-x86-64.so.2
+      0x7ffff7fc5000     0x7ffff7fef000    0x2a000     0x2000  r-xp   /lib64/ld-linux-x86-64.so.2
+      0x7ffff7fef000     0x7ffff7ffa000     0xb000    0x2c000  r--p   /lib64/ld-linux-x86-64.so.2
+      0x7ffff7ffb000     0x7ffff7ffd000     0x2000    0x37000  r--p   /lib64/ld-linux-x86-64.so.2
+      0x7ffff7ffd000     0x7ffff7fff000     0x2000    0x39000  rw-p   /lib64/ld-linux-x86-64.so.2
+      0x7ffffffde000     0x7ffffffff000    0x21000        0x0  rwxp   [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]
+From                To                  Syms Read   Shared Object Library
+0x00007ffff7fc5090  0x00007ffff7fee315  Yes (*)     /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dba700  0x00007ffff7f4c9bd  Yes (*)     /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7d87000  0x00007ffff7d8a000  Yes (*)     /work/validation/export/vkso/lib/libvkso_lz4.so
+0x00007ffff7d83180  0x00007ffff7d836b5  Yes (*)     /work/validation/export/vkso/lib/libshim.so
+(*): Shared library is missing debugging information.
+Symbol "memset" is at 0x7ffff7e3b690 in a file compiled without debugging.
+0x7fffffffe5c0:	0x00007ffff7d87e7d	0x0000000000001000
+0x7fffffffe5d0:	0x0000000000000000	0x000000006aa4d8e0
+0x7fffffffe5e0:	0x0000000008d24d00	0x000000006aa4d8e0
+0x7fffffffe5f0:	0x0000000008d24d00	0x000000006aa4d8e0
+0x7fffffffe600:	0x000000000000ffff	0x00005555555baa74
+0x7fffffffe610:	0x00005555555aa9a0	0x0000000000010000
+   0x7ffff7d87e65 <LZ4_compress_fast_extState+21>:	mov    %ecx,%ebx
+   0x7ffff7d87e67 <LZ4_compress_fast_extState+23>:	sub    $0x48,%rsp
+   0x7ffff7d87e6b <LZ4_compress_fast_extState+27>:	mov    %rdx,-0x30(%rbp)
+   0x7ffff7d87e6f <LZ4_compress_fast_extState+31>:	mov    $0x4020,%edx
+   0x7ffff7d87e74 <LZ4_compress_fast_extState+36>:	mov    %r8d,-0x38(%rbp)
+   0x7ffff7d87e78 <LZ4_compress_fast_extState+40>:	call   0x7fffb94398a0
+   0x7ffff7d87e7d <LZ4_compress_fast_extState+45>:	test   %r13d,%r13d
+   0x7ffff7d87e80 <LZ4_compress_fast_extState+48>:	mov    %rax,%rdi
+   0x7ffff7d87e83 <LZ4_compress_fast_extState+51>:	mov    $0x1,%eax
+   0x7ffff7d87e88 <LZ4_compress_fast_extState+56>:	cmovg  %r13d,%eax
+   0x7ffff7d87e8c <LZ4_compress_fast_extState+60>:	mov    %eax,%r9d
+   0x7ffff7d87e8f <LZ4_compress_fast_extState+63>:	cmp    $0x7e000000,%ebx

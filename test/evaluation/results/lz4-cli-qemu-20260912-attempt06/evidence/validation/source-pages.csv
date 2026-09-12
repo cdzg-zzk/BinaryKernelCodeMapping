@@ -1,0 +1,5 @@
+kernel_vaddr,pfn,level
+0xffffffffc0009000,1114706,1
+0xffffffffc000a000,1114672,1
+0xffffffffc000b000,1051503,1
+0xffffffffc000e000,1138171,1

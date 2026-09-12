@@ -1,0 +1,22 @@
+[
+  {
+    "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/Makefile",
+    "sha256": "c6164d88ccfeb58badbcf89df45ef670df4049acc18f0d7501386ef4797a757f"
+  },
+  {
+    "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/lz4_compress.c",
+    "sha256": "1968cc47508e2597ac9c13a2df4b4d7e2a686086255f604686e6149adf8fde3e"
+  },
+  {
+    "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/lz4_decompress.c",
+    "sha256": "180151929d358dfa7692e5e28758457d7185ab50fdbb8faf375641c26a92f875"
+  },
+  {
+    "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/lz4defs.h",
+    "sha256": "816aebc7ad56ac4093706a5351495bc7f8541750005d8d1802778b3f01305c9f"
+  },
+  {
+    "source": "/home/zzk/BinaryKernelCodeMapping/test/test_lz4/kmod/module_meta.c",
+    "sha256": "3f961a83c5d5032b6ec5c172fe5c4d122dc818b37d7ae70dfc3cbf4405733b49"
+  }
+]

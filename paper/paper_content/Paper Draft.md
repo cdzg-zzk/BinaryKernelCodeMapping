@@ -436,7 +436,7 @@ Work-placement 实验的每个 work unit 是一段作用于同一 64-bit 值的�
 
 ### LZ4
 
-LZ4 使用未修改的 upstream 1.9.3 official benchmark core 和 Silesia corpus，测试 4 KiB、64 KiB 和 1 MiB blocks。改变 block size 可以观察固定调用/适配工作在短块与较长计算中的相对影响；同时测量 compression 和 decompression，覆盖两种不同的计算与数据搬运路径。五个 backends 区分 upstream/kernel source 与 native/no-SIMD compilation。主比较是 kernel-backed 与 same-source no-SIMD：两者执行相同 Linux 5.15 algorithm，并使用相同的 test-local REP memory helpers。Native/no-SIMD 同时改变编译限制和 memory helpers，因而这一辅助对照衡量的是构建制度的组合影响。
+LZ4 使用未修改的 upstream 1.9.3 official benchmark core 和 Silesia corpus，测试 4 KiB、64 KiB 和 1 MiB blocks。改变 block size 可以观察固定调用/适配工作在短块与较长计算中的相对影响；同时测量 compression 和 decompression，覆盖两种不同的计算与数据搬运路径。五个 backends 区分 upstream/kernel source 与 native/no-SIMD compilation。主比较是 kernel-backed 与 same-source no-SIMD：两者使用相同 Linux 5.15 algorithm source，普通 no-SIMD DSO 使用 test-local REP memory helpers。Kernel-backed 归档的 page map 还包含原生内核 memory helpers 所在页，但没有记录实际 helper 执行地址，因此尚不能确认两侧 helper 身份一致。这组比值比较具体构建与部署的整体成本，包含编译限制、helper 绑定及导出布局的差异。
 
 七个 outer runs 共得到 105 个完整 benchmark cases。官方 harness 在每个 time window 内选择最快完整循环，再对 outer-run 配对吞吐比值取 median 和 P10–P90；该统计量衡量吞吐能力，而非请求尾延迟。五种 compressor × 五种 decompressor × 12 个边界长度以及所有 XXH64 checks 均通过。
 
@@ -452,7 +452,7 @@ LZ4 使用未修改的 upstream 1.9.3 official benchmark core 和 Silesia corpus
 | decompress | 1 MiB | 0.9848 [0.9837, 0.9882] | 1.0320 [1.0281, 1.0333] | 0.9228 [0.9207, 0.9257] |
 | 等权几何平均 | 六种组合 | 0.9999 | 1.0365 | 0.9840 |
 
-表 9 中，与 kernel-backed 构建约束及 memory helpers 更接近的 same-source no-SIMD 对照得到 0.9999× 的等权几何平均，六个组合落在 0.9817×–1.0234×。Same-source native 对照得到 1.0365×，说明 native compilation 与 glibc helpers 在这些路径上并不必然更快。相对 upstream native，compression 三项略快、decompression 三项较慢，几何平均为 0.9840×。因此，rehosting 后的同源性能接近，而跨构建或跨实现差异需要结合 control flow、copy strategy 和 compiler decisions 解释。
+表 9 中，相对 same-source no-SIMD 的等权几何平均为 0.9999×，六个组合落在 0.9817×–1.0234×；相对 same-source native 为 1.0365×。相对 upstream native，compression 三项略快、decompression 三项较慢，几何平均为 0.9840×。这些归档结果表明所测同源构建的整体吞吐接近；进一步解释差值需要结合实际 helper 路径、control flow、copy strategy 和 compiler decisions。
 
 ### BCH
 
@@ -505,6 +505,8 @@ Kernel-backed 与 same-source native 使用相同 adapted source；author standa
 | decode-precomputed | 8 | 3620.21 | 3882.10 | 1.078 | 1.071–1.086 | 1.095 |
 
 表 10–11 将 initialization、encode 和两种 decode 路径分开呈现。Encode 接近同源 native；full decode 在 t=4 时略快，在 t=8 时慢约 0.3%–5.4%。较短的 precomputed path 对 t 更敏感：t=4 大多更快或接近，而 t=8 的 1–8 error cases 均变慢，配对增量约为 5.5%–20.9%，其中 2-error case 最大。该例在 11 轮中均较慢，各轮比值为 1.078–1.519。该变化并非所有 BCH 路径共有，但也不止一个孤立慢点。分阶段结果将需要进一步分析的成本定位到较强纠错配置的 precomputed decode，而不是整个初始化或编码流程。
+
+另一次独立的 5.15.0-119 guest 会话重新构建完整 BCH owner 和两种普通 DSO，并通过实际导出器建立注册。原有功能矩阵在两种 t、各 128 vectors、全部错误数、三个 backend 和两种 decode 路径上再次通过。单独 loader 进程确认三个 RX text 页与一个只读 rodata 页的 user/source PFN 一致；恢复后的四个新映射均使用不同于源页的 PFN，随后模块卸载成功。该[功能会话](../../test/evaluation/bch-functional-evidence.md)补充了新构建和物理共享的证据，没有增加表 10–11 的性能样本。
 
 ### XZ Embedded
 
@@ -729,6 +731,14 @@ VKSO/Copy 的成功 snapshot 约为 45.158 cycles，Raw 约为 43.151。Hres ret
 这些结果表明，所测私有写入通过 COW 保持源页内容，正常退出顺序能够恢复文件后备。注册没有增加该 owner 的 module refcount，因此本组生命周期结果依赖 runner 保持 owner 驻留并按顺序清理。首次会话中的三个 reader 也观察到相同的共享、COW 和正常释放行为。
 
 部分失败检查使用另一独立会话：提交前确认第二个源地址没有 present PTE，再观察 kernel 日志、manager ready 状态和两个用户映射。失败后首个绑定仍可访问，说明当前注册不具备事务式回滚；manager 的成功状态也未反映内核结果。显式恢复后，这两个文件页均恢复原内容，owner 可按顺序卸载。
+
+## Application Integration
+
+我们进一步将 Linux LZ4 接入完整 upstream 1.9.3 CLI，保留 frame processing、checksum、内存分配和文件 I/O。工作负载为全部 12 个 Silesia 文件，使用 64 KiB 与 1 MiB independent blocks，分别执行压缩和解压。普通 upstream DSO 与同源 Linux DSO 的 48 个 input/block/backend 组合均通过完整输出与 stock CLI 交叉解码检查，调用记录确认执行了所选 DSO 的接口。
+
+Registered backend 在独立的 5.15.0-119 guest 中完成实际静态检查、carrier 构造与注册。同一注册文件在单独 loader 进程中的三个 RX text 页和一个只读 rodata 页均与源 kernel PFN 相同；完整 CLI 却在首个 dickens/64 KiB 压缩操作中触发 SIGSEGV。运行时诊断显示，LZ4 对 memset 的直接相对调用保留了内核中的位移，而 exporter 将该依赖列为 shim import 并省略其目标页。平移后的目标地址与实际崩溃地址一致，且没有对应映射。
+
+这个结果区分了静态检查通过、声明页共享与完整应用可执行性。动态符号导入本身无法重定向共享 text 中未改写的直接调用；当前导出路径尚未完成该依赖的绑定，因此本节只报告功能与故障诊断，不给出 registered CLI 吞吐结果。完整记录见[应用验证证据](../../test/evaluation/lz4-application-evidence.md)。
 
 ## Reproducibility
 

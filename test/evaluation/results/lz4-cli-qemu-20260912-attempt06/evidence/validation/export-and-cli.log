@@ -1,0 +1,124 @@
+[vkso] building KRG (sudo is used to resolve runtime kernel addresses)
+Built SAFE graph: nodes=64617 edges=237046 -> /work/validation/export/vkso/metadata/out.krg.new.155
+[vkso] checking dependency closure for vkso_LZ4_compress_default
+[1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+[*] 已加载 1 个模块对象。
+    - vkso_lz4.ko
+[*] 已加载 34 个 Shim 平替规则。
+[*] 正在解析 vmlinux: /work/vmlinux-5.15.0-119-generic
+[*] vmlinux 解析完成。
+[*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+[*] 已载入 138252 个活体内核符号。
+[1m[*] 开始构建依赖闭包并执行扫描...[0m
+  [96m├─ [Trace] 深入分析: vkso_lz4.ko -> vkso_LZ4_compress_default (剩余队列: 0)[0m
+  [96m├─ [Trace] 加入待分析队列: LZ4_compress_fast_extState <- vkso_LZ4_compress_default -> 同节直接跳转[0m
+  [96m├─ [Trace] 深入分析: vkso_lz4.ko -> LZ4_compress_fast_extState (剩余队列: 0)[0m
+  [92m├─ [Trace] Shim 截断成功: LZ4_compress_fast_extState -> memset[0m
+  [92m├─ [Trace] Shim 截断成功: LZ4_compress_fast_extState -> memcpy[0m
+  [92m├─ [Trace] Shim 截断成功: LZ4_compress_fast_extState -> memcpy[0m
+
+[1m[94m========================================================================[0m
+[1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+[1m[94m========================================================================[0m
+
+[1m[摘要][0m
+  - 已访问函数: 2
+  - Shim 命中数: 3
+  - 静态数据/地址引用数: 0
+  - 间接控制流命中数: 0
+  - 编译器插桩命中数: 0
+  - 致命失败数: 0
+  - 丢失符号数: 0
+  - 不可分析函数数: 0
+
+[92m[ℹ️ 基础检查][0m 未发现特权指令、控制寄存器访问或绝对地址重定位。
+  [92m闭包路径在当前输入范围内是完整的。[0m
+
+[96m[📦 静态数据 / 地址引用事实][0m
+  - 无静态数据 / 地址引用事实
+
+[96m[🔌 Shim 边界成功拦截][0m
+  拦截 API: [92mmemcpy[0m (共 2 处调用)
+    └─ 来自: LZ4_compress_fast_extState (+0x189 | 运行基址: [1m0xffffffffc0009fd9[0m) -> call memcpy
+    └─ 来自: LZ4_compress_fast_extState (+0x2d9 | 运行基址: [1m0xffffffffc000a129[0m) -> call memcpy
+  拦截 API: [92mmemset[0m (共 1 处调用)
+    └─ 来自: LZ4_compress_fast_extState (+0x28 | 运行基址: [1m0xffffffffc0009e78[0m) -> call memset
+
+[96m[🔀 间接控制流 / 盲跳][0m
+  [93m注意: 请在用户态确认这些位置的函数指针或跳转表已被合法初始化。[0m
+  - 无间接跳转
+
+[1m[最终结论][0m [92mPASS[0m (exit code: 0)
+[1m[94m=========================== 报告结束 ===========================[0m
+[vkso] checking dependency closure for vkso_LZ4_decompress_safe
+[1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+[*] 已加载 1 个模块对象。
+    - vkso_lz4.ko
+[*] 已加载 34 个 Shim 平替规则。
+[*] 正在解析 vmlinux: /work/vmlinux-5.15.0-119-generic
+[*] vmlinux 解析完成。
+[*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+[*] 已载入 138252 个活体内核符号。
+[1m[*] 开始构建依赖闭包并执行扫描...[0m
+  [96m├─ [Trace] 深入分析: vkso_lz4.ko -> vkso_LZ4_decompress_safe (剩余队列: 0)[0m
+  [92m├─ [Trace] Shim 截断成功: vkso_LZ4_decompress_safe -> memmove[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_LZ4_decompress_safe -> .rodata:.rodata+0x20 (reloc=2)[0m
+  [96m├─ [Trace] 记录静态引用事实: vkso_LZ4_decompress_safe -> .rodata:.rodata+0x0 (reloc=2)[0m
+
+[1m[94m========================================================================[0m
+[1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+[1m[94m========================================================================[0m
+
+[1m[摘要][0m
+  - 已访问函数: 1
+  - Shim 命中数: 1
+  - 静态数据/地址引用数: 2
+  - 间接控制流命中数: 0
+  - 编译器插桩命中数: 0
+  - 致命失败数: 0
+  - 丢失符号数: 0
+  - 不可分析函数数: 0
+
+[92m[ℹ️ 基础检查][0m 未发现特权指令、控制寄存器访问或绝对地址重定位。
+  [92m闭包路径在当前输入范围内是完整的。[0m
+
+[96m[📦 静态数据 / 地址引用事实][0m
+  [vkso_lz4.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_LZ4_decompress_safe (+0x29c | 运行基址: [1m0xffffffffc000b14c[0m)
+    └─ 指令事实: lea rcx, [rip] (目标: .rodata+0x20)
+  [vkso_lz4.ko] [92m[READONLY][0m .rodata | 节区权限: R-- | reloc=2
+    ├─ 所在函数: vkso_LZ4_decompress_safe (+0x2a3 | 运行基址: [1m0xffffffffc000b153[0m)
+    └─ 指令事实: lea r13, [rip] (目标: .rodata+0x0)
+
+[96m[🔌 Shim 边界成功拦截][0m
+  拦截 API: [92mmemmove[0m (共 1 处调用)
+    └─ 来自: vkso_LZ4_decompress_safe (+0x105 | 运行基址: [1m0xffffffffc000afb5[0m) -> call memmove
+
+[96m[🔀 间接控制流 / 盲跳][0m
+  [93m注意: 请在用户态确认这些位置的函数指针或跳转表已被合法初始化。[0m
+  - 无间接跳转
+
+[1m[最终结论][0m [92mPASS[0m (exit code: 0)
+[1m[94m=========================== 报告结束 ===========================[0m
+[vkso] generating minimal API header
+INFO: func=vkso_LZ4_compress_default auto-resolved to BTF source 'vkso_lz4'
+INFO: func=vkso_LZ4_decompress_safe auto-resolved to BTF source 'vkso_lz4'
+INFO: BTF source 'vkso_lz4' matched 2 functions
+[vkso] building sparse shared object
+[vkso] libshim.so is required by the generated DSO; building it
+[vkso] build complete
+[vkso]   library: /work/validation/export/vkso/lib/libvkso_lz4.so
+[vkso]   shim:    /work/validation/export/vkso/lib/libshim.so
+[vkso]   header:  /work/validation/export/vkso/include/vkso_types.h
+[vkso]   metadata: /work/validation/export/vkso/metadata
+[vkso] page_cache_replace is already loaded
+[vkso] starting guarded page replacement
+[vkso] running: python3 /work/guest.py --validate-cli
+Traceback (most recent call last):
+  File "/work/guest.py", line 302, in <module>
+    validate_cli()
+  File "/work/guest.py", line 139, in validate_cli
+    execute([adapted, *arguments], logs / f'{tag}-{operation}.log',
+  File "/work/guest.py", line 42, in execute
+    raise RuntimeError(f'command returned {result.returncode}; see {log}')
+RuntimeError: command returned -11; see /work/validation/cli-logs/00-dickens-b4-compress.log

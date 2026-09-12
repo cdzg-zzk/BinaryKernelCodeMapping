@@ -1,0 +1,55 @@
+
+Elf file type is DYN (Shared object file)
+Entry point 0x1000
+There are 4 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  LOAD           0x001000 0x0000000000001000 0x0000000000001000 0x003000 0x003000 R E 0x1000
+  LOAD           0x004000 0x0000000000006000 0x0000000000006000 0x001000 0x001000 R   0x1000
+  LOAD           0x005000 0x0000000000007000 0x0000000000007000 0x001310 0x001310 RW  0x1000
+  DYNAMIC        0x006260 0x0000000000008260 0x0000000000008260 0x0000a0 0x0000a0 RW  0x8
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .text 
+   01     .rodata 
+   02     .data .dynstr .dynsym .gnu.hash .rela.dyn .dynamic 
+   03     .dynamic 
+
+Relocation section '.rela.dyn' at offset 0x6188 contains 9 entries:
+    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
+0000000000007000  0000000500000001 R_X86_64_64            0000000000006318 .rodata.str1.8+0x0 + 0
+0000000000007010  0000000600000001 R_X86_64_64            0000000000007000 .data+0x0 + 60
+0000000000007018  0000000600000001 R_X86_64_64            0000000000007000 .data+0x0 + 76
+0000000000007020  0000000500000001 R_X86_64_64            0000000000006318 .rodata.str1.8+0x0 + 0
+0000000000007030  0000000600000001 R_X86_64_64            0000000000007000 .data+0x0 + 60
+0000000000007038  0000000600000001 R_X86_64_64            0000000000007000 .data+0x0 + 76
+0000000000007040  0000000500000001 R_X86_64_64            0000000000006318 .rodata.str1.8+0x0 + 0
+0000000000007050  0000000600000001 R_X86_64_64            0000000000007000 .data+0x0 + 60
+0000000000007058  0000000600000001 R_X86_64_64            0000000000007000 .data+0x0 + 76
+
+Symbol table '.dynsym' contains 8 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000002d80    48 FUNC    GLOBAL DEFAULT    1 vkso_LZ4_compress_default
+     2: 0000000000002eb0   928 FUNC    GLOBAL DEFAULT    1 vkso_LZ4_decompress_safe
+     3: 0000000000000000    64 FUNC    GLOBAL DEFAULT  UND memset
+     4: 0000000000000000    32 FUNC    GLOBAL DEFAULT  UND memcpy
+     5: 0000000000006318    16 OBJECT  GLOBAL DEFAULT    2 .rodata.str1.8+0x0
+     6: 0000000000007000    16 OBJECT  GLOBAL DEFAULT    3 .data+0x0
+     7: 0000000000000000   432 FUNC    GLOBAL DEFAULT  UND memmove
+
+Symbol table '.symtab' contains 11 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000    64 FUNC    GLOBAL DEFAULT  UND memset
+     2: 0000000000000000    32 FUNC    GLOBAL DEFAULT  UND memcpy
+     3: 0000000000001e50  3840 FUNC    GLOBAL DEFAULT    1 LZ4_compress_fast_extState
+     4: 0000000000002d80    48 FUNC    GLOBAL DEFAULT    1 vkso_LZ4_compress_default
+     5: 0000000000000000   432 FUNC    GLOBAL DEFAULT  UND memmove
+     6: 0000000000006160    32 OBJECT  GLOBAL DEFAULT    2 LZ4_inc32table
+     7: 0000000000006140    32 OBJECT  GLOBAL DEFAULT    2 LZ4_dec64table
+     8: 0000000000002eb0   928 FUNC    GLOBAL DEFAULT    1 vkso_LZ4_decompress_safe
+     9: 0000000000006318    16 OBJECT  GLOBAL DEFAULT    2 .rodata.str1.8+0x0
+    10: 0000000000007000    16 OBJECT  GLOBAL DEFAULT    3 .data+0x0

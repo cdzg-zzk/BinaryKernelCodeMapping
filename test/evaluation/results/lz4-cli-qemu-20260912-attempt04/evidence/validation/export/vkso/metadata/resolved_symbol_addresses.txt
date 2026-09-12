@@ -1,0 +1,8 @@
+memset,0xffffffff816bb8a0,0x40,shim,import
+memcpy,0xffffffff81dcbb90,0x20,shim,import
+LZ4_compress_fast_extState,0xffffffffc0009e50,0xf00,/work/owner/vkso_lz4.ko,internal
+vkso_LZ4_compress_default,0xffffffffc000ad80,0x30,/work/owner/vkso_lz4.ko,export
+memmove,0xffffffff816bb6f0,0x1b0,shim,import
+vkso_LZ4_decompress_safe,0xffffffffc000aeb0,0x3c0,/work/owner/vkso_lz4.ko,export
+.rodata.str1.8+0x0,0xffffffffc000e2c8,0x0,/work/owner/vkso_lz4.ko,internal
+.data+0x0,0xffffffffc000f000,0x0,/work/owner/vkso_lz4.ko,internal

@@ -1,0 +1,9 @@
+{
+  "scope": "full CLI functional validation; no performance observations",
+  "status": "fail",
+  "cases": [],
+  "library": "/work/validation/export/vkso/lib/libvkso_lz4.so",
+  "shared_pages": 4,
+  "owner_refcnt_during_registration": 0,
+  "error": "Traceback (most recent call last):\n  File \"/work/guest.py\", line 138, in validate_cli\n    execute([adapted, *arguments], logs / f'{tag}-{operation}.log',\n  File \"/work/guest.py\", line 42, in execute\n    raise RuntimeError(f'command returned {result.returncode}; see {log}')\nRuntimeError: command returned -11; see /work/validation/cli-logs/00-dickens-b4-compress.log\n"
+}
