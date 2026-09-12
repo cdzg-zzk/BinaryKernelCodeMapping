@@ -1,0 +1,3 @@
+correctness: m=13 t=4 vectors=128 backends=3 ok
+correctness: m=13 t=8 vectors=128 backends=3 ok
+BCH evaluation completed; sink=47532054

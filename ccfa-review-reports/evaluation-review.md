@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | A：Clocktime | 20 次采集、全量原始记录核验、三方法结果报告及正文更新已完成 | 保留 writer 不确定性；如需解释其原因，另定诊断，不追逐有利重复 |
 | B：页面复用与装载 | 已验证映射/释放及部分失败问题；BCH 63 个 loader 的 PFN、完整 owner core 与支持页账本完成，所测范围未显示净节省 | 完整 setup、工作堆/allocator 归因及剩余边界；[统一注册修订方案](../test/evaluation/proposals/registration-transactions.md)待审阅，未实施 |
-| C：PGOT 与真实算法 | 已核实重复层次并复算 BCH 对照点；全新 BCH/XZ owner 在精确 119 guest 中通过完整原有功能矩阵及各四页 PFN 验证 | 完整部署重复、BCH 性能退化分析及实际 owner 内核成本；核实 LZ4 实际 helper 路径 |
+| C：PGOT 与真实算法 | 已核实重复层次、BCH 对照点及 decode 计时边界；全新 BCH/XZ owner 在精确 119 guest 中通过完整原有功能矩阵及各四页 PFN 验证 | 完整部署重复、BCH 退化的指令/布局原因及实际 owner 内核成本；核实 LZ4 实际 helper 路径 |
 | D：适用范围与导出工具 | 固定 8 例的原分析器正在执行；前三例已落盘，hex_dump_to_buffer 仍在展开依赖；缓存方案未获确认、未应用 | 完成固定全集，导入既有适配证据，完成分类与可运行性验证 |
 | E：真实应用集成 | 普通 upstream/同源 DSO 全 Silesia 功能案例通过；真实注册的四页 PFN 匹配；首次 CLI 压缩因未绑定的直接 helper 调用崩溃，GDB 已确认 | 审阅基础导出器方案并完成实际绑定，再验证全矩阵及采集 C 会话内应用性能 |
 | F：论文与结果呈现 | 已更新 Clocktime、注册行为表 21、BCH 资源表 22、BCH/XZ 功能证据及 LZ4 应用失败；修正 helper 身份与静态分析能力断言 | 随 B–E 的剩余结果继续更新，再做全文一致性验收 |
@@ -37,24 +37,24 @@
 
 μFork 的正式发表位置是 SOSP 2025，不应把它当成 USENIX/OSDI 论文；附件没有提供其正式链接。以上前三篇可作为主要评估参照，后两篇分别提供内存机制和测量方法的依据。它们是评估范式参照，不是必须复现的 VKSO 性能基线。
 
-当前主张与证据的对应关系如下。Clocktime 状态按本轮材料更新；C 已完成重复结构核对及三份旧归档的矩阵检查、BCH 定向复算，其他组尚待逐项执行。“未见”表示在所列正文和归档中未找到足够证据，不等于断言整个仓库从未做过。
+当前主张与证据的对应关系如下。A 已完成；B/C/E 已有新的功能、PFN、资源及失败诊断记录，D 正在检查固定八例。各组的具体证据和剩余交付见后文。“未见”表示在所列正文和归档中未找到足够证据，不等于断言整个仓库从未做过。
 
 | 需要支撑的主张 | 当前可核查证据 | 判断与补充要求 |
 | --- | --- | --- |
 | grafting 不增加装载后执行路径成本 | 草稿 Table 3；first-touch CSV 中 hot 两侧均为 71 cycles，resident fault 接近 | 有较强受控证据；只能支撑所测单页函数和环境，不能代表部署总时间或所有闭包 |
 | PGOT 代价可控且受依赖结构影响 | primitives、retpoline 对照、四个完整 copied closures | 应保留；copied closures 是同域适配实验，不能计入实际成功导出的功能数量 |
-| 真实 resident export 保留功能及同源性能 | LZ4/Silesia、BCH、XZ；交叉输出校验和 DSO/page-map 记录 | 有支持但范围窄；要保留 regression、编译限制和 helper 条件 |
-| 是具有清楚边界的复用机制 | 设计约束和三个算法、一个状态子系统 | 缺固定候选集合的分母、失败原因、人工改造量及最终可运行比例 |
-| 消除了第二份物理执行体并有资源净收益 | Clocktime SLOC/符号大小；新实验已有 VKSO/完整代码复制对照的运行时 PFN 检查；XZ 四页 page map | Clocktime 声明闭包的共享/复制关系已有证据；全系统净内存与其他算法的运行时 PFN/完整账本仍需补齐 |
+| 真实 resident export 保留功能及同源性能 | 旧算法对照；新 BCH/XZ 完整功能与 PFN 验证；LZ4 完整 CLI 首次压缩失败 | BCH/XZ 支持范围受构建约束；LZ4 当前导出绑定待修复；保留旧部署身份与 regression |
+| 是具有清楚边界的复用机制 | 四个既有集成案例；另有固定八例候选，前三例静态结果已落盘 | 需完成剩余检查、失败分类、人工改造量及运行验证；不能估计 Linux 整体可复用比例 |
+| 消除了第二份物理执行体并有资源净收益 | Clocktime 共享/复制 PFN 对照；BCH/XZ 各四页共享；BCH 1/4/16 loader 的库/owner 账本 | 共享目标已验证；BCH 所测库与完整 owner 范围没有净节省，全系统及剩余资源归因尚未完成 |
 | 建立后可像普通 DSO 一样使用 | 目前从 dlopen/dlsym 后开始计时 | 建立/绑定/注册成本被排除，setup-to-first-call 和短生命周期成本尚未测量 |
-| Clocktime 读写代价可接受 | 正文仍是旧单启动结果；新工具覆盖多启动、1/2/3 reader、普通内核 API、固定速率与饱和负载 | 工具和功能验证已补，正式采集及全面核验尚未结束；新增代码复制对照可分离物理代码后备，不能单独分离 snapshot 布局优化 |
-| 保持保护和生命周期契约 | 四个 READ 镜像的 ABI/namespace/fallback 归档；草稿明确正常 loader 权限测试边界 | 已有语义测试，缺针对 VM/file 操作、源模块寿命和部署失败的契约证据；不能用 ABI PASS 替代 |
+| Clocktime 读写代价可接受 | 20 次完整采集及原始记录核验；正文表 15–20 已更新公开/内核 reader、writer 与并发结果 | 支持所测入口成本和共享关系；writer 区间不能证明稳定改善或无开销，三方法不能单独分离 snapshot 布局优化 |
+| 保持保护和生命周期契约 | 既有 ABI/namespace/fallback；新 guest 的权限/COW/正常恢复及注册部分失败记录 | 正常路径有实测支持；独立 owner pin、完成确认和失败回滚存在实现缺口，修订待确认 |
 
 工作按共同修改的代码、构建和采集流程分成六类。字母只用于引用，不代表重要程度或执行顺序。每类按“确认现有实现和统计口径 → 集中修改 → 验证 → 一次组织正式采集 → 汇总结果”推进，减少同一批脚本或内核镜像反复修改和重跑。实际需要分开的镜像和诊断采集仍保留区别。
 
 | 类别 | 共同修改对象 | 放在一起完成的内容 | 本类交付 |
 | --- | --- | --- | --- |
-| A：Clocktime 整套实验 | `test/test_gettime/vkso-tests/revision/`、既有结果报告 | 跨启动统计、公开/内核 reader、UPDATE、多 reader、物理代码共享对照、已有 ABI 与代码规模口径 | 已实现的采集计划及待完成的 READ/UPDATE/CONCURRENT 综合结果 |
+| A：Clocktime 整套实验 | `test/test_gettime/vkso-tests/revision/`、既有结果报告 | 跨启动统计、公开/内核 reader、UPDATE、多 reader、物理代码共享对照、已有 ABI 与代码规模口径 | 已完成的 READ/UPDATE/CONCURRENT 综合结果及全量核验 |
 | B：页面复用与装载 | `page_cache_replace/` 周边观测工具、`test/test_first_call/matrix_bench/`、各导出 runner | setup、注册完成时点核验、PFN/内存计费、权限/lifetime、first-touch 筛选与内存压力 | 一套注册到释放的采集流程，setup/footprint/边界验证结果 |
 | C：PGOT 与真实算法 | `pgot_benchmarks/`、`test/test_lz4/`、`test/test_BCH/`、`test/test_xz/` | 重复单位、baseline/构建条件、BCH 诊断、实际适配算法的内核端成本、统一统计 | 完整算法对照表、BCH 诊断及适配记录 |
 | D：适用范围与导出工具 | `make_dll/`、`kernel_cgd/`、`vkso`、候选清单 | 固定候选集、分阶段成功/失败分类、closure 特征、人工改造量、构建支持范围 | 候选全集、统一导出记录和 applicability 表 |
@@ -69,7 +69,7 @@
 
 **完成更新（2026-09-12）：** 下列设计与验收要求已由[结果报告](../test/test_gettime/vkso-tests/revision/NORMAL_RESULTS.md)及其原始/派生记录落实。4,275 个 writer 窗口共 13,893,682 样本、无 dropped；131 个非 CPU0 样本保留，CPU0-only 敏感性的最大点比值变化为 0.1861 个百分点。全部 19 个场景的 writer Mean 与 P99 的 Raw/VKSO 95% 区间均包含 1。定速实际值/目标范围为 0.9999968368–1.0000032182，late batches 为零；最小单窗口 Jain fairness 为 0.922232，已保留并报告。新 Normal 表替换旧单启动主表，no-retpoline 原归档保留为诊断。下面带“前次”“已准备”的条目记录设计和阶段证据，当前终态以本段及结果报告为准。
 
-共同修改位置：[新增实验目录](../test/test_gettime/vkso-tests/revision/)及最终结果报告，复用既有 `baremetal/`、`update-bench/`、`functional/`、`code-size/` 的完整实现和证据。本轮已经集中实现采集工具与对照，不再把内核 reader、多 reader、跨启动控制写成待开发项目。核心 Clocktime、公共 wrapper 和页面注册代码未改，后续首先完成现有采集与分析。
+共同修改位置：[新增实验目录](../test/test_gettime/vkso-tests/revision/)及最终结果报告，复用既有 `baremetal/`、`update-bench/`、`functional/`、`code-size/` 的完整实现和证据。本轮已经集中实现采集工具与对照，不再把内核 reader、多 reader、跨启动控制写成待开发项目。核心 Clocktime、公共 wrapper 和页面注册代码未改，现有采集与分析均已完成。
 
 前次草稿和[旧统一性能报告](../test/test_gettime/vkso-tests/VKSO_READ_UPDATE性能报告_20260801.md)明确将每个 backend/build 的正式批次限定为一次启动；当前草稿已替换为本轮跨启动结果。31 个 READ rounds、7 个进程、15 个 UPDATE rounds 都不能估计 boot-to-boot 变化。IQR、P10–P90 目前被正确标注为描述统计，但描述统计不能证明“等效”或小于某阈值。
 
@@ -81,13 +81,13 @@
 
 重新启动本身也不会随机化所有编译链接布局。对固定 `setarch -R` 的 Clocktime 或固定 ELF，要另外做默认 ASLR/多个合法布局的诊断，或限定结论适用的布局；不必对全部 workload 重跑完整布局矩阵。
 
-已增加测试模块，直接批量调用 `ktime_get_ts64`、`ktime_get_raw_ts64` 和 `ktime_get_coarse_ts64`，覆盖普通内核 hres/raw/coarse 入口；功能验证及实际 VKSO shared-core/fallback 调用路径核查已有记录。已有 syscall fallback 继续保留，但不代替这些普通内核 API。下一步在正式结果中并列用户 reader、这三个内核 reader 和 writer，检查成本是否转移到另一端；不能把三个代表性 API 称为所有内核使用情境的覆盖。
+已增加测试模块，直接批量调用 `ktime_get_ts64`、`ktime_get_raw_ts64` 和 `ktime_get_coarse_ts64`，覆盖普通内核 hres/raw/coarse 入口；功能验证及实际 VKSO shared-core/fallback 调用路径核查已有记录。已有 syscall fallback 继续保留，但不代替这些普通内核 API。正式结果已并列用户 reader、这三个内核 reader 和 writer，以检查两侧成本；不能把三个代表性 API 称为所有内核使用情境的覆盖。
 
 Clocktime 的既有设计同时改变共享计算、snapshot 字段组织、发布路径和入口。Raw→VKSO 的 UPDATE 变化只能先视为子系统重构的组合效果。本轮新增的 `compact-split` 复制完整实时 carrier，保留算法、支持代码、虚拟偏移、公共 wrapper 和共享状态，仅让用户代码使用独立物理后备，运行于同一 VKSO 内核。名称中的 compact 不能作为“只改 compact snapshot”的证据。
 
 **修正前次归因规划：** VKSO↔copy 可检验共享与复制代码后备的差异；Raw↔copy 仍混合 snapshot、发布和入口重构，无法单独量化状态布局收益。原报告把后一比较直接解释为布局/发布优化、把前一比较解释为入口重构，隔离程度说得过强，应撤回。当前无需为补全组件排列组合再改基础实现；最终报告先给三种完整方法的结果及其可解释范围。如果之后确实要主张某一布局优化是原因，再单独提出所需实现、成本和验证依据。
 
-旧归档是一个 reader 配正常 writer；新协议已经覆盖 monotonic/raw/coarse × 1/2/3 个独立绑核读进程 × 饱和/每读者 1,000,000 calls/s，并保留 idle writer。读进程使用 CPU 1–3，控制任务使用 CPU 0。后续输出总吞吐、各 reader 成本与实际速率、公平性、writer mean/median/P95/P99；sequence retry 单独作为诊断。该范围是当前四核机器上的最多三个用户 reader，不能外推为大核数或跨插槽扩展性。
+旧归档是一个 reader 配正常 writer；新协议已经覆盖 monotonic/raw/coarse × 1/2/3 个独立绑核读进程 × 饱和/每读者 1,000,000 calls/s，并保留 idle writer。读进程使用 CPU 1–3，控制任务使用 CPU 0。结果已输出总吞吐、各 reader 成本与实际速率、公平性、writer mean/median/P95/P99；sequence retry 单独作为诊断。该范围是当前四核机器上的最多三个用户 reader，不能外推为大核数或跨插槽扩展性。
 
 固定速率统计包含预热和正式计时调用，采用批次节流。必须检查实际速率和 late batches，不能用相同目标值自动证明相同实际负载；这些数据也不是平滑请求到达或逐请求尾延迟。窗口检查确认 writer 记录位于所有 reader 的负载区间内部。无需为常态并发结论额外提高系统 writer 频率。
 
@@ -97,13 +97,13 @@ Clocktime 的既有设计同时改变共享计算、snapshot 字段组织、发�
 
 旧归档 READ 的 20 个入口等权几何平均为约 ±1%，并不意味着每个路径均在 ±1% 内，也不是应用调用频率加权的总体效果。旧性能报告已揭示 `gettimeofday(NULL,NULL)` 约 2 cycles、约 33% 的差异，以及并发 coarse 约 9%–14% 的差异。正文需要同时保留分组、最差真实路径及绝对数；本轮正式结果按相同原则重新解释，不能预设仍得到旧幅度。
 
-本类剩余交付包括：所有计划启动的身份/数据覆盖核验、原始 writer 与汇总值一致性、实际速率/late batches/窗口重叠、ABI/sequence/PFN 记录检查，以及最终三方法结果报告。READ 使用不带 writer recorder 的配置，UPDATE/CONCURRENT 使用 recorder；诊断另采。历史 SLOC/符号规模证据对应既有完整实现，新增测试代码不计入产品缩减。已有 PFN 验证在声明闭包中观察到 VKSO 三个唯一页、复制对照五个唯一页；它证明两张代码页共享关系的差别，不代表全系统净节省两页，也不代替 B 类的开销账本。
+本类已完成所有计划启动的身份/数据覆盖核验、原始 writer 与汇总值一致性、实际速率/late batches/窗口重叠、ABI/sequence/PFN 记录检查，以及最终三方法结果报告。READ 使用不带 writer recorder 的配置，UPDATE/CONCURRENT 使用 recorder；诊断另采。历史 SLOC/符号规模证据对应既有完整实现，新增测试代码不计入产品缩减。已有 PFN 验证在声明闭包中观察到 VKSO 三个唯一页、复制对照五个唯一页；它证明两张代码页共享关系的差别，不代表全系统净节省两页，也不代替 B 类的开销账本。
 
-**reader 原始记录核验已准备：** [独立审计脚本](../test/test_gettime/vkso-tests/revision/audit_reader_records.py)逐个完成启动核对原始 READ/CONCURRENT CSV 与标准化值，重算调用速率、公平性和 kernel cycles，检查批次计数、CPU、读写窗口及 sequence counters。首个物理实验块 steps 000–003 的三方法共 8,619 个 reader 标准化值全部匹配；该块定速实际值/目标范围为 0.9999970704–1.0000032182，late batches 为零。五项测试确认错误身份、计数、窗口和汇总值会被拒绝，并保留合法的不等速负载及 late batches。全量核验和跨启动解释仍待采集结束；ABI/PFN 不在该脚本覆盖范围。详见[验证记录](../test/test_gettime/vkso-tests/revision/VALIDATION.md#reader-record-auditor-validation--2026-09-11)。尚未把该脚本加入待确认处置的自动接续服务。
+**reader 审计的前期验证：** [独立审计脚本](../test/test_gettime/vkso-tests/revision/audit_reader_records.py)核对原始 READ/CONCURRENT CSV 与标准化值，重算调用速率、公平性和 kernel cycles，检查批次计数、CPU、读写窗口及 sequence counters。首个物理实验块 steps 000–003 的三方法共 8,619 个 reader 标准化值全部匹配；该块定速实际值/目标范围为 0.9999970704–1.0000032182，late batches 为零。五项测试确认错误身份、计数、窗口和汇总值会被拒绝，并保留合法的不等速负载及 late batches。该首块验证随后扩展至全部 43,095 个 reader 值，最终结果见本报告状态快照；ABI/PFN 由单独脚本核验。详见[验证记录](../test/test_gettime/vkso-tests/revision/VALIDATION.md#reader-record-auditor-validation--2026-09-11)。
 
-**归档核验扩展（2026-09-12 01:21 UTC）：** 已在 CPU 0 对全部 19 个完成启动执行 reader 与独立 ABI/PFN 审计，结果保存在 `revision/results/record-audit-20260912T012130Z/`。15 个 READ 方法记录和 13 个 UPDATE 方法记录的 38,775 个 reader 值重算一致，sequence 计数一致；全部已核验并发窗口满足 writer 控制区间包含关系，定速实际值/目标范围仍为 0.9999970704–1.0000032182，late batches 为零。28 份 ABI 日志各有 51 条 PASS 和 49 条路径记录，均只使用一个允许 CPU；18 份 PFN 记录保持 VKSO/compact-split 的声明闭包并集为 3/5 页。这扩展了归档一致性证据，未产生新性能测量，也未覆盖最后一步或原始 writer 记录；正式三方法性能解释仍待完整数据。
+**归档核验扩展（2026-09-12 01:21 UTC）：** 已在 CPU 0 对全部 19 个完成启动执行 reader 与独立 ABI/PFN 审计，结果保存在 `revision/results/record-audit-20260912T012130Z/`。15 个 READ 方法记录和 13 个 UPDATE 方法记录的 38,775 个 reader 值重算一致，sequence 计数一致；全部已核验并发窗口满足 writer 控制区间包含关系，定速实际值/目标范围仍为 0.9999970704–1.0000032182，late batches 为零。28 份 ABI 日志各有 51 条 PASS 和 49 条路径记录，均只使用一个允许 CPU；18 份 PFN 记录保持 VKSO/compact-split 的声明闭包并集为 3/5 页。这扩展了归档一致性证据，未产生新性能测量，也未覆盖最后一步或原始 writer 记录；该次中间核验之后已完成全量数据检查及正式三方法解释。
 
-**ABI/PFN 记录核验已准备：** [支持记录审计脚本](../test/test_gettime/vkso-tests/revision/audit_support_records.py)已核对同一首块的六份 ABI 日志和四份 PFN 记录：各 ABI 日志的 51 个 pass 记录、49 个 fast/fallback 路径均符合默认模式；两次 VKSO 启动分别重算出共享方法 3 页、复制方法 5 页的声明闭包并集，源页面 PFN 在同启动两方法间一致，记录的 text/state loader 权限分别为 RX/R--。六项测试验证错误状态、页面关系、权限和计数会被拒绝。这些是首块保存记录的核验，不是新运行的 VM/lifetime 测试或全系统净内存结果。
+**ABI/PFN 审计的前期验证：** [支持记录审计脚本](../test/test_gettime/vkso-tests/revision/audit_support_records.py)已核对同一首块的六份 ABI 日志和四份 PFN 记录：各 ABI 日志的 51 个 pass 记录、49 个 fast/fallback 路径均符合默认模式；两次 VKSO 启动分别重算出共享方法 3 页、复制方法 5 页的声明闭包并集，源页面 PFN 在同启动两方法间一致，记录的 text/state loader 权限分别为 RX/R--。六项测试验证错误状态、页面关系、权限和计数会被拒绝。这些是首块保存记录的核验，不是新运行的 VM/lifetime 测试或全系统净内存结果。
 
 **多核功能证据范围已澄清：** 本轮默认 ABI 继承 collector 的 CPU 0 亲和性，`multicpu_threads=pass threads=1` 实际只覆盖一个允许 CPU。已有 [20260801T164548Z-vkso-final 归档](../test/test_gettime/vkso-tests/baremetal/results/20260801T164548Z-vkso-final/)中 Raw/VKSO × normal/no-retpoline 四个完成案例均保留 `threads=4` 的功能记录，可按原构建身份引用，无须将 Raw/VKSO 的多核验证重新列为完全缺失；该历史证据不包含 compact-split。最终正文须分别说明历史功能证据、本轮逐启动 ABI 与多读者性能覆盖，不把单线程 PASS 写成新增多核验证。
 
@@ -189,7 +189,7 @@ first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛�
 
 **实际执行更新（2026-09-11 17:23 UTC）：** [算法证据记录](../test/evaluation/algorithm-evidence.md)已列出基线身份、部署与进程边界、现有原始矩阵和 BCH 诊断目标。三份旧 raw 分别核验 210/1,056/42 行，缺行/重复行变体均被拒绝；四份报告重新生成后，五份数值 CSV 与全部 Markdown 数值表保持不变。LZ4/BCH runner 补齐新工作目录初始化，BCH 修正 root 执行时误把 `-v` 当命令的问题；均为实验 harness 改动，未改项目基础功能。
 
-[完整部署入口](../test/evaluation/algorithm_deployments.py)已准备，每算法先安排三次完整部署，保留原始全量配置，按部署块轮换算法顺序，并为每次 owner 装载/注册保留单独目录、boot identity 和逐行重复身份。三次用于检查重新部署敏感性，不能当作独立启动或等效性证明。当前真实服务检查确认 Clocktime 仍 active，入口按预期拒绝启动算法；待采集结束、恢复原算法内核后执行。该入口尚未经完整部署验收，PMU 诊断及实际 owner 内核端对照也尚未完成。
+[完整部署入口](../test/evaluation/algorithm_deployments.py)已准备，每算法先安排三次完整部署，保留原始全量配置，按部署块轮换算法顺序，并为每次 owner 装载/注册保留单独目录、boot identity 和逐行重复身份。三次用于检查重新部署敏感性，不能当作独立启动或等效性证明。早期验证中，入口曾在 Clocktime 服务 active 时按预期拒绝启动；现在 Clocktime 已完成并恢复原内核。正式执行仍需先完成 LZ4 绑定修复与完整功能验证、结束其他分析/测量任务，并由用户在正常特权终端启动。该入口尚未经完整部署验收，PMU 诊断及实际 owner 内核端对照也尚未完成。
 
 共同修改位置：[PGOT 实验](../test/test_MICRO/test_MICRO_pseudo_noqemu/pgot_benchmarks/)、[LZ4](../test/test_lz4/)、[BCH](../test/test_BCH/)、[XZ](../test/test_xz/) 的 runner、构建配置、统计脚本和适配记录。先统一统计字段和对照身份，再修改各自 runner；算法专用 harness 继续保留。BCH 的诊断与本类正式算法采集一起准备。
 
@@ -199,7 +199,9 @@ first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛�
 
 前次直接从 [BCH raw.csv](../test/test_BCH/results/raw.csv)重算 `t=8 / errors=2 / decode-precomputed` 的 11 个轮内比值，中位数为 `1.209496`，即约慢 20.95%；全部比值范围约为 `1.0777–1.5187`。这支持已报告的负收益方向，同时表明不能只用一个 20.9% 代表所有运行的幅度。这个范围不是置信区间。
 
-先检查轮次顺序、实际输入/错误位置和计时工作是否一致，补若干重新部署的完整重复；之后选最大 regression、相同 t 的 0-error，以及 full-decode 路径作为对照。采集 cycles、instructions、branch misses 和与代码/数据布局相关的 cache 事件，配合反汇编和 helper 调用计数。每次只改变一个可解释因素，验证 slowdown 是否随其变化；计数器相关性不等于因果证明。不需一开始采满所有 PMU 事件，诊断运行也不替代正式无插桩延迟。
+**BCH 路径语义已核实（2026-09-12）：** [源码及原归档二进制核对](../test/evaluation/bch-decode-path-evidence.md)确认，precomputed 只把受损 payload 的 ECC 编码及与接收 ECC 的异或移出计时；三个 backend 的两种 decode 均传入 `syn=NULL`，difference 非零时仍计算 syndromes、构造错误定位多项式并求根。返回位置后的位翻转/恢复检查也不在计时内。同一轮、同一路径的 backend 共用错误向量，但 seed 包含 mode，full 与 precomputed 的错误位置不同，不能直接相减估计阶段成本。两个有效错误在 t=4/8 下均选择二次多项式求根分支；t 增加 ECC 宽度、syndrome 数量和 Berlekamp–Massey 迭代上限，不代表该例进入高次求根分支。正文及 BCH README 已修正，旧性能数值未改；具体退化原因仍待动态证据。
+
+已核对轮次顺序及同一路径内的配对输入；接下来补重新部署的完整重复，再选择最大 regression、相同 t 的 0-error，以及 full-decode 路径作定向诊断。若要比较两个 decode 的阶段成本，诊断 harness 必须在两条路径间复用同一 payload 和错误位置，保存实际向量与调用顺序，不能沿用旧表作配对阶段差。采集 cycles、instructions、branch misses 和与代码/数据布局相关的 cache 事件，配合 syndrome、错误定位多项式及二次求根路径的反汇编/运行时记录。每次只改变一个可解释因素，验证 slowdown 是否随其变化；计数器相关性不等于因果证明。不需一开始采满所有 PMU 事件，诊断运行也不替代正式无插桩延迟。
 
 保留 BCH，报告“何时退化、幅度多少、能解释到什么程度”；不要通过删去路径或平均其它算法来隐藏它。LZ4 的 upstream/native 对照也应保留：1 MiB 解压吞吐比为 0.9228，含义是吞吐低 7.72%，不是延迟恰好高 7.72%。
 
@@ -219,11 +221,11 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 
 **分析器性能方案待确认：** hex_dump_to_buffer 的未裁剪检查已超过 30 分钟，源码定位到直接目标查询反复解析整个 ELF 符号表。[缓存补丁方案](../test/evaluation/proposals/README.md)已准备并通过边界/实际镜像查询对照，尚未应用；已向用户请求允许这项基础分析器调整。保持符号顺序、首匹配及全部判定规则，若获准将保留原记录并在新目录重检固定八例。等待答复期间，原分析器继续运行，不以超时或删减候选替代完整检查。
 
-**执行更新（2026-09-12）：** 已启动全部 8 个固定 API 的普通账户静态检查，输出 `test/evaluation/results/applicability-static-20260912/`；xxh32、crc32_le、sha256 的结果已落盘，完整矩阵仍在执行。[语义核查记录](../test/evaluation/applicability-semantics.md)已区分八例的 caller-owned state、只读依赖、callback 与 kernel-private state。当前 `/proc/kallsyms` 地址均被屏蔽为零，checker 的 runtime 展示列不可用；源码确认其只影响地址展示，静态判定仍使用配置 ELF。该 ELF 的 `.rodata` 带 WA 标志，不能把 checker 的 WRITABLE 标签当作内核运行时可写证据。未构造/注册 carrier，也未改变 checker 或访问限制。
+**执行更新（2026-09-12）：** 已启动固定 8 个 API 的普通账户顺序静态检查，输出 `test/evaluation/results/applicability-static-20260912/`；xxh32、crc32_le、sha256 的结果已落盘，完整矩阵仍在执行。[语义核查记录](../test/evaluation/applicability-semantics.md)已区分八例的 caller-owned state、只读依赖、callback 与 kernel-private state。当前 `/proc/kallsyms` 地址均被屏蔽为零，checker 的 runtime 展示列不可用；源码确认其只影响地址展示，静态判定仍使用配置 ELF。该 ELF 的 `.rodata` 带 WA 标志，不能把 checker 的 WRITABLE 标签当作内核运行时可写证据。未构造/注册 carrier，也未改变 checker 或访问限制。
 
 **实际执行更新（2026-09-11 17:51 UTC）：** [固定清单](../test/evaluation/applicability-candidates.json)纳入 `xxh32`、`crc32_le`、`sha256`、`hex_dump_to_buffer`、`string_escape_mem`、`sort`、`rhashtable_insert_slow`、`get_random_bytes` 八个本批待检查 API，按显式输入、只读表、内部闭包、可变输出、callback、同步环境和私有状态等差异选择；LZ4/BCH/XZ/Clocktime 四个已知集成单独作为回顾性案例。该清单是有意选择的分层案例，不能用总成功率估计 Linux 整体可复用比例。“本批待检查”不表示仓库从未探索过 xxHash 或 copied closures。
 
-[检查入口及口径](../test/evaluation/applicability.md)已准备，实际执行会保留每个 API 的完整静态 manifest、编译插桩/间接控制流计数、carrier 构造结果及单独的 runtime 状态；不会注册页面或调用新导出的函数。核对发现当前 checker 的 PASS 可伴随插桩和间接跳转记录，故不能直接归并为“完整成功导出”。同步/私有 RNG 状态两例先做静态检查，语义未解决前不构造 carrier。Python 解析及计划入口验证已通过，真实 Clocktime 服务 active 时执行被拒绝；尚未运行这八例的正式检查。
+[检查入口及口径](../test/evaluation/applicability.md)保留每个 API 的完整静态 manifest、编译插桩/间接控制流计数、carrier 构造结果及单独的 runtime 状态；不会注册页面或调用新导出的函数。核对发现当前 checker 的 PASS 可伴随插桩和间接跳转记录，故不能直接归并为“完整成功导出”。同步/私有 RNG 状态两例先做静态检查，语义未解决前不构造 carrier。Python 解析及计划入口验证已通过，早期执行曾被 active Clocktime 服务拒绝；现在原八例检查已启动，xxh32 为 checker PASS，crc32_le/sha256 为 checker FAIL，第四例 hex_dump_to_buffer 仍在展开依赖，其余四例尚未进入。已有结果未执行 runtime 验证，不能写成应用成功率。
 
 共同修改位置：[builder](../make_dll/)、[分析器](../kernel_cgd/)、[vkso 入口](../vkso)，以及新增的固定候选清单和导出记录。先规定清单与分类字段，再批量尝试候选；现有算法和 Clocktime 作为已检查案例纳入相同口径。
 

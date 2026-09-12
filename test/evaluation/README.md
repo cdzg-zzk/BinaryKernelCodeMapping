@@ -27,6 +27,10 @@ do not establish net savings. Control/workload heaps and full allocator costs
 remain outside this measurement.
 
 Group D now has a [fixed candidate set and inspection driver](applicability.md).
+The original checker is running the fixed eight cases in sequence: xxh32 has
+passed, crc32_le and sha256 have failed, and hex_dump_to_buffer is still
+expanding dependencies. These are static results; runtime validation has not
+been performed for these candidates.
 Group E has a [complete LZ4 CLI workflow](lz4-cli/README.md) prepared for the
 same owner-registration sessions as group C. Both CLIs have compiled and passed
 48 full-input ordinary-DSO functional cases. The

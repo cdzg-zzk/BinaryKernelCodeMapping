@@ -1,0 +1,441 @@
+SOURCE test/test_BCH/src/bch_bench.c
+16	#define MODE_COUNT 3
+17	
+18	enum operation_mode {
+19		MODE_ENCODE = 0,
+20		MODE_DECODE_PRECOMPUTED = 1,
+21		MODE_DECODE_FULL = 2,
+22	};
+23	
+24	/* Public prefix shared by the 2017 standalone and Linux 5.15 structures. */
+25	struct bch_public {
+26		unsigned int m;
+27		unsigned int n;
+28		unsigned int t;
+29		unsigned int ecc_bits;
+30		unsigned int ecc_bytes;
+31	};
+32	
+33	typedef void *(*init4_fn)(int, int, unsigned int, bool);
+34	typedef void *(*init3_fn)(int, int, unsigned int);
+35	typedef void (*free_fn)(void *);
+36	typedef void (*encode_fn)(void *, const uint8_t *, unsigned int, uint8_t *);
+37	typedef int (*decode_fn)(void *, const uint8_t *, unsigned int,
+38				 const uint8_t *, const uint8_t *,
+39				 const unsigned int *, unsigned int *);
+40	
+
+106	static void load_backend(struct backend *backend)
+107	{
+108		backend->handle = dlopen(backend->path, RTLD_NOW | RTLD_LOCAL);
+109		if (!backend->handle) {
+110			fprintf(stderr, "dlopen(%s): %s\n", backend->path, dlerror());
+111			exit(EXIT_FAILURE);
+112		}
+113	
+114		if (backend->standalone_api) {
+115			backend->init3 = (init3_fn)load_symbol(backend->handle, "init_bch");
+116			backend->free_control =
+117				(free_fn)load_symbol(backend->handle, "free_bch");
+118			backend->encode =
+119				(encode_fn)load_symbol(backend->handle, "encode_bch");
+120			backend->decode =
+121				(decode_fn)load_symbol(backend->handle, "decode_bch");
+122		} else {
+123			const bool vkso = strcmp(backend->name, "kernel-vkso") == 0;
+124			const char *init_name = vkso ? "vkso_bch_init" : "bch_init";
+125			const char *free_name = vkso ? "vkso_bch_free" : "bch_free";
+126			const char *encode_name = vkso ? "vkso_bch_encode" : "bch_encode";
+127			const char *decode_name = vkso ? "vkso_bch_decode" : "bch_decode";
+128	
+129			backend->init4 = (init4_fn)load_symbol(backend->handle, init_name);
+130			backend->free_control =
+131				(free_fn)load_symbol(backend->handle, free_name);
+132			backend->encode =
+133				(encode_fn)load_symbol(backend->handle, encode_name);
+134			backend->decode =
+135				(decode_fn)load_symbol(backend->handle, decode_name);
+136		}
+137	}
+138	
+139	static void *new_control(struct backend *backend, int m, int t)
+140	{
+141		void *control;
+142	
+143		if (backend->standalone_api)
+144			control = backend->init3(m, t, 0);
+145		else
+146			control = backend->init4(m, t, 0, false);
+147		if (!control) {
+148			fprintf(stderr, "%s: initialization failed for m=%d t=%d\n",
+149				backend->name, m, t);
+150			exit(EXIT_FAILURE);
+151		}
+
+153	}
+154	
+155	static uint64_t prng_next(uint64_t *state)
+156	{
+157		uint64_t value = *state;
+158	
+159		value ^= value >> 12;
+160		value ^= value << 25;
+161		value ^= value >> 27;
+162		*state = value;
+163		return value * UINT64_C(2685821657736338717);
+164	}
+165	
+166	static unsigned int reverse_bit_in_byte(unsigned int bit)
+167	{
+168		return (bit & ~7U) | (7U - (bit & 7U));
+169	}
+170	
+171	static void generate_error_vector(unsigned int *vector, int count,
+172					  unsigned int nbits, uint64_t seed)
+173	{
+174		int i;
+175	
+176		for (i = 0; i < count; ++i) {
+177			unsigned int candidate;
+178			bool duplicate;
+179			int j;
+180	
+181			do {
+182				candidate = (unsigned int)(prng_next(&seed) % nbits);
+183				candidate = reverse_bit_in_byte(candidate);
+184				duplicate = candidate >= nbits;
+185				for (j = 0; !duplicate && j < i; ++j)
+186					duplicate = vector[j] == candidate;
+187			} while (duplicate);
+188			vector[i] = candidate;
+189		}
+190	}
+191	
+192	static void flip_bits(uint8_t *buffer, const unsigned int *vector, int count)
+193	{
+194		int i;
+195	
+196		for (i = 0; i < count; ++i)
+197			buffer[vector[i] / 8] ^= (uint8_t)(1U << (vector[i] & 7));
+198	}
+199	
+200	static bool same_locations(const unsigned int *expected, int expected_count,
+201				   const unsigned int *actual, int actual_count)
+202	{
+203		int i;
+204	
+205		if (expected_count != actual_count)
+206			return false;
+207		for (i = 0; i < expected_count; ++i) {
+208			int j;
+209			bool found = false;
+210	
+211			for (j = 0; j < actual_count; ++j) {
+212				if (expected[i] == actual[j]) {
+213					found = true;
+214					break;
+215				}
+216			}
+217			if (!found)
+218				return false;
+219		}
+220		return true;
+221	}
+222	
+223	static void prepare_decode_context(struct op_context *context,
+224					   const unsigned int *vector)
+225	{
+226		struct bench_case *test = context->test;
+227		size_t codeword_bytes = (size_t)test->len + test->ecc_bytes;
+228		unsigned int i;
+229	
+230		context->work = xcalloc(codeword_bytes, 1);
+231		context->difference = xcalloc(test->ecc_bytes, 1);
+232		context->errloc = xcalloc((size_t)test->t, sizeof(*context->errloc));
+233		memcpy(context->work, test->codeword, codeword_bytes);
+234		flip_bits(context->work, vector, context->errors);
+235	
+236		if (context->mode == MODE_DECODE_PRECOMPUTED) {
+237			context->backend->encode(context->control, context->work,
+238						 test->len, context->difference);
+239			for (i = 0; i < test->ecc_bytes; ++i)
+240				context->difference[i] ^= context->work[test->len + i];
+241		}
+242	}
+243	
+244	static void free_decode_context(struct op_context *context)
+245	{
+246		free(context->work);
+247		free(context->difference);
+248		free(context->errloc);
+249		context->work = NULL;
+250		context->difference = NULL;
+251		context->errloc = NULL;
+252	}
+253	
+254	static int decode_once(struct op_context *context)
+255	{
+256		if (context->mode == MODE_DECODE_PRECOMPUTED) {
+257			return context->backend->decode(context->control, NULL,
+258				context->test->len, NULL, context->difference, NULL,
+259				context->errloc);
+260		}
+261		return context->backend->decode(context->control, context->work,
+262			context->test->len, context->work + context->test->len,
+263			NULL, NULL, context->errloc);
+264	}
+265	
+266	static void verify_decode(struct op_context *context,
+267				  const unsigned int *vector)
+268	{
+269		int found = decode_once(context);
+270	
+271		if (!same_locations(vector, context->errors, context->errloc, found)) {
+272			int i;
+273	
+274			fprintf(stderr, "%s m=%d t=%d mode=%d errors=%d returned=%d\n",
+275				context->backend->name, context->test->m, context->test->t,
+276				context->mode, context->errors, found);
+277			fprintf(stderr, "expected:");
+278			for (i = 0; i < context->errors; ++i)
+279				fprintf(stderr, " %u", vector[i]);
+280			fprintf(stderr, "\nactual:");
+281			for (i = 0; i < found && i < context->test->t; ++i)
+282				fprintf(stderr, " %u", context->errloc[i]);
+283			fprintf(stderr, "\n");
+284			die("BCH error-location correctness failure");
+285		}
+286	
+287		flip_bits(context->work, context->errloc, found);
+288		if (memcmp(context->work, context->test->codeword,
+289			   (size_t)context->test->len + context->test->ecc_bytes) != 0)
+290			die("BCH returned locations do not restore the codeword");
+291		flip_bits(context->work, context->errloc, found);
+
+300	
+301	static uint64_t run_context(struct op_context *context, uint64_t iterations)
+302	{
+303		uint64_t i;
+304		int value = 0;
+305	
+306		if (context->mode == MODE_ENCODE) {
+307			for (i = 0; i < iterations; ++i)
+308				context->backend->encode(context->control,
+309					context->test->codeword, context->test->len, NULL);
+310		} else {
+311			for (i = 0; i < iterations; ++i)
+312				value += decode_once(context);
+313		}
+314		result_sink += (uint64_t)value + iterations;
+315		return iterations;
+316	}
+317	
+318	static uint64_t measure_context(struct op_context *context, uint64_t iterations)
+319	{
+320		struct timespec start;
+321		struct timespec end;
+322	
+323		if (clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start) != 0)
+324			die("clock_gettime start failed");
+325		run_context(context, iterations);
+326		if (clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end) != 0)
+327			die("clock_gettime end failed");
+328		return elapsed_ns(&start, &end);
+329	}
+330	
+331	static uint64_t calibrate_context(struct op_context *context,
+332					  uint64_t target_ns)
+333	{
+334		uint64_t iterations = 1;
+335		uint64_t duration;
+336	
+337		do {
+338			duration = measure_context(context, iterations);
+339			if (duration >= target_ns / 8 || iterations >= UINT64_C(1000000))
+340				break;
+341			iterations *= 2;
+342		} while (true);
+343	
+344		if (duration == 0)
+345			return iterations;
+346		iterations = (uint64_t)((long double)iterations * target_ns / duration);
+347		if (iterations < 1)
+348			iterations = 1;
+349		if (iterations > UINT64_C(10000000))
+350			iterations = UINT64_C(10000000);
+
+402	static void initialize_cases(struct backend *backends,
+403				     struct bench_case *cases)
+404	{
+405		const int parameters[CASE_COUNT][2] = {{13, 4}, {13, 8}};
+406		int case_index;
+407	
+408		for (case_index = 0; case_index < CASE_COUNT; ++case_index) {
+409			struct bench_case *test = &cases[case_index];
+410			uint64_t seed = UINT64_C(0xb4c00000) + (uint64_t)case_index;
+411			uint8_t *reference_ecc = NULL;
+412			int backend_index;
+413			int i;
+414	
+415			test->m = parameters[case_index][0];
+416			test->t = parameters[case_index][1];
+417			/* This is the exact length rule used by the author's tu_bench.c. */
+418			test->len = (1 << (test->m - 1)) / 8;
+419	
+420			for (backend_index = 0; backend_index < BACKEND_COUNT;
+421			     ++backend_index) {
+422				struct bch_public *public;
+423	
+424				test->controls[backend_index] =
+425					new_control(&backends[backend_index], test->m, test->t);
+426				public = (struct bch_public *)test->controls[backend_index];
+427				if (backend_index == 0) {
+428					test->ecc_bits = public->ecc_bits;
+429					test->ecc_bytes = public->ecc_bytes;
+430					test->codeword = xcalloc((size_t)test->len +
+431								 test->ecc_bytes, 1);
+432					reference_ecc = test->codeword + test->len;
+433					for (i = 0; i < test->len; ++i)
+434						test->codeword[i] = (uint8_t)prng_next(&seed);
+435				} else if (public->ecc_bits != test->ecc_bits ||
+436					   public->ecc_bytes != test->ecc_bytes) {
+437					die("backend BCH geometry differs");
+438				}
+439	
+440				if (backend_index == 0) {
+441					backends[backend_index].encode(test->controls[backend_index],
+442						test->codeword, test->len, reference_ecc);
+443				} else {
+444					uint8_t *ecc = xcalloc(test->ecc_bytes, 1);
+445	
+446					backends[backend_index].encode(test->controls[backend_index],
+447						test->codeword, test->len, ecc);
+448					if (memcmp(reference_ecc, ecc, test->ecc_bytes) != 0)
+449						die("backend parity bytes differ");
+450					free(ecc);
+451				}
+452			}
+453		}
+454	}
+455	
+456	static void run_correctness(struct backend *backends,
+
+519	static void run_benchmark(FILE *output, struct backend *backends,
+520				  struct bench_case *cases, int outer_runs,
+521				  uint64_t target_ns)
+522	{
+523		uint64_t iterations[BACKEND_COUNT][CASE_COUNT][MODE_COUNT][MAX_T + 1] = {0};
+524		uint64_t init_iterations[BACKEND_COUNT][CASE_COUNT] = {0};
+525		int case_index;
+526	
+527		for (case_index = 0; case_index < CASE_COUNT; ++case_index) {
+528			struct bench_case *test = &cases[case_index];
+529			int backend_index;
+530	
+531			for (backend_index = 0; backend_index < BACKEND_COUNT; ++backend_index) {
+532				struct op_context encode_context = {
+533					.backend = &backends[backend_index],
+534					.control = test->controls[backend_index],
+535					.test = test,
+536					.mode = MODE_ENCODE,
+537				};
+538				int errors;
+539	
+540				iterations[backend_index][case_index][MODE_ENCODE][0] =
+541					calibrate_context(&encode_context, target_ns);
+542				init_iterations[backend_index][case_index] =
+543					calibrate_init(&backends[backend_index], test->m,
+544						       test->t, target_ns);
+545	
+546				for (errors = 0; errors <= test->t; ++errors) {
+547					unsigned int vector[MAX_T];
+548					enum operation_mode mode;
+549	
+550					generate_error_vector(vector, errors,
+551						8U * (unsigned int)test->len + test->ecc_bits,
+552						UINT64_C(0xca11b4a7) ^
+553						((uint64_t)case_index << 32) ^
+554						(uint64_t)errors);
+555					for (mode = MODE_DECODE_PRECOMPUTED;
+556					     mode <= MODE_DECODE_FULL; ++mode) {
+557						struct op_context context = {
+558							.backend = &backends[backend_index],
+559							.control = test->controls[backend_index],
+560							.test = test,
+561							.mode = mode,
+562							.errors = errors,
+563						};
+564	
+565						prepare_decode_context(&context, vector);
+566						iterations[backend_index][case_index][mode][errors] =
+567							calibrate_context(&context, target_ns);
+568						free_decode_context(&context);
+569					}
+570				}
+571			}
+572		}
+573	
+574		fprintf(output,
+575			"outer,m,t,len,errors,operation,backend,iterations,total_ns,ns_per_op,mbit_per_second\n");
+576	
+577		for (int outer = 0; outer < outer_runs; ++outer) {
+578			for (case_index = 0; case_index < CASE_COUNT; ++case_index) {
+579				struct bench_case *test = &cases[case_index];
+580				int position;
+581	
+582				for (position = 0; position < BACKEND_COUNT; ++position) {
+583					int backend_index = (position + outer + case_index) % BACKEND_COUNT;
+584					uint64_t count = init_iterations[backend_index][case_index];
+585					uint64_t duration = measure_init(&backends[backend_index],
+586						test->m, test->t, count);
+587	
+588					write_row(output, outer, test, -1, "init",
+589						  &backends[backend_index], count, duration);
+590				}
+591	
+592				for (int mode_value = MODE_ENCODE;
+593				     mode_value <= MODE_DECODE_FULL; ++mode_value) {
+594					enum operation_mode mode = (enum operation_mode)mode_value;
+595					int error_limit = mode == MODE_ENCODE ? 0 : test->t;
+596	
+597					for (int errors = 0; errors <= error_limit; ++errors) {
+598						unsigned int vector[MAX_T];
+599						uint64_t seed = UINT64_C(0x9e3779b97f4a7c15) ^
+600							((uint64_t)outer << 40) ^
+601							((uint64_t)case_index << 32) ^
+602							((uint64_t)mode << 24) ^
+603							(uint64_t)errors;
+604	
+605						generate_error_vector(vector, errors,
+606							8U * (unsigned int)test->len + test->ecc_bits,
+607							seed);
+608						for (position = 0; position < BACKEND_COUNT; ++position) {
+609							int backend_index = (position + outer + case_index +
+610								mode + errors) % BACKEND_COUNT;
+611							struct op_context context = {
+612								.backend = &backends[backend_index],
+613								.control = test->controls[backend_index],
+614								.test = test,
+615								.mode = mode,
+616								.errors = errors,
+617							};
+618							uint64_t count = iterations[backend_index][case_index]
+619								[mode][errors];
+620							uint64_t duration;
+621	
+622							if (mode != MODE_ENCODE)
+623								prepare_decode_context(&context, vector);
+624							run_context(&context, count < 32 ? count : 32);
+625							duration = measure_context(&context, count);
+626							write_row(output, outer, test, errors,
+627								  mode_name(mode), &backends[backend_index],
+628								  count, duration);
+629							if (mode != MODE_ENCODE)
+630								free_decode_context(&context);
+631						}
+632					}
+633				}
+634			}
+635		}
+636	}
+637	

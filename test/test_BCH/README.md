@@ -19,14 +19,20 @@ BCH 没有类似 SPEC 的统一标准 benchmark。这里采用作者仓库自带
 - 数据长度 `(1 << (m - 1)) / 8`，两组均为 512 bytes；
 - `CLOCK_PROCESS_CPUTIME_ID` 计时；
 - 在 data+ECC codeword 中随机注入 0 到 `t` 个错误；
-- 分别测量 encode、使用预计算 ECC difference 的 decode，以及包含 syndrome
-  计算的完整 decode；
+- 分别测量 encode、使用预计算 ECC difference 的 decode，以及在计时内编码
+  受损 payload 并与接收 ECC 异或的完整 decode；两条 decode 路径在 difference
+  非零时都继续计算 syndromes、构造错误定位多项式并求根；
 - 每个计时样本自适应到至少约 10 ms。
 
 在性能计时前，测试还会验证三种实现生成的 ECC byte-for-byte 相同，并对每个
 错误数、两条 decode 路径执行 128 组随机向量，检查返回位置且据此恢复完整
 codeword。与原 `tu_bench.c` 相比，这是为了让跨实现性能比较同时具备严格的
 功能等价性证据。
+
+性能轮次中，同一路径的三个 backend 使用相同错误向量；full 与 precomputed
+路径的种子不同，两条路径的时间差不能作为配对的阶段成本。Decode 计时只到
+返回错误位置，位翻转及完整 codeword 恢复检查在计时外。详见
+[计时边界与两错误路径核对](../evaluation/bch-decode-path-evidence.md)。
 
 ## 前置条件
 

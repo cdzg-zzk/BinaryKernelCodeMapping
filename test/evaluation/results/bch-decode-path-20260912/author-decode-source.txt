@@ -1,0 +1,69 @@
+SOURCE test/test_BCH/vendor/parrot-bch/lib/bch.c
+987	int decode_bch(struct bch_control *bch, const uint8_t *data, unsigned int len,
+988		       const uint8_t *recv_ecc, const uint8_t *calc_ecc,
+989		       const unsigned int *syn, unsigned int *errloc)
+990	{
+991		const unsigned int ecc_words = BCH_ECC_WORDS(bch);
+992		unsigned int nbits;
+993		int i, err, nroots;
+994		uint32_t sum;
+995	
+996		/* sanity check: make sure data length can be handled */
+997		if (8*len > (bch->n-bch->ecc_bits))
+998			return -EINVAL;
+999	
+1000		/* if caller does not provide syndromes, compute them */
+1001		if (!syn) {
+1002			if (!calc_ecc) {
+1003				/* compute received data ecc into an internal buffer */
+1004				if (!data || !recv_ecc)
+1005					return -EINVAL;
+1006				encode_bch(bch, data, len, NULL);
+1007			} else {
+1008				/* load provided calculated ecc */
+1009				load_ecc8(bch, bch->ecc_buf, calc_ecc);
+1010			}
+1011			/* load received ecc or assume it was XORed in calc_ecc */
+1012			if (recv_ecc) {
+1013				load_ecc8(bch, bch->ecc_buf2, recv_ecc);
+1014				/* XOR received and calculated ecc */
+1015				for (i = 0, sum = 0; i < (int)ecc_words; i++) {
+1016					bch->ecc_buf[i] ^= bch->ecc_buf2[i];
+1017					sum |= bch->ecc_buf[i];
+1018				}
+1019				if (!sum)
+1020					/* no error found */
+1021					return 0;
+1022			}
+1023			compute_syndromes(bch, bch->ecc_buf, bch->syn);
+1024			syn = bch->syn;
+1025		}
+1026	
+1027		err = compute_error_locator_polynomial(bch, syn);
+1028		if (err > 0) {
+1029			nroots = find_poly_roots(bch, 1, bch->elp, errloc);
+1030			if (err != nroots)
+1031				err = -1;
+1032		}
+1033		if (err > 0) {
+1034			/* post-process raw error locations for easier correction */
+1035			nbits = (len*8)+bch->ecc_bits;
+1036			for (i = 0; i < err; i++) {
+1037				if (errloc[i] >= nbits) {
+1038					err = -1;
+1039					break;
+1040				}
+1041				errloc[i] = nbits-1-errloc[i];
+1042				errloc[i] = (errloc[i] & ~7)|(7-(errloc[i] & 7));
+1043			}
+1044		}
+1045		return (err >= 0) ? err : -EBADMSG;
+1046	}
+1047	EXPORT_SYMBOL_GPL(decode_bch);
+1048	
+1049	/*
+1050	 * generate Galois field lookup tables
+1051	 */
+1052	static int build_gf_tables(struct bch_control *bch, unsigned int poly)
+1053	{
+1054		unsigned int i, x = 1;

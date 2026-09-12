@@ -1,0 +1,41 @@
+
+Symbol table '.dynsym' contains 11 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000    64 FUNC    GLOBAL DEFAULT  UND memset
+     2: 0000000000000000   592 FUNC    GLOBAL DEFAULT  UND kfree
+     3: 0000000000000000   816 FUNC    GLOBAL DEFAULT  UND __kmalloc
+     4: 0000000000001cb0  2176 FUNC    GLOBAL DEFAULT    1 vkso_bch_init
+     5: 0000000000002e80  1306 FUNC    GLOBAL DEFAULT    1 vkso_bch_decode
+     6: 0000000000001480  1200 FUNC    GLOBAL DEFAULT    1 vkso_bch_encode
+     7: 0000000000000000    32 FUNC    GLOBAL DEFAULT  UND memcpy
+     8: 0000000000001000    16 FUNC    GLOBAL DEFAULT    1 init_module
+     9: 0000000000001000    16 FUNC    GLOBAL DEFAULT    1 cleanup_module
+    10: 00000000000013b0   208 FUNC    GLOBAL DEFAULT    1 vkso_bch_free
+
+Symbol table '.symtab' contains 24 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000    64 FUNC    GLOBAL DEFAULT  UND memset
+     2: 0000000000000000   592 FUNC    GLOBAL DEFAULT  UND kfree
+     3: 0000000000000000   816 FUNC    GLOBAL DEFAULT  UND __kmalloc
+     4: 00000000000040a0    44 OBJECT  GLOBAL DEFAULT    2 bch_prim_poly_tab
+     5: 0000000000005020     8 OBJECT  GLOBAL DEFAULT    3 vkso_bch_kfree_slot
+     6: 0000000000005028     8 OBJECT  GLOBAL DEFAULT    3 vkso_bch_kmalloc_slot
+     7: 00000000000013b0   208 FUNC    GLOBAL DEFAULT    1 vkso_bch_free
+     8: 0000000000005010     8 OBJECT  GLOBAL DEFAULT    3 vkso_bch_memset_slot
+     9: 0000000000001cb0  2176 FUNC    GLOBAL DEFAULT    1 vkso_bch_init
+    10: 0000000000000000    32 FUNC    GLOBAL DEFAULT  UND memcpy
+    11: 0000000000001000   208 FUNC    GLOBAL DEFAULT    1 bch_encode_unaligned
+    12: 00000000000040e0   256 OBJECT  GLOBAL DEFAULT    2 swap_bits_table
+    13: 00000000000010d0   384 FUNC    GLOBAL DEFAULT    1 load_ecc8
+    14: 0000000000001480  1200 FUNC    GLOBAL DEFAULT    1 vkso_bch_encode
+    15: 0000000000005018     8 OBJECT  GLOBAL DEFAULT    3 vkso_bch_memcpy_slot
+    16: 0000000000001250    96 FUNC    GLOBAL DEFAULT    1 gf_poly_logrep
+    17: 00000000000012b0   256 FUNC    GLOBAL DEFAULT    1 gf_poly_mod
+    18: 0000000000001930   544 FUNC    GLOBAL DEFAULT    1 solve_linear_system.constprop.0.isra.0
+    19: 0000000000001b50   352 FUNC    GLOBAL DEFAULT    1 find_affine4_roots
+    20: 0000000000002530  2384 FUNC    GLOBAL DEFAULT    1 find_poly_roots
+    21: 0000000000002e80  1306 FUNC    GLOBAL DEFAULT    1 vkso_bch_decode
+    22: 0000000000001000    16 FUNC    GLOBAL DEFAULT    1 init_module
+    23: 0000000000001000    16 FUNC    GLOBAL DEFAULT    1 cleanup_module

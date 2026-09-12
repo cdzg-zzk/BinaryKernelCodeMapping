@@ -456,9 +456,9 @@ LZ4 使用未修改的 upstream 1.9.3 official benchmark core 和 Silesia corpus
 
 ### BCH
 
-BCH 测试 Linux 5.15 scalar implementation，沿用作者 benchmark 的 m=13、t∈{4,8} 和 512-byte data 定义。两种 t 分别提供不同纠错能力，注入 0 到 t 个错误则改变实际 decode 工作量。我们分别计时 encode、包含 syndrome 计算的 full decode，以及输入预计算 ECC difference 的 decode；这种分解能够观察去掉前段工作后，较短剩余路径是否更容易暴露适配成本。
+BCH 测试 Linux 5.15 scalar implementation，沿用作者 benchmark 的 m=13、t∈{4,8} 和 512-byte data 定义。两种 t 分别提供不同纠错能力，注入 0 到 t 个错误则改变实际 decode 工作量。我们分别计时 encode、full decode 和 decode-precomputed。Full decode 在计时内重新编码受损 payload，并与接收的 ECC 异或；precomputed 将这两步移至计时外，直接传入 ECC difference。两种路径在 difference 非零时均继续计算 syndromes、构造错误定位多项式并求根，返回错误位置。无错误时，full 在 ECC 比较后提前返回，precomputed 仍执行零 syndrome 的定位流程。位翻转和完整 codeword 恢复检查在计时外执行。
 
-Kernel-backed 与 same-source native 使用相同 adapted source；author standalone 用于展示跨实现差异。计时使用 CLOCK_PROCESS_CPUTIME_ID，每个样本自适应运行至少约 10 ms，以摊薄定时器读取成本；11 个 outer runs 形成配对 latency ratios。每组参数使用一个固定种子的 512-byte data payload，附加 parity 后形成 codeword；128 轮错误位置试验各自覆盖 0 到 t 个错误，分别验证 full/precomputed decode 的错误位置和完整 codeword recovery，所有检查及 DSO relocation/page-map audit 均通过。
+Kernel-backed 与 same-source native 使用相同 adapted source；author standalone 用于展示跨实现差异。计时使用 CLOCK_PROCESS_CPUTIME_ID，每个样本自适应运行至少约 10 ms，以摊薄定时器读取成本；11 个 outer runs 形成配对 latency ratios。同一轮、同一路径的三个 backend 使用相同错误向量；full 与 precomputed 的种子不同，因此跨路径的时间差不能作为配对的阶段成本。每组参数使用一个固定种子的 512-byte data payload，附加 parity 后形成 codeword；128 轮错误位置试验各自覆盖 0 到 t 个错误，分别验证 full/precomputed decode 的错误位置和完整 codeword recovery，所有检查及 DSO relocation/page-map audit 均通过。
 
 初始化成本单独计量，表中的 init 包含 BCH 控制结构及查找表的创建与随后释放，不包含 owner module 或 DSO 的部署时间。该行与 encode/decode 分列，以区分算法对象的建立/回收和后续调用成本。
 
@@ -504,7 +504,7 @@ Kernel-backed 与 same-source native 使用相同 adapted source；author standa
 | decode-precomputed | 7 | 2781.25 | 2953.63 | 1.065 | 1.061–1.078 | 1.095 |
 | decode-precomputed | 8 | 3620.21 | 3882.10 | 1.078 | 1.071–1.086 | 1.095 |
 
-表 10–11 将 initialization、encode 和两种 decode 路径分开呈现。Encode 接近同源 native；full decode 在 t=4 时略快，在 t=8 时慢约 0.3%–5.4%。较短的 precomputed path 对 t 更敏感：t=4 大多更快或接近，而 t=8 的 1–8 error cases 均变慢，配对增量约为 5.5%–20.9%，其中 2-error case 最大。该例在 11 轮中均较慢，各轮比值为 1.078–1.519。该变化并非所有 BCH 路径共有，但也不止一个孤立慢点。分阶段结果将需要进一步分析的成本定位到较强纠错配置的 precomputed decode，而不是整个初始化或编码流程。
+表 10–11 将 initialization、encode 和两种 decode 路径分开呈现。Encode 接近同源 native；full decode 在 t=4 时略快，在 t=8 时慢约 0.3%–5.4%。较短的 precomputed path 对 t 更敏感：t=4 大多更快或接近，而 t=8 的 1–8 error cases 均变慢，配对增量约为 5.5%–20.9%，其中 2-error case 最大。该例在 11 轮中均较慢，各轮比值为 1.078–1.519。对于两个有效错误，两种 t 均选择二次多项式求根分支；t=8 增加了 ECC 宽度、syndrome 数量和错误定位多项式构造的迭代上限，并不因此进入更高次数的求根分支。现有结果显示较强纠错配置下多个 precomputed case 退化，具体指令或布局原因尚未确定。
 
 另一次独立的 5.15.0-119 guest 会话重新构建完整 BCH owner 和两种普通 DSO，并通过实际导出器建立注册。原有功能矩阵在两种 t、各 128 轮错误位置试验、全部错误数、三个 backend 和两种 decode 路径上再次通过。单独 loader 进程确认三个 RX text 页与一个只读 rodata 页的 user/source PFN 一致；恢复后的四个新映射均使用不同于源页的 PFN，随后模块卸载成功。该[功能会话](../../test/evaluation/bch-functional-evidence.md)补充了新构建和物理共享的证据，没有增加表 10–11 的性能样本。
 

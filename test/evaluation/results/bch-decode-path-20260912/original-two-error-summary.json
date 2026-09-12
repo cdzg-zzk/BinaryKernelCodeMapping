@@ -1,0 +1,450 @@
+[
+  {
+    "m": 13,
+    "t": 4,
+    "errors": 2,
+    "operation": "decode-precomputed",
+    "median_paired_ratio": 0.9684943099873263,
+    "min_paired_ratio": 0.9286329272402702,
+    "max_paired_ratio": 0.9988514327892031,
+    "rounds_slower": 0,
+    "rounds": 11,
+    "paired": [
+      {
+        "outer": 0,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 289.51595292663455,
+          "kernel-native": 311.765762804711,
+          "author-standalone": 308.84769698130765
+        },
+        "vkso_over_native": 0.9286329272402702
+      },
+      {
+        "outer": 1,
+        "ns_per_op_from_integers": {
+          "kernel-native": 296.78622295261573,
+          "author-standalone": 309.07102000602094,
+          "kernel-vkso": 294.4028789946695
+        },
+        "vkso_over_native": 0.9919694926057038
+      },
+      {
+        "outer": 2,
+        "ns_per_op_from_integers": {
+          "author-standalone": 227.736445989217,
+          "kernel-vkso": 226.29361625421677,
+          "kernel-native": 233.65508079978088
+        },
+        "vkso_over_native": 0.9684943099873263
+      },
+      {
+        "outer": 3,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 262.02428347024437,
+          "kernel-native": 262.3255820323199,
+          "author-standalone": 258.2716275760147
+        },
+        "vkso_over_native": 0.9988514327892031
+      },
+      {
+        "outer": 4,
+        "ns_per_op_from_integers": {
+          "kernel-native": 301.0162969049575,
+          "author-standalone": 298.130901228824,
+          "kernel-vkso": 288.622099760513
+        },
+        "vkso_over_native": 0.9588254945932118
+      },
+      {
+        "outer": 5,
+        "ns_per_op_from_integers": {
+          "author-standalone": 246.9033087933441,
+          "kernel-vkso": 244.101897870368,
+          "kernel-native": 249.41763900301288
+        },
+        "vkso_over_native": 0.9786873889357093
+      },
+      {
+        "outer": 6,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 255.28529858625396,
+          "kernel-native": 268.8723363462065,
+          "author-standalone": 265.89501628397056
+        },
+        "vkso_over_native": 0.9494665834924068
+      },
+      {
+        "outer": 7,
+        "ns_per_op_from_integers": {
+          "kernel-native": 324.54272801972064,
+          "author-standalone": 318.2395796272476,
+          "kernel-vkso": 316.6285118327196
+        },
+        "vkso_over_native": 0.9756142550619094
+      },
+      {
+        "outer": 8,
+        "ns_per_op_from_integers": {
+          "author-standalone": 235.73663756534114,
+          "kernel-vkso": 235.78247881956068,
+          "kernel-native": 238.8241577649959
+        },
+        "vkso_over_native": 0.9872639394025279
+      },
+      {
+        "outer": 9,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 246.34766822032807,
+          "kernel-native": 256.80734045466994,
+          "author-standalone": 253.43777881168066
+        },
+        "vkso_over_native": 0.9592703533480651
+      },
+      {
+        "outer": 10,
+        "ns_per_op_from_integers": {
+          "kernel-native": 263.3743357984114,
+          "author-standalone": 263.719642026328,
+          "kernel-vkso": 253.10877346586665
+        },
+        "vkso_over_native": 0.9610229208498049
+      }
+    ]
+  },
+  {
+    "m": 13,
+    "t": 4,
+    "errors": 2,
+    "operation": "decode-full",
+    "median_paired_ratio": 0.9718467953822919,
+    "min_paired_ratio": 0.9629288499188625,
+    "max_paired_ratio": 0.9958490154822075,
+    "rounds_slower": 0,
+    "rounds": 11,
+    "paired": [
+      {
+        "outer": 0,
+        "ns_per_op_from_integers": {
+          "kernel-native": 1369.3107977326144,
+          "author-standalone": 1400.9797010012344,
+          "kernel-vkso": 1330.760310658811
+        },
+        "vkso_over_native": 0.9718467953822919
+      },
+      {
+        "outer": 1,
+        "ns_per_op_from_integers": {
+          "author-standalone": 1410.1507337813744,
+          "kernel-vkso": 1335.3485538296732,
+          "kernel-native": 1374.3260058067192
+        },
+        "vkso_over_native": 0.9716388602032117
+      },
+      {
+        "outer": 2,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 1336.141938939475,
+          "kernel-native": 1373.7710493571133,
+          "author-standalone": 1383.0619942394733
+        },
+        "vkso_over_native": 0.9726088925550967
+      },
+      {
+        "outer": 3,
+        "ns_per_op_from_integers": {
+          "kernel-native": 1350.4623254527858,
+          "author-standalone": 1381.729666712385,
+          "kernel-vkso": 1329.6905463310122
+        },
+        "vkso_over_native": 0.9846187644554918
+      },
+      {
+        "outer": 4,
+        "ns_per_op_from_integers": {
+          "author-standalone": 1389.3088739541902,
+          "kernel-vkso": 1352.1316282806642,
+          "kernel-native": 1396.1169639153877
+        },
+        "vkso_over_native": 0.9684945196057447
+      },
+      {
+        "outer": 5,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 1309.3872522763793,
+          "kernel-native": 1314.8451541545694,
+          "author-standalone": 1347.4663283500206
+        },
+        "vkso_over_native": 0.9958490154822075
+      },
+      {
+        "outer": 6,
+        "ns_per_op_from_integers": {
+          "kernel-native": 1313.831605143094,
+          "author-standalone": 1379.3394596077355,
+          "kernel-vkso": 1297.9844670594537
+        },
+        "vkso_over_native": 0.9879382273789079
+      },
+      {
+        "outer": 7,
+        "ns_per_op_from_integers": {
+          "author-standalone": 1346.4633109312852,
+          "kernel-vkso": 1303.2131762185325,
+          "kernel-native": 1338.5940826766212
+        },
+        "vkso_over_native": 0.9735686068570228
+      },
+      {
+        "outer": 8,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 1272.2971344402786,
+          "kernel-native": 1321.2784460113369,
+          "author-standalone": 1330.9732546975724
+        },
+        "vkso_over_native": 0.9629288499188625
+      },
+      {
+        "outer": 9,
+        "ns_per_op_from_integers": {
+          "kernel-native": 1380.7456103967925,
+          "author-standalone": 1377.6230969688656,
+          "kernel-vkso": 1334.1884038564542
+        },
+        "vkso_over_native": 0.966281112038474
+      },
+      {
+        "outer": 10,
+        "ns_per_op_from_integers": {
+          "author-standalone": 1371.122342614182,
+          "kernel-vkso": 1317.8790840921265,
+          "kernel-native": 1363.3861468270427
+        },
+        "vkso_over_native": 0.9666220293929031
+      }
+    ]
+  },
+  {
+    "m": 13,
+    "t": 8,
+    "errors": 2,
+    "operation": "decode-precomputed",
+    "median_paired_ratio": 1.2094962630250792,
+    "min_paired_ratio": 1.0777299838683503,
+    "max_paired_ratio": 1.5187206476836306,
+    "rounds_slower": 11,
+    "rounds": 11,
+    "paired": [
+      {
+        "outer": 0,
+        "ns_per_op_from_integers": {
+          "kernel-native": 606.1721354508466,
+          "author-standalone": 642.3400685420534,
+          "kernel-vkso": 683.2923207795221
+        },
+        "vkso_over_native": 1.1272248934229163
+      },
+      {
+        "outer": 1,
+        "ns_per_op_from_integers": {
+          "author-standalone": 546.0531200913894,
+          "kernel-vkso": 581.1422937127833,
+          "kernel-native": 510.8503740648379
+        },
+        "vkso_over_native": 1.1375978627335286
+      },
+      {
+        "outer": 2,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 838.0129920346454,
+          "kernel-native": 715.8720304501903,
+          "author-standalone": 717.1820648293589
+        },
+        "vkso_over_native": 1.1706184295364135
+      },
+      {
+        "outer": 3,
+        "ns_per_op_from_integers": {
+          "kernel-native": 615.1174038587741,
+          "author-standalone": 653.9598029415964,
+          "kernel-vkso": 793.5044466785245
+        },
+        "vkso_over_native": 1.290004870128348
+      },
+      {
+        "outer": 4,
+        "ns_per_op_from_integers": {
+          "author-standalone": 684.6758532057689,
+          "kernel-vkso": 799.8893357048952,
+          "kernel-native": 628.3149363433522
+        },
+        "vkso_over_native": 1.2730706997991585
+      },
+      {
+        "outer": 5,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 869.6421003789343,
+          "kernel-native": 719.0118125738286,
+          "author-standalone": 730.466657146937
+        },
+        "vkso_over_native": 1.2094962630250792
+      },
+      {
+        "outer": 6,
+        "ns_per_op_from_integers": {
+          "kernel-native": 735.8799054994093,
+          "author-standalone": 750.2136227331143,
+          "kernel-vkso": 862.1559817492847
+        },
+        "vkso_over_native": 1.171598755865167
+      },
+      {
+        "outer": 7,
+        "ns_per_op_from_integers": {
+          "author-standalone": 677.5114950735399,
+          "kernel-vkso": 851.9893279715412,
+          "kernel-native": 646.3592991206195
+        },
+        "vkso_over_native": 1.3181357940245992
+      },
+      {
+        "outer": 8,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 652.368107648287,
+          "kernel-native": 605.3168394802467,
+          "author-standalone": 630.6034556618592
+        },
+        "vkso_over_native": 1.0777299838683503
+      },
+      {
+        "outer": 9,
+        "ns_per_op_from_integers": {
+          "kernel-native": 624.0173907336921,
+          "author-standalone": 643.1205197772383,
+          "kernel-vkso": 761.0968989250638
+        },
+        "vkso_over_native": 1.219672576801425
+      },
+      {
+        "outer": 10,
+        "ns_per_op_from_integers": {
+          "author-standalone": 581.6595030701128,
+          "kernel-vkso": 837.8229061944165,
+          "kernel-native": 551.6636041475259
+        },
+        "vkso_over_native": 1.5187206476836306
+      }
+    ]
+  },
+  {
+    "m": 13,
+    "t": 8,
+    "errors": 2,
+    "operation": "decode-full",
+    "median_paired_ratio": 1.0385531229466196,
+    "min_paired_ratio": 1.0254559504808238,
+    "max_paired_ratio": 1.0883336967175898,
+    "rounds_slower": 11,
+    "rounds": 11,
+    "paired": [
+      {
+        "outer": 0,
+        "ns_per_op_from_integers": {
+          "author-standalone": 1933.2858610768599,
+          "kernel-vkso": 1735.509040590406,
+          "kernel-native": 1684.5987708516243
+        },
+        "vkso_over_native": 1.030221006105237
+      },
+      {
+        "outer": 1,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 1870.2990774907748,
+          "kernel-native": 1782.9139596136963,
+          "author-standalone": 2052.414303329223
+        },
+        "vkso_over_native": 1.0490125266033659
+      },
+      {
+        "outer": 2,
+        "ns_per_op_from_integers": {
+          "kernel-native": 1655.5431079894645,
+          "author-standalone": 1876.952938758734,
+          "kernel-vkso": 1697.6865313653136
+        },
+        "vkso_over_native": 1.0254559504808238
+      },
+      {
+        "outer": 3,
+        "ns_per_op_from_integers": {
+          "author-standalone": 1991.6613234689682,
+          "kernel-vkso": 1838.1669741697417,
+          "kernel-native": 1764.044776119403
+        },
+        "vkso_over_native": 1.0420183200867468
+      },
+      {
+        "outer": 4,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 1953.4911439114392,
+          "kernel-native": 1794.937664618086,
+          "author-standalone": 2077.8563501849567
+        },
+        "vkso_over_native": 1.0883336967175898
+      },
+      {
+        "outer": 5,
+        "ns_per_op_from_integers": {
+          "kernel-native": 1761.3381913959613,
+          "author-standalone": 1978.1750924784217,
+          "kernel-vkso": 1866.4684501845018
+        },
+        "vkso_over_native": 1.05968771886177
+      },
+      {
+        "outer": 6,
+        "ns_per_op_from_integers": {
+          "author-standalone": 1918.726469379367,
+          "kernel-vkso": 1711.7736162361623,
+          "kernel-native": 1664.5079894644425
+        },
+        "vkso_over_native": 1.028396154942415
+      },
+      {
+        "outer": 7,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 1944.521033210332,
+          "kernel-native": 1837.5402985074627,
+          "author-standalone": 2076.9017673653925
+        },
+        "vkso_over_native": 1.0582195311796776
+      },
+      {
+        "outer": 8,
+        "ns_per_op_from_integers": {
+          "kernel-native": 1737.1720807726076,
+          "author-standalone": 2025.372174270448,
+          "kernel-vkso": 1798.2453874538746
+        },
+        "vkso_over_native": 1.0351567397134915
+      },
+      {
+        "outer": 9,
+        "ns_per_op_from_integers": {
+          "author-standalone": 1951.9344430743938,
+          "kernel-vkso": 1740.2929889298894,
+          "kernel-native": 1693.1195785776997
+        },
+        "vkso_over_native": 1.0278618302859728
+      },
+      {
+        "outer": 10,
+        "ns_per_op_from_integers": {
+          "kernel-vkso": 1743.877859778598,
+          "kernel-native": 1679.1417032484635,
+          "author-standalone": 1940.7708590217837
+        },
+        "vkso_over_native": 1.0385531229466196
+      }
+    ]
+  }
+]
