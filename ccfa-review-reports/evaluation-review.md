@@ -12,7 +12,7 @@
 | B：页面复用与装载 | 多进程 PFN、只读/COW、非特权文件操作及正常释放已观察；另复现部分失败仍 ready、内核错误未传回 manager | 实际闭包的时间/资源账本及剩余边界；[统一注册修订方案](../test/evaluation/proposals/registration-transactions.md)待审阅，未实施 |
 | C：PGOT 与真实算法 | 已核实三算法的部署/进程/轮次关系，修正报告生成器，复算 BCH 对照点；完整部署采集入口已准备 | Clocktime 结束后执行完整部署重复，分析 BCH 及实际 owner 内核成本 |
 | D：适用范围与导出工具 | 固定 8 例的原分析器正在执行；前三例已落盘，hex_dump_to_buffer 仍在展开依赖；缓存方案未获确认、未应用 | 完成固定全集，导入既有适配证据，完成分类与可运行性验证 |
-| E：真实应用集成 | 完整 CLI 已编译；普通 upstream/同源 DSO 在全 Silesia、两块大小的 48 个功能案例通过 | 验证真实 registered carrier，再在 C 的注册会话内采集应用结果 |
+| E：真实应用集成 | 普通 upstream/同源 DSO 的全 Silesia 功能案例通过；精确 119 guest 中四页真实注册 PFN 匹配，但首次 CLI 压缩出现 SIGSEGV，正在定位 | 解决真实注册后的完整 CLI 调用问题，再执行全矩阵及 C 会话内应用测量 |
 | F：论文与结果呈现 | 已修正算法重复单位，并用完整 Normal 跨启动数据更新 Clocktime 正文及摘要/结论 | 随 B–E 的实际结果继续更新，再做全文一致性验收 |
 
 **自动接续的实际终态（2026-09-12）：** 此前启用的 `vkso-evaluation-followup.service` 在 Clocktime 完成后的原内核启动中触发，已完成覆盖核验及全部 15 个 UPDATE 方法目录的 writer 原始记录审计。随后 `algorithm-and-cli-deployments` 在开始构建/部署之前的 `git diff HEAD` 源码归档步骤失败（exit 129）；算法部署和后续 D 检查没有执行。服务按设计在进入时停用，目前 `ActiveState=failed`、`MainPID=0`、`UnitFileState=disabled`，不会在下次启动自动重试。失败日志和原输出目录保留，详见[接续记录](../test/evaluation/FOLLOWUP.md)。
@@ -220,6 +220,8 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 本类完成时：候选分母固定且失败项不丢失；语义不适合与工具暂不支持分开；静态检查、carrier 构造、实际运行分别记录；每个成功目标列出 closure/页数、绑定、编译限制和真实人工改造量。C 类已有适配证据直接导入，Clocktime 既有结构性重构与本轮仅新增测量工具分开记录。候选失败先归类并保留；涉及导出器等基础功能修改时先报告原因，不把修复全部失败候选或全候选性能重测作为本类默认任务。
 
 **E 类：真实应用集成。**
+
+**真实 registered carrier 验证进展（2026-09-12）：** 已从公开 Ubuntu 包取得与算法环境一致的 `5.15.0-119-generic=5.15.0-119.129` 镜像，在无网络、无共享 host 目录的私有 guest 中重建实际运行地址对应的 KRG、执行原静态检查、构造完整 sparse DSO 并注册 LZ4 owner。前期 guest 准备和观测工具错误均保留为独立尝试，未计作算法结果。第五次尝试使用逐页 fault 后的新鲜 pagemap 读取，确认三个 text 页和一个 rodata 页的 kernel/user PFN 全部相同；随后完整 CLI 的 dickens/64 KiB 首次压缩以 SIGSEGV 退出，尚无完整压缩/解压组合通过。恢复后四个文件偏移均已不再指向源 PFN，再完成模块卸载。正在核对实际 owner 构建、直接 helper 调用及最终载入布局；尚未修改基础 exporter 或归因为算法性能问题。该次记录位于 `test/evaluation/results/lz4-cli-qemu-20260912-attempt05/`，未形成新应用性能数据。
 
 **实际验证更新（2026-09-12）：** 完整 stock/adapted CLI 编译通过；使用 upstream-default 与实际 Linux-source no-SIMD 普通用户 DSO，在全 12 个 Silesia 输入、64 KiB/1 MiB 两种块大小的 48 个案例中验证了真实 API 调用、目标 DSO、公共 stock 压缩输入的解码及 stock 对 adapted 输出的交叉解码，完整输出均匹配。这些是功能验证，不产生正式吞吐结论。Live registered carrier 和 C 的完整部署仍待执行，详见 [LZ4 CLI 验证记录](../test/evaluation/lz4-cli/README.md#build-and-ordinary-dso-validation--2026-09-12)。
 
