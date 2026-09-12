@@ -35,8 +35,8 @@ the later permitted construction/validation, not from estimates in this table.
 The driver invokes the complete existing checker once per fixed entry, using
 the configured Shim list with the requested entry itself removed from that
 list. It records pass/fail/incomplete, visited functions, static references,
-indirect sites, instrumentation, hard failures and missing/unanalysable functions
-separately. A visited-function count describes this checker traversal with
+indirect sites, instrumentation, hard failures, missing symbols and unanalysable
+records separately. A visited-function count describes this checker traversal with
 those Shim boundaries; it is not automatically the final exported closure size.
 
 The current unprivileged process can read symbol names from `/proc/kallsyms`,
@@ -54,16 +54,75 @@ are not an observation of the booted kernel's final PTE permissions. Source
 read-only tables, static ELF flags and live mapping permissions are distinct
 fields; do not infer live writable mappings from this label.
 
-Early complete records show `xxh32` checker PASS and `crc32_le` rejection of
-an absolute table address. The latter is a build/address-representation obstacle,
-not evidence that its lookup table is semantically private mutable state.
-All remaining outcomes must be taken from the completed eight-case result set.
-No checker or exporter code was changed to turn a rejection into a success.
+## Terminal records captured at 08:02 UTC
+
+The read-only capture at **2026-09-12 08:02:43 UTC** contains six completed
+candidates: two checker PASS and four checker FAIL. Controller PID 14474 was
+still live; its current child PID 172137 was checking the seventh candidate,
+`rhashtable_insert_slow`. `get_random_bytes` had no log or terminal record yet.
+The former `hex_dump_to_buffer` child PID 15248 had exited and left a complete
+FAIL manifest. The eight-case campaign was therefore still in progress.
+
+| Candidate | Captured checker state | Visited functions | Static-reference records | Indirect sites | Instrumentation sites | Hard-failure records | Unanalysable records |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `xxh32` | PASS | 1 | 0 | 0 | 0 | 0 | 0 |
+| `crc32_le` | FAIL | 2 | 1 | 0 | 0 | 1 | 0 |
+| `sha256` | FAIL | 5 | 18 | 0 | 14 | 18 | 0 |
+| `hex_dump_to_buffer` | FAIL | 1,834 | 6,405 | 408 | 2,230 | 3,542 | 716 |
+| `string_escape_mem` | FAIL | 2 | 4 | 0 | 0 | 4 | 0 |
+| `sort` | PASS | 3 | 0 | 5 | 0 | 0 | 0 |
+| `rhashtable_insert_slow` | running | — | — | — | — | — | — |
+| `get_random_bytes` | not started | — | — | — | — | — | — |
+
+All six completed records report zero missing symbols. Terminal manifest
+counts and exit codes were independently compared with each candidate's
+`result.json` and the campaign `results.json`; all matched. None of these
+prospective candidates has a carrier or runtime result in this batch. Pending
+cells are not zeros and do not enter a completed-case success denominator.
+
+The newly completed records refine the semantic reading as follows:
+
+- **`hex_dump_to_buffer`: rejection of the current static dependency expansion.**
+  The terminal manifest contains 3,537 absolute-address records and five
+  privileged-instruction/control-register records. It also records 716 failures
+  to resolve a function from a section offset, across **347 distinct function
+  names**. The checker labels that field “unanalysable functions” but appends
+  one entry per diagnostic; it is not a count of 716 different functions.
+  Because hard failures are present, the exit policy reports FAIL even though
+  analysis gaps also remain. The earlier 44-edge formatter/warning ancestry
+  below explains the observed expansion, without proving that a normal hex
+  formatting call executes those kernel service paths. This is not a semantic
+  conclusion that caller-owned formatting inherently requires private kernel
+  state, nor a completed export of 1,834 functions.
+- **`string_escape_mem`: address representation of table dependencies.** The
+  two visited functions are `string_escape_mem` and `strchr`. The four hard
+  failures are all absolute-address references in the requested entry: `_ctype`
+  at `+0xb8`, `.rodata+0x83860` at `+0x1a9`, and `hex_asc` at `+0x1f9` and
+  `+0x211`. No privileged instruction, indirect site or instrumentation site
+  is reported in this small closure. As with `crc32_le`, the rejection concerns
+  this build's addressing and binding, rather than proving that a lookup table
+  is semantically private mutable state. The existing distinction between ELF
+  section flags and live page permissions still applies.
+- **`sort`: checker PASS with callback work remaining.** The traversal visits
+  `sort`, `sort_r` and `do_swap`. Its five indirect sites are retpoline-wrapped
+  calls: four in `sort_r` (`+0x8e`, `+0xbc`, `+0xfa`, `+0x140`) and one in
+  `do_swap` (`+0x15`). `generate_report()` chooses PASS when hard failures,
+  missing symbols and unanalysable records are absent; indirect sites and
+  instrumentation are reported separately and do not determine that exit code.
+  This PASS therefore retains the need to establish callback bindings and
+  final control targets, followed by actual carrier and complete-API validation.
+
+The [terminal evidence snapshot](results/applicability-terminal-20260912/README.md)
+contains the six candidate records, all small raw logs, the large hex log's
+numbered summary/diagnostic/verdict excerpts, the audit script, and the checker
+source lines defining diagnostic counts and verdict precedence. The original
+5,159,573-byte hex log remains in the campaign directory. No checker or exporter
+code, candidate, original log or running process was changed for this audit.
 
 ## Observed expansion of the fourth candidate
 
-A read-only snapshot at **2026-09-12 06:56:34 UTC** explains why the ongoing
-`hex_dump_to_buffer` check has reached functions outside formatting. At capture,
+A read-only snapshot at **2026-09-12 06:56:34 UTC** explains why the then-running
+`hex_dump_to_buffer` check had reached functions outside formatting. At capture,
 controller PID 14474 and checker PID 15248 were live, and the campaign result
 file contained only the first three completed candidates. The snapshot contained
 1,608 first-enqueue events and 1,578 analysis-entry events; its last analysis

@@ -1,0 +1,85 @@
+{
+  "captured_utc": "2026-09-12T08:02:43.312212+00:00",
+  "atomic_snapshot": false,
+  "child_commands": [
+    {
+      "pid": 172137,
+      "argv": [
+        "/usr/bin/python3",
+        "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/function_checker/functions_checker.py",
+        "-t",
+        "rhashtable_insert_slow",
+        "-v",
+        "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic",
+        "-s",
+        "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/rhashtable_insert_slow/effective-shim.txt"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "xxh32",
+      "state": "checker_pass",
+      "terminal_result_file_exists": true,
+      "log_exists": true,
+      "runtime": "not_attempted",
+      "allow_carrier_attempt": true
+    },
+    {
+      "id": "crc32_le",
+      "state": "checker_fail",
+      "terminal_result_file_exists": true,
+      "log_exists": true,
+      "runtime": "not_attempted",
+      "allow_carrier_attempt": true
+    },
+    {
+      "id": "sha256",
+      "state": "checker_fail",
+      "terminal_result_file_exists": true,
+      "log_exists": true,
+      "runtime": "not_attempted",
+      "allow_carrier_attempt": true
+    },
+    {
+      "id": "hex_dump_to_buffer",
+      "state": "checker_fail",
+      "terminal_result_file_exists": true,
+      "log_exists": true,
+      "runtime": "not_attempted",
+      "allow_carrier_attempt": true
+    },
+    {
+      "id": "string_escape_mem",
+      "state": "checker_fail",
+      "terminal_result_file_exists": true,
+      "log_exists": true,
+      "runtime": "not_attempted",
+      "allow_carrier_attempt": true
+    },
+    {
+      "id": "sort",
+      "state": "checker_pass",
+      "terminal_result_file_exists": true,
+      "log_exists": true,
+      "runtime": "not_attempted",
+      "allow_carrier_attempt": true
+    },
+    {
+      "id": "rhashtable_insert_slow",
+      "state": "running",
+      "terminal_result_file_exists": false,
+      "log_exists": true,
+      "runtime": "not_attempted",
+      "allow_carrier_attempt": false
+    },
+    {
+      "id": "get_random_bytes",
+      "state": "not_started",
+      "terminal_result_file_exists": false,
+      "log_exists": false,
+      "runtime": "not_attempted",
+      "allow_carrier_attempt": false
+    }
+  ]
+}

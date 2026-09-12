@@ -1,0 +1,37 @@
+218:     def _record_unanalyzable(self, owner_elf, func_name, reason, detail=''):
+219:         entry = {
+220:             'mod': owner_elf.name,
+221:             'func': func_name,
+222:             'reason': reason,
+223:             'detail': detail,
+224:         }
+225:         self.unanalyzable_funcs.append(entry)
+226:         suffix = f' ({detail})' if detail else ''
+227:         self._warn(f'函数无法继续分析: {owner_elf.name}:{func_name} -> {reason}{suffix}')
+710:     def generate_report(self):
+711:         print(f'\n{C.BOLD}{C.BLUE}========================================================================{C.RESET}')
+712:         print(f'{C.BOLD}{C.BLUE}====================== FINAL REUSE MANIFEST =========================={C.RESET}')
+713:         print(f'{C.BOLD}{C.BLUE}========================================================================{C.RESET}\n')
+714: 
+715:         print(f'{C.BOLD}[摘要]{C.RESET}')
+716:         print(f'  - 已访问函数: {len(self.visited)}')
+717:         print(f'  - Shim 命中数: {sum(len(v) for v in self.shim_hits.values())}')
+718:         print(f'  - 静态数据/地址引用数: {len(self.static_refs)}')
+719:         print(f'  - 间接控制流命中数: {len(self.manifest_got)}')
+720:         print(f'  - 编译器插桩命中数: {len(self.manifest_instrumentation)}')
+721:         print(f'  - 致命失败数: {len(self.hard_fails)}')
+722:         print(f'  - 丢失符号数: {len(self.missing_deps)}')
+723:         print(f'  - 不可分析函数数: {len(self.unanalyzable_funcs)}\n')
+801:         if self.hard_fails:
+802:             exit_code = 1
+803:             verdict = f'{C.RED}FAIL{C.RESET}'
+804:         elif self.missing_deps or self.unanalyzable_funcs:
+805:             exit_code = 2
+806:             verdict = f'{C.YELLOW}INCOMPLETE{C.RESET}'
+807:         else:
+808:             exit_code = 0
+809:             verdict = f'{C.GREEN}PASS{C.RESET}'
+810: 
+811:         print(f'\n{C.BOLD}[最终结论]{C.RESET} {verdict} (exit code: {exit_code})')
+812:         print(f'{C.BOLD}{C.BLUE}=========================== 报告结束 ==========================={C.RESET}')
+813:         return exit_code

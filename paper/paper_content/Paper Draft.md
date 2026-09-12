@@ -757,6 +757,18 @@ VKSO/Copy 的成功 snapshot 约为 45.158 cycles，Raw 约为 43.151。Hres ret
 
 完整 owner core 为 24 KiB，其中四页用于共享、两页用于其他 core 内容；page-cache 模块 core 为 48 KiB，PFN observer 为 16 KiB。活动 manager 的 VmRSS 为 1,216 KiB、PSS 为 1,212 KiB、VmPTE 为 28 KiB。Loader 的 VmPTE 为 88–100 KiB，本次布局中装载前后的增量为零，反映已有页表分配粒度。这些进程指标与库的 PFN 并集可能重叠，故分别呈现。模块外分配、BCH 工作对象和完整 allocator/slab 成本尚未归入表 22；本组报告明确范围内的驻留成本，不推定全系统净节省。原始记录与重建步骤见[BCH 资源证据](../../test/evaluation/results/bch_resource-qemu-20260912-attempt03/README.md)。
 
+我们在另一 exact119 guest 中补充观测 BCH 的活动对象。每个进程使用一个后端，同时保留 m=13、t=4/8 的两个 control 和对应的 512 B payload 加 parity；依次建立、验证并释放一个 full-decode context。观测复用原 benchmark 的 C 分配和校验函数，原有完整三后端正确性矩阵在同一注册会话中另行通过。普通 DSO 与 registered carrier 的分配请求量相同：两个 control 及其持久表分别请求 41,448 B 和 49,896 B，表 23 给出同时存活的对象总量。
+
+**Table 23: Live BCH allocation requests per process, identical for the native DSO and registered carrier.** Both parameter cases remain initialized; at most one decode context is live. Bytes exclude allocator metadata and initialization temporaries already freed before observation.
+
+| 活动状态 | 分配对象数 | Control 及持久表 (B) | Codeword 与工作缓冲区 (B) | 合计 (B) |
+| --- | ---: | ---: | ---: | ---: |
+| 两个参数组初始化完成 | 30 | 91,344 | 1,044 | 92,388 |
+| t=4 full-decode context 存活 | 33 | 91,344 | 1,586 | 92,930 |
+| t=8 full-decode context 存活 | 33 | 91,344 | 1,614 | 92,958 |
+
+三个角色下的 1/4/16 个同时存活进程均得到相同的每进程请求量。由对象地址区间重建的 PFN 集合显示，control 覆盖页在同组进程之间没有共享，而 control 与工作缓冲区可能共页。因此，共享执行页没有消除这些随进程数增加的活动对象；物理覆盖需按 PFN 求并集。覆盖页也可能包含其他分配，不能作为 BCH 独占成本，完整 allocator/slab 计费和短暂分配峰值仍需另行测量。原始快照、分配清单和重建结果见[BCH 活动对象证据](../../test/evaluation/bch-heap-evidence.md)。
+
 ## Application Integration
 
 我们进一步将 Linux LZ4 接入完整 upstream 1.9.3 CLI，保留 frame processing、checksum、内存分配和文件 I/O。工作负载为全部 12 个 Silesia 文件，使用 64 KiB 与 1 MiB independent blocks，分别执行压缩和解压。普通 upstream DSO 与同源 Linux DSO 的 48 个 input/block/backend 组合均通过完整输出与 stock CLI 交叉解码检查，调用记录确认执行了所选 DSO 的接口。
@@ -771,7 +783,7 @@ First-touch、PGOT、LZ4、BCH 和 XZ 均提供单命令入口，正式参数和
 
 表 3–8 来自 first-touch 汇总及 PGOT 各层的 paper tables；表 9–12 来自 LZ4、BCH 的配对结果及 XZ 的正式解码结果；表 13–14 来自 clocktime 的完整代码规模审计；表 15–20 来自 Normal 20-boot campaign 及[三方法结果报告](../../test/test_gettime/vkso-tests/revision/NORMAL_RESULTS.md)。历史 no-retpoline 单启动诊断按原归档身份保留。配对比值与差值直接沿用对应统计字段，不从已舍入的两侧中位数反推。复现时按各 README 的正式参数重新建立 owner module、Stub DSO 和页面映射，保留 closure checks，再生成相同口径的统计。
 
-表 21 来自[注册与恢复记录](../../test/evaluation/registration-evidence.md)，表 22 来自[BCH 多进程资源记录](../../test/evaluation/results/bch_resource-qemu-20260912-attempt03/README.md)。新增 BCH/XZ 功能、BCH 内核端对照和 LZ4 应用诊断分别保留实际输入、构建和完整输出检查；这些验证与表 9–12 的旧性能部署分开归档，未合并为新的性能重复。
+表 21 来自[注册与恢复记录](../../test/evaluation/registration-evidence.md)，表 22 来自[BCH 多进程资源记录](../../test/evaluation/results/bch_resource-qemu-20260912-attempt03/README.md)，表 23 来自[BCH 活动对象记录](../../test/evaluation/bch-heap-evidence.md)。新增 BCH/XZ 功能、BCH 内核端对照和 LZ4 应用诊断分别保留实际输入、构建和完整输出检查；这些验证与表 9–12 的旧性能部署分开归档，未合并为新的性能重复。
 
 # Related Work
 

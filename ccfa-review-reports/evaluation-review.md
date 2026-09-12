@@ -9,11 +9,11 @@
 | 工作组 | 本轮进展 | 下一步具体交付 |
 | --- | --- | --- |
 | A：Clocktime | 20 次采集、全量原始记录核验、三方法结果报告及正文更新已完成 | 保留 writer 不确定性；如需解释其原因，另定诊断，不追逐有利重复 |
-| B：页面复用与装载 | 已验证映射/释放及部分失败问题；BCH 63 个 loader 的 PFN、完整 owner core 与支持页账本完成，所测范围未显示净节省 | 完整 setup、工作堆/allocator 归因及剩余边界；[统一注册修订方案](../test/evaluation/proposals/registration-transactions.md)待审阅，未实施 |
+| B：页面复用与装载 | 已验证映射/释放及部分失败问题；完成 BCH 库/owner 页账本及 63 个 loader 的活动对象字节和 PFN 覆盖核算 | 完整 setup、allocator/slab 与瞬时分配峰值、剩余边界；[统一注册修订方案](../test/evaluation/proposals/registration-transactions.md)待审阅，未实施 |
 | C：PGOT 与真实算法 | 已核实重复层次及 BCH decode 边界；BCH/XZ 完整导出功能与 PFN 通过；BCH 内核端三后端的完整功能和计时采集入口通过 | 完整部署重复、BCH 退化的指令/布局原因及实际 owner 的物理机内核成本；核实 LZ4 实际 helper 路径 |
-| D：适用范围与导出工具 | 固定 8 例的原分析器正在执行；前三例已落盘，hex_dump_to_buffer 仍在展开依赖；缓存方案未获确认、未应用 | 完成固定全集，导入既有适配证据，完成分类与可运行性验证 |
+| D：适用范围与导出工具 | 原分析器已完成 6/8：2 PASS、4 FAIL；第 7 例执行中；sort PASS 仍含五个间接点，尚无 runtime 结果 | 完成固定全集，导入既有适配证据，完成分类与可运行性验证；缓存及导出修订未应用 |
 | E：真实应用集成 | 普通 upstream/同源 DSO 全 Silesia 功能案例通过；真实注册的四页 PFN 匹配；首次 CLI 压缩因未绑定的直接 helper 调用崩溃，GDB 已确认 | 审阅基础导出器方案并完成实际绑定，再验证全矩阵及采集 C 会话内应用性能 |
-| F：论文与结果呈现 | 已更新 Clocktime、注册行为表 21、BCH 资源表 22、BCH/XZ 功能证据及 LZ4 应用失败；修正 helper 身份与静态分析能力断言 | 随 B–E 的剩余结果继续更新，再做全文一致性验收 |
+| F：论文与结果呈现 | 已更新 Clocktime、注册行为表 21、BCH 资源表 22 与活动对象表 23、BCH/XZ 功能证据及 LZ4 应用失败；修正 helper 身份与静态分析能力断言 | 随 B–E 的剩余结果继续更新，再做全文一致性验收 |
 
 **自动接续的实际终态（2026-09-12）：** 此前启用的 `vkso-evaluation-followup.service` 在 Clocktime 完成后的原内核启动中触发，已完成覆盖核验及全部 15 个 UPDATE 方法目录的 writer 原始记录审计。随后 `algorithm-and-cli-deployments` 在开始构建/部署之前的 `git diff HEAD` 源码归档步骤失败（exit 129）；算法部署和后续 D 检查没有执行。服务按设计在进入时停用，目前 `ActiveState=failed`、`MainPID=0`、`UnitFileState=disabled`，不会在下次启动自动重试。失败日志和原输出目录保留，详见[接续记录](../test/evaluation/FOLLOWUP.md)。
 
@@ -143,6 +143,10 @@ Clocktime 的声明闭包运行时 PFN 检查已经补入 A；B 应复用其方�
 
 完整 owner core 六页/24 KiB、observer 四页/16 KiB、page-cache 模块十二页/48 KiB，所有 core 页均观测到，且注册前后至卸载前保持相同 PFN。范围以实际 coresize 为准，精确 119 debug ELF 已核实 `/proc/modules` 的总大小还含 init size，不能用它猜测连续的 core+init 区间。活动 manager 的 VmRSS 1,216 KiB、PSS 1,212 KiB、VmPTE 28 KiB 单列，不与库页盲目相加。Loader 本次 VmPTE 增量为零，但绝对值为 88–100 KiB。此观测尚未归因 BCH control objects、工作负载堆、模块外分配和完整 allocator/slab 成本；人工预加载专用 owner 也不证明实际内核需要它。B 的全系统净计费、完整 setup 和生命周期修订仍未完成。
 
+**BCH 活动对象核算已补齐（2026-09-12）：** 新的 exact119 私有 guest 沿用三个角色及 1/4/16 个同时存活 loader，每进程使用一个完整后端，保留 m13/t4、t8 两个 control 和 codeword，一次只保留一个原 benchmark 的 full-decode context。复用原 C 分配、错误向量及完整输出/位置校验函数，没有修改算法、owner 或注册工具；原三后端全量正确性矩阵在同一注册会话中另行通过。63 个 loader、九阶段的 567 份原始快照重放通过；真实 ELF、源身份、API 地址及完整 owner core 另行核对。两个参数组的 control 及持久表分别请求 41,448/49,896 B；加两个 codeword 后为 92,388 B，t4/t8 context 存活时为 92,930/92,958 B，普通 DSO 与 VKSO 一致。正文新增表 23，见[活动对象证据](../test/evaluation/bch-heap-evidence.md)。
+
+该观测同时保留 requested/allocator-usable 字节以及两种区间的 PFN 覆盖。Control 覆盖页在同组进程之间均不同，control 与工作缓冲区又存在同页重叠，因此按 PFN 求并集，不能由对象字节数直接向上取整或逐项加页数。普通 DSO 与 VKSO 的覆盖页数还受此次 Python/C 观测进程的分配布局影响，覆盖页可能包含其他对象；不把该差异当成 BCH 独占成本或全系统净收益。释放后不再解引用旧地址，进程页数变化也不单独归因 BCH。此项补充活动对象账本，初始化时已释放的临时分配、峰值、allocator 元数据、模块外/slab 成本和 B 的其余要求仍保留。
+
 结果表字段：`target / native unique pages / VKSO unique pages / shared PFN matches / private bytes or pages / incremental pinned pages / net difference`。无法干净分离的通用基础设施开销单列，而非隐去。跨进程的普通 DSO 本来可以共享文件后备，因此不能将用户 text 节省按进程数线性相乘；还应允许私有支持页随进程数量增长，使小闭包的净收益为零或负。
 
 先前草稿的 Registering Resident Backing 声称 module/page references 维护 lifetime，Threat Model and Security Boundary 又将普通进程的 mmap/mprotect/文件操作列入威胁模型。这是需要补证据的明确契约边界。正常退出时先停止 benchmark、再恢复映射和卸载模块，不等于活跃使用者仍在访问时的 lifetime 保证；当前正文已按下述源码和隔离观察校正，B 的完整要求仍保留。
@@ -226,6 +230,8 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 **分析器性能方案待确认：** hex_dump_to_buffer 的未裁剪检查已超过 30 分钟，源码定位到直接目标查询反复解析整个 ELF 符号表。[缓存补丁方案](../test/evaluation/proposals/README.md)已准备并通过边界/实际镜像查询对照，尚未应用；已向用户请求允许这项基础分析器调整。保持符号顺序、首匹配及全部判定规则，若获准将保留原记录并在新目录重检固定八例。等待答复期间，原分析器继续运行，不以超时或删减候选替代完整检查。
 
 **第 4 例依赖展开已解释（2026-09-12 06:56 UTC）：** 对原进程日志的只读快照恢复了 `hex_dump_to_buffer → snprintf → vsnprintf → format_decode → __warn_printk → vprintk`，继而沿调度、错误处理、回收及 swap/discard 扩展到 `blkg_create` 的 44 条首次入队祖先边。精确 119 ELF 的八条关键边核对确认，入口传入固定格式，而后续包含通用格式警告和调度器损坏检查分支。分析器逐条扫描整个函数、不按调用参数专化；已在 vmlinux 中定义的 `vprintk` 也不会被仅对 undefined symbol 生效的 Shim 规则截断。这解释了静态依赖规模的扩张，不说明这些分支在同一次运行中可达，也不是第 4 例的最终结果。见[原始摘录与独立重建](../test/evaluation/results/applicability-path-20260912/README.md)。原检查继续运行，固定八例、源码和 Shim 未改。
+
+**后续终态更新（2026-09-12 08:02 UTC）：** 原检查已完成六例。新增 `hex_dump_to_buffer` FAIL，访问 1,834 个函数，记录 3,537 条绝对地址和五条特权/控制寄存器问题；其 716 条不可分析记录涉及 347 个不同函数，不能按原字段标签误写为 716 个函数。`string_escape_mem` 因四处绝对地址引用 FAIL，`sort` 为 checker PASS，但仍记录五个 retpoline 包装的间接点。当前共 2 PASS/4 FAIL，第七例 `rhashtable_insert_slow` 执行中，最后一例尚未开始；不将未完成候选计为失败或从分母删除。全部候选尚无本批 carrier/runtime 结果。见[六例记录和计数核对](../test/evaluation/results/applicability-terminal-20260912/README.md)。未停止、重启或修改原检查。
 
 **执行更新（2026-09-12）：** 已启动固定 8 个 API 的普通账户顺序静态检查，输出 `test/evaluation/results/applicability-static-20260912/`；xxh32、crc32_le、sha256 的结果已落盘，完整矩阵仍在执行。[语义核查记录](../test/evaluation/applicability-semantics.md)已区分八例的 caller-owned state、只读依赖、callback 与 kernel-private state。当前 `/proc/kallsyms` 地址均被屏蔽为零，checker 的 runtime 展示列不可用；源码确认其只影响地址展示，静态判定仍使用配置 ELF。该 ELF 的 `.rodata` 带 WA 标志，不能把 checker 的 WRITABLE 标签当作内核运行时可写证据。未构造/注册 carrier，也未改变 checker 或访问限制。
 

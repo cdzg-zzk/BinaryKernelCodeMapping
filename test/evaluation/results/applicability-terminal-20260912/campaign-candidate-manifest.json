@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "frozen_date_utc": "2026-09-11",
+  "selection": "eight prospective API cases chosen by dependency/state shape, plus four explicitly retrospective existing integrations",
+  "inference_scope": "stratified case study; not random sampling or an estimate of the fraction of Linux that is reusable",
+  "prospective_kernel": "5.15.0-119-generic",
+  "prospective_vmlinux": "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic",
+  "source_reading_root": "/usr/src/linux-source-5.15.0/linux-source-5.15.0",
+  "source_scope": "Linux 5.15 source is used for semantic reading; the configured final vmlinux governs machine-code export decisions",
+  "cases": [
+    {
+      "id": "xxh32",
+      "cohort": "prospective",
+      "entrypoints": [
+        "xxh32"
+      ],
+      "source_path": "lib/xxhash.c",
+      "selection_reason": "buffer computation with explicit scalar seed",
+      "build": "5.15.0-119-generic/default",
+      "static_check": "not_attempted",
+      "carrier": "not_attempted",
+      "runtime": "not_attempted",
+      "semantic_classification": "pending_source_review",
+      "allow_carrier_attempt": true
+    },
+    {
+      "id": "crc32_le",
+      "cohort": "prospective",
+      "entrypoints": [
+        "crc32_le"
+      ],
+      "source_path": "lib/crc32.c",
+      "selection_reason": "buffer computation with read-only lookup tables",
+      "build": "5.15.0-119-generic/default",
+      "static_check": "not_attempted",
+      "carrier": "not_attempted",
+      "runtime": "not_attempted",
+      "semantic_classification": "pending_source_review",
+      "allow_carrier_attempt": true
+    },
+    {
+      "id": "sha256",
+      "cohort": "prospective",
+      "entrypoints": [
+        "sha256"
+      ],
+      "source_path": "lib/crypto/sha256.c",
+      "selection_reason": "complete digest with internal transform and temporary caller data",
+      "build": "5.15.0-119-generic/default",
+      "static_check": "not_attempted",
+      "carrier": "not_attempted",
+      "runtime": "not_attempted",
+      "semantic_classification": "pending_source_review",
+      "allow_carrier_attempt": true
+    },
+    {
+      "id": "hex_dump_to_buffer",
+      "cohort": "prospective",
+      "entrypoints": [
+        "hex_dump_to_buffer"
+      ],
+      "source_path": "lib/hexdump.c",
+      "selection_reason": "formatting with caller-owned output buffer",
+      "build": "5.15.0-119-generic/default",
+      "static_check": "not_attempted",
+      "carrier": "not_attempted",
+      "runtime": "not_attempted",
+      "semantic_classification": "pending_source_review",
+      "allow_carrier_attempt": true
+    },
+    {
+      "id": "string_escape_mem",
+      "cohort": "prospective",
+      "entrypoints": [
+        "string_escape_mem"
+      ],
+      "source_path": "lib/string_helpers.c",
+      "selection_reason": "variable output and read-only character classification",
+      "build": "5.15.0-119-generic/default",
+      "static_check": "not_attempted",
+      "carrier": "not_attempted",
+      "runtime": "not_attempted",
+      "semantic_classification": "pending_source_review",
+      "allow_carrier_attempt": true
+    },
+    {
+      "id": "sort",
+      "cohort": "prospective",
+      "entrypoints": [
+        "sort"
+      ],
+      "source_path": "lib/sort.c",
+      "selection_reason": "caller-supplied indirect comparator and optional swap callback",
+      "build": "5.15.0-119-generic/default",
+      "static_check": "not_attempted",
+      "carrier": "not_attempted",
+      "runtime": "not_attempted",
+      "semantic_classification": "pending_source_review",
+      "allow_carrier_attempt": true
+    },
+    {
+      "id": "rhashtable_insert_slow",
+      "cohort": "prospective",
+      "entrypoints": [
+        "rhashtable_insert_slow"
+      ],
+      "source_path": "lib/rhashtable.c",
+      "selection_reason": "mutable shared container with allocation and kernel synchronization",
+      "build": "5.15.0-119-generic/default",
+      "static_check": "not_attempted",
+      "carrier": "not_attempted",
+      "runtime": "not_attempted",
+      "semantic_classification": "pending_source_review",
+      "allow_carrier_attempt": false,
+      "carrier_attempt_scope": "static inspection first; kernel synchronization/private-state semantics must be resolved before export"
+    },
+    {
+      "id": "get_random_bytes",
+      "cohort": "prospective",
+      "entrypoints": [
+        "get_random_bytes"
+      ],
+      "source_path": "drivers/char/random.c",
+      "selection_reason": "kernel-private evolving state as a semantic boundary case",
+      "build": "5.15.0-119-generic/default",
+      "static_check": "not_attempted",
+      "carrier": "not_attempted",
+      "runtime": "not_attempted",
+      "semantic_classification": "pending_source_review",
+      "allow_carrier_attempt": false,
+      "carrier_attempt_scope": "static inspection first; kernel synchronization/private-state semantics must be resolved before export"
+    },
+    {
+      "id": "lz4",
+      "cohort": "retrospective",
+      "entrypoints": [
+        "vkso_LZ4_compress_default",
+        "vkso_LZ4_decompress_safe"
+      ],
+      "evidence_directory": "test/test_lz4",
+      "selection_reason": "stateless block APIs with explicit work memory",
+      "build": "existing adapted owner/integrated kernel; see archived metadata",
+      "static_check": "existing_evidence_to_import",
+      "carrier": "existing_evidence_to_import",
+      "runtime": "existing_evidence_to_import",
+      "semantic_classification": "existing_adaptation_to_account"
+    },
+    {
+      "id": "bch",
+      "cohort": "retrospective",
+      "entrypoints": [
+        "vkso_bch_init",
+        "vkso_bch_free",
+        "vkso_bch_encode",
+        "vkso_bch_decode"
+      ],
+      "evidence_directory": "test/test_BCH",
+      "selection_reason": "allocated algorithm state and lookup tables",
+      "build": "existing adapted owner/integrated kernel; see archived metadata",
+      "static_check": "existing_evidence_to_import",
+      "carrier": "existing_evidence_to_import",
+      "runtime": "existing_evidence_to_import",
+      "semantic_classification": "existing_adaptation_to_account"
+    },
+    {
+      "id": "xz",
+      "cohort": "retrospective",
+      "entrypoints": [
+        "vkso_xz_crc32_init",
+        "vkso_xz_dec_init",
+        "vkso_xz_dec_run",
+        "vkso_xz_dec_reset",
+        "vkso_xz_dec_end"
+      ],
+      "evidence_directory": "test/test_xz",
+      "selection_reason": "complete stream parser/decoder and helper slots",
+      "build": "existing adapted owner/integrated kernel; see archived metadata",
+      "static_check": "existing_evidence_to_import",
+      "carrier": "existing_evidence_to_import",
+      "runtime": "existing_evidence_to_import",
+      "semantic_classification": "existing_adaptation_to_account"
+    },
+    {
+      "id": "clocktime",
+      "cohort": "retrospective",
+      "entrypoints": [
+        "clock_gettime",
+        "ktime_get_ts64"
+      ],
+      "evidence_directory": "test/test_gettime/vkso-tests",
+      "selection_reason": "shared published state and address-space-dependent view",
+      "build": "existing adapted owner/integrated kernel; see archived metadata",
+      "static_check": "existing_evidence_to_import",
+      "carrier": "existing_evidence_to_import",
+      "runtime": "existing_evidence_to_import",
+      "semantic_classification": "existing_adaptation_to_account"
+    }
+  ]
+}

@@ -1,0 +1,200 @@
+[
+  {
+    "id": "xxh32",
+    "cohort": "prospective",
+    "checks": [
+      {
+        "api": "xxh32",
+        "command": [
+          "/usr/bin/python3",
+          "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/function_checker/functions_checker.py",
+          "-t",
+          "xxh32",
+          "-v",
+          "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic",
+          "-s",
+          "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/xxh32/effective-shim.txt"
+        ],
+        "exit_code": 0,
+        "status": "checker_pass",
+        "visited_functions": 1,
+        "shim_hits": 0,
+        "static_references": 0,
+        "indirect_control_flow_sites": 0,
+        "instrumentation_sites": 0,
+        "hard_failures": 0,
+        "missing_symbols": 0,
+        "unanalyzable_functions": 0,
+        "scope": "checker result; PASS can retain instrumentation and indirect control-flow sites"
+      }
+    ],
+    "carrier": "not_attempted",
+    "runtime": "not_attempted",
+    "semantic_classification": "pending_source_review"
+  },
+  {
+    "id": "crc32_le",
+    "cohort": "prospective",
+    "checks": [
+      {
+        "api": "crc32_le",
+        "command": [
+          "/usr/bin/python3",
+          "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/function_checker/functions_checker.py",
+          "-t",
+          "crc32_le",
+          "-v",
+          "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic",
+          "-s",
+          "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/crc32_le/effective-shim.txt"
+        ],
+        "exit_code": 1,
+        "status": "checker_fail",
+        "visited_functions": 2,
+        "shim_hits": 0,
+        "static_references": 1,
+        "indirect_control_flow_sites": 0,
+        "instrumentation_sites": 0,
+        "hard_failures": 1,
+        "missing_symbols": 0,
+        "unanalyzable_functions": 0,
+        "scope": "checker result; PASS can retain instrumentation and indirect control-flow sites"
+      }
+    ],
+    "carrier": "not_attempted_after_static_result",
+    "runtime": "not_attempted",
+    "semantic_classification": "pending_source_review"
+  },
+  {
+    "id": "sha256",
+    "cohort": "prospective",
+    "checks": [
+      {
+        "api": "sha256",
+        "command": [
+          "/usr/bin/python3",
+          "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/function_checker/functions_checker.py",
+          "-t",
+          "sha256",
+          "-v",
+          "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic",
+          "-s",
+          "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/sha256/effective-shim.txt"
+        ],
+        "exit_code": 1,
+        "status": "checker_fail",
+        "visited_functions": 5,
+        "shim_hits": 0,
+        "static_references": 18,
+        "indirect_control_flow_sites": 0,
+        "instrumentation_sites": 14,
+        "hard_failures": 18,
+        "missing_symbols": 0,
+        "unanalyzable_functions": 0,
+        "scope": "checker result; PASS can retain instrumentation and indirect control-flow sites"
+      }
+    ],
+    "carrier": "not_attempted_after_static_result",
+    "runtime": "not_attempted",
+    "semantic_classification": "pending_source_review"
+  },
+  {
+    "id": "hex_dump_to_buffer",
+    "cohort": "prospective",
+    "checks": [
+      {
+        "api": "hex_dump_to_buffer",
+        "command": [
+          "/usr/bin/python3",
+          "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/function_checker/functions_checker.py",
+          "-t",
+          "hex_dump_to_buffer",
+          "-v",
+          "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic",
+          "-s",
+          "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/hex_dump_to_buffer/effective-shim.txt"
+        ],
+        "exit_code": 1,
+        "status": "checker_fail",
+        "visited_functions": 1834,
+        "shim_hits": 0,
+        "static_references": 6405,
+        "indirect_control_flow_sites": 408,
+        "instrumentation_sites": 2230,
+        "hard_failures": 3542,
+        "missing_symbols": 0,
+        "unanalyzable_functions": 716,
+        "scope": "checker result; PASS can retain instrumentation and indirect control-flow sites"
+      }
+    ],
+    "carrier": "not_attempted_after_static_result",
+    "runtime": "not_attempted",
+    "semantic_classification": "pending_source_review"
+  },
+  {
+    "id": "string_escape_mem",
+    "cohort": "prospective",
+    "checks": [
+      {
+        "api": "string_escape_mem",
+        "command": [
+          "/usr/bin/python3",
+          "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/function_checker/functions_checker.py",
+          "-t",
+          "string_escape_mem",
+          "-v",
+          "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic",
+          "-s",
+          "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/string_escape_mem/effective-shim.txt"
+        ],
+        "exit_code": 1,
+        "status": "checker_fail",
+        "visited_functions": 2,
+        "shim_hits": 0,
+        "static_references": 4,
+        "indirect_control_flow_sites": 0,
+        "instrumentation_sites": 0,
+        "hard_failures": 4,
+        "missing_symbols": 0,
+        "unanalyzable_functions": 0,
+        "scope": "checker result; PASS can retain instrumentation and indirect control-flow sites"
+      }
+    ],
+    "carrier": "not_attempted_after_static_result",
+    "runtime": "not_attempted",
+    "semantic_classification": "pending_source_review"
+  },
+  {
+    "id": "sort",
+    "cohort": "prospective",
+    "checks": [
+      {
+        "api": "sort",
+        "command": [
+          "/usr/bin/python3",
+          "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/function_checker/functions_checker.py",
+          "-t",
+          "sort",
+          "-v",
+          "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic",
+          "-s",
+          "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/sort/effective-shim.txt"
+        ],
+        "exit_code": 0,
+        "status": "checker_pass",
+        "visited_functions": 3,
+        "shim_hits": 0,
+        "static_references": 0,
+        "indirect_control_flow_sites": 5,
+        "instrumentation_sites": 0,
+        "hard_failures": 0,
+        "missing_symbols": 0,
+        "unanalyzable_functions": 0,
+        "scope": "checker result; PASS can retain instrumentation and indirect control-flow sites"
+      }
+    ],
+    "carrier": "not_attempted",
+    "runtime": "not_attempted",
+    "semantic_classification": "pending_source_review"
+  }
+]

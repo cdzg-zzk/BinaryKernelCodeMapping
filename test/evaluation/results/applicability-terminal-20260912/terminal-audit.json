@@ -1,0 +1,264 @@
+{
+  "status": "PASS",
+  "captured_utc": "2026-09-12T08:02:43.312212+00:00",
+  "campaign_result_identity": {
+    "path": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/results.json",
+    "bytes": 6616,
+    "sha256": "cb40ee9aebad026f9abb990e505764b68d77a6d5ed6602eb84ed3cc0c213fcc7",
+    "mtime_ns": 1789198856455036371
+  },
+  "terminal_candidates": 6,
+  "observed_child_pids": [
+    172137
+  ],
+  "whole_eight_terminal": false,
+  "candidates": [
+    {
+      "id": "xxh32",
+      "log_identity": {
+        "path": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/xxh32/checker-xxh32.log",
+        "bytes": 1748,
+        "sha256": "6306b562810aa3b1ba80291897c3873fa62c3a65dce045e6cb3c4b0f1d154eeb",
+        "mtime_ns": 1789183304522763204
+      },
+      "original_log_lines": 40,
+      "archived_log": "xxh32-checker.log",
+      "summary_matches_result": true,
+      "candidate_matches_campaign": true,
+      "verdict": "PASS",
+      "exit_code": 0,
+      "counts": {
+        "visited_functions": 1,
+        "shim_hits": 0,
+        "static_references": 0,
+        "indirect_control_flow_sites": 0,
+        "instrumentation_sites": 0,
+        "hard_failures": 0,
+        "missing_symbols": 0,
+        "unanalyzable_functions": 0
+      },
+      "hard_failure_kinds": {},
+      "hard_failure_examples": {},
+      "unanalyzable_records": 0,
+      "unanalyzable_distinct_functions": 0,
+      "unanalyzable_reasons": {},
+      "scope": "Static checker result only; diagnostic record counts are not unique-function counts or runtime outcomes."
+    },
+    {
+      "id": "crc32_le",
+      "log_identity": {
+        "path": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/crc32_le/checker-crc32_le.log",
+        "bytes": 2681,
+        "sha256": "39b4079d53947602a11d2ea2fefb76ec56231d670844cca1371d48aca39fc4d9",
+        "mtime_ns": 1789183318890725470
+      },
+      "original_log_lines": 51,
+      "archived_log": "crc32_le-checker.log",
+      "summary_matches_result": true,
+      "candidate_matches_campaign": true,
+      "verdict": "FAIL",
+      "exit_code": 1,
+      "counts": {
+        "visited_functions": 2,
+        "shim_hits": 0,
+        "static_references": 1,
+        "indirect_control_flow_sites": 0,
+        "instrumentation_sites": 0,
+        "hard_failures": 1,
+        "missing_symbols": 0,
+        "unanalyzable_functions": 0
+      },
+      "hard_failure_kinds": {
+        "绝对地址寻址": 1
+      },
+      "hard_failure_examples": {
+        "绝对地址寻址": [
+          {
+            "line": 34,
+            "text": "  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x88240)"
+          }
+        ]
+      },
+      "unanalyzable_records": 0,
+      "unanalyzable_distinct_functions": 0,
+      "unanalyzable_reasons": {},
+      "scope": "Static checker result only; diagnostic record counts are not unique-function counts or runtime outcomes."
+    },
+    {
+      "id": "sha256",
+      "log_identity": {
+        "path": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/sha256/checker-sha256.log",
+        "bytes": 19378,
+        "sha256": "ba2844e522b0853e937bc7b0c520f1d67aa7e9df4e715030b309d0989a01c0a9",
+        "mtime_ns": 1789183372718660404
+      },
+      "original_log_lines": 255,
+      "archived_log": "sha256-checker.log",
+      "summary_matches_result": true,
+      "candidate_matches_campaign": true,
+      "verdict": "FAIL",
+      "exit_code": 1,
+      "counts": {
+        "visited_functions": 5,
+        "shim_hits": 0,
+        "static_references": 18,
+        "indirect_control_flow_sites": 0,
+        "instrumentation_sites": 14,
+        "hard_failures": 18,
+        "missing_symbols": 0,
+        "unanalyzable_functions": 0
+      },
+      "hard_failure_kinds": {
+        "绝对地址寻址": 18
+      },
+      "hard_failure_examples": {
+        "绝对地址寻址": [
+          {
+            "line": 136,
+            "text": "  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x839c0)"
+          },
+          {
+            "line": 139,
+            "text": "  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.data+0x2bf340)"
+          }
+        ]
+      },
+      "unanalyzable_records": 0,
+      "unanalyzable_distinct_functions": 0,
+      "unanalyzable_reasons": {},
+      "scope": "Static checker result only; diagnostic record counts are not unique-function counts or runtime outcomes."
+    },
+    {
+      "id": "hex_dump_to_buffer",
+      "log_identity": {
+        "path": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/hex_dump_to_buffer/checker-hex_dump_to_buffer.log",
+        "bytes": 5159573,
+        "sha256": "2ff614ebb898f9867b4625986fb24ff2baa5505a6db0e751d4b7363306edf4d2",
+        "mtime_ns": 1789198764822737708
+      },
+      "original_log_lines": 58874,
+      "archived_log": "hex_dump_to_buffer-selected-log-lines.txt",
+      "summary_matches_result": true,
+      "candidate_matches_campaign": true,
+      "verdict": "FAIL",
+      "exit_code": 1,
+      "counts": {
+        "visited_functions": 1834,
+        "shim_hits": 0,
+        "static_references": 6405,
+        "indirect_control_flow_sites": 408,
+        "instrumentation_sites": 2230,
+        "hard_failures": 3542,
+        "missing_symbols": 0,
+        "unanalyzable_functions": 716
+      },
+      "hard_failure_kinds": {
+        "绝对地址寻址": 3537,
+        "特权指令 / 控制寄存器访问": 5
+      },
+      "hard_failure_examples": {
+        "绝对地址寻址": [
+          {
+            "line": 26263,
+            "text": "  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (hex_asc+0x0)"
+          },
+          {
+            "line": 26266,
+            "text": "  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (hex_asc+0x0)"
+          }
+        ],
+        "特权指令 / 控制寄存器访问": [
+          {
+            "line": 29167,
+            "text": "  [vmlinux-5.15.0-119-generic] 崩溃类型: 特权指令 / 控制寄存器访问"
+          },
+          {
+            "line": 30118,
+            "text": "  [vmlinux-5.15.0-119-generic] 崩溃类型: 特权指令 / 控制寄存器访问"
+          }
+        ]
+      },
+      "unanalyzable_records": 716,
+      "unanalyzable_distinct_functions": 347,
+      "unanalyzable_reasons": {
+        "无法从节内偏移解析目标函数": 716
+      },
+      "scope": "Static checker result only; diagnostic record counts are not unique-function counts or runtime outcomes."
+    },
+    {
+      "id": "string_escape_mem",
+      "log_identity": {
+        "path": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/string_escape_mem/checker-string_escape_mem.log",
+        "bytes": 4885,
+        "sha256": "1c1edf38e8263076ccb074685109f800ac470b79942ed34b63fa0a54e8167674",
+        "mtime_ns": 1789198817458910659
+      },
+      "original_log_lines": 75,
+      "archived_log": "string_escape_mem-checker.log",
+      "summary_matches_result": true,
+      "candidate_matches_campaign": true,
+      "verdict": "FAIL",
+      "exit_code": 1,
+      "counts": {
+        "visited_functions": 2,
+        "shim_hits": 0,
+        "static_references": 4,
+        "indirect_control_flow_sites": 0,
+        "instrumentation_sites": 0,
+        "hard_failures": 4,
+        "missing_symbols": 0,
+        "unanalyzable_functions": 0
+      },
+      "hard_failure_kinds": {
+        "绝对地址寻址": 4
+      },
+      "hard_failure_examples": {
+        "绝对地址寻址": [
+          {
+            "line": 40,
+            "text": "  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (_ctype+0x0)"
+          },
+          {
+            "line": 43,
+            "text": "  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x83860)"
+          }
+        ]
+      },
+      "unanalyzable_records": 0,
+      "unanalyzable_distinct_functions": 0,
+      "unanalyzable_reasons": {},
+      "scope": "Static checker result only; diagnostic record counts are not unique-function counts or runtime outcomes."
+    },
+    {
+      "id": "sort",
+      "log_identity": {
+        "path": "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/sort/checker-sort.log",
+        "bytes": 4806,
+        "sha256": "573ea53123cbddd6ac3ca513f9957c184880a30e476e22e16d2f10283fd65ad1",
+        "mtime_ns": 1789198855259032544
+      },
+      "original_log_lines": 78,
+      "archived_log": "sort-checker.log",
+      "summary_matches_result": true,
+      "candidate_matches_campaign": true,
+      "verdict": "PASS",
+      "exit_code": 0,
+      "counts": {
+        "visited_functions": 3,
+        "shim_hits": 0,
+        "static_references": 0,
+        "indirect_control_flow_sites": 5,
+        "instrumentation_sites": 0,
+        "hard_failures": 0,
+        "missing_symbols": 0,
+        "unanalyzable_functions": 0
+      },
+      "hard_failure_kinds": {},
+      "hard_failure_examples": {},
+      "unanalyzable_records": 0,
+      "unanalyzable_distinct_functions": 0,
+      "unanalyzable_reasons": {},
+      "scope": "Static checker result only; diagnostic record counts are not unique-function counts or runtime outcomes."
+    }
+  ]
+}

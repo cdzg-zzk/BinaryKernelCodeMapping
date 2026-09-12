@@ -1,0 +1,1336 @@
+{
+  "status": "pass",
+  "identity": {
+    "boot_id": "15bda703-bf88-4ea1-ba26-da3afa33af3d",
+    "kernel": "5.15.0-119-generic",
+    "controller_pid": 137,
+    "observed_unix": 1789199988.3618474
+  },
+  "snapshots": 567,
+  "groups": [
+    {
+      "role": "native-before-owner",
+      "loaders": 1,
+      "phase": "faulted",
+      "allocations": {
+        "all": {
+          "allocation_count": 0,
+          "requested_bytes": 0,
+          "usable_bytes": 0
+        }
+      },
+      "selected_union_pages": 7,
+      "usable_heap_covering_pfn_union_pages": 0
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 1,
+      "phase": "initialized",
+      "allocations": {
+        "all": {
+          "allocation_count": 30,
+          "requested_bytes": 92388,
+          "usable_bytes": 92608
+        },
+        "control": {
+          "allocation_count": 28,
+          "requested_bytes": 91344,
+          "usable_bytes": 91536
+        },
+        "t4_control": {
+          "allocation_count": 14,
+          "requested_bytes": 41448,
+          "usable_bytes": 41536
+        },
+        "workload": {
+          "allocation_count": 2,
+          "requested_bytes": 1044,
+          "usable_bytes": 1072
+        },
+        "t4_workload": {
+          "allocation_count": 1,
+          "requested_bytes": 519,
+          "usable_bytes": 520
+        },
+        "t8_control": {
+          "allocation_count": 14,
+          "requested_bytes": 49896,
+          "usable_bytes": 50000
+        },
+        "t8_workload": {
+          "allocation_count": 1,
+          "requested_bytes": 525,
+          "usable_bytes": 552
+        }
+      },
+      "selected_union_pages": 46,
+      "usable_heap_covering_pfn_union_pages": 39
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 1,
+      "phase": "t4-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 33,
+          "requested_bytes": 92930,
+          "usable_bytes": 93192
+        },
+        "control": {
+          "allocation_count": 28,
+          "requested_bytes": 91344,
+          "usable_bytes": 91536
+        },
+        "t4_control": {
+          "allocation_count": 14,
+          "requested_bytes": 41448,
+          "usable_bytes": 41536
+        },
+        "workload": {
+          "allocation_count": 5,
+          "requested_bytes": 1586,
+          "usable_bytes": 1656
+        },
+        "t4_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 1061,
+          "usable_bytes": 1104
+        },
+        "t8_control": {
+          "allocation_count": 14,
+          "requested_bytes": 49896,
+          "usable_bytes": 50000
+        },
+        "t8_workload": {
+          "allocation_count": 1,
+          "requested_bytes": 525,
+          "usable_bytes": 552
+        }
+      },
+      "selected_union_pages": 47,
+      "usable_heap_covering_pfn_union_pages": 40
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 1,
+      "phase": "t8-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 33,
+          "requested_bytes": 92958,
+          "usable_bytes": 93208
+        },
+        "control": {
+          "allocation_count": 28,
+          "requested_bytes": 91344,
+          "usable_bytes": 91536
+        },
+        "t4_control": {
+          "allocation_count": 14,
+          "requested_bytes": 41448,
+          "usable_bytes": 41536
+        },
+        "workload": {
+          "allocation_count": 5,
+          "requested_bytes": 1614,
+          "usable_bytes": 1672
+        },
+        "t4_workload": {
+          "allocation_count": 1,
+          "requested_bytes": 519,
+          "usable_bytes": 520
+        },
+        "t8_control": {
+          "allocation_count": 14,
+          "requested_bytes": 49896,
+          "usable_bytes": 50000
+        },
+        "t8_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 1095,
+          "usable_bytes": 1152
+        }
+      },
+      "selected_union_pages": 46,
+      "usable_heap_covering_pfn_union_pages": 40
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 4,
+      "phase": "faulted",
+      "allocations": {
+        "all": {
+          "allocation_count": 0,
+          "requested_bytes": 0,
+          "usable_bytes": 0
+        }
+      },
+      "selected_union_pages": 13,
+      "usable_heap_covering_pfn_union_pages": 0
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 4,
+      "phase": "initialized",
+      "allocations": {
+        "all": {
+          "allocation_count": 120,
+          "requested_bytes": 369552,
+          "usable_bytes": 370432
+        },
+        "control": {
+          "allocation_count": 112,
+          "requested_bytes": 365376,
+          "usable_bytes": 366144
+        },
+        "t4_control": {
+          "allocation_count": 56,
+          "requested_bytes": 165792,
+          "usable_bytes": 166144
+        },
+        "workload": {
+          "allocation_count": 8,
+          "requested_bytes": 4176,
+          "usable_bytes": 4288
+        },
+        "t4_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 2076,
+          "usable_bytes": 2080
+        },
+        "t8_control": {
+          "allocation_count": 56,
+          "requested_bytes": 199584,
+          "usable_bytes": 200000
+        },
+        "t8_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 2100,
+          "usable_bytes": 2208
+        }
+      },
+      "selected_union_pages": 169,
+      "usable_heap_covering_pfn_union_pages": 156
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 4,
+      "phase": "t4-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 132,
+          "requested_bytes": 371720,
+          "usable_bytes": 372768
+        },
+        "control": {
+          "allocation_count": 112,
+          "requested_bytes": 365376,
+          "usable_bytes": 366144
+        },
+        "t4_control": {
+          "allocation_count": 56,
+          "requested_bytes": 165792,
+          "usable_bytes": 166144
+        },
+        "workload": {
+          "allocation_count": 20,
+          "requested_bytes": 6344,
+          "usable_bytes": 6624
+        },
+        "t4_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 4244,
+          "usable_bytes": 4416
+        },
+        "t8_control": {
+          "allocation_count": 56,
+          "requested_bytes": 199584,
+          "usable_bytes": 200000
+        },
+        "t8_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 2100,
+          "usable_bytes": 2208
+        }
+      },
+      "selected_union_pages": 173,
+      "usable_heap_covering_pfn_union_pages": 160
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 4,
+      "phase": "t8-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 132,
+          "requested_bytes": 371832,
+          "usable_bytes": 372832
+        },
+        "control": {
+          "allocation_count": 112,
+          "requested_bytes": 365376,
+          "usable_bytes": 366144
+        },
+        "t4_control": {
+          "allocation_count": 56,
+          "requested_bytes": 165792,
+          "usable_bytes": 166144
+        },
+        "workload": {
+          "allocation_count": 20,
+          "requested_bytes": 6456,
+          "usable_bytes": 6688
+        },
+        "t4_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 2076,
+          "usable_bytes": 2080
+        },
+        "t8_control": {
+          "allocation_count": 56,
+          "requested_bytes": 199584,
+          "usable_bytes": 200000
+        },
+        "t8_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 4380,
+          "usable_bytes": 4608
+        }
+      },
+      "selected_union_pages": 169,
+      "usable_heap_covering_pfn_union_pages": 160
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 16,
+      "phase": "faulted",
+      "allocations": {
+        "all": {
+          "allocation_count": 0,
+          "requested_bytes": 0,
+          "usable_bytes": 0
+        }
+      },
+      "selected_union_pages": 37,
+      "usable_heap_covering_pfn_union_pages": 0
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 16,
+      "phase": "initialized",
+      "allocations": {
+        "all": {
+          "allocation_count": 480,
+          "requested_bytes": 1478208,
+          "usable_bytes": 1481728
+        },
+        "control": {
+          "allocation_count": 448,
+          "requested_bytes": 1461504,
+          "usable_bytes": 1464576
+        },
+        "t4_control": {
+          "allocation_count": 224,
+          "requested_bytes": 663168,
+          "usable_bytes": 664576
+        },
+        "workload": {
+          "allocation_count": 32,
+          "requested_bytes": 16704,
+          "usable_bytes": 17152
+        },
+        "t4_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 8304,
+          "usable_bytes": 8320
+        },
+        "t8_control": {
+          "allocation_count": 224,
+          "requested_bytes": 798336,
+          "usable_bytes": 800000
+        },
+        "t8_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 8400,
+          "usable_bytes": 8832
+        }
+      },
+      "selected_union_pages": 661,
+      "usable_heap_covering_pfn_union_pages": 624
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 16,
+      "phase": "t4-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 528,
+          "requested_bytes": 1486880,
+          "usable_bytes": 1491072
+        },
+        "control": {
+          "allocation_count": 448,
+          "requested_bytes": 1461504,
+          "usable_bytes": 1464576
+        },
+        "t4_control": {
+          "allocation_count": 224,
+          "requested_bytes": 663168,
+          "usable_bytes": 664576
+        },
+        "workload": {
+          "allocation_count": 80,
+          "requested_bytes": 25376,
+          "usable_bytes": 26496
+        },
+        "t4_workload": {
+          "allocation_count": 64,
+          "requested_bytes": 16976,
+          "usable_bytes": 17664
+        },
+        "t8_control": {
+          "allocation_count": 224,
+          "requested_bytes": 798336,
+          "usable_bytes": 800000
+        },
+        "t8_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 8400,
+          "usable_bytes": 8832
+        }
+      },
+      "selected_union_pages": 677,
+      "usable_heap_covering_pfn_union_pages": 640
+    },
+    {
+      "role": "native-before-owner",
+      "loaders": 16,
+      "phase": "t8-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 528,
+          "requested_bytes": 1487328,
+          "usable_bytes": 1491328
+        },
+        "control": {
+          "allocation_count": 448,
+          "requested_bytes": 1461504,
+          "usable_bytes": 1464576
+        },
+        "t4_control": {
+          "allocation_count": 224,
+          "requested_bytes": 663168,
+          "usable_bytes": 664576
+        },
+        "workload": {
+          "allocation_count": 80,
+          "requested_bytes": 25824,
+          "usable_bytes": 26752
+        },
+        "t4_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 8304,
+          "usable_bytes": 8320
+        },
+        "t8_control": {
+          "allocation_count": 224,
+          "requested_bytes": 798336,
+          "usable_bytes": 800000
+        },
+        "t8_workload": {
+          "allocation_count": 64,
+          "requested_bytes": 17520,
+          "usable_bytes": 18432
+        }
+      },
+      "selected_union_pages": 661,
+      "usable_heap_covering_pfn_union_pages": 640
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 1,
+      "phase": "faulted",
+      "allocations": {
+        "all": {
+          "allocation_count": 0,
+          "requested_bytes": 0,
+          "usable_bytes": 0
+        }
+      },
+      "selected_union_pages": 13,
+      "usable_heap_covering_pfn_union_pages": 0
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 1,
+      "phase": "initialized",
+      "allocations": {
+        "all": {
+          "allocation_count": 30,
+          "requested_bytes": 92388,
+          "usable_bytes": 92608
+        },
+        "control": {
+          "allocation_count": 28,
+          "requested_bytes": 91344,
+          "usable_bytes": 91536
+        },
+        "t4_control": {
+          "allocation_count": 14,
+          "requested_bytes": 41448,
+          "usable_bytes": 41536
+        },
+        "workload": {
+          "allocation_count": 2,
+          "requested_bytes": 1044,
+          "usable_bytes": 1072
+        },
+        "t4_workload": {
+          "allocation_count": 1,
+          "requested_bytes": 519,
+          "usable_bytes": 520
+        },
+        "t8_control": {
+          "allocation_count": 14,
+          "requested_bytes": 49896,
+          "usable_bytes": 50000
+        },
+        "t8_workload": {
+          "allocation_count": 1,
+          "requested_bytes": 525,
+          "usable_bytes": 552
+        }
+      },
+      "selected_union_pages": 52,
+      "usable_heap_covering_pfn_union_pages": 39
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 1,
+      "phase": "t4-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 33,
+          "requested_bytes": 92930,
+          "usable_bytes": 93192
+        },
+        "control": {
+          "allocation_count": 28,
+          "requested_bytes": 91344,
+          "usable_bytes": 91536
+        },
+        "t4_control": {
+          "allocation_count": 14,
+          "requested_bytes": 41448,
+          "usable_bytes": 41536
+        },
+        "workload": {
+          "allocation_count": 5,
+          "requested_bytes": 1586,
+          "usable_bytes": 1656
+        },
+        "t4_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 1061,
+          "usable_bytes": 1104
+        },
+        "t8_control": {
+          "allocation_count": 14,
+          "requested_bytes": 49896,
+          "usable_bytes": 50000
+        },
+        "t8_workload": {
+          "allocation_count": 1,
+          "requested_bytes": 525,
+          "usable_bytes": 552
+        }
+      },
+      "selected_union_pages": 53,
+      "usable_heap_covering_pfn_union_pages": 40
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 1,
+      "phase": "t8-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 33,
+          "requested_bytes": 92958,
+          "usable_bytes": 93208
+        },
+        "control": {
+          "allocation_count": 28,
+          "requested_bytes": 91344,
+          "usable_bytes": 91536
+        },
+        "t4_control": {
+          "allocation_count": 14,
+          "requested_bytes": 41448,
+          "usable_bytes": 41536
+        },
+        "workload": {
+          "allocation_count": 5,
+          "requested_bytes": 1614,
+          "usable_bytes": 1672
+        },
+        "t4_workload": {
+          "allocation_count": 1,
+          "requested_bytes": 519,
+          "usable_bytes": 520
+        },
+        "t8_control": {
+          "allocation_count": 14,
+          "requested_bytes": 49896,
+          "usable_bytes": 50000
+        },
+        "t8_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 1095,
+          "usable_bytes": 1152
+        }
+      },
+      "selected_union_pages": 52,
+      "usable_heap_covering_pfn_union_pages": 40
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 4,
+      "phase": "faulted",
+      "allocations": {
+        "all": {
+          "allocation_count": 0,
+          "requested_bytes": 0,
+          "usable_bytes": 0
+        }
+      },
+      "selected_union_pages": 19,
+      "usable_heap_covering_pfn_union_pages": 0
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 4,
+      "phase": "initialized",
+      "allocations": {
+        "all": {
+          "allocation_count": 120,
+          "requested_bytes": 369552,
+          "usable_bytes": 370432
+        },
+        "control": {
+          "allocation_count": 112,
+          "requested_bytes": 365376,
+          "usable_bytes": 366144
+        },
+        "t4_control": {
+          "allocation_count": 56,
+          "requested_bytes": 165792,
+          "usable_bytes": 166144
+        },
+        "workload": {
+          "allocation_count": 8,
+          "requested_bytes": 4176,
+          "usable_bytes": 4288
+        },
+        "t4_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 2076,
+          "usable_bytes": 2080
+        },
+        "t8_control": {
+          "allocation_count": 56,
+          "requested_bytes": 199584,
+          "usable_bytes": 200000
+        },
+        "t8_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 2100,
+          "usable_bytes": 2208
+        }
+      },
+      "selected_union_pages": 175,
+      "usable_heap_covering_pfn_union_pages": 156
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 4,
+      "phase": "t4-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 132,
+          "requested_bytes": 371720,
+          "usable_bytes": 372768
+        },
+        "control": {
+          "allocation_count": 112,
+          "requested_bytes": 365376,
+          "usable_bytes": 366144
+        },
+        "t4_control": {
+          "allocation_count": 56,
+          "requested_bytes": 165792,
+          "usable_bytes": 166144
+        },
+        "workload": {
+          "allocation_count": 20,
+          "requested_bytes": 6344,
+          "usable_bytes": 6624
+        },
+        "t4_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 4244,
+          "usable_bytes": 4416
+        },
+        "t8_control": {
+          "allocation_count": 56,
+          "requested_bytes": 199584,
+          "usable_bytes": 200000
+        },
+        "t8_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 2100,
+          "usable_bytes": 2208
+        }
+      },
+      "selected_union_pages": 179,
+      "usable_heap_covering_pfn_union_pages": 160
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 4,
+      "phase": "t8-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 132,
+          "requested_bytes": 371832,
+          "usable_bytes": 372832
+        },
+        "control": {
+          "allocation_count": 112,
+          "requested_bytes": 365376,
+          "usable_bytes": 366144
+        },
+        "t4_control": {
+          "allocation_count": 56,
+          "requested_bytes": 165792,
+          "usable_bytes": 166144
+        },
+        "workload": {
+          "allocation_count": 20,
+          "requested_bytes": 6456,
+          "usable_bytes": 6688
+        },
+        "t4_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 2076,
+          "usable_bytes": 2080
+        },
+        "t8_control": {
+          "allocation_count": 56,
+          "requested_bytes": 199584,
+          "usable_bytes": 200000
+        },
+        "t8_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 4380,
+          "usable_bytes": 4608
+        }
+      },
+      "selected_union_pages": 175,
+      "usable_heap_covering_pfn_union_pages": 160
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 16,
+      "phase": "faulted",
+      "allocations": {
+        "all": {
+          "allocation_count": 0,
+          "requested_bytes": 0,
+          "usable_bytes": 0
+        }
+      },
+      "selected_union_pages": 43,
+      "usable_heap_covering_pfn_union_pages": 0
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 16,
+      "phase": "initialized",
+      "allocations": {
+        "all": {
+          "allocation_count": 480,
+          "requested_bytes": 1478208,
+          "usable_bytes": 1481728
+        },
+        "control": {
+          "allocation_count": 448,
+          "requested_bytes": 1461504,
+          "usable_bytes": 1464576
+        },
+        "t4_control": {
+          "allocation_count": 224,
+          "requested_bytes": 663168,
+          "usable_bytes": 664576
+        },
+        "workload": {
+          "allocation_count": 32,
+          "requested_bytes": 16704,
+          "usable_bytes": 17152
+        },
+        "t4_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 8304,
+          "usable_bytes": 8320
+        },
+        "t8_control": {
+          "allocation_count": 224,
+          "requested_bytes": 798336,
+          "usable_bytes": 800000
+        },
+        "t8_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 8400,
+          "usable_bytes": 8832
+        }
+      },
+      "selected_union_pages": 667,
+      "usable_heap_covering_pfn_union_pages": 624
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 16,
+      "phase": "t4-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 528,
+          "requested_bytes": 1486880,
+          "usable_bytes": 1491072
+        },
+        "control": {
+          "allocation_count": 448,
+          "requested_bytes": 1461504,
+          "usable_bytes": 1464576
+        },
+        "t4_control": {
+          "allocation_count": 224,
+          "requested_bytes": 663168,
+          "usable_bytes": 664576
+        },
+        "workload": {
+          "allocation_count": 80,
+          "requested_bytes": 25376,
+          "usable_bytes": 26496
+        },
+        "t4_workload": {
+          "allocation_count": 64,
+          "requested_bytes": 16976,
+          "usable_bytes": 17664
+        },
+        "t8_control": {
+          "allocation_count": 224,
+          "requested_bytes": 798336,
+          "usable_bytes": 800000
+        },
+        "t8_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 8400,
+          "usable_bytes": 8832
+        }
+      },
+      "selected_union_pages": 683,
+      "usable_heap_covering_pfn_union_pages": 640
+    },
+    {
+      "role": "native-owner-loaded",
+      "loaders": 16,
+      "phase": "t8-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 528,
+          "requested_bytes": 1487328,
+          "usable_bytes": 1491328
+        },
+        "control": {
+          "allocation_count": 448,
+          "requested_bytes": 1461504,
+          "usable_bytes": 1464576
+        },
+        "t4_control": {
+          "allocation_count": 224,
+          "requested_bytes": 663168,
+          "usable_bytes": 664576
+        },
+        "workload": {
+          "allocation_count": 80,
+          "requested_bytes": 25824,
+          "usable_bytes": 26752
+        },
+        "t4_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 8304,
+          "usable_bytes": 8320
+        },
+        "t8_control": {
+          "allocation_count": 224,
+          "requested_bytes": 798336,
+          "usable_bytes": 800000
+        },
+        "t8_workload": {
+          "allocation_count": 64,
+          "requested_bytes": 17520,
+          "usable_bytes": 18432
+        }
+      },
+      "selected_union_pages": 667,
+      "usable_heap_covering_pfn_union_pages": 640
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 1,
+      "phase": "faulted",
+      "allocations": {
+        "all": {
+          "allocation_count": 0,
+          "requested_bytes": 0,
+          "usable_bytes": 0
+        }
+      },
+      "selected_union_pages": 13,
+      "usable_heap_covering_pfn_union_pages": 0
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 1,
+      "phase": "initialized",
+      "allocations": {
+        "all": {
+          "allocation_count": 30,
+          "requested_bytes": 92388,
+          "usable_bytes": 92608
+        },
+        "control": {
+          "allocation_count": 28,
+          "requested_bytes": 91344,
+          "usable_bytes": 91536
+        },
+        "t4_control": {
+          "allocation_count": 14,
+          "requested_bytes": 41448,
+          "usable_bytes": 41552
+        },
+        "workload": {
+          "allocation_count": 2,
+          "requested_bytes": 1044,
+          "usable_bytes": 1072
+        },
+        "t4_workload": {
+          "allocation_count": 1,
+          "requested_bytes": 519,
+          "usable_bytes": 520
+        },
+        "t8_control": {
+          "allocation_count": 14,
+          "requested_bytes": 49896,
+          "usable_bytes": 49984
+        },
+        "t8_workload": {
+          "allocation_count": 1,
+          "requested_bytes": 525,
+          "usable_bytes": 552
+        }
+      },
+      "selected_union_pages": 53,
+      "usable_heap_covering_pfn_union_pages": 40
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 1,
+      "phase": "t4-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 33,
+          "requested_bytes": 92930,
+          "usable_bytes": 93176
+        },
+        "control": {
+          "allocation_count": 28,
+          "requested_bytes": 91344,
+          "usable_bytes": 91536
+        },
+        "t4_control": {
+          "allocation_count": 14,
+          "requested_bytes": 41448,
+          "usable_bytes": 41552
+        },
+        "workload": {
+          "allocation_count": 5,
+          "requested_bytes": 1586,
+          "usable_bytes": 1640
+        },
+        "t4_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 1061,
+          "usable_bytes": 1088
+        },
+        "t8_control": {
+          "allocation_count": 14,
+          "requested_bytes": 49896,
+          "usable_bytes": 49984
+        },
+        "t8_workload": {
+          "allocation_count": 1,
+          "requested_bytes": 525,
+          "usable_bytes": 552
+        }
+      },
+      "selected_union_pages": 54,
+      "usable_heap_covering_pfn_union_pages": 41
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 1,
+      "phase": "t8-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 33,
+          "requested_bytes": 92958,
+          "usable_bytes": 93208
+        },
+        "control": {
+          "allocation_count": 28,
+          "requested_bytes": 91344,
+          "usable_bytes": 91536
+        },
+        "t4_control": {
+          "allocation_count": 14,
+          "requested_bytes": 41448,
+          "usable_bytes": 41552
+        },
+        "workload": {
+          "allocation_count": 5,
+          "requested_bytes": 1614,
+          "usable_bytes": 1672
+        },
+        "t4_workload": {
+          "allocation_count": 1,
+          "requested_bytes": 519,
+          "usable_bytes": 520
+        },
+        "t8_control": {
+          "allocation_count": 14,
+          "requested_bytes": 49896,
+          "usable_bytes": 49984
+        },
+        "t8_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 1095,
+          "usable_bytes": 1152
+        }
+      },
+      "selected_union_pages": 55,
+      "usable_heap_covering_pfn_union_pages": 42
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 4,
+      "phase": "faulted",
+      "allocations": {
+        "all": {
+          "allocation_count": 0,
+          "requested_bytes": 0,
+          "usable_bytes": 0
+        }
+      },
+      "selected_union_pages": 25,
+      "usable_heap_covering_pfn_union_pages": 0
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 4,
+      "phase": "initialized",
+      "allocations": {
+        "all": {
+          "allocation_count": 120,
+          "requested_bytes": 369552,
+          "usable_bytes": 370432
+        },
+        "control": {
+          "allocation_count": 112,
+          "requested_bytes": 365376,
+          "usable_bytes": 366144
+        },
+        "t4_control": {
+          "allocation_count": 56,
+          "requested_bytes": 165792,
+          "usable_bytes": 166208
+        },
+        "workload": {
+          "allocation_count": 8,
+          "requested_bytes": 4176,
+          "usable_bytes": 4288
+        },
+        "t4_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 2076,
+          "usable_bytes": 2080
+        },
+        "t8_control": {
+          "allocation_count": 56,
+          "requested_bytes": 199584,
+          "usable_bytes": 199936
+        },
+        "t8_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 2100,
+          "usable_bytes": 2208
+        }
+      },
+      "selected_union_pages": 185,
+      "usable_heap_covering_pfn_union_pages": 160
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 4,
+      "phase": "t4-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 132,
+          "requested_bytes": 371720,
+          "usable_bytes": 372704
+        },
+        "control": {
+          "allocation_count": 112,
+          "requested_bytes": 365376,
+          "usable_bytes": 366144
+        },
+        "t4_control": {
+          "allocation_count": 56,
+          "requested_bytes": 165792,
+          "usable_bytes": 166208
+        },
+        "workload": {
+          "allocation_count": 20,
+          "requested_bytes": 6344,
+          "usable_bytes": 6560
+        },
+        "t4_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 4244,
+          "usable_bytes": 4352
+        },
+        "t8_control": {
+          "allocation_count": 56,
+          "requested_bytes": 199584,
+          "usable_bytes": 199936
+        },
+        "t8_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 2100,
+          "usable_bytes": 2208
+        }
+      },
+      "selected_union_pages": 189,
+      "usable_heap_covering_pfn_union_pages": 164
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 4,
+      "phase": "t8-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 132,
+          "requested_bytes": 371832,
+          "usable_bytes": 372832
+        },
+        "control": {
+          "allocation_count": 112,
+          "requested_bytes": 365376,
+          "usable_bytes": 366144
+        },
+        "t4_control": {
+          "allocation_count": 56,
+          "requested_bytes": 165792,
+          "usable_bytes": 166208
+        },
+        "workload": {
+          "allocation_count": 20,
+          "requested_bytes": 6456,
+          "usable_bytes": 6688
+        },
+        "t4_workload": {
+          "allocation_count": 4,
+          "requested_bytes": 2076,
+          "usable_bytes": 2080
+        },
+        "t8_control": {
+          "allocation_count": 56,
+          "requested_bytes": 199584,
+          "usable_bytes": 199936
+        },
+        "t8_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 4380,
+          "usable_bytes": 4608
+        }
+      },
+      "selected_union_pages": 193,
+      "usable_heap_covering_pfn_union_pages": 168
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 16,
+      "phase": "faulted",
+      "allocations": {
+        "all": {
+          "allocation_count": 0,
+          "requested_bytes": 0,
+          "usable_bytes": 0
+        }
+      },
+      "selected_union_pages": 73,
+      "usable_heap_covering_pfn_union_pages": 0
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 16,
+      "phase": "initialized",
+      "allocations": {
+        "all": {
+          "allocation_count": 480,
+          "requested_bytes": 1478208,
+          "usable_bytes": 1481728
+        },
+        "control": {
+          "allocation_count": 448,
+          "requested_bytes": 1461504,
+          "usable_bytes": 1464576
+        },
+        "t4_control": {
+          "allocation_count": 224,
+          "requested_bytes": 663168,
+          "usable_bytes": 664832
+        },
+        "workload": {
+          "allocation_count": 32,
+          "requested_bytes": 16704,
+          "usable_bytes": 17152
+        },
+        "t4_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 8304,
+          "usable_bytes": 8320
+        },
+        "t8_control": {
+          "allocation_count": 224,
+          "requested_bytes": 798336,
+          "usable_bytes": 799744
+        },
+        "t8_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 8400,
+          "usable_bytes": 8832
+        }
+      },
+      "selected_union_pages": 713,
+      "usable_heap_covering_pfn_union_pages": 640
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 16,
+      "phase": "t4-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 528,
+          "requested_bytes": 1486880,
+          "usable_bytes": 1490816
+        },
+        "control": {
+          "allocation_count": 448,
+          "requested_bytes": 1461504,
+          "usable_bytes": 1464576
+        },
+        "t4_control": {
+          "allocation_count": 224,
+          "requested_bytes": 663168,
+          "usable_bytes": 664832
+        },
+        "workload": {
+          "allocation_count": 80,
+          "requested_bytes": 25376,
+          "usable_bytes": 26240
+        },
+        "t4_workload": {
+          "allocation_count": 64,
+          "requested_bytes": 16976,
+          "usable_bytes": 17408
+        },
+        "t8_control": {
+          "allocation_count": 224,
+          "requested_bytes": 798336,
+          "usable_bytes": 799744
+        },
+        "t8_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 8400,
+          "usable_bytes": 8832
+        }
+      },
+      "selected_union_pages": 729,
+      "usable_heap_covering_pfn_union_pages": 656
+    },
+    {
+      "role": "registered-carrier",
+      "loaders": 16,
+      "phase": "t8-active",
+      "allocations": {
+        "all": {
+          "allocation_count": 528,
+          "requested_bytes": 1487328,
+          "usable_bytes": 1491328
+        },
+        "control": {
+          "allocation_count": 448,
+          "requested_bytes": 1461504,
+          "usable_bytes": 1464576
+        },
+        "t4_control": {
+          "allocation_count": 224,
+          "requested_bytes": 663168,
+          "usable_bytes": 664832
+        },
+        "workload": {
+          "allocation_count": 80,
+          "requested_bytes": 25824,
+          "usable_bytes": 26752
+        },
+        "t4_workload": {
+          "allocation_count": 16,
+          "requested_bytes": 8304,
+          "usable_bytes": 8320
+        },
+        "t8_control": {
+          "allocation_count": 224,
+          "requested_bytes": 798336,
+          "usable_bytes": 799744
+        },
+        "t8_workload": {
+          "allocation_count": 64,
+          "requested_bytes": 17520,
+          "usable_bytes": 18432
+        }
+      },
+      "selected_union_pages": 745,
+      "usable_heap_covering_pfn_union_pages": 672
+    }
+  ],
+  "scope": "library+shim+live requested heap+whole owner physical-page union; observer separately reported",
+  "limitations": [
+    "malloc usable bytes and requested bytes are distinct; neither includes all allocator metadata or freed temporaries",
+    "covering PFNs can contain other allocations; overlaps are reported and no exclusivity is inferred",
+    "whole-process sets include Python/C observer and allocator retention; no post-free PFN change is attributed to BCH alone",
+    "nonpresent pages contribute no PFN; unreadable whole-process ranges remain explicitly missing",
+    "raw pagemap and direct targets are sequential reads; every recorded explicit target must agree",
+    "loaded ELF layouts and allocator relocation checks are recorded by the observer; pagemap does not contain object bytes",
+    "guest page observations are not physical-machine performance samples"
+  ]
+}

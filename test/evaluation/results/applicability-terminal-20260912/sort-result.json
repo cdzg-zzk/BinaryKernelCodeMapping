@@ -1,0 +1,33 @@
+{
+  "id": "sort",
+  "cohort": "prospective",
+  "checks": [
+    {
+      "api": "sort",
+      "command": [
+        "/usr/bin/python3",
+        "/home/zzk/BinaryKernelCodeMapping/kernel_cgd/function_checker/functions_checker.py",
+        "-t",
+        "sort",
+        "-v",
+        "/usr/lib/debug/boot/vmlinux-5.15.0-119-generic",
+        "-s",
+        "/home/zzk/BinaryKernelCodeMapping/test/evaluation/results/applicability-static-20260912/sort/effective-shim.txt"
+      ],
+      "exit_code": 0,
+      "status": "checker_pass",
+      "visited_functions": 3,
+      "shim_hits": 0,
+      "static_references": 0,
+      "indirect_control_flow_sites": 5,
+      "instrumentation_sites": 0,
+      "hard_failures": 0,
+      "missing_symbols": 0,
+      "unanalyzable_functions": 0,
+      "scope": "checker result; PASS can retain instrumentation and indirect control-flow sites"
+    }
+  ],
+  "carrier": "not_attempted",
+  "runtime": "not_attempted",
+  "semantic_classification": "pending_source_review"
+}

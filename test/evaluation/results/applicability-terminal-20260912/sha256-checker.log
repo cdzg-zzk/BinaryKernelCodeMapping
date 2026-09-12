@@ -1,0 +1,255 @@
+[1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+[93m[*] 未提供模块列表，将只在 vmlinux 中解析符号。[0m
+[*] 已加载 34 个 Shim 平替规则。
+[*] 正在解析 vmlinux: /usr/lib/debug/boot/vmlinux-5.15.0-119-generic
+[*] vmlinux 解析完成。
+[*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+[*] 已载入 191674 个活体内核符号。
+[1m[*] 开始构建依赖闭包并执行扫描...[0m
+  [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> sha256 (剩余队列: 0)[0m
+  [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+  [96m├─ [Trace] 加入待分析队列: sha256_update <- sha256 -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 记录静态引用事实: sha256 -> .rodata:.rodata+0x839c0 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256 +0x9e -> mov rsi, 0xffffffff822839c0[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 记录静态引用事实: sha256 -> .data:.data+0x2bf340 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256 +0x115 -> mov rdi, 0xffffffff830bf340[0m
+  [93m├─ [Trace] 截获编译器插桩: __ubsan_handle_out_of_bounds[0m
+  [93m├─ [Trace] 截获编译器插桩: __stack_chk_fail[0m
+  [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> sha256_update (剩余队列: 0)[0m
+  [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+  [96m├─ [Trace] 加入待分析队列: memcpy <- sha256_update -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 加入待分析队列: sha256_transform <- sha256_update -> 同节直接跳转[0m
+  [93m├─ [Trace] 截获编译器插桩: __stack_chk_fail[0m
+  [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> memcpy (剩余队列: 1)[0m
+  [96m├─ [Trace] 加入待分析队列: memcpy_orig <- memcpy -> 同节直接跳转[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> sha256_transform (剩余队列: 1)[0m
+  [93m├─ [Trace] 截获编译器插桩: __fentry__[0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .rodata:.rodata+0x83a00 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x313 -> add esi, dword ptr [rdi*4 - 0x7dd7c600][0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .rodata:.rodata+0x83a04 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x395 -> add edx, dword ptr [rdi*4 - 0x7dd7c5fc][0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .rodata:.rodata+0x83a08 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x40d -> add eax, dword ptr [rdi*4 - 0x7dd7c5f8][0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .rodata:.rodata+0x83a0c (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x488 -> add ebx, dword ptr [rdi*4 - 0x7dd7c5f4][0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .rodata:.rodata+0x83a10 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x4fc -> add esi, dword ptr [rdi*4 - 0x7dd7c5f0][0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .rodata:.rodata+0x83a14 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x57b -> add ecx, dword ptr [rdi*4 - 0x7dd7c5ec][0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .rodata:.rodata+0x83a18 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x5fa -> add ecx, dword ptr [rdi*4 - 0x7dd7c5e8][0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .rodata:.rodata+0x83a1c (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x67c -> add esi, dword ptr [r10*4 - 0x7dd7c5e4][0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .data:.data+0x2bf480 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x723 -> mov rdi, 0xffffffff830bf480[0m
+  [93m├─ [Trace] 截获编译器插桩: __ubsan_handle_out_of_bounds[0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .data:.data+0x2bf3a0 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x75e -> mov rdi, 0xffffffff830bf3a0[0m
+  [93m├─ [Trace] 截获编译器插桩: __ubsan_handle_out_of_bounds[0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .data:.data+0x2bf3c0 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x799 -> mov rdi, 0xffffffff830bf3c0[0m
+  [93m├─ [Trace] 截获编译器插桩: __ubsan_handle_out_of_bounds[0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .data:.data+0x2bf3e0 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x7d6 -> mov rdi, 0xffffffff830bf3e0[0m
+  [93m├─ [Trace] 截获编译器插桩: __ubsan_handle_out_of_bounds[0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .data:.data+0x2bf400 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x813 -> mov rdi, 0xffffffff830bf400[0m
+  [93m├─ [Trace] 截获编译器插桩: __ubsan_handle_out_of_bounds[0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .data:.data+0x2bf420 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x84e -> mov rdi, 0xffffffff830bf420[0m
+  [93m├─ [Trace] 截获编译器插桩: __ubsan_handle_out_of_bounds[0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .data:.data+0x2bf440 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x889 -> mov rdi, 0xffffffff830bf440[0m
+  [93m├─ [Trace] 截获编译器插桩: __ubsan_handle_out_of_bounds[0m
+  [96m├─ [Trace] 记录静态引用事实: sha256_transform -> .data:.data+0x2bf460 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: sha256_transform +0x8c4 -> mov rdi, 0xffffffff830bf460[0m
+  [93m├─ [Trace] 截获编译器插桩: __ubsan_handle_out_of_bounds[0m
+  [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> memcpy_orig (剩余队列: 0)[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+
+[1m[94m========================================================================[0m
+[1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+[1m[94m========================================================================[0m
+
+[1m[摘要][0m
+  - 已访问函数: 5
+  - Shim 命中数: 0
+  - 静态数据/地址引用数: 18
+  - 间接控制流命中数: 0
+  - 编译器插桩命中数: 14
+  - 致命失败数: 18
+  - 丢失符号数: 0
+  - 不可分析函数数: 0
+
+[93m[⚠️ 编译器插桩残留][0m
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__fentry__[0m
+    ├─ 案发现场: sha256 (+0x0 | 运行基址: [1m0x0[0m)
+    └─ 机器汇编: call __fentry__
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__ubsan_handle_out_of_bounds[0m
+    ├─ 案发现场: sha256 (+0x11c | 运行基址: [1m0x11c[0m)
+    └─ 机器汇编: call __ubsan_handle_out_of_bounds
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__stack_chk_fail[0m
+    ├─ 案发现场: sha256 (+0x123 | 运行基址: [1m0x123[0m)
+    └─ 机器汇编: call __stack_chk_fail
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__fentry__[0m
+    ├─ 案发现场: sha256_update (+0x0 | 运行基址: [1m0x0[0m)
+    └─ 机器汇编: call __fentry__
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__stack_chk_fail[0m
+    ├─ 案发现场: sha256_update (+0x164 | 运行基址: [1m0x164[0m)
+    └─ 机器汇编: call __stack_chk_fail
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__fentry__[0m
+    ├─ 案发现场: sha256_transform (+0x0 | 运行基址: [1m0x0[0m)
+    └─ 机器汇编: call __fentry__
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__ubsan_handle_out_of_bounds[0m
+    ├─ 案发现场: sha256_transform (+0x73f | 运行基址: [1m0x73f[0m)
+    └─ 机器汇编: call __ubsan_handle_out_of_bounds
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__ubsan_handle_out_of_bounds[0m
+    ├─ 案发现场: sha256_transform (+0x77a | 运行基址: [1m0x77a[0m)
+    └─ 机器汇编: call __ubsan_handle_out_of_bounds
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__ubsan_handle_out_of_bounds[0m
+    ├─ 案发现场: sha256_transform (+0x7b6 | 运行基址: [1m0x7b6[0m)
+    └─ 机器汇编: call __ubsan_handle_out_of_bounds
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__ubsan_handle_out_of_bounds[0m
+    ├─ 案发现场: sha256_transform (+0x7f3 | 运行基址: [1m0x7f3[0m)
+    └─ 机器汇编: call __ubsan_handle_out_of_bounds
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__ubsan_handle_out_of_bounds[0m
+    ├─ 案发现场: sha256_transform (+0x82f | 运行基址: [1m0x82f[0m)
+    └─ 机器汇编: call __ubsan_handle_out_of_bounds
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__ubsan_handle_out_of_bounds[0m
+    ├─ 案发现场: sha256_transform (+0x86a | 运行基址: [1m0x86a[0m)
+    └─ 机器汇编: call __ubsan_handle_out_of_bounds
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__ubsan_handle_out_of_bounds[0m
+    ├─ 案发现场: sha256_transform (+0x8a5 | 运行基址: [1m0x8a5[0m)
+    └─ 机器汇编: call __ubsan_handle_out_of_bounds
+  [vmlinux-5.15.0-119-generic] 目标符号: [91m__ubsan_handle_out_of_bounds[0m
+    ├─ 案发现场: sha256_transform (+0x8e7 | 运行基址: [1m0x8e7[0m)
+    └─ 机器汇编: call __ubsan_handle_out_of_bounds
+
+[91m[❌ HARD FAILS - 物理层崩溃预警][0m
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x839c0)
+    ├─ 案发现场: sha256 (+0x9e | 运行基址: [1m0x9e[0m)
+    └─ 触发指令: mov rsi, 0xffffffff822839c0
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.data+0x2bf340)
+    ├─ 案发现场: sha256 (+0x115 | 运行基址: [1m0x115[0m)
+    └─ 触发指令: mov rdi, 0xffffffff830bf340
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x83a00)
+    ├─ 案发现场: sha256_transform (+0x313 | 运行基址: [1m0x313[0m)
+    └─ 触发指令: add esi, dword ptr [rdi*4 - 0x7dd7c600]
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x83a04)
+    ├─ 案发现场: sha256_transform (+0x395 | 运行基址: [1m0x395[0m)
+    └─ 触发指令: add edx, dword ptr [rdi*4 - 0x7dd7c5fc]
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x83a08)
+    ├─ 案发现场: sha256_transform (+0x40d | 运行基址: [1m0x40d[0m)
+    └─ 触发指令: add eax, dword ptr [rdi*4 - 0x7dd7c5f8]
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x83a0c)
+    ├─ 案发现场: sha256_transform (+0x488 | 运行基址: [1m0x488[0m)
+    └─ 触发指令: add ebx, dword ptr [rdi*4 - 0x7dd7c5f4]
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x83a10)
+    ├─ 案发现场: sha256_transform (+0x4fc | 运行基址: [1m0x4fc[0m)
+    └─ 触发指令: add esi, dword ptr [rdi*4 - 0x7dd7c5f0]
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x83a14)
+    ├─ 案发现场: sha256_transform (+0x57b | 运行基址: [1m0x57b[0m)
+    └─ 触发指令: add ecx, dword ptr [rdi*4 - 0x7dd7c5ec]
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x83a18)
+    ├─ 案发现场: sha256_transform (+0x5fa | 运行基址: [1m0x5fa[0m)
+    └─ 触发指令: add ecx, dword ptr [rdi*4 - 0x7dd7c5e8]
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x83a1c)
+    ├─ 案发现场: sha256_transform (+0x67c | 运行基址: [1m0x67c[0m)
+    └─ 触发指令: add esi, dword ptr [r10*4 - 0x7dd7c5e4]
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.data+0x2bf480)
+    ├─ 案发现场: sha256_transform (+0x723 | 运行基址: [1m0x723[0m)
+    └─ 触发指令: mov rdi, 0xffffffff830bf480
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.data+0x2bf3a0)
+    ├─ 案发现场: sha256_transform (+0x75e | 运行基址: [1m0x75e[0m)
+    └─ 触发指令: mov rdi, 0xffffffff830bf3a0
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.data+0x2bf3c0)
+    ├─ 案发现场: sha256_transform (+0x799 | 运行基址: [1m0x799[0m)
+    └─ 触发指令: mov rdi, 0xffffffff830bf3c0
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.data+0x2bf3e0)
+    ├─ 案发现场: sha256_transform (+0x7d6 | 运行基址: [1m0x7d6[0m)
+    └─ 触发指令: mov rdi, 0xffffffff830bf3e0
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.data+0x2bf400)
+    ├─ 案发现场: sha256_transform (+0x813 | 运行基址: [1m0x813[0m)
+    └─ 触发指令: mov rdi, 0xffffffff830bf400
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.data+0x2bf420)
+    ├─ 案发现场: sha256_transform (+0x84e | 运行基址: [1m0x84e[0m)
+    └─ 触发指令: mov rdi, 0xffffffff830bf420
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.data+0x2bf440)
+    ├─ 案发现场: sha256_transform (+0x889 | 运行基址: [1m0x889[0m)
+    └─ 触发指令: mov rdi, 0xffffffff830bf440
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.data+0x2bf460)
+    ├─ 案发现场: sha256_transform (+0x8c4 | 运行基址: [1m0x8c4[0m)
+    └─ 触发指令: mov rdi, 0xffffffff830bf460
+
+[96m[📦 静态数据 / 地址引用事实][0m
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256 (+0x9e | 运行基址: [1m0x9e[0m)
+    └─ 指令事实: mov rsi, 0xffffffff822839c0 (目标: .rodata+0x839c0)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256 (+0x115 | 运行基址: [1m0x115[0m)
+    └─ 指令事实: mov rdi, 0xffffffff830bf340 (目标: .data+0x2bf340)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x313 | 运行基址: [1m0x313[0m)
+    └─ 指令事实: add esi, dword ptr [rdi*4 - 0x7dd7c600] (目标: .rodata+0x83a00)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x395 | 运行基址: [1m0x395[0m)
+    └─ 指令事实: add edx, dword ptr [rdi*4 - 0x7dd7c5fc] (目标: .rodata+0x83a04)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x40d | 运行基址: [1m0x40d[0m)
+    └─ 指令事实: add eax, dword ptr [rdi*4 - 0x7dd7c5f8] (目标: .rodata+0x83a08)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x488 | 运行基址: [1m0x488[0m)
+    └─ 指令事实: add ebx, dword ptr [rdi*4 - 0x7dd7c5f4] (目标: .rodata+0x83a0c)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x4fc | 运行基址: [1m0x4fc[0m)
+    └─ 指令事实: add esi, dword ptr [rdi*4 - 0x7dd7c5f0] (目标: .rodata+0x83a10)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x57b | 运行基址: [1m0x57b[0m)
+    └─ 指令事实: add ecx, dword ptr [rdi*4 - 0x7dd7c5ec] (目标: .rodata+0x83a14)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x5fa | 运行基址: [1m0x5fa[0m)
+    └─ 指令事实: add ecx, dword ptr [rdi*4 - 0x7dd7c5e8] (目标: .rodata+0x83a18)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x67c | 运行基址: [1m0x67c[0m)
+    └─ 指令事实: add esi, dword ptr [r10*4 - 0x7dd7c5e4] (目标: .rodata+0x83a1c)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x723 | 运行基址: [1m0x723[0m)
+    └─ 指令事实: mov rdi, 0xffffffff830bf480 (目标: .data+0x2bf480)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x75e | 运行基址: [1m0x75e[0m)
+    └─ 指令事实: mov rdi, 0xffffffff830bf3a0 (目标: .data+0x2bf3a0)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x799 | 运行基址: [1m0x799[0m)
+    └─ 指令事实: mov rdi, 0xffffffff830bf3c0 (目标: .data+0x2bf3c0)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x7d6 | 运行基址: [1m0x7d6[0m)
+    └─ 指令事实: mov rdi, 0xffffffff830bf3e0 (目标: .data+0x2bf3e0)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x813 | 运行基址: [1m0x813[0m)
+    └─ 指令事实: mov rdi, 0xffffffff830bf400 (目标: .data+0x2bf400)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x84e | 运行基址: [1m0x84e[0m)
+    └─ 指令事实: mov rdi, 0xffffffff830bf420 (目标: .data+0x2bf420)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x889 | 运行基址: [1m0x889[0m)
+    └─ 指令事实: mov rdi, 0xffffffff830bf440 (目标: .data+0x2bf440)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .data | 节区权限: RW- | reloc=11
+    ├─ 所在函数: sha256_transform (+0x8c4 | 运行基址: [1m0x8c4[0m)
+    └─ 指令事实: mov rdi, 0xffffffff830bf460 (目标: .data+0x2bf460)
+
+[96m[🔌 Shim 边界成功拦截][0m
+  - 无或未命中
+
+[96m[🔀 间接控制流 / 盲跳][0m
+  [93m注意: 请在用户态确认这些位置的函数指针或跳转表已被合法初始化。[0m
+  - 无间接跳转
+
+[1m[最终结论][0m [91mFAIL[0m (exit code: 1)
+[1m[94m=========================== 报告结束 ===========================[0m

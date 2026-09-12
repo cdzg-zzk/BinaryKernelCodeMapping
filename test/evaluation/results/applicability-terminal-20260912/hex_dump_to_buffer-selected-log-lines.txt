@@ -1,0 +1,31 @@
+19557: [1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+19558: [1m[94m========================================================================[0m
+19559: 
+19560: [1m[摘要][0m
+19561:   - 已访问函数: 1834
+19562:   - Shim 命中数: 0
+19563:   - 静态数据/地址引用数: 6405
+19564:   - 间接控制流命中数: 408
+19565:   - 编译器插桩命中数: 2230
+19566:   - 致命失败数: 3542
+19567:   - 丢失符号数: 0
+19568:   - 不可分析函数数: 716
+19569: 
+26263:   [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (hex_asc+0x0)
+26264:     ├─ 案发现场: hex_dump_to_buffer (+0xa0 | 运行基址: [1m0xa0[0m)
+26265:     └─ 触发指令: movzx edx, byte ptr [rdx - 0x7dd7c680]
+26266:   [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (hex_asc+0x0)
+26267:     ├─ 案发现场: hex_dump_to_buffer (+0x113 | 运行基址: [1m0x113[0m)
+26268:     └─ 触发指令: movzx edx, byte ptr [rdx - 0x7dd7c680]
+29167:   [vmlinux-5.15.0-119-generic] 崩溃类型: 特权指令 / 控制寄存器访问
+29168:     ├─ 案发现场: __save_processor_state.constprop.0 (+0x10d | 运行基址: [1m0x10d[0m)
+29169:     └─ 触发指令: mov rax, cr4
+30118:   [vmlinux-5.15.0-119-generic] 崩溃类型: 特权指令 / 控制寄存器访问
+30119:     ├─ 案发现场: __apply_microcode_amd (+0x17 | 运行基址: [1m0x17[0m)
+30120:     └─ 触发指令: wrmsr
+36892:     * [vmlinux-5.15.0-119-generic] format_decode: 无法从节内偏移解析目标函数 (symbol=.text, target_offset=0xd5dee0)
+36893:     * [vmlinux-5.15.0-119-generic] set_field_width: 无法从节内偏移解析目标函数 (symbol=.text, target_offset=0xd5def9)
+36894:     * [vmlinux-5.15.0-119-generic] set_precision: 无法从节内偏移解析目标函数 (symbol=.text, target_offset=0xd5df0e)
+58872: 
+58873: [1m[最终结论][0m [91mFAIL[0m (exit code: 1)
+58874: [1m[94m=========================== 报告结束 ===========================[0m

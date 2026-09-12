@@ -1,0 +1,78 @@
+[1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+[93m[*] 未提供模块列表，将只在 vmlinux 中解析符号。[0m
+[*] 已加载 34 个 Shim 平替规则。
+[*] 正在解析 vmlinux: /usr/lib/debug/boot/vmlinux-5.15.0-119-generic
+[*] vmlinux 解析完成。
+[*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+[*] 已载入 191940 个活体内核符号。
+[1m[*] 开始构建依赖闭包并执行扫描...[0m
+  [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> sort (剩余队列: 0)[0m
+  [96m├─ [Trace] 加入待分析队列: sort_r <- sort -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> sort_r (剩余队列: 0)[0m
+  [93m├─ [Trace] 截获 Retpoline 间接跳: __x86_indirect_thunk_r12[0m
+  [93m├─ [Trace] 截获 Retpoline 间接跳: __x86_indirect_thunk_rax[0m
+  [93m├─ [Trace] 截获 Retpoline 间接跳: __x86_indirect_thunk_rbx[0m
+  [93m├─ [Trace] 截获 Retpoline 间接跳: __x86_indirect_thunk_rax[0m
+  [96m├─ [Trace] 加入待分析队列: do_swap <- sort_r -> 同节直接跳转[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> do_swap (剩余队列: 0)[0m
+  [93m├─ [Trace] 截获 Retpoline 间接跳: __x86_indirect_thunk_rcx[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+
+[1m[94m========================================================================[0m
+[1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+[1m[94m========================================================================[0m
+
+[1m[摘要][0m
+  - 已访问函数: 3
+  - Shim 命中数: 0
+  - 静态数据/地址引用数: 0
+  - 间接控制流命中数: 5
+  - 编译器插桩命中数: 0
+  - 致命失败数: 0
+  - 丢失符号数: 0
+  - 不可分析函数数: 0
+
+[92m[ℹ️ 基础检查][0m 未发现特权指令、控制寄存器访问或绝对地址重定位。
+  [92m闭包路径在当前输入范围内是完整的。[0m
+
+[96m[📦 静态数据 / 地址引用事实][0m
+  - 无静态数据 / 地址引用事实
+
+[96m[🔌 Shim 边界成功拦截][0m
+  - 无或未命中
+
+[96m[🔀 间接控制流 / 盲跳][0m
+  [93m注意: 请在用户态确认这些位置的函数指针或跳转表已被合法初始化。[0m
+  [vmlinux-5.15.0-119-generic] 控制流: Retpoline 包装的盲跳 (__x86_indirect_thunk_r12)
+    ├─ 所在函数: sort_r (+0x8e | 运行基址: [1m0x8e[0m)
+    ├─ 执行指令: call __x86_indirect_thunk_r12
+    ├─ 参与寻址的寄存器: r12
+    └─ 来源追踪 [r12]: mov r12, rcx @ 0x12 | 运行基址: [1m0x12[0m | 读取寄存器: rcx
+  [vmlinux-5.15.0-119-generic] 控制流: Retpoline 包装的盲跳 (__x86_indirect_thunk_rax)
+    ├─ 所在函数: sort_r (+0xbc | 运行基址: [1m0xbc[0m)
+    ├─ 执行指令: call __x86_indirect_thunk_rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rbp - 0x38] @ 0xb8 | 运行基址: [1m0xb8[0m | 读取寄存器: rbp
+  [vmlinux-5.15.0-119-generic] 控制流: Retpoline 包装的盲跳 (__x86_indirect_thunk_rbx)
+    ├─ 所在函数: sort_r (+0xfa | 运行基址: [1m0xfa[0m)
+    ├─ 执行指令: call __x86_indirect_thunk_rbx
+    ├─ 参与寻址的寄存器: rbx
+    └─ 来源追踪 [rbx]: mov rbx, r12 @ 0xe4 | 运行基址: [1m0xe4[0m | 读取寄存器: r12
+  [vmlinux-5.15.0-119-generic] 控制流: Retpoline 包装的盲跳 (__x86_indirect_thunk_rax)
+    ├─ 所在函数: sort_r (+0x140 | 运行基址: [1m0x140[0m)
+    ├─ 执行指令: call __x86_indirect_thunk_rax
+    ├─ 参与寻址的寄存器: rax
+    └─ 来源追踪 [rax]: mov rax, qword ptr [rbp - 0x38] @ 0x136 | 运行基址: [1m0x136[0m | 读取寄存器: rbp
+  [vmlinux-5.15.0-119-generic] 控制流: Retpoline 包装的盲跳 (__x86_indirect_thunk_rcx)
+    ├─ 所在函数: do_swap (+0x15 | 运行基址: [1m0x15[0m)
+    ├─ 执行指令: call __x86_indirect_thunk_rcx
+    ├─ 参与寻址的寄存器: rcx
+    └─ 来源追踪 [rcx]: 根据 thunk 名称推断目标寄存器为 rcx，但在当前函数内未找到更早的写入指令
+
+[1m[最终结论][0m [92mPASS[0m (exit code: 0)
+[1m[94m=========================== 报告结束 ===========================[0m

@@ -1,0 +1,25 @@
+{
+  "status": "pass",
+  "archive_file_count": 4318,
+  "raw_audit_byte_identical": true,
+  "coverage_normalized_findings_equal": true,
+  "replay_directory": "/tmp/bch-heap-final-replay-iwh3hzcq",
+  "commands": [
+    [
+      "python3",
+      "/tmp/bch-heap-final-replay-iwh3hzcq/observation-tools/bch_heap_audit.py",
+      "/tmp/bch-heap-final-replay-iwh3hzcq/evidence/validation/bch_heap",
+      "--output",
+      "/tmp/bch-heap-final-replay-iwh3hzcq/replayed-audit.json"
+    ],
+    [
+      "python3",
+      "/tmp/bch-heap-final-replay-iwh3hzcq/observation-tools/bch_heap_coverage.py",
+      "/tmp/bch-heap-final-replay-iwh3hzcq",
+      "--archived-inputs",
+      "--report",
+      "/tmp/bch-heap-final-replay-iwh3hzcq/replayed-coverage.json"
+    ]
+  ],
+  "scope": "fresh extraction of final compact archive; actual snapshots and source/binary inputs only; no target code execution"
+}

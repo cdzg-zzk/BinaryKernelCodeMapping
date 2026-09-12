@@ -1,0 +1,75 @@
+[1m[94m=== LKM 跨边界二进制静态分析引擎 ===[0m
+[93m[*] 未提供模块列表，将只在 vmlinux 中解析符号。[0m
+[*] 已加载 34 个 Shim 平替规则。
+[*] 正在解析 vmlinux: /usr/lib/debug/boot/vmlinux-5.15.0-119-generic
+[*] vmlinux 解析完成。
+[*] 正在尝试读取 /proc/kallsyms 以补充运行时虚拟地址...
+[*] 已载入 191940 个活体内核符号。
+[1m[*] 开始构建依赖闭包并执行扫描...[0m
+  [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> string_escape_mem (剩余队列: 0)[0m
+  [96m├─ [Trace] 记录静态引用事实: string_escape_mem -> .rodata:_ctype+0x0 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: string_escape_mem +0xb8 -> movzx eax, byte ptr [rsi - 0x7dd6c820][0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 加入待分析队列: strchr <- string_escape_mem -> 本 ELF 可执行符号[0m
+  [96m├─ [Trace] 记录静态引用事实: string_escape_mem -> .rodata:.rodata+0x83860 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: string_escape_mem +0x1a9 -> movzx esi, byte ptr [rax - 0x7dd7c7a0][0m
+  [96m├─ [Trace] 记录静态引用事实: string_escape_mem -> .rodata:hex_asc+0x0 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: string_escape_mem +0x1f9 -> movzx eax, byte ptr [rax - 0x7dd7c680][0m
+  [96m├─ [Trace] 记录静态引用事实: string_escape_mem -> .rodata:hex_asc+0x0 (reloc=11)[0m
+  [93m├─ [Warn] 命中绝对地址重定位: string_escape_mem +0x211 -> movzx eax, byte ptr [r8 - 0x7dd7c680][0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 深入分析: vmlinux-5.15.0-119-generic -> strchr (剩余队列: 0)[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+  [96m├─ [Trace] 截获 Retpoline 安全返回: __x86_return_thunk (忽略)[0m
+
+[1m[94m========================================================================[0m
+[1m[94m====================== FINAL REUSE MANIFEST ==========================[0m
+[1m[94m========================================================================[0m
+
+[1m[摘要][0m
+  - 已访问函数: 2
+  - Shim 命中数: 0
+  - 静态数据/地址引用数: 4
+  - 间接控制流命中数: 0
+  - 编译器插桩命中数: 0
+  - 致命失败数: 4
+  - 丢失符号数: 0
+  - 不可分析函数数: 0
+
+[91m[❌ HARD FAILS - 物理层崩溃预警][0m
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (_ctype+0x0)
+    ├─ 案发现场: string_escape_mem (+0xb8 | 运行基址: [1m0xb8[0m)
+    └─ 触发指令: movzx eax, byte ptr [rsi - 0x7dd6c820]
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (.rodata+0x83860)
+    ├─ 案发现场: string_escape_mem (+0x1a9 | 运行基址: [1m0x1a9[0m)
+    └─ 触发指令: movzx esi, byte ptr [rax - 0x7dd7c7a0]
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (hex_asc+0x0)
+    ├─ 案发现场: string_escape_mem (+0x1f9 | 运行基址: [1m0x1f9[0m)
+    └─ 触发指令: movzx eax, byte ptr [rax - 0x7dd7c680]
+  [vmlinux-5.15.0-119-generic] 崩溃类型: 绝对地址寻址 (hex_asc+0x0)
+    ├─ 案发现场: string_escape_mem (+0x211 | 运行基址: [1m0x211[0m)
+    └─ 触发指令: movzx eax, byte ptr [r8 - 0x7dd7c680]
+
+[96m[📦 静态数据 / 地址引用事实][0m
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: string_escape_mem (+0xb8 | 运行基址: [1m0xb8[0m)
+    └─ 指令事实: movzx eax, byte ptr [rsi - 0x7dd6c820] (目标: _ctype+0x0)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: string_escape_mem (+0x1a9 | 运行基址: [1m0x1a9[0m)
+    └─ 指令事实: movzx esi, byte ptr [rax - 0x7dd7c7a0] (目标: .rodata+0x83860)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: string_escape_mem (+0x1f9 | 运行基址: [1m0x1f9[0m)
+    └─ 指令事实: movzx eax, byte ptr [rax - 0x7dd7c680] (目标: hex_asc+0x0)
+  [vmlinux-5.15.0-119-generic] [93m[WRITABLE][0m .rodata | 节区权限: RW- | reloc=11
+    ├─ 所在函数: string_escape_mem (+0x211 | 运行基址: [1m0x211[0m)
+    └─ 指令事实: movzx eax, byte ptr [r8 - 0x7dd7c680] (目标: hex_asc+0x0)
+
+[96m[🔌 Shim 边界成功拦截][0m
+  - 无或未命中
+
+[96m[🔀 间接控制流 / 盲跳][0m
+  [93m注意: 请在用户态确认这些位置的函数指针或跳转表已被合法初始化。[0m
+  - 无间接跳转
+
+[1m[最终结论][0m [91mFAIL[0m (exit code: 1)
+[1m[94m=========================== 报告结束 ===========================[0m
