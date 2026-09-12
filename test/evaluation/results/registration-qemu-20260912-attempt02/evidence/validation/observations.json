@@ -1,0 +1,108 @@
+{
+  "scope": "KVM functional mechanism fixture; synthetic file backing, no API performance",
+  "kernel": "5.15.198",
+  "guest_uid": 0,
+  "boot_id": "3bbd7a88-728d-4ab9-8e5a-81083c741c52",
+  "phases": [
+    {
+      "phase": "before_registration",
+      "owner_refcnt": 0
+    },
+    {
+      "phase": "manager_ready_file",
+      "owner_refcnt": 0
+    },
+    {
+      "phase": "three_reader_processes_mapped",
+      "owner_refcnt": 0
+    },
+    {
+      "phase": "unprivileged_operations_completed",
+      "owner_refcnt": 0
+    },
+    {
+      "phase": "after_permission_observations",
+      "owner_refcnt": 0
+    },
+    {
+      "phase": "readers_closed_before_restore",
+      "owner_refcnt": 0
+    },
+    {
+      "phase": "after_restore",
+      "owner_refcnt": 0
+    }
+  ],
+  "source_address": 18446744072635875328,
+  "source_pfn": 33099,
+  "parent_mapping": {
+    "pid": 141,
+    "address": 139689494794240,
+    "pfn": 33099,
+    "bytes_sha256": "ca8d9370c131adbcd1334e2d494ae20731e892a2f5f2d942d15217469669de9f"
+  },
+  "child_mappings": [
+    {
+      "pid": 148,
+      "address": 140615024869376,
+      "pfn": 33099,
+      "bytes_sha256": "ca8d9370c131adbcd1334e2d494ae20731e892a2f5f2d942d15217469669de9f"
+    },
+    {
+      "pid": 149,
+      "address": 140449521008640,
+      "pfn": 33099,
+      "bytes_sha256": "ca8d9370c131adbcd1334e2d494ae20731e892a2f5f2d942d15217469669de9f"
+    }
+  ],
+  "unprivileged_operations": {
+    "pid": 150,
+    "uid": 65534,
+    "gid": 65534,
+    "cap_eff": "0000000000000000",
+    "open_rdwr": {
+      "errno": 1
+    },
+    "truncate": {
+      "errno": 1
+    },
+    "shared_address": 139965957365760,
+    "shared_bytes_sha256": "ca8d9370c131adbcd1334e2d494ae20731e892a2f5f2d942d15217469669de9f",
+    "shared_mprotect": {
+      "result": -1,
+      "errno": 13
+    },
+    "private_mprotect": {
+      "result": 0,
+      "errno": 0
+    },
+    "private_address": 139965957361664,
+    "private_bytes_sha256": "3043a1e40f1a83809dc6730df33fec55dc205a3a7503c20551de4ed0518fa169",
+    "shared_pfn": 33099,
+    "private_pfn": 257585
+  },
+  "readonly_store_signal": 11,
+  "private_mprotect_result": 0,
+  "private_mprotect_errno": 0,
+  "private_after_store": {
+    "pid": 141,
+    "address": 139689494794240,
+    "pfn": 36097,
+    "bytes_sha256": "3043a1e40f1a83809dc6730df33fec55dc205a3a7503c20551de4ed0518fa169"
+  },
+  "source_after_private_store": {
+    "pid": 141,
+    "address": 139689494790144,
+    "pfn": 33099,
+    "bytes_sha256": "ca8d9370c131adbcd1334e2d494ae20731e892a2f5f2d942d15217469669de9f"
+  },
+  "manager_exit_code": 0,
+  "restored_mapping": {
+    "pid": 141,
+    "address": 139689494794240,
+    "pfn": 260979,
+    "bytes_sha256": "f302957da5220938a7e3e51a8718c79b9e00dc13ab2119e8cfc978f041720382"
+  },
+  "owner_absent_after_ordered_unload": true,
+  "complete": true
+}

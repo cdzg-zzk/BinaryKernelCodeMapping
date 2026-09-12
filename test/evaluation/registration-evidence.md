@@ -67,3 +67,43 @@ during Clocktime collection.
 Group B remains open. The current benchmark's controlled owner lifetime and
 successful output checks are useful evidence within their scope; they do not
 close the broader lifetime and failure-atomicity claims in the manuscript.
+
+## Isolated runtime observations, 2026-09-12
+
+[`registration_qemu.py`](registration_qemu.py) runs the existing packaged
+5.15.198 kernel, `vkso_m09_clock.ko`, `page_cache_replace.ko`, manager and
+Clocktime PFN observer in a private KVM guest. It has a fresh ext4 image and
+no network or shared host filesystem. The host loads no modules. The full
+registration implementation is unchanged; a two-page synthetic file supplies
+one controlled file offset for the mechanism checks. This fixture neither
+calls a reduced Clocktime API nor measures API/setup performance.
+
+Two guest sessions completed. [Attempt 01](results/registration-qemu-20260912-attempt01/evidence/validation/observations.json)
+observed three reader processes and the ordered lifecycle. [Attempt 02](results/registration-qemu-20260912-attempt02/evidence/validation/observations.json)
+added an ordinary UID/GID 65534 reader with no effective capabilities. The
+file belonged to that UID with mode 0666, so its file-operation denials did
+not result from a missing DAC write permission. All ordinary-user operations
+were performed after the manager ready file appeared; pre-existing writable
+descriptors and the interval before immutable activation were not exercised.
+
+| Invariant or question | Exercised path | Required observation | Actual result in attempt 02 | Implementation location |
+| --- | --- | --- | --- | --- |
+| Shared physical backing | Three independent initial readers and one unprivileged `MAP_SHARED` reader | All faulted aliases match the kernel PFN | All four match PFN 33099 | `add_page_to_cache()` and the normal file-fault path |
+| Read-only PTE integrity | Ring-3 store through a read-only private mapping | Store faults | Child receives SIGSEGV (11) | Normal page protection |
+| Private write integrity | Root and UID 65534 `MAP_PRIVATE`, `mprotect(RW)`, then store | COW page differs from kernel backing; fresh source mapping unchanged | Private PFNs 36097 and 257585; fresh source remains 33099 with unchanged bytes | Normal private COW path |
+| Shared write permission | UID 65534 read-only fd, `MAP_SHARED`, then `mprotect(RW)` | Write permission is refused | EACCES (13) | File-backed mapping permission checks |
+| Registered file integrity for new operations | UID 65534 opens RDWR or truncates the owned mode-0666 file after ready | Operations are refused | Both return EPERM (1) | Manager immutable-file state |
+| Ordered release | Close every reader, signal manager, verify restored bytes, unload owner | Original file backing returns before owner unload | Restored PFN 260979 with original bytes; manager exits 0; owner unload succeeds | Manager restore and runner ordering |
+| Independent owner pin | Read `/sys/module/vkso_m09_clock/refcnt` before registration, after ready, with readers, and after restore | Explicit module pin would increase the refcount | All seven observations are 0 | Registration path has no owner-module acquisition |
+
+The guest console, manager log, page plan and kernel PFN records are retained
+beside each observation file. Neither guest produced a kernel panic, BUG or
+WARNING. The expected user-mode SIGSEGV was captured as the write-protection
+result. Attempt 01 independently observed owner refcount 0 at all six phases,
+three matching source PFNs, private COW and successful ordered cleanup.
+
+These results establish the exercised mapping and normal-release behavior.
+They confirm that this registration path does not increase the tested owner's
+module refcount; no active-owner unload was attempted. Partial-registration
+failure, other owners, page-reference balance, page-co-location policy and
+whole-session time/resource accounting remain separate B requirements.

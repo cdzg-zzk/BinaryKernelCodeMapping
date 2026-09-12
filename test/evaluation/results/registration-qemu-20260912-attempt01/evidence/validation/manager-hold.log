@@ -1,0 +1,49 @@
+=== ELF Section Replace Tool ===
+Command: replace --hold
+
+Target file: /work/validation/fixture.bin
+Page map: /work/validation/page_mappings.txt
+Loaded 1 explicit reusable page mappings from /work/validation/page_mappings.txt
+File size: 8192 bytes
+page 1: 7f6f9304d001
+page 4097: 7f6f9304e001
+
+=== Using builder-generated replacement plan ===
+Target file: /work/validation/fixture.bin
+Reusable pages: 1
+  [000] file_offset=0x1000 kernel_vaddr=0xffffffffc0010000 kind=text section=.fixture_text
+Total unique pages to replace: 1
+Planned replace mappings (page_count=1)
+  [000] file_offset=0x1000 kernel_vaddr=0xffffffffc0010000
+
+=== Sending replace batches ===
+Sending replace batch 1/1 (1 pages)
+Netlink replace payload (page_count=1)
+  [000] file_offset=0x1000 kernel_vaddr=0xffffffffc0010000
+Sent netlink message with protocol 30
+Waiting for kernel to process replace request...
+SUCCESS: ELF section replace completed
+
+=== ELF section replace completed successfully ===
+Set immutable flag on /work/validation/fixture.bin
+Wrote manager state: /work/runtime/manager.state
+Holding active replacement session. Send SIGTERM/SIGINT/SIGHUP to restore.
+Restore signal received; restoring active replacement session...
+
+=== Using builder-generated restore plan ===
+Target file: /work/validation/fixture.bin
+Reusable pages: 1
+  [000] file_offset=0x1000 kernel_vaddr=0xffffffffc0010000 kind=text section=.fixture_text
+Total unique pages to restore: 1
+Planned restore mappings (page_count=1)
+  [000] file_offset=0x1000 kernel_vaddr=0xffffffffc0010000
+
+=== Sending restore batches ===
+Sending restore batch 1/1 (1 pages)
+Netlink restore payload (addresses shown for reference) (page_count=1)
+  [000] file_offset=0x1000 kernel_vaddr=0xffffffffc0010000
+Sent netlink message with protocol 29
+Waiting for kernel to process restore request...
+SUCCESS: ELF section restore completed
+Cleared manager-added immutable flag on /work/validation/fixture.bin
+Manager hold session restored and exiting.

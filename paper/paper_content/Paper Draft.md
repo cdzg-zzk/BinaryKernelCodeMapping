@@ -215,7 +215,7 @@ Builder 不按原始 ELF section name 猜测权限，而是在 manifest 中为�
 
 ## Load-time Validation and Resident-page Grafting
 
-Kernel manager 消费 builder 生成的 manifest，并把其中的 logical carrier pages 与当前运行 kernel/LKM instance 对应起来。它先确认 runtime text 仍满足经过分析的 control-flow closure，再验证 source page、权限与生命周期并注册 resident backing。Stub DSO 的 ELF identity 和 loader-visible layout 在这一过程中保持不变。
+Kernel manager 消费 builder 生成的 manifest，并把其中的 logical carrier pages 与当前运行 kernel/LKM instance 对应起来。装载流程核对 runtime text 和页面计划，再请求注册 resident backing。LKM owner 的驻留和清理由部署 runner 管理。Stub DSO 的 ELF identity 和 loader-visible layout 在这一过程中保持不变。
 
 ### Final Runtime Machine-code Validation
 
@@ -227,9 +227,9 @@ Indirect Target Selection（ITS）说明了这项检查的必要性：编译时�
 
 ### Registering Resident Backing
 
-`ld.so` 装载 Stub DSO 后，reusable `PT_LOAD` ranges 形成普通 file-backed VMAs。每个 logical page 可由 Stub DSO file offset 转换为 `pgoff_t`，并经 inode 定位到相应 `address_space` entry。Manager 逐项校验 manifest 中的 source address、page alignment、backing class and user permission，再把该 file offset 注册为指向对应 kernel/LKM resident `struct page`。应用可见的 VMA、symbol address and shared-object identity 均不改变。
+`ld.so` 装载 Stub DSO 后，reusable `PT_LOAD` ranges 形成普通 file-backed VMAs。每个 logical page 可由 Stub DSO file offset 转换为 `pgoff_t`，并经 inode 定位到相应 `address_space` entry。Manager 检查页面计划的地址对齐、类别标签、重复项和文件范围，再把该 file offset 注册为指向对应 kernel/LKM resident `struct page`。用户映射权限由 carrier segments 和原生 loader 路径决定。应用可见的 VMA、symbol address and shared-object identity 均不改变。
 
-Registration 同时建立 backing lifetime。对于 LKM pages，manager 持有 module and page references；解除映射、进程退出或注册失败时撤销已建立的关系并释放引用。因而 file-offset binding 不会在 source module/page 已失效后继续存在，部分失败也不会留下可访问的半成品 carrier。
+注册路径为复用页获取 page references，并在备份记录中保存 file-offset bindings。LKM owner 装载后，runner 才开始注册并运行应用；应用结束后 manager 请求恢复绑定，runner 随后卸载 owner。当前路径不获取独立的 owner module references。逐页注册遇错时停止处理后续页面，此前成功的绑定留在备份记录中，由后续恢复请求处理。
 
 ### Fault-Driven PTE Installation and Execution
 
@@ -706,6 +706,24 @@ VKSO/Copy 的成功 snapshot 约为 45.158 cycles，Raw 约为 43.151。Hres ret
 
 **Takeaway.** Clocktime 将动态发布、namespace 状态和 fallback 所需的计算合并为同一 resident core，完整 product source 减少 13.29%，reader machine-code closure 减少 22.13%。公开 READ 的等权平均开销约 0.92%，同时存在短入口和并发吞吐的可见代价；普通内核 coarse reader 也增加约两 cycles。当前跨启动 writer 数据变化较大，尚不支持稳定的 publisher 性能收益。该案例证明完整状态子系统的共享执行可行，并量化了这种重构在两端的成本。
 
+## Registration and Mapping Behavior
+
+我们在独立 KVM guest 中使用同一套 5.15.198 kernel、owner module 和页面管理器检查注册到释放的行为。测试把 owner 的一张 text page 注册到合成文件的指定页偏移，直接比较 kernel/user PFN；这里测量映射行为，不采集 API 性能。扩展会话包含四个独立 reader 进程，其中一个以 UID/GID 65534、无 effective capabilities 运行。文件属于该用户且权限为 0666，文件操作测试从 manager 建立 ready 文件后开始。
+
+**Table 21: Registration, mapping and ordered-release observations.** The fixture uses the unchanged registration implementation and a controlled file offset. PFN equality is checked after faulting each mapping.
+
+| 检查对象 | 实际路径 | 观察结果 |
+| --- | --- | --- |
+| 物理页共享 | 四个进程读取注册页 | 四个 user PFN 均等于 kernel PFN |
+| 只读映射 | 对只读 PTE 执行用户态 store | SIGSEGV |
+| 私有写入 | 特权与非特权进程分别对 MAP_PRIVATE 执行 mprotect(RW) 和 store | 均产生独立 COW PFN；源页内容不变 |
+| 共享写权限 | 非特权进程以只读 fd 建立 MAP_SHARED，再请求 mprotect(RW) | EACCES |
+| 新文件操作 | 非特权 owner 对已注册文件执行 open(RDWR) 和 truncate | 均为 EPERM |
+| 正常释放 | 关闭全部 reader，恢复绑定，再卸载 owner | 原文件内容恢复，manager 正常退出，owner 卸载成功 |
+| Owner 引用 | 注册前、ready 后、活跃 reader 期间及恢复后读取 module refcnt | 七个观察点均为 0 |
+
+这些结果表明，所测私有写入通过 COW 保持源页内容，正常退出顺序能够恢复文件后备。注册没有增加该 owner 的 module refcount，因此本组生命周期结果依赖 runner 保持 owner 驻留并按顺序清理。首次会话中的三个 reader 也观察到相同的共享、COW 和正常释放行为。
+
 ## Reproducibility
 
 First-touch、PGOT、LZ4、BCH 和 XZ 均提供单命令入口，正式参数和数据来源记录于对应 README 与 results directory。结果保留原始 CSV、环境与构建信息、功能校验、disassembly 和 page-map audit，分别支持数值复算与被测执行体核对。Clocktime 的 READ/UPDATE/CONCURRENT 由固定 boot/collect 流程生成，归档中记录内核变体、测量协议和逐轮样本。
@@ -734,9 +752,9 @@ Manifest 与 Stub DSO 绑定到一个确定的 final kernel build。Kernel updat
 
 ## Threat Model and Security Boundary
 
-本文信任 kernel、export builder、page-grafting manager、目标 kernel/LKM image 和 manifest。攻击者是能够装载已授权 Stub DSO 的普通非特权进程：它可以选择任意 API 参数、以任意顺序并发调用导出入口，并尝试通过 `mmap`、`mprotect` 或文件操作改变映射。阻止该进程写入 kernel memory、读取未授权 kernel data 或跳转到 export closure 之外属于本文的安全目标；隐藏已显式导出的机器码和只读常量则不属于目标，因为这些字节已按设计向该进程可见。
+本文信任 kernel、export builder、page-grafting manager、目标 kernel/LKM image 和 manifest。攻击者是能够装载已授权 Stub DSO 的普通非特权进程：它可以选择任意 API 参数、以任意顺序并发调用导出入口，并尝试通过 `mmap`、`mprotect` 或文件操作改变映射。保护目标是导出映射不赋予应用修改 kernel backing 或读取未授权 kernel pages 的能力。Closure 分析检查声明入口及其依赖的控制目标，page grafting 本身不限制进程执行其地址空间中的其他代码。已显式导出的机器码和只读常量按设计对该进程可见。
 
-**Write integrity.** Reusable text、rodata 和 shared state 在 Stub DSO 中分别以 user RX、R/NX 和 R/NX 权限映射，所有 user-writable data 都位于不指向 kernel PFN 的 DSO-private pages。活跃 grafting session 还将 Stub DSO backing file 标记为 immutable，防止文件内容在 kernel pages 占据 page cache 时被修改，并在恢复 grafting 关系后撤销由 manager 添加的标记。当前原型的权限测试覆盖正常 loader 路径；对 adversarial `mprotect` 或 `MAP_SHARED` 组合的完整 VM/file boundary 证明不在本文范围内。
+**Write integrity.** Reusable text、rodata 和 shared state 在 Stub DSO 中分别以 user RX、R/NX 和 R/NX 权限映射，user-writable data 使用不指向 kernel PFN 的私有页面。管理器在发送替换请求并等待后设置 carrier 文件的 immutable 标志，正常退出时发送恢复请求，再撤销自身添加的标志。Table 21 检查 ready 之后的只读 store、私有 COW、只读 fd 的共享映射权限，以及新发起的文件写打开和截断。该结果覆盖这些具体操作；注册前已持有的可写描述符及设置标志前的区间需要独立验证。
 
 **Page granularity.** Page grafting 以物理页为最小单位，因此导出一个符号也会使同一页内的其他字节可见。Shared-state builder 因此只接受占据完整、对齐页的显式允许列表对象。对 executable pages，安全部署应用专用 section/page 隔离 export closure，或证明页内所有 colocated symbols 均可向用户态暴露。当前原型能严格检查 synthetic thunk page 和 shared-data page；若普通 text page 上还共存未分析函数，则必须依靠 linker layout 隔离，否则该 page 不应导出。
 

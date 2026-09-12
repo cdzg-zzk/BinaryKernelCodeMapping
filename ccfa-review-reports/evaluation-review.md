@@ -9,9 +9,9 @@
 | 工作组 | 本轮进展 | 下一步具体交付 |
 | --- | --- | --- |
 | A：Clocktime | 20 次采集、全量原始记录核验、三方法结果报告及正文更新已完成 | 保留 writer 不确定性；如需解释其原因，另定诊断，不追逐有利重复 |
-| B：页面复用与装载 | 已追踪算法注册/恢复调用链；页引用及顺序清理存在，module 引用、完成确认与失败原子性证据有缺口 | 隔离验证当前契约，再完成同一会话的时间/PFN/资源账本；基础修复另行明确 |
+| B：页面复用与装载 | 两次 KVM 会话完成多进程 PFN、只读/COW、非特权文件操作及正常释放观察；活跃期 owner refcnt 为 0，正文已校正 | 补实际闭包的时间/资源账本及剩余边界；owner pinning、完成确认、事务回滚的基础方案仍须明确 |
 | C：PGOT 与真实算法 | 已核实三算法的部署/进程/轮次关系，修正报告生成器，复算 BCH 对照点；完整部署采集入口已准备 | Clocktime 结束后执行完整部署重复，分析 BCH 及实际 owner 内核成本 |
-| D：适用范围与导出工具 | 已固定 8 个待检查 API 案例，并将 4 个已有集成单列；静态检查/构造记录工具已准备 | 实际检查固定全集，导入既有适配证据，完成分类与可运行性验证 |
+| D：适用范围与导出工具 | 固定 8 例的原分析器正在执行；前三例已落盘，hex_dump_to_buffer 仍在展开依赖；缓存方案未获确认、未应用 | 完成固定全集，导入既有适配证据，完成分类与可运行性验证 |
 | E：真实应用集成 | 完整 CLI 已编译；普通 upstream/同源 DSO 在全 Silesia、两块大小的 48 个功能案例通过 | 验证真实 registered carrier，再在 C 的注册会话内采集应用结果 |
 | F：论文与结果呈现 | 已修正算法重复单位，并用完整 Normal 跨启动数据更新 Clocktime 正文及摘要/结论 | 随 B–E 的实际结果继续更新，再做全文一致性验收 |
 
@@ -137,7 +137,7 @@ Clocktime 的声明闭包运行时 PFN 检查已经补入 A；B 应复用其方�
 
 结果表字段：`target / native unique pages / VKSO unique pages / shared PFN matches / private bytes or pages / incremental pinned pages / net difference`。无法干净分离的通用基础设施开销单列，而非隐去。跨进程的普通 DSO 本来可以共享文件后备，因此不能将用户 text 节省按进程数线性相乘；还应允许私有支持页随进程数量增长，使小闭包的净收益为零或负。
 
-但草稿第 232 行声称 module/page references 维护 lifetime，第 705 行将普通进程的 mmap/mprotect/文件操作列入威胁模型，第 707 行又说权限测试只覆盖正常 loader。这是需要补证据的明确契约边界。正常退出时先停止 benchmark、再恢复映射和卸载模块，不等于活跃使用者仍在访问时的 lifetime 保证。
+先前草稿的 Registering Resident Backing 声称 module/page references 维护 lifetime，Threat Model and Security Boundary 又将普通进程的 mmap/mprotect/文件操作列入威胁模型。这是需要补证据的明确契约边界。正常退出时先停止 benchmark、再恢复映射和卸载模块，不等于活跃使用者仍在访问时的 lifetime 保证；当前正文已按下述源码和隔离观察校正，B 的完整要求仍保留。
 
 最小验证矩阵应覆盖：共享页用户写保护；私有可写数据不落在 kernel PFN；对声明支持的映射操作仍保持不变量；源模块有活跃映射时的卸载/拒绝策略；最后一个使用者结束后的释放；部分注册失败后的回滚；普通 text 页内共置符号的可公开性/隔离布局。mprotect 后若是合法私有 COW，判据应是无法修改 kernel backing，而非强求所有操作都返回同一个 errno。
 
@@ -145,9 +145,11 @@ Clocktime 的声明闭包运行时 PFN 检查已经补入 A；B 应复用其方�
 
 实际执行已进一步追踪 `run.sh → vkso exec → manager replace --hold → nl_recv_msg → batch_process_pages → add_page_to_cache` 以及恢复路径，见[注册证据记录](../test/evaluation/registration-evidence.md)。当前注册代码获取/释放 page references，但请求、备份记录及该调用链没有获取/释放 owner module references；runner 的先恢复后卸载是正常流程约束，不能代替并发 owner lifetime 保证。逐页注册遇错会退出批次，已成功页面留在备份中，callback 只记录错误；manager 没有接收逐请求结果，仍以等待两秒后的流程作为成功。这些代码事实不足以支撑正文中的完整 module-reference、失败原子性和精确完成确认主张。
 
-该结论来自实际入口、数据结构及清理调用链，已超过前次局部关键词搜索；仍需隔离验证活跃映射下的引用变化和失败路径，不能把源码问题推演成已经观察到的运行时破坏。已向用户报告这一基础实现边界，当前未修改注册协议、页引用或权限代码。若要补齐明确的 module pinning、内核完成结果和事务回滚，应先提交具体实现方案及原因；不能将正常性能采集的成功当作此类契约验收。普通页面权限也不能证明用户无法跳到所有其他可执行地址，控制闭包保证需保持明确的适用范围。
+该结论来自实际入口、数据结构及清理调用链；活跃映射下的引用变化现已由下述隔离会话观察，失败路径仍需验证，不能把源码问题推演成已经观察到的运行时破坏。已向用户报告这一基础实现边界，当前未修改注册协议、页引用或权限代码。若要补齐明确的 module pinning、内核完成结果和事务回滚，应先提交具体实现方案及原因；不能将正常性能采集的成功当作此类契约验收。普通页面权限也不能证明用户无法跳到所有其他可执行地址，控制闭包保证需保持明确的适用范围。
 
-Evaluation 的 Experimental Setup and Measurement 已补入实际 owner 生命周期顺序，以及注册/恢复各两秒等待与现有调用计时窗口的关系。该修订说明现有数字测了什么，没有新增 setup 或生命周期实验结果。Implementation 的 Registering Resident Backing 中关于 module references 和部分失败完整撤销的强主张仍待处理；B 类完成前须将其与最终实现及隔离验证结果统一。
+**隔离执行更新（2026-09-12）：** [完整记录和验证矩阵](../test/evaluation/registration-evidence.md#isolated-runtime-observations-2026-09-12)保存两次独立 KVM guest 的实际结果。使用既有完整 5.15.198 镜像、owner、manager 与页注册模块，将一张 source text page 注册到合成文件偏移。首次会话有三个 reader；第二次增加 UID/GID 65534、无有效 capabilities 的 reader，四个进程均匹配源 PFN。只读 store 触发 SIGSEGV；私有 mprotect(RW) 后写入产生独立 COW，源内容不变。非特权用户对其拥有的 0666 文件在 ready 后进行写打开和 truncate，均得到 EPERM；只读 fd 的 MAP_SHARED 转 RW 得到 EACCES。关闭全部 reader 后恢复原文件内容，随后正常卸载 owner。两次会话的 owner refcnt 全程均为 0，未尝试活跃卸载，也未注入部分注册失败。两台 guest 均结束，无内核 panic/BUG/WARNING，未加载 host 模块。
+
+Evaluation 新增 Registration and Mapping Behavior 和表 21；Implementation 按实际页引用、runner owner 顺序及逐页失败处理改写，撤回独立 module 引用和事务式完整撤销的断言。Discussion 明确所测操作及其时间区间，不将 closure 分析描述成进程级控制流限制。此处使用合成文件验证完整注册机制，不计入算法性能或 setup 数据。三个真实闭包、规模扫描、页引用平衡、全系统净计费、注册前已有可写描述符和剩余生命周期/失败路径仍是 B 的待办；不能因文字校正而删除这些要求。
 
 first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛选，适合估计给定 fault class 的条件延迟。应一并报告总尝试数、各原因剔除数和未筛选分布；不能用过滤后的结果来声称真实 p99 或“永不发生某种 fault”。若原始日志没有保留被丢弃样本，后续采集需补记录，不能反推。
 
@@ -155,9 +157,9 @@ first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛�
 
 正文现将 CPU-2 配置限定到其他已列明实验；first-touch 表 2 保留 CSV 可证实的五个合格批次，不再把默认每批次 100 calls 写成已归档的运行参数。这些修订不推定历史运行使用了不同参数，而是保留可核验的描述范围。
 
-**first-touch 留档工具已准备：** C collector 新增筛选前的逐样本导出，保留准备失败状态；runner 保存全部尝试的 raw/stdout/stderr、筛选和接受记录、配置与实际亲和性，并保留所执行二进制。已有输出不覆盖，未达到合格批次数返回 incomplete，benchmark 错误保留记录并停止。三项合成输出测试及 shell 语法检查通过；这些检查不加载 DSO、不计时。C 编译和真实注册会话验证待 Clocktime 结束，未启动补测、未加入系统服务。结果视图已在下述离线分析中补齐，B 类整套会话集成仍待完成。
+**first-touch 留档工具已准备：** C collector 新增筛选前的逐样本导出，保留准备失败状态；runner 保存全部尝试的 raw/stdout/stderr、筛选和接受记录、配置与实际亲和性，并保留所执行二进制。已有输出不覆盖，未达到合格批次数返回 incomplete，benchmark 错误保留记录并停止。三项合成输出测试及 shell 语法检查通过。2026-09-12 已以 `-O3 -Wall -Wextra -Werror -std=c11` 编译，并用实际 Native DSO 的 20 次 hot calls 验证按序留档；重复输出路径被拒绝且文件不变。这是采集工具验证，未新增正式 Native/Stub 性能结果；完整注册会话集成仍待完成，未加入系统服务。
 
-**first-touch 离线结果视图已补齐：** [分析脚本](../test/test_first_call/matrix_bench/analyze_first_touch.py)从 raw 独立重建 fault-class 和 IQR 筛选，并与批次 stdout、接受记录互相核对；分别给出全部已准备调用、预期 fault class、IQR 保留及合格批次样本的描述分布，另列批次统计量均值。准备失败不作为零延迟样本，未记入 ledger 的 raw 文件会报错。新增六项分析测试，连同三项留档测试共九项通过；测试发现并修复了 shell 统计解析提前关闭管道导致的偶发 exit 141。以上均使用合成输出验证，C 编译、真实会话验证、B 类集成和新实验数据仍待完成。
+**first-touch 离线结果视图已补齐：** [分析脚本](../test/test_first_call/matrix_bench/analyze_first_touch.py)从 raw 独立重建 fault-class 和 IQR 筛选，并与批次 stdout、接受记录互相核对；分别给出全部已准备调用、预期 fault class、IQR 保留及合格批次样本的描述分布，另列批次统计量均值。准备失败不作为零延迟样本，未记入 ledger 的 raw 文件会报错。新增六项分析测试，连同三项留档测试共九项通过；测试发现并修复了 shell 统计解析提前关闭管道导致的偶发 exit 141。完整 Native/registered-Stub 会话的新采集及重建仍待完成。
 
 当前 53.5× 是 Native 已被逐出文件缓存而 kernel backing 仍驻留的受控比例。正文已经写明这一点，无须再把它当成尚未修正的夸大。若将 residency 作为重要收益，再用受控内存压力测实际驻留、minor/major fault 发生率和未经延迟裁剪的 first-use 分布，并记账额外 pinned memory。可加入正常用户 DSO 的预取/常驻策略作为 residency 对照，连同其代价一起报告；不必把特权驻留策略当成默认应用配置。
 
@@ -239,7 +241,7 @@ A 完成后，正文已更新重复单位与隔离核配置、Normal 三方法�
 
 本类完成时：每个主张指向相应完整实现的结果；新表和已有表单位一致；正文/附录分工明确；待验证内容与已完成实验分开。原始数据保持原样，不通过修改数据来适配文字。
 
-当前 A 已完成并更新论文；C/E 自动接续在源码归档时失败，未开始算法构建或性能采集。D/E 的固定候选与 CLI 工作流、B 的 first-touch 原始样本工具仍需实际运行验证。后续以共同修改对象推进：B 完成注册会话时间/页面/释放账本，C 验证完整部署并诊断 BCH，D 分类固定候选，E 验证实际应用调用与输出。涉及项目基础功能或新的系统级自动执行时先说明具体方案和授权边界。
+当前 A 已完成并更新论文；B 已完成上述隔离映射/正常释放观察，真实闭包的时间/资源账本仍待采集。C/E 自动接续在源码归档时失败，未开始正式部署；CLI 的普通 DSO 功能验证已完成。D 固定全集仍由原分析器执行。后续以共同修改对象推进：B 补全会话与边界证据，C 验证完整部署并诊断 BCH，D 分类固定候选，E 验证实际 registered carrier 的应用调用与输出。涉及项目基础功能或新的系统级自动执行时先说明具体方案和授权边界。
 
 前次核查包括：阅读 Evaluation/Implementation/Discussion，核对 first-touch/PGOT/算法/Clocktime 的材料，复算 first-touch 汇总和 BCH 报告点，检查 XZ 重复层次、Clocktime 功能记录及所列公开文献。本次继承这些证据记录，没有重复执行这些核查或将其视为最新数据。
 

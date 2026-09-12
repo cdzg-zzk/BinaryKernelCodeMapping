@@ -7,17 +7,35 @@ they do not enable or restart a service.
 
 This directory implements the grouped work in
 [evaluation-review.md](../../ccfa-review-reports/evaluation-review.md).
-The current addition concerns algorithm repetition identities (group C) and
-the corresponding manuscript/report corrections (group F). The
-[registration evidence audit](registration-evidence.md) additionally traces
-group B's runtime call path and identifies the lifetime/completion/failure
-contracts that still need isolated validation.
+The [registration evidence audit](registration-evidence.md) records group B's
+call path and two completed KVM functional sessions: multi-process PFN sharing,
+private COW, ordinary-user file/mapping operations and ordered normal release.
+The tested owner refcount remains zero throughout registration and use.
+Independent owner pinning, completion acknowledgement and partial-failure
+handling remain open, alongside real-closure setup and resource accounting.
 
 Group D now has a [fixed candidate set and inspection driver](applicability.md).
 Group E has a [complete LZ4 CLI workflow](lz4-cli/README.md) prepared for the
 same owner-registration sessions as group C. Both CLIs have compiled and passed
 48 full-input ordinary-DSO functional cases. Live-carrier application validation
 and the complete deployment measurements remain outstanding.
+
+## Isolated registration fixture
+
+Run with ordinary host KVM access; all module operations occur inside a fresh
+private guest using the existing packaged 5.15.198 components:
+
+```sh
+python3 test/evaluation/registration_qemu.py \
+  --output test/evaluation/results/registration-qemu-new
+```
+
+The output directory must be new. The runner retains the payload, private disk,
+guest console and extracted observations. The fixture exercises the full
+registration mechanism with a controlled synthetic file offset; it does not
+measure API performance or complete group B's setup/net-memory requirements.
+The recorded cases and untested boundaries are listed in
+[registration-evidence.md](registration-evidence.md#isolated-runtime-observations-2026-09-12).
 
 ## Algorithm deployments
 
@@ -108,9 +126,9 @@ Validation on 2026-09-11: all three archived raw matrices passed; duplicate
 and missing-row mutations were rejected for each algorithm. The live-host
 guard rejected collection while Clocktime was active. Regenerating the four
 algorithm summaries left all five numeric aggregate/pairwise CSVs byte-identical
-and every numeric Markdown table unchanged. Full deployment execution is
-pending completion of the Clocktime campaign and is now scheduled through
-the follow-up service, with the LZ4 CLI workflow enabled.
+and every numeric Markdown table unchanged. Clocktime has since completed;
+the follow-up service failed before deployment and is disabled. Full deployment
+execution now uses the separate foreground command above.
 
 ## Evaluation design references
 
