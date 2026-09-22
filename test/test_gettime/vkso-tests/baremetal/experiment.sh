@@ -11,8 +11,24 @@ RESULTS_DIR=${RESULTS_DIR:-$HERE/results}
 STATE=${STATE_FILE:-$HERE/.experiment-state}
 LOCK=${LOCK_FILE:-$HERE/.experiment.lock}
 CONFIG=$HERE/experiment.conf
-FULL_CASES=(raw-normal vkso-normal raw-no-retpoline vkso-no-retpoline)
+# Preplanned Williams order across four independent boot blocks. The chosen
+# order is frozen in experiment-manifest.txt at begin, not changed mid-run.
+PUBLIC_BLOCK=${PUBLIC_BLOCK:-0}
+[[ "$PUBLIC_BLOCK" =~ ^[0-9]{1,6}$ ]] || {
+    echo "PUBLIC_BLOCK must be an integer in 0..999999" >&2
+    exit 2
+}
+PUBLIC_BLOCK=$((10#$PUBLIC_BLOCK))
+case $((PUBLIC_BLOCK % 4)) in
+0) FULL_CASES=(raw-normal vkso-normal vkso-no-retpoline raw-no-retpoline) ;;
+1) FULL_CASES=(vkso-normal raw-no-retpoline raw-normal vkso-no-retpoline) ;;
+2) FULL_CASES=(raw-no-retpoline vkso-no-retpoline vkso-normal raw-normal) ;;
+3) FULL_CASES=(vkso-no-retpoline raw-normal raw-no-retpoline vkso-normal) ;;
+esac
 NORMAL_CASES=(raw-normal vkso-normal)
+if (( PUBLIC_BLOCK % 2 )); then
+    NORMAL_CASES=(vkso-normal raw-normal)
+fi
 CASES=("${FULL_CASES[@]}")
 
 manifest_value()
@@ -161,8 +177,8 @@ boot_or_begin_case()
 		saved_status=not-started
 	fi
 	if [[ "$saved_status" != active ]]; then
-		if [[ -n "$requested" && "$requested" != raw-normal ]]; then
-			echo "a new experiment must start with raw-normal" >&2
+		if [[ -n "$requested" && "$requested" != "${FULL_CASES[0]}" ]]; then
+			echo "a new experiment must start with ${FULL_CASES[0]}" >&2
 			exit 1
 		fi
 		begin_experiment "" full
@@ -217,20 +233,21 @@ begin_experiment()
 	fi
 	# shellcheck disable=SC1090
 	source "$CONFIG"
-	if [[ ${MACRO_ENABLED:-0} == 1 ]]; then
-		for package in "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"; do
-			[[ "$mode" == normal && "$package" == "$NO_RETPOLINE_PACKAGE" ]] && continue
-			for file in redis_workload.py redis-server redis-cli redis-benchmark adapter.so; do
-				test -s "$package/macro/$file" || {
-					echo "package lacks macrobench tools; rebuild with ./build-all.sh: $package" >&2
-					exit 1
-				}
-			done
-		done
-	fi
+    test "$EXPERIMENT_SCHEMA" = 5
+    test "$MACRO_ENABLED" = 0
+    test "$PMU" = 0
+    for package in "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"; do
+        [[ "$mode" == normal && "$package" == "$NO_RETPOLINE_PACKAGE" ]] && continue
+        test -s "$package/public-api/manifest.json" || {
+            echo "public-direct package required; rebuild using build-all.sh" >&2
+            exit 1
+        }
+    done
 	{
 		date -u '+created_utc=%Y-%m-%dT%H:%M:%SZ'
 		printf 'run_id=%s\n' "$run_id"
+		printf 'public_protocol=public-direct-v1\n'
+		printf 'public_block=%s\n' "$PUBLIC_BLOCK"
 		printf 'experiment_schema=%s\n' "$EXPERIMENT_SCHEMA"
 		printf 'case_order=%s\n' "${CASES[*]}"
 		printf 'git_commit=%s\n' "$(git -C "$ROOT" rev-parse HEAD)"

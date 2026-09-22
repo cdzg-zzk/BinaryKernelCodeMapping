@@ -59,28 +59,12 @@ else
 	echo "raw_baseline=reused archived Linux 5.15.198 Normal/no-retpoline images"
 fi
 
-# Build the application tools once so both mitigation variants use identical
-# executables. This step compiles; it does not launch Redis or a benchmark.
+# This protocol does not build an application bridge or run Redis.
 source "$HERE/experiment.conf"
-macro_source=$ROOT/test/test_gettime/macro-benchmark
-macro_build=$BUILD_ROOT/macro
-if [[ ${MACRO_ENABLED:-0} == 1 ]]; then
-	mkdir -p "$macro_build/source"
-	tar -xzf "$macro_source/vendor/redis-7.2.4.tar.gz" \
-		-C "$macro_build/source" --strip-components=1
-	make -C "$macro_build/source" -j"$JOBS" \
-		>"$macro_build/build.log" 2>&1
-	for binary in redis-server redis-cli redis-benchmark; do
-		cp "$macro_build/source/src/$binary" "$macro_build/$binary"
-	done
-	${CC:-gcc} -O2 -Wall -Wextra -Werror -fPIC -shared \
-		-I"$ROOT/test/test_gettime/vkso-tests/functional" \
-		"$macro_source/adapter.c" -ldl -o "$macro_build/adapter.so"
-	cp "$macro_source/redis_workload.py" "$macro_build/"
-	cp "$macro_source/adapter.c" "$macro_build/"
-	cp "$macro_source/vendor/REDIS-COPYING" "$macro_build/"
+if [[ "$MACRO_ENABLED" != 0 || "$PMU" != 0 ]]; then
+    echo "public-direct-v1 requires MACRO_ENABLED=0 and PMU=0" >&2
+    exit 1
 fi
-
 BUILD_VARIANT=normal UPDATE_BENCH=0 \
 	RAW_PACKAGE="$raw_normal" \
 	RAW_SOURCE="$RAW_SOURCE" RAW_TARBALL="$RAW_TARBALL" \
@@ -94,18 +78,14 @@ BUILD_VARIANT=no-retpoline UPDATE_BENCH=0 \
 	OUT="$NO_RETPOLINE_PACKAGE" CURRENT_LINK= JOBS="$JOBS" \
 	"$HERE/build-images.sh"
 
-if [[ ${MACRO_ENABLED:-0} == 1 ]]; then
-	for package in "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"; do
-		mkdir "$package/macro"
-		for file in redis-server redis-cli redis-benchmark adapter.so \
-			redis_workload.py adapter.c REDIS-COPYING build.log; do
-			cp "$macro_build/$file" "$package/macro/"
-		done
-		cp "$macro_source/vendor/redis-7.2.4.tar.gz" "$package/macro/"
-		cp "$ROOT/test/test_gettime/vkso-tests/functional/vkso_abi.h" "$package/macro/"
-		(cd "$package" && sha256sum macro/* >>SHA256SUMS)
-	done
-fi
+# Link public callers against each package carrier. No runtime execution here.
+for package in "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"; do
+    python3 "$HERE/../public-api/build.py" "$package" --cc "${CC:-gcc}"
+done
+# Changing mitigation variants must not also change the user caller code.
+for binary in raw-public-bench vkso-public-bench; do
+    cmp "$NORMAL_PACKAGE/public-api/$binary" "$NO_RETPOLINE_PACKAGE/public-api/$binary"
+done
 
 "$HERE/verify-packages.sh" "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE" |
 	tee "$BUILD_ROOT/package-audit.txt"
