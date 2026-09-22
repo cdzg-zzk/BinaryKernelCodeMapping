@@ -8,7 +8,7 @@
 
 struct mm_struct;
 struct task_struct;
-struct timens_offsets;
+struct time_namespace;
 
 void vkso_timekeeping_get_private(clockid_t clock_id, struct timespec64 *ts);
 
@@ -21,8 +21,8 @@ int vkso_posix_clock_gettime_failure(
 int vkso_kernel_gettimeofday_failure(
 	struct vkso_timeval *tv, struct vkso_timezone *tz, int status);
 void vkso_time_update_timezone(void);
-void vkso_time_update_mm_data(struct task_struct *task,
-			      const struct timens_offsets *offsets);
+void vkso_time_join_namespace(struct task_struct *task,
+			      struct time_namespace *ns);
 void vkso_time_set_pvclock_page(const void *page);
 void vkso_time_set_hvclock_page(const void *page);
 #ifdef CONFIG_VKSO_TIME_TEST

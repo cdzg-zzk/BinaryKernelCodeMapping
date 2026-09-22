@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <fstream>
+#include <sstream>
 #include <limits.h>
 #include <time.h>
 #include <algorithm>
@@ -23,29 +24,12 @@
 #include <vector>
 #include <string>
 
-#define NETLINK_MODIFY 30  // 自定义 Netlink 协议号
-#define NETLINK_RESTORE 29  // 恢复操作的 Netlink 协议号
-#define MAX_PAGES_PER_OPERATION 256  // 每次操作的最大页面数（需与内核模块保持一致）
+#include <poll.h>
+#include <sys/random.h>
+#include <sys/file.h>
+#include "protocol.h"
 
-// #define PAGE_SIZE 4096
 #define PAGE_SIZE 4096
-// Netlink 消息格式 - 支持多页面
-struct nl_msg {
-    char filepath[256];
-    loff_t offset;                 // 起始偏移量（单页面模式）
-    unsigned long addr;            // 用户空间地址
-    int page_count;                // 页面数量，1表示单页面模式
-    loff_t page_offsets[MAX_PAGES_PER_OPERATION];  // 每个页面的偏移量
-    unsigned long kernel_vaddrs[MAX_PAGES_PER_OPERATION];  // 每个页面对应的内核虚拟地址
-};
-
-// 恢复请求消息格式 - 支持多页面
-struct restore_msg {
-    char filepath[256];  // 要恢复的文件路径
-    loff_t offset;       // 起始偏移量（单页面模式）
-    int page_count;      // 要恢复的页面数量，1表示单页面模式
-    loff_t page_offsets[MAX_PAGES_PER_OPERATION];  // 每个页面的偏移量
-};
 
 struct page_plan_entry {
     loff_t file_offset;
@@ -55,6 +39,158 @@ struct page_plan_entry {
 };
 
 using PageMappingList = std::vector<page_plan_entry>;
+static std::vector<struct vkso_owner_request> requested_owners;
+static unsigned long long active_transaction;
+static bool transaction_absent;
+static unsigned long long carrier_device, carrier_inode;
+static std::string notify_fifo;
+static int notify_fd = -1;
+
+static bool notify_session(const char *event, int status) {
+    if (notify_fd < 0) return true;
+    char message[128];
+    int size = snprintf(message, sizeof(message), "%s %d %ld %llu\n", event,
+                        status, (long)getpid(), active_transaction);
+    ssize_t written;
+    do { written = write(notify_fd, message, size); } while (written < 0 && errno == EINTR);
+    return written == size;
+}
+
+
+static void test_checkpoint(const char *name) {
+    const char *selected = getenv("VKSO_TEST_STOP_AT");
+    if (selected && strcmp(selected, name) == 0) {
+        fprintf(stderr, "VKSO_TEST_STOP_AT=%s\n", name);
+        fflush(nullptr);
+        raise(SIGSTOP);
+    }
+}
+
+
+
+struct owner_image_identity {
+    std::string symbol, module, build_id;
+};
+static std::vector<owner_image_identity> owner_images;
+static std::string kernel_build_id;
+
+static bool valid_build_id(const std::string &id) {
+    return !id.empty() && id.size() <= 128 && id.size() % 2 == 0 &&
+        id.find_first_not_of("0123456789abcdef") == std::string::npos;
+}
+
+static bool note_build_id(const std::string &path, std::string &id) {
+    std::ifstream stream(path, std::ios::binary);
+    if (!stream) return false;
+    std::vector<unsigned char> data((std::istreambuf_iterator<char>(stream)), {});
+    size_t offset = 0;
+    unsigned matches = 0;
+    while (offset < data.size()) {
+        if (data.size() - offset < 12) {
+            if (std::any_of(data.begin() + offset, data.end(), [](unsigned char c) { return c != 0; }))
+                return false;
+            break;
+        }
+        uint32_t namesz, descsz, kind;
+        memcpy(&namesz, data.data() + offset, 4);
+        memcpy(&descsz, data.data() + offset + 4, 4);
+        memcpy(&kind, data.data() + offset + 8, 4);
+        size_t name = offset + 12;
+        size_t desc = name + ((static_cast<size_t>(namesz) + 3) & ~size_t(3));
+        size_t end = desc + ((static_cast<size_t>(descsz) + 3) & ~size_t(3));
+        if (end > data.size()) return false;
+        if (kind == 3 && namesz == 4 && memcmp(data.data() + name, "GNU\0", 4) == 0) {
+            if (!descsz || descsz > 64 || ++matches != 1) return false;
+            static const char hex[] = "0123456789abcdef";
+            id.clear();
+            for (size_t i = desc; i < desc + descsz; ++i) {
+                id += hex[data[i] >> 4]; id += hex[data[i] & 15];
+            }
+        }
+        offset = end;
+    }
+    return matches == 1;
+}
+
+static bool load_owner_descriptors(const char *page_map) {
+    std::string path(page_map);
+    auto slash = path.find_last_of('/');
+    path = (slash == std::string::npos ? "." : path.substr(0, slash));
+    std::ifstream stream(path + "/owner_descriptors.txt");
+    std::ifstream kernel(path + "/kernel_identity.txt");
+    if (!stream || !kernel) return false;
+    std::string line;
+    while (std::getline(stream, line)) {
+        if (line.empty() || line[0] == '#') continue;
+        std::istringstream fields(line);
+        std::string name, version, module, build_id, extra;
+        if (!(fields >> name >> version >> module >> build_id) || (fields >> extra) ||
+            name.size() >= sizeof(vkso_owner_request::symbol) ||
+            version.size() >= sizeof(vkso_owner_request::srcversion) ||
+            module.empty() || module.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_") != std::string::npos ||
+            !valid_build_id(build_id) || requested_owners.size() == VKSO_MAX_OWNERS)
+            return false;
+        if (std::any_of(owner_images.begin(), owner_images.end(), [&](const owner_image_identity &i) { return i.symbol == name; }))
+            return false;
+        struct vkso_owner_request entry = {};
+        strcpy(entry.symbol, name.c_str());
+        strcpy(entry.srcversion, version.c_str());
+        requested_owners.push_back(entry);
+        owner_images.push_back({name, module, build_id});
+    }
+    while (std::getline(kernel, line)) {
+        if (line.empty() || line[0] == '#') continue;
+        std::istringstream fields(line);
+        std::string kind, id, extra;
+        if (!(fields >> kind >> id) || (fields >> extra) || kind != "kernel" ||
+            !valid_build_id(id) || !kernel_build_id.empty()) return false;
+        kernel_build_id = id;
+    }
+    return !kernel_build_id.empty();
+}
+
+// BEGIN pins the descriptor owners. Check their linked images while those
+// references are held, before sending any source pages to STAGE.
+static bool verify_pinned_images() {
+    std::string observed;
+    if (!note_build_id("/sys/kernel/notes", observed) || observed != kernel_build_id) {
+        fprintf(stderr, "VKSO_IMAGE kernel mismatch expected=%s observed=%s phase=after-begin\n",
+                kernel_build_id.c_str(), observed.c_str());
+        return false;
+    }
+    printf("VKSO_IMAGE kernel build_id=%s phase=after-begin\n", observed.c_str());
+    std::map<std::string, std::vector<std::string>> symbol_modules;
+    std::ifstream kallsyms("/proc/kallsyms");
+    if (!kallsyms) return false;
+    std::string line;
+    while (std::getline(kallsyms, line)) {
+        std::istringstream fields(line);
+        std::string address, type, name, module;
+        if (!(fields >> address >> type >> name)) continue;
+        if (!std::any_of(owner_images.begin(), owner_images.end(), [&](const owner_image_identity &i) { return i.symbol == name; })) continue;
+        fields >> module;
+        symbol_modules[name].push_back(module);
+    }
+    for (const auto &i : owner_images) {
+        const auto &modules = symbol_modules[i.symbol];
+        if (modules.size() != 1 || modules[0] != "[" + i.module + "]") {
+            fprintf(stderr, "VKSO_IMAGE owner mismatch symbol=%s expected_module=%s phase=after-begin\n",
+                    i.symbol.c_str(), i.module.c_str());
+            return false;
+        }
+        observed.clear();
+        if (!note_build_id("/sys/module/" + i.module + "/notes/.note.gnu.build-id", observed) || observed != i.build_id) {
+            fprintf(stderr, "VKSO_IMAGE module=%s mismatch expected=%s observed=%s phase=after-begin\n",
+                    i.module.c_str(), i.build_id.c_str(), observed.c_str());
+            return false;
+        }
+        printf("VKSO_IMAGE module=%s symbol=%s build_id=%s phase=after-begin\n",
+               i.module.c_str(), i.symbol.c_str(), observed.c_str());
+    }
+    fflush(stdout);
+    return true;
+}
+
 
 static volatile sig_atomic_t g_restore_requested = 0;
 
@@ -132,7 +268,8 @@ static bool write_manager_state(const char *argv0,
 
     std::string state_path = state_path_for(argv0);
     std::string pid_path = pid_path_for(argv0);
-    FILE *state = fopen(state_path.c_str(), "w");
+    const std::string temporary = state_path + ".tmp";
+    FILE *state = fopen(temporary.c_str(), "w");
     if (!state) {
         perror("fopen manager.state");
         return false;
@@ -140,18 +277,26 @@ static bool write_manager_state(const char *argv0,
 
     time_t now = time(NULL);
     fprintf(state, "manager_pid=%ld\n", hold ? (long)getpid() : 0L);
+    fprintf(state, "process_pid=%ld\nnotify_fifo=%s\n", (long)getpid(), notify_fifo.c_str());
     fprintf(state, "stub_so=%s\n", filepath);
     fprintf(state, "page_map=%s\n", page_map_file);
     fprintf(state, "immutable_added=%d\n", immutable_added ? 1 : 0);
     fprintf(state, "created_at=%ld\n", (long)now);
-    fclose(state);
+    fprintf(state, "transaction_id=%llu\n", active_transaction);
+    fprintf(state, "carrier_device=%llu\ncarrier_inode=%llu\n", carrier_device, carrier_inode);
+    if (fflush(state) || fsync(fileno(state))) { fclose(state); return false; }
+    if (fclose(state) || rename(temporary.c_str(), state_path.c_str())) return false;
+    int directory = open(runtime_dir_for(argv0).c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+    if (directory < 0) return false;
+    int synced = fsync(directory);
+    close(directory);
+    if (synced) return false;
 
     if (hold) {
         FILE *pid = fopen(pid_path.c_str(), "w");
-        if (pid) {
-            fprintf(pid, "%ld\n", (long)getpid());
-            fclose(pid);
-        }
+        if (!pid) return false;
+        fprintf(pid, "%ld\n", (long)getpid());
+        if (fclose(pid)) return false;
     }
 
     printf("Wrote manager state: %s\n", state_path.c_str());
@@ -165,36 +310,10 @@ static void remove_manager_state(const char *argv0) {
     unlink(pid_path.c_str());
 }
 
-static bool protect_file_immutable(const char *filepath, bool *added) {
-    int fd = open(filepath, O_RDONLY | O_CLOEXEC);
-    int flags = 0;
-
-    *added = false;
-
-    if (fd < 0) {
-        perror("open immutable target");
-        return false;
-    }
-    if (ioctl(fd, FS_IOC_GETFLAGS, &flags) != 0) {
-        perror("FS_IOC_GETFLAGS");
-        close(fd);
-        return false;
-    }
-
-    if (flags & FS_IMMUTABLE_FL) {
-        close(fd);
-        printf("Immutable flag was already set on %s\n", filepath);
-        return true;
-    }
-    int new_flags = flags | FS_IMMUTABLE_FL;
-    if (ioctl(fd, FS_IOC_SETFLAGS, &new_flags) != 0) {
-        perror("set immutable");
-        close(fd);
-        return false;
-    }
-
-    close(fd);
-    *added = true;
+static bool protect_file_immutable(int fd, const char *filepath, int original_flags) {
+    if (original_flags & FS_IMMUTABLE_FL) return true;
+    int flags = original_flags | FS_IMMUTABLE_FL;
+    if (ioctl(fd, FS_IOC_SETFLAGS, &flags)) { perror("set immutable"); return false; }
     printf("Set immutable flag on %s\n", filepath);
     return true;
 }
@@ -210,6 +329,12 @@ static bool clear_managed_immutable(const char *filepath, bool immutable_added) 
     if (fd < 0) {
         perror("open immutable target");
         return false;
+    }
+    struct stat st;
+    if (fstat(fd, &st) || static_cast<unsigned long long>(st.st_dev) != carrier_device ||
+        static_cast<unsigned long long>(st.st_ino) != carrier_inode) {
+        fprintf(stderr, "Carrier identity changed; retaining recovery state\n");
+        close(fd); return false;
     }
     if (ioctl(fd, FS_IOC_GETFLAGS, &flags) != 0) {
         perror("FS_IOC_GETFLAGS");
@@ -405,151 +530,283 @@ bool load_page_mappings(const char *filename, PageMappingList &mappings) {
 }
 
 // 发送 netlink 消息的通用函数
-int send_netlink_message(int protocol, void *data, size_t data_size) {
-    struct sockaddr_nl src_addr, dest_addr;
-    struct nlmsghdr *nlh = NULL;
-    int sock_fd, ret;
+static unsigned long long monotonic_ns() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return static_cast<unsigned long long>(ts.tv_sec) * 1000000000ULL + ts.tv_nsec;
+}
 
-    // 创建 Netlink Socket
-    sock_fd = socket(PF_NETLINK, SOCK_RAW, protocol);
-    if (sock_fd < 0) {
-        perror("socket");
-        return -1;
-    }
-
-    memset(&src_addr, 0, sizeof(src_addr));
-    src_addr.nl_family = AF_NETLINK;
-    src_addr.nl_pid = getpid();
-
-    if (bind(sock_fd, (struct sockaddr *)&src_addr, sizeof(src_addr)) < 0) {
-        perror("bind");
-        close(sock_fd);
-        return -1;
-    }
-
-    memset(&dest_addr, 0, sizeof(dest_addr));
-    dest_addr.nl_family = AF_NETLINK;
-    dest_addr.nl_pid = 0;
-    dest_addr.nl_groups = 0;
-
-    // 构造 Netlink 消息头
-    nlh = (struct nlmsghdr *)malloc(NLMSG_SPACE(data_size));
-    if (!nlh) {
-        perror("malloc");
-        close(sock_fd);
-        return -1;
-    }
-
-    memcpy(NLMSG_DATA(nlh), data, data_size);
-    nlh->nlmsg_len = NLMSG_SPACE(data_size);
-    nlh->nlmsg_pid = getpid();
-    nlh->nlmsg_flags = 0;
-
-    // 发送消息
-    ret = sendto(sock_fd, nlh, nlh->nlmsg_len, 0,
-                (struct sockaddr *)&dest_addr, sizeof(dest_addr));
-    if (ret < 0) {
+static int exchange_result(int fd, int protocol, const void *data, size_t size,
+                           unsigned short type, unsigned expected_pages) {
+    static unsigned sequence = 0;
+    const unsigned seq = ++sequence;
+    std::vector<char> request(NLMSG_SPACE(size), 0);
+    auto *header = reinterpret_cast<struct nlmsghdr *>(request.data());
+    header->nlmsg_len = NLMSG_LENGTH(size);
+    header->nlmsg_type = type;
+    header->nlmsg_flags = NLM_F_REQUEST;
+    header->nlmsg_seq = seq;
+    memcpy(NLMSG_DATA(header), data, size);
+    struct sockaddr_nl kernel = {};
+    kernel.nl_family = AF_NETLINK;
+    const auto started = monotonic_ns();
+    if (sendto(fd, header, header->nlmsg_len, 0,
+               reinterpret_cast<struct sockaddr *>(&kernel), sizeof(kernel)) !=
+        static_cast<ssize_t>(header->nlmsg_len)) {
         perror("sendto");
-        free(nlh);
-        close(sock_fd);
         return -1;
     }
-
-    printf("Sent netlink message with protocol %d\n", protocol);
-
-    free(nlh);
-    close(sock_fd);
+    // A timeout means unknown state, never successful completion or permission
+    // to repeat a modifying request. This exchange only negotiates the protocol.
+    const auto deadline = monotonic_ns() + 5000000000ULL;
+    struct pollfd pending = {fd, POLLIN, 0};
+    int ready;
+    do {
+        const auto now = monotonic_ns();
+        if (now >= deadline) { ready = 0; break; }
+        ready = poll(&pending, 1, static_cast<int>((deadline - now + 999999) / 1000000));
+    } while (ready < 0 && errno == EINTR);
+    if (ready <= 0 || !(pending.revents & POLLIN)) {
+        fprintf(stderr, "No kernel completion: protocol=%d sequence=%u; state unknown\n", protocol, seq);
+        errno = ready == 0 ? ETIMEDOUT : EIO;
+        return -1;
+    }
+    alignas(struct nlmsghdr) char buffer[NLMSG_SPACE(sizeof(struct vkso_result))] = {};
+    struct sockaddr_nl sender = {};
+    struct iovec iov = {buffer, sizeof(buffer)};
+    struct msghdr message = {};
+    message.msg_name = &sender;
+    message.msg_namelen = sizeof(sender);
+    message.msg_iov = &iov;
+    message.msg_iovlen = 1;
+    ssize_t received;
+    do { received = recvmsg(fd, &message, 0); } while (received < 0 && errno == EINTR);
+    const auto finished = monotonic_ns();
+    const auto *reply = reinterpret_cast<const struct nlmsghdr *>(buffer);
+    if (received != NLMSG_LENGTH(sizeof(struct vkso_result)) ||
+        (message.msg_flags & MSG_TRUNC) || sender.nl_pid != 0 ||
+        sender.nl_family != AF_NETLINK ||
+        reply->nlmsg_len != received || reply->nlmsg_seq != seq ||
+        reply->nlmsg_type != VKSO_RESULT_V2) {
+        fprintf(stderr, "Invalid kernel completion envelope; state unknown\n");
+        errno = EPROTO;
+        return -1;
+    }
+    struct vkso_result result;
+    memcpy(&result, NLMSG_DATA(reply), sizeof(result));
+    if (result.version != VKSO_PROTOCOL_VERSION || result.operation != static_cast<unsigned>(protocol) ||
+        result.status > 0 || result.completed > expected_pages ||
+        (result.status == 0 && (result.completed != expected_pages || result.failed_page != -1))) {
+        fprintf(stderr, "Invalid kernel completion payload; state unknown\n");
+        errno = EPROTO;
+        return -1;
+    }
+    printf("VKSO_RESULT version=%u operation=%u sequence=%u hello=%u status=%d completed=%u "
+           "failed_page=%d kernel_operation_ns=%llu exchange_wall_ns=%llu\n",
+           result.version, result.operation, seq, type == VKSO_HELLO_V2, result.status,
+           result.completed, result.failed_page,
+           static_cast<unsigned long long>(result.operation_ns), finished - started);
+    fflush(stdout);
+    if (result.status) {
+        fprintf(stderr, "Kernel operation failed: %s; completed prefix=%u, failed page=%d\n",
+                strerror(-result.status), result.completed, result.failed_page);
+        errno = -result.status;
+        return -1;
+    }
     return 0;
 }
 
-int send_replace_batches(const char *filepath,
-                         void *mapped_addr,
-                         const std::vector<loff_t> &page_offsets,
-                         const std::vector<unsigned long> &kernel_vaddrs) {
-    size_t total_pages = page_offsets.size();
-    if (total_pages != kernel_vaddrs.size()) {
-        fprintf(stderr, "Page offset and kernel address counts do not match\n");
-        return -1;
+static int transaction_socket() {
+    int fd = socket(PF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_MODIFY);
+    if (fd < 0) return -1;
+    struct sockaddr_nl local = {};
+    local.nl_family = AF_NETLINK;
+    if (bind(fd, reinterpret_cast<struct sockaddr *>(&local), sizeof(local)) < 0) {
+        close(fd); return -1;
     }
-
-    size_t total_batches = (total_pages + MAX_PAGES_PER_OPERATION - 1) /
-                           MAX_PAGES_PER_OPERATION;
-
-    for (size_t batch_idx = 0; batch_idx < total_batches; ++batch_idx) {
-        size_t start = batch_idx * MAX_PAGES_PER_OPERATION;
-        size_t batch_pages = std::min(static_cast<size_t>(MAX_PAGES_PER_OPERATION),
-                                      total_pages - start);
-
-        struct nl_msg replace_msg;
-        memset(&replace_msg, 0, sizeof(replace_msg));
-        strncpy(replace_msg.filepath, filepath, sizeof(replace_msg.filepath) - 1);
-        replace_msg.offset = page_offsets[start];
-        replace_msg.addr = (unsigned long)mapped_addr;
-        replace_msg.page_count = static_cast<int>(batch_pages);
-
-        for (size_t i = 0; i < batch_pages; ++i) {
-            replace_msg.page_offsets[i] = page_offsets[start + i];
-            replace_msg.kernel_vaddrs[i] = kernel_vaddrs[start + i];
-        }
-
-        printf("Sending replace batch %zu/%zu (%zu pages)\n",
-               batch_idx + 1,
-               total_batches,
-               batch_pages);
-        dump_page_mappings(&replace_msg.page_offsets[0],
-                           &replace_msg.kernel_vaddrs[0],
-                           replace_msg.page_count,
-                           "Netlink replace payload");
-
-        if (send_netlink_message(NETLINK_MODIFY,
-                                 &replace_msg,
-                                 sizeof(replace_msg)) < 0) {
-            return -1;
-        }
+    struct nl_msg hello = {};
+    if (exchange_result(fd, NETLINK_MODIFY, &hello, sizeof(hello), VKSO_HELLO_V2, 0) < 0) {
+        close(fd); return -1;
     }
+    return fd;
+}
 
+static int tx_exchange(int fd, struct vkso_tx_request &request,
+                       struct vkso_tx_result &result, unsigned &seq) {
+    static unsigned next_sequence = 1000;
+    seq = ++next_sequence;
+    std::vector<char> buffer(NLMSG_SPACE(sizeof(request)), 0);
+    auto *h = reinterpret_cast<struct nlmsghdr *>(buffer.data());
+    h->nlmsg_len = NLMSG_LENGTH(sizeof(request)); h->nlmsg_seq = seq;
+    h->nlmsg_type = VKSO_TX_REQUEST; h->nlmsg_flags = NLM_F_REQUEST;
+    request.version = VKSO_PROTOCOL_VERSION;
+    memcpy(NLMSG_DATA(h), &request, sizeof(request));
+    struct sockaddr_nl kernel = {};
+    kernel.nl_family = AF_NETLINK;
+    auto started = monotonic_ns();
+    if (sendto(fd, h, h->nlmsg_len, 0, reinterpret_cast<struct sockaddr *>(&kernel), sizeof(kernel)) !=
+        static_cast<ssize_t>(h->nlmsg_len)) return -1;
+    const auto deadline = monotonic_ns() + 5000000000ULL;
+    while (monotonic_ns() < deadline) {
+        struct pollfd pending = {fd, POLLIN, 0};
+        const auto now = monotonic_ns();
+        if (now >= deadline) break;
+        int ready = poll(&pending, 1, static_cast<int>((deadline - now + 999999) / 1000000));
+        if (ready < 0 && errno == EINTR) continue;
+        if (ready <= 0) break;
+        alignas(struct nlmsghdr) char reply_buffer[NLMSG_SPACE(sizeof(result))] = {};
+        struct sockaddr_nl sender = {};
+        struct iovec iov = {reply_buffer, sizeof(reply_buffer)};
+        struct msghdr message = {};
+        message.msg_name = &sender; message.msg_namelen = sizeof(sender);
+        message.msg_iov = &iov; message.msg_iovlen = 1;
+        auto received = recvmsg(fd, &message, 0);
+        if (received < 0 && errno == EINTR) continue;
+        const auto *reply = reinterpret_cast<const struct nlmsghdr *>(reply_buffer);
+        if (received != NLMSG_LENGTH(sizeof(result)) || message.msg_flags & MSG_TRUNC ||
+            sender.nl_family != AF_NETLINK || sender.nl_pid || reply->nlmsg_len != received ||
+            reply->nlmsg_type != VKSO_TX_RESULT) { errno = EPROTO; return -1; }
+        if (reply->nlmsg_seq != seq) continue; // A late ACK from the preceding operation.
+        memcpy(&result, NLMSG_DATA(reply), sizeof(result));
+        if (result.version != VKSO_PROTOCOL_VERSION || result.transaction != request.transaction ||
+            result.operation != request.operation || result.status > 0 ||
+            result.state > VKSO_RECOVERY_REQUIRED || result.applied > result.total ||
+            result.staged > result.total) { errno = EPROTO; return -1; }
+        printf("VKSO_TRANSACTION id=%llu operation=%u sequence=%u status=%d state=%u "
+               "total=%u staged=%u applied=%u failed_page=%d kernel_operation_ns=%llu "
+               "prepare_ns=%llu apply_ns=%llu release_ns=%llu exchange_wall_ns=%llu\n",
+               static_cast<unsigned long long>(result.transaction), result.operation, seq,
+               result.status, result.state, result.total, result.staged, result.applied,
+               result.failed_page, static_cast<unsigned long long>(result.operation_ns),
+               static_cast<unsigned long long>(result.prepare_ns),
+               static_cast<unsigned long long>(result.apply_ns),
+               static_cast<unsigned long long>(result.release_ns), monotonic_ns() - started);
+        fflush(stdout);
+        return 0;
+    }
+    errno = ETIMEDOUT;
+    return -1;
+}
+
+static int tx_request(int fd, struct vkso_tx_request &r, struct vkso_tx_result &result) {
+    unsigned seq;
+    if (tx_exchange(fd, r, result, seq) < 0) {
+        const int delivery_error = errno;
+        fprintf(stderr, "Transaction operation %u has no confirmed reply (%s); querying id=%llu\n",
+                r.operation, strerror(delivery_error), static_cast<unsigned long long>(r.transaction));
+        struct vkso_tx_request query = {};
+        query.operation = VKSO_QUERY; query.transaction = r.transaction;
+        unsigned query_seq;
+        const int query_ret = tx_exchange(fd, query, result, query_seq);
+        // FORGET removes its own result record. A confirmed absence is the
+        // successful terminal state when its acknowledgement was lost.
+        if (query_ret == 0 && r.operation == VKSO_FORGET &&
+            result.status == -ENOENT && result.state == VKSO_UNKNOWN) {
+            printf("VKSO_TRANSACTION recovered_absence id=%llu operation=%u\n",
+                   static_cast<unsigned long long>(r.transaction), r.operation);
+            result.status = 0;
+            return 0;
+        }
+        if (query_ret < 0 || result.status ||
+            result.last_operation != r.operation || result.last_sequence != seq) {
+            fprintf(stderr, "Transaction state remains unconfirmed; retaining recovery state\n");
+            errno = delivery_error; return -1;
+        }
+        result.status = result.last_status;
+        printf("VKSO_TRANSACTION recovered_reply id=%llu operation=%u sequence=%u status=%d\n",
+               static_cast<unsigned long long>(r.transaction), r.operation, seq, result.status);
+    }
+    if (result.status) { errno = -result.status; return -1; }
     return 0;
 }
 
-int send_restore_batches(const char *filepath,
-                         const std::vector<loff_t> &page_offsets,
-                         const std::vector<unsigned long> &kernel_vaddrs) {
-    size_t total_pages = page_offsets.size();
-    size_t total_batches = (total_pages + MAX_PAGES_PER_OPERATION - 1) /
-                           MAX_PAGES_PER_OPERATION;
-
-    for (size_t batch_idx = 0; batch_idx < total_batches; ++batch_idx) {
-        size_t start = batch_idx * MAX_PAGES_PER_OPERATION;
-        size_t batch_pages = std::min(static_cast<size_t>(MAX_PAGES_PER_OPERATION),
-                                      total_pages - start);
-
-        struct restore_msg restore_msg;
-        memset(&restore_msg, 0, sizeof(restore_msg));
-        strncpy(restore_msg.filepath, filepath, sizeof(restore_msg.filepath) - 1);
-        restore_msg.offset = page_offsets[start];
-        restore_msg.page_count = static_cast<int>(batch_pages);
-
-        for (size_t i = 0; i < batch_pages; ++i) {
-            restore_msg.page_offsets[i] = page_offsets[start + i];
+int send_replace_batches(const char *filepath, void *,
+                         const std::vector<loff_t> &offsets,
+                         const std::vector<unsigned long> &sources,
+                         const std::vector<unsigned int> &kinds) {
+    if (offsets.size() != sources.size() || offsets.size() != kinds.size() || offsets.size() > UINT_MAX) return -1;
+    transaction_absent = true; // No BEGIN has been attempted by this manager.
+    int fd = transaction_socket();
+    if (fd < 0) return -1;
+    struct stat st;
+    if (stat(filepath, &st)) { close(fd); return -1; }
+    struct vkso_tx_request r = {};
+    struct vkso_tx_result result = {};
+    r.operation = VKSO_BEGIN; r.transaction = active_transaction;
+    r.total = offsets.size(); r.device = st.st_dev; r.inode = st.st_ino;
+    strncpy(r.filepath, filepath, sizeof(r.filepath)-1);
+    r.owner_count = requested_owners.size();
+    std::copy(requested_owners.begin(), requested_owners.end(), r.owners);
+    transaction_absent = false;
+    int ret = tx_request(fd, r, result);
+    if (ret < 0) {
+        // A confirmed rejected BEGIN made no binding. Unknown delivery keeps
+        // the durable state, since it may name a staged transaction.
+        transaction_absent = result.status < 0 && result.state == VKSO_UNKNOWN;
+        close(fd); return -1;
+    }
+    test_checkpoint("begin-confirmed");
+    if (!verify_pinned_images()) { close(fd); errno = ESTALE; return -1; }
+    for (size_t start = 0; start < offsets.size(); start += MAX_PAGES_PER_OPERATION) {
+        r = {}; r.operation = VKSO_STAGE; r.transaction = active_transaction;
+        r.total = offsets.size(); r.start = start;
+        r.count = std::min<size_t>(MAX_PAGES_PER_OPERATION, offsets.size() - start);
+        for (unsigned i = 0; i < r.count; i++) {
+            r.pages[i].offset = offsets[start+i]; r.pages[i].source = sources[start+i];
+            r.pages[i].kind = kinds[start+i];
         }
-
-        printf("Sending restore batch %zu/%zu (%zu pages)\n",
-               batch_idx + 1,
-               total_batches,
-               batch_pages);
-        dump_page_mappings(&restore_msg.page_offsets[0],
-                           &kernel_vaddrs[start],
-                           restore_msg.page_count,
-                           "Netlink restore payload (addresses shown for reference)");
-
-        if (send_netlink_message(NETLINK_RESTORE,
-                                 &restore_msg,
-                                 sizeof(restore_msg)) < 0) {
-            return -1;
+        ret = tx_request(fd, r, result);
+        if (ret < 0) break;
+        test_checkpoint("staged");
+    }
+    if (ret == 0) {
+        r = {}; r.operation = VKSO_COMMIT; r.transaction = active_transaction;
+        ret = tx_request(fd, r, result);
+        if (ret == 0 && (result.state != VKSO_ACTIVE || result.applied != offsets.size())) {
+            errno = EPROTO; ret = -1;
         }
     }
+    if (!ret) test_checkpoint("committed");
+    close(fd);
+    return ret;
+}
 
-    return 0;
+int send_restore_batches(const char *, const std::vector<loff_t> &,
+                         const std::vector<unsigned long> &) {
+    if (!active_transaction) { fprintf(stderr, "No transaction ID for recovery\n"); return -1; }
+    if (transaction_absent) return 0;
+    int fd = transaction_socket();
+    if (fd < 0) return -1;
+    struct vkso_tx_request r = {};
+    struct vkso_tx_result result = {};
+    r.operation = VKSO_RELEASE; r.transaction = active_transaction;
+    int ret = tx_request(fd, r, result);
+    if (ret && result.version == VKSO_PROTOCOL_VERSION &&
+        result.transaction == active_transaction && result.status == -ENOENT &&
+        result.state == VKSO_UNKNOWN) {
+        // A live transaction pins this module. An explicit kernel absence
+        // therefore permits cleanup even if the manager died before BEGIN,
+        // or the terminal record disappeared on a later module reload.
+        printf("Transaction %llu absent; no active bindings to release\n", active_transaction);
+        close(fd); return 0;
+    }
+    if (!ret && (result.applied || (result.state != VKSO_RESTORED && result.state != VKSO_ABORTED))) {
+        errno = EPROTO; ret = -1;
+    }
+    if (!ret) {
+        test_checkpoint("released-confirmed");
+        r = {}; r.operation = VKSO_FORGET; r.transaction = active_transaction;
+        ret = tx_request(fd, r, result);
+        if (!ret) {
+            transaction_absent = true;
+            test_checkpoint("forgotten-confirmed");
+        }
+    }
+    // Keep durable local recovery state if either operation is unconfirmed.
+    // After confirmed FORGET a reconnecting RELEASE observes ENOENT, which
+    // also permits recovery of flags/state if this process exits here.
+    close(fd);
+    return ret;
 }
 
 static bool validate_page_mappings_for_file(const char *filepath,
@@ -587,6 +844,7 @@ int replace_elf_sections_by_page_info(const char *filepath,
 
     std::vector<loff_t> page_offsets;
     std::vector<unsigned long> kernel_vaddrs;
+    std::vector<unsigned int> page_kinds;
     page_offsets.reserve(plan.size());
     kernel_vaddrs.reserve(plan.size());
 
@@ -594,6 +852,8 @@ int replace_elf_sections_by_page_info(const char *filepath,
         const auto &entry = plan[idx];
         page_offsets.push_back(entry.file_offset);
         kernel_vaddrs.push_back(entry.kernel_vaddr);
+        page_kinds.push_back(entry.kind == "text" ? VKSO_PAGE_TEXT :
+                             entry.kind == "rodata" ? VKSO_PAGE_RODATA : VKSO_PAGE_SHARED_DATA);
 
         printf("  [%03zu] file_offset=0x%llx kernel_vaddr=0x%lx kind=%s section=%s\n",
                idx,
@@ -610,14 +870,11 @@ int replace_elf_sections_by_page_info(const char *filepath,
                        "Planned replace mappings");
 
     printf("\n=== Sending replace batches ===\n");
-    if (send_replace_batches(filepath, mapped_addr, page_offsets, kernel_vaddrs) < 0) {
+    if (send_replace_batches(filepath, mapped_addr, page_offsets, kernel_vaddrs, page_kinds) < 0) {
         printf("Failed to send replace batches\n");
         return -1;
     }
     
-    // 等待一下让内核处理
-    printf("Waiting for kernel to process replace request...\n");
-    sleep(2);
     printf("SUCCESS: ELF section replace completed\n");
     return 0;
 }
@@ -663,9 +920,6 @@ int restore_elf_sections_by_page_info(const char *filepath,
         return -1;
     }
     
-    // 等待一下让内核处理
-    printf("Waiting for kernel to process restore request...\n");
-    sleep(2);
     
     printf("SUCCESS: ELF section restore completed\n");
     return 0;
@@ -675,7 +929,7 @@ static void usage(const char *prog) {
     fprintf(stderr,
             "Usage:\n"
             "  %s validate <stub-so> <page-map>\n"
-            "  %s replace <stub-so> <page-map> [--hold]\n"
+            "  %s replace <stub-so> <page-map> [--hold [--notify-fifo <path>]]\n"
             "  %s restore <stub-so> <page-map>\n"
             "\n"
             "The page map is generated by make_dll and contains exact DSO file\n"
@@ -686,7 +940,7 @@ static void usage(const char *prog) {
             prog, prog, prog);
 }
 
-int main(int argc, char **argv) {
+static int manager_main(int argc, char **argv) {
     int fd;
     int result = 0;
     struct stat st;
@@ -696,6 +950,7 @@ int main(int argc, char **argv) {
     const char *page_map_file = NULL;
     bool hold = false;
     bool immutable_added = false;
+    sigset_t hold_signals, previous_mask;
 
     if (argc < 4) {
         usage(argv[0]);
@@ -708,11 +963,25 @@ int main(int argc, char **argv) {
     for (int i = 4; i < argc; ++i) {
         if (strcmp(argv[i], "--hold") == 0) {
             hold = true;
+        } else if (strcmp(argv[i], "--notify-fifo") == 0 && i + 1 < argc) {
+            notify_fifo = argv[++i];
         } else {
             fprintf(stderr, "Unknown argument: %s\n", argv[i]);
             usage(argv[0]);
             return 1;
         }
+    }
+
+    if (!notify_fifo.empty()) {
+        if (!hold || notify_fifo.find('\n') != std::string::npos) return 1;
+        notify_fd = open(notify_fifo.c_str(), O_WRONLY | O_NONBLOCK | O_CLOEXEC | O_NOFOLLOW);
+        struct stat notification;
+        if (notify_fd < 0 || fstat(notify_fd, &notification) || !S_ISFIFO(notification.st_mode)) {
+            if (notify_fd >= 0) close(notify_fd);
+            notify_fd = -1;
+            fprintf(stderr, "Notification destination must be an openable FIFO\n"); return 1;
+        }
+        signal(SIGPIPE, SIG_IGN);
     }
 
     if (strcmp(command, "validate") != 0 &&
@@ -753,13 +1022,50 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    // One recovery file belongs to one manager session. The kernel itself
+    // supports independent transactions; separate runtime directories can use them.
+    if (!ensure_runtime_dir(argv[0])) return 1;
+    int state_lock = open(join_path(runtime_dir_for(argv[0]), "manager.lock").c_str(),
+                          O_CREAT | O_RDWR | O_CLOEXEC, 0600);
+    if (state_lock < 0 || flock(state_lock, LOCK_EX | LOCK_NB)) {
+        fprintf(stderr, "Another manager owns this runtime directory\n"); return 1;
+    }
+
+    if (strcmp(command, "replace") == 0 && !load_owner_descriptors(page_map_file)) {
+        fprintf(stderr, "Invalid owner descriptor manifest\n");
+        return 1;
+    }
+
     if (strcmp(command, "restore") == 0) {
+        std::ifstream state(state_path_for(argv[0]));
+        std::string line, saved_path;
+        while (std::getline(state, line)) {
+            if (line.rfind("transaction_id=", 0) == 0) {
+                try { active_transaction = std::stoull(line.substr(15)); }
+                catch (...) { return 1; }
+            }
+            if (line.rfind("stub_so=", 0) == 0) saved_path = line.substr(8);
+            try {
+                if (line.rfind("carrier_device=", 0) == 0) carrier_device = std::stoull(line.substr(15));
+                if (line.rfind("carrier_inode=", 0) == 0) carrier_inode = std::stoull(line.substr(14));
+            } catch (...) { return 1; }
+        }
+        if (!active_transaction || saved_path != filepath) {
+            fprintf(stderr, "No matching transaction state for restore\n"); return 1;
+        }
+        struct stat recovery_st;
+        if (!carrier_inode || stat(filepath, &recovery_st) ||
+            static_cast<unsigned long long>(recovery_st.st_dev) != carrier_device ||
+            static_cast<unsigned long long>(recovery_st.st_ino) != carrier_inode) {
+            fprintf(stderr, "Recovery target does not match the saved carrier inode\n"); return 1;
+        }
         int restore_ret = restore_elf_sections_by_page_info(filepath, page_mappings);
         if (restore_ret == 0) {
             bool managed_immutable = false;
             if (load_managed_immutable_state(argv[0], filepath,
                                              &managed_immutable)) {
-                clear_managed_immutable(filepath, managed_immutable);
+                if (!clear_managed_immutable(filepath, managed_immutable))
+                    return -1;
             } else {
                 printf("No matching immutable state; preserving file flags on %s\n",
                        filepath);
@@ -767,6 +1073,24 @@ int main(int argc, char **argv) {
             remove_manager_state(argv[0]);
         }
         return restore_ret;
+    }
+
+    if (access(state_path_for(argv[0]).c_str(), F_OK) == 0) {
+        fprintf(stderr, "Existing manager state requires recovery before replacement\n");
+        return 1;
+    }
+    if (getrandom(&active_transaction, sizeof(active_transaction), 0) != sizeof(active_transaction) ||
+        !active_transaction) { perror("transaction ID"); return 1; }
+
+    if (hold) {
+        sigemptyset(&hold_signals);
+        sigaddset(&hold_signals, SIGTERM);
+        sigaddset(&hold_signals, SIGINT);
+        sigaddset(&hold_signals, SIGHUP);
+        signal(SIGTERM, signal_handler);
+        signal(SIGINT, signal_handler);
+        signal(SIGHUP, signal_handler);
+        sigprocmask(SIG_BLOCK, &hold_signals, &previous_mask);
     }
 
     // 1. 打开文件
@@ -783,6 +1107,11 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    carrier_device = st.st_dev;
+    carrier_inode = st.st_ino;
+    int original_flags = 0;
+    if (ioctl(fd, FS_IOC_GETFLAGS, &original_flags)) { perror("FS_IOC_GETFLAGS"); close(fd); return 1; }
+    immutable_added = !(original_flags & FS_IMMUTABLE_FL);
     printf("File size: %ld bytes\n", st.st_size);
 
     // 2. 映射文件到内存
@@ -795,22 +1124,23 @@ int main(int argc, char **argv) {
     for(int i = 1; i< st.st_size; i+= PAGE_SIZE) {
         printf("page %d: %lx\n", i, (unsigned long)mapped_addr + i);
     }
-    // 3. 替换ELF段
-    // 使用页面信息文件
-    if (replace_elf_sections_by_page_info(
-            filepath, mapped_addr, page_mappings) < 0) {
-        printf("ELF section replace failed\n");
-        result = -1;
-        goto cleanup;
+    // Persist intended flag ownership before changing the file. Recovery can
+    // undo it whether the crash occurs before or after the ioctl or BEGIN.
+    if (!write_manager_state(argv[0], filepath, page_map_file, false, immutable_added)) {
+        result = -1; goto cleanup;
     }
-
-    printf("\n=== ELF section replace completed successfully ===\n");
-
-    if (!protect_file_immutable(filepath, &immutable_added)) {
-        printf("Failed to protect replaced file; restoring before exit\n");
-        restore_elf_sections_by_page_info(filepath, page_mappings);
-        result = -1;
-        goto cleanup;
+    if (!notify_session("START", 0)) { remove_manager_state(argv[0]); result = -1; goto cleanup; }
+    test_checkpoint("state-persisted");
+    if (!protect_file_immutable(fd, filepath, original_flags)) {
+        if (clear_managed_immutable(filepath, immutable_added)) remove_manager_state(argv[0]);
+        result = -1; goto cleanup;
+    }
+    test_checkpoint("immutable-set");
+    if (replace_elf_sections_by_page_info(filepath, mapped_addr, page_mappings) < 0) {
+        fprintf(stderr, "Transaction did not commit; releasing staged/applied resources\n");
+        if (restore_elf_sections_by_page_info(filepath, page_mappings) == 0 &&
+            clear_managed_immutable(filepath, immutable_added)) remove_manager_state(argv[0]);
+        result = -1; goto cleanup;
     }
 
     if (!write_manager_state(argv[0], filepath, page_map_file,
@@ -824,22 +1154,25 @@ int main(int argc, char **argv) {
     }
 
     if (hold) {
-        signal(SIGTERM, signal_handler);
-        signal(SIGINT, signal_handler);
-        signal(SIGHUP, signal_handler);
-
         printf("Holding active replacement session. Send SIGTERM/SIGINT/SIGHUP to restore.\n");
         fflush(stdout);
+        if (!notify_session("READY", 0)) g_restore_requested = 1;
         while (!g_restore_requested) {
-            pause();
+            sigsuspend(&previous_mask);
         }
 
         printf("Restore signal received; restoring active replacement session...\n");
         if (restore_elf_sections_by_page_info(filepath, page_mappings) == 0) {
-            clear_managed_immutable(filepath, immutable_added);
-            remove_manager_state(argv[0]);
+            if (!clear_managed_immutable(filepath, immutable_added)) {
+                result = -1;
+            } else {
+                remove_manager_state(argv[0]);
+                printf("Manager hold session restored and exiting.\n");
+            }
+        } else {
+            fprintf(stderr, "Restore failed; retaining manager state for recovery.\n");
+            result = -1;
         }
-        printf("Manager hold session restored and exiting.\n");
     }
 
 cleanup:
@@ -847,5 +1180,12 @@ cleanup:
         munmap(mapped_addr, st.st_size);
     }
     close(fd);
+    return result;
+}
+
+int main(int argc, char **argv) {
+    int result = manager_main(argc, argv);
+    notify_session("DONE", result);
+    if (notify_fd >= 0) close(notify_fd);
     return result;
 }

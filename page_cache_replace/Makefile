@@ -12,7 +12,7 @@ all: module manager
 module:
 	$(MAKE) -C $(KDIR) M=$(CURDIR) modules EXTRA_CFLAGS="-fno-inline -g"
 
-manager: manager.cpp
+manager: manager.cpp protocol.h
 	$(CXX) $(CXXFLAGS) $< $(MANAGER_LDFLAGS) -o $@
 
 clean:

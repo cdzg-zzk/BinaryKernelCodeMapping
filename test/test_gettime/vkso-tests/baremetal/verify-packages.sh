@@ -130,6 +130,16 @@ for file in raw-abi-matrix vkso-abi-matrix vkso-time-bench \
 	}
 done
 
+if [[ -d "$NORMAL_PACKAGE/macro" || -d "$NO_RETPOLINE_PACKAGE/macro" ]]; then
+	for file in redis-server redis-cli redis-benchmark adapter.so redis_workload.py \
+		adapter.c vkso_abi.h redis-7.2.4.tar.gz; do
+		cmp -s "$NORMAL_PACKAGE/macro/$file" "$NO_RETPOLINE_PACKAGE/macro/$file" || {
+			echo "macrobench tool missing or differs across variants: $file" >&2
+			exit 1
+		}
+	done
+fi
+
 echo "four_image_package_validation=pass"
 echo "normal_package=$NORMAL_PACKAGE"
 echo "no_retpoline_package=$NO_RETPOLINE_PACKAGE"

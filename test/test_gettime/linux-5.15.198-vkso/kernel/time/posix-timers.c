@@ -62,7 +62,7 @@ vkso_current_mm_data(void)
 {
 	/*
 	 * Every userspace mm receives this page during exec.  Its mask is zero
-	 * in the root time namespace and is updated in place after setns(), so
+	 * in the root time namespace; setns() switches its backing page, so
 	 * the shared reader needs no separate namespace classification here.
 	 */
 	return READ_ONCE(current->mm->context.vkso_mm_kdata);

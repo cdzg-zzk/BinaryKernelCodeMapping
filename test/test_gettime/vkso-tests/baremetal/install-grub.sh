@@ -10,6 +10,16 @@ GRUB_SCRIPT=/etc/grub.d/41_vkso_time
 # shellcheck disable=SC1091
 source "$HERE/experiment.conf"
 
+for package in "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"; do
+	for artifact in SHA256SUMS boot-manifest.txt raw-bzImage vkso-bzImage; do
+		if [[ ! -s "$package/$artifact" ]]; then
+			echo "build is incomplete: $package (missing $artifact)" >&2
+			echo "finish ./build-all.sh successfully before installing; no boot files changed" >&2
+			exit 1
+		fi
+	done
+done
+
 if [[ $(id -u) -ne 0 ]]; then
 	exec sudo --preserve-env=NORMAL_PACKAGE,NO_RETPOLINE_PACKAGE \
 		"$0" "$@"
@@ -72,8 +82,8 @@ done
 
 common_args="root=PARTUUID=$root_partuuid rootwait ro nokaslr"
 common_args+=" clocksource=tsc tsc=reliable nosmt"
-common_args+=" isolcpus=domain,managed_irq,$CPU nohz_full=$CPU"
-common_args+=" rcu_nocbs=$CPU irqaffinity=$HOUSEKEEPING_CPUS"
+common_args+=" isolcpus=domain,managed_irq,${ISOLATED_CPUS:-$CPU} nohz_full=${ISOLATED_CPUS:-$CPU}"
+common_args+=" rcu_nocbs=${ISOLATED_CPUS:-$CPU} irqaffinity=$HOUSEKEEPING_CPUS"
 common_args+=" idle=poll intel_pstate=active"
 common_args+=" processor.max_cstate=0 intel_idle.max_cstate=0"
 common_args+=" nmi_watchdog=0 nowatchdog audit=0"

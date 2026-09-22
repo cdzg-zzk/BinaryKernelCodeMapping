@@ -1,875 +1,655 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Resident-page transactions for the controlled VKSO research kernel. */
 #include <linux/module.h>
 #include <linux/fs.h>
+#include <linux/file.h>
 #include <linux/pagemap.h>
 #include <linux/netlink.h>
 #include <net/sock.h>
-#include <linux/uaccess.h>
 #include <linux/slab.h>
-#include <linux/mm.h>
-#include <linux/highmem.h>
-#include <asm/cacheflush.h>
-#include <asm/tlbflush.h>
-#include <linux/mm_types.h>
-#include <linux/hugetlb.h>
-
-#include <asm/page.h>
-#include <asm/pgtable.h>
 #include <linux/vmalloc.h>
+#include <linux/ktime.h>
+#include <linux/mutex.h>
+#include <linux/kdev_t.h>
+#include <linux/cleancache.h>
+#include <linux/memcontrol.h>
+#include <linux/sched.h>
+#include <asm/pgtable.h>
+#include "protocol.h"
+#include "owner.h"
 
-#define NETLINK_MODIFY 30  // 自定义 Netlink 协议号
-#define NETLINK_RESTORE 29  // 恢复操作的 Netlink 协议号
-#define MAX_PAGES_PER_OPERATION 256  // 每次操作的最大页面数（需覆盖最大 replace 页数）
+static DEFINE_MUTEX(operation_lock);
+static LIST_HEAD(transactions);
+static struct sock *nl_sk, *nl_restore_sk;
 
-static struct sock *nl_sk = NULL;
-static struct sock *nl_restore_sk = NULL;
-static struct file *target_file = NULL;
+/* One-shot fault injection, disabled in ordinary runs. Only the administrator
+ * of the private evaluation guest writes these module parameters. */
+static int test_fail_apply = -1, test_fail_release = -1;
+static unsigned int test_drop_reply;
+module_param(test_fail_apply, int, 0600);
+module_param(test_fail_release, int, 0600);
+module_param(test_drop_reply, uint, 0600);
 
-// 保存原始页信息用于恢复（当前实现仅使用 add 模式，下列 original_* 字段为未来扩展预留）
-struct page_backup {
-    struct page *original_page;     // 预留：原始页面指针（当前实现恒为 NULL）
-    unsigned long original_flags;   // 预留：原始页面的标志位
-    void *original_mapping;         // 预留：原始页面的地址空间映射指针
-    unsigned long original_index;   // 预留：原始页面在地址空间中的索引位置
-    bool is_backed_up;             // 备份状态标志：true表示已备份，false表示未备份
-    pgoff_t backup_index;          // 被备份页面在页缓存中的索引，用于定位恢复位置
-    struct address_space *target_mapping; // 目标文件的地址空间映射，用于恢复操作
+struct owner_pin {
+    char symbol[64];
+    const struct vkso_owner_descriptor *descriptor;
+};
+struct binding {
+    struct vkso_page_spec spec;
+    struct page *source, *old_cache;
+    void *saved_mapping;
+    unsigned long saved_index;
+    bool saved_uptodate, applied;
+};
+struct transaction {
+    struct list_head list;
+    u64 id;
+    u32 controller_port, total, staged, applied, state;
+    u32 last_operation, last_sequence;
+    int last_status, failed_page;
+    u64 prepare_ns, apply_ns, release_ns;
+    struct file *file;
+    struct binding *pages;
+    struct owner_pin owners[VKSO_MAX_OWNERS];
+    u32 owner_count;
+    bool write_denied, mapping_denied, module_held;
 };
 
-// 多页面备份管理结构
-struct multi_page_backup {
-    struct page_backup backup_array[MAX_PAGES_PER_OPERATION];  // 备份页面数组
-    int backup_count;               // 备份的页面数量
-    bool is_active;                 // 是否有活跃的备份
-};
-
-static struct multi_page_backup page_backup_manager = {
-    .backup_count = 0,
-    .is_active = false
-};
-
-// 初始化多页面备份管理器
-static void init_multi_page_backup(void) {
-    int i;
-    memset(&page_backup_manager, 0, sizeof(page_backup_manager));
-    for (i = 0; i < MAX_PAGES_PER_OPERATION; i++) {
-        page_backup_manager.backup_array[i].is_backed_up = false;
-        page_backup_manager.backup_array[i].original_page = NULL;
-    }
-}
-
-// 单页面备份（保持原有逻辑）
-// static struct page_backup page_backup_info = {0};  // 已不再使用
-
-// Netlink 消息格式 - 支持多页面
-struct nl_msg {
-    char filepath[256];
-    loff_t offset;                 // 起始偏移量（单页面模式）
-    unsigned long addr;            // 用户空间地址
-    int page_count;                // 页面数量，1表示单页面模式
-    loff_t page_offsets[MAX_PAGES_PER_OPERATION];  // 每个页面的偏移量
-    unsigned long kernel_vaddrs[MAX_PAGES_PER_OPERATION];  // 每个页面对应的内核虚拟地址
-};
-
-// 恢复请求消息格式 - 支持多页面
-struct restore_msg {
-    char filepath[256];  // 要恢复的文件路径
-    loff_t offset;       // 起始偏移量（单页面模式）
-    int page_count;      // 要恢复的页面数量，1表示单页面模式
-    loff_t page_offsets[MAX_PAGES_PER_OPERATION];  // 每个页面的偏移量
-};
-
-unsigned long filemap_addr;
-
-// 函数声明
-static struct page *get_kernel_code_page(unsigned long kernel_vaddr);
-static void backup_page_info(struct page *original_page, pgoff_t index, struct address_space *mapping);
-static struct page_backup* find_backup_info(pgoff_t index);
-static void clear_backup_info(pgoff_t index);
-static int batch_process_pages(struct file *file, struct nl_msg *msg);
-static int batch_restore_pages(struct file *file, struct restore_msg *msg);
-
-void test_page_lru(struct page *page)
+static struct transaction *find_transaction(u64 id)
 {
-    if (!PageLRU(page)) {
-        pr_info("LRU: not on any LRU\n");
-        return;
-    }
-
-    if (PageUnevictable(page))
-        pr_info("LRU: on unevictable LRU\n");
-    else if (PageActive(page))
-        pr_info("LRU: on active LRU\n");
-    else
-        pr_info("LRU: on inactive LRU\n");
-}
-static int vkso_pmd_huge(pmd_t pmd)
-{
-    return !pmd_none(pmd) && 
-            (pmd_val(pmd) & (_PAGE_PRESENT|_PAGE_PSE)) != _PAGE_PRESENT;
-}
-int get_page_table(unsigned long addr)
-{
-    pgd_t *pgd;
-    p4d_t *p4d;
-    pud_t *pud;
-    pmd_t *pmd;
-    pte_t *pte;
-    struct mm_struct *mm;
-    struct page *tmp_page;
-    
-    if(addr == 0) {
-        printk(KERN_INFO "skip walk page table\n");
-        return 0;
-    }
-    printk(KERN_INFO "%s\n", __func__);
-    printk(KERN_INFO "%lx\n", addr);
-
-    mm = current->mm;
-    printk(KERN_INFO "current->pid is %d   addr: %lx    mm: %p\n", current->pid, addr, mm);   // 检查PGD是否一致，虽然一致，但是还挺重要的
-    if(!mm) {
-        printk(KERN_ERR "No mm_struct for current process\n");
-        return 1;
-    }
-    pgd = pgd_offset(mm, addr);
-    if(pgd_none(*pgd) || pgd_bad(*pgd)) {
-        printk(KERN_INFO "PGD invalid or not present for address 0x%lx\n", addr);
-         return 2;
-    }
-    printk(KERN_INFO "PGD found at %p, value: 0x%lx\n", pgd, pgd_val(*pgd));
-     printk(KERN_INFO "Protection bits: %s%s%s\n", 
-        (pgd_val(*pgd) & _PAGE_USER) ? "USER " : "", 
-        (pgd_val(*pgd) & _PAGE_RW) ? "RW " : "RO ",
-        (pgd_val(*pgd) & _PAGE_NX) ? "NO-EXEC" : "EXEC"); 
-
-
-    printk(KERN_INFO "if have p4d: %d\n", pgtable_l5_enabled());
-    p4d = p4d_offset(pgd, addr);
-    if(p4d_none(*p4d) || p4d_bad(*p4d)) {
-        printk(KERN_INFO "P4D invalid or not present for address 0x%lx\n", addr);
-         return 3;
-    }
-    printk(KERN_INFO "P4D found at %p, value: 0x%lx\n", p4d, p4d_val(*p4d));
-    printk(KERN_INFO "Protection bits: %s%s%s\n", 
-        (p4d_val(*p4d) & _PAGE_USER) ? "USER " : "", 
-         (p4d_val(*p4d) & _PAGE_RW) ? "RW " : "RO ",
-        (p4d_val(*p4d) & _PAGE_NX) ? "NO-EXEC" : "EXEC"); 
-
-
-    pud = pud_offset(p4d, addr);
-    if(pud_none(*pud) || pud_bad(*pud)) {
-        printk(KERN_INFO "PUD invalid or not present for address 0x%lx\n", addr);
-        return 4;
-    }
-    printk(KERN_INFO "PUD found at %p, value: 0x%lx\n", pud, pud_val(*pud));
-    printk(KERN_INFO "Protection bits: %s%s%s\n", 
-        (pud_val(*pud) & _PAGE_USER) ? "USER " : "", 
-        (pud_val(*pud) & _PAGE_RW) ? "RW " : "RO ",
-        (pud_val(*pud) & _PAGE_NX) ? "NO-EXEC" : "EXEC"); 
-
-
-    pmd = pmd_offset(pud, addr);
-    if(pmd_none(*pmd) || pmd_bad(*pmd)) {
-        printk(KERN_INFO "PMD invalid or not present for address 0x%lx\n", addr);
-        return 5;
-    }
-    printk(KERN_INFO "PMD found at %p, value: 0x%lx\n", pmd, pmd_val(*pmd));
-    if(vkso_pmd_huge(*pmd)) {
-        printk(KERN_INFO "This is a huge page mapping at PMD level\n");
-        printk(KERN_INFO "PMD flags: %s %s %s\n", (pmd_val(*pmd) & _PAGE_USER) ? "USER " : "",
-                                                    (pmd_val(*pmd) & _PAGE_RW) ? "RW " : "RO ",
-                                                    (pmd_val(*pmd) & _PAGE_NX) ? "EXEC " : "NO-EXEC");
-        return 6;
-    }
-    printk(KERN_INFO "Protection bits: %s%s%s\n", 
-            (pmd_val(*pmd) & _PAGE_USER) ? "USER " : "", 
-            (pmd_val(*pmd) & _PAGE_RW) ? "RW " : "RO ",
-            (pmd_val(*pmd) & _PAGE_NX) ? "NO-EXEC" : "EXEC"); 
-    
-    
-    pte = pte_offset_map(pmd, addr);
-    if(!pte) {
-         printk(KERN_INFO "Filed to map PTE for address 0x%lx\n", addr);
-        return 7;
-    }
-    if(pte_none(*pte)) {
-        printk(KERN_INFO "PTE not present for address 0x%lx\n", addr);
-        pte_unmap(pte);
-         return 8;
-    }
-    printk(KERN_INFO "PTE found at %p, value: 0x%lx\n", pte, pte_val(*pte)); 
-    printk(KERN_INFO "Page frame number: 0x%lx\n", pte_pfn(*pte)); 
-    printk(KERN_INFO "Protection bits: %s%s%s\n", 
-            (pte_val(*pte) & _PAGE_USER) ? "USER " : "", 
-            (pte_val(*pte) & _PAGE_RW) ? "RW " : "RO ",
-            (pte_val(*pte) & _PAGE_NX) ? "NO-EXEC" : "EXEC"); 
-    if (!(pte_val(*pte) & _PAGE_PRESENT)) 
-         printk(KERN_INFO "Warning: Page is not present!\n");
-    tmp_page = pfn_to_page(pte_pfn(*pte));
-    pr_info("tmp_page refcount: %d\n", atomic_read(&tmp_page->_refcount));
-    pr_info("tmp_page mapcount: %d\n", atomic_read(&tmp_page->_mapcount));
-
-    return -1;
-}
-
-// 添加新页到页缓存（之前没有页缓存的情况）
-static int add_page_to_cache(struct file *file, pgoff_t index, struct page *new_page) {
-    struct address_space *mapping = file->f_mapping;
-    struct page *existing_page;
-    int ret = 0;
-    struct page *verify_page;
-    XA_STATE(xas, &mapping->i_pages, index);
-    
-    pr_info("add_page_to_cache start mapping: %p  i_pages: %p\n", mapping, &mapping->i_pages);
-
-    /* 确认这是文件页而不是 swap-backed 页 */
-    VM_BUG_ON_PAGE(PageSwapBacked(new_page), new_page);
-
-    /* 遵守通用约定：插入 page cache 期间保持 PageLocked */
-    lock_page(new_page);
-
-    /*
-     * 核心内核在使用 xarray 更新 page cache 时会调用 mapping_set_update()
-     * 配合 workingset 做更精细的回收统计。但该 helper 只在核心 mm 内部使用，
-     * 对模块不可见。这里直接略过它，只使用 xas_lock/xas_store 即可，正确性不受影响。
-     */
-
-    xas_lock(&xas);
-    
-    // 确认该位置确实没有页
-    existing_page = xas_load(&xas);
-    if (existing_page) {
-        /*
-         * xarray 里既可能存真正的 struct page*，也可能是 workingset
-         * 留下的 shadow entry（xa_is_value(entry) 为真）。
-         *
-         * - 如果是 shadow entry：说明之前这里有过页被回收，
-         *   但现在只剩一块“墓碑”，可以安全覆盖为我们的 code_page。
-         * - 如果是实际的 page*：说明页缓存里已经有有效页，
-         *   当前只支持 add 模式，视为冲突。
-         */
-        if (!xa_is_value(existing_page)) {
-            pr_warn("Page already exists at index %lu, add mode does not overwrite existing cache\n", index);
-            ret = -EEXIST;
-            goto unlock_xas;
-        }
-        pr_info("Found shadow entry at index %lu, will overwrite with code page\n", index);
-    }
-    
-    // 设置新页的映射信息
-    new_page->mapping = mapping;
-    new_page->index = index;
-    
-    // 设置页为最新状态
-    SetPageUptodate(new_page);
-    
-    // 增加新页引用计数
-    get_page(new_page);
-    
-    // 备份添加操作的信息 - 使用新的多页面备份管理
-    backup_page_info(NULL, index, mapping);
-
-    // 使用 xarray state + xas_store 插入页，配合 mapping_set_update
-    xas_store(&xas, new_page);
-    if (xas_error(&xas)) {
-        int err = xas_error(&xas);
-
-        put_page(new_page);
-        pr_err("Failed to store page in cache: %d\n", err);
-        ret = err;
-        goto unlock_xas;
-    }
-    
-    // 增加页面计数器（add操作增加了页面数量）
-    mapping->nrpages++;
-    
-    pr_info("New page added to cache: %p at index %lu (nrpages: %lu)\n",
-            new_page, index, mapping->nrpages);
-
-unlock_xas:
-    xas_unlock(&xas);
-    unlock_page(new_page);
-    
-    if (ret == 0) {
-        // 刷新CPU缓存确保一致性
-        // flush_dcache_page(new_page);
-        if(PageDirty(new_page)) {
-            pr_info("PageDirty: %p\n", new_page);
-        }
-        get_page_table(filemap_addr);
-        pr_info("new page refcount: %d\n", atomic_read(&new_page->_refcount));
-        pr_info("new page mapcount: %d\n", atomic_read(&new_page->_mapcount));
-        // 清除所有映射该文件的进程的PTE，让后续访问触发page fault
-        unmap_mapping_range(mapping, (loff_t)index << PAGE_SHIFT, PAGE_SIZE, 0);
-        get_page_table(filemap_addr);
-        pr_info("new page refcount: %d\n", atomic_read(&new_page->_refcount));
-        pr_info("new page mapcount: %d\n", atomic_read(&new_page->_mapcount));
-        pr_info("Page addition to cache completed successfully\n");
-    }
-    {
-        verify_page = xa_load(&mapping->i_pages, index);
-        pr_info("Page cache add: old=NULL, new=%p at index %lu (验证成功)\n", verify_page, index);
-   
-    }
-    return ret;
-}
-
-// 恢复原始页缓存
-static int restore_page_cache(struct file *file, pgoff_t index) {
-    struct address_space *mapping = file->f_mapping;
-    struct page *current_page;
-    int ret = 0;
-    struct page_backup *backup_entry;
-    XA_STATE(xas, &mapping->i_pages, index);
-    
-    pr_info("restore_page_cache start mapping: %p  i_pages: %p\n", mapping, &mapping->i_pages);
-    
-    if (!page_backup_manager.is_active) {
-        pr_err("No backup information available\n");
-        return -ENOENT;
-    }
-    
-    // 查找备份信息
-    backup_entry = find_backup_info(index);
-    if (!backup_entry) {
-        pr_err("No backup found for index %lu\n", index);
-        return -ENOENT;
-    }
-    xas_lock(&xas);
-    
-    current_page = xas_load(&xas);
-    pr_info("xa_load done");
-    test_page_lru(current_page);
-    if (!current_page) {
-        pr_err("No current page found at index %lu\n", index);
-        ret = -ENOENT;
-        goto unlock_xas;
-    }
-    get_page(current_page);
-    
-    /*
-     * 当前实现只支持 add 模式：backup_entry->original_page 始终为 NULL。
-     * 这里统一走“删除 LKM 页”的路径：
-     * - xas_store(NULL) 从 i_pages 删除条目
-     * - nrpages-- 保持 mapping 统计一致
-     * - put_page(current_page) 撤销 page cache 持有的那一份引用
-     */
-    pr_info("Removing added page from add operation\n");
-    
-    // 从页缓存中删除（使用 xas_store(NULL) 与 add 路径保持一致）
-    xas_store(&xas, NULL);
-    if (xas_error(&xas)) {
-        int err = xas_error(&xas);
-
-        pr_err("xas_store(NULL) failed during restore: %d\n", err);
-        ret = err;
-        goto unlock_xas;
-    }
-    
-    // 减少页面计数器（删除操作减少了页面数量）
-    if (mapping->nrpages > 0) {
-        mapping->nrpages--;
-    }
-    
-    // 减少LKM页在page cache中的引用
-    put_page(current_page);
-    
-    pr_info("Added page removed from cache at index %lu (nrpages: %lu)\n", 
-            index, mapping->nrpages);
-    
-unlock_xas:
-    xas_unlock(&xas);
-    
-    if (ret == 0) {
-        // 清除所有映射该文件的进程的PTE，让后续访问触发page fault
-        unmap_mapping_range(mapping, (loff_t)index << PAGE_SHIFT, PAGE_SIZE, 0);
-
-        // 清除该页面的备份信息
-        clear_backup_info(index);
-        
-        pr_info("current_page refcount: %d\n", atomic_read(&current_page->_refcount));
-        pr_info("current_page mapcount: %d\n", atomic_read(&current_page->_mapcount));
-        current_page->mapping = NULL;
-        current_page->index = 0;
-        put_page(current_page); // 本进程的struct page*引用
-        pr_info("Page cache restore completed successfully\n");
-    }
-    pr_info("================== END ==================\n");
-    return ret;
-}
-
-// 批量处理多页面操作 - 封装现有逻辑
-static int batch_process_pages(struct file *file, struct nl_msg *msg) {
-    struct page *code_page;
-    int ret = 0;
-    int i;
-    
-    pr_info("Processing %d pages for file: %s\n", msg->page_count, msg->filepath);
-    
-    // 处理每个页面
-    for (i = 0; i < msg->page_count; i++) {
-        pgoff_t index = msg->page_offsets[i] >> PAGE_SHIFT;
-        struct page *existing_page;
-        unsigned long kernel_vaddr = msg->kernel_vaddrs[i];
-        
-        pr_info("Processing page %d: offset=%lld, index=%lu, kernel_vaddr=0x%lx\n", 
-                i, msg->page_offsets[i], index, kernel_vaddr);
-        
-        // 获取指定内核虚拟地址对应的物理页
-        code_page = get_kernel_code_page(kernel_vaddr);
-        if (!code_page) {
-            pr_err("Failed to get LKM code page for kernel_vaddr: 0x%lx\n", kernel_vaddr);
-            ret = -ENOMEM;
-            break;
-        }
-        
-        // 检查页缓存中是否已存在该页
-        existing_page = pagecache_get_page(file->f_mapping, index, FGP_LOCK, 0);
-        if(existing_page) {
-            pr_info("existing_page refcount: %d\n", atomic_read(&existing_page->_refcount));
-            pr_info("existing_page mapcount: %d\n", atomic_read(&existing_page->_mapcount));
-            test_page_lru(existing_page);
-            // 页缓存中已存在页面，需要删除这个页
-            unmap_mapping_range(file->f_mapping, (loff_t)index << PAGE_SHIFT, PAGE_SIZE, 0);
-            delete_from_page_cache(existing_page);
-            unlock_page(existing_page);
-            test_page_lru(existing_page);
-            pr_info("existing_page refcount: %d\n", atomic_read(&existing_page->_refcount));
-            pr_info("existing_page mapcount: %d\n", atomic_read(&existing_page->_mapcount));
-            put_page(existing_page);  // 至此完全释放
-        }
-        pr_info("Page not in cache at index %lu, adding new page...\n", index);
-        ret = add_page_to_cache(file, index, code_page);
-        if (ret) {
-            pr_err("Failed to add page at index %lu: %d\n", index, ret);
-            break;
-        }
-    }
-    
-    return ret;
-}
-
-// 批量恢复多页面操作 - 封装现有逻辑
-static int batch_restore_pages(struct file *file, struct restore_msg *msg) {
-    int ret = 0;
-    int i;
-    
-    pr_info("Restoring %d pages for file: %s\n", msg->page_count, msg->filepath);
-    
-    // 处理每个页面
-    for (i = 0; i < msg->page_count; i++) {
-        pgoff_t index = msg->page_offsets[i] >> PAGE_SHIFT;
-        
-        pr_info("Restoring page %d: offset=%lld, index=%lu\n", i, msg->page_offsets[i], index);
-        
-        ret = restore_page_cache(file, index);
-        if (ret) {
-            pr_err("Failed to restore page at index %lu: %d\n", index, ret);
-            break;
-        }
-    }
-    
-    return ret;
-}
-
-// 多页面备份管理函数
-static void backup_page_info(struct page *original_page, pgoff_t index, struct address_space *mapping) {
-    if (page_backup_manager.backup_count < MAX_PAGES_PER_OPERATION) {
-        struct page_backup *backup_entry = &page_backup_manager.backup_array[page_backup_manager.backup_count];
-        
-        /*
-         * 当前实现只支持 add 模式：不会备份原始页，只记录 index/mapping。
-         * 保留 original_* 字段仅作为未来扩展的占位，不在当前逻辑中使用。
-         */
-        backup_entry->original_page = NULL;
-        backup_entry->original_flags = 0;
-        backup_entry->original_mapping = NULL;
-        backup_entry->original_index = 0;
-        backup_entry->backup_index = index;
-        backup_entry->target_mapping = mapping;
-        backup_entry->is_backed_up = true;
-        
-        page_backup_manager.backup_count++;
-        page_backup_manager.is_active = true;
-        
-        pr_info("Backed up page info: index=%lu, original_page=%p\n", index, original_page);
-    } else {
-        pr_err("Backup array is full, cannot backup more pages\n");
-    }
-}
-
-// 查找备份信息
-static struct page_backup* find_backup_info(pgoff_t index) {
-    int i;
-    for (i = 0; i < page_backup_manager.backup_count; i++) {
-        if (page_backup_manager.backup_array[i].backup_index == index && 
-            page_backup_manager.backup_array[i].is_backed_up) {
-            return &page_backup_manager.backup_array[i];
-        }
-    }
+    struct transaction *t;
+    list_for_each_entry(t, &transactions, list)
+        if (t->id == id)
+            return t;
     return NULL;
 }
 
-// 清除备份信息
-static void clear_backup_info(pgoff_t index) {
-    struct page_backup *backup_entry = find_backup_info(index);
-    if (backup_entry) {
-        /* 目前 original_page 始终为 NULL，这里只清理标志位 */
-        backup_entry->is_backed_up = false;
-        pr_info("Cleared backup info for index %lu\n", index);
-    }
-}
-
-void inspect_page_content(struct page *page) {
-    void *vaddr;
-    int i;
-    char *content;
-
-    // 1. 将物理页临时映射到内核虚拟地址空间
-    vaddr = kmap(page);
-    if (!vaddr) {
-        pr_err("kmap failed!\n");
-        return;
-    }
-
-    // 2. 现在 vaddr 是一个指向该页面起始地址的指针
-    content = (char *)vaddr;
-
-    // 3. 示例：打印页面开头的前 128 个字节
-    pr_info("Content of page %p (PFN: %lu):\n", page, page_to_pfn(page));
-    for (i = 0; i < 128; i++) {
-        if (i % 16 == 0) {
-            pr_cont("\n%04x: ", i);
-        }
-        pr_cont("%02x ", content[i+0x900] & 0xff);
-    }
-    pr_cont("\n");
-
-    // 4. 重要：解除映射
-    kunmap(page);
-}
-
-static struct page *lookup_kernel_page(unsigned long kernel_vaddr, unsigned int *level_out)
+static void drop_resources(struct transaction *t)
 {
-    unsigned int level = PG_LEVEL_NONE;
-    pte_t *pte = lookup_address(kernel_vaddr, &level);
-    unsigned long pfn = 0;
-
-    if (!pte) {
-        return NULL;
-    }
-
-    // lookup_address() returns a pte_t* for 4K, or a casted pmd/pud for huge pages.
-    switch (level) {
-    case PG_LEVEL_4K:
-        if (!pte_present(*pte)) {
-            return NULL;
+    u32 i;
+    if (t->applied)
+        return;
+    for (i = 0; i < t->total; i++) {
+        if (t->pages[i].old_cache) {
+            put_page(t->pages[i].old_cache);
+            t->pages[i].old_cache = NULL;
         }
-        pfn = pte_pfn(*pte);
-        break;
-    case PG_LEVEL_2M: {
-        pmd_t *pmd = (pmd_t *)pte;
-        if (!pmd_present(*pmd)) {
-            return NULL;
-        }
-        pfn = pmd_pfn(*pmd) + ((kernel_vaddr & ~PMD_MASK) >> PAGE_SHIFT);
-        break;
-    }
-    case PG_LEVEL_1G: {
-        pud_t *pud = (pud_t *)pte;
-        if (!pud_present(*pud)) {
-            return NULL;
-        }
-        pfn = pud_pfn(*pud) + ((kernel_vaddr & ~PUD_MASK) >> PAGE_SHIFT);
-        break;
-    }
-    default:
-        return NULL;
-    }
-
-    if (level_out) {
-        *level_out = level;
-    }
-    if (!pfn_valid(pfn)) {
-        return NULL;
-    }
-    return pfn_to_page(pfn);
-}
-
-// 获取内核代码页 - 通用版本（支持LKM和内核核心代码）
-static struct page *get_kernel_code_page(unsigned long kernel_vaddr) {
-    struct page *code_page = NULL;
-    phys_addr_t pa = 0;
-    unsigned long pfn = 0;
-    unsigned int level = PG_LEVEL_NONE;
-    
-    // 验证内核虚拟地址是否有效
-    if (!kernel_vaddr) {
-        pr_err("Invalid kernel virtual address: 0x%lx\n", kernel_vaddr);
-        return NULL;
-    }
-
-    pr_info("Attempting to get page for kernel virtual address: 0x%lx\n", kernel_vaddr);
-
-    // 0) 直接查页表（最可靠：模块/直映射/内核文本都能覆盖）
-    code_page = lookup_kernel_page(kernel_vaddr, &level);
-    if (code_page) {
-        pr_info("Successfully got page via lookup_address (level=%u): %p\n", level, code_page);
-        goto out;
-    }
-    
-    // 1) vmalloc/module_alloc 区（LKM/BPF/execmem）
-    code_page = vmalloc_to_page((void *)kernel_vaddr);
-    if (code_page) {
-        pr_info("Successfully got page via vmalloc_to_page: %p\n", code_page);
-        goto out;
-    }
-    
-    // 2) 直接映射（线性映射）区
-    if (virt_addr_valid((void *)kernel_vaddr)) {
-        pr_info("Address is in direct mapping (virt_addr_valid)\n");
-        code_page = virt_to_page((void *)kernel_vaddr);
-        if (code_page) {
-            pr_info("Successfully got page via virt_to_page: %p\n", code_page);
-            goto out;
+        if (t->pages[i].source) {
+            put_page(t->pages[i].source);
+            t->pages[i].source = NULL;
         }
     }
-    
-    // 3) vmlinux 核心镜像（.text/.rodata/.data 等）
-    pr_info("Trying core image (__pa_symbol)\n");
-    pa = __pa_symbol(kernel_vaddr);
-    pfn = PHYS_PFN(pa);
-    if (pfn_valid(pfn)) {
-        code_page = pfn_to_page(pfn);
-        if (code_page) {
-            pr_info("Successfully got page via __pa_symbol->pfn_to_page: %p\n", code_page);
-            goto out;
-        }
+    kvfree(t->pages);
+    t->pages = NULL;
+    for (i = 0; i < t->owner_count; i++)
+        __symbol_put(t->owners[i].symbol);
+    t->owner_count = 0;
+    if (t->file) {
+        if (t->mapping_denied)
+            mapping_allow_writable(t->file->f_mapping);
+        if (t->write_denied)
+            allow_write_access(t->file);
+        fput(t->file);
+        t->file = NULL;
     }
-
-out:
-    if (!code_page) {
-        pr_err("Failed to resolve struct page* for vaddr: 0x%lx\n", kernel_vaddr);
-        return NULL;
-    }
-    
-    // 检查页面状态
-    if (PageReserved(code_page)) {
-        pr_info("Code page is reserved: %p (vaddr: 0x%lx)\n", code_page, kernel_vaddr);
-    } else {
-        pr_info("Code page is not reserved: %p (vaddr: 0x%lx)\n", code_page, kernel_vaddr);
-    }
-    
-    // 强制设置页面为最新状态（注意：对于内核核心代码页要谨慎）
-    SetPageUptodate(code_page);
-    
-    pr_info("Code page obtained: %p (vaddr: 0x%lx)\n", code_page, kernel_vaddr);
-    pr_info("Code page mapping: %p\n", code_page->mapping);
-    pr_info("Code page index: %lu\n", code_page->index);
-    pr_info("Code page flags: %lu\n", code_page->flags);
-    pr_info("Code page refcount: %d\n", atomic_read(&code_page->_refcount));
-    pr_info("Code page mapcount: %d\n", atomic_read(&code_page->_mapcount));
-    inspect_page_content(code_page);
-    return code_page;
-}
-
-// 恢复消息处理回调 - 支持多页面
-static void nl_recv_restore_msg(struct sk_buff *skb) {
-    struct nlmsghdr *nlh = nlmsg_hdr(skb);
-    struct restore_msg *msg = nlmsg_data(nlh);
-    struct file *target_file = NULL;  // 初始化为NULL
-    int err;
-    int i;
-
-    pr_info("Received page cache restore request for file: %s, page_count: %d\n", 
-            msg->filepath, msg->page_count);
-
-    // 验证参数
-    if (msg->page_count <= 0 || msg->page_count > MAX_PAGES_PER_OPERATION) {
-        pr_err("Invalid page count: %d\n", msg->page_count);
-        goto out;  // 跳转到清理点
-    }
-    
-    // 验证所有offset是否合法
-    for (i = 0; i < msg->page_count; i++) {
-        if (msg->page_offsets[i] < 0) {
-            pr_err("Invalid negative offset at index %d: %lld\n", i, msg->page_offsets[i]);
-            goto out;  // 跳转到清理点
-        }
-    }
-
-    // 打开目标文件
-    target_file = filp_open(msg->filepath, O_RDONLY, 0);
-    if (IS_ERR(target_file)) {
-        pr_err("Failed to open file: %s, error: %ld\n", msg->filepath, PTR_ERR(target_file));
-        goto out;  // 跳转到清理点
-    }
-
-    // 验证备份信息是否匹配
-    if (!page_backup_manager.is_active) {
-        pr_err("No backup information available for restore\n");
-        goto out;  // 跳转到清理点
-    }
-
-    // 批量恢复页面
-    err = batch_restore_pages(target_file, msg);
-    if (err) {
-        pr_err("Failed to restore page cache: %d\n", err);
-    } else {
-        pr_info("Page cache restored successfully!\n");
-    }
-
-out:
-    if (target_file && !IS_ERR(target_file)) {
-        filp_close(target_file, NULL);
+    t->mapping_denied = t->write_denied = false;
+    if (t->module_held) {
+        t->module_held = false;
+        module_put(THIS_MODULE);
     }
 }
 
-// Netlink 消息处理回调 - 支持多页面
-static void nl_recv_msg(struct sk_buff *skb) {
-    struct nlmsghdr *nlh = nlmsg_hdr(skb);
-    struct nl_msg *msg = nlmsg_data(nlh);
-    int err;
-    int i;
-
-    pr_info("Received page cache request for file: %s, page_count: %d\n", 
-            msg->filepath, msg->page_count);
-
-    // 验证参数
-    if (msg->page_count <= 0 || msg->page_count > MAX_PAGES_PER_OPERATION) {
-        pr_err("Invalid page count: %d\n", msg->page_count);
-        goto out;  // 跳转到清理点
-    }
-    
-    // 验证所有offset是否合法
-    for (i = 0; i < msg->page_count; i++) {
-        if (msg->page_offsets[i] < 0) {
-            pr_err("Invalid negative offset at index %d: %lld\n", i, msg->page_offsets[i]);
-            goto out;  // 跳转到清理点
+static int pin_owners(struct transaction *t, const struct vkso_tx_request *r)
+{
+    u32 i, j;
+    for (i = 0; i < r->owner_count; i++) {
+        const struct vkso_owner_request *o = &r->owners[i];
+        const struct vkso_owner_descriptor *d;
+        if (!memchr(o->symbol, 0, sizeof(o->symbol)) || !o->symbol[0] ||
+            !memchr(o->srcversion, 0, sizeof(o->srcversion)) || !o->srcversion[0] ||
+            memchr_inv(o->reserved, 0, sizeof(o->reserved)))
+            return -EINVAL;
+        for (j = 0; j < i; j++)
+            if (!strcmp(o->symbol, r->owners[j].symbol))
+                return -EEXIST;
+        d = __symbol_get(o->symbol);
+        if (!d)
+            return -ENOENT;
+        if (!IS_ALIGNED((unsigned long)d, PAGE_SIZE) || d->magic != VKSO_OWNER_MAGIC ||
+            d->abi != VKSO_OWNER_ABI || !d->owner ||
+            !within_module_core((unsigned long)d, d->owner) ||
+            !within_module_core((unsigned long)d + PAGE_SIZE - 1, d->owner)) {
+            __symbol_put(o->symbol);
+            return -EINVAL;
         }
+        strscpy(t->owners[i].symbol, o->symbol, sizeof(t->owners[i].symbol));
+        t->owners[i].descriptor = d;
+        t->owner_count++;
+        if (!memchr(d->srcversion, 0, sizeof(d->srcversion)) ||
+            strcmp(d->srcversion, o->srcversion) || !d->owner->srcversion ||
+            strcmp(d->owner->srcversion, o->srcversion))
+            return -ESTALE;
+        if (d->text_start != (unsigned long)d->owner->core_layout.base ||
+            d->text_end != d->text_start + d->owner->core_layout.text_size ||
+            d->ro_start != d->text_end ||
+            d->ro_end != d->text_start + d->owner->core_layout.ro_size)
+            return -EINVAL;
     }
-    
-    // 验证所有内核虚拟地址是否合法
-    for (i = 0; i < msg->page_count; i++) {
-        if (msg->kernel_vaddrs[i] == 0) {
-            pr_err("Invalid kernel virtual address at index %d: 0x%lx\n", i, msg->kernel_vaddrs[i]);
-            goto out;  // 跳转到清理点
-        }
-    }
-
-    // 打开目标文件
-    target_file = filp_open(msg->filepath, O_RDONLY, 0);
-    if (IS_ERR(target_file)) {
-        pr_err("Failed to open file: %s, error: %ld\n", msg->filepath, PTR_ERR(target_file));
-        goto out;  // 跳转到清理点
-    }
-
-    filemap_addr = msg->addr;
-    
-    // 批量处理页面
-    err = batch_process_pages(target_file, msg);
-    if (err) {
-        pr_err("Failed to process pages: %d\n", err);
-    } else {
-        pr_info("Page cache operation completed successfully!\n");
-        pr_info("Next file access will trigger page fault and establish PTE mapping automatically\n");
-    }
-
-out:
-    if (target_file && !IS_ERR(target_file)) {
-        filp_close(target_file, NULL);
-    }
-}
-
-// Netlink 初始化
-static int __init page_replace_init(void) {
-    struct netlink_kernel_cfg cfg = {
-        .input = nl_recv_msg,
-    };
-    struct netlink_kernel_cfg restore_cfg = {
-        .input = nl_recv_restore_msg,
-    };
-
-    pr_info("Initializing Page Replace LKM...\n");
-    pr_info("Attempting to create Netlink socket with protocol %d\n", NETLINK_MODIFY);
-
-    // 初始化多页面备份管理器
-    init_multi_page_backup();
-
-    // 创建页面替换/添加的netlink套接字
-    nl_sk = (struct sock *)netlink_kernel_create(&init_net, NETLINK_MODIFY, &cfg);
-    if (!nl_sk) {
-        pr_err("Failed to create Netlink socket with protocol %d\n", NETLINK_MODIFY);
-        return -ENOMEM;
-    }
-    pr_info("Successfully created Netlink socket with protocol %d\n", NETLINK_MODIFY);
-
-    pr_info("Attempting to create restore Netlink socket with protocol %d\n", NETLINK_RESTORE);
-
-    // 创建页面恢复的netlink套接字
-    nl_restore_sk = (struct sock *)netlink_kernel_create(&init_net, NETLINK_RESTORE, &restore_cfg);
-    if (!nl_restore_sk) {
-        pr_err("Failed to create restore Netlink socket with protocol %d\n", NETLINK_RESTORE);
-        pr_err("Cleaning up previously created socket\n");
-        netlink_kernel_release(nl_sk);
-        nl_sk = NULL;
-        return -ENOMEM;
-    }
-    pr_info("Successfully created restore Netlink socket with protocol %d\n", NETLINK_RESTORE);
-
-    pr_info("Page Replace LKM loaded successfully\n");
-    pr_info("Use protocol %d for replace/add operations\n", NETLINK_MODIFY);
-    pr_info("Use protocol %d for restore operations\n", NETLINK_RESTORE);
     return 0;
 }
 
-static void __exit page_replace_exit(void) {
-    int i;
-    
-    pr_info("Unloading Page Replace LKM...\n");
-    
-    // 在模块退出时自动恢复页缓存
-    if (page_backup_manager.is_active) {
-        pr_info("Auto-restoring page cache during module unload\n");
-        
-        for (i = 0; i < page_backup_manager.backup_count; i++) {
-            struct page_backup *backup_entry = &page_backup_manager.backup_array[i];
-            if (backup_entry->is_backed_up && backup_entry->target_mapping) {
-                struct file temp_file = {
-                    .f_mapping = backup_entry->target_mapping
-                };
-                
-                int ret = restore_page_cache(&temp_file, backup_entry->backup_index);
-                if (ret == 0) {
-                    pr_info("Page cache auto-restore completed successfully for index %lu\n", 
-                           backup_entry->backup_index);
-                } else {
-                    pr_err("Page cache auto-restore failed for index %lu: %d\n", 
-                          backup_entry->backup_index, ret);
-                    pr_warn("Some pages may remain modified in cache\n");
-                }
-            }
-        }
-        
-        page_backup_manager.backup_count = 0;
-        page_backup_manager.is_active = false;
+static bool source_allowed(struct transaction *t, const struct vkso_page_spec *spec)
+{
+    unsigned long address = spec->source;
+    u32 i;
+    if (!IS_ALIGNED(address, PAGE_SIZE) || address > ULONG_MAX - PAGE_SIZE)
+        return false;
+    for (i = 0; i < t->owner_count; i++) {
+        const struct vkso_owner_descriptor *d = t->owners[i].descriptor;
+        if (address >= d->text_start && address + PAGE_SIZE <= d->text_end)
+            return spec->kind == VKSO_PAGE_TEXT;
+        if (address >= d->ro_start && address + PAGE_SIZE <= d->ro_end)
+            return spec->kind == VKSO_PAGE_RODATA;
     }
-    
-    // 释放netlink套接字
-    if (nl_restore_sk) {
-        pr_info("Releasing restore Netlink socket\n");
-        netlink_kernel_release(nl_restore_sk);
-        nl_restore_sk = NULL;
-    }
-    if (nl_sk) {
-        pr_info("Releasing main Netlink socket\n");
-        netlink_kernel_release(nl_sk);
-        nl_sk = NULL;
-    }
-    pr_info("Page Replace LKM unloaded successfully\n");
+    return address >= __START_KERNEL_map && address + PAGE_SIZE <= MODULES_VADDR;
+}
+/* Effective permissions combine every level, including huge-page leaves.
+ * Read the requesting task's active kernel page table, not ELF section flags.
+ * Owner pins keep the resident module alive; this is admission-time checking,
+ * not serialization against later privileged text/page-table rewriting. */
+static bool accumulate_permissions(u64 entry, u64 *permissions)
+{
+    if (!(entry & _PAGE_PRESENT)) return false;
+    *permissions &= entry | ~((u64)_PAGE_RW | _PAGE_USER);
+    *permissions |= entry & _PAGE_NX;
+    return true;
 }
 
+static struct page *lookup_kernel_page(unsigned long address, u64 *permissions)
+{
+    pgd_t *pgdp, pgd;
+    p4d_t *p4dp, p4d;
+    pud_t *pudp, pud;
+    pmd_t *pmdp, pmd;
+    pte_t pte;
+    unsigned long pfn;
+    if (!current->active_mm) return NULL;
+    *permissions = _PAGE_RW | _PAGE_USER;
+    pgdp = pgd_offset(current->active_mm, address); pgd = READ_ONCE(*pgdp);
+    if (!accumulate_permissions(pgd_val(pgd), permissions)) return NULL;
+    p4dp = p4d_offset(pgdp, address); p4d = READ_ONCE(*p4dp);
+    if (!accumulate_permissions(p4d_val(p4d), permissions) || p4d_large(p4d)) return NULL;
+    pudp = pud_offset(p4dp, address); pud = READ_ONCE(*pudp);
+    if (!accumulate_permissions(pud_val(pud), permissions)) return NULL;
+    if (pud_large(pud)) {
+        pfn = pud_pfn(pud) + ((address & ~PUD_MASK) >> PAGE_SHIFT);
+        goto resolved;
+    }
+    pmdp = pmd_offset(pudp, address); pmd = READ_ONCE(*pmdp);
+    if (!accumulate_permissions(pmd_val(pmd), permissions)) return NULL;
+    if (pmd_large(pmd)) {
+        pfn = pmd_pfn(pmd) + ((address & ~PMD_MASK) >> PAGE_SHIFT);
+        goto resolved;
+    }
+    pte = READ_ONCE(*pte_offset_kernel(pmdp, address));
+    if (!accumulate_permissions(pte_val(pte), permissions)) return NULL;
+    pfn = pte_pfn(pte);
+resolved:
+    return pfn_valid(pfn) ? pfn_to_page(pfn) : NULL;
+}
+
+static bool source_permissions_allowed(u32 kind, u64 permissions)
+{
+    bool writable = permissions & _PAGE_RW;
+    bool executable = !(permissions & _PAGE_NX);
+    if (permissions & _PAGE_USER) return false;
+    switch (kind) {
+    case VKSO_PAGE_TEXT: return !writable && executable;
+    case VKSO_PAGE_RODATA: return !writable && !executable;
+    case VKSO_PAGE_SHARED_DATA: return writable && !executable;
+    default: return false;
+    }
+}
+
+
+static int begin_transaction(const struct vkso_tx_request *r, u32 port,
+                             struct transaction **out)
+{
+    struct transaction *t, *other;
+    struct inode *inode;
+    int ret;
+    if (!r->transaction || !r->total || r->owner_count > VKSO_MAX_OWNERS ||
+        r->start || r->count || !memchr(r->filepath, 0, sizeof(r->filepath)))
+        return -EINVAL;
+    t = kzalloc(sizeof(*t), GFP_KERNEL);
+    if (!t)
+        return -ENOMEM;
+    t->pages = kvcalloc(r->total, sizeof(*t->pages), GFP_KERNEL);
+    if (!t->pages) { kfree(t); return -ENOMEM; }
+    t->total = r->total;
+    t->id = r->transaction;
+    t->controller_port = port;
+    t->state = VKSO_STAGING;
+    t->failed_page = -1;
+    t->file = filp_open(r->filepath, O_RDONLY | O_NOFOLLOW, 0);
+    if (IS_ERR(t->file)) { ret = PTR_ERR(t->file); t->file = NULL; goto fail; }
+    inode = file_inode(t->file);
+    if (!S_ISREG(inode->i_mode) || IS_DAX(inode)) { ret = -EOPNOTSUPP; goto fail; }
+    if (huge_encode_dev(inode->i_sb->s_dev) != r->device || inode->i_ino != r->inode) {
+        ret = -ESTALE; goto fail;
+    }
+    list_for_each_entry(other, &transactions, list)
+        if (other->file && other->file->f_mapping == t->file->f_mapping) {
+            ret = -EBUSY; goto fail;
+        }
+    if (!try_module_get(THIS_MODULE)) { ret = -ENODEV; goto fail; }
+    t->module_held = true;
+    ret = pin_owners(t, r);
+    if (ret) goto fail;
+    /* Atomic counters reject existing write fds and writable shared VMAs,
+     * including read-only VMAs that retain VM_MAYWRITE from a write fd. */
+    inode_lock(inode);
+    ret = deny_write_access(t->file);
+    if (!ret) {
+        t->write_denied = true;
+        ret = mapping_deny_writable(t->file->f_mapping);
+        if (!ret) t->mapping_denied = true;
+    }
+    inode_unlock(inode);
+    if (ret) goto fail;
+    list_add_tail(&t->list, &transactions);
+    *out = t;
+    return 0;
+fail:
+    drop_resources(t);
+    /* Keep a terminal result when BEGIN reached an allocated transaction.
+     * A lost rejection ACK can then be recovered with its exact errno. */
+    t->state = VKSO_ABORTED;
+    list_add_tail(&t->list, &transactions);
+    *out = t;
+    return ret;
+}
+
+static int stage_transaction(struct transaction *t, const struct vkso_tx_request *r)
+{
+    u32 i, j;
+    if (t->state != VKSO_STAGING) return -EBUSY;
+    if (r->total != t->total || !r->count || r->count > MAX_PAGES_PER_OPERATION ||
+        r->start > t->total || r->count > t->total - r->start)
+        return -EINVAL;
+    if (r->start < t->staged) {
+        if (r->count > t->staged - r->start) return -EINVAL;
+        for (i = 0; i < r->count; i++)
+            if (memcmp(&t->pages[r->start+i].spec, &r->pages[i], sizeof(r->pages[i])))
+                return -EALREADY;
+        return 0; /* Exact retransmission is idempotent. */
+    }
+    if (r->start != t->staged) return -EINVAL;
+    for (i = 0; i < r->count; i++) {
+        const struct vkso_page_spec *p = &r->pages[i];
+        t->failed_page = r->start + i;
+        if (!IS_ALIGNED(p->offset, PAGE_SIZE) || p->offset > S64_MAX - PAGE_SIZE ||
+            !IS_ALIGNED(p->source, PAGE_SIZE) || !p->source || p->reserved ||
+            p->kind < VKSO_PAGE_TEXT || p->kind > VKSO_PAGE_SHARED_DATA)
+            return -EINVAL;
+        for (j = 0; j < t->staged; j++)
+            if (t->pages[j].spec.offset == p->offset || t->pages[j].spec.source == p->source)
+                return -EEXIST;
+        for (j = 0; j < i; j++)
+            if (r->pages[j].offset == p->offset || r->pages[j].source == p->source)
+                return -EEXIST;
+    }
+    for (i = 0; i < r->count; i++)
+        t->pages[t->staged+i].spec = r->pages[i];
+    t->staged += r->count;
+    t->failed_page = -1;
+    return 0;
+}
+
+/* Validate and resolve every source before changing any target cache entry.
+ * Owner pins precede lookup; source references outlive rollback and unmapping. */
+static int prepare_sources(struct transaction *t)
+{
+    u32 i, j;
+    struct transaction *other;
+    for (i = 0; i < t->total; i++) {
+        struct binding *b = &t->pages[i];
+        struct page *p;
+        u64 permissions;
+        t->failed_page = i;
+        if (i_size_read(file_inode(t->file)) < PAGE_SIZE ||
+            b->spec.offset > i_size_read(file_inode(t->file)) - PAGE_SIZE)
+            return -EINVAL;
+        if (!source_allowed(t, &b->spec)) return -EACCES;
+        p = lookup_kernel_page(b->spec.source, &permissions);
+        if (!p) return -EFAULT;
+        if (!source_permissions_allowed(b->spec.kind, permissions)) return -EACCES;
+        for (j = 0; j < i; j++)
+            if (t->pages[j].source == p) return -EEXIST;
+        list_for_each_entry(other, &transactions, list) {
+            if (other == t || !other->pages) continue;
+            for (j = 0; j < other->total; j++)
+                if (other->pages[j].source == p) return -EBUSY;
+        }
+        lock_page(p);
+        if (p->mapping || PageLRU(p) || PageCompound(p) || PageSlab(p) ||
+            PageSwapBacked(p) || PagePrivate(p) || PageDirty(p) || PageWriteback(p)) {
+            unlock_page(p); return -EBUSY;
+        }
+        get_page(p);
+        b->source = p;
+        b->saved_mapping = p->mapping;
+        b->saved_index = p->index;
+        b->saved_uptodate = PageUptodate(p);
+        unlock_page(p);
+    }
+    t->failed_page = -1;
+    return 0;
+}
+
+/* invalidate_lock -> page lock -> xarray lock, as in the release path. */
+static int apply_binding(struct transaction *t, struct binding *b)
+{
+    struct address_space *mapping = t->file->f_mapping;
+    struct page *p = b->source, *old = b->old_cache;
+    pgoff_t index = b->spec.offset >> PAGE_SHIFT;
+    int ret = 0;
+    XA_STATE(xas, &mapping->i_pages, index);
+    lock_page(old);
+    if (old->mapping != mapping || old->index != index || PageDirty(old) ||
+        PageWriteback(old) || PageCompound(old) || PageSwapBacked(old)) {
+        unlock_page(old); return -EBUSY;
+    }
+    lock_page(p);
+    if (p->mapping || PageLRU(p) || PageCompound(p)) { ret = -EBUSY; goto out; }
+    unmap_mapping_range(mapping, b->spec.offset, PAGE_SIZE, 0);
+    if (page_mapped(old)) { ret = -EBUSY; goto out; }
+    xas_lock_irq(&xas);
+    /* Retain the occupied slot. With an ordinary one-page entry and both
+     * pages locked, this store neither expands nor contracts the xarray.
+     * delete_from_page_cache() + insert could free the last leaf node. */
+    if (xas_load(&xas) != old) {
+        ret = -ESTALE;
+        goto unlock_xarray;
+    }
+    get_page(p);
+    p->mapping = mapping;
+    p->index = index;
+    SetPageUptodate(p);
+    xas_store(&xas, p);
+    ret = xas_error(&xas);
+    if (ret) {
+        p->mapping = b->saved_mapping;
+        p->index = b->saved_index;
+        if (!b->saved_uptodate) ClearPageUptodate(p);
+        put_page(p);
+        goto unlock_xarray;
+    }
+    /* The resident source was already allocated as kernel memory. Do not
+     * transfer the file page's memcg charge to it. The displaced ordinary
+     * page keeps its own charge until its last reference is dropped, just
+     * as with delete_from_page_cache(). nrpages is unchanged: one file
+     * slot still exists, but the separate ordinary file page is removed. */
+    __mod_lruvec_page_state(old, NR_FILE_PAGES, -1);
+    old->mapping = NULL;
+    xas_init_marks(&xas);
+    b->applied = true;
+    t->applied++;
+unlock_xarray:
+    xas_unlock_irq(&xas);
+    if (!ret) {
+        if (mapping->a_ops->freepage)
+            mapping->a_ops->freepage(old);
+        put_page(old); /* original cache reference; preparation still holds it */
+        unmap_mapping_range(mapping, b->spec.offset, PAGE_SIZE, 0);
+    }
+out:
+    unlock_page(p);
+    unlock_page(old);
+    if (!ret) {
+        put_page(old); /* preparation reference */
+        b->old_cache = NULL;
+    }
+    return ret;
+}
+
+static int release_binding(struct transaction *t, struct binding *b)
+{
+    struct address_space *mapping = t->file->f_mapping;
+    struct page *p = b->source;
+    pgoff_t index = b->spec.offset >> PAGE_SHIFT;
+    int ret = 0;
+    XA_STATE(xas, &mapping->i_pages, index);
+    lock_page(p);
+    xas_lock_irq(&xas);
+    if (xas_load(&xas) != p || p->mapping != mapping || p->index != index) {
+        ret = -ESTALE;
+    } else {
+        xas_store(&xas, NULL);
+        ret = xas_error(&xas);
+        if (!ret) mapping->nrpages--;
+    }
+    xas_unlock_irq(&xas);
+    if (!ret) {
+        /* Keep PageLocked through invalidation: a file fault holding an old
+         * page reference must recheck mapping before it can install a PTE. */
+        unmap_mapping_range(mapping, b->spec.offset, PAGE_SIZE, 0);
+        p->mapping = b->saved_mapping;
+        p->index = b->saved_index;
+        if (!b->saved_uptodate) ClearPageUptodate(p);
+        b->applied = false;
+        t->applied--;
+    }
+    unlock_page(p);
+    if (!ret) put_page(p); /* insertion reference */
+    return ret;
+}
+
+/* Called with inode and invalidate locks held; continue past a failed page. */
+static int rollback_bindings(struct transaction *t)
+{
+    u32 i = t->total;
+    int first_error = 0;
+    while (i--) {
+        int ret;
+        if (!t->pages[i].applied) continue;
+        if (test_fail_release == i) {
+            test_fail_release = -1;
+            ret = -EIO;
+        } else ret = release_binding(t, &t->pages[i]);
+        if (ret && !first_error) {
+            first_error = ret;
+            t->failed_page = i;
+        }
+    }
+    return first_error;
+}
+
+static int commit_transaction(struct transaction *t)
+{
+    struct address_space *mapping;
+    u64 started = ktime_get_ns(), applying;
+    u32 i;
+    int ret;
+    if (t->state == VKSO_ACTIVE) return 0;
+    if (t->state != VKSO_STAGING || t->staged != t->total) return -EINVAL;
+    mapping = t->file->f_mapping;
+    inode_lock(file_inode(t->file));
+    ret = filemap_write_and_wait(mapping);
+    if (ret) goto unlock_inode;
+    filemap_invalidate_lock(mapping);
+    ret = prepare_sources(t);
+    if (ret) goto unlock_mapping;
+    for (i = 0; i < t->total; i++) {
+        struct page *p = read_mapping_page(mapping, t->pages[i].spec.offset >> PAGE_SHIFT, NULL);
+        if (IS_ERR(p)) { ret = PTR_ERR(p); t->failed_page = i; goto unlock_mapping; }
+        t->pages[i].old_cache = p;
+        lock_page(p);
+        if (p->mapping != mapping || PageCompound(p) || PageSwapBacked(p) ||
+            PageDirty(p) || PageWriteback(p)) {
+            unlock_page(p);
+            ret = -EOPNOTSUPP; t->failed_page = i; goto unlock_mapping;
+        }
+        /* Discard an optional secondary clean-cache copy before apply; a
+         * later restore reloads the unchanged file through its filesystem. */
+        cleancache_invalidate_page(mapping, p);
+        unlock_page(p);
+    }
+    t->prepare_ns = ktime_get_ns() - started;
+    applying = ktime_get_ns();
+    for (i = 0; i < t->total; i++) {
+        if (test_fail_apply == i) { test_fail_apply = -1; ret = -EIO; }
+        else ret = apply_binding(t, &t->pages[i]);
+        if (ret) { t->failed_page = i; break; }
+    }
+    t->apply_ns = ktime_get_ns() - applying;
+    if (ret) {
+        u64 releasing = ktime_get_ns();
+        rollback_bindings(t);
+        t->release_ns += ktime_get_ns() - releasing;
+    }
+unlock_mapping:
+    filemap_invalidate_unlock(mapping);
+unlock_inode:
+    inode_unlock(file_inode(t->file));
+    if (ret) {
+        t->state = t->applied ? VKSO_RECOVERY_REQUIRED : VKSO_ABORTED;
+        drop_resources(t);
+    } else {
+        t->state = VKSO_ACTIVE;
+        t->failed_page = -1;
+    }
+    return ret;
+}
+
+static int release_transaction(struct transaction *t)
+{
+    u64 started = ktime_get_ns();
+    int ret = 0;
+    if (t->state == VKSO_RESTORED || t->state == VKSO_ABORTED) return 0;
+    t->failed_page = -1;
+    if (t->file) {
+        inode_lock(file_inode(t->file));
+        filemap_invalidate_lock(t->file->f_mapping);
+        ret = rollback_bindings(t);
+        filemap_invalidate_unlock(t->file->f_mapping);
+        inode_unlock(file_inode(t->file));
+    }
+    t->state = t->applied ? VKSO_RECOVERY_REQUIRED : VKSO_RESTORED;
+    t->release_ns += ktime_get_ns() - started;
+    drop_resources(t);
+    return ret;
+}
+
+static void snapshot(struct transaction *t, struct vkso_tx_result *r)
+{
+    if (!t) return;
+    r->state = t->state; r->total = t->total;
+    r->staged = t->staged; r->applied = t->applied;
+    r->failed_page = t->failed_page;
+    r->last_operation = t->last_operation;
+    r->last_sequence = t->last_sequence;
+    r->last_status = t->last_status;
+    r->prepare_ns = t->prepare_ns; r->apply_ns = t->apply_ns;
+    r->release_ns = t->release_ns;
+}
+
+static void reply_payload(struct sock *socket, struct sk_buff *request,
+                          const struct nlmsghdr *h, u16 type, const void *data, size_t size)
+{
+    struct sk_buff *reply = nlmsg_new(size, GFP_KERNEL);
+    struct nlmsghdr *out;
+    if (!reply) return; /* QUERY retains the result when delivery fails. */
+    out = nlmsg_put(reply, 0, h->nlmsg_seq, type, size, 0);
+    if (!out) { kfree_skb(reply); return; }
+    memcpy(nlmsg_data(out), data, size);
+    nlmsg_unicast(socket, reply, NETLINK_CB(request).portid);
+}
+
+static void receive(struct sk_buff *skb, bool restore_socket)
+{
+    struct sock *socket = restore_socket ? nl_restore_sk : nl_sk;
+    struct nlmsghdr *h;
+    const struct vkso_tx_request *r;
+    struct transaction *t = NULL;
+    struct vkso_tx_result result = { .version = VKSO_PROTOCOL_VERSION, .failed_page = -1 };
+    u64 started = ktime_get_ns();
+    int ret = 0;
+    bool forget = false;
+    if (skb->len < NLMSG_HDRLEN) return;
+    h = nlmsg_hdr(skb);
+    if (!nlmsg_ok(h, skb->len) || h->nlmsg_len != skb->len) return;
+    /* New and old managers negotiate without issuing a replacement. */
+    if (h->nlmsg_type == VKSO_HELLO_V2 || h->nlmsg_type == VKSO_REQUEST_V2) {
+        struct vkso_result legacy = { .version = VKSO_PROTOCOL_VERSION,
+            .operation = restore_socket ? NETLINK_RESTORE : NETLINK_MODIFY,
+            .failed_page = -1 };
+        legacy.status = h->nlmsg_type == VKSO_HELLO_V2 ? 0 : -EPROTONOSUPPORT;
+        if (!netlink_capable(skb, CAP_SYS_ADMIN)) legacy.status = -EPERM;
+        reply_payload(socket, skb, h, VKSO_RESULT_V2, &legacy, sizeof(legacy));
+        return;
+    }
+    if (h->nlmsg_type != VKSO_TX_REQUEST || nlmsg_len(h) < 16) return;
+    r = nlmsg_data(h);
+    result.transaction = r->transaction; result.operation = r->operation;
+    if (!netlink_capable(skb, CAP_SYS_ADMIN)) { ret = -EPERM; goto reply; }
+    if (r->version != VKSO_PROTOCOL_VERSION) { ret = -EPROTONOSUPPORT; goto reply; }
+    if (nlmsg_len(h) != sizeof(*r)) { ret = -EMSGSIZE; goto reply; }
+    mutex_lock(&operation_lock);
+    t = find_transaction(r->transaction);
+    if (r->operation == VKSO_BEGIN) {
+        if (t) ret = -EEXIST;
+        else ret = begin_transaction(r, NETLINK_CB(skb).portid, &t);
+    } else if (!t) ret = -ENOENT;
+    else if (r->operation == VKSO_QUERY) { /* Privileged recovery may reconnect. */ }
+    else if (r->operation == VKSO_RELEASE) ret = release_transaction(t);
+    else if (r->operation == VKSO_FORGET) {
+        if (t->file || t->applied) ret = -EBUSY;
+        else forget = true;
+    } else if (NETLINK_CB(skb).portid != t->controller_port) ret = -EPERM;
+    else if (r->operation == VKSO_STAGE) ret = stage_transaction(t, r);
+    else if (r->operation == VKSO_COMMIT) ret = commit_transaction(t);
+    else ret = -EINVAL;
+    if (t && r->operation != VKSO_QUERY) {
+        t->last_operation = r->operation; t->last_sequence = h->nlmsg_seq;
+        t->last_status = ret;
+    }
+    snapshot(t, &result);
+    if (forget) { list_del(&t->list); kvfree(t->pages); kfree(t); }
+    if (test_drop_reply == r->operation) {
+        test_drop_reply = 0;
+        mutex_unlock(&operation_lock);
+        return;
+    }
+    mutex_unlock(&operation_lock);
+reply:
+    result.status = ret;
+    result.operation_ns = ktime_get_ns() - started;
+    reply_payload(socket, skb, h, VKSO_TX_RESULT, &result, sizeof(result));
+}
+static void nl_recv_msg(struct sk_buff *skb) { receive(skb, false); }
+static void nl_recv_restore_msg(struct sk_buff *skb) { receive(skb, true); }
+static int __init page_replace_init(void)
+{
+    struct netlink_kernel_cfg cfg = { .input = nl_recv_msg };
+    struct netlink_kernel_cfg restore_cfg = { .input = nl_recv_restore_msg };
+    nl_sk = netlink_kernel_create(&init_net, NETLINK_MODIFY, &cfg);
+    if (!nl_sk) return -ENOMEM;
+    nl_restore_sk = netlink_kernel_create(&init_net, NETLINK_RESTORE, &restore_cfg);
+    if (!nl_restore_sk) { netlink_kernel_release(nl_sk); return -ENOMEM; }
+    return 0;
+}
+static void __exit page_replace_exit(void)
+{
+    struct transaction *t, *next;
+    netlink_kernel_release(nl_restore_sk);
+    netlink_kernel_release(nl_sk);
+    /* A live transaction pins this module. Only terminal query records remain. */
+    list_for_each_entry_safe(t, next, &transactions, list) {
+        list_del(&t->list); kvfree(t->pages); kfree(t);
+    }
+}
 module_init(page_replace_init);
 module_exit(page_replace_exit);
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("YourName");
-MODULE_DESCRIPTION("Page Cache Replacement LKM");
+MODULE_DESCRIPTION("VKSO resident-page registration transactions");

@@ -1,5 +1,12 @@
 # Four-image VKSO reader experiment
 
+The existing `experiment.sh boot/collect CASE` interface now also collects
+Redis macrobench when `MACRO_ENABLED=1` in `experiment.conf`. Build and install
+fresh packages before starting: the historical packages lack the new tools and
+namespace-sharing implementation. See the [four-image command guide](../../macro-benchmark/README.md).
+`build-all.sh` builds and verifies packages; it no longer launches QEMU tests
+automatically. The separate existing QEMU entry remains a diagnostic tool.
+
 The final reader experiment has four cases, always collected in this order:
 
 1. raw vDSO, normal mitigation configuration;

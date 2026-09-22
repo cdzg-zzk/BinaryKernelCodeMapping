@@ -90,9 +90,14 @@ class ELFObj:
             raise ValueError(f'[{self.name}] 未找到符号表，文件可能已被 strip。')
 
         self.sym_dict = {}
+        self.function_ranges = {}
+        self.function_lookup_cache = {}
         for sym in self.symtab.iter_symbols():
             if sym.name and sym['st_shndx'] != 'SHN_UNDEF':
                 self.sym_dict[sym.name] = sym
+            if sym['st_info']['type'] == 'STT_FUNC':
+                self.function_ranges.setdefault(sym['st_shndx'], []).append(
+                    (sym['st_value'], sym['st_size'], sym.name))
 
         self.reloc_cache = {}
 
@@ -116,19 +121,18 @@ class ELFObj:
         return relocs
 
     def resolve_func_by_offset(self, sec_idx, offset):
-        for sym in self.symtab.iter_symbols():
-            if sym['st_info']['type'] != 'STT_FUNC':
-                continue
-            if sym['st_shndx'] != sec_idx:
-                continue
+        key = (sec_idx, offset)
+        if key in self.function_lookup_cache:
+            return self.function_lookup_cache[key]
+        result = None
+        # Preserve symbol-table order, including overlapping aliases and zero sizes.
+        for start, size, name in self.function_ranges.get(sec_idx, ()):
+            if (size == 0 and start == offset) or start <= offset < start + size:
+                result = name
+                break
+        self.function_lookup_cache[key] = result
+        return result
 
-            start = sym['st_value']
-            end = start + sym['st_size']
-            if sym['st_size'] == 0 and start == offset:
-                return sym.name
-            if start <= offset < end:
-                return sym.name
-        return None
 
 
 class AcademicReuseEngine:
@@ -668,13 +672,18 @@ class AcademicReuseEngine:
 
                     if target_sym['st_shndx'] == 'SHN_UNDEF':
                         if target_name in self.shims:
-                            self.shim_hits[target_name].append({
+                            # A PC-relative reference in shared executable bytes
+                            # keeps its native target. Declaring a DSO import does
+                            # not redirect it to a user-space Shim implementation.
+                            self.hard_fails.append({
+                                'mod': owner_elf.name,
                                 'func': func_name,
                                 'addr': local_offset,
                                 'run_addr': addr_display,
                                 'asm': asm_str,
+                                'type': f'不支持的共享代码 Shim 绑定 ({target_name})',
                             })
-                            self._trace(f'Shim 截断成功: {func_name} -> {target_name}', C.GREEN)
+                            self._warn(f'Shim 无可用重绑定位置: {func_name} -> {target_name}')
                         else:
                             self.queue_func(target_name, f'{func_name} -> 外部符号')
                     else:

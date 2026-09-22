@@ -1,5 +1,13 @@
 # VKSO clocktime experiments
 
+项目全貌、目录导航和应用级 macro-benchmark 接入边界见
+[项目索引](../README.md)。当前正式性能结论以 2026-09-12 完成的
+[Normal 20-boot 三方法结果](revision/NORMAL_RESULTS.md)为准；下文链接的
+2026-08-01 报告保留为历史实验，不覆盖较新的跨启动结果。
+
+后续实现优化的独立调查见 [优化空间与候选验证](../optimization-audit/README.md)，
+包含 namespace 元数据物理页核验、代码生成对照及候选入口诊断。
+
 本目录保存用 VKSO 替代 x86-64 原生 vDSO time/getcpu 路径的最终实现、功能验证和
 性能实验。它不仅验证 `clock_gettime` 算法共享，还形成了“共享机器码 + 显式运行时
 依赖”的机制实例：内核和用户入口执行同一份 global-time reader，而全局快照、
@@ -26,8 +34,8 @@ timekeeper 读取，不能据此声称旧内核 reader 已被全部删除。
       │                            │
       │ namespace commit          │ shared core reads under seq
       v                            v
- per-mm vkso_mm_page ─────> shared clock/time/getcpu machine code
- (kernel RW alias, user R--)       ^
+ namespace-owned MM_data ─> shared clock/time/getcpu machine code
+ (per-mm user R-- mapping)         ^
       │                            │ inject dependencies once
       └─ AT_VKSO_MM_DATA ─> private user entry/context/fallback
 ```
@@ -36,29 +44,35 @@ timekeeper 读取，不能据此声称旧内核 reader 已被全部删除。
 
 1. `vkso_shared_page` 是全局 canonical reader snapshot。timekeeping writer 用 seq
    协议发布，所有内核普通 reader 和用户进程读取同一页。它不是每进程副本。
-2. `vkso_mm_page` 属于一个 `mm_struct`，当前 payload 是 `abi_version`、
-   `clock_mask`、monotonic offset 和 boottime offset。用户映射只读，内核通过
-   `vkso_mm_kdata` 写别名更新。
+2. MM_data 页由 time namespace 持有，payload 是 `abi_version`、`clock_mask`、
+   monotonic offset 和 boottime offset。每个 `mm_struct` 保留独立的用户只读映射，
+   同 namespace 复用物理页。`vkso_mm_kdata` 是普通内核入口使用的读取别名。
 3. `vkso_context` 与用户入口位于 DSO 私有 wrapper 中，保存当前地址空间有效的
    provider 数据别名和 failure callback。共享代码不硬编码用户地址，也不直接
    发起 syscall。
 
 `MM_data` 不是 process namespace 的通用副本，而是当前 `mm` 所需的最小 time
-namespace 视图。root time namespace 的 `clock_mask` 为零；offset 只在 namespace
-commit/setns 等语义变化时更新，不随每次 timekeeping update 刷新。
+namespace 视图。root time namespace 的 `clock_mask` 为零；非 root namespace
+在首次进入、offsets 冻结时初始化数据页，以后通过切换 backing 更新 mm 的视图，
+不随每次 timekeeping update 刷新。
 
 ## per-MM 生命周期
 
-- `exec`：`arch_setup_additional_pages()` 创建零填充页面、安装只读
-  `[vkso_mm_data]` special mapping，并写入当前 time namespace offset。
+- `exec`：`arch_setup_additional_pages()` 安装只读 `[vkso_mm_data]` special mapping，
+  引用当前 time namespace 的不可变数据页。
 - `auxv`：`AT_VKSO_MM_DATA` 暴露该映射的用户虚拟地址，不暴露内核写地址。
-- `fork`：新建 `mm` 时显式复制 payload 并在相同用户地址安装新页；共享同一
-  `mm` 的线程自然共享该页。
-- `setns`/namespace commit：更新已存在页面中的 offset，最后发布 `clock_mask`。
+- `fork`：在相同用户地址建立映射并增加页引用，不复制 payload；进入新 namespace
+  的子进程在 namespace commit 时切换 backing。
+- `setns`/namespace commit：持有 mmap 写锁切换页引用和内核读取别名，清除旧 PTE；
+  用户下一次读取在原地址 fault 到新页，已经绑定的 context 无需重建。
 - `exit`/`exec` replacement：随 `mm` 清理页面引用；禁止 `mremap`，并标记
-  `VM_DONTCOPY`，避免绕开显式复制逻辑。
+  `VM_DONTCOPY`，通过显式 fork 钩子建立引用；namespace 销毁时释放自身的页引用。
 - 用户启动：`vkso_user_wrapper_init()` 校验 shared/MM ABI version，从 auxv 取得
   MM_data，再调用 `__vkso_bind_context()` 完成一次性绑定。
+
+上述 namespace-owned backing 是后续资源优化；此前正式性能归档使用 per-mm
+私有 backing。实现差异与验证入口见 [namespace sharing](../namespace-sharing/README.md)，
+历史实验身份保持不变。
 
 对应实现入口：
 
@@ -98,7 +112,8 @@ clocktime 实验验证了下列可推广能力：
   功能验证。
 - `baremetal/`：可复现的四镜像独立 READ 实验。
 - `update-bench/`：UPDATE 与 READ/UPDATE CONCURRENT 实验。
+- `revision/`：当前正式的 Raw/VKSO/Copy 多启动采集、结果分析与记录审计。
 
-最终 READ、UPDATE、CONCURRENT 结果、测量窗口、完整表格与统一解释见
+历史 READ、UPDATE、CONCURRENT 结果、测量窗口、完整表格与统一解释见
 [`VKSO_READ_UPDATE性能报告_20260801.md`](VKSO_READ_UPDATE性能报告_20260801.md)。
 历史 milestone 目录和旧结果分析不属于当前维护路径。

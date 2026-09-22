@@ -143,6 +143,14 @@ else
 fi
 mkdir -p "$RAW_BUILD" "$VKSO_BUILD" "$OUT"
 
+# Kbuild rejects O= against an in-tree configured source. Clean only a copy.
+VKSO_COMPILE_SOURCE=$VKSO_SOURCE
+if [[ -e "$VKSO_SOURCE/.config" || -d "$VKSO_SOURCE/include/config" ]]; then
+	VKSO_COMPILE_SOURCE=$(mktemp -d "$BUILD_ROOT/vkso-source.XXXXXX")
+	cp -a "$VKSO_SOURCE/." "$VKSO_COMPILE_SOURCE/"
+	make -C "$VKSO_COMPILE_SOURCE" mrproper
+fi
+
 configure_tree()
 {
 	local source=$1
@@ -218,7 +226,7 @@ if [[ "$reuse_raw" == 1 ]]; then
 else
 	configure_tree "$RAW_SOURCE" "$RAW_BUILD" raw
 fi
-configure_tree "$VKSO_SOURCE" "$VKSO_BUILD" vkso
+configure_tree "$VKSO_COMPILE_SOURCE" "$VKSO_BUILD" vkso
 
 config_symbols()
 {
@@ -279,7 +287,7 @@ if [[ "$reuse_raw" == 0 ]]; then
 	make -C "$RAW_SOURCE" O="$RAW_BUILD" CC="$CC" -j"$JOBS" \
 		bzImage modules_prepare
 fi
-make -C "$VKSO_SOURCE" O="$VKSO_BUILD" CC="$CC" -j"$JOBS" \
+make -C "$VKSO_COMPILE_SOURCE" O="$VKSO_BUILD" CC="$CC" -j"$JOBS" \
 	bzImage modules_prepare
 cp "$VKSO_BUILD/vmlinux.symvers" "$VKSO_BUILD/Module.symvers"
 
@@ -343,7 +351,9 @@ MODULE_BUILD="$BUILD_ROOT/page-cache-replace"
 mkdir -p "$MODULE_BUILD"
 cp "$ROOT/page_cache_replace/Makefile" \
 	"$ROOT/page_cache_replace/page_cache_replace.c" \
-	"$ROOT/page_cache_replace/manager.cpp" "$MODULE_BUILD/"
+	"$ROOT/page_cache_replace/manager.cpp" \
+	"$ROOT/page_cache_replace/protocol.h" \
+	"$ROOT/page_cache_replace/owner.h" "$MODULE_BUILD/"
 make -C "$MODULE_BUILD" KDIR="$VKSO_BUILD" CC="$CC" -j"$JOBS" \
 	module manager
 
@@ -419,6 +429,8 @@ install -m 0644 "$RAW_BUILD/.config" "$OUT/raw.config"
 install -m 0644 "$VKSO_BUILD/.config" "$OUT/vkso.config"
 install -m 0644 "$DSO_BUILD/libkernel.so" "$OUT/libkernel.so"
 install -m 0644 "$DSO_BUILD/page_mappings.txt" "$OUT/page_mappings.txt"
+install -m 0644 "$DSO_BUILD/owner_descriptors.txt" "$OUT/owner_descriptors.txt"
+install -m 0644 "$DSO_BUILD/kernel_identity.txt" "$OUT/kernel_identity.txt"
 install -m 0644 "$DSO_BUILD/resolved_symbol_addresses.txt" \
 	"$OUT/resolved_symbol_addresses.txt"
 install -m 0644 "$MODULE_BUILD/page_cache_replace.ko" \
@@ -495,7 +507,7 @@ candidate_patch_sha256=$(sha256sum "$OUT/source.patch" | awk '{print $1}')
 	printf 'vkso_build=%s\n' "$VKSO_BUILD"
 	printf 'base_config=%s\n' "$BASE_CONFIG"
 	printf 'kernelrelease=%s\n' \
-		"$(make -s -C "$VKSO_SOURCE" O="$VKSO_BUILD" kernelrelease)"
+		"$(make -s -C "$VKSO_COMPILE_SOURCE" O="$VKSO_BUILD" kernelrelease)"
 	printf 'raw_image_sha256=%s\n' \
 		"$(sha256sum "$OUT/raw-bzImage" | awk '{print $1}')"
 	printf 'vkso_image_sha256=%s\n' \
@@ -531,6 +543,7 @@ candidate_patch_sha256=$(sha256sum "$OUT/source.patch" | awk '{print $1}')
 	sha256sum raw-bzImage vkso-bzImage raw.config vkso.config \
 		raw.image.config vkso.image.config boot-manifest.txt \
 		libkernel.so page_mappings.txt page_cache_replace.ko \
+		owner_descriptors.txt kernel_identity.txt \
 		vkso_m09_clock.ko manager \
 		raw-abi-matrix vkso-abi-matrix vkso-time-bench \
 		vkso_time_bench.c \

@@ -217,6 +217,17 @@ begin_experiment()
 	fi
 	# shellcheck disable=SC1090
 	source "$CONFIG"
+	if [[ ${MACRO_ENABLED:-0} == 1 ]]; then
+		for package in "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"; do
+			[[ "$mode" == normal && "$package" == "$NO_RETPOLINE_PACKAGE" ]] && continue
+			for file in redis_workload.py redis-server redis-cli redis-benchmark adapter.so; do
+				test -s "$package/macro/$file" || {
+					echo "package lacks macrobench tools; rebuild with ./build-all.sh: $package" >&2
+					exit 1
+				}
+			done
+		done
+	fi
 	{
 		date -u '+created_utc=%Y-%m-%dT%H:%M:%SZ'
 		printf 'run_id=%s\n' "$run_id"
@@ -239,6 +250,13 @@ begin_experiment()
 				awk '{print $1}')"
 		printf 'cpu=%s\n' "$CPU"
 		printf 'housekeeping_cpus=%s\n' "$HOUSEKEEPING_CPUS"
+		printf 'isolated_cpus=%s\n' "${ISOLATED_CPUS:-$CPU}"
+		printf 'macro_enabled=%s\n' "${MACRO_ENABLED:-0}"
+		printf 'macro_rounds=%s\n' "${MACRO_ROUNDS:-7}"
+		printf 'macro_requests=%s\n' "${MACRO_REQUESTS:-3000000}"
+		printf 'macro_warmup=%s\n' "${MACRO_WARMUP:-200000}"
+		printf 'macro_server_cpu=%s\n' "${MACRO_SERVER_CPU:-1}"
+		printf 'macro_client_cpus=%s\n' "${MACRO_CLIENT_CPUS:-2,3}"
 		printf 'iterations=%s\n' "$ITERATIONS"
 		printf 'repeats=%s\n' "$REPEATS"
 		printf 'perf_processes=%s\n' "$PERF_PROCESSES"

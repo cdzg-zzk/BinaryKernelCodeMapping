@@ -2,9 +2,7 @@
 
 #include <linux/err.h>
 #include <linux/binfmts.h>
-#include <linux/gfp.h>
 #include <linux/mm.h>
-#include <linux/string.h>
 #include <linux/time_namespace.h>
 #include <linux/vkso_time.h>
 
@@ -36,19 +34,17 @@ static const struct vm_special_mapping vkso_mm_mapping = {
 	.mremap = vkso_mm_mremap,
 };
 
-static struct page *vkso_alloc_mm_page(const struct page *source)
-{
-	struct page *page = alloc_page(GFP_KERNEL | __GFP_ZERO);
-	union vkso_mm_page *data;
+static union vkso_mm_page vkso_root_mm_data __page_aligned_data = {
+	.data.abi_version = VKSO_MM_DATA_ABI_VERSION,
+};
 
-	if (!page)
-		return NULL;
-	data = page_address(page);
-	if (source)
-		memcpy(data, page_address(source), PAGE_SIZE);
-	else
-		data->data.abi_version = VKSO_MM_DATA_ABI_VERSION;
-	return page;
+static struct page *vkso_namespace_page(struct time_namespace *ns)
+{
+#ifdef CONFIG_TIME_NS
+	if (ns != &init_time_ns)
+		return ns->vkso_page;
+#endif
+	return virt_to_page(&vkso_root_mm_data);
 }
 
 static int vkso_install_mm_mapping(struct mm_struct *mm, unsigned long addr,
@@ -61,6 +57,7 @@ static int vkso_install_mm_mapping(struct mm_struct *mm, unsigned long addr,
 			&vkso_mm_mapping);
 	if (IS_ERR(vma))
 		return PTR_ERR(vma);
+	get_page(page);
 	mm->context.vkso_mm_page = page;
 	mm->context.vkso_mm_kdata = page_address(page);
 	mm->context.vkso_mm_data = (void __user *)addr;
@@ -76,20 +73,11 @@ void vkso_init_context(struct mm_struct *mm)
 
 int vkso_dup_mmap(struct mm_struct *oldmm, struct mm_struct *mm)
 {
-	struct page *page;
-	unsigned long addr;
-	int ret;
-
 	if (!oldmm->context.vkso_mm_page)
 		return 0;
-	addr = (unsigned long)oldmm->context.vkso_mm_data;
-	page = vkso_alloc_mm_page(oldmm->context.vkso_mm_page);
-	if (!page)
-		return -ENOMEM;
-	ret = vkso_install_mm_mapping(mm, addr, page);
-	if (ret)
-		put_page(page);
-	return ret;
+	return vkso_install_mm_mapping(mm,
+		(unsigned long)oldmm->context.vkso_mm_data,
+		oldmm->context.vkso_mm_page);
 }
 
 void vkso_destroy_context(struct mm_struct *mm)
@@ -103,49 +91,41 @@ void vkso_destroy_context(struct mm_struct *mm)
 		put_page(page);
 }
 
-void vkso_time_update_mm_data(struct task_struct *task,
-			      const struct timens_offsets *offsets)
+void vkso_time_join_namespace(struct task_struct *task,
+			      struct time_namespace *ns)
 {
 	struct mm_struct *mm = task->mm;
-	union vkso_mm_page *data;
+	struct page *page = vkso_namespace_page(ns), *old;
+	struct vm_area_struct *vma;
+	unsigned long addr;
 
-	if (!mm)
+	if (!mm || !mm->context.vkso_mm_page)
 		return;
-	data = READ_ONCE(mm->context.vkso_mm_kdata);
-	if (!data)
-		return;
-	WRITE_ONCE(data->data.monotonic_offset.sec,
-		   offsets->monotonic.tv_sec);
-	WRITE_ONCE(data->data.monotonic_offset.nsec,
-		   offsets->monotonic.tv_nsec);
-	WRITE_ONCE(data->data.boottime_offset.sec, offsets->boottime.tv_sec);
-	WRITE_ONCE(data->data.boottime_offset.nsec, offsets->boottime.tv_nsec);
-	smp_wmb();
-	WRITE_ONCE(data->data.clock_mask,
-		   (offsets->monotonic.tv_sec || offsets->monotonic.tv_nsec ?
-		    (1U << CLOCK_MONOTONIC) |
-		    (1U << CLOCK_MONOTONIC_RAW) |
-		    (1U << CLOCK_MONOTONIC_COARSE) : 0) |
-		   (offsets->boottime.tv_sec || offsets->boottime.tv_nsec ?
-		    (1U << CLOCK_BOOTTIME) : 0));
+	/* Serialize backing changes against faults, including remote mm readers. */
+	mmap_write_lock(mm);
+	old = mm->context.vkso_mm_page;
+	get_page(page);
+	mm->context.vkso_mm_page = page;
+	mm->context.vkso_mm_kdata = page_address(page);
+	addr = (unsigned long)mm->context.vkso_mm_data;
+	vma = find_vma(mm, addr);
+	if (vma && vma_is_special_mapping(vma, &vkso_mm_mapping))
+		zap_page_range(vma, vma->vm_start, PAGE_SIZE);
+	mmap_write_unlock(mm);
+	put_page(old);
 }
 
 int arch_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)
 {
 	struct mm_struct *mm = current->mm;
-	struct page *page;
+	struct page *page = vkso_namespace_page(current->nsproxy->time_ns);
 	unsigned long addr;
 	int ret;
 
 	(void)bprm;
 	(void)uses_interp;
-	page = vkso_alloc_mm_page(NULL);
-	if (!page)
-		return -ENOMEM;
-	if (mmap_write_lock_killable(mm)) {
-		put_page(page);
+	if (mmap_write_lock_killable(mm))
 		return -EINTR;
-	}
 	addr = get_unmapped_area(NULL, 0, PAGE_SIZE, 0, 0);
 	if (IS_ERR_VALUE(addr)) {
 		ret = addr;
@@ -154,13 +134,5 @@ int arch_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)
 	ret = vkso_install_mm_mapping(mm, addr, page);
 out:
 	mmap_write_unlock(mm);
-	if (ret) {
-		put_page(page);
-		return ret;
-	}
-#ifdef CONFIG_TIME_NS
-	vkso_time_update_mm_data(current,
-				&current->nsproxy->time_ns->offsets);
-#endif
-	return 0;
+	return ret;
 }

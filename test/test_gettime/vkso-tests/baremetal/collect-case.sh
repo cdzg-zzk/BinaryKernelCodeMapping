@@ -81,6 +81,9 @@ test "$config_sha" = \
 	"$(manifest_value "$EXPERIMENT_MANIFEST" experiment_config_sha256)"
 CPU=$(manifest_value "$EXPERIMENT_MANIFEST" cpu)
 HOUSEKEEPING_CPUS=$(manifest_value "$EXPERIMENT_MANIFEST" housekeeping_cpus)
+ISOLATED_CPUS=$(manifest_value "$EXPERIMENT_MANIFEST" isolated_cpus)
+ISOLATED_CPUS=${ISOLATED_CPUS:-$CPU}
+MACRO_ENABLED=$(manifest_value "$EXPERIMENT_MANIFEST" macro_enabled)
 ITERATIONS=$(manifest_value "$EXPERIMENT_MANIFEST" iterations)
 REPEATS=$(manifest_value "$EXPERIMENT_MANIFEST" repeats)
 PERF_PROCESSES=$(manifest_value "$EXPERIMENT_MANIFEST" perf_processes)
@@ -144,8 +147,8 @@ test "$(uname -v)" = "$expected_uts" || {
 clocksource=$(cat /sys/devices/system/clocksource/clocksource0/current_clocksource)
 test "$clocksource" = tsc
 for argument in nokaslr nosmt "clocksource=tsc" "tsc=reliable" \
-	"isolcpus=domain,managed_irq,$CPU" "nohz_full=$CPU" \
-	"rcu_nocbs=$CPU" "irqaffinity=$HOUSEKEEPING_CPUS" idle=poll \
+	"isolcpus=domain,managed_irq,$ISOLATED_CPUS" "nohz_full=$ISOLATED_CPUS" \
+	"rcu_nocbs=$ISOLATED_CPUS" "irqaffinity=$HOUSEKEEPING_CPUS" idle=poll \
 	nmi_watchdog=0 nowatchdog audit=0; do
 	grep -qw "$argument" /proc/cmdline || {
 		echo "missing controlled boot argument: $argument" >&2
@@ -436,6 +439,27 @@ END {
 				exit 1
 }
 ' "$PARTIAL/perf.csv"
+
+if [[ "$MACRO_ENABLED" == 1 ]]; then
+	# Same public collect command; application code and binaries are package-owned.
+	if [[ "$BACKEND" == raw ]]; then
+		macro_methods=(native vdso)
+	else
+		macro_methods=(vkso)
+	fi
+	for method in "${macro_methods[@]}"; do
+		python3 "$PACKAGE/macro/redis_workload.py" "$PACKAGE/macro" \
+			"$PARTIAL/redis/$method" --method "$method" \
+			--carrier "$PACKAGE/libkernel.so" \
+			--rounds "$(manifest_value "$EXPERIMENT_MANIFEST" macro_rounds)" \
+			--requests "$(manifest_value "$EXPERIMENT_MANIFEST" macro_requests)" \
+			--warmup "$(manifest_value "$EXPERIMENT_MANIFEST" macro_warmup)" \
+			--server-cpu "$(manifest_value "$EXPERIMENT_MANIFEST" macro_server_cpu)" \
+			--client-cpus "$(manifest_value "$EXPERIMENT_MANIFEST" macro_client_cpus)" \
+			>"$PARTIAL/redis-$method.log" 2>&1
+		test -s "$PARTIAL/redis/$method/complete.json"
+	done
+fi
 
 cat /proc/interrupts >"$PARTIAL/interrupts-after.txt"
 dmesg >"$PARTIAL/dmesg-after.txt"

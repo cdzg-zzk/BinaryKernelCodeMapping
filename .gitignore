@@ -39,3 +39,6 @@ ai_output.md
 !/test/test_gettime/.gitignore
 !/test/test_gettime/linux-5.15.198-vkso/
 !/test/test_gettime/vkso-tests/
+!/test/test_gettime/optimization-audit/
+!/test/test_gettime/namespace-sharing/
+!/test/test_gettime/macro-benchmark/

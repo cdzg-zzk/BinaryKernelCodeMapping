@@ -250,6 +250,8 @@ BTF_PATH="/sys/kernel/btf/vmlinux"
 SHIM_LIST="$REPO_ROOT/make_dll/shim.txt"
 EXPLICIT_KRG=""
 OWNER_KO=""
+DATA_BINDINGS_PATH=""
+API_HEADER_PATH=""
 SKIP_CHECK=0
 UNLOAD_MODULE=0
 MODULES=()
@@ -269,6 +271,12 @@ HOLD_ACTIVE=0
 HOLD_WRAPPER_PID=""
 HOLD_PID_FILE=""
 HOLD_STATE_FILE=""
+HOLD_NOTIFY_DIR=""
+HOLD_NOTIFY_PATH=""
+HOLD_NOTIFY_FD=""
+HOLD_SESSION_PID=""
+HOLD_SESSION_ID=""
+HOLD_NOTIFY_DONE=0
 PAGE_MODULE_LOADED_BY_US=0
 
 usage() {
@@ -278,8 +286,11 @@ Usage:
   ./vkso build   <work-dir> [options]
   ./vkso replace <work-dir> [options]
   ./vkso exec    <work-dir> [options] -- <program> [args...]
+  ./vkso exec-ready <work-dir> -- <program> [args...]
   ./vkso restore <work-dir> [--unload-module]
   ./vkso status  <work-dir>
+
+exec-ready reuses built outputs; the manager still verifies deployment identity.
 
 The default input is <work-dir>/vkso/symbols.txt. Generated files are placed in:
   <work-dir>/vkso/include/    generated C header
@@ -295,6 +306,8 @@ Options:
   --module <file>       Add a module to the KRG/checker/header search (repeatable).
   --owner-ko <file>     Module that owns the exported APIs; enables .data relocation handling.
   --shim-list <file>    Override make_dll/shim.txt.
+  --data-bindings <file> Bind explicit owner data slots to named user Shim entries.
+  --api-header <file>   Use a self-contained caller-supplied C ABI header instead of BTF generation.
   --skip-check          Skip functions_checker.py (not recommended).
   --unload-module       With restore, unload page_cache_replace after restoring.
 
@@ -328,48 +341,83 @@ as_root() {
     fi
 }
 
+# Optional evaluation observer; absent in ordinary runs. Shell stage events use
+# an external monotonic clock, whose cost is retained in the external total.
+setup_event() {
+    [[ -n "${VKSO_SETUP_TRACE:-}" ]] || return 0
+    "${VKSO_SETUP_CLOCK:?VKSO_SETUP_CLOCK is required with VKSO_SETUP_TRACE}" \
+        "$VKSO_SETUP_TRACE" "$$" "$1"
+}
+
+hold_state_owned() {
+    [[ -n "$HOLD_NOTIFY_PATH" && -f "$HOLD_STATE_FILE" ]] &&
+        grep -Fxq "notify_fifo=$HOLD_NOTIFY_PATH" "$HOLD_STATE_FILE"
+}
+
 cleanup_session() {
     local saved_status="$1"
     trap - EXIT
     set +e
+    setup_event cleanup.begin || saved_status=1
 
     if (( HOLD_ACTIVE )); then
-        if [[ -f "$HOLD_PID_FILE" ]]; then
+        # A failed competing launcher must never signal or restore another
+        # manager. The unique FIFO identity is written before file mutation.
+        if hold_state_owned; then
             local manager_pid
-            manager_pid="$(sed -n '1p' "$HOLD_PID_FILE")"
-            if [[ "$manager_pid" =~ ^[0-9]+$ ]]; then
+            manager_pid="$(sed -n 's/^process_pid=//p' "$HOLD_STATE_FILE")"
+            if [[ "$manager_pid" =~ ^[1-9][0-9]*$ ]]; then
                 as_root kill -TERM "$manager_pid" >/dev/null 2>&1
             fi
         fi
         if [[ -n "$HOLD_WRAPPER_PID" ]]; then
-            wait "$HOLD_WRAPPER_PID" >/dev/null 2>&1
-        elif [[ -f "$HOLD_STATE_FILE" ]]; then
-            # `sudo -b` returns before its child finishes the signal-driven
-            # restore. Give manager time to remove its state before deciding
-            # that the explicit fallback restore is needed.
-            local attempt
-            for attempt in $(seq 1 60); do
-                [[ ! -f "$HOLD_STATE_FILE" ]] && break
-                sleep 0.1
+            if ! wait "$HOLD_WRAPPER_PID"; then
+                (( saved_status != 0 )) || saved_status=1
+            fi
+        elif [[ -n "$HOLD_NOTIFY_FD" ]] && (( ! HOLD_NOTIFY_DONE )); then
+            local event status pid transaction done=0
+            while read -r -t 10 -u "$HOLD_NOTIFY_FD" event status pid transaction; do
+                if [[ "$event" == DONE ]]; then
+                    done=1
+                    [[ "$status" == 0 ]] || saved_status=1
+                    break
+                fi
             done
+            (( done )) || saved_status=1
         fi
-        if [[ -f "$HOLD_STATE_FILE" ]]; then
+        if hold_state_owned; then
             local library page_map
             library="$(metadata_value library)"
             page_map="$(metadata_value page_map)"
             if [[ -n "$library" && -n "$page_map" ]]; then
-                as_root "$MANAGER_BIN" restore "$library" "$page_map" \
-                    >>"$METADATA_DIR/page_replace.log" 2>&1
+                if ! as_root "$MANAGER_BIN" restore "$library" "$page_map" \
+                    >>"$METADATA_DIR/page_replace.log" 2>&1; then
+                    (( saved_status != 0 )) || saved_status=1
+                fi
+            else
+                (( saved_status != 0 )) || saved_status=1
             fi
         fi
-        if (( PAGE_MODULE_LOADED_BY_US )); then
-            as_root rmmod page_cache_replace >/dev/null 2>&1
+        if hold_state_owned; then
+            (( saved_status != 0 )) || saved_status=1
+        fi
+        if (( PAGE_MODULE_LOADED_BY_US && saved_status == 0 )); then
+            as_root rmmod page_cache_replace || saved_status=1
+        elif (( PAGE_MODULE_LOADED_BY_US )); then
+            log "session failed; retaining page_cache_replace for explicit recovery"
         fi
     fi
 
+    if [[ -n "$HOLD_NOTIFY_FD" ]]; then
+        exec {HOLD_NOTIFY_FD}>&-
+    fi
+    if [[ -n "$HOLD_NOTIFY_DIR" ]] && ! hold_state_owned; then
+        rm -rf "$HOLD_NOTIFY_DIR"
+    fi
     if [[ -n "$CURRENT_SCRATCH" && -d "$CURRENT_SCRATCH" ]]; then
         rm -rf "$CURRENT_SCRATCH"
     fi
+    setup_event cleanup.end || saved_status=1
     exit "$saved_status"
 }
 
@@ -386,7 +434,7 @@ parse_args() {
     shift 2
 
     case "$COMMAND" in
-        init|build|replace|exec|restore|status) ;;
+        init|build|replace|exec|exec-ready|restore|status) ;;
         -h|--help|help) usage; exit 0 ;;
         *) die "unknown command: $COMMAND" ;;
     esac
@@ -401,6 +449,8 @@ parse_args() {
             --module) (( $# >= 2 )) || die "--module requires a file"; MODULES+=("$2"); shift 2 ;;
             --owner-ko) (( $# >= 2 )) || die "--owner-ko requires a file"; OWNER_KO="$2"; shift 2 ;;
             --shim-list) (( $# >= 2 )) || die "--shim-list requires a file"; SHIM_LIST="$2"; shift 2 ;;
+            --data-bindings) (( $# >= 2 )) || die "--data-bindings requires a file"; DATA_BINDINGS_PATH="$2"; shift 2 ;;
+            --api-header) (( $# >= 2 )) || die "--api-header requires a file"; API_HEADER_PATH="$2"; shift 2 ;;
             --skip-check) SKIP_CHECK=1; shift ;;
             --unload-module) UNLOAD_MODULE=1; shift ;;
             --) shift; EXEC_CMD=("$@"); break ;;
@@ -457,6 +507,14 @@ validate_inputs() {
     [[ -f "$VMLINUX_PATH" ]] || die "vmlinux not found: $VMLINUX_PATH"
     [[ -f "$BTF_PATH" ]] || die "BTF not found: $BTF_PATH"
     [[ -f "$SHIM_LIST" ]] || die "shim list not found: $SHIM_LIST"
+    if [[ -n "$API_HEADER_PATH" ]]; then
+        [[ -f "$API_HEADER_PATH" ]] || die "API header not found: $API_HEADER_PATH"
+        API_HEADER_PATH="$(realpath "$API_HEADER_PATH")"
+    fi
+    if [[ -n "$DATA_BINDINGS_PATH" ]]; then
+        [[ -f "$DATA_BINDINGS_PATH" ]] || die "data bindings not found: $DATA_BINDINGS_PATH"
+        DATA_BINDINGS_PATH="$(realpath "$DATA_BINDINGS_PATH")"
+    fi
     [[ -f "$SHARED_DATA_PATH" ]] || die "shared-data list not found: $SHARED_DATA_PATH"
     [[ -z "$OWNER_KO" || -f "$OWNER_KO" ]] || die "owner module not found: $OWNER_KO"
     local module
@@ -565,6 +623,20 @@ run_function_checks() {
     done < <(symbol_names)
 }
 
+validate_api_header() {
+    require_cmd gcc
+    install -m 0644 "$API_HEADER_PATH" "$CURRENT_SCRATCH/vkso_types.h"
+    local symbol index=0
+    : > "$CURRENT_SCRATCH/check_api_header.c"
+    while IFS= read -r symbol; do
+        [[ "$symbol" =~ ^[a-zA-Z_][a-zA-Z_0-9]*$ ]] || die "invalid C API identifier: $symbol"
+        printf '__typeof__(&%s) vkso_header_reference_%d;\n' "$symbol" "$index" >> "$CURRENT_SCRATCH/check_api_header.c"
+        index=$((index + 1))
+    done < "$CURRENT_SCRATCH/symbols.txt"
+    gcc -std=gnu11 -Werror -fsyntax-only -include "$CURRENT_SCRATCH/vkso_types.h" \
+        "$CURRENT_SCRATCH/check_api_header.c"
+}
+
 build_workspace() {
     validate_inputs
     require_cmd python3
@@ -572,14 +644,18 @@ build_workspace() {
     require_cmd nm
     require_cmd bpftool
     require_cmd mktemp
+    setup_event krg.begin
     prepare_krg
+    setup_event krg.end
 
     CURRENT_SCRATCH="$(mktemp -d "${TMPDIR:-/tmp}/vkso-build.XXXXXX")"
     symbol_names >"$CURRENT_SCRATCH/symbols.txt"
     [[ -s "$CURRENT_SCRATCH/symbols.txt" ]] || die "no symbols found in $SYMBOLS_PATH"
 
     write_effective_shim_list
+    setup_event checker.begin
     run_function_checks
+    setup_event checker.end
 
     local effective_shim_list="$CURRENT_SCRATCH/effective_shim.txt"
 
@@ -592,7 +668,14 @@ build_workspace() {
     for module in "${MODULES[@]}"; do
         header_args+=(--module "$module")
     done
-    "${header_args[@]}"
+    setup_event header.begin
+    if [[ -n "$API_HEADER_PATH" ]]; then
+        log "using caller-supplied API declarations: $API_HEADER_PATH"
+        validate_api_header
+    else
+        "${header_args[@]}"
+    fi
+    setup_event header.end
 
     log "building sparse shared object"
     local so_args=(python3 "$REPO_ROOT/make_dll/build_PIC_so.py"
@@ -604,11 +687,19 @@ build_workspace() {
                    --shared-data-list "$SHARED_DATA_PATH"
                    --vmlinux "$VMLINUX_PATH")
     [[ -z "$OWNER_KO" ]] || so_args+=(--ko "$OWNER_KO")
+    if [[ -n "$DATA_BINDINGS_PATH" ]]; then
+        install -m 0644 "$DATA_BINDINGS_PATH" "$CURRENT_SCRATCH/data_bindings.json"
+        so_args+=(--data-bindings "$CURRENT_SCRATCH/data_bindings.json"
+                  --data-bindings-report "$CURRENT_SCRATCH/data_bindings_resolved.json")
+    fi
+    setup_event carrier.begin
     (
         cd "$CURRENT_SCRATCH"
         "${so_args[@]}"
     )
+    setup_event carrier.end
 
+    setup_event install.begin
     local candidates=() candidate library
     shopt -s nullglob
     for candidate in "$CURRENT_SCRATCH"/lib*.so; do
@@ -625,7 +716,7 @@ build_workspace() {
         require_cmd gcc
         log "libshim.so is required by the generated DSO; building it"
         gcc -shared -fPIC -O2 -Wall -Wextra "$REPO_ROOT/make_dll/shim.c" \
-            -o "$CURRENT_SCRATCH/libshim.so"
+            -ldl -o "$CURRENT_SCRATCH/libshim.so"
         readelf -hW "$CURRENT_SCRATCH/libshim.so" >/dev/null
     else
         log "libshim.so is not required by the generated DSO"
@@ -654,6 +745,14 @@ build_workspace() {
     install -m 0644 "$CURRENT_SCRATCH/page_mappings.txt" \
         "$METADATA_DIR/page_mappings.txt"
     install -m 0644 "$CURRENT_SCRATCH/module_deps.txt" "$METADATA_DIR/module_deps.txt"
+    install -m 0644 "$CURRENT_SCRATCH/owner_descriptors.txt" "$METADATA_DIR/owner_descriptors.txt"
+    install -m 0644 "$CURRENT_SCRATCH/kernel_identity.txt" "$METADATA_DIR/kernel_identity.txt"
+    if [[ -n "$DATA_BINDINGS_PATH" ]]; then
+        install -m 0644 "$CURRENT_SCRATCH/data_bindings.json" "$METADATA_DIR/data_bindings.json"
+        install -m 0644 "$CURRENT_SCRATCH/data_bindings_resolved.json" "$METADATA_DIR/data_bindings_resolved.json"
+    else
+        rm -f "$METADATA_DIR/data_bindings.json" "$METADATA_DIR/data_bindings_resolved.json"
+    fi
     rm -rf "$METADATA_DIR/checks"
     if [[ -d "$CURRENT_SCRATCH/checks" ]]; then
         cp -a "$CURRENT_SCRATCH/checks" "$METADATA_DIR/checks"
@@ -665,6 +764,7 @@ build_workspace() {
         printf 'shim_required=%s\n' "$shim_required"
         printf 'shim_library=%s\n' "$installed_shim"
         printf 'header=%s\n' "$INCLUDE_DIR/vkso_types.h"
+        printf 'header_origin=%s\n' "${API_HEADER_PATH:-BTF}"
         printf 'resolved_symbols=%s\n' "$METADATA_DIR/resolved_symbol_addresses.txt"
         printf 'page_map=%s\n' "$METADATA_DIR/page_mappings.txt"
         printf 'krg=%s\n' "$KRG_PATH"
@@ -683,6 +783,7 @@ build_workspace() {
 
     rm -rf "$CURRENT_SCRATCH"
     CURRENT_SCRATCH=""
+    setup_event install.end
 }
 
 metadata_value() {
@@ -693,7 +794,7 @@ metadata_value() {
 
 compile_manager() {
     require_cmd make
-    if [[ ! -x "$MANAGER_BIN" || "$REPO_ROOT/page_cache_replace/manager.cpp" -nt "$MANAGER_BIN" ]]; then
+    if [[ ! -x "$MANAGER_BIN" || "$REPO_ROOT/page_cache_replace/manager.cpp" -nt "$MANAGER_BIN" || "$REPO_ROOT/page_cache_replace/protocol.h" -nt "$MANAGER_BIN" ]]; then
         log "building project page-cache manager"
         make -C "$REPO_ROOT/page_cache_replace" manager
     fi
@@ -761,6 +862,7 @@ restore_pages() {
 }
 
 exec_with_replacement() {
+    setup_event session.begin
     (( ${#EXEC_CMD[@]} )) || die "exec requires a program after --"
     require_build_outputs
     compile_manager
@@ -772,37 +874,56 @@ exec_with_replacement() {
     HOLD_PID_FILE="$runtime_dir/manager.pid"
     HOLD_STATE_FILE="$runtime_dir/manager.state"
     as_root mkdir -p "$runtime_dir"
-    as_root rm -f "$HOLD_PID_FILE" "$HOLD_STATE_FILE"
+    require_cmd mkfifo
+    HOLD_NOTIFY_DIR="$(mktemp -d "$METADATA_DIR/.manager-notify.XXXXXX")"
+    HOLD_NOTIFY_PATH="$HOLD_NOTIFY_DIR/status"
+    mkfifo -m 0600 "$HOLD_NOTIFY_PATH"
+    exec {HOLD_NOTIFY_FD}<>"$HOLD_NOTIFY_PATH"
     as_root true
 
+    setup_event manager.begin
     log "starting guarded page replacement"
     if (( EUID == 0 )); then
-        "$MANAGER_BIN" replace "$library" "$page_map" --hold \
-            >>"$METADATA_DIR/page_replace.log" 2>&1 &
+        (
+            exec {HOLD_NOTIFY_FD}>&-
+            exec "$MANAGER_BIN" replace "$library" "$page_map" --hold --notify-fifo "$HOLD_NOTIFY_PATH"
+        ) >>"$METADATA_DIR/page_replace.log" 2>&1 &
         HOLD_WRAPPER_PID="$!"
     else
         # `sudo command &` can lose a non-TTY sudo credential because the shell
         # launches sudo from a background subshell. Let sudo perform the
         # backgrounding so authentication stays in this foreground session.
-        sudo -b "$MANAGER_BIN" replace "$library" "$page_map" --hold \
+        sudo -b "$MANAGER_BIN" replace "$library" "$page_map" --hold --notify-fifo "$HOLD_NOTIFY_PATH" \
             >>"$METADATA_DIR/page_replace.log" 2>&1
         HOLD_WRAPPER_PID=""
     fi
     HOLD_ACTIVE=1
 
-    local attempt
-    for attempt in $(seq 1 40); do
-        [[ -f "$HOLD_PID_FILE" ]] && break
-        if [[ -n "$HOLD_WRAPPER_PID" ]]; then
-            kill -0 "$HOLD_WRAPPER_PID" >/dev/null 2>&1 || \
-                die "page-cache manager exited early; see $METADATA_DIR/page_replace.log"
+    local event status pid transaction
+    local ready=0
+    while read -r -t 10 -u "$HOLD_NOTIFY_FD" event status pid transaction; do
+        if [[ "$event" == DONE ]]; then
+            HOLD_NOTIFY_DONE=1
+            die "page-cache manager exited before ready; see $METADATA_DIR/page_replace.log"
         fi
-        sleep 0.25
+        [[ "$status" == 0 && "$pid" =~ ^[1-9][0-9]*$ && "$transaction" =~ ^[1-9][0-9]*$ ]] ||
+            die "page-cache manager failed before ready; see $METADATA_DIR/page_replace.log"
+        case "$event" in
+            START) HOLD_SESSION_PID="$pid"; HOLD_SESSION_ID="$transaction" ;;
+            READY)
+                [[ "$pid" == "$HOLD_SESSION_PID" && "$transaction" == "$HOLD_SESSION_ID" ]] ||
+                    die "manager notification identity changed"
+                ready=1; break ;;
+            *) die "page-cache manager exited before ready; see $METADATA_DIR/page_replace.log" ;;
+        esac
     done
-    [[ -f "$HOLD_PID_FILE" ]] || die "page-cache manager did not become ready"
+    (( ready )) || die "page-cache manager did not confirm ready"
+    setup_event manager.ready
 
+    setup_event application.begin
     log "running: ${EXEC_CMD[*]}"
     LD_LIBRARY_PATH="$LIB_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "${EXEC_CMD[@]}"
+    setup_event application.end
     log "program finished; restoring pages"
 }
 
@@ -827,11 +948,13 @@ show_status() {
 main() {
     parse_args "$@"
     configure_paths
+    setup_event command.begin
     case "$COMMAND" in
         init) init_workspace ;;
         build) build_workspace ;;
         replace) build_workspace; replace_pages ;;
         exec) build_workspace; exec_with_replacement ;;
+        exec-ready) exec_with_replacement ;;
         restore) restore_pages ;;
         status) show_status ;;
     esac

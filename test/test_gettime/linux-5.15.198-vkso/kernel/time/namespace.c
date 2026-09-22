@@ -5,6 +5,7 @@
  */
 
 #include <linux/time_namespace.h>
+#include <linux/mm.h>
 #include <linux/user_namespace.h>
 #include <linux/sched/signal.h>
 #include <linux/sched/task.h>
@@ -95,6 +96,11 @@ static struct time_namespace *clone_time_ns(struct user_namespace *user_ns,
 	err = ns_alloc_inum(&ns->ns);
 	if (err)
 		goto fail_free;
+	ns->vkso_page = alloc_page(GFP_KERNEL_ACCOUNT | __GFP_ZERO);
+	if (!ns->vkso_page) {
+		err = -ENOMEM;
+		goto fail_inum;
+	}
 
 	ns->ucounts = ucounts;
 	ns->ns.ops = &timens_operations;
@@ -103,6 +109,8 @@ static struct time_namespace *clone_time_ns(struct user_namespace *user_ns,
 	ns->frozen_offsets = false;
 	return ns;
 
+fail_inum:
+	ns_free_inum(&ns->ns);
 fail_free:
 	kfree(ns);
 fail_dec:
@@ -139,21 +147,38 @@ static DEFINE_MUTEX(offset_lock);
 
 static void timens_freeze_offsets(struct time_namespace *ns)
 {
+	struct vkso_mm_data *data;
+	struct timens_offsets *offsets = &ns->offsets;
+
 	if (ns == &init_time_ns)
 		return;
 
 	/* Fast-path, taken by every task in namespace except the first. */
-	if (likely(ns->frozen_offsets))
+	if (likely(smp_load_acquire(&ns->frozen_offsets)))
 		return;
 
 	mutex_lock(&offset_lock);
-	if (!ns->frozen_offsets)
-		ns->frozen_offsets = true;
+	if (!ns->frozen_offsets) {
+		data = page_address(ns->vkso_page);
+		data->abi_version = VKSO_MM_DATA_ABI_VERSION;
+		data->monotonic_offset.sec = offsets->monotonic.tv_sec;
+		data->monotonic_offset.nsec = offsets->monotonic.tv_nsec;
+		data->boottime_offset.sec = offsets->boottime.tv_sec;
+		data->boottime_offset.nsec = offsets->boottime.tv_nsec;
+		data->clock_mask =
+			(offsets->monotonic.tv_sec || offsets->monotonic.tv_nsec ?
+			 (1U << CLOCK_MONOTONIC) | (1U << CLOCK_MONOTONIC_RAW) |
+			 (1U << CLOCK_MONOTONIC_COARSE) : 0) |
+			(offsets->boottime.tv_sec || offsets->boottime.tv_nsec ?
+			 (1U << CLOCK_BOOTTIME) : 0);
+		smp_store_release(&ns->frozen_offsets, true);
+	}
 	mutex_unlock(&offset_lock);
 }
 
 void free_time_ns(struct time_namespace *ns)
 {
+	put_page(ns->vkso_page);
 	dec_time_namespaces(ns->ucounts);
 	put_user_ns(ns->user_ns);
 	ns_free_inum(&ns->ns);
@@ -205,7 +230,7 @@ static void timens_put(struct ns_common *ns)
 void timens_commit(struct task_struct *tsk, struct time_namespace *ns)
 {
 	timens_freeze_offsets(ns);
-	vkso_time_update_mm_data(tsk, &ns->offsets);
+	vkso_time_join_namespace(tsk, ns);
 }
 
 static int timens_install(struct nsset *nsset, struct ns_common *new)

@@ -6,6 +6,7 @@ Sparse ELF64 shared-object builder for kernel code mapping.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import struct
 from dataclasses import dataclass
@@ -437,6 +438,61 @@ class KoCoreLayout:
     def data_size(self) -> int:
         return self.data_end - self.data_start
 
+def gnu_build_id_notes(data: bytes) -> List[str]:
+    """Read GNU build IDs from little-endian ELF notes (four-byte alignment)."""
+    ids: List[str] = []
+    offset = 0
+    while offset < len(data):
+        if len(data) - offset < 12:
+            if any(data[offset:]):
+                raise ValueError("truncated ELF note header")
+            break
+        namesz, descsz, kind = struct.unpack_from("<III", data, offset)
+        name_start = offset + 12
+        desc_start = name_start + ((namesz + 3) & ~3)
+        end = desc_start + ((descsz + 3) & ~3)
+        if end > len(data):
+            raise ValueError("truncated ELF note payload")
+        if kind == 3 and data[name_start:name_start + namesz] == b"GNU\0":
+            if not 1 <= descsz <= 64:
+                raise ValueError("unsupported GNU build-id length")
+            ids.append(data[desc_start:desc_start + descsz].hex())
+        offset = end
+    return ids
+
+
+def elf_build_id(path: Path) -> str:
+    """Extract the linker's identity without reading a whole debug vmlinux."""
+    header = struct.Struct("<16sHHIQQQIHHHHHH")
+    section = struct.Struct("<IIQQQQIIQQ")
+    ids: List[str] = []
+    with path.open("rb") as stream:
+        file_size = path.stat().st_size
+        raw = stream.read(header.size)
+        if len(raw) != header.size:
+            raise ValueError(f"{path}: truncated ELF header")
+        fields = header.unpack(raw)
+        ident, machine = fields[0], fields[2]
+        shoff, shentsize, shnum = fields[6], fields[11], fields[12]
+        if ident[:6] != b"\x7fELF\x02\x01" or machine != EM_X86_64:
+            raise ValueError(f"{path}: expected little-endian x86-64 ELF")
+        if shentsize != section.size or not shnum or shoff + shentsize * shnum > file_size:
+            raise ValueError(f"{path}: invalid ELF section table")
+        for index in range(shnum):
+            stream.seek(shoff + index * shentsize)
+            values = section.unpack(stream.read(section.size))
+            if values[1] != 7: # SHT_NOTE
+                continue
+            offset, size = values[4], values[5]
+            if offset + size > file_size:
+                raise ValueError(f"{path}: truncated note section")
+            stream.seek(offset)
+            ids.extend(gnu_build_id_notes(stream.read(size)))
+    if len(ids) != 1:
+        raise ValueError(f"{path}: expected one GNU build-id, found {len(ids)}")
+    return ids[0]
+
+
 class KoFile:
     _EHDR = struct.Struct("<16sHHIQQQIHHHHHH")
     _SHDR = struct.Struct("<IIQQQQIIQQ")
@@ -658,7 +714,8 @@ class KoFile:
         data_size = data_end - data_start
         data_image = bytearray(data_size)
         for sec in data_secs:
-            if sec.sh_size == 0:
+            # Keep kernel layout offsets while omitting management pointers.
+            if sec.sh_size == 0 or sec.name == ".vkso_owner":
                 continue
             dest_off = section_offsets[sec.index] - data_start
             if sec.sh_type == SHT_NOBITS:
@@ -670,7 +727,7 @@ class KoFile:
                 self._blob[sec.sh_offset : end]
             )
 
-        data_sec_indices = {sec.index for sec in data_secs}
+        data_sec_indices = {sec.index for sec in data_secs if sec.name != ".vkso_owner"}
         data_relocs: List[KoDataReloc] = []
         for sec in self.sections:
             if sec.sh_type != SHT_RELA or not sec.name.startswith(".rela."):
@@ -1808,12 +1865,135 @@ class ManualElfBuilder:
 # CLI glue
 # -----------------------------------------------------------------------------
 
+def validate_executable_shim_bindings(
+    ko: KoFile, symbols: Sequence[ResolvedSymbol], owner_module: str,
+) -> None:
+    """Reject Shim bindings that would require rewriting shared owner code.
+
+    This is a module binding check, not certification of the final runtime
+    control closure. Private data-slot relocations are handled separately.
+    """
+    imports = {symbol.name for symbol in symbols
+               if not symbol.defined and symbol.module_name == "shim"}
+    if not imports:
+        return
+    try:
+        from capstone import Cs, CS_ARCH_X86, CS_MODE_64, CS_GRP_CALL, CS_GRP_JUMP
+        from capstone.x86 import X86_OP_IMM
+    except ImportError as error:
+        raise ValueError("capstone is required to validate executable Shim bindings") from error
+    decoder = Cs(CS_ARCH_X86, CS_MODE_64)
+    decoder.detail = True
+    local_imports = [symbol for symbol in ko.symbols
+                     if symbol.name in imports and not symbol.is_undef
+                     and symbol.typ == STT_FUNC]
+    conflicts: List[str] = []
+    for selected in symbols:
+        if (not selected.defined or selected.module_name != owner_module
+                or selected.st_type != STT_FUNC or not selected.replace_from_kernel):
+            continue
+        found = ko.find_symbol(selected.name)
+        if found is None:
+            raise ValueError(f"{ko.path}: cannot locate shared function {selected.name}")
+        _, symbol = found
+        if symbol.is_undef or symbol.st_shndx >= len(ko.sections):
+            raise ValueError(f"{ko.path}: invalid shared function {selected.name}")
+        section = ko.sections[symbol.st_shndx]
+        start, end = symbol.st_value, symbol.st_value + symbol.st_size
+        if (not section.is_exec or not section.is_alloc or symbol.st_size <= 0
+                or end > section.sh_size):
+            raise ValueError(f"{ko.path}: cannot bound shared function {selected.name}")
+        relocations = [relocation for relocation in ko.relocations_for(section)
+                       if start <= relocation.offset < end]
+        for relocation in relocations:
+            if relocation.symbol_name in imports:
+                conflicts.append(f"{selected.name}+0x{relocation.offset - start:x}: "
+                    f"{relocation.symbol_name} (executable relocation type {relocation.r_type})")
+        cursor = start
+        for instruction in decoder.disasm(ko.section_bytes(section)[start:end], start):
+            if instruction.address != cursor:
+                raise ValueError(f"{ko.path}: incomplete decoding of {selected.name}")
+            cursor += instruction.size
+            if (not (instruction.group(CS_GRP_CALL) or instruction.group(CS_GRP_JUMP))
+                    or not instruction.operands or instruction.operands[0].type != X86_OP_IMM):
+                continue
+            if any(instruction.address <= relocation.offset < cursor for relocation in relocations):
+                continue  # A relocation already supplies the target identity above.
+            target = instruction.operands[0].imm
+            for imported in local_imports:
+                if imported.st_shndx != symbol.st_shndx:
+                    continue
+                if (target == imported.st_value or
+                        imported.st_value <= target < imported.st_value + imported.st_size):
+                    conflicts.append(f"{selected.name}+0x{instruction.address - start:x}: "
+                                     f"{imported.name} (resolved local direct branch)")
+        if cursor != end:
+            raise ValueError(f"{ko.path}: incomplete decoding of {selected.name}")
+    if conflicts:
+        raise ValueError(
+            "unsupported executable Shim binding: shared instruction bytes retain "
+            "their native target; an undefined DSO symbol cannot redirect them. "
+            "Provide a supported private data-slot binding or validate a complete "
+            "native dependency closure. " + "; ".join(sorted(set(conflicts)))
+        )
+
 def infer_default_krg_path() -> Path | None:
     script_path = Path(__file__).resolve()
     for parent in script_path.parents:
         candidate = parent / "KernelCodeMappingFinal/kernel-cgd/src/out.krg"
         if candidate.exists(): return candidate
     return None
+
+def private_data_bindings(ko: KoFile, layout: KoCoreLayout, path: Path | None,
+                          shim_symbols: Set[str]) -> Dict[int, dict]:
+    """Validate explicit user targets for complete owner pointer objects.
+
+    Keys are offsets in the private data image, never executable locations.
+    The original kernel relocation and source text remain unchanged.
+    """
+    if path is None:
+        return {}
+    contract = json.loads(path.read_text())
+    if contract.get("format") != "vkso-private-data-bindings-v1":
+        raise ValueError(f"{path}: unsupported data binding format")
+    records = contract.get("bindings")
+    if not isinstance(records, list) or not records:
+        raise ValueError(f"{path}: bindings must be a nonempty list")
+    bound: Dict[int, dict] = {}
+    for record in records:
+        if not isinstance(record, dict) or any(not isinstance(record.get(key), str) or not record[key]
+                for key in ("slot", "kernel_symbol", "user_symbol", "user_library", "signature")):
+            raise ValueError(f"{path}: incomplete private binding record")
+        if record['user_library'] != LIB_SHIM or record['user_symbol'] == record['kernel_symbol']:
+            raise ValueError(f"{path}: binding requires a distinct target in {LIB_SHIM}")
+        if record['kernel_symbol'] not in shim_symbols:
+            raise ValueError(f"{path}: kernel target must be an explicit Shim dependency")
+        matches = [sym for sym in ko.symbols if sym.name == record['slot'] and not sym.is_undef]
+        if len(matches) != 1:
+            raise ValueError(f"{record['slot']}: expected exactly one defined slot")
+        symbol = matches[0]
+        if not 0 < symbol.st_shndx < len(ko.sections):
+            raise ValueError(f"{record['slot']}: slot has no ordinary data section")
+        section = ko.sections[symbol.st_shndx]
+        if (symbol.typ != STT_OBJECT or symbol.st_size != 8 or symbol.st_value % 8
+                or not section.is_alloc or not section.is_write or section.is_exec
+                or section.sh_type != SHT_PROGBITS or section.index not in layout.section_offsets
+                or symbol.st_value + 8 > section.sh_size):
+            raise ValueError(f"{record['slot']}: binding requires a complete aligned private 8-byte data object")
+        offset = layout.section_offsets[section.index] + symbol.st_value - layout.data_start
+        if offset < 0 or offset + 8 > len(layout.data_image):
+            raise ValueError(f"{record['slot']}: slot lies outside private data")
+        overlaps = [reloc for reloc in layout.data_relocs if offset - 7 <= reloc.offset < offset + 8]
+        if (len(overlaps) != 1 or overlaps[0].offset != offset
+                or overlaps[0].r_type != R_X86_64_64 or overlaps[0].addend != 0
+                or not overlaps[0].is_undef or overlaps[0].symbol_name != record['kernel_symbol']):
+            raise ValueError(f"{record['slot']}: kernel initializer must be one exact R_X86_64_64 binding")
+        if any(abs(offset - other) < 8 for other in bound):
+            raise ValueError(f"{record['slot']}: duplicate or overlapping private binding")
+        bound[offset] = {**record, "data_offset": offset, "section": section.name,
+                         "section_offset": symbol.st_value}
+    return bound
+
 
 def build_shared_object(
     symbols_path: Path, krg_path: Path, export_stub_size: int = DEFAULT_EXPORT_STUB_SIZE,
@@ -1822,6 +2002,8 @@ def build_shared_object(
     shared_data_list_path: Path | None = None, vmlinux_path: Path | None = None,
     private_wrapper_object: Path | None = None,
     reusable_text_list_path: Path | None = None,
+    data_bindings_path: Path | None = None,
+    data_bindings_report_path: Path | None = None,
 ) -> None:
     graph = KrgGraph(krg_path)
     shim_symbols = load_shim_symbols(shim_list_path)
@@ -1875,7 +2057,10 @@ def build_shared_object(
 
     data_bytes = b""
     data_relocations: List[DataRelocation] = []
+    bindings: Dict[int, dict] = {}
     rw_base_vaddr: int | None = None
+    if data_bindings_path is not None and ko_path is None:
+        raise ValueError("--data-bindings requires an owner --ko")
 
     def compute_text_min_page(symbols: Sequence[ResolvedSymbol]) -> int:
         addrs = [sym.address for sym in symbols if sym.defined and sym.st_type == STT_FUNC and sym.address]
@@ -1886,6 +2071,15 @@ def build_shared_object(
     if ko_path is not None:
         ko = KoFile(ko_path)
         layout = ko.compute_core_layout()
+        management = ko.find_section(".vkso_owner")
+        if management is not None:
+            if not management.is_write or management.is_exec or management.sh_size != PAGE_SIZE or management.sh_addralign != PAGE_SIZE:
+                raise ValueError("owner descriptor must occupy one writable non-executable management page")
+            for name in requested:
+                found = ko.find_symbol(name)
+                if found is not None and found[1].st_shndx == management.index:
+                    raise ValueError("owner management symbols cannot be exported to user space")
+        bindings = private_data_bindings(ko, layout, data_bindings_path, shim_symbols)
 
         def infer_module_core_base_kernel() -> int:
             for name in requested:
@@ -1999,6 +2193,19 @@ def build_shared_object(
                     name = f"{ko.sections[reloc.sym_shndx].name}+0x{reloc.sym_value:x}"
                 else:
                     name = f".internal+0x{reloc.sym_value:x}"
+            if reloc.offset in bindings:
+                binding = bindings[reloc.offset]
+                name = binding['user_symbol']
+                if name not in by_name:
+                    target = ResolvedSymbol(name=name, source=LIB_SHIM, defined=False,
+                        exported=False, st_type=STT_FUNC, module_name="shim",
+                        export_order=len(resolved), original_order=len(resolved))
+                    resolved.append(target)
+                    by_name[name] = target
+                elif by_name[name].defined or by_name[name].st_type != STT_FUNC:
+                    raise ValueError(f"{name}: private binding conflicts with a defined/non-function symbol")
+                if LIB_SHIM not in needed_libs:
+                    needed_libs.append(LIB_SHIM)
             target = by_name[name]
             data_relocations.append(DataRelocation(offset=reloc.offset, symbol=target, addend=reloc.addend, r_type=R_X86_64_64))
 
@@ -2073,11 +2280,37 @@ def build_shared_object(
             synthetic_text_pages,
         )
 
+    if ko_path is not None:
+        validate_executable_shim_bindings(ko, resolved, owner_module)
+
     dep_modules = ["shim"] if LIB_SHIM in needed_libs else []
     module_deps_path = symbols_path.parent / "module_deps.txt"
     module_deps_path.write_text("".join(format_module_deps(owner_module, dep_modules, resolved)))
     if symbol_dump_path is not None:
         dump_symbol_addresses_all([(owner_module, resolved)], symbol_dump_path)
+
+    owner_manifest = page_map_path.with_name("owner_descriptors.txt")
+    owner_lines = []
+    if ko_path is not None and ko.find_section(".vkso_owner") is not None:
+        candidates = [sym for sym in ko.symbols
+                      if sym.st_shndx == ko.find_section(".vkso_owner").index
+                      and sym.bind == STB_GLOBAL and sym.typ == STT_OBJECT
+                      and sym.st_value == 0 and sym.st_size == PAGE_SIZE]
+        if len(candidates) != 1:
+            raise ValueError("owner requires one global full-page descriptor object")
+        descriptor_name = candidates[0].name
+        modinfo = ko.find_section(".modinfo")
+        versions = [x.split(b"=", 1)[1].decode("ascii") for x in ko.section_bytes(modinfo).split(b"\0")
+                    if x.startswith(b"srcversion=")] if modinfo else []
+        if len(versions) != 1 or not 1 <= len(versions[0]) <= 24:
+            raise ValueError("owner requires a module srcversion")
+        names = [x.split(b"=", 1)[1].decode("ascii") for x in ko.section_bytes(modinfo).split(b"\0")
+                 if x.startswith(b"name=")]
+        if len(names) != 1 or not names[0] or any(not (c.isascii() and (c.isalnum() or c == "_")) for c in names[0]):
+            raise ValueError("owner requires one valid module name")
+        owner_lines.append(f"{descriptor_name} {versions[0]} {names[0]} {elf_build_id(ko_path)}\n")
+
+    kernel_identity = elf_build_id(vmlinux_path) if vmlinux_path else None
 
     builder = ManualElfBuilder(
         symbols=resolved, needed_libraries=needed_libs, export_stub_size=export_stub_size,
@@ -2085,6 +2318,17 @@ def build_shared_object(
         synthetic_text_pages=synthetic_text_pages,
     )
     builder.write(Path(owner_lib), page_map_path=page_map_path)
+    owner_manifest.write_text("# descriptor_symbol module_srcversion module_name gnu_build_id\n" + "".join(owner_lines))
+    page_map_path.with_name("kernel_identity.txt").write_text(
+        "# vmlinux GNU build-id; required for registration\n" +
+        (f"kernel {kernel_identity}\n" if kernel_identity else ""))
+    if data_bindings_report_path is not None:
+        data_bindings_report_path.write_text(json.dumps({
+            "format": "vkso-private-data-bindings-resolved-v1",
+            "owner": str(ko_path) if ko_path else None,
+            "bindings": [{**binding, "dso_vaddr": builder.sections['.data'].addr + offset}
+                         for offset, binding in sorted(bindings.items())],
+        }, indent=2) + "\n")
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build a sparse kernel-mapped .so")
@@ -2096,6 +2340,8 @@ def main() -> None:
     parser.add_argument("--export-stub-size", type=lambda x: int(x, 0), default=DEFAULT_EXPORT_STUB_SIZE)
     parser.add_argument("--shim-list", type=Path, default=Path("shim.txt"))
     parser.add_argument("--ko", type=Path, default=None)
+    parser.add_argument("--data-bindings", type=Path, default=None)
+    parser.add_argument("--data-bindings-report", type=Path, default=None)
     parser.add_argument(
         "--shared-data-list", type=Path, default=Path("shared_data.txt"),
         help="explicit allow-list of page-aligned kernel objects mapped user R--/NX",
@@ -2134,6 +2380,8 @@ def main() -> None:
         vmlinux_path=args.vmlinux,
         private_wrapper_object=args.private_wrapper_object,
         reusable_text_list_path=args.reusable_text_list,
+        data_bindings_path=args.data_bindings,
+        data_bindings_report_path=args.data_bindings_report,
     )
 
 if __name__ == "__main__":
