@@ -1,19 +1,115 @@
-本报告评估 VKSO 当前 Evaluation 的证据完整性，并按共同修改对象组织后续工作。更新日期：2026-09-12；原评估基线为 `849ecf6`，实验修订分支为 `experiment/clocktime-evaluation-revision`，Clocktime 无人值守交接基线为 `9a0e3e5`，后续实际执行进展记录在下文。输入为前次评估、[当前完整草稿](../paper/paper_content/Paper%20Draft.md)、已有实验归档，以及新增的 [Clocktime 实验说明](../test/test_gettime/vkso-tests/revision/README.md)、[验证记录](../test/test_gettime/vkso-tests/revision/VALIDATION.md)和[采集核查记录](../test/test_gettime/vkso-tests/revision/COLLECTION_NOTES.md)。`paper/paper_draft.md` 是前半部分大纲，不作为当前 Evaluation。前次修订仅更新评估报告与修改规划；目前按用户授权进入实际执行，并逐组更新论文 Evaluation。
+本报告评估 VKSO 当前 Evaluation 的证据完整性，并按共同修改对象组织后续工作。更新日期：2026-09-18；原评估基线为 `849ecf6`，实验修订分支为 `experiment/clocktime-evaluation-revision`，Clocktime 无人值守交接基线为 `9a0e3e5`，后续实际执行进展记录在下文。输入为前次评估、[当前完整草稿](../paper/paper_content/Paper%20Draft.md)、已有实验归档，以及新增的 [Clocktime 实验说明](../test/test_gettime/vkso-tests/revision/README.md)、[验证记录](../test/test_gettime/vkso-tests/revision/VALIDATION.md)和[采集核查记录](../test/test_gettime/vkso-tests/revision/COLLECTION_NOTES.md)。`paper/paper_draft.md` 是前半部分大纲，不作为当前 Evaluation。前次修订仅更新评估报告与修改规划；目前按用户授权进入实际执行，并逐组更新论文 Evaluation。
 
-**更新结论：Clocktime 完整跨启动数据支持代码共享和具体入口成本的报告，但不支持稳定降低 writer 平均与长尾的概括。** 本轮没有修改 Clocktime 核心算法、公共 wrapper 或页面注册实现。公开 READ 的 20 项等权平均开销为 0.922%，短入口和普通内核 coarse reader 存在可见代价。整篇 Evaluation 的适用范围、装载成本、净内存和真实应用成本仍需 B–E 的实际工作闭合，不能将 A 的完成视为整篇 Evaluation 完成。
+## 当前目标与收尾标准（2026-09-12，按用户要求重新收敛）
+
+**本轮目标：形成能够写入论文、支撑 VKSO 核心贡献的充分证据。** 研究问题是在明确的复用条件下，能否让用户程序以普通函数调用正确执行内核已驻留的计算，减少重复执行体或实现，并量化适配、部署和实际使用的代价。收益是否成立由实验决定；不预设所有案例更快、所有部署净省内存或所有内核函数均可复用。
+
+本节是后续执行依据，优先于下方历史记录中的待办和“整组完成”要求。A–F 继续作为共同代码和构建流程的分组，实验取舍以论文主张为依据。历史失败、未实现能力及不利结果均保留；将某项移出当前目标不等于它已经实现或验证。目标收敛时未启动新实验或改动底层实现；后续实际进展单列于本节末。
+
+| 论文需要回答的问题 | 足够的证据与比较 | 当前取舍及停止条件 |
+| --- | --- | --- |
+| 同一 resident kernel execution body 能否在用户态正确使用？ | 实际 carrier 的 kernel/user PFN、完整算法输入输出、Clocktime ABI 和共享状态语义；应用确实调用该 carrier | 复用已通过的完整证据。不继续增加类似故障矩阵；只有实际用于论文的配置存在功能或测量错误时才修复 |
+| 复用减少了什么重复，又付出了什么资源代价？ | Clocktime 源码/执行体规模，普通同源 DSO 与 VKSO 的唯一物理执行页及 owner、私有支持成本；明确已有 DSO 的进程间共享 | 收敛为一份有明确范围的代码和资源账本。未覆盖项标明，不把局部页数当全系统净收益；不以精确归因整个内核 allocator 的每张页作为收尾前提 |
+| 稳态调用及适配对用户端、原有内核使用者有多大影响？ | 保留 PGOT/完整 closure 对照；LZ4/BCH/XZ 同源编译条件下的实际两端成本；Clocktime 现有完整跨启动结果 | A 保持完成。补当前算法构建的正式部署结果，保留退化及区间。只有影响结论的配置或测量错误触发重采 |
+| 建立与释放的成本在真实工作流中是否值得承担？ | 从命令启动到有效结果的 setup、释放，以及同一完整 LZ4 工作流的 Native/VKSO 对比；区分一次性成本与复用后的成本 | C/E 共用部署、输入和采集安排，形成主结果表。Guest 通过不替代正式性能；不为完成而再扩展多应用或所有参数的笛卡尔积 |
+| 哪些依赖形态适用，需要付出多少适配工作？ | 固定八例的成功/失败分类，既有成功案例的闭包、helper/context、修改量和构建条件；Clocktime 作为完整子系统案例 | D 保持完成。报告固定分母及失败，不继续扩大候选集合，不把 SLOC 等同于实际维护工时 |
+
+### 收敛后的三个交付
+
+1. **正式成本与应用结果。** 以当前已通过完整验证的算法构建为候选冻结版本，把 C 的算法两端成本、E 的完整 LZ4 工作流及直接相关 setup 测量集中安排。沿用原始完整输入与合理 baseline；先消除妨碍结果解释的测量问题，再进行既定独立部署重复。物理机权限是明确的外部执行条件，不能用反复 guest 回归替代。
+2. **资源与异常结果解释。** 整理已有物理页及支持成本账本，补足所选计费范围内影响判断的缺项，保留 BCH 所测范围没有净节省的结果。BCH 性能退化先从已有证据提出有限的具体假设，再做能区分假设的一组诊断；没有因果证据时报告观察及解释边界，不要求追查到每条指令，也不反复采到有利数字。
+3. **论文整合。** 按上述问题组织 Evaluation，每项保留主结果、关键对照及解释。工程恢复矩阵和详细日志主要作为附录/复现材料；核对正文、表图、摘要及结论，保持旧结果与新实现身份清楚。写作与实验同步推进，不等所有工程待办清空才整理论文。
+
+### 不再默认扩展的工作
+
+- 通用注册协议继续升级、更多 crash/权限组合、全 Linux 自动准入、全部运行时改写的通用认证，转为后续工程方向。已知边界如实写入适用条件。若边界使论文所选实际案例的正确性、共享语义或保护主张不成立，则必须修复该案例或撤回对应主张，不能用一句 limitation 掩盖。
+- Clocktime 不因其它案例的注册协议升级而自动重做 20 次采集。仅当论文实际采用新协议承载 Clocktime，才核对该完整配置的功能与共享状态；不强求不同内核案例使用同一个版本号。
+- 不追加相似算法、第二个真实应用、第二台 CPU 或新 ISA 来追求覆盖面。只有新的泛化主张需要它们时再设计。
+- 不追逐 writer 稳定收益、压力下的 major-fault 优势或全系统净内存收益；现有无收益和不确定结果同样属于论文结论。
+
+### 新实验准入与完成判据
+
+每个新增实验在执行前必须写清：**它支撑哪条论文主张、现有证据缺什么、用哪个完整配置和 baseline、结果会改变哪张表或哪段结论、什么情况下停止。** 如果不能回答这些问题，暂不执行。新增假设只有在已有结果无法判别且会改变核心结论时才触发追加实验。
+
+实现修复必须关联到所选实验中已观察到的问题；回归覆盖实际受影响的路径和配置，复用未受影响的证据。没有新的失败或结论风险，就结束该轮验证并进入正式采集/写作。已经完成的 A/D 不因其它工作组更新而自动重新打开。
+
+**Evaluation 的完成标准是：五个问题均有与实际配置一致的证据或明确限制，关键成本与真实应用比较完整，异常结果不被掩盖，表图和正文一致。** 工程 backlog 清零、所有测试均重复通过、测得正收益均不是完成标准。若执行资源无法支撑某条保留主张，明确该缺口并调整主张或解决执行条件，不无限添加替代性验证。
+
+### §6.3 不稳定性复测（2026-09-20，完成）
+
+按用户要求，BCH 新增九次完整两端部署，保留原三次，共十二次；LZ4/XZ 各三次不变。当前正式结果共十八次部署、13,239 条用户记录、17,721 条内核记录，384 项比较全部重放通过。[复测报告](../test/section63/results/repeat-bch/findings.md)分别列出原三次和新增九次，并给出完整范围。
+
+两错误 precomputed 用户变化为 t=4 −8.62%、t=8 −10.00%；t=8 八错误仍为 +3.73%。用户 PMU 分别显示两错误指令数下降、八错误指令数和分支失误增加，解释了路径相关的性能方向。独立内核同上下文轮换中两错误收益仍保留。零错误短路径仍跨零波动，计数器和地址检查没有给出唯一微架构原因；正文保留范围，不以其负中位数主张加速。
+
+新增内核诊断为三次装载、每次三个同上下文阶段，保留 9,504 个完整操作和 47,520 个事件记录；用户 PMU 为三次实际 carrier 注册，保留 3,168 个操作和 15,840 个事件记录。它们不混入正式计时。Owner 和三种算法二进制保持不变。首个新增尝试因启动器 CPU 亲和性在内核计时前退出，原记录与恢复过程保留。
+
+Paper Draft 的 6.3、引言、实验设置、图表及复现入口已同步更新。[完成核验](../test/section63/results/validation/completion.json)覆盖主矩阵、诊断完整向量、上下文交叉、计数器运行时间、论文与图一致性，以及模块卸载。当前工作结束，不追加追逐零错误微架构原因的实验。
+
+### §6.3 初始六版本实验（2026-09-20，完成；当前数值见上述复测）
+
+LZ4/BCH/XZ 已统一切换新对照：用户端 Native DSO / Adapted DSO / VKSO，内核端 Stock / 原始源码 Matched / Owner。九次完整部署通过原始重放，共 3,735 行用户数据、8,217 行内核数据及 384 项比较。[完整报告](../test/section63/results/report.md)集中给出实验设计、全部结果、部署变化和原因分析；[最终核验](../test/section63/results/validation/completion.json)记录实际完成证据。
+
+BCH 的缓存循环对两错误 precomputed 有可测收益，但 loop-only 和 helper 对照没有解释 Owner 的全部收益。t=8、八错误仍保留 +3.71% 用户开销。XZ 的 +4.33%–5.21% 内核开销由 CRC 替换对照定位，后续可采用域内 CRC 绑定；本轮没有修改实际 Owner 来替换不利结果。三组诊断分别完成三次装载，BCH loop/helper 各 3,168 行，XZ CRC 297 行，与主实验分开。
+
+`test/README.md` 按 6.1/6.2/6.3 区分入口。旧 Matched 原始数据、独立旧 XZ 对照与旧三算法图已清理，仅保留紧凑历史记录。独立应用/setup 数据在清理后重放，全部数值保持一致。Paper Draft 的 6.3、引言相关数值、源码账本及图表引用已更新，后续表号连续调整；[英文 LaTeX](../test/section63/results/paper-material/section63.tex)和图已生成。本轮收尾完成，剩余 BCH 归因边界和可选 CRC 优化不进入自动追加实验队列。
+
+### §6.3 先前执行记录（由新实验替换）
+
+XZ 内核端已按新的 Matched 定义重新完成三次装载、十一轮配对采集，共 297 条记录。新 Matched 使用对应发行版原始源码、内核 CRC32 和完整原生功能配置，仅对齐 owner 代码生成选项。Owner 二进制与先前用户测量一致。Stock 为主基线，新结果为 Owner/Stock +4.73%–+5.51%、Matched/Stock -2.85%–-2.20%、Owner/Matched +7.14%–+7.81%。[已归档的旧结果说明](../test/section63/results/validation/retired-provenance/old-findings.md)已集中保存。旧 XZ helper 对照及其内核结果由本次数据替换；LZ4/BCH 和用户数据不变。
+
+下面记录 2026-09-18 的公共源码修改和完整采集背景，其中 XZ 内核对照已由上述定义替换。
+
+用户已授权应用 XZ memcpy 显式绑定和字典复制循环缓存，并完整重跑 LZ4/BCH/XZ 的用户、内核两端实验。BCH 保留已完成的公共源码优化；普通 DSO 和内核 matched 参考使用相同的优化循环。新一轮仍为每算法三次完整部署，BCH 统一两域与两种 decode 路径的输入。
+
+[当前唯一结果入口](../test/evaluation/results/section63/README.md)集中保存原始采集、配对统计、源码账本和论文表格。[方法说明](../test/evaluation/section63-methods.md)记录对照和计时边界。九次完整部署已全部完成，4,050 行用户记录、8,217 行内核记录及 263 项比较由原始记录重建通过。论文表 9–13、摘要/引言中的算法结论和源码账本已更新，以本次结果为准。旧算法结果及诊断产物已清理。
+
+本次发现首次 XZ 导出的旧审计脚本仍要求 memcpy 符号，未识别新增 bridge，在性能计时前退出。页面恢复已核实，更新审计要求后继续同一计划；已完成 BCH 部署保留，失败 XZ 尝试不进入统计。
+
+其他章节的 LZ4 应用/setup 原始记录已抽离到[独立目录](../test/evaluation/results/application-setup/README.md)，表 28–30 及全部阶段统计重建后逐项不变。Clocktime、资源与适用范围的既有结果保持各自证据范围；适配源码计数随 BCH/XZ 的修改更新。本轮完整采集、论文同步和旧 6.3 文件清理均已完成，不扩大算法或平台集合。XZ 用户成本增加 1.15%–1.38%；BCH 两错误 precomputed 的 t=4/t=8 成本比为 0.906/0.990，t=8 的五至八错误仍有 4.06%–5.38% 开销，正文与完整表格均保留。
+
+## 收敛前的执行记录与工程状态
+
+以下记录保留产物来源、失败及各阶段当时的判断；其中超出上述主张范围的“仍需完成”不再自动进入当前执行队列。
+
+
+**更新结论：Clocktime 完整跨启动数据支持代码共享和具体入口成本的报告，但不支持稳定降低 writer 平均与长尾的概括。** Clocktime 冻结采集期间没有修改其核心算法、公共 wrapper 或打包的页面注册实现。公开 READ 的 20 项等权平均开销为 0.922%，短入口和普通内核 coarse reader 存在可见代价。整篇 Evaluation 的适用范围、装载成本、净内存和真实应用成本仍需 B–E 的实际工作闭合，不能将 A 的完成视为整篇 Evaluation 完成。
 
 评估的目的，是回答：哪些 resident kernel computations 可以复用；真正复用了哪些物理页、维护量减少多少；建立与释放成本是多少；用户端和原有内核使用者分别付出什么代价；这些结论覆盖哪些输入、构建和运行条件。性能接近、收益为零或出现退化都应如实进入结论。已有正确性证据直接复用，只补与具体主张相关的缺口。
 
-**本次状态快照（2026-09-12）：** Clocktime 的 20 项采集全部完成，服务 inactive，机器恢复 `5.15.0-119-generic`。60,195 个标准化值覆盖完整，43,095 个 reader 值和 17,100 个 writer 值均从原始记录重算一致，30 份 ABI 与 20 份 PFN 记录通过核验。729 项比较及 bootstrap 区间逐字节重现。已生成[三方法结果报告](../test/test_gettime/vkso-tests/revision/NORMAL_RESULTS.md)，并更新正文 setup、表 2、Clocktime 表 15–20 及摘要/结论。Writer 启动间变化较大，撤回稳定降低平均及长尾成本的概括；A 的完整采集、核验和结果解释已完成，其他工作组仍未完成。
+**本次状态快照（2026-09-12）：** Clocktime 的 20 项采集全部完成，服务 inactive，机器恢复 `5.15.0-119-generic`。60,195 个标准化值覆盖完整，43,095 个 reader 值和 17,100 个 writer 值均从原始记录重算一致，30 份 ABI 与 20 份 PFN 记录通过核验。729 项比较及 bootstrap 区间逐字节重现。已生成[三方法结果报告](../test/test_gettime/vkso-tests/revision/NORMAL_RESULTS.md)，并更新正文 setup、表 2、Clocktime 表 15–20 及摘要/结论。Writer 启动间变化较大，撤回稳定降低平均及长尾成本的概括；A 的完整采集、核验和结果解释已完成；D 随下述当前 owner 两域验证完成验收，B/C/E/F 仍未完成。
 
 | 工作组 | 本轮进展 | 下一步具体交付 |
 | --- | --- | --- |
 | A：Clocktime | 20 次采集、全量原始记录核验、三方法结果报告及正文更新已完成 | 保留 writer 不确定性；如需解释其原因，另定诊断，不追逐有利重复 |
-| B：页面复用与装载 | 已验证映射/释放及部分失败问题；完成 BCH 库/owner 页账本及 63 个 loader 的活动对象字节和 PFN 覆盖核算 | 完整 setup、allocator/slab 与瞬时分配峰值、剩余边界；[统一注册修订方案](../test/evaluation/proposals/registration-transactions.md)待审阅，未实施 |
-| C：PGOT 与真实算法 | 已核实重复层次及 BCH decode 边界；BCH/XZ 完整导出功能与 PFN 通过；BCH 内核端三后端的完整功能和计时采集入口通过 | 完整部署重复、BCH 退化的指令/布局原因及实际 owner 的物理机内核成本；核实 LZ4 实际 helper 路径 |
-| D：适用范围与导出工具 | 原分析器已完成 6/8：2 PASS、4 FAIL；第 7 例执行中；sort PASS 仍含五个间接点，尚无 runtime 结果 | 完成固定全集，导入既有适配证据，完成分类与可运行性验证；缓存及导出修订未应用 |
-| E：真实应用集成 | 普通 upstream/同源 DSO 全 Silesia 功能案例通过；真实注册的四页 PFN 匹配；首次 CLI 压缩因未绑定的直接 helper 调用崩溃，GDB 已确认 | 审阅基础导出器方案并完成实际绑定，再验证全矩阵及采集 C 会话内应用性能 |
-| F：论文与结果呈现 | 已更新 Clocktime、注册行为表 21、BCH 资源表 22 与活动对象表 23、BCH/XZ 功能证据及 LZ4 应用失败；修正 helper 身份与静态分析能力断言 | 随 B–E 的剩余结果继续更新，再做全文一致性验收 |
+| B：页面复用与装载 | 已验证映射/释放及部分失败问题；完成 BCH 库/owner 页账本及 63 个 loader 的活动对象字节和 PFN 覆盖核算 | v3 完整计划、300 页跨批次回滚、QUERY、恢复重试及 LZ4 完整 CLI 已验证；槽位内替换、启动中断恢复及三算法新 owner runtime 已通过；manager 的链接产物身份核对、FIFO 完成通知、root/sudo 会话和普通 ext4 文件/VMA 矩阵已通过；三算法 setup、96 次规模会话、first-touch 3,800 个原始调用及 60 次压力/恢复调用已验证；终态对象正常回收及其中断恢复已通过；v4 类型与实际权限、三算法及 built-in 两入口回归通过；仍需正式性能、完整物理计费及源页边界 |
+| C：PGOT 与真实算法 | 重复层次、BCH decode 边界、LZ4 libc 对照与完整 runner 已核实；三算法当前 owner 在同一注册会话的完整内核及用户工作负载通过，共 2,739 行内核采集记录 | 完整独立部署重复、BCH 退化归因及实际 owner 的物理机内核成本；guest 记录不进入正式性能表 |
+| D：适用范围与导出工具 | 已完成：固定 8/8 终态（2 PASS、6 FAIL）；六个成功案例的闭包、绑定、页、构建限制和源码账本；全部成功案例的两域功能证据 | 保留固定分母和失败分类；后续构建变动同步维护账本，不以扩大候选数作为完成条件 |
+| E：真实应用集成 | 修改后 registered LZ4 完成全部 24 组压缩/解压与 stock 交叉校验，48 份调用记录及 5 页 PFN 核对通过 | libc 对照及完整四后端 workflow 已验证；在 C 的独立部署会话内采集完整应用性能 |
+| F：论文与结果呈现 | 已更新 Clocktime、注册与资源表 21–23、适用范围表 24–26，以及当前 owner 内核执行小节；表 26 的 XZ support 更新为 27 SLOC | 随 B/C/E 的剩余结果继续更新，再做正文/附录、图表和全文一致性验收 |
+
+**源页类型及实际权限已接通并验证（2026-09-12）：** [类型准入记录](../test/evaluation/registration-typed-evidence.md)将 manifest 的 text/rodata/shared_data 传入内核，按 owner 范围和实际页表权限检查。协议更新为 v4，binding 为 64 B；完整三/300 页事务及 96 次规模会话通过，48 个 manager 终态均回收。相同完整 LZ4 owner 在正常与 `rodata=off` 两次 guest 启动完成 18 个直接协议组合及 16 次 manager 拒绝检查：正常 text/rodata 可注册；关闭保护后的可写页即使类型匹配也在应用前被拒绝。新增字段、旧版本拒绝、源 PFN 和完整恢复均核对。该结果不解决 built-in 宽范围的公开性及后续运行时改写；三算法当前 owner 的完整两端回归、LZ4 六/四后端及三算法 setup 已通过，共 2,739 行内核采集和六次 setup 注册。built-in xxh32/sort 又通过完整 247/1,152 个两域功能组合及 4 KiB/2 MiB 页表映射核验；其 launcher 已修正旧 prepared 产品复用问题。Clocktime 新协议共享状态仍需核对，冻结 A 数据不重采。
+
+**完成事务回收已修复并验证（2026-09-12）：** [新回收记录](../test/evaluation/registration-retirement-evidence.md)在确认 RELEASE 后发送 FORGET；丢失 FORGET 回复时以 QUERY 的明确 ENOENT 完成恢复，本地清理后才通知 DONE。完整三/300 页矩阵、两个新增释放中断点、丢回复、root/sudo 和普通文件/VMA 检查通过，17 个 manager 事务最终全部不存在。原 96 次规模扫描重做通过，48 次 manager 会话在 DONE 后均无终态记录，1,008 个活动及 1,008 个恢复 PFN 通过；直接协议对照仍自行 FORGET。实际完整 LZ4 又通过 24 组功能、36 行 component、192 次完整 CLI 和两次 setup 注册/回收。新 manager 不再累积旧版本每会话 688 B 的终态对象；这不等于 allocator 立即归还 slab 页，完整物理计费仍未完成。
+
+当前源页准入已增加声明类型及实际页表权限检查，但 built-in image 仍使用宽范围，manager 的 GNU build-ID 核对也没有逐指令认证运行时代码。正文保留这一实现边界；B 的源页公开性、共享状态及运行时改写验证仍未闭合。
+
+**当前 owner 两域验证与 D 验收已完成（2026-09-12）：** [三算法内核端实验](../test/evaluation/kernel-cost-evidence.md)在三个 exact119 guest 中复用同一次 owner 装载、导出和注册，先运行原完整用户工作负载，再调用内核公开 API。LZ4 的全部 12 个 Silesia 文件及两种块大小完成 792 个三后端试验、1,584 行计时，完整输出与独立 liblz4 交叉解码通过；BCH 完成 10,752 次正确性 decode 检查和 1,056 行计时；XZ 三个完整输入完成 99 个内核试验，原有 882 次用户解码也通过。十三个声明页 PFN、owner 引用 1→2→1、正常恢复与卸载均通过。XZ 补充五个公开 GPL 模块导出后 support 为 27 SLOC，四个算法对象的执行代码与先前构建逐字节相同。
+
+[新账本及重放](../test/evaluation/results/applicability-ledger-20260912-attempt06/independent-audit.json)合入三次实际会话，六个案例结构、二十个声明页、十一处算法 helper slots 和 44 个源文件补丁全部通过。固定八例仍为 2 PASS/6 FAIL。D 按既定交付已完成；C 的 guest 功能及采集验证完成不等于正式成本完成。B 的完整物理计费/源页边界、C 的独立部署/物理机内核成本/BCH 归因、E 的正式应用性能以及 F 的最终验收仍未完成。以下记录保留各阶段当时的实现身份与缺口。
+
+**跨案例适配账本已统一（2026-09-12）：** [完整账本](../test/evaluation/applicability-ledger-evidence.md)保留固定八例的 2 PASS/6 FAIL，并合入四个既有集成。六个成功案例的实际 carrier、二十个声明页 PFN、代码/thunk 闭包及十一处算法 helper slots 均已重建；Clocktime 的 40 B context 单列两个函数与三个数据地址，sort 的回调参数不算 PGOT。三算法源码差分仍为 LZ4 45/7、BCH 37/9、XZ 52/9 行，但当前 cooperative owner support 分别为 18/19/21 SLOC，旧 support 数保留历史身份。Clocktime 原始 v5.15.198、M11 与最终语义范围逐行复算为 Raw/VKSO 1,505/1,305 SLOC，32 个完整源文件补丁重放通过；当前产品范围与冻结终点相同。正文新增表 25–26。账本明确当前 LZ4/XZ owner 的完整内核侧 workload 尚缺，BCH 内核矩阵属于较早 owner；这部分与 C 的 kernel-cost 实验合并完成，D 尚不标为整组完成。
+
+**实际回收压力与恢复已观察（2026-09-12）：** [同一 first-touch runner 的压力场景](../test/evaluation/first-touch-evidence.md#reclaim-pressure-scenario--2026-09-12)在一个 exact119 guest 完成 baseline/pressure/recovery 各十对调用，共 60 次，全部保留。后台持有 2,903,486,464 B 匿名内存，每对压力调用前完整读取两遍 1 GiB 文件；十窗均有实际扫描/回收，合计 5,238,600 个回收页事件，无 OOM。Native 和 Stub 在所有调用前均驻留，调用均为一次 minor fault，因而没有观察到避免 native major fault 的收益；这限制了 post-drop 结果的外推。30 次 Stub 调用 PFN、压力前后各 247 个完整向量、恢复和卸载全部通过。该场景没有 drop_caches，复用实际 owner/export/注册流程；压力 guest 诊断已闭合，正式物理机性能、净内存及源页边界仍待完成。
+
+**完整 first-touch 原始采集已通过（2026-09-12）：** [注册态记录](../test/evaluation/first-touch-evidence.md#registered-raw-protocol-run--2026-09-12)在 exact119 guest 完成 Native/Stub × hot/PTE-cold/post-drop，保持 100 calls、90% 阈值、每组五个合格批次及最多 20 次尝试。38 批、3,800 次准备成功调用全部保存；Native/post-drop 的八个拒绝批次也进入未筛选分布。独立重放确认 3,564 个 IQR 样本和 2,859 个 accepted-batch 样本，各组均达到目标。原 XXH32 汇编的 338 个字节在 native、owner 和实际载入函数中一致，247 个独立 oracle 向量及一页 PFN 通过，恢复与卸载正常。为缺少 BTF 原型的原汇编入口补充了显式 API header；合作 owner 使用统一 descriptor，核心汇编未改。功能校验进程现先退出，避免其 native 映射阻止驱逐；空 expected-fault class 现保留全部调用并拒绝该批而非中止后续组。原始格式记为 v2，计时体不变，十项测试通过。Guest 延迟不替代物理机结果；正式重复、完整 setup/计费和压力仍未完成。
+
+**规模扫描与事务对象计费已执行（2026-09-12）：** [完整记录](../test/evaluation/registration-scale-evidence.md)在 exact119 guest 覆盖 1/2/4/8/16/32 页 × 文件页已驻留/逐文件驱逐 × 完整 manager/直接 v3 传输 × 四轮，共 96 会话；所有页在计时前以 mincore 核对缓存状态，1,008 个活动 PFN 和 1,008 个释放后 PFN 逐项核对通过。Guest CPU 固定为 1，内核阶段与外部 READY/DONE 分开保存。真实模块的 transaction/binding 大小分别为 688/56 B；活动请求量为 688+56N，RELEASE 后保留 688 B 的终态对象，测试显式 FORGET 后 QUERY 为 ENOENT。该归档的 manager 未发送 FORGET；后续已按上方回收记录修复，旧账本仍保留这部分成本。48 个 manager 的 smaps_rollup RSS 为 1,540–1,560 KiB；status VmRSS 明显偏低，已保留原始值并使用前者。六个 FD 和 FIFO 容量单列，未将容量视为物理驻留。该 guest 同环境完成 30 次时钟 helper 开销观测。规模采集流程通过，正式物理机伸缩性、完整物理计费和压力仍未完成。
+
+**三算法 setup 采集入口已验证（2026-09-12）：** [装载采集证据](../test/evaluation/setup-evidence.md)在三个独立 exact119 guest 中运行实际完整 `vkso exec` 和复用已构造 carrier 的 `exec-ready`，共六次注册、36 个新进程。完整 LZ4 语料往返、BCH 初始化到纠错恢复及 XZ 全文件解码使用原有算法和校验函数；每进程一次或三次完整任务。采集统一使用 CLOCK_MONOTONIC_RAW，重建外部命令到首个有效结果、进程装载/符号解析、内核 COMMIT 与释放范围，保留嵌套关系。全部原始时间戳、两次事务和释放结果重放通过，三算法原完整功能矩阵仍通过。Shell 阶段标记有外部 helper 进程开销，这批 guest 数据只用于采集验证。正式重复前仍需匹配普通 DSO 的完整命令路径、同环境 observer 校准及无插桩外部对照、缓存顺序和 CPU 记录；完整计费、规模扫描、first-touch/压力及源页边界仍未完成。
+
+**注册通知及文件操作更新（2026-09-12）：** [最新完整记录](../test/evaluation/registration-notification-evidence.md)通过 exact119 guest 的三/300 页事务全矩阵，并新增实际 `vkso` 会话函数的 START/READY/DONE FIFO 通知、竞争启动与遗留状态保留、wrapper 退出后的恢复。普通 UID 65534 经真实 `sudo -b` 启动 root manager，应用保留 UID 65534，释放完成通知通过。七种文件操作在同用户普通文件上成功，在 carrier 及其既有 hardlink 上均返回 EPERM；共享写升级返回 EACCES，私有写/fork 和 cache hints 保持源内容，前后 PFN 相同。普通 ext4 文件/VMA 矩阵不再笼统列为未做。
+
+当前同一 manager/模块/vkso 又分别通过 LZ4、BCH、XZ 的完整功能及 PFN 会话。LZ4 同时重放六后端正确性、36 行 component 与 192 行完整四后端 CLI 采集验证；这些 guest 时间不进入正式性能表。取消 250 ms ready 轮询不代表已经测得相应延迟收益。B 下一步仍是完整 setup、1/2/4/8/16/32 页扫描、净资源账本（含 FIFO/pipe、FD 和终态事务记录）、未筛选 first-touch 与压力；源页公开性和运行时重写边界仍需处理。C/E 的独立正式部署尚未执行，D 的跨案例账本和 F 的最终全文验收也未完成。
 
 **自动接续的实际终态（2026-09-12）：** 此前启用的 `vkso-evaluation-followup.service` 在 Clocktime 完成后的原内核启动中触发，已完成覆盖核验及全部 15 个 UPDATE 方法目录的 writer 原始记录审计。随后 `algorithm-and-cli-deployments` 在开始构建/部署之前的 `git diff HEAD` 源码归档步骤失败（exit 129）；算法部署和后续 D 检查没有执行。服务按设计在进入时停用，目前 `ActiveState=failed`、`MainPID=0`、`UnitFileState=disabled`，不会在下次启动自动重试。失败日志和原输出目录保留，详见[接续记录](../test/evaluation/FOLLOWUP.md)。
 
@@ -21,7 +117,7 @@
 
 各组先核对现有材料，列清剩余修改对象、运行成本和验收产物，再集中实施。新增性能采集先验证完整实现和测量路径，再安排正式重复；启动次数、候选数量和硬件矩阵是针对主张的预算，不是统一门槛。当前已运行的 Clocktime 计划保持原样，不因更新本报告而重启或扩大。若任何组确实需要改动项目基础功能，先报告具体不一致与原因；不能把“补证据”默认变成基础功能重写。
 
-当前所需的底层修订已按共同文件整理为[分析/导出工具、注册会话/owner 构建两组清单](../test/evaluation/proposals/implementation-handoff.md)，链接具体补丁、编译证据和待实施接口。清单同时说明原八例长任务的保留及重新执行安排。两组修改及停止旧任务均待明确确认，尚未实施。
+当前所需的底层修订已按共同文件整理为[分析/导出工具、注册会话/owner 构建两组清单](../test/evaluation/proposals/implementation-handoff.md)，链接具体补丁、编译证据和待实施接口。分析器/导出器、LZ4 bridge 与显式数据绑定已在工作树实施并通过离线验证；完成通知和错误传播已通过新 guest；cooperative owner descriptor/pin 已实施且 LZ4 生命周期通过；v3 动态事务、跨批次回滚和 QUERY/恢复重试已实施并实测；其余要求见 B 的最新记录。原八例旧任务已停止并保留历史记录，修订 checker 已在新目录完成 8/8 静态终态。
 
 这里以 SOSP/OSDI 论文为参照，依据是各篇论文如何验证自己的主张，并非声称这些会议规定了统一的实验清单。本文的分组、样本量建议和实验设计是针对 VKSO 的判断，不是引用论文的硬性要求。
 
@@ -37,18 +133,18 @@
 
 μFork 的正式发表位置是 SOSP 2025，不应把它当成 USENIX/OSDI 论文；附件没有提供其正式链接。以上前三篇可作为主要评估参照，后两篇分别提供内存机制和测量方法的依据。它们是评估范式参照，不是必须复现的 VKSO 性能基线。
 
-当前主张与证据的对应关系如下。A 已完成；B/C/E 已有新的功能、PFN、资源及失败诊断记录，D 正在检查固定八例。各组的具体证据和剩余交付见后文。“未见”表示在所列正文和归档中未找到足够证据，不等于断言整个仓库从未做过。
+当前主张与证据的对应关系如下。A/D 已完成既定交付；B/C/E 已有新的功能、PFN、资源及失败诊断记录。各组的具体证据和剩余交付见后文。“未见”表示在所列正文和归档中未找到足够证据，不等于断言整个仓库从未做过。
 
 | 需要支撑的主张 | 当前可核查证据 | 判断与补充要求 |
 | --- | --- | --- |
 | grafting 不增加装载后执行路径成本 | 草稿 Table 3；first-touch CSV 中 hot 两侧均为 71 cycles，resident fault 接近 | 有较强受控证据；只能支撑所测单页函数和环境，不能代表部署总时间或所有闭包 |
 | PGOT 代价可控且受依赖结构影响 | primitives、retpoline 对照、四个完整 copied closures | 应保留；copied closures 是同域适配实验，不能计入实际成功导出的功能数量 |
-| 真实 resident export 保留功能及同源性能 | 旧算法对照；新 BCH/XZ 完整功能与 PFN 验证；LZ4 完整 CLI 首次压缩失败 | BCH/XZ 支持范围受构建约束；LZ4 当前导出绑定待修复；保留旧部署身份与 regression |
-| 是具有清楚边界的复用机制 | 四个既有集成案例；另有固定八例候选，前三例静态结果已落盘 | 需完成剩余检查、失败分类、人工改造量及运行验证；不能估计 Linux 整体可复用比例 |
+| 真实 resident export 保留功能及同源性能 | 旧算法对照；新 BCH/XZ 完整功能与 PFN 验证；修改后 LZ4 完整 CLI 和五页 PFN 验证 | 修改后功能通过，跨部署性能仍缺；新旧 owner 与 helper 构建分开报告 |
+| 是具有清楚边界的复用机制 | 四个既有集成案例；固定八例 8/8 静态终态；六个成功案例的结构/源码/构建账本及两域功能验证 | 支持所列显式输入、回调与适配配置；固定案例研究不能估计 Linux 整体可复用比例 |
 | 消除了第二份物理执行体并有资源净收益 | Clocktime 共享/复制 PFN 对照；BCH/XZ 各四页共享；BCH 1/4/16 loader 的库/owner 账本 | 共享目标已验证；BCH 所测库与完整 owner 范围没有净节省，全系统及剩余资源归因尚未完成 |
-| 建立后可像普通 DSO 一样使用 | 目前从 dlopen/dlsym 后开始计时 | 建立/绑定/注册成本被排除，setup-to-first-call 和短生命周期成本尚未测量 |
+| 建立后可像普通 DSO 一样使用 | 旧性能表从 dlopen/dlsym 后开始计时；三个 guest 已完成完整导出、ready-carrier 及新进程的 setup 采集 | 阶段边界和完整任务已验证，正式物理机 setup-to-first-call、匹配的 Native 命令全程及短生命周期比较仍缺 |
 | Clocktime 读写代价可接受 | 20 次完整采集及原始记录核验；正文表 15–20 已更新公开/内核 reader、writer 与并发结果 | 支持所测入口成本和共享关系；writer 区间不能证明稳定改善或无开销，三方法不能单独分离 snapshot 布局优化 |
-| 保持保护和生命周期契约 | 既有 ABI/namespace/fallback；新 guest 的权限/COW/正常恢复及注册部分失败记录 | 正常路径有实测支持；独立 owner pin、完成确认和失败回滚存在实现缺口，修订待确认 |
+| 保持保护和生命周期契约 | 既有 ABI/namespace/fallback；新 guest 的权限/COW/正常恢复及注册部分失败记录 | v3 已验证 owner 引用、跨批次回滚、恢复重试及若干文件边界；提交槽位和启动中断恢复已补齐；manager 的链接产物身份核对已补齐，其余边界仍待完成 |
 
 工作按共同修改的代码、构建和采集流程分成六类。字母只用于引用，不代表重要程度或执行顺序。每类按“确认现有实现和统计口径 → 集中修改 → 验证 → 一次组织正式采集 → 汇总结果”推进，减少同一批脚本或内核镜像反复修改和重跑。实际需要分开的镜像和诊断采集仍保留区别。
 
@@ -123,13 +219,21 @@ first-touch 第 331 行、算法第 431 行、XZ 第 509 行分别排除了装�
 
 对普通同源 DSO 与完整 VKSO，使用相同入口和输入，分别测 ready-carrier 的装载到首个有效结果、当前实际部署命令到首个有效结果、已经注册后的新进程，以及使用结束后的释放。内部阶段按实际代码顺序计时，避免把嵌套阶段相加两遍；外部 wall-time 单独测全程。
 
-**当前实现细节会实质影响结果：** [manager.cpp](../page_cache_replace/manager.cpp)第 620 和 668 行在 replace/restore 发出后各有 `sleep(2)`。实际部署总时间必须包含这些等待；机制分解应独立记录 kernel 完成时间和等待/日志等管理开销。固定睡眠不是完成确认，不能简单扣掉 2 秒就把剩余时间当成可靠 registration cost；若后续实现显式完成通知，应作为新实现重新测量并注明区别。
+**链接产物身份已核对并实测（2026-09-12）：** [当前证据](../test/evaluation/registration-transaction-evidence.md#linked-image-identity-before-staging)记录 builder 的 owner/vmlinux GNU build ID，以及 manager 在 BEGIN 持有引用后、STAGE 前对 sysfs notes 和 descriptor 所属模块的核对。同目录同源码用不同编译选项生成的真实 owner 具有相同 srcversion、不同 build ID 和初始化代码；另一构建 ID、错误模块、错误内核身份均被拒绝并清理，日志确认未发送 STAGE/COMMIT。完整 300 页与五个启动中断点仍通过。三个完整算法再次通过相同 manager/注册模块：BCH 10,752 个 decode checks、XZ 882 次完整解码及 LZ4 24 组/48 操作，分别四/四/五页共享并正常释放；独立核验确认所有实际日志均先匹配 owner/vmlinux ID 再进入 STAGE。同样两个 built-in PASS 入口也在新流程下完成 247/1,152 个功能组合和每入口两页 PFN 核验，确认无 owner 时的内核身份核对；固定八例分母不变。身份检查位于 manager，未更改协议或 owner 布局；GNU build ID 不覆盖保留 note 的后续修改或运行时重写。下面较早记录中的“构建身份未完成”描述相应历史时点。正式 setup/资源、其余文件与重写边界仍待闭合。
+
+**提交资源与中断恢复已补齐（2026-09-12）：** [当前记录](../test/evaluation/registration-transaction-evidence.md#prepared-slots-and-interruption-recovery)以占用中的 xarray 槽位直接替换页面，提交体不再删除槽位后重新分配节点；旧普通 file page 的计费和引用显式释放，源页不继承其 memcg charge。除完整三页/300 页矩阵外，索引 1、64、4096、262144 的稀疏槽位也通过。Manager 在改变 immutable 前持久化目标 inode 与标志归属，五个真实启动阶段被终止后均可由新 manager 恢复；丢失 BEGIN 拒绝响应可查询原 errno。BCH、XZ 和完整 LZ4 CLI 均已在相同注册构建下通过新 owner runtime，活跃引用为 1，分别四/四/五页共享且正常释放。BCH 10,752 个 decode checks、XZ 42 行/882 次完整解码和 LZ4 24 组/48 操作均核验。没有新增正式性能；完整 ELF/build identity、其余文件边界、setup/完整内存及压力测量仍待完成。下面的初始 v3、v2 和 v1 记录保留当时的实现身份。
+
+**动态事务已实施并实测（2026-09-12）：** [v3 证据](../test/evaluation/registration-transaction-evidence.md)记录按事务分配的完整计划、STAGE/COMMIT、QUERY 和幂等 RELEASE。300 页分为 256+44 两批；第 0、150、255、256、299 项提交错误均使已应用绑定全部回滚，所有文件页恢复原内容。恢复遇错继续处理其余页，残留保留引用并可重试；实际 manager 通过丢失提交/释放响应后的 QUERY、ready 后进程终止后的接续恢复、恢复非零后的新进程重试。已有写 fd/shared writable VMA 被拒绝；持久只读/COW 及三进程并发 fault 通过。两个不同 carrier 可使用不相交 PFN，同一源 PFN 的冲突提交被拒绝。完整 LZ4 CLI 在同一注册构建下再次通过 24 组、48 操作与五页 PFN。无 guest panic/BUG/WARNING，未采集正式性能。该初始 v3 仍有删除 cache page 后 xarray 节点可能重新分配的问题；后续槽位内替换已解决，见上文。完整 ELF/build identity、其余文件边界和 B 的 setup/资源结果仍未完成。下述 v1/v2 文字保留对应历史构建身份。
+
+**Owner 引用已实施并实测（2026-09-12）：** [新证据](../test/evaluation/registration-owner-evidence.md)记录 protocol v2 与三算法 owner descriptor 的实现；LZ4 在 exact119 guest 的活跃期 owner/page-module refcnt 均为 1，卸载均被拒绝。源版本不匹配、管理页导出及冲突 inode 分别拒绝；错误 mapping 恢复保留引用。正确恢复后，持久只读映射读回原文件，私有 COW 保留，引用归零且模块可卸载。新 owner 的完整 LZ4 CLI 24 组及五页 PFN 同时通过。该 v2 时点 BCH/XZ 新 owner 仅完成编译；后续完整 runtime 见上文；srcversion 也不等于独立完整 ELF/build identity。该 v2 归档仍是单 carrier、固定容量的批次 registry；后续 v3 的事务证据见上文。管理页在 carrier 私有数据中保留零窗口，未宣称净内存收益。
+
+**完成通知已修订（2026-09-12）：** 旧 manager 在 replace/restore 发出后各 `sleep(2)`，旧部署全程时间应保留这些等待。当前两端使用共享版本协议，内核返回真实 errno、完成页前缀、失败下标及 callback 纳秒；manager 核对内核 sender 和 sequence，收到全部成功结果才发布 ready，并已删除固定睡眠。[新验证](../test/evaluation/registration-completion-evidence.md)包括 exact119 正常/部分失败/恢复错误/版本不匹配矩阵和完整 LZ4 24 组 CLI，均通过。第二页失败现返回 ENOMEM、completed=1，manager 非零退出且不发布 ready；首个绑定仍存在，需显式恢复。恢复失败保留 state 并非零退出，vkso 和算法 runner 传播错误并保留模块。该 protocol v1 归档中 owner refcount 为零；后续 v2 的引用证据见上文，完成通知本身不代表事务完成。现有计时含逐页 debug 日志与 guest 开销，只验证边界；完整 setup 和其余 lifetime 边界仍须落实；v3 已补入动态 stage/commit、QUERY/回滚证据。
 
 先测三个真实闭包，再增加 1/2/4/8/16/32 页的合成规模扫描，观察页数、批次数、bindings 数的作用；后者只解释机制伸缩性。分别测缓存已热与自然首次装载，若保留 `drop_caches`，把它作为额外控制条件。
 
 用短任务、重复调用任务报告完整耗时。只有稳态每次调用确有节省时，才计算额外 setup 的盈亏平衡调用次数；若稳态持平或更慢，不能给出虚构的“足够多次就回本”，应把收益定位于实现复用或内存。
 
-Clocktime 的 2,639→2,055 B 是 reader symbol closure，减少 584 B 不意味着减少一个 4 KiB 物理页。[XZ DSO audit](../test/test_xz/results/formal-20260806/kernel-dso-audit.md)记录四个 reusable pages，但[审计程序](../test/test_xz/scripts/audit_kernel_dso.py)检查的是 ELF dependencies、exports、relocations 和 page-map 数量，没有读取活跃 kernel/user PTE 的 PFN。不能把此 PASS 写成运行时 PFN 一致性测试。
+Clocktime 的 2,639→2,055 B 是 reader symbol closure，减少 584 B 不意味着减少一个 4 KiB 物理页。[XZ DSO audit](../test/evaluation/results/section63/raw/deployment-00-xz/results/kernel-dso-audit.md)记录四个 reusable pages，但[审计程序](../test/test_xz/scripts/audit_kernel_dso.py)检查的是 ELF dependencies、exports、relocations 和 page-map 数量，没有读取活跃 kernel/user PTE 的 PFN。不能把此 PASS 写成运行时 PFN 一致性测试。
 
 Clocktime 的声明闭包运行时 PFN 检查已经补入 A；B 应复用其方法和结果，把尚缺的多进程与其他算法 owner 的对应关系、私有支持开销和完整计费补上。对所需目标触达页面后记录 kernel alias 与用户 alias，按物理页去重；正文只给匹配页数和分类。分别统计共享 text/rodata/shared state、私有 PGOT/wrapper/MM_data、carrier 实际驻留页、页表和 manager 元数据；运行前后在同一归因口径内比较。RSS/PSS 可作辅助，不能单独完成跨 kernel/user PFN 的全系统计费。
 
@@ -155,9 +259,9 @@ Clocktime 的声明闭包运行时 PFN 检查已经补入 A；B 应复用其方�
 
 对 mmap/mprotect/MAP_SHARED 等测试，限定在项目控制的内核和合成测试页，检验契约即可；无须扩成攻击评测或完整 VM 证明。已有 namespace/exec/fallback 案例直接引用，不重复堆测试。建立 `invariant / exercised path / expected behavior / observed result / implementation location` 表，每项明确实际测过的行为。
 
-实际执行已进一步追踪 `run.sh → vkso exec → manager replace --hold → nl_recv_msg → batch_process_pages → add_page_to_cache` 以及恢复路径，见[注册证据记录](../test/evaluation/registration-evidence.md)。当前注册代码获取/释放 page references，但请求、备份记录及该调用链没有获取/释放 owner module references；runner 的先恢复后卸载是正常流程约束，不能代替并发 owner lifetime 保证。逐页注册遇错会退出批次，已成功页面留在备份中，callback 只记录错误；manager 没有接收逐请求结果，仍以等待两秒后的流程作为成功。这些代码事实不足以支撑正文中的完整 module-reference、失败原子性和精确完成确认主张。
+实际执行已进一步追踪 `run.sh → vkso exec → manager replace --hold → nl_recv_msg → batch_process_pages → add_page_to_cache` 以及恢复路径，见[注册证据记录](../test/evaluation/registration-evidence.md)。该旧版本注册代码获取/释放 page references，但请求、备份记录及当时调用链没有获取/释放 owner module references；runner 的先恢复后卸载是正常流程约束，不能代替并发 owner lifetime 保证。逐页注册遇错会退出批次，已成功页面留在备份中，callback 只记录错误；manager 没有接收逐请求结果，仍以等待两秒后的流程作为成功。这些代码事实不足以支撑正文中的完整 module-reference、失败原子性和精确完成确认主张。
 
-该结论来自实际入口、数据结构及清理调用链；活跃映射下的引用变化和特定两页计划的部分失败行为已由下述隔离会话观察。其余失败路径仍需验证，不能将已测触发条件推广为任意运行时破坏。已向用户报告这一基础实现边界，当前未修改注册协议、页引用或权限代码。若要补齐明确的 module pinning、内核完成结果和事务回滚，应先提交具体实现方案及原因；不能将正常性能采集的成功当作此类契约验收。普通页面权限也不能证明用户无法跳到所有其他可执行地址，控制闭包保证需保持明确的适用范围。
+该旧版本审计结论来自实际入口、数据结构及清理调用链；活跃映射下的引用变化和特定两页计划的部分失败行为已由下述隔离会话观察。其余失败路径仍需验证，不能将已测触发条件推广为任意运行时破坏。已向用户报告这一基础实现边界，该审计时点尚未修改注册协议、页引用或权限代码。后续已按统一方案实施 module pinning、完成通知与事务恢复，当前证据见本节开头；性能测量与契约验证分别报告。普通页面权限也不能证明用户无法跳到所有其他可执行地址，控制闭包保证需保持明确的适用范围。
 
 **隔离执行更新（2026-09-12）：** [完整记录和验证矩阵](../test/evaluation/registration-evidence.md#isolated-runtime-observations-2026-09-12)保存两次独立 KVM guest 的实际结果。使用既有完整 5.15.198 镜像、owner、manager 与页注册模块，将一张 source text page 注册到合成文件偏移。首次会话有三个 reader；第二次增加 UID/GID 65534、无有效 capabilities 的 reader，四个进程均匹配源 PFN。只读 store 触发 SIGSEGV；私有 mprotect(RW) 后写入产生独立 COW，源内容不变。非特权用户对其拥有的 0666 文件在 ready 后进行写打开和 truncate，均得到 EPERM；只读 fd 的 MAP_SHARED 转 RW 得到 EACCES。关闭全部 reader 后恢复原文件内容，随后正常卸载 owner。两次会话的 owner refcnt 全程均为 0，未尝试活跃卸载，也未注入部分注册失败。两台 guest 均结束，无内核 panic/BUG/WARNING，未加载 host 模块。
 
@@ -165,7 +269,7 @@ Evaluation 新增 Registration and Mapping Behavior 和表 21；Implementation �
 
 **部分失败已复现：** 第三个私有 guest 使用同批次“有效源页 + 无 present PTE 的源地址”。内核在第二项报 -ENOMEM，但 manager 仍打印 SUCCESS 并建立 ready，首个注册 PFN 仍可访问。显式恢复先恢复首项，再因第二项无备份报 -ENOENT；manager 仍打印恢复成功并退出 0。该 fixture 的两页最终都恢复原内容，owner 正常卸载；不能把这一局部恢复推为任意跨批次错误均可恢复。结果及两侧日志见[部分失败证据](../test/evaluation/registration-evidence.md#partial-registration-and-completion-reporting)，已补入表 21。此处的 observation complete 表示记录完成，失败原子性并未通过。
 
-[统一修订方案](../test/evaluation/proposals/registration-transactions.md)已列出 owner descriptor/pin、完整计划 stage/commit、真实完成响应、回滚和最终释放顺序，以及共同修改文件和验收项。可用内核 API 的核查发现 owner-from-address 私有接口不能由现有 LKM 直接调用；方案采用公开导出接口和显式 owner 合作，不使用私有符号地址调用。它涉及基础机制，尚未实施；三算法元数据改变后必须以新构建重新生成 carrier 并测量相应 B/C/E。
+[统一修订方案](../test/evaluation/proposals/registration-transactions.md)已列出 owner descriptor/pin、完整计划 stage/commit、真实完成响应、回滚和最终释放顺序，以及共同修改文件和验收项。可用内核 API 的核查发现 owner-from-address 私有接口不能由现有 LKM 直接调用；方案采用公开导出接口和显式 owner 合作，不使用私有符号地址调用。方案中的 descriptor、完整计划、回滚和恢复已分阶段实施；槽位内替换已消除提交中的 xarray 分配；manager 的链接产物身份核对已补齐，其余要求仍待完成。三算法元数据改变后必须以新构建重新生成 carrier 并测量相应 B/C/E。
 
 first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛选，适合估计给定 fault class 的条件延迟。应一并报告总尝试数、各原因剔除数和未筛选分布；不能用过滤后的结果来声称真实 p99 或“永不发生某种 fault”。若原始日志没有保留被丢弃样本，后续采集需补记录，不能反推。
 
@@ -183,6 +287,8 @@ first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛�
 
 **C 类：PGOT、LZ4、BCH、XZ 算法实验。**
 
+**LZ4 对照与完整采集流程已统一并实测（2026-09-12）：** [新证据](../test/evaluation/lz4-helper-baseline-evidence.md)新增 `kernel-userspace-libc`，保留旧 REP 对照。两者的算法源码与编译选项相同，新 DSO 的算法体无 SIMD，外部 helper 使用 libc；实际 GOT/PLT target 与 VKSO bridge provider 三项完全一致。完整 guest 通过 6×6×12 正确性、18 个官方 harness 进程/36 行和全部 12 文件的 192 次完整 CLI 工作流，五页 PFN 与恢复通过。旧 REP DSO 被 libc 身份核对拒绝。第一次因 parser 仍要求五后端停止，修复后完整重跑通过，失败归档保留。正式 LZ4 队列改为六后端/252 行，每部署 CLI 仍为四轮/768 次；采集器会拒绝缺少新后端，旧 210 行只能显式作为历史矩阵核对。Git 忽略的 owner 源码、新文件和每次 Kbuild 命令亦纳入实际归档。Owner 的 Kbuild/-O2/kernel ABI 与用户 DSO 的 -O3/PIC 仍不同，未声称单因素 PGOT 消融或新增正式性能。
+
 **实际 owner 内核端对照已准备并验证（2026-09-12）：** 新增独立 GPL 实验 driver，通过十二个公开导入直接调用 Ubuntu119 stock BCH、完整未适配源码的匹配编译模块，以及现有完整 `vkso_bch` owner。Matched 与 owner 的实际算法编译命令除命名和构建路径外逐 token 一致；stock 的 stack protector、UBSAN、FORTIFY、thunks、内联策略及 compiler package 差异单列，不能冒充同编译条件。两次精确 119 guest 会话各通过两种 t、各 128 轮、全部错误数、三个后端与两种 decode 的 10,752 次完整检查；另一次完整 measure 模式产生并核验 1,056 行。实际 API 指针及模块归属已核对，driver 正常依赖产生的 refcnt 0→1→0 不作为注册 pin 修复证据。首次 BusyBox 参数失败完整保留；没有修改原 owner/core 或装载 host 模块。详见[内核端记录](../test/evaluation/bch-kernel-evidence.md)。Guest 时间只用于采集工具验证，实际内核成本仍待物理机正式重复。
 
 **新增完整功能验证（2026-09-12）：** BCH 使用全新独立构建的未修改 owner、benchmark 和两个普通 DSO，在精确 `5.15.0-119-generic` 私有 guest 中执行实际 `vkso init/exec`；四个导出入口的原 closure checks 均通过。原有 `--correctness-only` 矩阵完整覆盖 m=13、t=4/8、各 128 轮错误位置试验、全部 0..t 错误数、三个 backend 与两种 decode 路径，并通过完整输出/错误位置检查。单独 loader 进程观察到三个 RX text 页和一个只读 rodata 页的 user/source PFN 一致；恢复后的四个新映射均不再使用源 PFN，随后模块正常卸载。该会话没有性能采样，不能作为部署重复、BCH 退化解释或净内存结果。证据见 [BCH 功能记录](../test/evaluation/bch-functional-evidence.md)。
@@ -195,17 +301,13 @@ first-touch 有 expected-fault filtering、IQR filtering 和 accepted-batch 筛�
 
 **实际执行更新（2026-09-11 17:23 UTC）：** [算法证据记录](../test/evaluation/algorithm-evidence.md)已列出基线身份、部署与进程边界、现有原始矩阵和 BCH 诊断目标。三份旧 raw 分别核验 210/1,056/42 行，缺行/重复行变体均被拒绝；四份报告重新生成后，五份数值 CSV 与全部 Markdown 数值表保持不变。LZ4/BCH runner 补齐新工作目录初始化，BCH 修正 root 执行时误把 `-v` 当命令的问题；均为实验 harness 改动，未改项目基础功能。
 
-[完整部署入口](../test/evaluation/algorithm_deployments.py)已准备，每算法先安排三次完整部署，保留原始全量配置，按部署块轮换算法顺序，并为每次 owner 装载/注册保留单独目录、boot identity 和逐行重复身份。三次用于检查重新部署敏感性，不能当作独立启动或等效性证明。早期验证中，入口曾在 Clocktime 服务 active 时按预期拒绝启动；现在 Clocktime 已完成并恢复原内核。正式执行仍需先完成 LZ4 绑定修复与完整功能验证、结束其他分析/测量任务，并由用户在正常特权终端启动。该入口尚未经完整部署验收，PMU 诊断及实际 owner 内核端对照也尚未完成。
+[完整部署入口](../test/evaluation/algorithm_deployments.py)已准备，每算法先安排三次完整部署，保留原始全量配置，按部署块轮换算法顺序，并为每次 owner 装载/注册保留单独目录、boot identity 和逐行重复身份。三次用于检查重新部署敏感性，不能当作独立启动或等效性证明。早期验证中，入口曾在 Clocktime 服务 active 时按预期拒绝启动；现在 Clocktime 已完成并恢复原内核。LZ4 绑定、libc 对照和完整 runner 的 guest 验证现已通过；正式执行仍需结束其他分析/测量任务，并由用户在正常特权终端启动。该入口尚未经完整部署验收，PMU 诊断及实际 owner 内核端对照也尚未完成。
 
 共同修改位置：[PGOT 实验](../test/test_MICRO/test_MICRO_pseudo_noqemu/pgot_benchmarks/)、[LZ4](../test/test_lz4/)、[BCH](../test/test_BCH/)、[XZ](../test/test_xz/) 的 runner、构建配置、统计脚本和适配记录。先统一统计字段和对照身份，再修改各自 runner；算法专用 harness 继续保留。BCH 的诊断与本类正式算法采集一起准备。
 
 **前次已发现：算法的 outer run 也未必是重新部署。** 草稿第 431 行说每次正式 run 都重新加载 owner module；但 [XZ run.sh](../test/test_xz/run.sh)在进入 benchmark 前只部署一次，[xz-bench.c](../test/test_xz/src/xz-bench.c)第 244–259 行先加载两个 DSO，再在同一进程中循环七个 outer runs。LZ4/BCH 的顶层脚本也把多个 outer runs 交给一次部署下的 runner。因此要明确区分“一次完整脚本运行”和“程序内 outer round”，不能把后者描述为重新注册、重新分配布局或独立启动。现有比值可保留为该次部署内重复；需要部署泛化的结论应另做少量完整部署重复。
 
 实际 export owner 的内核执行对照已选用 BCH，完整语义与输入验证、匹配编译 baseline 和采集入口均已通过上述 guest 验收；后续在物理机上正式测量，并与 stock 发行构建分列。现有 copied closures 保留为同域 PGOT 机制对照，不能替代该实际 owner 对照的正式成本结果。
-
-前次直接从 [BCH raw.csv](../test/test_BCH/results/raw.csv)重算 `t=8 / errors=2 / decode-precomputed` 的 11 个轮内比值，中位数为 `1.209496`，即约慢 20.95%；全部比值范围约为 `1.0777–1.5187`。这支持已报告的负收益方向，同时表明不能只用一个 20.9% 代表所有运行的幅度。这个范围不是置信区间。
-
-**BCH 路径语义已核实（2026-09-12）：** [源码及原归档二进制核对](../test/evaluation/bch-decode-path-evidence.md)确认，precomputed 只把受损 payload 的 ECC 编码及与接收 ECC 的异或移出计时；三个 backend 的两种 decode 均传入 `syn=NULL`，difference 非零时仍计算 syndromes、构造错误定位多项式并求根。返回位置后的位翻转/恢复检查也不在计时内。同一轮、同一路径的 backend 共用错误向量，但 seed 包含 mode，full 与 precomputed 的错误位置不同，不能直接相减估计阶段成本。两个有效错误在 t=4/8 下均选择二次多项式求根分支；t 增加 ECC 宽度、syndrome 数量和 Berlekamp–Massey 迭代上限，不代表该例进入高次求根分支。正文及 BCH README 已修正，旧性能数值未改；具体退化原因仍待动态证据。
 
 已核对轮次顺序及同一路径内的配对输入；接下来补重新部署的完整重复，再选择最大 regression、相同 t 的 0-error，以及 full-decode 路径作定向诊断。若要比较两个 decode 的阶段成本，诊断 harness 必须在两条路径间复用同一 payload 和错误位置，保存实际向量与调用顺序，不能沿用旧表作配对阶段差。采集 cycles、instructions、branch misses 和与代码/数据布局相关的 cache 事件，配合 syndrome、错误定位多项式及二次求根路径的反汇编/运行时记录。每次只改变一个可解释因素，验证 slowdown 是否随其变化；计数器相关性不等于因果证明。不需一开始采满所有 PMU 事件，诊断运行也不替代正式无插桩延迟。
 
@@ -221,13 +323,19 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 
 **D 类：适用范围、闭包特征和导出改造。**
 
-**新确认的导出边界（2026-09-12）：** 完整 LZ4 CLI 运行证明，当前 checker 会把共享 text 中对 Shim 的直接相对引用判为成功，而实际 PIC exporter 仅声明 import、没有绑定该指令或保留目标页。[具体未应用补丁](../test/evaluation/proposals/export-direct-calls.md)已通过机器码案例和真实 owner/KRG 离线重放，纠正这类错误放行；它只提供准确拒绝，尚不实现完整 native helper 闭包，也不能代替 E 的完整应用验收。基础工具修改仍待明确确认，固定八例原检查继续运行。
+**新确认的导出边界（2026-09-12）：** 完整 LZ4 CLI 运行证明了直接 Shim 相对引用的风险。checker、exporter 和显式私有数据 binding contract 已在当前工作树实现，并通过机器码案例、真实 owner/KRG 离线重放及合成 binding 测试；没有重绑定位置的直接引用现在准确拒绝，数据 slot 只接受完整、对齐且可审计的重定位。该修订已在 exact119 guest 完成 LZ4 注册和全部 24 组完整应用验收；本次提供功能及映射证据，正式应用性能仍待采集。
+
+**本批实际导出已补齐两个入口（2026-09-12 08:33 UTC）：** 在精确 Ubuntu119 私有 guest 中，使用现有完整 `vkso exec`、checker、exporter、manager 和注册模块，分别导出实际 built-in `xxh32` 与 `sort`，未重编译或修改目标算法。GPL 观测 driver 通过公开内核符号调用原入口，用户 driver 调用实际生成的公开 API，并对生成 header 做类型一致性编译检查。XXH32 的 247 个向量在两侧分别匹配独立 libxxhash 参考；sort 的 1,152 个组合覆盖长度、宽度、对齐、输入分布、比较方向和默认/自定义 swap，完整输出及逐例 callback 次数一致。两侧各观测 95,384 次 comparator 和 35,252 次 custom swap 调用。完整证据及复现见[适用范围记录](../test/evaluation/applicability-evidence.md)。
+
+两个 carrier 各有两个 source-backed RX 页，独立 loader 的四页 raw pagemap 与 source PFN 全部一致。XXH32 共享原 return thunk；sort 使用现有 exporter 生成的一个额外 thunk 页，它不属于 kernel PFN 共享页。真实 ELF 的 API offset、生成 thunk 字节和完整 page-map 覆盖已独立核对；恢复后新映射均不再使用原源页，实验模块正常卸载，guest 无 panic/BUG/WARNING。PFN observer 与功能 driver 是同一注册 inode 下的不同进程，未将前者的页表观测冒称为后者的。原始输入、输出及参考重算通过，八项真实归档变异测试验证了审计器；guest 功能组合不计入性能重复或应用结果。
+
+**静态任务终态更新（2026-09-12 08:54 UTC）：** 使用当前 checker 在新目录完成固定八例，得到 2 PASS/6 FAIL；早期中断的六例快照原样保留，未混入修订分母。`rhashtable_insert_slow` 现为 FAIL（访问 1,844 个函数，3,530 条硬失败、721 条未解析记录），`get_random_bytes` 现为 FAIL（访问 28 个函数，36 条硬失败、4 条未解析记录）。六个 FAIL 均按静态拒绝处理，不构造 carrier，也不计为运行时失败。正文表 24、适用范围证据和语义记录已同步；D 仍待回顾性适配账本及必要的其他 runtime case，不能标为整组完成。
 
 正文 Implementation 与 Applicability 已同步撤回“Analyzer 自动证明完整 binding/page identity、所有未解析间接跳转均拒绝”的断言。实际 checker 的 FAIL/INCOMPLETE/PASS 条件已从源码核实；间接控制流、插桩和 Shim 命中分开记录，PFN 验证属于运行时观测。完整依赖绑定仍是实现与验收要求，文字修正不代替该项工作。
 
-**构建身份表述已修正（2026-09-12）：** 当前 [`vkso`](../vkso) 的 replace/exec 会先重新构建 workspace；KRG 缓存指纹使用 boot ID 以及 vmlinux/模块的路径、大小、mtime，显式 `--krg` 则可复用给定图。它们不是 carrier 与当前内核的独立运行时身份校验。[manager](../page_cache_replace/manager.cpp) 的 page-map 检查关注语法、对齐、范围和文件内偏移；内核请求也没有 build identity 字段。实验 guest 固定检查内核 release，只能证明相应会话的前置条件。正文已删除“运行端拒绝 build identity 不匹配 carrier”的完成式，保留每次部署需核实构建及运行地址的要求。此核对没有修改工具或注册机制。
+**较早的构建身份表述修正（2026-09-12，后续实现见 B 最新记录）：** 当时 [`vkso`](../vkso) 的 replace/exec 会先重新构建 workspace；KRG 缓存指纹使用 boot ID 以及 vmlinux/模块的路径、大小、mtime，显式 `--krg` 则可复用给定图。它们不是 carrier 与当前内核的独立运行时身份校验。[manager](../page_cache_replace/manager.cpp) 的 page-map 检查关注语法、对齐、范围和文件内偏移；内核请求也没有 build identity 字段。实验 guest 固定检查内核 release，只能证明相应会话的前置条件。正文已删除“运行端拒绝 build identity 不匹配 carrier”的完成式，保留每次部署需核实构建及运行地址的要求。此核对没有修改工具或注册机制。
 
-**分析器性能方案待确认：** hex_dump_to_buffer 的未裁剪检查已超过 30 分钟，源码定位到直接目标查询反复解析整个 ELF 符号表。[缓存补丁方案](../test/evaluation/proposals/README.md)已准备并通过边界/实际镜像查询对照，尚未应用；已向用户请求允许这项基础分析器调整。保持符号顺序、首匹配及全部判定规则，若获准将保留原记录并在新目录重检固定八例。等待答复期间，原分析器继续运行，不以超时或删减候选替代完整检查。
+**分析器性能修订已落地：** hex_dump_to_buffer 的直接目标查询缓存方案已应用并通过边界/实际镜像查询对照；固定八例在新目录完整重检。保持符号顺序、首匹配及全部判定规则，早期六例记录仍原样保留。修订批次现为 2 PASS/6 FAIL，完整计数见[适用范围证据](../test/evaluation/applicability-evidence.md)。
 
 **第 4 例依赖展开已解释（2026-09-12 06:56 UTC）：** 对原进程日志的只读快照恢复了 `hex_dump_to_buffer → snprintf → vsnprintf → format_decode → __warn_printk → vprintk`，继而沿调度、错误处理、回收及 swap/discard 扩展到 `blkg_create` 的 44 条首次入队祖先边。精确 119 ELF 的八条关键边核对确认，入口传入固定格式，而后续包含通用格式警告和调度器损坏检查分支。分析器逐条扫描整个函数、不按调用参数专化；已在 vmlinux 中定义的 `vprintk` 也不会被仅对 undefined symbol 生效的 Shim 规则截断。这解释了静态依赖规模的扩张，不说明这些分支在同一次运行中可达，也不是第 4 例的最终结果。见[原始摘录与独立重建](../test/evaluation/results/applicability-path-20260912/README.md)。原检查继续运行，固定八例、源码和 Shim 未改。
 
@@ -249,9 +357,13 @@ LZ4 官方 harness 的最快循环估计的是吞吐能力，不提供请求尾�
 
 本类完成时：候选分母固定且失败项不丢失；语义不适合与工具暂不支持分开；静态检查、carrier 构造、实际运行分别记录；每个成功目标列出 closure/页数、绑定、编译限制和真实人工改造量。C 类已有适配证据直接导入，Clocktime 既有结构性重构与本轮仅新增测量工具分开记录。候选失败先归类并保留；涉及导出器等基础功能修改时先报告原因，不把修复全部失败候选或全候选性能重测作为本类默认任务。
 
+**源码适配量更新（2026-09-12）：** [三算法账本](../test/evaluation/results/adaptation-ledger-20260912-attempt02/README.md)归档了 Linux 5.15 安装源码基线、当前完整适配源文件、支持文件和差分。BCH/LZ4/XZ 分别涉及 1/3/8 个比较文件，新增/删除有效代码行为 37/9、45/7、52/9；module metadata 与 Kbuild 单列。差分行数与补丁一致，三组补丁均重放得到完整适配源文件。该基线可能含 exact119 二进制之后的 5.15 backports，不能用它宣称精确重构发行版二进制。此处未计通用 builder/shim、用户对照兼容层和测试工具，也没有从行数推算工时。D 仍需合并 Clocktime 既有结构性适配，以及成功案例的 closure、slots、页和构建限制，不能将这份源文件账本当作完整适配成本。
+
 **E 类：真实应用集成。**
 
-**完整 helper 绑定路线已具体化：** [LZ4 未实施方案](../test/evaluation/proposals/lz4-helper-binding.md)将完整 owner 的外部 memory-helper 调用接入三个私有数据 slots，并由显式数据重定位契约绑定到现有 libshim 中唯一命名、负责栈对齐的用户入口。不能仅增加三个 slots 后让普通 libc 名称自动匹配：编译证据显示所选调用链的 helper 入口栈对齐与普通 SysV 契约不一致。Owner 候选保留全部 21 个函数，34 个 memory-helper 直接引用改为 slot 引用，text 增加 160 B；三个已知选中函数体的静态页覆盖由三页变四页，因此需要重新生成 live KRG/carrier 并测量 B/C/E。Owner patch 和 bridge 仅独立编译，通用 builder/vkso 绑定集成尚未实施；未用修改模块运行应用。该方案与 owner descriptor/注册事务按共同修改文件一起审阅，不能用拒绝错误导出来替代完整应用通过。
+**修改后完整应用已通过（2026-09-12）：** [binding attempt06](../test/evaluation/results/lz4-binding-qemu-20260912-attempt06/result.json)在 exact119 guest 中完成实际分析、构造、注册及全部 12 个 Silesia 文件 × 64 KiB/1 MiB 的压缩、解压和 stock 交叉校验。48 份调用记录核对到选中 carrier，三个私有 slots 的目标为唯一 libshim bridge 及 libc helper。独立 observer 的四张 text 页和一张 rodata 页与 kernel PFN 相同；释放后五个偏移的新映射均不再指向源页，模块正常卸载。该旧归档注册期间 owner refcount 为零；后续 v2/v3 的引用和事务证据见 B 最新记录。本次没有性能样本。先前 KVM 启动限制已解除；BTF 和 guest `libdl.a` 准备问题修正后运行通过，失败尝试仍单独归档。见[完整应用记录](../test/evaluation/lz4-application-evidence.md)。
+
+**完整 helper 绑定路线已实现：** [LZ4 绑定契约](../test/evaluation/proposals/lz4-helper-binding.md)将完整 owner 的外部 memory-helper 调用接入三个私有数据 slots，并由显式数据重定位契约绑定到现有 libshim 中唯一命名、负责栈对齐的用户入口。Owner 候选保留全部 21 个函数；bridge、builder/vkso 集成和 resolved-binding 归档均已编译验证。新的 guest 构建已准备，但当前 host 没有 `/dev/kvm`，因此尚无修改后 owner 的注册或应用运行结果，不能沿用旧失败前的性能数据。
 
 **真实 registered carrier 失败已定位（2026-09-12）：** 精确 `5.15.0-119-generic=5.15.0-119.129` 私有 guest 执行实际 KRG、原静态检查、carrier 构造和注册。第六次尝试重新构建未改动的当前 owner，独立 loader 进程逐页确认三个 RX text 页和一个只读 rodata 页的 user/source PFN 一致；完整 CLI 仍在首个 dickens/64 KiB 压缩操作中 SIGSEGV，完成 0/24 个 input/block 组合。GDB 记录证明：内核 memset 直接调用位移 −1049945565 平移到用户 call 地址后，计算出的 `0x7fffb94398a0` 与实际 RIP 完全相同，且目标未映射。Exporter 把该依赖列为 undefined Shim import，却没有重绑定共享 text 中的直接调用或保留目标页。这是已确认的运行时闭包绑定失败，不是性能结论。恢复后的四个新映射 PFN 均不同于源页，随后模块卸载成功；该观测不证明原字节恢复或存活旧映射撤销。[完整证据记录](../test/evaluation/lz4-application-evidence.md)保留六次尝试、构建差异、GDB 与 PFN 原始记录。未修改基础 exporter；准确拒绝的补丁方案已准备，完整调用绑定和应用矩阵仍待完成。
 
@@ -283,7 +395,7 @@ A 完成后，正文已更新重复单位与隔离核配置、Normal 三方法�
 
 本类完成时：每个主张指向相应完整实现的结果；新表和已有表单位一致；正文/附录分工明确；待验证内容与已完成实验分开。原始数据保持原样，不通过修改数据来适配文字。
 
-当前 A 已完成并更新论文；B 已完成隔离映射、正常释放、部分失败及 BCH 多进程库/owner 资源观测，完整 setup 和剩余内存归因仍待采集。C 新增 BCH/XZ 完整功能及各四页 PFN 验证；C/E 新增正式性能部署尚未开始。E 已定位真实 registered LZ4 CLI 的直接调用绑定失败，完整应用组合尚未通过。D 固定全集仍由原分析器执行。后续以共同修改对象推进：B 补全会话与边界证据，C 采集完整部署并诊断 BCH 性能，D 分类固定候选并完善导出判定，E 完成实际绑定、完整功能及应用性能。注册机制、缓存和导出器基础修订均保留具体方案，未经明确确认不实施。
+当前 A/D 已完成既定交付并同步论文。B 已完成注册、FIFO、普通 ext4 文件/VMA、setup、规模扫描、原始 first-touch 和一次实际回收压力的 guest 验证；继续匹配的正式 setup 性能、完整物理计费、源页公开性与运行时重写边界。C 已完成三算法当前 owner 的同一注册两域完整功能及内核采集入口，继续独立正式部署、物理机内核成本和 BCH 退化归因。E 已完成实际 LZ4 接入和完整四后端 workflow，正式应用性能复用 C 的部署会话采集。F 已加入内核执行小节并更新适配表，待 B/C/E 结果后统一正文/附录、图表与全文口径。
 
 前次核查包括：阅读 Evaluation/Implementation/Discussion，核对 first-touch/PGOT/算法/Clocktime 的材料，复算 first-touch 汇总和 BCH 报告点，检查 XZ 重复层次、Clocktime 功能记录及所列公开文献。本次继承这些证据记录，没有重复执行这些核查或将其视为最新数据。
 
