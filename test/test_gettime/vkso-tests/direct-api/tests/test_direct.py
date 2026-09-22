@@ -21,6 +21,7 @@ sys.path.insert(0, str(HERE))
 import bundle
 import results
 import collect
+import campaign
 
 
 def run(argv, **kwargs):
@@ -60,7 +61,8 @@ class RuntimeTests(unittest.TestCase):
             line.split('=', 1) for line in cls.native_probe.splitlines() if '=' in line)
         cls.raw_host = (cls.native_probe_fields.get('native_vdso') == '1' and
                         cls.native_probe_fields.get('vkso_mm_auxv') == '0')
-        run([cls.cc, *flags, HERE / 'tests/test_api.c', cls.out / 'libvkso_time_init.a', '-pthread',
+        run([cls.cc, *flags, HERE / 'tests/test_api.c', '-L' + str(cls.out), '-lvkso_time', '-pthread',
+             '-Wl,-rpath,' + str(cls.out),
              '-L' + str(cls.out / 'carrier'), '-lkernel', '-Wl,-rpath,' + str(cls.out / 'carrier'),
              '-o', cls.out / 'test-api'])
 
@@ -89,6 +91,9 @@ class RuntimeTests(unittest.TestCase):
         for name, expected in bundle.FUNCTIONAL_BLOBS.items():
             data = (HERE.parent / 'functional' / name).read_bytes()
             self.assertEqual(hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest(), expected)
+
+    def test_public_shared_library_direct_calls_no_recursion(self):
+        bundle.audit_public_library(self.out / 'libvkso_time.so')
 
     def test_native_and_vkso_link_disassembly_audit(self):
         for name in ('native', 'vkso'):
@@ -215,11 +220,12 @@ def synthetic_run(root, case, boot_id):
     root.mkdir()
     rows, record = samples()
     backend = 'native-libc' if case.startswith('raw-') else 'vkso-direct'
-    record.update(status='COMPLETE', protocol=bundle.PROTOCOL, case=case, boot_id=boot_id,
+    record.update(block=1, status='COMPLETE', protocol=bundle.PROTOCOL, case=case, boot_id=boot_id,
                   backend=backend, warmup=10, compiler_version='TEST-ONLY',
                   benchmark_source_sha256='TEST-SOURCE', header_sha256='TEST-HEADER',
                   source_fingerprint='TEST-CODE', base_cflags='TEST-FLAGS',
                   package_manifest_sha256='TEST-PACKAGE', binary_sha256='TEST-BINARY',
+                  package_checksums_sha256='TEST-INVENTORY', public_library_sha256='TEST-LIBRARY',
                   cpu_info={'model name': 'SYNTHETIC', 'microcode': 'TEST'}, tuning={})
     for row in rows:
         row['backend'] = backend
@@ -231,8 +237,10 @@ def synthetic_run(root, case, boot_id):
         writer = csv.DictWriter(stream, fieldnames=results.COLUMNS)
         writer.writeheader()
         writer.writerows(rows)
-    for name in ('check.log', 'check-fast.log', 'legacy-abi.log'):
-        (root / name).write_text('SYNTHETIC TEST FIXTURE; NOT runtime evidence\n')
+    for name, marker in [('check.log', 'public_api_check=PASS scope=full'),
+                         ('check-fast.log', 'time_syscall_denial_check=PASS'),
+                         ('legacy-abi.log', 'abi_matrix_status=pass')]:
+        (root / name).write_text('SYNTHETIC TEST FIXTURE; NOT runtime evidence\n' + marker)
     sums(root)
     return root
 
@@ -244,6 +252,86 @@ def sums(root):
 
 
 class WorkflowTests(unittest.TestCase):
+    def test_four_block_balanced_order(self):
+        schedule = campaign.plan(4)
+        self.assertEqual(len(schedule), 16)
+        for block in range(1, 5):
+            self.assertEqual({x['case'] for x in schedule if x['block'] == block}, set(results.GROUPS))
+        for position in range(4):
+            self.assertEqual({schedule[4*b+position]['case'] for b in range(4)}, set(results.GROUPS))
+
+    def test_campaign_begin_freezes_and_rejects_changed_input(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bare = root / 'baremetal'; bare.mkdir()
+            (bare / 'experiment.conf').write_text('BLOCKS=4\nPERF_PROCESSES=7\nREPEATS=31\nITERATIONS=500000\nWARMUP=10000\n')
+            for name in ('collect-case.sh', 'experiment.sh', 'boot-once.sh', 'verify-packages.sh'):
+                (bare / name).write_text('TEST ONLY')
+            source = root / 'direct-api'; source.mkdir()
+            (source / 'campaign.py').write_text('TEST ONLY')
+            for variant in ('normal', 'no-retpoline'):
+                package = bare / 'artifacts' / ('direct-' + variant)
+                (package / 'direct/src/direct-api').mkdir(parents=True)
+                for name in ('collect-case.sh', 'experiment.sh', 'experiment.conf', 'boot-once.sh'):
+                    shutil.copy2(bare / name, package / name)
+                shutil.copy2(source / 'campaign.py', package / 'direct/src/direct-api/campaign.py')
+                (package / 'SHA256SUMS').write_text('TEST ONLY')
+            env = {k:v for k,v in os.environ.items() if k not in
+                   ('RESULTS_DIR','STATE_FILE','LOCK_FILE','NORMAL_PACKAGE','NO_RETPOLINE_PACKAGE')}
+            with patch.object(campaign, 'BARE', bare), patch.object(campaign, 'HERE', source), \
+                 patch.dict(os.environ, env, clear=True), patch.object(campaign.subprocess, 'run'):
+                with patch.object(sys, 'argv', ['campaign', 'begin', 'fixture']):
+                    campaign.main()
+                state=json.loads((bare / '.direct-api-state.json').read_text())
+                self.assertEqual(state['next_index'], 0)
+                with patch.object(sys, 'argv', ['campaign', 'begin', 'fixture2']):
+                    with self.assertRaisesRegex(ValueError, 'already active'): campaign.main()
+                (bare / 'experiment.conf').write_text('CHANGED')
+                with patch.object(sys, 'argv', ['campaign', 'collect']):
+                    with self.assertRaisesRegex(ValueError, 'frozen input changed'): campaign.main()
+
+    def test_campaign_collection_failure_preserves_and_success_advances(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            bare = Path(tmp) / 'baremetal'; bare.mkdir()
+            root = bare / 'results/fixture'; root.mkdir(parents=True)
+            manifest = dict(config={}, identities={}, plan=campaign.plan(1),
+                            packages={'normal': str(bare / 'package')})
+            bundle.write_json(root / 'campaign.json', manifest)
+            state_file = bare / '.direct-api-state.json'
+            bundle.write_json(state_file, dict(root=str(root), next_index=0, status='active',
+                        manifest_sha256=bundle.sha256(root / 'campaign.json')))
+            env = {k:v for k,v in os.environ.items() if k not in ('RESULTS_DIR','STATE_FILE','LOCK_FILE')}
+            def fake_command(argv, env, check):
+                out = Path(env['DIRECT_OUT']); out.mkdir()
+                (out / 'started').write_text('TEST ONLY')
+                raise subprocess.CalledProcessError(17, argv)
+            with patch.object(campaign, 'BARE', bare), patch.dict(os.environ, env, clear=True), \
+                 patch.object(campaign, 'check'), patch.object(sys, 'argv', ['campaign','collect']), \
+                 patch.object(campaign.subprocess, 'run', side_effect=fake_command):
+                with self.assertRaises(subprocess.CalledProcessError): campaign.main()
+            self.assertEqual(json.loads(state_file.read_text())['next_index'], 0)
+            self.assertEqual(len(list((root / 'incomplete').iterdir())), 1)
+            def success(argv, env, check):
+                out = Path(env['DIRECT_OUT']); out.mkdir()
+                bundle.write_json(out / 'run.json', dict(status='COMPLETE', boot_id='TEST'))
+            with patch.object(campaign, 'BARE', bare), patch.dict(os.environ, env, clear=True), \
+                 patch.object(campaign, 'check'), patch.object(sys, 'argv', ['campaign','collect']), \
+                 patch.object(campaign.subprocess, 'run', side_effect=success):
+                campaign.main()
+            self.assertEqual(json.loads(state_file.read_text())['next_index'], 1)
+            self.assertTrue((root / 'block-01/raw-normal/run.json').is_file())
+
+    def test_archive_preserves_original_and_refuses_overwrite(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / 'campaign'
+            root.mkdir()
+            (root / 'sample').write_text('TEST ONLY')
+            archived = campaign.archive(root)
+            self.assertTrue(archived.exists())
+            self.assertEqual((root / 'sample').read_text(), 'TEST ONLY')
+            with self.assertRaises(ValueError):
+                campaign.archive(root)
+
     def test_synthetic_four_group_summary(self):
         with tempfile.TemporaryDirectory() as tmp:
             paths = [synthetic_run(Path(tmp) / case, case, 'TEST-' + case) for case in results.GROUPS]

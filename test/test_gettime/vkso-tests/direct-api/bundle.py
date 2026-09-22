@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0
-"""Build a direct-API sidecar; do not modify the kernel package or run its code."""
+"""Build the direct-API portion of a new coherent kernel package; never run kernel code."""
 import argparse
 import hashlib
 import json
@@ -11,8 +11,7 @@ import shutil
 import subprocess
 import sys
 
-PROTOCOL = 'clocktime-direct-api-v1'
-BASE_COMMIT = '43c60fc68a6ec6bed5b8131927f7c17100b2f20c'
+PROTOCOL = 'clocktime-direct-api-v2'
 FUNCTIONAL_BLOBS = {
     'vkso_abi.h': '85fb8caa676e019e1dca7763d14bc5d595961097',
     'vkso_user_wrapper.c': '6a4c2148371fd07529f13ed27e6d3f0573f0c2d6',
@@ -21,8 +20,8 @@ FUNCTIONAL_BLOBS = {
 REQUIRED = {'boot-manifest.txt', 'raw-bzImage', 'vkso-bzImage', 'raw.config',
             'vkso.config', 'libkernel.so', 'page_mappings.txt', 'manager',
             'page_cache_replace.ko', 'vkso_m09_clock.ko', 'raw-abi-matrix',
-            'vkso-abi-matrix', 'owner_descriptors.txt', 'kernel_identity.txt'}
-CFLAGS = '-O2 -g -std=gnu11 -Wall -Wextra -Werror -fno-lto -fno-builtin'
+            'vkso-abi-matrix', 'owner_descriptors.txt', 'kernel_identity.txt', 'raw-kernel-reader.ko', 'vkso-kernel-reader.ko'}
+CFLAGS = '-O2 -g -std=gnu11 -Wall -Wextra -Werror -fno-lto -fno-builtin -fPIC'
 
 
 def sha256(path):
@@ -88,9 +87,9 @@ def audit_binary(binary, backend):
     if any('adapter' in name for name in needs) or re.search(r'\b(?:dlopen|dlsym|dlvsym)(?:@|\s|$)', undefined):
         raise ValueError('unexpected dynamic provider resolver/adapter')
     if backend == 'vkso':
-        if 'libkernel.so' not in needs:
-            raise ValueError('VKSO executable does not DT_NEEDED libkernel.so')
-        prefix = '__vkso_'
+        if 'libvkso_time.so' not in needs:
+            raise ValueError('VKSO executable does not DT_NEEDED libvkso_time.so')
+        prefix = ''
     else:
         if 'libkernel.so' in needs or '__vkso_' in undefined:
             raise ValueError('native executable depends on VKSO')
@@ -101,6 +100,20 @@ def audit_binary(binary, backend):
         if not re.search(r'call[^\n]*<' + prefix + symbol + r'@plt>', disassembly):
             raise ValueError('expected direct PLT call not found: ' + prefix + symbol)
     return dynamic, undefined, disassembly
+
+
+def audit_public_library(library):
+    undefined = subprocess.check_output(['nm', '-u', str(library)], text=True)
+    dynamic = subprocess.check_output(['readelf', '-dW', str(library)], text=True)
+    assembly = subprocess.check_output(['objdump', '-d', str(library)], text=True)
+    if '[libkernel.so]' not in dynamic or any(x in undefined for x in ('dlopen', 'dlsym', 'dlvsym')):
+        raise ValueError('public API must directly depend on the carrier without dynamic lookup')
+    for name in ('clock_gettime', 'clock_getres', 'gettimeofday', 'time', 'getcpu'):
+        if not re.search(r'(?:call|jmp)[^\n]*<__vkso_' + name + r'@plt>', assembly):
+            raise ValueError('missing direct carrier call: ' + name)
+        if re.search(r'\b' + name + r'(?:@|\s|$)', undefined):
+            raise ValueError('recursive public API fallback: ' + name)
+    return dynamic, undefined, assembly
 
 
 def build(package, out, compiler):
@@ -118,7 +131,7 @@ def build(package, out, compiler):
         raise ValueError('compiler must be an executable path without whitespace')
     version = subprocess.check_output([compiler, '-dumpfullversion', '-dumpversion'], text=True).strip()
     if version != original['cc_version']:
-        raise ValueError('target sidecar compiler must match package: expected ' + original['cc_version'] + ', got ' + version)
+        raise ValueError('direct API compiler must match package: expected ' + original['cc_version'] + ', got ' + version)
     here = Path(__file__).resolve().parent
     for name, expected in FUNCTIONAL_BLOBS.items():
         data = (here.parent / 'functional' / name).read_bytes()
@@ -137,7 +150,7 @@ def build(package, out, compiler):
             shutil.copy2(here.parent / 'functional' / name, out / 'src' / 'functional' / name)
         shutil.copytree(here, out / 'src' / 'direct-api', ignore=shutil.ignore_patterns('__pycache__', 'build', '*.pyc'))
         (out / 'carrier').mkdir()
-        (out / 'carrier' / 'libkernel.so').symlink_to(package / 'libkernel.so')
+        (out / 'carrier' / 'libkernel.so').symlink_to('../../libkernel.so')
         # Explicit flags, no inherited preload, linker search path, or Make overrides.
         env = dict(os.environ)
         for key in ('LD_PRELOAD', 'LD_LIBRARY_PATH', 'LD_AUDIT', 'MAKEFLAGS', 'MFLAGS', 'MAKEOVERRIDES',
@@ -148,6 +161,7 @@ def build(package, out, compiler):
                    'OUT=' + str(out), 'CC=' + compiler, 'CFLAGS=' + flags]
         with (out / 'build.log').open('x') as log:
             subprocess.run(command, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
+        audit_public_library(out / 'libvkso_time.so')
         for backend in ('native', 'vkso'):
             outputs = audit_binary(out / (backend + '-bench'), backend)
             for suffix, content in zip(('dynamic.txt', 'undefined.txt', 'disassembly.txt'), outputs):
@@ -158,16 +172,19 @@ def build(package, out, compiler):
         source_hashes['direct-api/Makefile'] = sha256(out / 'src/direct-api/Makefile')
         source_fingerprint = hashlib.sha256(json.dumps(source_hashes, sort_keys=True).encode()).hexdigest()
         manifest = {
-            'protocol': PROTOCOL, 'baseline_commit': BASE_COMMIT,
-            'build_variant': original['build_variant'], 'package': str(package),
-            'package_checksums_sha256': sha256(package / 'SHA256SUMS'),
+            'protocol': PROTOCOL,
+            'source_git_commit': subprocess.check_output(['git', '-C', str(here), 'rev-parse', 'HEAD'], text=True).strip(),
+            'source_dirty_patch_sha256': hashlib.sha256(subprocess.check_output(
+                ['git', '-C', str(here), 'diff', '--binary', '--no-ext-diff', 'HEAD', '--'])).hexdigest(),
+            'build_variant': original['build_variant'], 'package': '..',
+            'kernel_checksums': package_sums,
             'package_manifest_sha256': package_sums['boot-manifest.txt'],
             'carrier_sha256': package_sums['libkernel.so'],
             'compiler': compiler, 'compiler_version': version, 'cflags': flags, 'base_cflags': CFLAGS,
             'source_fingerprint': source_fingerprint, 'source_hashes': source_hashes,
             'kernel_package_commit': original.get('git_commit'),
             'kernel_candidate_patch_sha256': original.get('candidate_patch_sha256'),
-            'runtime_tests': 'NOT_RUN', 'kernel_build': 'REUSED_UNCHANGED',
+            'runtime_tests': 'NOT_RUN', 'kernel_build': 'BUILT_WITH_PACKAGE',
             'redis': 'NOT_INCLUDED', 'registration': 'external; same carrier inode required',
         }
         write_json(out / 'build.json', manifest)
@@ -188,8 +205,8 @@ def main():
     parser.add_argument('--cc', default='gcc')
     args = parser.parse_args()
     try:
-        if args.out.resolve() == args.package.resolve() or args.package.resolve() in args.out.resolve().parents:
-            raise ValueError('sidecar output must be outside the immutable package')
+        if args.out.resolve() != args.package.resolve() / 'direct':
+            raise ValueError('direct API must be built inside the coherent package at PACKAGE/direct')
         build(args.package, args.out, args.cc)
         return 0
     except (OSError, ValueError, subprocess.SubprocessError) as exc:

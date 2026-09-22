@@ -6,7 +6,7 @@
 int main(void)
 {
 	struct timespec now;
-	if (vkso_time_init() || vkso_time_clock_gettime(CLOCK_MONOTONIC, &now)) {
+	if (vkso_time_init() || clock_gettime(CLOCK_MONOTONIC, &now)) {
 		perror("VKSO time");
 		return 1;
 	}

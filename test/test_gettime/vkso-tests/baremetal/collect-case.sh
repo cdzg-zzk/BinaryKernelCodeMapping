@@ -1,488 +1,77 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-2.0
-
+# Internal implementation of experiment.sh collect; never launch a second protocol.
 set -euo pipefail
-
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-CASE=${1:?usage: collect-case.sh CASE RUN_ID}
-RUN_ID=${2:?usage: collect-case.sh CASE RUN_ID}
-NORMAL_PACKAGE=${NORMAL_PACKAGE:-$HERE/artifacts/final-normal}
-NO_RETPOLINE_PACKAGE=${NO_RETPOLINE_PACKAGE:-$HERE/artifacts/final-no-retpoline}
-RESULTS_DIR=${RESULTS_DIR:-$HERE/results}
-STATE=${STATE_FILE:-$HERE/.experiment-state}
-RESULT_ROOT=$RESULTS_DIR/$RUN_ID
-EXPERIMENT_MANIFEST=$RESULT_ROOT/experiment-manifest.txt
-
+CASE=${1:?case required}
+: "${DIRECT_PACKAGE:?run ./experiment.sh collect}"
+: "${DIRECT_OUT:?run ./experiment.sh collect}"
+: "${DIRECT_CONFIG:?run ./experiment.sh collect}"
 if [[ $(id -u) -ne 0 ]]; then
-	exec sudo --preserve-env=NORMAL_PACKAGE,NO_RETPOLINE_PACKAGE,RESULTS_DIR,STATE_FILE \
-		"$0" "$@"
+    exec sudo --preserve-env=DIRECT_PACKAGE,DIRECT_OUT,DIRECT_CONFIG,DIRECT_BLOCK "$0" "$@"
 fi
-
-manifest_value()
-{
-	local file=$1 key=$2
-
-	awk -F= -v key="$key" '$1 == key {
-		sub(/^[^=]*=/, ""); print; exit
-	}' "$file"
+# Tuning is performed only after basic target identity checks. Full preflight below
+# additionally verifies installed image, auxv, controls and all checksummed artifacts.
+test "$(uname -r)" = 5.15.198 || { echo 'wrong kernel: requires experimental 5.15.198' >&2; exit 1; }
+backend=${CASE%%-*}
+case "$CASE" in raw-normal|vkso-normal|raw-no-retpoline|vkso-no-retpoline) ;; *) exit 2 ;; esac
+cmp -s <(zcat /proc/config.gz) "$DIRECT_PACKAGE/$backend.config" || {
+    echo 'wrong kernel config' >&2; exit 1;
 }
-
-case "$CASE" in
-raw-normal)
-	BACKEND=raw
-	VARIANT=normal
-	PACKAGE=$NORMAL_PACKAGE
-	IMAGE=/boot/vkso-final-raw-normal-5.15.198.bzImage
-	;;
-vkso-normal)
-	BACKEND=vkso
-	VARIANT=normal
-	PACKAGE=$NORMAL_PACKAGE
-	IMAGE=/boot/vkso-final-vkso-normal-5.15.198.bzImage
-	;;
-raw-no-retpoline)
-	BACKEND=raw
-	VARIANT=no-retpoline
-	PACKAGE=$NO_RETPOLINE_PACKAGE
-	IMAGE=/boot/vkso-final-raw-no-retpoline-5.15.198.bzImage
-	;;
-vkso-no-retpoline)
-	BACKEND=vkso
-	VARIANT=no-retpoline
-	PACKAGE=$NO_RETPOLINE_PACKAGE
-	IMAGE=/boot/vkso-final-vkso-no-retpoline-5.15.198.bzImage
-	;;
-*)
-	echo "invalid experiment case: $CASE" >&2
-	exit 2
-	;;
-esac
-
-test -s "$EXPERIMENT_MANIFEST"
-test -s "$STATE"
-test "$(manifest_value "$STATE" run_id)" = "$RUN_ID"
-test "$(manifest_value "$STATE" status)" = active
-test "$(manifest_value "$PACKAGE/boot-manifest.txt" build_variant)" = \
-	"$VARIANT"
-case_order=$(manifest_value "$EXPERIMENT_MANIFEST" case_order)
-if [[ " $case_order " == *" raw-no-retpoline "* ]]; then
-	"$HERE/verify-packages.sh" \
-		"$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE" >/dev/null
-else
-	(
-		cd "$NORMAL_PACKAGE"
-		sha256sum -c SHA256SUMS >/dev/null
-	)
+python3 - "$DIRECT_PACKAGE" "$backend" <<'PY'
+import platform,sys
+from pathlib import Path
+m=dict(line.split('=',1) for line in (Path(sys.argv[1])/'boot-manifest.txt').read_text().splitlines() if '=' in line)
+if platform.version()!=m[sys.argv[2]+'_uts_version']: sys.exit('wrong kernel build identity')
+PY
+saved_paths=() saved_values=()
+irq_active=0
+restore() {
+    status=$?
+    trap - EXIT
+    set +e
+    for ((i=${#saved_paths[@]}-1; i>=0; --i)); do
+        printf '%s\n' "${saved_values[$i]}" >"${saved_paths[$i]}" || status=1
+    done
+    if [[ $irq_active == 1 ]]; then systemctl start irqbalance || status=1; fi
+    if [[ -n ${SUDO_UID:-} && -d "$DIRECT_OUT" ]]; then
+        chown -R "$SUDO_UID:$SUDO_GID" "$DIRECT_OUT" || status=1
+    fi
+    if [[ "$status" != 0 && -f "$DIRECT_OUT/run.json" ]]; then
+        python3 - "$DIRECT_OUT" <<'RECORD'
+import hashlib,json,sys
+from pathlib import Path
+out=Path(sys.argv[1]);p=out/'run.json'
+r=json.loads(p.read_text());r['status']='FAIL';r['environment_cleanup_status']='FAIL'
+p.write_text(json.dumps(r,indent=2,sort_keys=True)+'\n')
+(out/'SHA256SUMS').write_text(''.join(hashlib.sha256(f.read_bytes()).hexdigest()+'  '+f.name+'\n'
+    for f in sorted(out.iterdir()) if f.is_file() and f.name!='SHA256SUMS'))
+RECORD
+    fi
+    exit "$status"
+}
+trap restore EXIT
+set_value() {
+    test -r "$1"
+    saved_paths+=("$1"); saved_values+=("$(cat "$1")")
+    printf '%s\n' "$2" >"$1"
+}
+set_value /sys/devices/system/cpu/intel_pstate/no_turbo 1
+set_value /sys/devices/system/cpu/intel_pstate/max_perf_pct 100
+set_value /sys/devices/system/cpu/intel_pstate/min_perf_pct 100
+for path in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do set_value "$path" performance; done
+if systemctl is-active --quiet irqbalance; then
+    irq_active=1
+    systemctl stop irqbalance
 fi
-(cd "$PACKAGE" && sha256sum -c SHA256SUMS >/dev/null)
-
-config_sha=$(sha256sum "$HERE/experiment.conf" | awk '{print $1}')
-test "$config_sha" = \
-	"$(manifest_value "$EXPERIMENT_MANIFEST" experiment_config_sha256)"
-CPU=$(manifest_value "$EXPERIMENT_MANIFEST" cpu)
-HOUSEKEEPING_CPUS=$(manifest_value "$EXPERIMENT_MANIFEST" housekeeping_cpus)
-ISOLATED_CPUS=$(manifest_value "$EXPERIMENT_MANIFEST" isolated_cpus)
-ISOLATED_CPUS=${ISOLATED_CPUS:-$CPU}
-MACRO_ENABLED=$(manifest_value "$EXPERIMENT_MANIFEST" macro_enabled)
-ITERATIONS=$(manifest_value "$EXPERIMENT_MANIFEST" iterations)
-REPEATS=$(manifest_value "$EXPERIMENT_MANIFEST" repeats)
-PERF_PROCESSES=$(manifest_value "$EXPERIMENT_MANIFEST" perf_processes)
-WARMUP=$(manifest_value "$EXPERIMENT_MANIFEST" warmup)
-PMU=$(manifest_value "$EXPERIMENT_MANIFEST" pmu)
-SEQ_ITERATIONS=$(manifest_value "$EXPERIMENT_MANIFEST" seq_iterations)
-
-for value in "$CPU" "$ITERATIONS" "$REPEATS" "$PERF_PROCESSES" \
-	"$WARMUP" "$PMU" "$SEQ_ITERATIONS"; do
-	[[ "$value" =~ ^[0-9]+$ ]]
-done
-(( PERF_PROCESSES > 0 && PERF_PROCESSES <= REPEATS ))
-
-test "$(uname -r)" = 5.15.198 || {
-	echo "expected experimental kernel 5.15.198, got $(uname -r)" >&2
-	exit 1
-}
-command -v setarch >/dev/null
-BENCHMARK_RUNNER=(setarch "$(uname -m)" -R)
-probe=$("${BENCHMARK_RUNNER[@]}" "$PACKAGE/vkso-time-bench" --probe)
-detected_backend=$(printf '%s\n' "$probe" |
-	awk -F= '$1 == "backend" { print $2; exit }')
-reader_measurement_window=$(printf '%s\n' "$probe" |
-	awk -F= '$1 == "reader_measurement_window" { print $2; exit }')
-test "$detected_backend" = "$BACKEND" || {
-	echo "wrong kernel backend: expected $BACKEND, got $detected_backend" >&2
-	exit 1
-}
-test "$reader_measurement_window" = direct-user-api-steady-batch-v3 || {
-	echo "unsupported reader measurement window: ${reader_measurement_window:-missing}" >&2
-	exit 1
-}
-boot_image=$(awk '{
-	for (i = 1; i <= NF; ++i) {
-		if ($i ~ /^BOOT_IMAGE=/) {
-			sub(/^BOOT_IMAGE=/, "", $i)
-			print $i
-			exit
-		}
-	}
-}' /proc/cmdline)
-test "${boot_image##*/}" = "${IMAGE##*/}" || {
-	echo "wrong boot image: expected ${IMAGE##*/}, got ${boot_image:-missing}" >&2
-	exit 1
-}
-test "$(sha256sum "$IMAGE" | awk '{print $1}')" = \
-	"$(sha256sum "$PACKAGE/$BACKEND-bzImage" | awk '{print $1}')" || {
-	echo "installed image differs from experiment package: $IMAGE" >&2
-	exit 1
-}
-expected_uts=$(manifest_value "$PACKAGE/boot-manifest.txt" \
-	"${BACKEND}_uts_version")
-test -n "$expected_uts"
-test "$(uname -v)" = "$expected_uts" || {
-	echo "running kernel build identity does not match the package" >&2
-	echo "running: $(uname -v)" >&2
-	echo "package: $expected_uts" >&2
-	exit 1
-}
-
-clocksource=$(cat /sys/devices/system/clocksource/clocksource0/current_clocksource)
-test "$clocksource" = tsc
-for argument in nokaslr nosmt "clocksource=tsc" "tsc=reliable" \
-	"isolcpus=domain,managed_irq,$ISOLATED_CPUS" "nohz_full=$ISOLATED_CPUS" \
-	"rcu_nocbs=$ISOLATED_CPUS" "irqaffinity=$HOUSEKEEPING_CPUS" idle=poll \
-	nmi_watchdog=0 nowatchdog audit=0; do
-	grep -qw "$argument" /proc/cmdline || {
-		echo "missing controlled boot argument: $argument" >&2
-		exit 1
-	}
-done
-test -d "/sys/devices/system/cpu/cpu$CPU"
-test "$(cat /sys/devices/system/cpu/cpu$CPU/online 2>/dev/null || echo 1)" = 1
-isolated=$(cat /sys/devices/system/cpu/isolated)
-printf '%s\n' "$isolated" | awk -v cpu="$CPU" '
-{
-	n = split($0, ranges, ",")
-	for (i = 1; i <= n; ++i) {
-		if (ranges[i] ~ /-/) {
-			split(ranges[i], bounds, "-")
-			if (cpu >= bounds[1] && cpu <= bounds[2])
-				found = 1
-		} else if (ranges[i] == cpu) {
-			found = 1
-		}
-	}
-}
-END { exit !found }
-'
-if [[ -r /sys/devices/system/cpu/smt/active ]]; then
-	test "$(cat /sys/devices/system/cpu/smt/active)" = 0
-fi
-
-set_sysfs_value()
-{
-	local path=$1 expected=$2
-
-	[[ -r "$path" ]] || return 0
-	if [[ $(cat "$path") != "$expected" ]]; then
-		printf '%s\n' "$expected" >"$path"
-	fi
-	test "$(cat "$path")" = "$expected"
-}
-
-set_sysfs_value /sys/devices/system/cpu/intel_pstate/no_turbo 1
-set_sysfs_value /sys/devices/system/cpu/intel_pstate/min_perf_pct 100
-set_sysfs_value /sys/devices/system/cpu/intel_pstate/max_perf_pct 100
-for governor in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
-	[[ -e "$governor" ]] &&
-		set_sysfs_value "$governor" performance
-done
-
-zcat /proc/config.gz >"$RESULT_ROOT/.running-config-$CASE.tmp"
-cmp -s "$PACKAGE/$BACKEND.config" \
-	"$RESULT_ROOT/.running-config-$CASE.tmp" || {
-	rm -f "$RESULT_ROOT/.running-config-$CASE.tmp"
-	echo "running config differs from package $BACKEND.config" >&2
-	exit 1
-}
-
-FINAL=$RESULT_ROOT/$CASE
-test ! -e "$FINAL" || {
-	echo "case result already exists and will not be overwritten: $FINAL" >&2
-	exit 1
-}
-PARTIAL=$RESULT_ROOT/.partial-$CASE-$(date -u +%Y%m%dT%H%M%SZ)-$$
-mkdir -p "$PARTIAL"
-mv "$RESULT_ROOT/.running-config-$CASE.tmp" "$PARTIAL/running.config"
-
-module_loaded=0
-clock_module_loaded=0
-replaced=0
-irqbalance_was_active=0
-completed=0
-
-cleanup()
-{
-	local status=$?
-	trap - EXIT INT TERM
-	set +e
-	if [[ "$replaced" == 1 ]]; then
-		"$PACKAGE/manager" restore "$PACKAGE/libkernel.so" \
-			"$PACKAGE/page_mappings.txt"
-		replaced=0
-	fi
-	if [[ "$module_loaded" == 1 ]]; then
-		rmmod page_cache_replace
-		module_loaded=0
-	fi
-	if [[ "$clock_module_loaded" == 1 ]]; then
-		rmmod vkso_m09_clock
-		clock_module_loaded=0
-	fi
-	if [[ "$irqbalance_was_active" == 1 ]]; then
-		systemctl start irqbalance
-	fi
-	if [[ "$completed" != 1 && -d "$PARTIAL" ]]; then
-		mkdir -p "$RESULT_ROOT/incomplete"
-		incomplete=$RESULT_ROOT/incomplete/${PARTIAL##*/}
-		mv "$PARTIAL" "$incomplete"
-		echo "incomplete_result=$incomplete" >&2
-	fi
-	if [[ -n ${SUDO_UID:-} && -n ${SUDO_GID:-} ]]; then
-		chown -R "$SUDO_UID:$SUDO_GID" "$RESULT_ROOT"
-	fi
-	exit "$status"
-}
-trap cleanup EXIT INT TERM
-
-if command -v systemctl >/dev/null &&
-	systemctl is-active --quiet irqbalance; then
-	systemctl stop irqbalance
-	irqbalance_was_active=1
-fi
-
-printf '%s\n' "$probe" >"$PARTIAL/backend-probe.txt"
-{
-	date -u '+utc=%Y-%m-%dT%H:%M:%SZ'
-	printf 'case=%s\n' "$CASE"
-	printf 'backend=%s\n' "$BACKEND"
-	printf 'build_variant=%s\n' "$VARIANT"
-	printf 'run_id=%s\n' "$RUN_ID"
-	printf 'cpu=%s\n' "$CPU"
-	printf 'housekeeping_cpus=%s\n' "$HOUSEKEEPING_CPUS"
-	printf 'iterations=%s\n' "$ITERATIONS"
-	printf 'repeats=%s\n' "$REPEATS"
-	printf 'perf_processes=%s\n' "$PERF_PROCESSES"
-	printf 'warmup=%s\n' "$WARMUP"
-	printf 'pmu=%s\n' "$PMU"
-	printf 'seq_iterations=%s\n' "$SEQ_ITERATIONS"
-	printf 'reader_measurement_window=%s\n' \
-		"$reader_measurement_window"
-	printf 'user_address_layout=fixed-setarch-R\n'
-	printf 'clocksource=%s\n' "$clocksource"
-	printf 'isolated=%s\n' "$isolated"
-	printf 'cmdline=%s\n' "$(cat /proc/cmdline)"
-	printf 'package=%s\n' "$(realpath "$PACKAGE")"
-	printf 'package_manifest_sha256=%s\n' \
-		"$(sha256sum "$PACKAGE/boot-manifest.txt" | awk '{print $1}')"
-	printf 'image_sha256=%s\n' \
-		"$(sha256sum "$PACKAGE/$BACKEND-bzImage" | awk '{print $1}')"
-	printf 'test_binary_sha256=%s\n' \
-		"$(sha256sum "$PACKAGE/vkso-time-bench" | awk '{print $1}')"
-	printf 'collector_sha256=%s\n' \
-		"$(sha256sum "$0" | awk '{print $1}')"
-	printf 'package_collector_sha256=%s\n' \
-		"$(sha256sum "$PACKAGE/collect-case.sh" | awk '{print $1}')"
-	printf 'collector_git_commit=%s\n' \
-		"$(git -C "$HERE/../../../.." rev-parse HEAD)"
-	printf 'irqbalance_stopped=%s\n' "$irqbalance_was_active"
-	printf 'uname=%s\n' "$(uname -a)"
-	printf 'uname_version=%s\n' "$(uname -v)"
-	printf 'compiler=%s\n' \
-		"$(manifest_value "$PACKAGE/boot-manifest.txt" cc_version)"
-	printf 'benchmark_cflags=%s\n' \
-		"$(manifest_value "$PACKAGE/boot-manifest.txt" benchmark_cflags)"
-	for file in \
-		/sys/devices/system/cpu/intel_pstate/no_turbo \
-		/sys/devices/system/cpu/intel_pstate/min_perf_pct \
-		/sys/devices/system/cpu/intel_pstate/max_perf_pct \
-		/sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
-		[[ -r "$file" ]] && printf '%s=%s\n' "$file" "$(cat "$file")"
-	done
-	printf '%s\n' '--- lscpu ---'
-	lscpu
-	printf '%s\n' '--- clocksource_available ---'
-	cat /sys/devices/system/clocksource/clocksource0/available_clocksource
-	printf '%s\n' '--- default_irq_affinity ---'
-	cat /proc/irq/default_smp_affinity
-	printf '%s\n' '--- processes ---'
-	ps -eLo pid,tid,psr,cls,rtprio,pri,ni,comm,args
-} >"$PARTIAL/environment.txt"
-cat /proc/interrupts >"$PARTIAL/interrupts-before.txt"
-dmesg >"$PARTIAL/dmesg-before.txt"
-
-if grep -q '^vkso_m09_clock ' /proc/modules; then
-	echo "vkso_m09_clock is already loaded" >&2
-	exit 1
-fi
-insmod "$PACKAGE/vkso_m09_clock.ko"
-clock_module_loaded=1
-for _ in $(seq 1 50); do
-	[[ -c /dev/vkso-m09-clock ]] && break
-	sleep 0.1
-done
-test -c /dev/vkso-m09-clock || {
-	echo "vkso_m09_clock did not create /dev/vkso-m09-clock" >&2
-	exit 1
-}
-
-if [[ "$BACKEND" == vkso ]]; then
-	if grep -q '^page_cache_replace ' /proc/modules; then
-		echo "page_cache_replace is already loaded" >&2
-		exit 1
-	fi
-	insmod "$PACKAGE/page_cache_replace.ko"
-	module_loaded=1
-	"$PACKAGE/manager" validate "$PACKAGE/libkernel.so" \
-		"$PACKAGE/page_mappings.txt"
-	"$PACKAGE/manager" replace "$PACKAGE/libkernel.so" \
-		"$PACKAGE/page_mappings.txt"
-	replaced=1
-	VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
-		LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-abi-matrix" \
-		>"$PARTIAL/functional.log" 2>&1
-else
-	VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
-		LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/raw-abi-matrix" \
-		>"$PARTIAL/functional.log" 2>&1
-fi
-grep -Fq 'abi_matrix_status=pass' "$PARTIAL/functional.log"
-tr -d '\r' <"$PARTIAL/functional.log" |
-	grep -E '^(semantics|path|namespace)\.' \
-	>"$PARTIAL/functional.matrix"
-
-mkdir "$PARTIAL/perf-processes"
-printf '%s\n' \
-	'process,local_repeat,global_repeat' \
-	>"$PARTIAL/perf-process-map.csv"
-repeat_offset=0
-for ((process = 0; process < PERF_PROCESSES; ++process)); do
-	remaining=$((REPEATS - repeat_offset))
-	processes_left=$((PERF_PROCESSES - process))
-	process_repeats=$(((remaining + processes_left - 1) / processes_left))
-	process_name=$(printf 'process-%02d' "$process")
-	process_csv=$PARTIAL/perf-processes/$process_name.csv
-	process_stderr=$PARTIAL/perf-processes/$process_name.stderr
-
-	LD_LIBRARY_PATH="$PACKAGE" "${BENCHMARK_RUNNER[@]}" \
-		"$PACKAGE/vkso-time-bench" \
-		--backend "$BACKEND" --mode perf --cpu "$CPU" \
-		--iterations "$ITERATIONS" --repeats "$process_repeats" \
-		--warmup "$WARMUP" --pmu "$PMU" \
-		>"$process_csv" 2>"$process_stderr"
-	if (( process == 0 )); then
-		sed -n '1p' "$process_csv" >"$PARTIAL/perf.csv"
-	fi
-	awk -F, -v OFS=, -v offset="$repeat_offset" \
-		'NR > 1 { $3 += offset; print }' "$process_csv" \
-		>>"$PARTIAL/perf.csv"
-	for ((local_repeat = 0; local_repeat < process_repeats;
-	      ++local_repeat)); do
-		printf '%d,%d,%d\n' "$process" "$local_repeat" \
-			"$((repeat_offset + local_repeat))" \
-			>>"$PARTIAL/perf-process-map.csv"
-	done
-	repeat_offset=$((repeat_offset + process_repeats))
-done
-test "$repeat_offset" -eq "$REPEATS"
-cat "$PARTIAL"/perf-processes/*.stderr >"$PARTIAL/perf.stderr"
-LD_LIBRARY_PATH="$PACKAGE" "${BENCHMARK_RUNNER[@]}" \
-	"$PACKAGE/vkso-time-bench" \
-	--backend "$BACKEND" --mode seq --cpu "$CPU" \
-	--seq-iterations "$SEQ_ITERATIONS" \
-	>"$PARTIAL/seq.csv" 2>"$PARTIAL/seq.stderr"
-
-test "$(sed -n '1p' "$PARTIAL/perf.csv")" = \
-	'backend,api,repeat,path,tsc_cycles_per_call,pmu_enabled,pmu_cycles_per_call,instructions_per_call,branches_per_call,branch_misses_per_call,cache_references_per_call,cache_misses_per_call,l1d_load_misses_per_call,llc_load_misses_per_call'
-expected_rows=$((1 + 20 * REPEATS * 2))
-test "$(wc -l <"$PARTIAL/perf.csv")" -eq "$expected_rows" || {
-	echo "incomplete perf.csv: expected $expected_rows rows" >&2
-	exit 1
-}
-test "$(wc -l <"$PARTIAL/perf-process-map.csv")" \
-	-eq "$((REPEATS + 1))"
-test "$(wc -l <"$PARTIAL/seq.csv")" -eq 3
-if [[ "$BACKEND" == raw ]]; then
-	expected_user_path=raw_vdso
-else
-	expected_user_path=vkso_wrapper
-fi
-awk -F, -v backend="$BACKEND" -v repeats="$REPEATS" \
-	-v user_path="$expected_user_path" '
-NR == 1 { next }
-$1 != backend { exit 1 }
-{
-	key = $2 SUBSEP $3 SUBSEP $4
-	if (seen[key]++)
-		exit 1
-	if (!api[$2]++)
-		api_count++
-	if (!path[$4]++)
-		path_count++
-}
-END {
-	if (api_count != 20 || path_count != 2 ||
-	    !path["syscall"] || !path[user_path])
-		exit 1
-	for (i = 0; i < repeats; ++i)
-		for (name in api)
-			if (!seen[name SUBSEP i SUBSEP "syscall"] ||
-			    !seen[name SUBSEP i SUBSEP user_path])
-				exit 1
-}
-' "$PARTIAL/perf.csv"
-
-if [[ "$MACRO_ENABLED" == 1 ]]; then
-	# Same public collect command; application code and binaries are package-owned.
-	if [[ "$BACKEND" == raw ]]; then
-		macro_methods=(native vdso)
-	else
-		macro_methods=(vkso)
-	fi
-	for method in "${macro_methods[@]}"; do
-		python3 "$PACKAGE/macro/redis_workload.py" "$PACKAGE/macro" \
-			"$PARTIAL/redis/$method" --method "$method" \
-			--carrier "$PACKAGE/libkernel.so" \
-			--rounds "$(manifest_value "$EXPERIMENT_MANIFEST" macro_rounds)" \
-			--requests "$(manifest_value "$EXPERIMENT_MANIFEST" macro_requests)" \
-			--warmup "$(manifest_value "$EXPERIMENT_MANIFEST" macro_warmup)" \
-			--server-cpu "$(manifest_value "$EXPERIMENT_MANIFEST" macro_server_cpu)" \
-			--client-cpus "$(manifest_value "$EXPERIMENT_MANIFEST" macro_client_cpus)" \
-			>"$PARTIAL/redis-$method.log" 2>&1
-		test -s "$PARTIAL/redis/$method/complete.json"
-	done
-fi
-
-cat /proc/interrupts >"$PARTIAL/interrupts-after.txt"
-dmesg >"$PARTIAL/dmesg-after.txt"
-printf 'case=%s\nstatus=complete\n' "$CASE" >"$PARTIAL/complete"
-sync
-
-if [[ "$replaced" == 1 ]]; then
-	"$PACKAGE/manager" restore "$PACKAGE/libkernel.so" \
-		"$PACKAGE/page_mappings.txt"
-	replaced=0
-fi
-if [[ "$module_loaded" == 1 ]]; then
-	rmmod page_cache_replace
-	module_loaded=0
-fi
-if [[ "$clock_module_loaded" == 1 ]]; then
-	rmmod vkso_m09_clock
-	clock_module_loaded=0
-fi
-if [[ "$irqbalance_was_active" == 1 ]]; then
-	systemctl start irqbalance
-	irqbalance_was_active=0
-fi
-mv "$PARTIAL" "$FINAL"
-completed=1
-echo "case_result=$FINAL"
+mapfile -t values < <(python3 - <<'PY'
+import json,os
+c=json.loads(os.environ['DIRECT_CONFIG'])
+for key in ('CPU','ITERATIONS','WARMUP','REPEATS','PERF_PROCESSES'): print(int(c[key]))
+PY
+)
+echo "collecting=$CASE output=$DIRECT_OUT (validation, then public READ)"
+python3 "$HERE/../direct-api/collect.py" --execute --case "$CASE" \
+    --bundle "$DIRECT_PACKAGE/direct" --out "$DIRECT_OUT" \
+    --cpu "${values[0]}" --iterations "${values[1]}" --warmup "${values[2]}" \
+    --repeats "${values[3]}" --processes "${values[4]}"

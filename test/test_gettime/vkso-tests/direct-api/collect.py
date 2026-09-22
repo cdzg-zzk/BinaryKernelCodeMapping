@@ -54,13 +54,14 @@ def preflight(bundle, case, cpu):
     verify_sums(bundle, {'build.json', 'native-bench', 'vkso-bench',
                          'src/direct-api/collect.py', 'src/direct-api/results.py'})
     build = json.loads((bundle / 'build.json').read_text())
-    must(build['protocol'] == PROTOCOL, 'wrong sidecar protocol')
+    must(build['protocol'] == PROTOCOL, 'wrong direct API protocol')
     for name in ('collect.py', 'results.py', 'bundle.py'):
         must(sha256(Path(__file__).parent / name) == sha256(bundle / 'src/direct-api' / name),
              'collector/helper differs from bundled source: ' + name)
-    package = Path(build['package']).resolve()
+    package = (bundle / build['package']).resolve()
     verify_sums(package, REQUIRED)
-    must(sha256(package / 'SHA256SUMS') == build['package_checksums_sha256'], 'kernel package inventory changed')
+    must(all(sha256(package / name) == value for name, value in build['kernel_checksums'].items()),
+         'kernel package inventory changed')
     must(sha256(package / 'libkernel.so') == build['carrier_sha256'], 'carrier changed')
     must(os.path.samefile(bundle / 'carrier/libkernel.so', package / 'libkernel.so'),
          'linked carrier must be the manager-registered inode, not a copy')
@@ -104,7 +105,7 @@ def preflight(bundle, case, cpu):
         tuning[str(path)] = text(path)
         must(tuning[str(path)] == 'performance', 'governor is not performance')
     modules = text('/proc/modules')
-    for name in ('page_cache_replace', 'vkso_m09_clock'):
+    for name in ('page_cache_replace', 'vkso_m09_clock', 'vkso_kernel_reader'):
         must(not any(line.startswith(name + ' ') for line in modules.splitlines()), 'module already active: ' + name)
     try:
         active = subprocess.run(['systemctl', 'is-active', '--quiet', 'irqbalance'],
@@ -128,19 +129,28 @@ def preflight(bundle, case, cpu):
                      for k, sep, v in [line.partition(':')] if sep and k.strip() in ('model name', 'microcode', 'flags')},
         'bundle_build_sha256': sha256(bundle / 'build.json'),
         'package_manifest_sha256': sha256(package / 'boot-manifest.txt'),
+        'package_checksums_sha256': sha256(package / 'SHA256SUMS'),
+        'public_library_sha256': sha256(bundle / 'libvkso_time.so'),
+        'carrier_sha256': sha256(package / 'libkernel.so'),
+        'kernel_image_sha256': sha256(package / (backend + '-bzImage')),
+        'kernel_config_sha256': sha256(package / (backend + '.config')),
+        'git_commit': original['git_commit'],
+        'dirty_patch_sha256': original['candidate_patch_sha256'],
         'compiler_version': build['compiler_version'],
         'source_fingerprint': build['source_fingerprint'], 'base_cflags': build['base_cflags'],
         'benchmark_source_sha256': sha256(bundle / 'src/direct-api/time_bench.c'),
         'header_sha256': sha256(bundle / 'src/direct-api/vkso_time.h'),
         'binary_sha256': sha256(bundle / ('native-bench' if backend == 'raw' else 'vkso-bench')),
         'counter_unit': 'TSC ticks, not unhalted core cycles',
-        'pfn_identity': 'NOT_RUN: manager validation is not an independent PFN observation',
-        'kernel_reader_publisher': 'NOT_RUN: use separate existing kernel-side protocols',
+        'pfn_identity': 'NOT_RUN',
+        'kernel_reader': 'NOT_RUN',
+        'publisher_interaction': 'NOT_RUN: separate instrumented update protocol',
     }
 
 
 def logged(argv, destination, env, timeout=600):
     """Wait synchronously; on interruption stop this command's process group."""
+    print('stage=' + Path(destination).name, flush=True)
     with Path(destination).open('xb') as output:
         process = subprocess.Popen(argv, stdout=output, stderr=subprocess.STDOUT,
                                    env=env, start_new_session=True)
@@ -173,10 +183,10 @@ def collect(options, package, build, runner, record):
     env = dict(os.environ)
     for key in ('LD_PRELOAD', 'LD_LIBRARY_PATH', 'LD_AUDIT'):
         env.pop(key, None)
-    clock_loaded = manager_loaded = replacement_attempted = False
+    clock_loaded = manager_loaded = replacement_attempted = reader_loaded = False
     failure = None
     cleanup_errors = []
-    record.update(iterations=options.iterations, warmup=options.warmup,
+    record.update(block=int(os.environ.get('DIRECT_BLOCK', '0')), iterations=options.iterations, warmup=options.warmup,
                   repeats=options.repeats, processes=options.processes,
                   expected_api_count=len(CASE_NAMES), status='RUNNING')
     write_json(out / 'start.json', record)
@@ -204,6 +214,27 @@ def collect(options, package, build, runner, record):
         must('abi_matrix_status=pass' in (out / 'legacy-abi.log').read_text(), 'legacy ABI matrix did not pass')
         for mode in ('--check', '--check-fast'):
             logged(runner + [str(binary), mode, '--cpu', str(options.cpu)], out / (mode[2:] + '.log'), env)
+        logged(['insmod', str(package / (backend + '-kernel-reader.ko'))], out / 'reader-module.log', env)
+        reader_loaded = True
+        if backend == 'vkso':
+            logged([sys.executable, str(bundle / 'src/direct-api/sharing.py'),
+                    str(package / 'libkernel.so'), str(package / 'page_mappings.txt'), 'vkso'],
+                   out / 'sharing.json', env)
+            record['pfn_identity'] = 'PASS'
+        else:
+            record['pfn_identity'] = 'SKIP: Raw does not graft a carrier'
+        kernel = Path('/sys/kernel/debug/vkso_kernel_reader')
+        (kernel / 'control').write_text(f"{options.cpu} {options.iterations} {options.repeats} {options.warmup}\n")
+        data = (kernel / 'samples').read_text()
+        (out / 'kernel-reader.csv').write_text(data)
+        kernel_rows = list(csv.DictReader(data.splitlines()))
+        must(len(kernel_rows) == 3 * options.repeats and
+             len({(r['api'], r['round']) for r in kernel_rows}) == len(kernel_rows) and
+             all(int(r['cpu']) == options.cpu and int(r['iterations']) == options.iterations
+                 and int(r['total_tsc_cycles']) > 0 for r in kernel_rows), 'incomplete kernel reader samples')
+        record['kernel_reader'] = 'PASS; counter unit=TSC ticks/call'
+        logged(['rmmod', 'vkso_kernel_reader'], out / 'reader-unload.log', env)
+        reader_loaded = False
         rows = []
         remaining = options.repeats
         for process in range(options.processes):
@@ -235,6 +266,11 @@ def collect(options, package, build, runner, record):
                 logged(['rmmod', 'page_cache_replace'], out / 'manager-unload.log', env)
             except BaseException as exc:
                 cleanup_errors.append(repr(exc))
+        if reader_loaded:
+            try:
+                logged(['rmmod', 'vkso_kernel_reader'], out / 'reader-cleanup.log', env)
+            except BaseException as exc:
+                cleanup_errors.append(repr(exc))
         if clock_loaded:
             try:
                 logged(['rmmod', 'vkso_m09_clock'], out / 'clock-unload.log', env)
@@ -253,7 +289,7 @@ def collect(options, package, build, runner, record):
                     stream.write(sha256(path) + '  ' + path.name + '\n')
     if record['status'] != 'COMPLETE':
         raise RuntimeError('collection failed; preserve ' + str(out) + ': ' + str(failure or cleanup_errors))
-    print('public_api_collection=COMPLETE; PFN and kernel-side tests remain separate; ' + str(out))
+    print('public_api_collection=COMPLETE; ' + str(out))
 
 
 def interrupted(signum, frame):
@@ -280,8 +316,8 @@ def main():
             fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
             for number in (signal.SIGTERM, signal.SIGHUP):
                 signal.signal(number, interrupted)
-        must(1 <= options.processes <= options.repeats <= 10000, 'invalid repetition hierarchy')
-        must(0 < options.iterations <= 1000000000 and 0 <= options.warmup <= 1000000000, 'invalid batch size')
+        must(1 <= options.processes <= options.repeats <= 1000, 'invalid repetition hierarchy')
+        must(0 < options.iterations <= 1000000 and 0 <= options.warmup <= 1000000, 'invalid batch size')
         package, build, runner, record = preflight(options.bundle, options.case, options.cpu)
         if not options.execute:
             print(json.dumps({'preflight': 'PASS', 'kernel_setup': 'NOT_RUN', 'environment': record}, indent=2))

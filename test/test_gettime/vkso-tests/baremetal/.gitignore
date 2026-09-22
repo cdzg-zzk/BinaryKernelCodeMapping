@@ -4,3 +4,6 @@
 /.experiment-state*
 /.experiment*.lock
 /__pycache__/
+
+/.direct-api-state.json*
+/.direct-api.lock

@@ -23,11 +23,11 @@
 #ifdef USE_VKSO
 #include "vkso_time.h"
 #define BACKEND "vkso-direct"
-#define api_cgt vkso_time_clock_gettime
-#define api_cgr vkso_time_clock_getres
-#define api_gtod vkso_time_gettimeofday
-#define api_time vkso_time_time
-#define api_cpu vkso_time_getcpu
+#define api_cgt clock_gettime
+#define api_cgr clock_getres
+#define api_gtod gettimeofday
+#define api_time time
+#define api_cpu getcpu
 #else
 #define BACKEND "native-libc"
 #define api_cgt clock_gettime
@@ -36,7 +36,7 @@
 #define api_time time
 #define api_cpu getcpu
 #endif
-#define PROTOCOL "clocktime-direct-api-v1"
+#define PROTOCOL "clocktime-direct-api-v2"
 #ifndef AT_VKSO_MM_DATA
 #define AT_VKSO_MM_DATA 52
 #endif
@@ -276,6 +276,11 @@ int main(int argc, char **argv)
 		}
 		puts("time_syscall_denial_check=PASS (selected fast paths only)");
 		return 0;
+	}
+	/* Explicit first touch even when a diagnostic caller requests zero warmup. */
+	for (size_t i = 0; i < CASE_COUNT; ++i) {
+		if (fast_only && !cases[i].fast) continue;
+		if (cases[i].run(1, 1).error) fail("first-touch API error");
 	}
 	puts("protocol,backend,case,process_index,round,iterations,tsc_ticks,ticks_per_call,cpu,aux_start,aux_end,checksum");
 	for (uint64_t round = 0; round < repeats; ++round) {

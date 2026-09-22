@@ -4,8 +4,8 @@
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-NORMAL_PACKAGE=${NORMAL_PACKAGE:-$HERE/artifacts/final-normal}
-NO_RETPOLINE_PACKAGE=${NO_RETPOLINE_PACKAGE:-$HERE/artifacts/final-no-retpoline}
+NORMAL_PACKAGE=${NORMAL_PACKAGE:-$HERE/artifacts/direct-normal}
+NO_RETPOLINE_PACKAGE=${NO_RETPOLINE_PACKAGE:-$HERE/artifacts/direct-no-retpoline}
 GRUB_SCRIPT=/etc/grub.d/41_vkso_time
 # shellcheck disable=SC1091
 source "$HERE/experiment.conf"

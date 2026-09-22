@@ -8,8 +8,8 @@ ROOT=$(cd "$HERE/../../../.." && pwd)
 RAW_TARBALL=${RAW_TARBALL:-/tmp/linux-5.15.198.tar.xz}
 RAW_SOURCE=${RAW_SOURCE:-/tmp/vkso-final-raw-source}
 BUILD_ROOT=${BUILD_ROOT:-/tmp/vkso-final-build}
-NORMAL_PACKAGE=${NORMAL_PACKAGE:-$HERE/artifacts/final-normal}
-NO_RETPOLINE_PACKAGE=${NO_RETPOLINE_PACKAGE:-$HERE/artifacts/final-no-retpoline}
+NORMAL_PACKAGE=${NORMAL_PACKAGE:-$HERE/artifacts/direct-normal}
+NO_RETPOLINE_PACKAGE=${NO_RETPOLINE_PACKAGE:-$HERE/artifacts/direct-no-retpoline}
 JOBS=${JOBS:-$(nproc)}
 KBUILD_BUILD_TIMESTAMP=${KBUILD_BUILD_TIMESTAMP:-$(date -u '+%Y-%m-%d %H:%M:%S UTC')}
 export KBUILD_BUILD_TIMESTAMP
@@ -41,71 +41,45 @@ normal_final=$NORMAL_PACKAGE
 no_retpoline_final=$NO_RETPOLINE_PACKAGE
 NORMAL_PACKAGE=$normal_final.building-$$
 NO_RETPOLINE_PACKAGE=$no_retpoline_final.building-$$
-raw_normal=
-raw_no_retpoline=
-if [[ -s "$RAW_TARBALL" ]]; then
-	if [[ -e "$RAW_SOURCE" ]]; then
-		RAW_SOURCE=$(mktemp -d "$BUILD_ROOT/raw-source.XXXXXX")
-	fi
-	mkdir -p "$RAW_SOURCE"
-	tar -xf "$RAW_TARBALL" -C "$RAW_SOURCE" --strip-components=1
-	test "$(make -s -C "$RAW_SOURCE" kernelversion)" = 5.15.198
-else
-	# Reuse only the unchanged, verified native baselines. Both VKSO images
-	# are rebuilt from the current implementation, including namespace sharing.
-	raw_normal=$HERE/artifacts/reader-load-v4-normal
-	raw_no_retpoline=$HERE/artifacts/reader-load-v4-no-retpoline
-	"$HERE/verify-packages.sh" "$raw_normal" "$raw_no_retpoline"
-	echo "raw_baseline=reused archived Linux 5.15.198 Normal/no-retpoline images"
+# Rebuild all four images. Legacy packages are not a source/provenance substitute.
+test -s "$RAW_TARBALL" || {
+    echo "missing Linux 5.15.198 source archive: $RAW_TARBALL; set RAW_TARBALL" >&2
+    exit 1
+}
+if [[ -e "$RAW_SOURCE" ]]; then
+    RAW_SOURCE=$(mktemp -d "$BUILD_ROOT/raw-source.XXXXXX")
 fi
-
-# Build the application tools once so both mitigation variants use identical
-# executables. This step compiles; it does not launch Redis or a benchmark.
-source "$HERE/experiment.conf"
-macro_source=$ROOT/test/test_gettime/macro-benchmark
-macro_build=$BUILD_ROOT/macro
-if [[ ${MACRO_ENABLED:-0} == 1 ]]; then
-	mkdir -p "$macro_build/source"
-	tar -xzf "$macro_source/vendor/redis-7.2.4.tar.gz" \
-		-C "$macro_build/source" --strip-components=1
-	make -C "$macro_build/source" -j"$JOBS" \
-		>"$macro_build/build.log" 2>&1
-	for binary in redis-server redis-cli redis-benchmark; do
-		cp "$macro_build/source/src/$binary" "$macro_build/$binary"
-	done
-	${CC:-gcc} -O2 -Wall -Wextra -Werror -fPIC -shared \
-		-I"$ROOT/test/test_gettime/vkso-tests/functional" \
-		"$macro_source/adapter.c" -ldl -o "$macro_build/adapter.so"
-	cp "$macro_source/redis_workload.py" "$macro_build/"
-	cp "$macro_source/adapter.c" "$macro_build/"
-	cp "$macro_source/vendor/REDIS-COPYING" "$macro_build/"
-fi
+mkdir -p "$RAW_SOURCE"
+tar -xf "$RAW_TARBALL" -C "$RAW_SOURCE" --strip-components=1
+test "$(make -s -C "$RAW_SOURCE" kernelversion)" = 5.15.198
 
 BUILD_VARIANT=normal UPDATE_BENCH=0 \
-	RAW_PACKAGE="$raw_normal" \
+	RAW_PACKAGE= \
 	RAW_SOURCE="$RAW_SOURCE" RAW_TARBALL="$RAW_TARBALL" \
 	BUILD_ROOT="$BUILD_ROOT/normal" OUT="$NORMAL_PACKAGE" \
 	CURRENT_LINK= JOBS="$JOBS" "$HERE/build-images.sh"
 
 BUILD_VARIANT=no-retpoline UPDATE_BENCH=0 \
-	RAW_PACKAGE="$raw_no_retpoline" \
+	RAW_PACKAGE= \
 	RAW_SOURCE="$RAW_SOURCE" RAW_TARBALL="$RAW_TARBALL" \
 	BUILD_ROOT="$BUILD_ROOT/no-retpoline" \
 	OUT="$NO_RETPOLINE_PACKAGE" CURRENT_LINK= JOBS="$JOBS" \
 	"$HERE/build-images.sh"
 
-if [[ ${MACRO_ENABLED:-0} == 1 ]]; then
-	for package in "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"; do
-		mkdir "$package/macro"
-		for file in redis-server redis-cli redis-benchmark adapter.so \
-			redis_workload.py adapter.c REDIS-COPYING build.log; do
-			cp "$macro_build/$file" "$package/macro/"
-		done
-		cp "$macro_source/vendor/redis-7.2.4.tar.gz" "$package/macro/"
-		cp "$ROOT/test/test_gettime/vkso-tests/functional/vkso_abi.h" "$package/macro/"
-		(cd "$package" && sha256sum macro/* >>SHA256SUMS)
-	done
-fi
+for package in "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"; do
+    python3 "$HERE/../direct-api/bundle.py" --package "$package" \
+        --out "$package/direct" --cc "${CC:-gcc}"
+    # The outer inventory also covers every direct API file, including build.json.
+    (cd "$package" && python3 - <<'INVENTORY'
+from pathlib import Path
+import hashlib
+with open('SHA256SUMS', 'a') as f:
+    for p in sorted(Path('direct').rglob('*')):
+        if p.is_file() and not p.is_symlink():
+            f.write(hashlib.sha256(p.read_bytes()).hexdigest() + '  ' + str(p) + '\n')
+INVENTORY
+    )
+done
 
 "$HERE/verify-packages.sh" "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE" |
 	tee "$BUILD_ROOT/package-audit.txt"

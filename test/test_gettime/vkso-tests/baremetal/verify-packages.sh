@@ -4,8 +4,8 @@
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-NORMAL_PACKAGE=${1:-$HERE/artifacts/final-normal}
-NO_RETPOLINE_PACKAGE=${2:-$HERE/artifacts/final-no-retpoline}
+NORMAL_PACKAGE=${1:-$HERE/artifacts/direct-normal}
+NO_RETPOLINE_PACKAGE=${2:-$HERE/artifacts/direct-no-retpoline}
 
 manifest_value()
 {
@@ -25,7 +25,7 @@ validate_package()
 		raw-abi-matrix vkso-abi-matrix vkso-time-bench \
 		vkso_time_bench.c libkernel.so \
 		page_mappings.txt page_cache_replace.ko vkso_m09_clock.ko \
-		manager; do
+		manager owner_descriptors.txt kernel_identity.txt; do
 		test -s "$package/$file" || {
 			echo "missing package artifact: $package/$file" >&2
 			exit 1
@@ -130,15 +130,7 @@ for file in raw-abi-matrix vkso-abi-matrix vkso-time-bench \
 	}
 done
 
-if [[ -d "$NORMAL_PACKAGE/macro" || -d "$NO_RETPOLINE_PACKAGE/macro" ]]; then
-	for file in redis-server redis-cli redis-benchmark adapter.so redis_workload.py \
-		adapter.c vkso_abi.h redis-7.2.4.tar.gz; do
-		cmp -s "$NORMAL_PACKAGE/macro/$file" "$NO_RETPOLINE_PACKAGE/macro/$file" || {
-			echo "macrobench tool missing or differs across variants: $file" >&2
-			exit 1
-		}
-	done
-fi
+python3 "$HERE/../direct-api/package_check.py" "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"
 
 echo "four_image_package_validation=pass"
 echo "normal_package=$NORMAL_PACKAGE"

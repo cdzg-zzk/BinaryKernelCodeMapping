@@ -29,11 +29,8 @@ ai_prompt.md
 ai_output.md
 
 # test
-/test/test_BCH/
 /test/test_glibc/
-/test/test_lz4/
 /test/test_UTF-8/
-/test/test_xz/
 
 /test/test_gettime/*
 !/test/test_gettime/.gitignore
@@ -41,4 +38,68 @@ ai_output.md
 !/test/test_gettime/vkso-tests/
 !/test/test_gettime/optimization-audit/
 !/test/test_gettime/namespace-sharing/
-!/test/test_gettime/macro-benchmark/
+!/test/test_gettime/history/
+!/test/test_gettime/README.md
+
+# Reproducible compiler/Python outputs; never source or measured evidence
+__pycache__/
+*.pyc
+/test/evaluation/*/*.o
+/test/evaluation/*/*.ko
+/test/evaluation/*/*.mod
+/test/evaluation/*/*.mod.c
+/test/evaluation/*/.*.cmd
+/test/evaluation/*/.*.o.d
+/test/evaluation/*/Module.symvers
+/test/evaluation/*/modules.order
+/page_cache_replace/runtime/manager.lock
+
+# Local experiment evidence/build payloads, retained on disk (not source)
+/test/section63/results/
+/test/test_gettime/namespace-sharing/results/
+/test/test_gettime/optimization-audit/results/
+
+# test_lz4 generated artifacts (source/configs remain visible)
+/test/test_lz4/results/
+/test/test_lz4/work*/
+/test/test_lz4/build*/
+/test/test_lz4/vendor/
+/test/test_lz4/corpus/
+/test/test_lz4/**/*.o
+/test/test_lz4/**/*.ko
+/test/test_lz4/**/*.mod
+/test/test_lz4/**/*.mod.c
+/test/test_lz4/**/.*.cmd
+/test/test_lz4/**/.*.o.d
+/test/test_lz4/**/Module.symvers
+/test/test_lz4/**/modules.order
+
+# test_BCH generated artifacts (source/configs remain visible)
+/test/test_BCH/results/
+/test/test_BCH/work*/
+/test/test_BCH/build*/
+/test/test_BCH/vendor/
+/test/test_BCH/corpus/
+/test/test_BCH/**/*.o
+/test/test_BCH/**/*.ko
+/test/test_BCH/**/*.mod
+/test/test_BCH/**/*.mod.c
+/test/test_BCH/**/.*.cmd
+/test/test_BCH/**/.*.o.d
+/test/test_BCH/**/Module.symvers
+/test/test_BCH/**/modules.order
+
+# test_xz generated artifacts (source/configs remain visible)
+/test/test_xz/results/
+/test/test_xz/work*/
+/test/test_xz/build*/
+/test/test_xz/vendor/
+/test/test_xz/corpus/
+/test/test_xz/**/*.o
+/test/test_xz/**/*.ko
+/test/test_xz/**/*.mod
+/test/test_xz/**/*.mod.c
+/test/test_xz/**/.*.cmd
+/test/test_xz/**/.*.o.d
+/test/test_xz/**/Module.symvers
+/test/test_xz/**/modules.order

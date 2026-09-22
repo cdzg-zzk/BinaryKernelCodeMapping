@@ -1,146 +1,107 @@
-# Clocktime direct API：§6.4 候选读接口流程 v1
+# Clocktime：四组公开 API READ（v2）
 
-基线：`43c60fc68a6ec6bed5b8131927f7c17100b2f20c`。
-协议：`clocktime-direct-api-v1`。这是新增、独立的候选流程，不改写历史数据。
+唯一正式入口是 `../baremetal/experiment.sh`。协议为 `clocktime-direct-api-v2`；旧 Redis、v1 sidecar、revision 数据不兼容，不能混入。测试内容先验证功能与物理共享，再测完整公开时间 API，另存普通内核 reader 的批量成本。
 
-## 本次改动与边界
+## 调用路径
 
-主比较只有 **Raw/VKSO × Normal/no-retpoline 配置族**。Raw 调用原生 libc，由 libc 使用原生 vDSO；VKSO 显式动态链接现有 `libkernel.so`，通过公开头文件中的薄入口调用 `__vkso_*`。没有 `adapter.so`、`LD_PRELOAD`、`dlopen/dlsym` 或每次调用的 provider 选择。
+- Raw：应用 → libc 的 `clock_gettime/clock_getres/gettimeofday/time/getcpu` → 原生 vDSO 或 syscall。
+- VKSO：应用 → 动态链接的 `libvkso_time.so` 同名公开函数 → `libkernel.so` 的 `__vkso_*` 私有入口/context → grafted 内核驻留计算页；不支持的路径由 carrier 汇编直接 syscall。
 
-`vkso_time.h` 提供 `vkso_time_clock_gettime`、`vkso_time_clock_getres`、`vkso_time_gettimeofday`、`vkso_time_time`、`vkso_time_getcpu`。参数和返回约定对应相应公开 C API；名称使用显式前缀，**不接管 libc 的标准名称，也不宣称既有应用二进制透明接入**。应用需要包含头文件、选择这些入口并重新链接。
+没有 LD_PRELOAD、provider selector 或热路径 dlopen/dlsym/dlvsym。`libvkso_time.so` 是部署用的固定公开 API 库，不是多后端实验桥。库只做 ABI/errno 转换；时间计算没有复制进该库。私有 context 注入仍保留。共享库与执行文件反汇编均在构建时检查。
 
-薄入口仅完成原始负错误码到 `-1/errno` 的转换，随后/此前的真实时间计算仍在 carrier 指向的共享核心中。`time()` 返回的负秒数不被误当成错误码。`libvkso_time_init.a` 只包含一次性初始化和原有的 `vkso_user_wrapper.c`；不包含时间计算的第二份实现，也不是新的转接 DSO。
+应用需要显式链接这个库，在任何时间 API 调用前调用一次 `vkso_time_init()`；初始化使用 pthread_once，失败后保持失败状态。manager 必须在应用启动前完成注册，所有使用者退出后才能 restore。不是任意未修改应用二进制的透明兼容方案。构造函数中提前调用时间函数的第三方库不在此初始化契约内。
 
-应用必须在任何调用之前成功执行 `vkso_time_init()`。它使用 `pthread_once`，初始化成功时保留调用线程的 errno；首次失败是 sticky 的，修复部署后应启动新进程。热路径不重复执行 once 检查。不要在同一进程中另行调用旧 binder 或混用其他会重写其 context 的适配器。
+公开函数成功不改 errno；失败转换为 -1/errno。time() 的负秒数不当作通用负错误码。gettimeofday 的过时 timezone 参数与 glibc 公共接口一致忽略，正式测量使用非空 tv、NULL timezone。原始带 timezone 的 carrier 语义仍由 ABI matrix 验证。公开 fallback 不调用同名 libc 函数，所以不会递归。
 
-**共享页必须在进程启动前由现有 manager 注册，并保持到全部用户退出。** 新初始化首先检查 VKSO auxv，避免在普通 Raw 启动上触碰 carrier 状态；该检查不是物理页共享证明。carrier 内的私有汇编入口、共享时间核心、namespace 页共享、grafting 与内核生命周期代码均未修改。
+## 测试内容与单位
 
-本轮只实现用户公开 READ 接入与采集。PFN、内核 reader/publisher、完整并发/namespace 生命周期仍使用独立的原有验证；新 collector 不把它们冒充为已通过。
+16 个 READ 项目：7 种 clock_gettime（realtime、monotonic、raw、boottime、TAI、两种 coarse）；realtime/coarse clock_getres；gettimeofday；time(NULL)、time(&t)；getcpu；process CPU clock 的 gettime/getres；realtime alarm gettime。invalid clock/errno、NULL clock_getres、namespace 与映射权限通过单独功能检查覆盖。目标内核不支持任一正式 API 时失败，不悄悄删项目。
 
-## 源码层验证
+绑定 CPU 2，固定地址布局 setarch -R，初始化、首次访问和预热在计时前。每轮批量 500000 次完整调用，31 轮分布到 7 个新进程。两端使用 LFENCE/RDTSCP/LFENCE 与编译器屏障，检查 TSC_AUX 和运行 CPU。保留全部有效原始批次，发现迁移/错误则整个采集失败。单位是 **TSC ticks/call**，不是核心 cycles。不扣除循环或固定常数；批次分位数不是单次调用 P99。
 
-在仓库根目录：
+`--check-fast` 独立进程先预触碰，再用 seccomp 拒绝时间/getcpu syscall，并执行过滤器正向对照；诊断计时不会进入样本。`--fast-only` 仅用于宿主源码测试，正式收集与汇总不允许漏掉 fallback 项目。
 
-```sh
+## 构建和安装
+
+在仓库根目录先运行源码测试：
+
+```bash
 python3 test/test_gettime/vkso-tests/direct-api/tests/test_direct.py
+cd test/test_gettime/vkso-tests/baremetal
+# 准备原版 Linux 源码；已有同版本压缩包可直接设置 RAW_TARBALL。
+curl -fL https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.198.tar.xz -o /tmp/linux-5.15.198.tar.xz
+export NORMAL_PACKAGE="$PWD/artifacts/direct-normal"
+export NO_RETPOLINE_PACKAGE="$PWD/artifacts/direct-no-retpoline"
+JOBS=4 RAW_TARBALL=/tmp/linux-5.15.198.tar.xz ./build-all.sh
+./verify-packages.sh "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"
+sudo env NORMAL_PACKAGE="$NORMAL_PACKAGE" NO_RETPOLINE_PACKAGE="$NO_RETPOLINE_PACKAGE" ./install-grub.sh
 ```
 
-测试会在临时目录构建一个带 `vkso_test_only_mock_carrier` 标记的假 DSO，**仅验证调用端 ABI、errno、初始化、链接和工具逻辑**，退出后删除。它不能用于目标机实验，bundle builder 会拒绝该标记。
+GCC 11.4.0、Python 3、GNU Make/binutils 与原有内核构建依赖必须可用。没有原版源码压缩包时明确失败；不回用缺少身份元数据的旧包。`build-all.sh` 重新构建四个镜像、carrier、manager、模块、ABI 程序和直接 API 程序。失败构建保留 `.building-*` 与日志，旧完整包不覆盖。要重新构建，显式选择一对新包路径；不要手工补造旧包的 owner/kernel identity。
 
-本地 Native smoke 使用真实 libc/vDSO，但它不是原论文硬件上的性能数据。本会话中 GCC 14 与 Clang 分别通过 25 个测试；GCC 11.4.0、目标内核和真实 kernel-backed VKSO 执行未在本地完成。见交付包验证记录。
+每个包包含 `direct/`。相对链接 `direct/carrier/libkernel.so -> ../../libkernel.so` 保证运行与 manager 注册同一 inode，包从 staging 移到最终目录后仍有效。外层 SHA256SUMS 覆盖 direct 构建清单、源码和二进制；内层清单绑定构建时的内核清单、carrier、编译器和源码指纹。boot-manifest/source.patch 记录 Git 提交与 dirty patch；不同 variant 的配置、源码与工具身份做交叉检查。
 
-## 构建：复用未修改的内核包，新增独立 sidecar
+no-retpoline 保留原配置含义：关闭 RETPOLINE、RETHUNK、CPU_UNRET_ENTRY、CPU_SRSO、MITIGATION_ITS 配置族。Normal 至少启用前三项；实际差异可检查包内 raw/vkso.config。不能解释为只替换了一条跳转指令。
 
-本次没有修改内核或 carrier ABI，因此可以对已构建、哈希有效的原 Normal/no-retpoline 包建立 sidecar，不需要为了用户入口变化重新构建时间核心。
+## 固定启动/采集流程
 
-两个包须保留完整原产物与 `SHA256SUMS`，包括 carrier、manager、模块、ABI matrix、四组对应镜像及配置。源码必须保留基线的 `functional/vkso_abi.h`、`vkso_user_wrapper.c/.h`；builder 会核对其 Git blob 身份。
+`experiment.conf` 默认 4 个 block，每个 block 4 次独立启动，共 16 boot；四种顺序平衡位置。参数应在构建前确定，begin 后冻结，不可中途修改源码、工具或包。
 
-在目标构建环境执行，路径替换为真实绝对路径：
-
-```sh
-D=test/test_gettime/vkso-tests/direct-api
-python3 "$D/bundle.py" --package /absolute/final-normal \
-  --out /absolute/direct-normal --cc gcc-11
-python3 "$D/bundle.py" --package /absolute/final-no-retpoline \
-  --out /absolute/direct-no-retpoline --cc gcc-11
+```bash
+./experiment.sh begin
+./experiment.sh status
+./experiment.sh boot       # 设置一次性 GRUB 项并立即重启
+# 重启后，回到同一 baremetal 目录
+./experiment.sh collect    # 自动 sudo、设置并恢复调频/irqbalance，验证后采集
+./experiment.sh status
+# 重复 boot → 重启后 collect，直到 status=complete
+./experiment.sh aggregate
 ```
 
-要求 GCC **11.4.0** 与原包清单一致，依赖 Python 3.8+、Make、GNU binutils 和 C/C++ 编译器。脚本不下载依赖、不执行内核包里的程序，不改变原包，不安装内核、不重启。输出目录必须不存在且位于源码和原包之外。输出含两种 benchmark、初始化静态库、源码、编译日志、ELF/反汇编审计、构建清单和校验和。
+第一 block 可显式写四组名称（每个 boot 都会重启）：
 
-`carrier/libkernel.so` 是指向原包 carrier 的符号链接，必须与 manager 注册的文件为**同一 inode**。不能换成复制文件。sidecar 记录原包绝对路径；迁移包的位置后应重新构建 sidecar，而不是手改清单。对两个 mitigation 变体使用同一源代码、编译器与公开调用选项；差异维度是原内核/carrier 构建配置族，不是单条 retpoline 指令。
-
-自有应用的链接示例（manager 注册完成后才可启动）：
-
-```sh
-B=/absolute/direct-normal
-gcc-11 -D_GNU_SOURCE -O2 -std=gnu11 \
-  -I"$B/src/direct-api" -I"$B/src/functional" \
-  "$B/src/direct-api/example.c" "$B/libvkso_time_init.a" -pthread \
-  -L"$B/carrier" -Wl,--no-as-needed -lkernel -Wl,--as-needed \
-  -Wl,-rpath,"$B/carrier" -o ./vkso-time-example
+```bash
+./experiment.sh boot raw-normal
+# 重启后
+./experiment.sh collect raw-normal
+./experiment.sh boot vkso-normal
+# 重启后
+./experiment.sh collect vkso-normal
+./experiment.sh boot raw-no-retpoline
+# 重启后
+./experiment.sh collect raw-no-retpoline
+./experiment.sh boot vkso-no-retpoline
+# 重启后
+./experiment.sh collect vkso-no-retpoline
 ```
 
-这不是将共享核心静态链接进应用。静态库只提供 setup；执行文件具有 `DT_NEEDED libkernel.so`，时间计算仍从 carrier 调用。
+后续 block 按 status 的顺序使用无参数 boot/collect，不能重复第一块的顺序。只有四种配置，没有 native/bridge/Copy 等额外后端。每个成功样本必须来自新的 boot_id。首次跑通可在**构建前**将 BLOCKS 改为 1，但一组只有一次启动不能支持稳定差异或等价性结论。
 
-## 测量口径
+目标控制：Linux 5.15.198/x86-64、TSC、SMT 关闭、隔离 1–3、控制 CPU 0、测量 CPU 2、Intel P-state 固定 performance/turbo off。安装器保留既有控制启动参数。collector 核对 UTS、内嵌 config、安装镜像哈希、BOOT_IMAGE、auxv、clocksource、调频和模块占用。Raw 必须有 native vDSO 且无 VKSO MM-data auxv；VKSO 相反。不同实验机器需先明确调整控制协议，不能忽略失败继续运行。debugfs 必须已挂载在 `/sys/kernel/debug`。
 
-16 个路径：七种 clock_gettime 快路径、两种 clock_getres 快路径、gettimeofday(tv,NULL)、time(NULL)、time(&t)、getcpu(cpu,node)，以及 process CPU clock 的读取/分辨率和 realtime alarm 读取三条回退路径。
+## 功能、共享与状态成本
 
-不测 `gettimeofday(NULL,...)` 作为 libc 基线，也不将旧 timezone 参数行为混入对照。调用参数必须满足各入口的有效指针等前提；新增薄入口不是用户态指针访问的安全门。
+每次收集先执行原 ABI matrix（含动态 clock、namespace 与权限），独立 PFN 观察确认 carrier 的声明代码/只读数据确实映射到内核源 PFN，代码 RX、数据 R--；再跑公开 API syscall-bracket/errno 检查和无时间 syscall 诊断，之后才收 READ。PFN 辅助模块在正式用户态计时前卸载。
 
-每个 case 编译成独立批次函数，函数选择发生在时间戳之前。计时范围包括循环与完整公开调用，包括 VKSO 的返回值转换；不含装载、grafting、初始化、预热或输出。两侧都保留完整批次成本，不做事后空循环/包装成本扣减。
+同次启动还测三种普通内核 ktime reader，存 `kernel-reader.csv`；旧字段 total_tsc_cycles 的真实单位仍是 TSC ticks。collector 在失败时尝试 restore，restore 失败则保留 backing module 并记录 FAIL，不卸载后伪报成功。捕获不到的断电/SIGKILL 必须人工恢复或重启。
 
-时间戳使用有 LFENCE 和编译器 memory clobber 的 RDTSCP，先检查 invariant TSC/RDTSCP 能力，固定 CPU，检查批次两端 TSC_AUX。单位为 **TSC ticks/call**，不是 unhalted core cycles；批次分布也不是单次 API 的尾延迟。所有有效批次保留，不删除不利样本。操作系统保持正常时间更新。
+publisher/update 与持续读写交互的插桩和采集工具保留在 `../update-bench/`，它们需要另外构建的 UPDATE 镜像，不能混入无插桩 READ 样本。入口见 [状态成本说明](STATEFUL.md)。此版本不会把历史 writer 结果作为新 READ 包的证据，也不把 Raw/VKSO 所有差异归因于物理页共享。
 
-`--check` 使用 syscall bracket、分辨率、返回值和 errno 检查公开接口；`--check-fast` 是单独进程的 syscall-denial 诊断，含 filter 正向对照。它只检查 13 条快路径，不输出该诊断的时延，也不进入性能样本。
+## 结果与统计
 
-`--fast-only` 只供明确的本地诊断；正式 collector 不使用它，汇总器会拒绝缺少三条回退路径的数据。本会话宿主对 CLOCK_REALTIME_ALARM 返回 EINVAL，因此本地完整矩阵未通过，不能用 fast-only 结果替代。
+结果在 `baremetal/results/<run>/block-NN/<case>/`：
 
-## 目标机：先预检，再显式执行
+- `samples.csv` 和 `process-NN.csv`：原始批次的 ticks、调用次数、AUX、进程/轮次。
+- `run.json`：case/block/boot_id、源码/包/程序身份、编译器、CPU、控制参数、清理状态。
+- `check.log`、`check-fast.log`、`legacy-abi.log`、`sharing.json`（VKSO）：功能和共享证据。
+- `kernel-reader.csv`：单独的内核 reader 数据；不会作为用户公开调用结果。
 
-保留原来的内核安装和启动操作。每次由操作者明确启动所需的镜像。**原 `experiment.sh collect` 仍是历史协议；本候选流程使用下面的新入口，不要混合两者输出。** Redis 在新流程中没有构建/运行步骤，不需要构造 bridge-vDSO 基线。
+失败留在 `incomplete/`；不覆盖已完成组。全部完成后生成 `.tar.gz` 和 `.sha256`，同时保留原目录。aggregate 生成 `summary.json`，先求每个 boot 内中位数，再等权汇总 boot；VKSO/Raw 大于 1 表示更慢。缺组、重复 boot、缺样本、源码/参数/构建混用均拒绝。少于 3 boot/组不生成区间；区间为逐 API 独立 boot bootstrap，不证明等价性。
 
-当前预检针对原 i7/四核配置：Linux 5.15.198、CPU 2 测量、CPU 0 控制、SMT 关闭、TSC clocksource、隔离 CPUs 1–3、固定布局，以及原流程的启动参数：
+也可明确指定结果：
 
-```text
-nokaslr nosmt clocksource=tsc tsc=reliable
-isolcpus=domain,managed_irq,1-3 nohz_full=1-3 rcu_nocbs=1-3 irqaffinity=0
-idle=poll nmi_watchdog=0 nowatchdog audit=0
+```bash
+python3 ../direct-api/results.py results/<run>/block-*/* --out results/<run>/summary.json
 ```
 
-还要求 Intel P-state no_turbo=1、min/max_perf_pct=100、performance governor，并且 irqbalance 不活跃。collector 只核验，不自动改这些系统设置。与原安装命名保持一致：`/boot/vkso-final-CASE-5.15.198.bzImage`。
-
-启动某个 case 后，先只读预检：
-
-```sh
-python3 "$D/collect.py" --case raw-normal --bundle /absolute/direct-normal
-```
-
-预检核对校验和、构建版本、运行配置/内核身份、安装镜像、原生 vDSO/auxv、clocksource、CPU、调频配置、现有模块占用及同 inode carrier。若权限不足读取系统信息，可以由 root 执行预检，但不加 `--execute` 时不加载模块。
-
-通过后执行（该命令明确加载测试模块，并在 VKSO case 中注册/恢复 carrier）：
-
-```sh
-sudo python3 "$D/collect.py" --execute \
-  --case raw-normal --bundle /absolute/direct-normal \
-  --out /absolute/results/block-01/raw-normal
-```
-
-其他三组改为对应 case 和 bundle：
-
-```text
-vkso-normal         /absolute/direct-normal
-raw-no-retpoline    /absolute/direct-no-retpoline
-vkso-no-retpoline   /absolute/direct-no-retpoline
-```
-
-每次必须在**对应内核启动后**采集，不能在一个 boot 中把 case 名换四次。默认 31 个批次轮次分配到 7 个新进程，每路径每轮预热 10,000 次、测量 500,000 次。启动内重复不是独立 boot。
-
-collector 先运行原包的 ABI matrix，再运行新的完整公开 API 检查与快路径拒绝 syscall 诊断，最后采样；它不会把检查中的数据写入性能表。模块和 registration 只由显式执行模式操作，不安装内核、不更改 GRUB、不重启。
-
-正常结束和可捕获的失败都会尝试恢复。若 replace 部分失败，也会尝试 restore；若 restore 失败，不卸载 page_cache_replace，并将结果标成 FAIL、保留日志供人工恢复。不要并行运行旧 collector、另一个 manager 或其他载体会话。SIGKILL、断电或 kernel panic 无法依靠 Python finally 清理，需要按原管理流程恢复或重启。
-
-`COMPLETE` 仅表示本次公开 READ 收集及清理完成。run.json 的 PFN 和 kernel reader/publisher 字段仍为 NOT_RUN；没有独立 PFN/两端验证时，不可据此宣称整个 §6.4 验收完成。
-
-## 独立启动与汇总
-
-建议至少完成四个完整启动块，每个块包含四个配置，并采用平衡顺序，例如：
-
-```text
-block 1: raw-normal, vkso-normal, vkso-no-retpoline, raw-no-retpoline
-block 2: vkso-normal, raw-no-retpoline, raw-normal, vkso-no-retpoline
-block 3: raw-no-retpoline, vkso-no-retpoline, vkso-normal, raw-normal
-block 4: vkso-no-retpoline, raw-normal, raw-no-retpoline, vkso-normal
-```
-
-这不增加实现种类；增加的是独立启动重复。每组输出使用新目录，不覆盖失败记录或历史结果。汇总示例：
-
-```sh
-python3 "$D/results.py" /absolute/results/block-*/* --out /absolute/direct-summary.json
-```
-
-汇总先计算每个 boot 的各 API 中位数，再等权汇总 boot；VKSO/Raw 是成本比，大于 1 表示 VKSO 较慢。重复 boot_id、漏样本、协议/构建混用、同组镜像或可执行文件变化会被拒绝。启动间比值不强行配对轮次。每侧少于三个 boot 时省略置信区间；其余提供独立 boot 重采样的逐项 percentile 区间，不作等价性证明或多重比较修正。
-
-## 尚需完成的目标验收
-
-本地测试没有运行真实 grafted VKSO，也没有执行本文件中的 root 采集流程。采用正式结果前，仍需在原机器确认 GCC 11.4 构建、四种内核下的新公开 API/路径、实际代码页身份、namespace 与进程生命周期，以及原有内核 reader/publisher 成本。新版本没有修改相关核心，仍然需要将它们的证据与实际使用的 package 身份关联。
+不要重复输出到同一个 summary 文件。压缩包是汇总前的原始证据包，summary 单独保留。当前实际测试及 NOT_RUN 边界见 [VALIDATION.md](VALIDATION.md)。

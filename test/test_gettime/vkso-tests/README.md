@@ -1,3 +1,7 @@
+> 当前正式 READ 入口： [direct-api/README.md](direct-api/README.md)。
+> 使用正常 libc/vDSO 对比直接链接的 VKSO 公开 API，四组、独立启动重复。
+> 下文保留功能设计与历史验证背景；旧 revision/Redis 性能不是新协议结果。
+
 # VKSO clocktime experiments
 
 项目全貌、目录导航和应用级 macro-benchmark 接入边界见

@@ -53,6 +53,8 @@ def validate_rows(rows, run):
             raise ValueError('invalid iteration count or counter')
         if not math.isfinite(cost) or abs(cost - ticks / iterations) > 1e-8:
             raise ValueError('cost does not match the raw batch counter')
+        if not 0 <= int(row['aux_start']) < 2**32 or not 0 <= int(row['checksum']) < 2**64:
+            raise ValueError('invalid AUX/checksum value')
         if int(row['cpu']) != run['cpu'] or row['aux_start'] != row['aux_end']:
             raise ValueError('CPU/migration mismatch')
     if seen != expected:
@@ -80,6 +82,7 @@ def summarize(directories):
     boots = set()
     group_identities = {}
     signature = None
+    blocks = {}
     for directory in directories:
         verify_sums(directory, {'run.json', 'samples.csv', 'check.log', 'check-fast.log', 'legacy-abi.log'})
         run = json.loads((directory / 'run.json').read_text())
@@ -88,10 +91,22 @@ def summarize(directories):
         if run['boot_id'] in boots:
             raise ValueError('same boot counted twice: ' + run['boot_id'])
         boots.add(run['boot_id'])
+        block = run.get('block')
+        if not isinstance(block, int) or block < 1:
+            raise ValueError('missing independent block identity')
+        if run['case'] in blocks.setdefault(block, set()):
+            raise ValueError('duplicate case in a boot block')
+        blocks[block].add(run['case'])
+        for name, marker in [('check.log', 'public_api_check=PASS scope=full'),
+                             ('check-fast.log', 'time_syscall_denial_check=PASS'),
+                             ('legacy-abi.log', 'abi_matrix_status=pass')]:
+            if marker not in (directory / name).read_text():
+                raise ValueError('missing functional evidence: ' + name)
         expected_backend = 'native-libc' if run['case'].startswith('raw-') else 'vkso-direct'
         if run['backend'] != expected_backend:
             raise ValueError('case/backend mismatch')
-        identity = (run['package_manifest_sha256'], run['binary_sha256'])
+        identity = (run['package_manifest_sha256'], run['binary_sha256'],
+                    run['package_checksums_sha256'], run['public_library_sha256'])
         if run['case'] in group_identities and group_identities[run['case']] != identity:
             raise ValueError('mixed kernel package or executable within one group')
         group_identities[run['case']] = identity
@@ -110,6 +125,8 @@ def summarize(directories):
         groups[run['case']].append({'boot_id': run['boot_id'], 'path': str(directory), 'medians': medians})
     if not all(groups.values()):
         raise ValueError('all four groups are required; no missing group silently omitted')
+    if any(cases != set(GROUPS) for cases in blocks.values()):
+        raise ValueError('incomplete independent boot block')
     rng = random.Random(20260922)
     comparisons = []
     for variant in ('normal', 'no-retpoline'):
