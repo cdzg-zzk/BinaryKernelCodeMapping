@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fresh-build unchanged BCH and run it in the prepared private exact119 guest."""
+"""Fresh-build complete BCH with the current owner and registration code and run it in the prepared private exact119 guest."""
 from pathlib import Path
 import argparse
 import hashlib
@@ -13,7 +13,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
-PREPARED = HERE / 'results/lz4-cli-qemu-20260912-attempt06'
+PREPARED = HERE / 'results/lz4-transaction-qemu-20260912-attempt02'
 KERNEL = Path('/tmp/vkso-guest-kernel-119/extracted/boot/vmlinuz-5.15.0-119-generic')
 
 
@@ -31,11 +31,13 @@ def main():
     parser.add_argument('--prepared', type=Path, default=PREPARED)
     parser.add_argument('--kernel', type=Path, default=KERNEL)
     parser.add_argument('--timeout', type=int, default=1800)
+    parser.add_argument('--kernel-cost', action='store_true',
+                        help='run the full kernel matrix with the same registered owner')
     args = parser.parse_args()
     output, prepared, kernel = map(lambda value: value.resolve(),
                                     (args.output, args.prepared, args.kernel))
     output.mkdir(parents=True, exist_ok=False)
-    metadata = {'scope': 'full unchanged BCH correctness-only; no paper performance samples',
+    metadata = {'scope': 'full BCH correctness-only with current owner/registration; no paper performance samples',
                 'host_euid': os.geteuid(), 'host_command': sys.argv,
                 'prepared_environment': str(prepared), 'components': [], 'host_commands': []}
 
@@ -87,7 +89,7 @@ def main():
         logged(['make', '-C', '/lib/modules/5.15.0-119-generic/build',
                 f'M={source / "kmod"}', '-j2', 'modules'], 'owner-build.log')
         owner = source / 'kmod/vkso_bch.ko'
-        logged(['pahole', '-J', '--btf_base', '/sys/kernel/btf/vmlinux', owner], 'owner-btf.log')
+        logged(['pahole', '-J', '--skip_encoding_btf_enum64', '--btf_base', '/sys/kernel/btf/vmlinux', owner], 'owner-btf.log')
         logged(['modinfo', '-F', 'vermagic', owner], 'owner-vermagic.log')
         assert (output / 'owner-vermagic.log').read_text().startswith('5.15.0-119-generic ')
         binaries = output / 'binaries'
@@ -98,7 +100,13 @@ def main():
         for directory in ('repo', 'helpers'):
             for path in (prepared / 'payload' / directory).rglob('*'):
                 if path.is_file():
-                    copy_file(path, payload / path.relative_to(prepared / 'payload'))
+                    relative = path.relative_to(prepared / 'payload')
+                    current = ROOT / path.relative_to(prepared / 'payload/repo') if directory == 'repo' else path
+                    copy_file(current, payload / relative)
+        # These interfaces may be absent from an older prepared environment.
+        for name in ('protocol.h', 'owner.h'):
+            copy_file(ROOT / 'page_cache_replace' / name,
+                      payload / 'repo/page_cache_replace' / name)
         copy_file(prepared / 'payload/vmlinux-5.15.0-119-generic', payload / 'vmlinux-5.15.0-119-generic')
         copy_file(owner, payload / 'owner/vkso_bch.ko')
         copy_file(source / 'config/symbols.txt', payload / 'symbols.txt')
@@ -107,6 +115,11 @@ def main():
         copy_file(HERE / 'bch_guest.py', payload / 'guest.py')
         copy_file(HERE / 'lz4_guest.py', payload / 'lz4_guest_helpers.py')
         copy_file(HERE / 'bch_qemu.py', output / 'bch_qemu.py')
+        from setup.prepare import prepare as prepare_setup
+        prepare_setup(output, payload, copy_file)
+        if args.kernel_cost:
+            from kernel_cost_prepare import prepare_bch
+            prepare_bch(output, payload, copy_file, source / 'kmod')
         disk = output / 'guest.ext4'
         with disk.open('wb') as stream:
             stream.truncate(3 * 1024**3)

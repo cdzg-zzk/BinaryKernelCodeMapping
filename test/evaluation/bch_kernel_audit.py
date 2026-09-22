@@ -18,6 +18,21 @@ RESULT_FIELDS = ('round', 'backend', 'm', 't', 'len', 'errors', 'mode', 'iterati
 MASK64 = (1 << 64) - 1
 
 
+def new_log_window(before, after):
+    """Locate newly appended messages even if older, pre-load lines expired.
+
+    A unique 64-line suffix from immediately before the driver load must still
+    be present. If this anchor itself expired, collection remains invalid.
+    """
+    if after.startswith(before):
+        return after[len(before):]
+    lines = before.splitlines(keepends=True)
+    require(bool(lines), 'empty pre-load kernel log')
+    anchor = ''.join(lines[-64:])
+    require(after.count(anchor) == 1, 'kernel log lost the pre-load boundary')
+    return after.split(anchor, 1)[1]
+
+
 def require(condition, message):
     if not condition:
         raise ValueError(message)
@@ -73,7 +88,7 @@ def expected_positions(seed, errors, nbits):
     return result
 
 
-def vector_plan(measure, correctness_vectors, outer_runs):
+def vector_plan(measure, correctness_vectors, outer_runs, aligned_inputs=False):
     plan = []
     for case, t in enumerate((4, 8)):
         for trial in range(correctness_vectors):
@@ -89,16 +104,20 @@ def vector_plan(measure, correctness_vectors, outer_runs):
             for case, t in enumerate((4, 8)):
                 for errors in range(t + 1):
                     plan.append(('measurement', round_number, t, errors,
-                        0x9e3779b97f4a7c15 ^ (round_number << 40) ^ (case << 32) ^ errors))
+                        0x9e3779b97f4a7c15 ^ (round_number << 40) ^ (case << 32) ^ errors ^
+                        ((1 << 24) if aligned_inputs else 0)))
     return plan
 
 
 def audit(directory: Path, *, measure: bool, expected_cpu: int = 1,
-          correctness_vectors: int = 128, outer_runs: int = 11, sample_ms: int = 10) -> dict:
+          correctness_vectors: int = 128, outer_runs: int = 11, sample_ms: int = 10,
+          aligned_inputs: bool = False) -> dict:
     directory = Path(directory)
     require(correctness_vectors == 128 and 1 <= outer_runs <= 128 and 1 <= sample_ms <= 100,
             'requested audit parameters do not match the driver contract')
     status = read_status(directory / 'driver-status.txt')
+    require(int(status.get('aligned_inputs', '0')) == int(aligned_inputs),
+            'aligned-input protocol differs from requested audit')
     vector_rows = read_csv(directory / 'driver-vectors.txt', VECTOR_FIELDS)
     result_rows = read_csv(directory / 'driver-results.txt', RESULT_FIELDS)
     expected_checks = correctness_vectors * (5 + 9) * len(BACKENDS) * 2
@@ -124,7 +143,7 @@ def audit(directory: Path, *, measure: bool, expected_cpu: int = 1,
         require(integer(status.get(key), f'status {key}') == expected,
                 f'status {key}: expected {expected}')
 
-    plan = vector_plan(measure, correctness_vectors, outer_runs)
+    plan = vector_plan(measure, correctness_vectors, outer_runs, aligned_inputs)
     expected_keys = []
     for vector_id, (phase, _round, _t, _errors, _seed) in enumerate(plan):
         if phase == 'correctness':

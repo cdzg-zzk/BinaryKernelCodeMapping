@@ -7,7 +7,7 @@ The full original correctness matrix passed, followed by normal restoration
 and module unload. Requested bytes are identical for the native and registered
 backends: 92,388 B after initialization and 92,930/92,958 B while the t4/t8
 context is live. The linked record reports physical interval coverage, overlaps
-and allocator-usable bytes separately. Paper Table 23 uses requested live bytes.
+and allocator-usable bytes separately. Paper Table 24 uses requested live bytes.
 
 This observation extends the existing library/owner page census to persistent
 BCH control allocations and the original benchmark's C workload buffers. It

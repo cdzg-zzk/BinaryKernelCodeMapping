@@ -1,5 +1,20 @@
 # XZ: complete export and functional validation
 
+The [current-owner kernel-cost session](kernel-cost-evidence.md) adds five public
+GPL module exports in owner metadata and runs the complete user and kernel
+workloads in one registration. All 882 original user decodes and 99 three-backend
+kernel trials pass, as do four declared PFNs and release. The four algorithm
+objects' executable sections are unchanged; owner support is now 27 SLOC.
+
+Current-build update: [identity-checked registration and complete algorithm workflows](registration-transaction-evidence.md#current-complete-algorithm-workflows)
+rerun the full workload with the cooperative owner and current transaction
+manager. The archived logs match owner and kernel build IDs before STAGE.
+Owner refcount is 1 while active, source/user PFNs match, fresh
+post-release mappings no longer use them, and all modules unload. The results
+below retain their earlier build identities; formal performance for the new
+build is still outstanding.
+
+
 On 2026-09-12, a private KVM guest running the exact Ubuntu
 `5.15.0-119-generic` kernel completed the unchanged XZ Embedded benchmark on
 all three original inputs after a fresh `vkso init` / `vkso exec` deployment.

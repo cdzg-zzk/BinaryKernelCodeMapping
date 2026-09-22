@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fresh-build unchanged XZ and run it in the prepared private exact119 guest."""
+"""Fresh-build complete XZ with the current owner and registration code and run it in the prepared private exact119 guest."""
 from pathlib import Path
 import argparse
 import gzip
@@ -14,7 +14,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
-PREPARED = HERE / 'results/lz4-cli-qemu-20260912-attempt06'
+PREPARED = HERE / 'results/lz4-transaction-qemu-20260912-attempt02'
 KERNEL = Path('/tmp/vkso-guest-kernel-119/extracted/boot/vmlinuz-5.15.0-119-generic')
 
 
@@ -32,11 +32,13 @@ def main():
     parser.add_argument('--prepared', type=Path, default=PREPARED)
     parser.add_argument('--kernel', type=Path, default=KERNEL)
     parser.add_argument('--timeout', type=int, default=1800)
+    parser.add_argument('--kernel-cost', action='store_true',
+                        help='validate three kernel backends in the same registration')
     args = parser.parse_args()
     output, prepared, kernel = map(lambda value: value.resolve(),
                                     (args.output, args.prepared, args.kernel))
     output.mkdir(parents=True, exist_ok=False)
-    metadata = {'scope': 'full unchanged XZ functional workload; guest timings are diagnostic only',
+    metadata = {'scope': 'full XZ workload with current owner/registration; guest timings are diagnostic only',
                 'host_euid': os.geteuid(), 'host_command': sys.argv,
                 'prepared_environment': str(prepared), 'components': [], 'host_commands': []}
 
@@ -124,7 +126,7 @@ def main():
         logged(['make', '-C', '/lib/modules/5.15.0-119-generic/build',
                 f'M={source / "kmod"}', '-j2', 'modules'], 'owner-build.log')
         owner = source / 'kmod/vkso_xz.ko'
-        logged(['pahole', '-J', '--btf_base', '/sys/kernel/btf/vmlinux', owner], 'owner-btf.log')
+        logged(['pahole', '-J', '--skip_encoding_btf_enum64', '--btf_base', '/sys/kernel/btf/vmlinux', owner], 'owner-btf.log')
         logged(['modinfo', '-F', 'vermagic', owner], 'owner-vermagic.log')
         assert (output / 'owner-vermagic.log').read_text().startswith('5.15.0-119-generic ')
         binaries = output / 'binaries'
@@ -137,8 +139,13 @@ def main():
                 if path.is_file():
                     if directory == 'repo':
                         current = ROOT / path.relative_to(prepared / 'payload/repo')
-                        assert digest(path) == digest(current), current
-                    copy_file(path, payload / path.relative_to(prepared / 'payload'))
+                        path = current
+                    target = (payload / 'repo' / path.relative_to(ROOT)) if directory == 'repo' else (payload / path.relative_to(prepared / 'payload'))
+                    copy_file(path, target)
+        # These interfaces may be absent from an older prepared environment.
+        for name in ('protocol.h', 'owner.h'):
+            copy_file(ROOT / 'page_cache_replace' / name,
+                      payload / 'repo/page_cache_replace' / name)
         copy_file(prepared / 'payload/vmlinux-5.15.0-119-generic', payload / 'vmlinux-5.15.0-119-generic')
         copy_file(owner, payload / 'owner/vkso_xz.ko')
         copy_file(source / 'config/symbols.txt', payload / 'symbols.txt')
@@ -154,6 +161,11 @@ def main():
         copy_file(HERE / 'xz_guest.py', payload / 'guest.py')
         copy_file(HERE / 'lz4_guest.py', payload / 'lz4_guest_helpers.py')
         copy_file(HERE / 'xz_qemu.py', output / 'xz_qemu.py')
+        from setup.prepare import prepare as prepare_setup
+        prepare_setup(output, payload, copy_file)
+        if args.kernel_cost:
+            from kernel_cost_prepare import prepare as prepare_kernel_cost
+            prepare_kernel_cost('xz', output, payload, copy_file, source / 'kmod')
         disk = output / 'guest.ext4'
         with disk.open('wb') as stream:
             stream.truncate(3 * 1024**3)

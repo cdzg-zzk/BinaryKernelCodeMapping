@@ -1,11 +1,73 @@
 # LZ4 registered application evidence — 2026-09-12
 
-The complete LZ4 CLI reaches the selected registered carrier but fails on its
-first compression operation. The failure is an unresolved direct relative
-helper call in the current export path. Static checks and physical page
-sharing succeed before that call; neither establishes executable closure
-completeness. These guest sessions provide functional and diagnostic evidence,
-with no application performance samples.
+The [libc-matched baseline and complete runner](lz4-helper-baseline-evidence.md)
+now pass a six-backend component matrix and all 192 four-backend CLI
+invocations in one guest round. Formal application performance remains pending.
+
+Current-build update: [identity-checked registration and complete algorithm workflows](registration-transaction-evidence.md#current-complete-algorithm-workflows)
+rerun the full workload with the cooperative owner and current transaction
+manager. The archived logs match owner and kernel build IDs before STAGE.
+Owner refcount is 1 while active, source/user PFNs match, fresh
+post-release mappings no longer use them, and all modules unload. The results
+below retain their earlier build identities; formal performance for the new
+build is still outstanding.
+
+
+Latest registration build: [protocol v3](registration-transaction-evidence.md)
+passes the complete 24 input/block pairs, 48 operation traces and five-page
+PFN checks, with COMMIT confirmation and transactional release. The archived
+performance data below still belong to their original builds; no v3 formal
+application timing has been collected.
+
+
+The modified registered LZ4 backend passes the complete CLI validation:
+12 Silesia files at two block sizes, with compression, decompression and stock
+cross-decoding. Its three private helper slots bind to stack-realigning
+libshim bridges backed by libc. Five declared pages match the source kernel
+PFNs. These are functional and mapping results; application performance across
+independent deployments remains uncollected. The older direct-call failure
+and its diagnosis are retained below under their original build identity.
+
+The later [cooperative-owner session](results/lz4-owner-qemu-20260912-attempt03/result.json)
+also passes the complete 24-pair matrix, with owner reference count 1 during
+registration and successful release/unload. Its protocol v2, owner descriptor,
+zeroed management-data window and separate active-unload fixture are described
+in [owner lifetime evidence](registration-owner-evidence.md). The binding-only
+session below retains its earlier protocol and reference-count observations.
+
+## Completed helper-binding validation
+
+The successful archive is
+[`lz4-binding-qemu-20260912-attempt06`](results/lz4-binding-qemu-20260912-attempt06/).
+It uses Linux `5.15.0-119-generic`, boot ID
+`c79c7d0e-5d60-4ae4-8df3-401d7057ae78`, the full adapted owner, the revised
+checker and builder, and the existing complete upstream 1.9.3 CLI.
+
+| Evidence | Observed result |
+| --- | --- |
+| `evidence/validation/cli-validation.json` | All 24 input/block pairs pass complete output and stock cross-decoding checks |
+| `evidence/validation/cli-logs/*.trace` | 48 operation traces record nonzero calls to the selected carrier; all three helper bindings identify libshim bridges and libc providers |
+| `evidence/validation/export/vkso/metadata/data_bindings_resolved.json` | Three private slots at DSO addresses 32896, 32904 and 32912 for memset, memmove and memcpy |
+| `evidence/validation/registered-pfns.json` | Four RX text pages and one R rodata page match source PFNs in the observer loader |
+| `evidence/validation/restored-pfns.json` | Fresh mappings of all five offsets no longer reference their registered source PFNs |
+| `result.json` | Guest PASS, QEMU exit 0, normal release and test modules unloaded |
+
+An offline consistency check compared all 24 case records with the 48 raw
+traces and all five registration/restoration PFN pairs. Full output comparison
+was performed by the guest; the CLI scratch paths are reused between cases,
+so this is not a second offline decode of every intermediate output. The PFN
+observer is a separate loader, not a PFN measurement of each CLI process.
+The observed owner reference count during registration remains zero; normal
+release does not establish owner pinning or transactional rollback.
+
+The new binding attempts preserve their preparation failures separately.
+Attempt 03 could not see `/dev/kvm` in the restricted execution environment.
+After that restriction was removed, attempt 04 reached header generation but
+the rebuilt owner lacked BTF; attempt 05 reached shim linking but the guest
+lacked `libdl.a`. Adding split BTF to the exact119 owner and including the
+link input allowed attempt 06 to finish. KVM is currently available; it is no
+longer a blocker. These failures are not algorithm correctness failures or
+performance trials.
 
 ## Workload and environment
 
@@ -15,7 +77,8 @@ backend validation requires all 12 complete Silesia files, independent blocks
 at 64 KiB and 1 MiB, compression and decompression: 24 input/block pairs and
 48 selected-backend operations. Each pair must decode a common stock frame,
 cross-decode the adapted output with the stock CLI, match the complete input,
-and record calls to the selected DSO. Zero pairs completed in the registered
+and record calls to the selected DSO. All 24 pairs completed in the modified
+binding session above; zero pairs completed in the historical registered
 sessions below. The separate ordinary-DSO validation passed 48
 input/block/backend pairs across its two user-space backends.
 
@@ -23,13 +86,14 @@ input/block/backend pairs across its two user-space backends.
 Ubuntu `5.15.0-119-generic=5.15.0-119.129` kernel and the existing full
 [`lz4_guest.py`](lz4_guest.py) validation. The guest has no network or shared
 host directory. The kernel image was extracted from the public package;
-package and environment records are included with attempt 06. Modules are
+package and environment records are included in the archives. Modules are
 loaded only in the guest. The harness invokes the actual `vkso init` and
 `vkso exec` path, rebuilding runtime KRG, static checks, type header, sparse
-carrier and shim for that session. No checker bypass, historical runtime
-address substitution, exporter patch or replacement algorithm was used.
+carrier and shim for that session. The historical failure sessions use the
+old exporter; the successful binding session uses the revised exporter and
+explicit owner slots. Both retain the full selected algorithm APIs.
 
-## Attempt ledger
+## Historical direct-call attempt ledger
 
 All paths below are under `test/evaluation/results/`. Earlier failures remain
 separate records; preparation failures are not algorithm test failures.
@@ -100,9 +164,9 @@ attempt directories outside Git.
 
 Declaring an undefined dynamic symbol does not retarget an unchanged direct
 branch in a shared executable page. The observed exporter output omitted
-the native destination while treating it as a shim import. The next change
-therefore concerns binding and closure construction, not LZ4 timing or the
-number of repetitions. The separately prepared exporter proposal is unapplied.
+the native destination while treating it as a shim import. The implemented
+revision rejects this unsupported direct reference and gives the adapted
+owner explicit private helper slots, as exercised in the successful session.
 
 ## Mapping and cleanup observations
 
@@ -122,8 +186,6 @@ This establishes the observed fresh mappings and ordered unload; it does not
 verify original carrier bytes, original PFN identity, surviving old mappings,
 transactional rollback or owner pinning.
 
-The next complete application result still requires resolving the direct-call
-binding, then passing the full 24-pair registered validation and collecting
-the three-deployment application matrix defined by the plan. A successful
-rejection of an unsupported export would improve error reporting but would
-not complete that application experiment.
+The full 24-pair registered validation is now complete. Group E still requires
+the three-deployment application performance matrix defined by the plan,
+using the modified owner and the same helper policy in the matched baseline.

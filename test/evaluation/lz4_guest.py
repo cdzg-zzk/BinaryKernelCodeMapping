@@ -11,6 +11,7 @@ import struct
 import subprocess
 import sys
 import traceback
+import time
 
 ROOT = Path('/work')
 REPO = ROOT / 'repo'
@@ -32,12 +33,15 @@ def digest(path):
 
 def execute(command, log, environment=None):
     command = list(map(str, command))
+    started = time.clock_gettime_ns(time.CLOCK_MONOTONIC_RAW)
     with log.open('w') as stream:
         result = subprocess.run(command, stdout=stream, stderr=subprocess.STDOUT,
                                 env=environment)
+    finished = time.clock_gettime_ns(time.CLOCK_MONOTONIC_RAW)
     with (OUT / 'commands.jsonl').open('a') as stream:
         stream.write(json.dumps({'argv': command, 'log': str(log),
-                                'returncode': result.returncode}) + '\n')
+                                'returncode': result.returncode, 'clock': 'CLOCK_MONOTONIC_RAW',
+                                'start_ns': started, 'end_ns': finished}) + '\n')
     if result.returncode:
         raise RuntimeError(f'command returned {result.returncode}; see {log}')
 
@@ -102,6 +106,16 @@ def validate_cli():
         fields = dict(line.split('=', 1) for line in
                       (WORK / 'vkso/metadata/outputs.env').read_text().splitlines())
         library = Path(fields['library']).resolve()
+        sys.path.insert(0, str(ROOT / 'setup'))
+        from collect import active as collect_setup
+        collect_setup('lz4', ROOT, OUT / 'setup-full', WORK)
+        if (ROOT / 'setup-comparison.json').exists():
+            from compare import run as compare_setup
+            settings = json.loads((ROOT / 'setup-comparison.json').read_text())
+            compare_setup('active', WORK, ROOT / 'baselines/libkernel-userspace-libc.so',
+                          ROOT / 'corpus/manifest.txt', ROOT / 'setup', REPO / 'vkso',
+                          OUT / 'setup-comparison-active', **settings)
+
         footprint = observe_registered_pages(library, Path(fields['page_map']))
         record['library'] = str(library)
         record['shared_pages'] = len(footprint['pages'])
@@ -118,6 +132,11 @@ def validate_cli():
         for key in ('VKSO_LZ4_LIBRARY', 'VKSO_LZ4_API', 'VKSO_LZ4_TRACE', 'LD_PRELOAD'):
             environment.pop(key, None)
         selected = dict(environment, VKSO_LZ4_LIBRARY=str(library), VKSO_LZ4_API='kernel')
+        bindings = json.loads((WORK / 'vkso/metadata/data_bindings_resolved.json').read_text())['bindings']
+        by_target = {row['user_symbol']: row for row in bindings}
+        targets = ('vkso_abi_memcpy', 'vkso_abi_memmove', 'vkso_abi_memset')
+        assert set(by_target) == set(targets)
+        selected['VKSO_LZ4_SLOT_OFFSETS'] = ','.join(format(by_target[name]['dso_vaddr'], 'x') for name in targets)
         logs, scratch = OUT / 'cli-logs', OUT / 'cli-files'
         logs.mkdir()
         scratch.mkdir()
@@ -161,6 +180,10 @@ def validate_cli():
                     assert int(values[operation + '_calls']) > 0, (tag, operation, values)
                     for field in ('compress_dso', 'decompress_dso'):
                         assert Path(values[field]).resolve() == library, (tag, values)
+                    for helper in ('memcpy', 'memmove', 'memset'):
+                        assert Path(values[helper + '_bridge_dso']).resolve() == library.parent / 'libshim.so'
+                        assert Path(values[helper + '_provider_dso']).name == 'libc.so.6'
+                        assert int(values[helper + '_bridge'], 0) != int(values[helper + '_provider'], 0)
                     calls[operation] = int(values[operation + '_calls'])
                 assert digest(decoded) == expected, (tag, 'kernel-backed decode mismatch')
                 execute([stock, '-q', '-f', '-d', '--no-sparse', encoded, decoded],
@@ -176,6 +199,41 @@ def validate_cli():
                     path.unlink()
             print(f'lz4_full_cli_input={source.name}:pass', flush=True)
         assert len(record['cases']) == 24
+        # Run the real six-backend component runner and full four-backend CLI
+        # workflow once. Guest time validates collection only, not host speed.
+        runner_results = OUT / 'runner-validation'
+        runner_results.mkdir()
+        run_environment = dict(environment, CPU='1', BUILD_DIR=str(ROOT / 'baselines'),
+            WORK_DIR=str(WORK), RESULT_DIR=str(runner_results), MANIFEST=str(manifest),
+            MODULE=str(ROOT / 'owner/vkso_lz4.ko'), OUTER_RUNS='1', BENCH_SECONDS='1',
+            BLOCK_SIZES='4096,65536,1048576', RUN_CLI_WORKFLOW='1', CLI_ROUNDS='1')
+        execute(['bash', REPO / 'test/test_lz4/run_under_replacement.sh'],
+                OUT / 'component-and-cli-runner.log', run_environment)
+        rows = list(csv.DictReader((runner_results / 'raw.csv').open()))
+        expected_backends = {'user-default', 'user-nosimd', 'kernel-userspace-native',
+                             'kernel-userspace-nosimd', 'kernel-userspace-libc', 'kernel-vkso'}
+        assert len(rows) == 36 and {r['backend'] for r in rows} == expected_backends
+        assert '6 compressors x 6 decompressors' in (runner_results / 'correctness.log').read_text()
+        application = json.loads((runner_results / 'cli-workflow/complete.json').read_text())
+        assert application['rows'] == 192 and application['input_files'] == 12
+        # The old scalar-helper DSO must not pass the same-provider requirement.
+        sys.path.insert(0, str(REPO / 'test/test_lz4/scripts'))
+        from audit_helpers import inspect
+        try:
+            inspect(library, ROOT / 'baselines/libkernel-userspace-nosimd.so',
+                    WORK / 'vkso/metadata/data_bindings_resolved.json')
+        except ValueError as error:
+            record['rep_baseline_identity_refusal'] = str(error)
+        else:
+            raise AssertionError('REP baseline incorrectly accepted as libc matched')
+        record['runner_validation'] = dict(component_rows=36, application_rows=192,
+            backends=sorted(expected_backends), scope='complete runner in guest; diagnostic times only')
+        if (ROOT / 'kernel-cost').exists():
+            from kernel_cost_guest import run as kernel_cost
+            record['kernel_cost'] = kernel_cost('lz4', ROOT, OUT / 'kernel-cost')
+            after = observe_registered_pages(library, Path(fields['page_map']))
+            assert [(p['file_offset'], p['kernel_pfn']) for p in footprint['pages']] == [
+                (p['file_offset'], p['kernel_pfn']) for p in after['pages']]
         record['status'] = 'pass'
     except BaseException:
         record['status'] = 'fail'
@@ -252,14 +310,27 @@ def main():
         write_json(OUT / 'status.json', record)
         execute([REPO / 'vkso', 'exec', WORK, '--symbols', ROOT / 'symbols.txt',
                  '--module', ROOT / 'owner/vkso_lz4.ko', '--owner-ko', ROOT / 'owner/vkso_lz4.ko',
+                 '--data-bindings', ROOT / 'data-bindings.json',
                  '--vmlinux', ROOT / 'vmlinux-5.15.0-119-generic',
-                 '--', 'python3', ROOT / 'guest.py', '--validate-cli'], OUT / 'export-and-cli.log')
+                 '--', 'python3', ROOT / 'guest.py', '--validate-cli'], OUT / 'export-and-cli.log', dict(os.environ,
+                    VKSO_SETUP_TRACE=str(OUT / 'setup-stages.tsv'), VKSO_SETUP_CLOCK=str(ROOT / 'setup/setup-clock')))
         validation = json.loads((OUT / 'cli-validation.json').read_text())
         assert validation['status'] == 'pass' and len(validation['cases']) == 24
         assert not (REPO / 'page_cache_replace/runtime/manager.pid').exists()
         record['stage'] = 'normal-release'
         verify_restored_pages()
         record['restoration_verified'] = True
+        sys.path.insert(0, str(ROOT / 'setup'))
+        from collect import ready as collect_ready
+        collect_ready('lz4', ROOT, OUT / 'setup-ready', WORK)
+        if (ROOT / 'setup-comparison.json').exists():
+            from compare import run as compare_setup
+            settings = json.loads((ROOT / 'setup-comparison.json').read_text())
+            compare_setup('ready', WORK, ROOT / 'baselines/libkernel-userspace-libc.so',
+                          ROOT / 'corpus/manifest.txt', ROOT / 'setup', REPO / 'vkso',
+                          OUT / 'setup-comparison-ready', **settings)
+
+        verify_restored_pages()
         record['status'] = 'pass'
     except BaseException:
         record['status'] = 'fail'

@@ -1,5 +1,14 @@
 # BCH: complete export and functional validation
 
+Current-build update: [identity-checked registration and complete algorithm workflows](registration-transaction-evidence.md#current-complete-algorithm-workflows)
+rerun the full workload with the cooperative owner and current transaction
+manager. The archived logs match owner and kernel build IDs before STAGE.
+Owner refcount is 1 while active, source/user PFNs match, fresh
+post-release mappings no longer use them, and all modules unload. The results
+below retain their earlier build identities; formal performance for the new
+build is still outstanding.
+
+
 On 2026-09-12, a private KVM guest running the exact Ubuntu
 `5.15.0-119-generic` kernel completed the existing BCH correctness-only path
 after a full `vkso init` / `vkso exec` deployment. The owner, benchmark, and two

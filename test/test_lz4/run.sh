@@ -14,6 +14,7 @@ CORPUS="${CORPUS:-silesia}"
 KERNEL_BUILD="/lib/modules/$(uname -r)/build"
 MODULE="${MODULE:-$KMOD_DIR/vkso_lz4.ko}"
 SHIM_LIST="${SHIM_LIST:-$REPO_ROOT/make_dll/shim.txt}"
+DATA_BINDINGS="${DATA_BINDINGS:-$SCRIPT_DIR/config/data-bindings.json}"
 loaded_by_us=0
 
 sudo_validate() {
@@ -24,9 +25,16 @@ sudo_validate() {
 }
 
 cleanup() {
+    local status=$?
+    trap - EXIT
     if (( loaded_by_us )); then
-        sudo rmmod vkso_lz4 2>/dev/null || true
+        if (( status == 0 )); then
+            sudo rmmod vkso_lz4 || status=1
+        else
+            echo "Run failed; retaining vkso_lz4 until registration recovery is verified" >&2
+        fi
     fi
+    exit "$status"
 }
 trap cleanup EXIT
 
@@ -65,6 +73,9 @@ rm -rf "$RESULT_DIR"
 mkdir -p "$RESULT_DIR"
 "$REPO_ROOT/vkso" init "$WORK_DIR" --symbols "$SYMBOLS"
 make -C "$SCRIPT_DIR" BUILD_DIR="$BUILD_DIR" clean all
+if [[ "${RUN_LZ4_SETUP:-0}" == 1 ]]; then
+    python3 "$REPO_ROOT/test/evaluation/setup/build.py" "$BUILD_DIR/setup"
+fi
 if [[ "${RUN_CLI_WORKFLOW:-0}" == 1 ]]; then
     python3 "$REPO_ROOT/test/evaluation/lz4-cli/prepare_source.py"
     make -C "$REPO_ROOT/test/evaluation/lz4-cli" BUILD_DIR="$BUILD_DIR/cli" all
@@ -74,6 +85,7 @@ python3 "$SCRIPT_DIR/scripts/audit_simd.py" \
     --nosimd "$BUILD_DIR/liblz4-nosimd.so" \
     --kernel-native "$BUILD_DIR/libkernel-userspace-native.so" \
     --kernel-nosimd "$BUILD_DIR/libkernel-userspace-nosimd.so" \
+    --kernel-libc "$BUILD_DIR/libkernel-userspace-libc.so" \
     --output "$RESULT_DIR/simd-audit.md"
 
 sudo_validate
@@ -84,7 +96,12 @@ make -C "$KERNEL_BUILD" M="$KMOD_DIR" modules
 # External-module Kbuild skips BTF when the headers tree has no local vmlinux.
 # Add split BTF against the running kernel's base BTF so vkso can generate the
 # function prototypes without changing the system headers tree.
-pahole -J --btf_base /sys/kernel/btf/vmlinux "$MODULE"
+pahole -J --skip_encoding_btf_enum64 --btf_base /sys/kernel/btf/vmlinux "$MODULE"
+if [[ "${RUN_KERNEL_COST:-0}" == 1 ]]; then
+    python3 "$REPO_ROOT/test/evaluation/kernel_cost_host.py" prepare lz4 \
+        --owner-source "$KMOD_DIR" --output "$RESULT_DIR/kernel-cost-prepared" --cpu "$CPU" \
+        --manifest "$MANIFEST"
+fi
 sudo insmod "$MODULE"
 loaded_by_us=1
 
@@ -112,15 +129,18 @@ rm -f "$WORK_DIR/vkso/metadata/out.krg" \
     echo "userspace_kernel_compat_sha256=$(sha256sum "$SCRIPT_DIR/userspace_kernel/kernel_compat.h" | cut -d' ' -f1)"
     echo "userspace_scalar_mem_sha256=$(sha256sum "$SCRIPT_DIR/userspace_kernel/scalar_mem.c" | cut -d' ' -f1)"
     echo "official_adapter_sha256=$(sha256sum "$SCRIPT_DIR/src/official_backend_adapter.c" | cut -d' ' -f1)"
-    echo "kernel_memory_helpers=memcpy:shim,memset:shim,memmove:shim"
+    echo "kernel_memory_helpers=private-slots:vkso_abi_memcpy,vkso_abi_memmove,vkso_abi_memset;provider=libc;stack=realigned"
     echo "outer_runs=${OUTER_RUNS:-3}"
     echo "cli_workflow=${RUN_CLI_WORKFLOW:-0}"
     echo "official_harness_seconds=${BENCH_SECONDS:-1}"
     echo "block_sizes=${BLOCK_SIZES:-4096,65536,1048576}"
-    echo "backends=user-default,user-nosimd,kernel-userspace-native,kernel-userspace-nosimd,kernel-vkso"
+    echo "backends=user-default,user-nosimd,kernel-userspace-native,kernel-userspace-nosimd,kernel-userspace-libc,kernel-vkso"
     echo "native_flags=-O3 -fPIC -march=native"
     echo "nosimd_flags=-O3 -fPIC -fno-tree-vectorize -fno-tree-slp-vectorize -fno-tree-loop-vectorize -fno-tree-loop-distribute-patterns -fno-builtin -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4 -mno-sse4.1 -mno-sse4.2 -mno-avx -mno-avx2 -mno-avx512f -mno-avx512bw -mno-avx512dq -mno-avx512vl"
     echo "nosimd_memory_helpers=test-local scalar memcpy/memmove/memset"
+    echo "kernel_userspace_libc_flags=same-as-kernel-userspace-nosimd"
+    echo "kernel_userspace_libc_helpers=libc;scalar-algorithm-body-only;helper-simd-allowed"
+    echo "cli_same_source=kernel-userspace-libc"
     echo "official_bench_sha256=$(sha256sum "$SCRIPT_DIR/vendor/lz4-1.9.3/programs/bench.c" | cut -d' ' -f1)"
     echo "lz4_source=https://github.com/lz4/lz4/archive/refs/tags/v1.9.3.tar.gz"
     echo "lz4_source_sha256=030644df4611007ff7dc962d981f390361e6c97a34e5cbc393ddfbe019ffe2c1"
@@ -151,17 +171,30 @@ vkso_args=(
     --module "$MODULE"
     --owner-ko "$MODULE"
     --shim-list "$SHIM_LIST"
+    --data-bindings "$DATA_BINDINGS"
 )
 if [[ "${VKSO_SKIP_CHECK:-0}" == 1 ]]; then
     vkso_args+=(--skip-check)
 fi
 vkso_args+=(-- "$SCRIPT_DIR/run_under_replacement.sh")
 
+setup_environment=()
+if [[ "${RUN_LZ4_SETUP:-0}" == 1 ]]; then
+    setup_environment=("VKSO_SETUP_TRACE=$RESULT_DIR/setup-export-stages.tsv"
+                       "VKSO_SETUP_CLOCK=$BUILD_DIR/setup/setup-clock")
+fi
 CPU="$CPU" RESULT_DIR="$RESULT_DIR" MANIFEST="$MANIFEST" \
 BUILD_DIR="$BUILD_DIR" WORK_DIR="$WORK_DIR" MODULE="$MODULE" \
 OUTER_RUNS="${OUTER_RUNS:-3}" BENCH_SECONDS="${BENCH_SECONDS:-1}" \
 BLOCK_SIZES="${BLOCK_SIZES:-4096,65536,1048576}" \
-    "$REPO_ROOT/vkso" "${vkso_args[@]}"
+    env "${setup_environment[@]}" "$REPO_ROOT/vkso" "${vkso_args[@]}"
+
+if [[ "${RUN_LZ4_SETUP:-0}" == 1 ]]; then
+    python3 "$REPO_ROOT/test/evaluation/setup/compare.py" ready \
+        --work "$WORK_DIR" --native "$BUILD_DIR/libkernel-userspace-libc.so" \
+        --manifest "$MANIFEST" --binaries "$BUILD_DIR/setup" --vkso "$REPO_ROOT/vkso" \
+        --output "$RESULT_DIR/setup-comparison-ready" --cpu "$CPU"
+fi
 
 KERNEL_LIBRARY="$(<"$RESULT_DIR/kernel-library-path.txt")"
 [[ -f "$KERNEL_LIBRARY" ]] || {

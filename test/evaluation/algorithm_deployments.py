@@ -23,9 +23,10 @@ ROOT = Path(__file__).resolve().parents[2]
 CONFIG = {
     "lz4": {"directory": "test_lz4", "rounds": 7,
             "environment": {"CORPUS": "silesia", "BENCH_SECONDS": "2",
-                            "BLOCK_SIZES": "4096,65536,1048576"}},
+                            "BLOCK_SIZES": "4096,65536,1048576", "CLI_ROUNDS": "4"}},
     "bch": {"directory": "test_BCH", "rounds": 11,
-            "environment": {"SAMPLE_MS": "10", "CORRECTNESS_VECTORS": "128"}},
+            "environment": {"SAMPLE_MS": "10", "CORRECTNESS_VECTORS": "128",
+                            "BCH_ALIGNED_INPUTS": "1"}},
     "xz": {"directory": "test_xz", "rounds": 7,
            "environment": {"REPEATS": "20",
                            "INPUTS": "/bin/bash /usr/bin/python3 /usr/lib/x86_64-linux-gnu/libc.so.6"}},
@@ -59,7 +60,38 @@ def source_snapshot():
     if top != ROOT:
         raise RuntimeError(f"expected repository {ROOT}, Git selected {top}")
     return git("diff", "HEAD", "--", "test/test_lz4", "test/test_BCH", "test/test_xz",
-               "test/evaluation", "vkso", "make_dll", "page_cache_replace")
+               "test/evaluation", "vkso", "make_dll", "page_cache_replace",
+               "kernel_cgd/function_checker")
+
+
+def capture_source_files(directory):
+    """Preserve actual inputs, including ignored owner sources and new tools."""
+    destination = directory / 'source-files'
+    destination.mkdir()
+    roots = ('make_dll', 'page_cache_replace', 'kernel_cgd/function_checker',
+             'kernel_cgd/kerne_type', 'test/test_lz4', 'test/test_BCH',
+             'test/test_xz', 'test/test_first_call', 'test/evaluation')
+    excluded = {'results', 'build', 'work', 'corpus', '__pycache__', '.git'}
+    suffixes = {'.c', '.cpp', '.h', '.S', '.sh', '.py', '.txt', '.json', '.map', '.mk', '.md', '.ld'}
+    paths = {ROOT / 'vkso', ROOT / 'kernel_cgd/src/krg.cpp', ROOT / 'kernel_cgd/src/krg'}
+    for relative in roots:
+        for current, directories, files in os.walk(ROOT / relative):
+            directories[:] = [d for d in directories if d not in excluded and not d.startswith('.')]
+            for name in files:
+                path = Path(current) / name
+                if (name == 'Makefile' or path.suffix in suffixes) and not name.endswith('.mod.c'):
+                    paths.add(path)
+    records = []
+    for path in sorted(paths):
+        relative = path.relative_to(ROOT)
+        target = destination / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, target)  # Materialize cooperative-owner header symlinks.
+        records.append(dict(path=str(relative), bytes=target.stat().st_size,
+                            source_was_symlink=path.is_symlink()))
+    write_json(directory / 'source-files.json', {'scope': 'actual source/configuration files and executed KRG binary; excludes outputs/corpora',
+                                                'files': records})
+    return records
 
 
 def host_ready(kernel):
@@ -82,12 +114,14 @@ def host_ready(kernel):
         raise RuntimeError(f"owner modules still loaded: {sorted(loaded & OWNER_MODULES)}")
 
 
-def read_observations(algorithm, raw, deployment):
+def read_observations(algorithm, raw, deployment, *, legacy_lz4=False):
     """Validate the full configured raw matrix and retain repetition identities."""
     rounds = CONFIG[algorithm]["rounds"]
     if algorithm == "lz4":
         backends = ("user-default", "user-nosimd", "kernel-userspace-native",
                     "kernel-userspace-nosimd", "kernel-vkso")
+        if not legacy_lz4:
+            backends += ("kernel-userspace-libc",)
         expected = set(itertools.product(range(rounds), backends,
                                          (4096, 65536, 1048576), ("compress", "decompress")))
     elif algorithm == "bch":
@@ -144,7 +178,7 @@ def read_observations(algorithm, raw, deployment):
     return observations
 
 
-def make_plan(algorithms, count, output, cpu, kernel, with_lz4_workflow=False):
+def make_plan(algorithms, count, output, cpu, kernel, with_lz4_workflow=False, with_kernel_cost=False, with_lz4_setup=False):
     entries = []
     for block in range(count):
         order = algorithms[block % len(algorithms):] + algorithms[:block % len(algorithms)]
@@ -162,30 +196,67 @@ def make_plan(algorithms, count, output, cpu, kernel, with_lz4_workflow=False):
                 "SHIM_LIST": str(ROOT / "make_dll/shim.txt"), "VKSO_SKIP_CHECK": "0",
                 **config["environment"],
             }
+            environment["RUN_LZ4_SETUP"] = str(int(with_lz4_setup and algorithm == "lz4"))
+            environment["RUN_KERNEL_COST"] = str(int(with_kernel_cost))
             environment["RUN_CLI_WORKFLOW"] = str(int(with_lz4_workflow and algorithm == "lz4"))
             entries.append({"deployment": directory.name, "algorithm": algorithm,
                             "directory": str(directory), "environment": environment,
                             "command": ["bash", str(source / "run.sh")]})
     return {"kernel": kernel, "cpu": cpu, "deployments_per_algorithm": count,
-            "with_lz4_workflow": with_lz4_workflow,
+            "with_lz4_workflow": with_lz4_workflow, "with_kernel_cost": with_kernel_cost, "with_lz4_setup": with_lz4_setup,
             "sampling_unit": "complete owner load/export/register/benchmark/restore/unload",
             "boot_scope": "same boot unless recorded boot_id values differ",
             "entries": entries}
 
 
-def execute(plan, output):
+def execute(plan, output, resume=False):
     host_ready(plan["kernel"])
     if plan["cpu"] not in os.sched_getaffinity(0):
         raise RuntimeError("requested benchmark CPU is outside current affinity")
     changes = source_snapshot()
     if os.geteuid() != 0:
         subprocess.run(["sudo", "-n", "true"], check=True)
-    output.mkdir(parents=True, exist_ok=False)
-    write_json(output / "plan.json", plan)
-    (output / "source-changes.patch").write_bytes(changes)
+    recovery = None
+    if resume:
+        if json.loads((output / 'plan.json').read_text()) != plan:
+            raise ValueError('resume must retain the complete original plan')
+        # Algorithm/build changes require a fresh campaign. Offline reporting
+        # and pre-timing evidence checks may be repaired without resampling.
+        for algorithm in CONFIG.values():
+            source = ROOT / 'test' / algorithm['directory']
+            for folder in ('kmod', 'adapted', 'src', 'userspace', 'config'):
+                if not (source / folder).exists():
+                    continue
+                for path in (source / folder).rglob('*'):
+                    if path.suffix not in ('.c', '.h', '.json', '.map') or path.name.endswith('.mod.c'):
+                        continue
+                    saved = output / 'source-files' / path.relative_to(ROOT)
+                    if not saved.exists() or saved.read_bytes() != path.read_bytes():
+                        raise ValueError(f'measurement source changed: {path}')
+            saved = output / 'source-files' / source.relative_to(ROOT) / 'Makefile'
+            if saved.read_bytes() != (source / 'Makefile').read_bytes():
+                raise ValueError('user compiler configuration changed')
+        recovery = output / ('resume-' + dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ'))
+        recovery.mkdir()
+        capture_source_files(recovery)
+        (recovery / 'source-changes.patch').write_bytes(changes)
+        if (output / 'failed.json').exists():
+            (output / 'failed.json').rename(recovery / 'failed.json')
+    else:
+        output.mkdir(parents=True, exist_ok=False)
+        write_json(output / "plan.json", plan)
+        (output / "source-changes.patch").write_bytes(changes)
+        capture_source_files(output)
     for entry in plan["entries"]:
         host_ready(plan["kernel"])
         directory = Path(entry["directory"])
+        if resume and (directory / 'complete.json').exists():
+            from formal_kernel_audit import audit
+            audit(directory)
+            read_observations(entry['algorithm'], directory / 'results/raw.csv', entry['deployment'])
+            continue
+        if resume and directory.exists():
+            directory.rename(recovery / directory.name)
         directory.mkdir()
         identity = {"deployment": entry["deployment"], "started_utc": timestamp(),
                     "uid": os.getuid(), "euid": os.geteuid(),
@@ -215,7 +286,40 @@ def execute(plan, output):
                 writer = csv.DictWriter(stream, fieldnames=list(observations[0]))
                 writer.writeheader()
                 writer.writerows(observations)
+            if entry['algorithm'] == 'lz4' and plan['with_lz4_workflow']:
+                cli = directory / 'results/cli-workflow'
+                complete = json.loads((cli / 'complete.json').read_text())
+                cli_metadata = json.loads((cli / 'metadata.json').read_text())
+                if (complete['rows'] != 768 or complete['input_files'] != 12 or
+                        cli_metadata['rounds'] != 4 or cli_metadata['block_ids'] != [4, 6] or
+                        Path(cli_metadata['backends']['same-source'][0]).name != 'libkernel-userspace-libc.so'):
+                    raise ValueError('LZ4 application did not complete the configured libc-baseline matrix')
+            if entry['algorithm'] == 'lz4' and plan.get('with_lz4_setup'):
+                from setup.compare_audit import audit as audit_setup_comparison, audit_export
+                for phase in ('active', 'ready'):
+                    report = audit_setup_comparison(directory / 'results' / ('setup-comparison-'+phase),
+                        manager_log=directory / 'work/vkso/metadata/page_replace.log')
+                    write_json(directory / ('setup-'+phase+'-audit.json'), report)
+                write_json(directory / 'setup-export-audit.json',
+                    audit_export(directory / 'results/setup-export-stages.tsv'))
+            if plan.get('with_kernel_cost'):
+                kernel = directory / 'results/kernel-cost'
+                name = 'status.json' if entry['algorithm'] == 'bch' else 'collection.json'
+                collection = json.loads((kernel / name).read_text())
+                if collection['status'] != 'pass' or collection['configuration']['cpu'] != plan['cpu']:
+                    raise ValueError('same-owner kernel collection did not complete on selected CPU')
+                if entry['algorithm'] == 'bch':
+                    if collection['coverage']['timing_rows'] != 1056 or not collection['same_registered_owner']:
+                        raise ValueError('BCH kernel matrix is incomplete')
+                else:
+                    expected_trials = 792 if entry['algorithm'] == 'lz4' else 99
+                    if len(collection['trials']) != expected_trials or collection['owner_refcnt_after'] != 1:
+                        raise ValueError('LZ4/XZ kernel matrix or owner lifetime is incomplete')
             shutil.copy2(entry["environment"]["MODULE"], directory / "owner.ko")
+            commands = directory / 'owner-build-commands'
+            commands.mkdir()
+            for path in Path(entry['environment']['KMOD_DIR']).glob('.*.cmd'):
+                shutil.copy2(path, commands / path.name)
             write_json(directory / "complete.json", {
                 **identity, "completed_utc": timestamp(), "observations": len(observations),
                 "runner_wall_seconds": runner_seconds,
@@ -238,19 +342,27 @@ def main():
     parser.add_argument("--cpu", type=int, default=2)
     parser.add_argument("--kernel", default="5.15.0-119-generic")
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--resume", action="store_true",
+                        help="continue a stopped campaign, preserving completed deployments")
     parser.add_argument("--with-lz4-workflow", action="store_true")
+    parser.add_argument("--with-kernel-cost", action="store_true",
+                        help="run complete kernel workload in each existing registration after user measurement")
+    parser.add_argument("--with-lz4-setup", action="store_true",
+                        help="compare full LZ4 tasks with traced/untraced active and ready-carrier commands")
     args = parser.parse_args()
     if args.deployments < 1 or len(set(args.algorithms)) != len(args.algorithms):
         parser.error("use a positive deployment count and distinct algorithms")
-    if args.with_lz4_workflow and "lz4" not in args.algorithms:
+    if (args.with_lz4_workflow or args.with_lz4_setup) and "lz4" not in args.algorithms:
         parser.error("the file workflow requires lz4 in --algorithms")
     output = args.output.resolve()
-    if output.exists():
+    if args.resume and (not args.execute or not (output / 'plan.json').exists()):
+        parser.error('resume requires --execute and an existing plan')
+    if output.exists() and not args.resume:
         parser.error("output already exists; use a fresh campaign path")
     plan = make_plan(args.algorithms, args.deployments, output, args.cpu, args.kernel,
-                     args.with_lz4_workflow)
+                     args.with_lz4_workflow, args.with_kernel_cost, args.with_lz4_setup)
     if args.execute:
-        execute(plan, output)
+        execute(plan, output, resume=args.resume)
     else:
         print(json.dumps(plan, indent=2))
 

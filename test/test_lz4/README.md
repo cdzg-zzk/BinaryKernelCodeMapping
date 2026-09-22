@@ -1,6 +1,10 @@
 # LZ4 kernel/vkso benchmark
 
-This test compares the same block-compression workload through five backends:
+论文 6.3 的当前结果统一位于 [section63](../section63/README.md)，
+方法、对照和适配记录见[方法说明](../section63/methods.md)。本目录保留
+算法源码和单次运行入口；论文使用统一 runner 的三次完整部署统计。
+
+This test compares the same block-compression workload through six backends:
 
 - `kernel-vkso`: Linux 5.15 LZ4 machine code exported by a fresh, standard
   `vkso` build;
@@ -8,23 +12,32 @@ This test compares the same block-compression workload through five backends:
   as an ordinary user-space DSO with `-O3 -march=native`;
 - `kernel-userspace-nosimd`: the same adapted kernel source with compiler SIMD
   disabled and test-local non-SIMD memory helpers;
+- `kernel-userspace-libc`: the same algorithm source and compiler flags as
+  `kernel-userspace-nosimd`, with external helpers resolved to libc;
 - `user-default`: upstream LZ4 1.9.3 with `-O3 -march=native`;
 - `user-nosimd`: the same upstream source with compiler SIMD disabled and the
   same test-local non-SIMD memory helpers.
+
+The new libc baseline matches the registered carrier's helper implementation,
+verified through actual GOT/PLT entries and private slots before timing. The
+owner still uses Kbuild (-O2, kernel ABI and build-specific mitigations), while
+the user DSO uses -O3/PIC and a compatibility header. This comparison does not
+isolate PGOT or physical sharing alone. The existing REP baseline remains for
+helper-policy comparison.
 
 The measured timing core is the unmodified LZ4 1.9.3 `programs/bench.c`. A thin
 adapter only opens the selected DSO and forwards the level-1 block compression
 and decompression calls. This preserves the official harness's block splitting,
 time-adaptive loops, fastest-complete-loop policy, and XXH64 validation.
 
-The current formal result and its interpretation are in [RESULTS.md](RESULTS.md).
+All six backends are retained in the current campaign analysis.
 
 ## Prerequisites
 
 The running kernel must have matching headers and `/sys/kernel/btf/vmlinux`.
 The host also needs:
 
-- GCC, GNU make, binutils, Python 3, curl, unzip, and `taskset`;
+- GCC, GNU make, binutils, Python 3 with pyelftools, curl, unzip, and `taskset`;
 - headers for `uname -r`;
 - `pahole`/dwarves;
 - sudo permission to load `vkso_lz4` and `page_cache_replace`.
@@ -75,25 +88,27 @@ relative to the manifest directory; file boundaries are preserved.
 
 `run.sh` performs the following work without a pre-existing `libkernel.so`:
 
-1. Builds the four ordinary user-space DSOs and the official benchmark driver.
-2. Rejects either no-SIMD DSO if disassembly contains XMM/YMM/ZMM/MMX use or if
-   it still imports `memcpy`, `memmove`, or `memset`.
+1. Builds the five ordinary user-space DSOs and the official benchmark driver.
+2. Rejects either complete no-SIMD DSO if it contains SIMD or imports external
+   memory helpers. The new libc baseline requires a scalar algorithm body and
+   three external memory imports; its helpers may use SIMD.
 3. Builds the namespaced test module, adds split BTF against the running kernel,
    loads it, and deliberately deletes the test-local KRG cache.
 4. Runs the normal project `vkso exec` path: resolve runtime addresses, analyze
    the requested closures, construct a fresh sparse DSO and shim, and replace
    the mapped pages.
-5. Runs 5 × 5 × 12 cross-backend correctness cases, then runs the official
+5. Verifies that the new same-source DSO and carrier bridges resolve to the same
+   libc helper addresses, then runs 6 × 6 × 12 cross-backend correctness cases, then runs the official
    harness for every backend/block/outer-run combination on one pinned CPU.
-6. Restores replaced pages and unloads the test module even when a later step
-   fails.
+6. Restores replaced pages before unloading the test module. A failed restoration
+   retains recovery state and owner references and returns a failure.
 
 Do not use `VKSO_SKIP_CHECK=1` for reported measurements. It is only a local
 debugging shortcut after an unchanged DSO has already passed closure checks.
 
 ## Correctness and statistics
 
-All five compressors are crossed with all five decompressors on 12
+All six compressors are crossed with all six decompressors on 12
 boundary-focused sizes. Return values, output bytes, and guard regions are
 checked. The official harness independently verifies the decompressed Silesia
 content with XXH64 for every measured case.

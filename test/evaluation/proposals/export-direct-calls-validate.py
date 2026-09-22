@@ -94,15 +94,23 @@ def main():
               'source_sha256': before, 'patch_sha256': digest(PATCH), 'fixtures': []}
     with tempfile.TemporaryDirectory(prefix='vkso-export-direct-validation-') as directory:
         temporary = Path(directory)
+        baseline = temporary / 'baseline'
+        # Replay the unapplied proposal against the repository baseline. The
+        # working tree may now contain the accepted implementation; validation
+        # must continue to compare baseline and proposal in isolation.
         for name in SOURCES:
             target = temporary / name
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes((ROOT / name).read_bytes())
+            original_bytes = subprocess.check_output(['git', 'show', 'HEAD:' + name], cwd=ROOT)
+            target.write_bytes(original_bytes)
+            baseline_target = baseline / name
+            baseline_target.parent.mkdir(parents=True, exist_ok=True)
+            baseline_target.write_bytes(original_bytes)
         subprocess.run(['git', 'apply', str(PATCH)], cwd=temporary, check=True)
         for name in SOURCES:
             ast.parse((temporary / name).read_text(), filename=name)
         proposed = load_module('proposed_pic_direct_calls', temporary / SOURCES[0])
-        original = load_module('original_pic_direct_calls', ROOT / SOURCES[0])
+        original = load_module('original_pic_direct_calls', baseline / SOURCES[0])
         assembly = temporary / 'bindings.s'
         assembly.write_text(ASSEMBLY)
         obj = temporary / 'bindings.o'
@@ -145,7 +153,7 @@ def main():
         shims = temporary / 'shims.txt'
         shims.write_text('helper_external\n')
         report['checker'] = []
-        for variant, checker in [('original', ROOT / SOURCES[1]), ('proposed', temporary / SOURCES[1])]:
+        for variant, checker in [('original', baseline / SOURCES[1]), ('proposed', temporary / SOURCES[1])]:
             for root, expected in [('root_direct', 0 if variant == 'original' else 1), ('root_pgot', 0)]:
                 command = [sys.executable, str(checker), '-v', str(obj), '-m', str(obj),
                            '-t', root, '-s', str(shims)]

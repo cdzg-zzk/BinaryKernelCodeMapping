@@ -25,9 +25,16 @@ sudo_cmd() {
 }
 
 cleanup() {
+    local status=$?
+    trap - EXIT
     if (( loaded_by_us )); then
-        sudo_cmd rmmod vkso_bch 2>/dev/null || true
+        if (( status == 0 )); then
+            sudo_cmd rmmod vkso_bch || status=1
+        else
+            echo "Run failed; retaining vkso_bch until registration recovery is verified" >&2
+        fi
     fi
+    exit "$status"
 }
 trap cleanup EXIT
 
@@ -58,7 +65,11 @@ if grep -q '^vkso_bch ' /proc/modules; then
     sudo_cmd rmmod vkso_bch
 fi
 make -C "$KERNEL_BUILD" M="$KMOD_DIR" clean modules
-pahole -J --btf_base /sys/kernel/btf/vmlinux "$MODULE"
+pahole -J --skip_encoding_btf_enum64 --btf_base /sys/kernel/btf/vmlinux "$MODULE"
+if [[ "${RUN_KERNEL_COST:-0}" == 1 ]]; then
+    python3 "$REPO_ROOT/test/evaluation/kernel_cost_host.py" prepare bch \
+        --owner-source "$KMOD_DIR" --output "$RESULT_DIR/kernel-cost-prepared" --cpu "$CPU"
+fi
 sudo_cmd insmod "$MODULE"
 loaded_by_us=1
 
@@ -75,6 +86,7 @@ rm -f "$WORK_DIR/vkso/metadata/out.krg" \
     echo "parameters=m13t4,m13t8"
     echo "data_length_rule=(1<<(m-1))/8"
     echo "timing_clock=CLOCK_PROCESS_CPUTIME_ID"
+    echo "aligned_inputs=${BCH_ALIGNED_INPUTS:-0}"
     echo "backend_order=rotated_per_outer_run"
     echo "backends=kernel-vkso,kernel-native,author-standalone"
     echo "kernel_source=Ubuntu linux-source-5.15.0/lib/bch.c"

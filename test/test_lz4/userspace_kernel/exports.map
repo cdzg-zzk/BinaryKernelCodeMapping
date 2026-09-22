@@ -1,0 +1,7 @@
+{
+	global:
+		vkso_LZ4_compress_default;
+		vkso_LZ4_decompress_safe;
+	local:
+		*;
+};

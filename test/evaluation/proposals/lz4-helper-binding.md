@@ -1,6 +1,6 @@
 # LZ4 私有 helper slots 与实际用户绑定方案
 
-状态：**供审阅，尚未实施**。本方案补齐完整 LZ4 的真实 helper 调用路线，不把“正确拒绝导出”当作应用实验完成。已完成的是完整 owner 的隔离编译和 ELF 检查；没有加载修改后的 owner，没有运行修改后的 CLI，也没有新增性能结果。
+状态：**已实施，修改后的完整 guest CLI 功能通过，正式性能待采集**（2026-09-12）。完整 owner、ELF 检查、bridge、builder/vkso 数据绑定集成已由实际导出和全部 24 组 input/block 功能验证覆盖。48 份调用记录核对到选中 carrier、libshim bridge 和 libc provider，四页 text 加一页 rodata 与 kernel PFN 匹配。结果见[应用证据](../lz4-application-evidence.md)。旧编译与故障诊断保留其构建身份，没有将旧性能数字当作新实现结果。
 
 ## 为什么采用已有的私有数据路线
 
@@ -41,7 +41,7 @@
 4. 原 helper 名仍参与原来的依赖边界分析；新名字仅是该私有数据 relocation 的用户目标。不能把这个映射应用于 text relocation，不能因此放过其他直接相对调用。[直接调用拒绝方案](export-direct-calls.md)仍需要共同实施，且检查器与 builder 应记录相同的绑定事实。
 5. `vkso` 透传并归档 binding contract、最终 slot offset、原始目标、用户目标及输出身份；编译现有 shim 时加入相应 bridge 源及 `-ldl`。不新增全局 preload，不重写用户 libc。实际解析后的 slot 值与 bridge 内的 libc 指针在功能阶段记录，时间测量不混入这一诊断。
 
-上面的 builder/vkso/用户 binding 集成尚未实现为补丁。当前提供的 owner patch 和 bridge 候选是可审查、已编译的组成部分，**不能直接用旧 builder 接上三 slots 就宣布此方案全部实现**。此次没有生成虚假的新 live KRG；旧 guest 的 KRG 不适用于改变布局的新 owner。
+上述 builder/vkso/用户 binding 集成已通过合成 contract 测试，并在 binding attempt06 中从新 owner 的实际地址生成 live KRG，完成注册和完整 CLI 执行；旧 guest 的 KRG 未用于新 owner。
 
 栈契约依据是 [x86-64 psABI 的 Stack Frame 规定](https://gitlab.com/x86-psABIs/x86-64-ABI/-/raw/master/x86-64-ABI/low-level-sys-info.tex)：普通调用在 call 前按 16 字节对齐，进入函数后 `(rsp + 8)` 对齐。[GCC 11.4 的 x86 function attributes 文档](https://gcc.gnu.org/onlinedocs/gcc-11.4.0/gcc/x86-Function-Attributes.html)说明 `force_align_arg_pointer` 可生成运行时栈重对齐的序言和尾声。这里的具体余数与实际 `and rsp, -16` 指令来自归档反汇编；属性名称本身不能替代最终指令和绑定目标核对。
 
@@ -64,15 +64,15 @@ GCC 在此构建中使用 `mov slot(%rip), %rax` 然后 `call *%rax`。检查逐
 
 完整 owner 仍有三个 `__ubsan_handle_out_of_bounds` 直接调用，全部位于 `vkso_LZ4_compress_fast_continue`；原始 owner 也有这三项。没有通过新关掉 sanitizer 或删除该函数来隐藏它们。选择的独立 block API 不走该 streaming API，但完整声明仍需由新 KRG/实际调用链确认。原有 `-mfunction-return=keep`、`-mindirect-branch=keep` 继续使用；Kbuild 的 naked-return/indirect-call 警告完整保留，不能把此 owner 称为发行版默认缓解配置。
 
-候选 bridge 与**完整当前 shim.c**一起链接，仅作反汇编：三个唯一入口均在间接 libc 调用前 `and rsp, -16`。没有运行构造函数、wrappers 或修改后的 LZ4。编译能证明这些指令及重定位形态，不能证明最终动态绑定、初始化次序、页面共享或完整输出已正确。
+最初的离线编译将候选 bridge 与当时完整的 shim.c 一起链接，仅作反汇编：三个唯一入口均在间接 libc 调用前 `and rsp, -16`。该离线步骤没有运行构造函数、wrappers 或修改后的 LZ4；后续 binding attempt06 才提供实际绑定、页面共享及完整输出证据。
 
-上述四页是三个函数体的静态覆盖范围，不是最终 page map 或净内存数字。新增 slots 有 24 字节 payload，但会连同布局、私有数据、桥接库及元数据按真实驻留页计费，不能只报 24 字节而复用旧三页结论。
+上述四页是三个函数体的静态覆盖范围，不是最终 page map 或净内存数字。新增 slots 有 24 字节 payload，但会连同布局、私有数据、桥接库及元数据按真实驻留页计费，不能只报 24 字节而复用旧三页结论。[attempt03](../results/lz4-binding-qemu-20260912-attempt03/result.json) 当时受执行环境限制，无法访问 `/dev/kvm`。限制解除并补齐 owner BTF 与 guest `libdl.a` 后，[attempt06](../results/lz4-binding-qemu-20260912-attempt06/result.json) 完成运行，实际 page map 为四页 text 和一页 rodata；净内存仍需完整计费。
 
 ## 联动文件、owner descriptor 与实验重测
 
 实施时除了四个 owner 文件，还要共同处理 `make_dll/build_PIC_so.py`、`make_dll/shim.c`、`vkso`、LZ4 的 binding config、`run.sh`/`run_under_replacement.sh` 的配置与身份记录，以及 `test/evaluation/lz4_guest.py`、`lz4_qemu.py` 的输入归档和运行观察。原有 API、官方 benchmark、完整 CLI 的 framing/I/O/校验行为不改变；adapter 只增加功能阶段的绑定身份记录。若新 shim 全局增加初始化工作，BCH/XZ 使用该 shim 的新部署也要记录版本和初始化成本。
 
-[注册事务方案](registration-transactions.md)计划在 `module_meta.c` 附近增加 owner descriptor。两项应一起审阅、形成最终构建：descriptor 是独立对齐的管理页，包含 `THIS_MODULE`，必须从用户导出排除；三个 helper slots 则属于应当被私有化、重定位的算法数据，不能随 descriptor 一并误删，也不能注册成共享源数据页。Owner pin、确认及恢复完成的修订仍是独立未完成的契约；本方案不替代它们。
+[注册事务方案](registration-transactions.md)已在 `module_meta.c` 增加 owner descriptor。两项应共同形成最终构建：descriptor 是独立对齐的管理页，包含 `THIS_MODULE`，必须从用户导出排除；三个 helper slots 则属于应当被私有化、重定位的算法数据，不能随 descriptor 一并误删，也不能注册成共享源数据页。逐批次完成确认与错误传播已通过新 guest；cooperative owner pin 及正常释放又已通过 LZ4 验证；后续 [v3 事务](../registration-transaction-evidence.md)已通过 300 页回滚、QUERY 和恢复重试；槽位内替换和启动中断恢复已通过，其余生命周期仍待完成，本方案不替代它们。
 
 在正式性能采集前，原计划要求的下列证据必须由最终实现重新获得：
 

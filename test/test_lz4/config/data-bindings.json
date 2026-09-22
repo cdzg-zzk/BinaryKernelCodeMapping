@@ -1,0 +1,26 @@
+{
+  "format": "vkso-private-data-bindings-v1",
+  "bindings": [
+    {
+      "slot": "vkso_lz4_memcpy_slot",
+      "kernel_symbol": "memcpy",
+      "user_symbol": "vkso_abi_memcpy",
+      "user_library": "libshim.so",
+      "signature": "void *(void *, const void *, size_t)"
+    },
+    {
+      "slot": "vkso_lz4_memmove_slot",
+      "kernel_symbol": "memmove",
+      "user_symbol": "vkso_abi_memmove",
+      "user_library": "libshim.so",
+      "signature": "void *(void *, const void *, size_t)"
+    },
+    {
+      "slot": "vkso_lz4_memset_slot",
+      "kernel_symbol": "memset",
+      "user_symbol": "vkso_abi_memset",
+      "user_library": "libshim.so",
+      "signature": "void *(void *, int, size_t)"
+    }
+  ]
+}

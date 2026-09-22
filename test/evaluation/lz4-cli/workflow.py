@@ -125,6 +125,12 @@ def collect(args):
     def decompression(source, target):
         return ["-q", "-f", "-d", "--no-sparse", str(source), str(target)]
 
+    helper_evidence = json.loads(args.helper_evidence.read_text())
+    if (helper_evidence['status'] != 'pass' or Path(helper_evidence['library']).resolve() != args.kernel.resolve()
+            or Path(helper_evidence['same_source']).resolve() != args.same_source.resolve()
+            or {h['name'] for h in helper_evidence['helpers']} != {'memcpy', 'memmove', 'memset'}):
+        raise ValueError('helper audit does not identify these complete backends')
+    (args.output / 'helper-targets.json').write_text(json.dumps(helper_evidence, indent=2)+'\n')
     metadata = {"cpu": args.cpu, "uid": os.getuid(), "euid": os.geteuid(),
                 "rounds": args.rounds, "block_ids": args.block_ids,
                 "inputs": inputs, "boot_id": Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
@@ -132,7 +138,8 @@ def collect(args):
                 "backends": {name: None if b is None else [str(b[0]), b[1]] for name, b in backends.items()},
                 "cache": "input pre-read; buffered output without fsync",
                 "timing": "parent wall time around taskset/CLI process launch and completion",
-                "diagnostic": "call counters enabled only in separate untimed invocations"}
+                "diagnostic": "call counters enabled only in separate untimed invocations",
+                "same_source_helper_policy": "resolved libc targets matched to the carrier ABI bridges; scalar algorithm body"}
     (args.output / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
     common_frames = {}
     for block in args.block_ids:
@@ -223,7 +230,7 @@ def collect(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("stock", "adapted", "kernel", "same-source", "upstream", "manifest", "output"):
+    for name in ("stock", "adapted", "kernel", "same-source", "upstream", "manifest", "output", "helper-evidence"):
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--cpu", type=int, default=2)
     parser.add_argument("--rounds", type=int, default=4)

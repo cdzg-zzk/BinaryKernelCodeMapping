@@ -1,8 +1,171 @@
 # First-touch evidence and collection changes
 
-Source and artifact audit on 2026-09-11. No benchmark was run and no cache was
-dropped. Collector changes prepared after the audit are described below;
-registration code remains unchanged.
+The initial source/artifact audit on 2026-09-11 ran no benchmarks. The sections
+below record subsequent collector changes and registered guest experiments;
+the latest pressure scenario changes neither registration nor hash assembly.
+
+## Reclaim-pressure scenario — 2026-09-12
+
+The [pressure run](results/first-touch-pressure-qemu-20260912-attempt01/result.json),
+boot `2a151ee4-32e8-47ff-aedb-cc16ac62bd65`, uses the same owner, full exporter,
+registered carrier and native 338-byte XXH32 implementation as the raw run
+below. It adds `--scenario pressure` to the existing `first_touch_qemu.py`
+deployment flow. The original three-condition collector remains unchanged.
+The [independent audit](results/first-touch-pressure-qemu-20260912-attempt01/independent-audit.json)
+reconstructs all 30 paired trials and 60 calls.
+
+The exact119 guest has 4 GiB RAM, two vCPUs and no swap. Both probes use CPU 1;
+the controller and background worker use CPU 0. Before each pair, both targets
+execute the full hash on `hello`, seed `0x1234`, then remove their function PTE
+with `MADV_DONTNEED`. Pagemap confirms absence. After the intervening workload,
+each probe records `mincore`, pagemap, call TSC, faults and the actual hash.
+Post-call pagemap checks the installed PFN. Pair order is shuffled with seed
+20260912; every call is retained without fault-class or latency filtering.
+The independent 247-vector validator exits before probes start.
+
+Baseline, pressure and recovery each contain ten pairs. Baseline and recovery
+have no intervening background read. The pressure worker writes every byte of
+an anonymous reservation, bounded before collection by
+`min(MemAvailable - 512 MiB, 0.8 * MemTotal)`, rounded down to pages. This run
+reserves 2,903,486,464 B (about 2.70 GiB). Worker smaps records 2,836,572 KiB of
+anonymous memory, compared with 1,136 KiB before allocation and after release.
+THP is disabled for this reservation only; observed `AnonHugePages` is zero.
+Between preparation and each pair, the worker reads a fully written, fsynced
+1 GiB ext4 file twice, then waits while retaining its anonymous allocation.
+The ten windows last 0.830–0.980 seconds each. This measures an idle code page
+after competing file-cache traffic, not overlapping application throughput.
+Neither process drops caches or advises file-page eviction. All memory and
+filesystem activity is confined to the private guest.
+
+All ten pressure windows have positive scans and reclaim. Their combined
+`pgscan_kswapd`/`pgscan_direct` deltas are 5,238,597/76 pages;
+`pgsteal_kswapd`/`pgsteal_direct` are 5,238,524/76 pages.
+`workingset_refault_file` increases by 5,242,880 pages. These repeated events
+are not unique-page counts or net-memory savings. Memory PSI records stalls;
+there is no OOM kill. Raw vmstat, meminfo, memory/I/O PSI, swaps and worker
+smaps are retained per pair. Linux's
+[reclaim description](https://www.kernel.org/doc/html/v5.15/admin-guide/mm/concepts.html#reclaim)
+and [PSI interface](https://www.kernel.org/doc/html/v5.15/accounting/psi.html)
+define these observations. `mincore` is a residency snapshot, as documented
+in its [manual](https://man7.org/linux/man-pages/man2/mincore.2.html); actual
+faults and post-call PFNs are recorded separately.
+
+| Phase | Native resident before call | Stub resident before call | Native minor/major class | Stub minor/major class |
+| --- | ---: | ---: | --- | --- |
+| Baseline | 10/10 | 10/10 | 1/0 in 10 calls | 1/0 in 10 calls |
+| Pressure | 10/10 | 10/10 | 1/0 in 10 calls | 1/0 in 10 calls |
+| Recovery | 10/10 | 10/10 | 1/0 in 10 calls | 1/0 in 10 calls |
+
+Both code pages remain resident despite substantial background reclaim.
+This workload provides no evidence of avoided native major faults. The
+controlled post-drop result cannot therefore be generalized to ordinary
+memory pressure. Guest cycles remain in raw records and are not added to
+Table 3 or used to estimate a physical-machine latency advantage.
+
+All 60 hashes match the independent oracle. Each of the 30 Stub calls installs
+the original kernel PFN, with owner reference one throughout. Separate
+before/after PFN observations agree. Full 247-vector checks before and after
+pressure pass; native, owner and loaded function bytes agree. The reservation
+is released before session cleanup; the carrier restores and all test modules
+unload without panic, BUG or WARNING.
+
+This completes one registered pressure/recovery diagnostic. Physical-host
+repetitions, full net-memory accounting and broader resident source-page
+boundaries remain group B work. The archive's top-level `scope` retains the
+generic raw-protocol label; `collection.scope`, the scenario marker and logs
+identify pressure. This archive does not contain another 3,800-call matrix.
+
+From the repository root:
+
+```sh
+python3 test/evaluation/first_touch_qemu.py --scenario pressure \
+  --output test/evaluation/results/first-touch-pressure-NEW
+python3 test/evaluation/first_touch_pressure_audit.py \
+  test/evaluation/results/first-touch-pressure-NEW
+```
+
+The payload includes both C observers, the included original collector,
+Python protocol/auditor, owner build sources, native/owner binaries, wrapper
+and registration module. `pressure-config.json`, `pressure-events.jsonl` and
+`pressure-trials.jsonl` retain configuration, worker commands and unfiltered
+observations. Without observed reclaim, pressure collection is incomplete
+even if every hash succeeds.
+
+## Registered raw-protocol run — 2026-09-12
+
+[The full run](results/first-touch-raw-qemu-20260912-attempt03/result.json),
+boot `f86477f5-fd57-4b6b-90c2-4ce9ba96f497`, completes the revised Native/Stub
+matrix in an exact119 private guest. Each of six target/condition groups
+reaches five accepted batches with the original 100 calls, 90% retention
+threshold and 20-attempt limit. The independent
+[audit](results/first-touch-raw-qemu-20260912-attempt03/independent-audit.json)
+replays all raw calls, decisions and printed statistics. No guest cycles are
+inserted into the historical physical-machine table.
+
+| Target / condition | Attempted batches | Prepared calls | IQR retained calls | Calls in accepted batches after IQR |
+| --- | ---: | ---: | ---: | ---: |
+| Native / hot | 5 | 500 | 482 | 482 |
+| Native / PTE cold | 5 | 500 | 466 | 466 |
+| Native / post-drop | 13 | 1,300 | 1,160 | 455 |
+| Stub / hot | 5 | 500 | 493 | 493 |
+| Stub / PTE cold | 5 | 500 | 477 | 477 |
+| Stub / post-drop | 5 | 500 | 486 | 486 |
+
+All 38 batches and 3,800 prepared calls are retained, including the eight
+rejected native/post-drop batches. The all-prepared view retains 800 calls
+from those rejected batches. The complete collection has 3,564 IQR-retained
+calls and 2,859 calls in the accepted-batch filtered view. No preparation
+failed. In this run all observed fault classes match their configured class:
+hot 0/0, PTE cold 1/0, native post-drop 0/1 and Stub post-drop 1/0. This is a
+frequency observation in one run, not a guarantee about future faults.
+Acquisition order, raw TSC/fault counts, batch logs and the exact CPU-1 affinity
+record are archived under `evidence/validation/first-touch.logs/`.
+
+The existing XXH32 assembly is unchanged. Its full 338-byte body is identical
+in the native ELF, cooperative owner ELF and the actual loaded native/registered
+functions. Both entries match an independent libxxhash oracle on all 247 known
+and boundary vectors, including the existing alignment and seed matrix. The
+registered text page matches the kernel PFN after latency collection, active
+owner reference is checked as one, release removes the source PFN from a fresh
+mapping, and all test modules unload without kernel panic, BUG or WARNING.
+
+The first-touch owner now has the same cooperative descriptor used by the
+other module exports. Its assembly entry lacks a BTF FUNC prototype, so the
+explicit `api.h` supplies the existing SysV declaration via `vkso --api-header`.
+The actual exporter still performs closure checking, full carrier construction
+and manager identity validation. The supplied header is compiled for syntax
+and all requested names. Its ABI meaning is a caller contract, checked here
+by actual bytes and independent full-function calls; it is not inferred from
+missing BTF. Missing declarations and invalid C are rejected in the archived
+header checks. This is an existing mechanism benchmark, not another success
+in the fixed eight-case applicability denominator.
+
+Two integration corrections precede this run. Attempt 01 stopped before
+registration because header generation could not find the assembly prototype;
+that failure and its checker PASS remain archived. Attempt 02 registered and
+passed bytes/oracle/PFN checks but kept the native DSO mapped in the long-lived
+functional validator. Its archived process maps contain that native mapping;
+all 100 native/post-drop calls were minor faults, and the old statistics path
+aborted on the empty expected class. The
+[failed-run analysis](results/first-touch-raw-qemu-20260912-attempt02/failed-run-analysis.json)
+retains those observations. The validator now runs in a separate process that
+exits before sampling; the controller's pre-sampling maps are also retained.
+No host cache-dropping command was run.
+
+The raw protocol is now `first-touch-raw-v2`: a successfully measured batch
+with zero expected-fault calls reports its counts, emits no conditional
+latency statistics and is rejected with `no_expected_fault_samples`. It does
+not terminate the remaining matrix and is rejected even at a zero retention
+threshold. The analyzer supports both v1 and v2 and independently enforces this
+rule. A compiled test of the real C statistics function exercises the complete
+shell/analyzer empty-class path; all ten first-touch tests pass. The archived
+[timed-region check](results/first-touch-raw-qemu-20260912-attempt03/timed-region-validation.json)
+confirms that `measure_once` and `prepare_condition` are unchanged by this fix.
+
+Registered-Stub collection and raw-result reconstruction are now exercised.
+Formal physical-machine repetitions, matched whole-session setup/resource
+accounting and memory pressure remain group B delivery. Earlier statements
+below describe their original audit/preparation dates.
 
 ## What the existing table contains
 

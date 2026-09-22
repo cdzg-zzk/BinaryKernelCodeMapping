@@ -1,6 +1,10 @@
-# Shared executable references and Shim binding: unapplied proposal
+# Shared executable references and Shim binding
 
-Status: proposal only, 2026-09-12. The actual exporter and checker have not been edited. No patched tool has been used for a campaign or guest run. The patch implements rejection of unsupported bindings; it does not make the pending LZ4 CLI matrix pass.
+Status: implemented in the current worktree, 2026-09-12. The checker and
+exporter now reject unsupported direct Shim bindings; the patch does not make
+the pending LZ4 CLI matrix pass. The revised static applicability batch used
+the current checker, while the modified LZ4 guest has not run because the host
+lacks `/dev/kvm`.
 
 ## Observed failure and active source path
 
@@ -17,7 +21,8 @@ Evidence: `../results/lz4-cli-qemu-20260912-attempt06/diagnosis.json`, `evidence
 
 ## Proposed rejection patch
 
-`export-direct-calls.patch` changes two core files, without applying either change:
+`export-direct-calls.patch` records the two core-file changes now present in the
+worktree:
 
 - The checker records a PC-relative executable reference to a configured undefined Shim as an unsupported binding and returns `FAIL`. It no longer reports successful interception at that site. Existing explicit private data-slot analysis and built-in thunk handling are not rewritten by this patch.
 - The active PIC builder checks the finally selected shared owner functions before writing the DSO, page map, or dependency declaration. It rejects executable relocations to imported Shim symbols. It also disassembles selected functions to catch resolved local direct branches to locally defined symbols that were classified as Shim imports and therefore have no relocation record.
@@ -70,7 +75,7 @@ Results are in `export-direct-calls-validation.json`; the original core identiti
 
 The current manuscript says kernel-backed and same-source no-SIMD use the same test-local REP memory helpers. Existing historical evidence does not establish that identity:
 
-- `test/test_lz4/results/metadata.txt` labels kernel helpers as Shim imports and separately labels no-SIMD helpers as test-local scalar helpers.
+- `test/evaluation/results/section63/raw/deployment-00-lz4/results/metadata.txt` labels kernel helpers as Shim imports and separately labels no-SIMD helpers as test-local scalar helpers.
 - `kernel-page-mappings.txt` includes kernel text pages at `0xffffffff91ebb000`, `0xffffffff925cb000`, and `0xffffffff92802000`. The companion resolved-symbol file places `memset`, `memset_orig`, `memmove`, `memcpy`, `memcpy_orig`, and a return thunk in those pages, although some are also labelled Shim imports.
 - `kernel-relocations.txt` contains nine private-data relocations and no helper call-slot relocations. `DT_NEEDED: libshim.so` therefore does not prove that these direct memory-helper calls were redirected.
 - `simd-audit.md` audits the four ordinary DSOs; it does not audit the actual kernel-backed helper execution. `correctness-trace.log` names the selected algorithm backend, not the executed helper entry.

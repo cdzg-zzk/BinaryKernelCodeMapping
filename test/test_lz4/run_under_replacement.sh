@@ -14,6 +14,7 @@ USER_DEFAULT="$BUILD_DIR/liblz4-default.so"
 USER_NOSIMD="$BUILD_DIR/liblz4-nosimd.so"
 KERNEL_USER_NATIVE="$BUILD_DIR/libkernel-userspace-native.so"
 KERNEL_USER_NOSIMD="$BUILD_DIR/libkernel-userspace-nosimd.so"
+KERNEL_USER_LIBC="$BUILD_DIR/libkernel-userspace-libc.so"
 BENCH="$BUILD_DIR/lz4-bench"
 OFFICIAL_BENCH="$BUILD_DIR/official-lz4-bench"
 
@@ -32,8 +33,14 @@ common_args=(
     --user-nosimd "$USER_NOSIMD"
     --kernel-user-native "$KERNEL_USER_NATIVE"
     --kernel-user-nosimd "$KERNEL_USER_NOSIMD"
+    --kernel-user-libc "$KERNEL_USER_LIBC"
     --kernel "$KERNEL_LIBRARY"
 )
+
+python3 "$SCRIPT_DIR/scripts/audit_helpers.py" \
+    --library "$KERNEL_LIBRARY" --same-source "$KERNEL_USER_LIBC" \
+    --bindings "$WORK_DIR/vkso/metadata/data_bindings_resolved.json" \
+    --output "$RESULT_DIR/helper-targets.json" >"$RESULT_DIR/helper-targets.log"
 
 if [[ "${GDB_CORRECTNESS:-0}" == 1 ]]; then
     taskset -c "$CPU" gdb -q -batch \
@@ -70,6 +77,7 @@ backend_names=(
     user-nosimd
     kernel-userspace-native
     kernel-userspace-nosimd
+    kernel-userspace-libc
     kernel-vkso
 )
 backend_paths=(
@@ -77,9 +85,10 @@ backend_paths=(
     "$USER_NOSIMD"
     "$KERNEL_USER_NATIVE"
     "$KERNEL_USER_NOSIMD"
+    "$KERNEL_USER_LIBC"
     "$KERNEL_LIBRARY"
 )
-backend_apis=(user user kernel kernel kernel)
+backend_apis=(user user kernel kernel kernel kernel)
 IFS=',' read -r -a block_sizes <<<"$BLOCK_SIZES"
 official_logs="$RESULT_DIR/official-logs"
 rm -rf "$official_logs"
@@ -111,7 +120,7 @@ done
 
 raw="$RESULT_DIR/raw.csv"
 python3 "$SCRIPT_DIR/scripts/parse_official.py" \
-    --logs "$official_logs" \
+    --logs "$official_logs" --with-libc \
     --output "$raw"
 python3 "$SCRIPT_DIR/scripts/summarize.py" \
     --input "$raw" \
@@ -126,9 +135,10 @@ if [[ "${RUN_CLI_WORKFLOW:-0}" == 1 ]]; then
     python3 "$SCRIPT_DIR/../evaluation/lz4-cli/workflow.py" \
         --stock "$BUILD_DIR/cli/lz4-stock" \
         --adapted "$BUILD_DIR/cli/lz4-adapted" \
-        --kernel "$KERNEL_LIBRARY" --same-source "$KERNEL_USER_NOSIMD" \
+        --kernel "$KERNEL_LIBRARY" --same-source "$KERNEL_USER_LIBC" \
         --upstream "$USER_DEFAULT" --manifest "$MANIFEST" \
-        --output "$RESULT_DIR/cli-workflow" --cpu "$CPU" --rounds 4 --block-ids 4 6
+        --helper-evidence "$RESULT_DIR/helper-targets.json" \
+        --output "$RESULT_DIR/cli-workflow" --cpu "$CPU" --rounds "${CLI_ROUNDS:-4}" --block-ids 4 6
 fi
 
 readelf -dW "$KERNEL_LIBRARY" >"$RESULT_DIR/kernel-dynamic.txt"
@@ -151,10 +161,24 @@ sha256sum \
     "$USER_NOSIMD" \
     "$KERNEL_USER_NATIVE" \
     "$KERNEL_USER_NOSIMD" \
+    "$KERNEL_USER_LIBC" \
     "$MODULE" \
     "$WORK_DIR/vkso/lib/libshim.so" \
     >"$RESULT_DIR/artifacts.sha256"
 if [[ "${RUN_CLI_WORKFLOW:-0}" == 1 ]]; then
     sha256sum "$BUILD_DIR/cli/lz4-stock" "$BUILD_DIR/cli/lz4-adapted" \
         >>"$RESULT_DIR/artifacts.sha256"
+fi
+
+if [[ "${RUN_LZ4_SETUP:-0}" == 1 ]]; then
+    python3 "$SCRIPT_DIR/../evaluation/setup/compare.py" active \
+        --work "$WORK_DIR" --native "$KERNEL_USER_LIBC" --manifest "$MANIFEST" \
+        --binaries "$BUILD_DIR/setup" --vkso "$SCRIPT_DIR/../../vkso" \
+        --output "$RESULT_DIR/setup-comparison-active" --cpu "$CPU"
+fi
+
+# The complete user workload has ended; measure the same still-registered owner.
+if [[ "${RUN_KERNEL_COST:-0}" == 1 ]]; then
+    sudo -n python3 "$SCRIPT_DIR/../evaluation/kernel_cost_host.py" collect \
+        --prepared "$RESULT_DIR/kernel-cost-prepared" --output "$RESULT_DIR/kernel-cost"
 fi

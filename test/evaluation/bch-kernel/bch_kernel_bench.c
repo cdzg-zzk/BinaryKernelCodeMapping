@@ -46,10 +46,13 @@ static bool measure;
 static unsigned int correctness_vectors = VECTOR_TRIALS;
 static unsigned int outer_runs = 11;
 static unsigned int sample_ms = 10;
+static bool aligned_inputs;
 module_param(measure, bool, 0444);
 module_param(correctness_vectors, uint, 0444);
 module_param(outer_runs, uint, 0444);
 module_param(sample_ms, uint, 0444);
+module_param(aligned_inputs, bool, 0444);
+MODULE_PARM_DESC(aligned_inputs, "Use historical user precomputed error vectors in both decode modes");
 MODULE_PARM_DESC(measure, "0: full correctness only; 1: also collect wall-time samples");
 MODULE_PARM_DESC(correctness_vectors, "Must be 128; complete correctness coverage");
 MODULE_PARM_DESC(outer_runs, "Timing rounds, default 11, range 1..128");
@@ -104,6 +107,9 @@ struct vector_record {
 	unsigned int positions[MAX_T];
 	bool ecc_equal[BACKENDS];
 	struct decode_evidence checks[BACKENDS][2];
+	/* Diagnostic snapshots are taken before timing and kept after contexts free. */
+	u8 work[BACKENDS][DATA_BYTES + 13];
+	u8 difference[BACKENDS][13];
 };
 
 struct measurement {
@@ -513,6 +519,12 @@ static int sample_backends(unsigned int round, unsigned int case_index,
 		count = calibrated[backend][case_index][op][errors];
 		if (op >= OP_PRECOMPUTED)
 			prepare(test, backend, positions, errors, op == OP_PRECOMPUTED);
+		if (aligned_inputs && op == OP_PRECOMPUTED) {
+			memcpy(vectors[vector_id].work[backend], test->context[backend].work,
+				DATA_BYTES + test->ecc_bytes);
+			memcpy(vectors[vector_id].difference[backend], test->context[backend].difference,
+				test->ecc_bytes);
+		}
 		/* Warmup and all preparation precede the recorded interval. */
 		error = time_batch(test, backend, op, errors, min_t(u64, count, 32), &warmup);
 		if (error)
@@ -555,7 +567,7 @@ static int benchmark(void)
 			for (errors = 0; errors <= cases[c].t; errors++) {
 				/* One vector shared by both decode modes and all three backends. */
 				u64 seed = 0x9e3779b97f4a7c15ULL ^ ((u64)round << 40) ^
-					((u64)c << 32) ^ errors;
+					((u64)c << 32) ^ errors ^ (aligned_inputs ? (1ULL << 24) : 0);
 
 				vector_id = save_vector("measurement", round, &cases[c], errors, seed, positions);
 				if (vector_id < 0)
@@ -572,6 +584,7 @@ static int benchmark(void)
 
 static int status_show(struct seq_file *stream, void *unused)
 {
+    seq_printf(stream, "aligned_inputs=%u\n", aligned_inputs);
 	unsigned int c, b, m;
 
 	seq_printf(stream, "status=%s\nerrno=%d\nstage=%s\nmeasure=%u\nbackends=3\n",
@@ -648,6 +661,34 @@ static int vectors_show(struct seq_file *stream, void *unused)
 }
 DEFINE_SHOW_ATTRIBUTE(vectors);
 
+static int inputs_show(struct seq_file *stream, void *unused)
+{
+	unsigned int v, b, j, bytes;
+	seq_puts(stream, "round,t,errors,backend,positions,work_hex,ecc_difference_hex\n");
+	if (!aligned_inputs)
+		return 0;
+	for (v = 0; v < vector_count; v++) {
+		const struct vector_record *r = &vectors[v];
+		if (strcmp(r->phase, "measurement"))
+			continue;
+		bytes = DIV_ROUND_UP(13 * r->t, 8);
+		for (b = 0; b < BACKENDS; b++) {
+			seq_printf(stream, "%d,%u,%u,%s,", r->round, r->t, r->errors, backends[b].name);
+			for (j = 0; j < r->errors; j++)
+				seq_printf(stream, "%s%u", j ? ":" : "", r->positions[j]);
+			seq_putc(stream, ',');
+			for (j = 0; j < DATA_BYTES + bytes; j++)
+				seq_printf(stream, "%02x", r->work[b][j]);
+			seq_putc(stream, ',');
+			for (j = 0; j < bytes; j++)
+				seq_printf(stream, "%02x", r->difference[b][j]);
+			seq_putc(stream, '\n');
+		}
+	}
+	return 0;
+}
+DEFINE_SHOW_ATTRIBUTE(inputs);
+
 static int create_outputs(void)
 {
 	struct dentry *entry;
@@ -662,6 +703,9 @@ static int create_outputs(void)
 	if (IS_ERR_OR_NULL(entry))
 		return entry ? PTR_ERR(entry) : -ENOMEM;
 	entry = debugfs_create_file("vectors", 0400, debug_directory, NULL, &vectors_fops);
+	if (IS_ERR_OR_NULL(entry))
+		return entry ? PTR_ERR(entry) : -ENOMEM;
+	entry = debugfs_create_file("inputs", 0400, debug_directory, NULL, &inputs_fops);
 	return IS_ERR_OR_NULL(entry) ? (entry ? PTR_ERR(entry) : -ENOMEM) : 0;
 }
 

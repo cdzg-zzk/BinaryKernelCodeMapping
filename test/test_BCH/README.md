@@ -1,11 +1,15 @@
 # BCH evaluation
 
+论文 6.3 的当前结果统一位于 [section63](../section63/README.md)，
+方法、对照和适配记录见[方法说明](../section63/methods.md)。本目录保留
+算法源码和单次运行入口；论文使用统一 runner 的三次完整部署统计。
+
 本目录比较三种 BCH 实现：
 
 1. `kernel-vkso`：由实际加载的 owner LKM 生成 sparse DSO，并在运行时映射
    LKM resident pages；这是论文需要评估的 exported-kernel 版本。
 2. `kernel-native`：把同一份、同样适配过的 Linux 5.15 `lib/bch.c` 普通编译成
-   用户态 DSO；它用于分离“算法/源代码差异”和“内核页面复用机制”的影响。
+   用户态 DSO；该对照衡量内核构建、依赖绑定与导出执行的组合成本。
 3. `author-standalone`：BCH 作者仓库提供的 standalone 用户态实现，按其 Makefile
    风格使用 `-O3 -mtune=native` 编译。
 
@@ -29,10 +33,10 @@ BCH 没有类似 SPEC 的统一标准 benchmark。这里采用作者仓库自带
 codeword。与原 `tu_bench.c` 相比，这是为了让跨实现性能比较同时具备严格的
 功能等价性证据。
 
-性能轮次中，同一路径的三个 backend 使用相同错误向量；full 与 precomputed
-路径的种子不同，两条路径的时间差不能作为配对的阶段成本。Decode 计时只到
+统一 runner 设置 `BCH_ALIGNED_INPUTS=1`，full/precomputed 与两域的 backend
+使用相同 codeword、错误位置及 ECC difference；每轮更换错误位置。Decode 计时只到
 返回错误位置，位翻转及完整 codeword 恢复检查在计时外。详见
-[计时边界与两错误路径核对](../evaluation/bch-decode-path-evidence.md)。
+[计时边界与两错误路径核对](../section63/methods.md)。
 
 ## 前置条件
 
@@ -46,19 +50,14 @@ vendored Linux 5.15 与作者 standalone 源码已放在 `vendor/`，正常复�
 
 ## 执行
 
-正式测试：
+单次完整运行：
 
 ```bash
-SUDO_PASSWORD='<password>' CPU=2 OUTER_RUNS=11 SAMPLE_MS=10 \
-CORRECTNESS_VECTORS=128 ./test/test_BCH/run.sh
+sudo env CPU=2 OUTER_RUNS=11 SAMPLE_MS=10 CORRECTNESS_VECTORS=128 \
+BCH_ALIGNED_INPUTS=1 bash test/test_BCH/run.sh
 ```
 
-快速验证：
-
-```bash
-SUDO_PASSWORD='<password>' CPU=2 OUTER_RUNS=2 SAMPLE_MS=1 \
-CORRECTNESS_VECTORS=16 ./test/test_BCH/run.sh
-```
+论文全量采集采用统一结果入口给出的命令。
 
 脚本会重新编译 owner LKM、添加 BTF、加载模块、按规范 `vkso exec` 流程构造并
 运行 DSO，最后恢复页面并卸载 owner LKM。输出位于 `results/`：
@@ -78,6 +77,5 @@ sparse 文件视图的哈希；两者不同是 sparse page replacement 的预期
 `vkso/native` 使用同一 outer round 的配对样本计算；大于 1 表示导出版本更慢。
 所有 outer rounds 在同一进程、同一次 owner 装载和页面注册中完成；
 轮次分布不估计重新部署或重新启动的变化。
-正式结果及结论见 [`RESULTS.md`](RESULTS.md)，所有逐项数值见
-[`results/summary.md`](results/summary.md)。适配边界见
-[`ADAPTATIONS.md`](ADAPTATIONS.md)。
+正式结果及全部逐项数值见 [section63](../section63/README.md)。
+适配边界见 [ADAPTATIONS.md](ADAPTATIONS.md)。

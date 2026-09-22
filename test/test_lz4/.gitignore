@@ -1,0 +1,15 @@
+/build/
+/.cache/
+/corpus/
+/results/
+/work/
+/scripts/__pycache__/
+/scripts/*.py[cod]
+/kmod/.*.cmd
+/kmod/*.d
+/kmod/*.ko
+/kmod/*.mod
+/kmod/*.mod.c
+/kmod/*.o
+/kmod/Module.symvers
+/kmod/modules.order

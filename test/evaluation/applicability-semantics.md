@@ -1,5 +1,11 @@
 # Applicability: source semantics and static-result scope
 
+Current update (2026-09-12): [actual built-in export evidence](applicability-evidence.md)
+now verifies xxh32 and sort, including the latter's user callbacks and generated
+thunk page. The revised static batch completed all eight fixed cases: two
+checker PASS and six checker FAIL. The earlier interrupted capture is retained
+as historical evidence; it is not used for the current denominator.
+
 Source review: 2026-09-12. The candidate list remains the eight entries frozen
 on 2026-09-11; none was replaced after seeing a checker result. The four existing
 integrations form a separate retrospective cohort. These are selected cases,
@@ -26,9 +32,10 @@ the source reading alone.
 | `get_random_bytes` | `drivers/char/random.c:437`, `_get_random_bytes`, `crng_make_state` | Depends on evolving global/per-CPU CRNG state, reseeding and locks; caller output ownership does not make generator state public | Kernel-private-state boundary case. Code-page export alone does not provide the required state semantics; the fixed plan withholds carrier construction. |
 
 These assessments classify semantic requirements, not completed adaptation.
-The prospective cases have no new registration or runtime test in this batch.
-Actual modified SLOC, carrier pages and runtime correctness must come from
-the later permitted construction/validation, not from estimates in this table.
+The prospective cases other than xxh32 and sort have no new registration or
+runtime test in this batch. Actual modified SLOC, carrier pages and runtime
+correctness must come from later permitted construction/validation, not from
+estimates in this table.
 
 ## Interpreting the actual checker logs
 
@@ -54,14 +61,12 @@ are not an observation of the booted kernel's final PTE permissions. Source
 read-only tables, static ELF flags and live mapping permissions are distinct
 fields; do not infer live writable mappings from this label.
 
-## Terminal records captured at 08:02 UTC
+## Revised terminal records captured at 08:54 UTC
 
-The read-only capture at **2026-09-12 08:02:43 UTC** contains six completed
-candidates: two checker PASS and four checker FAIL. Controller PID 14474 was
-still live; its current child PID 172137 was checking the seventh candidate,
-`rhashtable_insert_slow`. `get_random_bytes` had no log or terminal record yet.
-The former `hex_dump_to_buffer` child PID 15248 had exited and left a complete
-FAIL manifest. The eight-case campaign was therefore still in progress.
+The revised run at **2026-09-12 08:54 UTC** contains terminal manifests for
+all eight candidates: two checker PASS and six checker FAIL. It uses the
+current checker revision, writes to a new result directory, and leaves the
+earlier six-result capture untouched.
 
 | Candidate | Captured checker state | Visited functions | Static-reference records | Indirect sites | Instrumentation sites | Hard-failure records | Unanalysable records |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -71,29 +76,31 @@ FAIL manifest. The eight-case campaign was therefore still in progress.
 | `hex_dump_to_buffer` | FAIL | 1,834 | 6,405 | 408 | 2,230 | 3,542 | 716 |
 | `string_escape_mem` | FAIL | 2 | 4 | 0 | 0 | 4 | 0 |
 | `sort` | PASS | 3 | 0 | 5 | 0 | 0 | 0 |
-| `rhashtable_insert_slow` | running | — | — | — | — | — | — |
-| `get_random_bytes` | not started | — | — | — | — | — | — |
+| `rhashtable_insert_slow` | FAIL | 1,844 | 6,398 | 411 | 2,232 | 3,530 | 721 |
+| `get_random_bytes` | FAIL | 28 | 94 | 0 | 36 | 36 | 4 |
 
-All six completed records report zero missing symbols. Terminal manifest
+All eight completed records report zero missing symbols. Terminal manifest
 counts and exit codes were independently compared with each candidate's
-`result.json` and the campaign `results.json`; all matched. None of these
-prospective candidates has a carrier or runtime result in this batch. Pending
-cells are not zeros and do not enter a completed-case success denominator.
+`result.json` and the campaign `results.json`; all matched.
+Only xxh32 and sort have a carrier and runtime result in this batch. The six
+static failures are not treated as runtime failures, and their absent runtime
+cells are not zeros.
 
 The newly completed records refine the semantic reading as follows:
 
 - **`hex_dump_to_buffer`: rejection of the current static dependency expansion.**
-  The terminal manifest contains 3,537 absolute-address records and five
-  privileged-instruction/control-register records. It also records 716 failures
-  to resolve a function from a section offset, across **347 distinct function
-  names**. The checker labels that field “unanalysable functions” but appends
-  one entry per diagnostic; it is not a count of 716 different functions.
-  Because hard failures are present, the exit policy reports FAIL even though
-  analysis gaps also remain. The earlier 44-edge formatter/warning ancestry
-  below explains the observed expansion, without proving that a normal hex
-  formatting call executes those kernel service paths. This is not a semantic
-  conclusion that caller-owned formatting inherently requires private kernel
-  state, nor a completed export of 1,834 functions.
+  The revised terminal manifest contains 6,405 static references, 408 indirect
+  sites, 2,230 instrumentation sites and 3,542 hard failures. It also records
+  716 failures to resolve a function from a section offset, across **347
+  distinct function names**. The checker labels that field “unanalysable
+  functions” but appends one entry per diagnostic; it is not a count of 716
+  different functions. Because hard failures are present, the exit policy
+  reports FAIL even though analysis gaps also remain. The earlier 44-edge
+  formatter/warning ancestry below explains the observed expansion, without
+  proving that a normal hex formatting call executes those kernel service
+  paths. This is not a semantic conclusion that caller-owned formatting
+  inherently requires private kernel state, nor a completed export of 1,834
+  functions.
 - **`string_escape_mem`: address representation of table dependencies.** The
   two visited functions are `string_escape_mem` and `strchr`. The four hard
   failures are all absolute-address references in the requested entry: `_ctype`

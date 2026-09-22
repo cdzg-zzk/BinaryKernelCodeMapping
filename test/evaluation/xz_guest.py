@@ -25,6 +25,9 @@ def validate_xz():
         fields = dict(line.split('=', 1) for line in
                       (WORK / 'vkso/metadata/outputs.env').read_text().splitlines())
         library = Path(fields['library']).resolve()
+        sys.path.insert(0, str(ROOT / 'setup'))
+        from collect import active as collect_setup
+        collect_setup('xz', ROOT, OUT / 'setup-full', WORK)
         page_map = Path(fields['page_map'])
         record['library'] = str(library)
         execute(['python3', ROOT / 'scripts/audit_kernel_dso.py',
@@ -35,6 +38,7 @@ def validate_xz():
         record['shared_pages'] = len(pages['pages'])
         record['owner_refcnt_during_registration'] = int(
             Path('/sys/module/vkso_xz/refcnt').read_text())
+        assert record['owner_refcnt_during_registration'] == 1
         manifest = list(csv.reader((OUT / 'corpus/manifest.csv').read_text().splitlines()))
         assert [row[0] for row in manifest] == ['bash', 'python3', 'libc.so.6'], manifest
         inputs = []
@@ -76,6 +80,12 @@ def validate_xz():
             'source': '/work/benchmark-source/src/xz-bench.c',
             'page_observation': 'all declared pages before and after full workload',
         }
+        if (ROOT / 'kernel-cost').exists():
+            from kernel_cost_guest import run as kernel_cost
+            record['kernel_cost'] = kernel_cost('xz', ROOT, OUT / 'kernel-cost')
+            final = observe_registered_pages(library, page_map)
+            assert [(p['file_offset'], p['kernel_pfn']) for p in pages['pages']] == [
+                (p['file_offset'], p['kernel_pfn']) for p in final['pages']]
         record['status'] = 'pass'
     except BaseException:
         record['status'] = 'fail'
@@ -116,12 +126,17 @@ def main():
                  '--owner-ko', ROOT / 'owner/vkso_xz.ko',
                  '--vmlinux', ROOT / 'vmlinux-5.15.0-119-generic',
                  '--', 'python3', ROOT / 'guest.py', '--validate-xz'],
-                OUT / 'export-and-correctness.log')
+                OUT / 'export-and-correctness.log', dict(os.environ,
+                    VKSO_SETUP_TRACE=str(OUT / 'setup-stages.tsv'), VKSO_SETUP_CLOCK=str(ROOT / 'setup/setup-clock')))
         assert json.loads((OUT / 'xz-validation.json').read_text())['status'] == 'pass'
         assert not (REPO / 'page_cache_replace/runtime/manager.pid').exists()
         record['stage'] = 'normal-release'
         verify_restored_pages()
         record['restoration_verified'] = True
+        sys.path.insert(0, str(ROOT / 'setup'))
+        from collect import ready as collect_ready
+        collect_ready('xz', ROOT, OUT / 'setup-ready', WORK)
+        verify_restored_pages()
         record['status'] = 'pass'
     except BaseException:
         record['status'] = 'fail'

@@ -1,8 +1,11 @@
-# Registration evidence: current call path and outstanding checks
+# Registration evidence: baseline path and subsequent observations
 
-Source audit on 2026-09-11, after `09740b2`. This records the implementation
-reached by the algorithm runners, not an observation of a new deployment.
-No registration code or live mappings were changed.
+The source audit below describes the 2026-09-11 baseline after `09740b2`,
+followed by its isolated runtime observations. On 2026-09-12, the modified
+manager/module gained explicit completion results and removed fixed waits;
+[the new evidence](registration-completion-evidence.md) includes full LZ4 and
+error-path guest validation. Baseline statements below retain their original
+implementation identity. Owner pinning and transactional rollback remain open.
 
 ## Executed path
 

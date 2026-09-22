@@ -24,11 +24,15 @@ def validate_bch():
         fields = dict(line.split('=', 1) for line in
                       (WORK / 'vkso/metadata/outputs.env').read_text().splitlines())
         library = Path(fields['library']).resolve()
+        sys.path.insert(0, str(ROOT / 'setup'))
+        from collect import active as collect_setup
+        collect_setup('bch', ROOT, OUT / 'setup-full', WORK)
         pages = observe_registered_pages(library, Path(fields['page_map']))
         record['library'] = str(library)
         record['shared_pages'] = len(pages['pages'])
         record['owner_refcnt_during_registration'] = int(
             Path('/sys/module/vkso_bch/refcnt').read_text())
+        assert record['owner_refcnt_during_registration'] == 1
         execute([ROOT / 'binaries/bch-bench', '--kernel', library,
                  '--kernel-native', ROOT / 'binaries/libbch-kernel-native.so',
                  '--standalone', ROOT / 'binaries/libbch-author-standalone.so',
@@ -49,6 +53,12 @@ def validate_bch():
                        'exact error locations', 'corrected codeword equals original'],
             'decode_checks_from_unchanged_loop': 128 * (5 + 9) * 3 * 2,
         }
+        if (ROOT / 'kernel-cost').exists():
+            from bch_kernel_guest import run_registered
+            record['kernel_cost'] = run_registered()
+            final = observe_registered_pages(library, Path(fields['page_map']))
+            assert [(p['file_offset'], p['kernel_pfn']) for p in pages['pages']] == [
+                (p['file_offset'], p['kernel_pfn']) for p in final['pages']]
         record['status'] = 'pass'
     except BaseException:
         record['status'] = 'fail'
@@ -84,12 +94,17 @@ def main():
                  '--owner-ko', ROOT / 'owner/vkso_bch.ko',
                  '--vmlinux', ROOT / 'vmlinux-5.15.0-119-generic',
                  '--', 'python3', ROOT / 'guest.py', '--validate-bch'],
-                OUT / 'export-and-correctness.log')
+                OUT / 'export-and-correctness.log', dict(os.environ,
+                    VKSO_SETUP_TRACE=str(OUT / 'setup-stages.tsv'), VKSO_SETUP_CLOCK=str(ROOT / 'setup/setup-clock')))
         assert json.loads((OUT / 'bch-validation.json').read_text())['status'] == 'pass'
         assert not (REPO / 'page_cache_replace/runtime/manager.pid').exists()
         record['stage'] = 'normal-release'
         verify_restored_pages()
         record['restoration_verified'] = True
+        sys.path.insert(0, str(ROOT / 'setup'))
+        from collect import ready as collect_ready
+        collect_ready('bch', ROOT, OUT / 'setup-ready', WORK)
+        verify_restored_pages()
         record['status'] = 'pass'
     except BaseException:
         record['status'] = 'fail'

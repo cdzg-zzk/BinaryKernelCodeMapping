@@ -28,6 +28,20 @@ def digest(path):
     return value.hexdigest()
 
 
+def copy_tree_skip_existing(source, destination):
+    """Merge a toolchain tree without replacing dependency symlinks copied by ldd."""
+    source, destination = Path(source), Path(destination)
+    destination.mkdir(parents=True, exist_ok=True)
+    for item in source.iterdir():
+        target = destination / item.name
+        if target.exists() or target.is_symlink():
+            continue
+        if item.is_dir() and not item.is_symlink():
+            copy_tree_skip_existing(item, target)
+        else:
+            shutil.copy2(item, target, follow_symlinks=False)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
@@ -39,8 +53,13 @@ def main():
     parser.add_argument('--environment-evidence', type=Path)
     parser.add_argument('--owner', type=Path, default=ROOT / 'test/test_lz4/kmod/vkso_lz4.ko')
     parser.add_argument('--diagnose-runtime', action='store_true')
+    parser.add_argument('--kernel-cost', action='store_true',
+                        help='fresh-build current owner and validate three kernel backends in the same registration')
+    parser.add_argument("--setup-comparison", action="store_true")
     args = parser.parse_args()
     output, kernel, base = [path.resolve() for path in (args.output, args.kernel, args.initramfs)]
+    if not os.access('/dev/kvm', os.R_OK | os.W_OK):
+        raise RuntimeError('KVM validation requires readable/writable /dev/kvm; refusing a TCG substitute')
     output.mkdir(parents=True, exist_ok=False)
     manifest = []
 
@@ -77,27 +96,26 @@ def main():
             copy_file(name, initroot / name.lstrip('/'))
 
     for name in ('env', 'bash', 'gcc', 'as', 'ld', 'make', 'readelf', 'nm', 'install', 'realpath',
-                 'stat', 'sha256sum', 'awk', 'sed', 'grep', 'tee', 'cp', 'mv', 'rm', 'mktemp'):
+                 'stat', 'taskset', 'objdump', 'sha256sum', 'awk', 'sed', 'grep', 'tee', 'cp', 'mv', 'rm', 'mktemp'):
         runtime(shutil.which(name), initroot / 'usr/bin' / name)
     runtime('/bin/bash', initroot / 'bin/bash')
     runtime('/usr/lib/linux-tools/5.15.0-119-generic/bpftool', initroot / 'usr/bin/bpftool')
     if args.diagnose_runtime:
         runtime('/usr/bin/gdb')
-        shutil.copytree('/usr/share/gdb', initroot / 'usr/share/gdb', symlinks=True)
+        copy_tree_skip_existing('/usr/share/gdb', initroot / 'usr/share/gdb')
     compiler = Path('/usr/lib/gcc/x86_64-linux-gnu/11')
-    shutil.copytree(compiler, initroot / str(compiler).lstrip('/'), symlinks=True)
-    shutil.copytree('/usr/include', initroot / 'usr/include', symlinks=True)
+    copy_tree_skip_existing(compiler, initroot / str(compiler).lstrip('/'))
+    copy_tree_skip_existing('/usr/include', initroot / 'usr/include')
     runtime(compiler / 'cc1')
     runtime(compiler / 'collect2')
-    for name in ('crti.o', 'crtn.o', 'libc.so', 'libc_nonshared.a', 'libgcc_s.so.1'):
+    for name in ('crti.o', 'crtn.o', 'libc.so', 'libc_nonshared.a', 'libgcc_s.so.1', 'libdl.a'):
         source = Path('/usr/lib/x86_64-linux-gnu') / name
         copy_file(source, initroot / str(source).lstrip('/'))
     import capstone
     import elftools
     for module in (capstone, elftools):
         directory = Path(module.__file__).parent
-        shutil.copytree(directory, initroot / 'opt/python-packages' / directory.name,
-                        ignore=shutil.ignore_patterns('__pycache__'))
+        copy_tree_skip_existing(directory, initroot / 'opt/python-packages' / directory.name)
     (initroot / 'init').write_text('''#!/bin/busybox sh
 /bin/busybox --install -s /bin
 export PATH=/usr/bin:/bin
@@ -124,16 +142,46 @@ poweroff -f
     (initroot / 'init').chmod(0o755)
     payload = output / 'payload'
     payload.mkdir()
+    if args.setup_comparison:
+        (payload / 'setup-comparison.json').write_text(json.dumps(dict(cpu=1,rounds=3))+'\n')
     files = ['vkso', 'kernel_cgd/src/krg', 'kernel_cgd/src/krg.cpp',
              'kernel_cgd/kerne_type/vkso_gen_types.py',
              'kernel_cgd/function_checker/functions_checker.py', 'make_dll/build_PIC_so.py',
              'make_dll/shim.c', 'make_dll/shim.txt', 'page_cache_replace/manager',
-             'page_cache_replace/manager.cpp', 'page_cache_replace/page_cache_replace.ko']
+             'page_cache_replace/manager.cpp', 'page_cache_replace/protocol.h', 'page_cache_replace/owner.h',
+             'page_cache_replace/page_cache_replace.c', 'page_cache_replace/Makefile',
+             'page_cache_replace/page_cache_replace.ko']
     for relative in files:
         copy_file(ROOT / relative, payload / 'repo' / relative)
     runtime(ROOT / 'kernel_cgd/src/krg', payload / 'repo/kernel_cgd/src/krg')
     for name in ('lz4-stock', 'lz4-adapted'):
         runtime(HERE / 'lz4-cli/build' / name, payload / 'cli' / name)
+    # Build every ordinary baseline and the original component harness from
+    # an isolated source snapshot. The owner is still the supplied full LKM.
+    baseline_source = output / 'baseline-source'
+    baseline_source.mkdir()
+    test_source = ROOT / 'test/test_lz4'
+    for relative in ('Makefile', 'run_under_replacement.sh'):
+        copy_file(test_source / relative, baseline_source / relative)
+    for directory in ('kmod', 'userspace_kernel', 'src', 'scripts', 'vendor'):
+        for source in sorted((test_source / directory).rglob('*')):
+            if source.is_file() and source.suffix in ('.c', '.h', '.map', '.py') and not source.name.endswith('.mod.c'):
+                copy_file(source, baseline_source / source.relative_to(test_source))
+    baseline_build = output / 'baseline-build'
+    with (output / 'baseline-build.log').open('w') as stream:
+        run(['make', '-C', baseline_source, f'BUILD_DIR={baseline_build}', 'all'],
+            stdout=stream, stderr=subprocess.STDOUT)
+    with (output / 'baseline-simd-audit.log').open('w') as stream:
+        run(['make', '-C', baseline_source, f'BUILD_DIR={baseline_build}', 'audit-simd'],
+            stdout=stream, stderr=subprocess.STDOUT)
+    for source in baseline_build.iterdir():
+        runtime(source, payload / 'baselines' / source.name)
+    for name in ('lz4-stock', 'lz4-adapted'):
+        copy_file(HERE / 'lz4-cli/build' / name, payload / 'baselines/cli' / name)
+    for source in (baseline_source / 'scripts').glob('*.py'):
+        copy_file(source, payload / 'repo/test/test_lz4/scripts' / source.name)
+    copy_file(baseline_source / 'run_under_replacement.sh', payload / 'repo/test/test_lz4/run_under_replacement.sh')
+    copy_file(HERE / 'lz4-cli/workflow.py', payload / 'repo/test/evaluation/lz4-cli/workflow.py')
     copy_file(args.owner.resolve(), payload / 'owner/vkso_lz4.ko')
     if args.diagnose_runtime:
         (payload / 'diagnose-runtime').touch()
@@ -146,6 +194,7 @@ poweroff -f
         magic = run(['modinfo', '-F', 'vermagic', module], capture_output=True, text=True).stdout
         assert magic.startswith('5.15.0-119-generic '), (module, magic)
     copy_file(ROOT / 'test/test_lz4/config/symbols.txt', payload / 'symbols.txt')
+    copy_file(ROOT / 'test/test_lz4/config/data-bindings.json', payload / 'data-bindings.json')
     corpus = ROOT / 'test/test_lz4/corpus/silesia'
     copy_file(corpus / 'manifest.txt', payload / 'corpus/manifest.txt')
     names = [line for line in (corpus / 'manifest.txt').read_text().splitlines()
@@ -161,6 +210,11 @@ poweroff -f
                   input=paths, capture_output=True).stdout
     initrd = output / 'initramfs.cpio.gz'
     initrd.write_bytes(gzip.compress(rebuilt, compresslevel=1))
+    from setup.prepare import prepare as prepare_setup
+    prepare_setup(output, payload, copy_file)
+    if args.kernel_cost:
+        from kernel_cost_prepare import prepare as prepare_kernel_cost
+        prepare_kernel_cost('lz4', output, payload, copy_file)
     disk = output / 'guest.ext4'
     with disk.open('wb') as stream:
         stream.truncate(4 * 1024**3)

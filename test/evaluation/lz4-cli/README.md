@@ -20,8 +20,15 @@ in-memory official benchmark.
 | --- | --- | --- |
 | `stock-cli` | Original upstream CLI and built-in block implementation, release-style `-O3` build | Ordinary application reference |
 | `upstream-dso` | Adapted CLI calling the existing upstream 1.9.3 user DSO | Separates a practical dynamically selected user implementation from the stock CLI |
-| `same-source` | Adapted CLI calling the existing adapted Linux 5.15 no-SIMD user DSO | Same-source application comparison |
+| `same-source` | Adapted CLI calling the adapted Linux 5.15 scalar-body DSO with libc helpers | Same-source application comparison with the same helper provider |
 | `kernel-vkso` | Same adapted CLI calling the live registered kernel-backed carrier | Complete VKSO application path |
+
+The new `same-source` target is `libkernel-userspace-libc.so`. Before any CLI
+measurements, the component runner records actual baseline GOT/PLT targets and
+carrier bridge providers in `helper-targets.json`; the workflow requires this
+evidence with `--helper-evidence`. Algorithm flags match the REP user DSO, but
+libc helpers may execute SIMD. The earlier REP-baseline application runs below
+retain their own identities.
 
 The three adapted modes use the same dispatch code. The two kernel-API modes
 allocate 64 KiB of work memory per CLI process; upstream uses its frame
@@ -119,7 +126,7 @@ An earlier validation command mistakenly selected `liblz4-nosimd.so` (the
 upstream API) for the kernel-signature mode; the adapter rejected its missing
 `vkso_LZ4_compress_default` symbol before compression. That failed command's
 logs remain in the sibling `lz4-cli/` directory. The corrected validation uses
-`libkernel-userspace-nosimd.so`; the formal workflow already selects that
+`libkernel-userspace-nosimd.so`; the earlier workflow selected that
 library. No adapter or algorithm change was needed.
 
 ## Registered-carrier validation — 2026-09-12

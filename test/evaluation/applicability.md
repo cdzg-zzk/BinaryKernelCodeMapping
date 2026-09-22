@@ -96,8 +96,15 @@ adaptation counts must come from actual source diffs, not inferred effort.
 Already tested correctness cases are imported instead of repeated merely to
 enlarge a table.
 
-Current status: the set and inspection driver are prepared; no new prospective
-static checks, carrier builds, or runtime attempts have been performed.
-Parser fixtures verified that a PASS with diagnostic findings is not silently
-converted to a clean result, and the live Clocktime guard rejected execution.
-These software checks do not supply applicability outcomes.
+Current status (2026-09-12): the revised static batch has terminal results for
+all eight fixed cases, with two PASS and six FAIL. The earlier interrupted
+capture is retained separately and is not mixed into the revised denominator.
+Both passing roots, `xxh32` and `sort`, now have actual carrier, registered PFN
+and full typed functional evidence from a private exact119 guest: 247 and
+1,152 cases respectively, checked in each domain against independent
+references. Sort uses an additional generated thunk page, separately counted
+from its two shared kernel pages. See the
+[consolidated evidence and reproduction commands](applicability-evidence.md).
+The retrospective adaptation ledger remains outstanding, and the six static
+failures have no carrier/runtime evidence. This selected cohort does not
+establish a Linux-wide success rate.

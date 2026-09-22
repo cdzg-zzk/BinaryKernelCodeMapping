@@ -1,6 +1,8 @@
 # 注册、引用和恢复的统一修订方案
 
-状态：供用户审阅，尚未实施。此方案涉及项目基础机制，不能由补实验的授权自动推出实施授权。现有 Clocktime 冻结采集及原始结果保持其原版本身份。
+当前补充：[终态回收](../registration-retirement-evidence.md)已在完整 manager 中实现 RELEASE 后 FORGET，并通过丢回复、两个释放中断点、96 次规模会话及完整 LZ4。链接产物身份不等于 final runtime text 验证，源页准入和运行时改写仍按下述要求继续。
+
+状态：按持续任务实施中。[v3 事务证据](../registration-transaction-evidence.md)已验证动态完整计划、STAGE/COMMIT、300 页跨批次回滚、QUERY、幂等恢复、残留引用保留、manager 持久化身份和接续恢复。LZ4 完整应用在相同注册构建下通过。槽位内替换已消除提交中的 xarray 分配，五个启动中断点和 BCH/XZ 新 runtime 又已通过。manager 已实施并验证 owner/vmlinux 链接产物身份核对；[FIFO 完成通知及普通 ext4 文件/VMA 矩阵](../registration-notification-evidence.md)已通过，包含真实 root/sudo 路径、竞争/遗留状态保护和三个完整算法会话。运行时重写、源页公开性及正式 setup/资源结果仍未完成。以下为原始完整要求，不以已有通过项缩减验收范围。现有 Clocktime 冻结采集及原始结果保持其原版本身份。
 
 ## 已复现的问题与需要达到的行为
 
@@ -24,7 +26,7 @@
 
 完整计划分批 STAGE，最后 COMMIT。256 页保留为传输分块上限，不能继续作为静默溢出的全局备份容量。提交前完成文件范围、溢出、对齐、重复项、全部 owner、页类别和资源分配检查。每个事务持有目标 file/inode、完整计划、owner pin 集合、源页及原管理字段、实际 applied 标记。索引必须包含事务和 mapping，不能只用 file offset。
 
-Manager 保持接收 socket，匹配 sequence/transaction ID 并等待真实结果。成功 COMMIT 后才建立 ready，删除目前两处 `sleep(2)`。超时表示状态未知，通过 QUERY 查询；RESTORE 按事务幂等执行，不能盲目重复替换。`vkso` 和算法 runner 必须传播恢复错误，不能吞掉错误后继续卸载 owner。
+当前 manager 保持完整提交期间的接收 socket，核对 sequence、版本、transaction ID 及实际结果，并删除两处 `sleep(2)`；ready 已推迟到成功 COMMIT。超时表示状态未知，通过 QUERY 查询；RESTORE 按事务幂等执行，不能盲目重复替换。`vkso` 和算法 runner 必须传播恢复错误，不能吞掉错误后继续卸载 owner。
 
 当前单个 `struct page` 的 `mapping/index` 会被注册操作改写。同一源 PFN 同时注册到不同 inode 必须明确拒绝，直到另有支持该场景的设计；多个进程使用同一 carrier 仍然共享该绑定。这个限制需进入接口契约与 B 的验证记录。
 
@@ -34,7 +36,7 @@ Manager 保持接收 socket，匹配 sequence/transaction ID 并等待真实结�
 
 回滚按实际成功记录逆序处理，确认当前 backing 属于该事务；某页恢复失败仍继续处理其余页并汇总错误。恢复锁序须结合原生 file fault：阻止新 fault 取得待撤销 backing，移除对应 cache entry，撤销源页 user PTE 并完成失效，再恢复源页管理字段，释放页引用，最后释放 owner pin。原文件恢复方式是重新从文件取得内容，并非恢复此前已删除 cache page 的身份。
 
-恢复未完成则进入 `RECOVERY_REQUIRED`，保留必要的 owner/page/file 引用和文件保护状态。现有 restore 函数不能直接充当可靠回滚：它不验证当前 entry 的 source identity、部分错误路径引用不平衡、遇首错就停止，并依赖未持 file 引用的 mapping。
+恢复未完成则进入 `RECOVERY_REQUIRED`，保留必要的 owner/page/file 引用和文件保护状态。当前 restore 已校验 source page/mapping/index，保留 file 引用，并在移除 cache entry 和撤销映射期间持 source page lock。v3 已按逆序继续处理其余 applied 页，聚合残留为 RECOVERY_REQUIRED，并支持重复 RELEASE；相关实测见上方链接。
 
 “失败返回前撤销全部绑定”和“所有并发观察者始终看不到提交中间状态”是不同要求。仅使用 `invalidate_lock` 不能证明后者，因为缓存命中的 file fault 不总取得该锁。新版本至少必须保证应用在成功确认前不由 runner 启动，并完成 B 中已有映射/并发 fault 的提交与恢复验证；更强的并发发布原子性需要实际的 fault/read 发布控制，不能靠措辞代替。
 

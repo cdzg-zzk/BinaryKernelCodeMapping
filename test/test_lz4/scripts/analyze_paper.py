@@ -30,6 +30,12 @@ COMPARISONS = (
 )
 
 
+LIBC_COMPARISONS = (
+    ("vkso_vs_kernel_user_libc", "kernel-vkso", "kernel-userspace-libc"),
+    ("kernel_libc_vs_kernel_rep", "kernel-userspace-libc", "kernel-userspace-nosimd"),
+)
+
+
 def percentile(values: list[float], fraction: float) -> float:
     ordered = sorted(values)
     index = (len(ordered) - 1) * fraction
@@ -53,6 +59,8 @@ def main() -> None:
 
     with args.input.open(encoding="utf-8", newline="") as stream:
         raw = list(csv.DictReader(stream))
+    backend_names = {row['backend'] for row in raw}
+    comparisons = COMPARISONS + (LIBC_COMPARISONS if 'kernel-userspace-libc' in backend_names else ())
     lookup = {
         (
             int(row["run"]),
@@ -62,12 +70,18 @@ def main() -> None:
         ): float(row["official_mb_per_second"])
         for row in raw
     }
+    if len(lookup) != len(raw):
+        raise ValueError('duplicate round/backend/operation/block observation')
     runs = sorted({key[0] for key in lookup})
     blocks = sorted({key[3] for key in lookup})
 
+    expected = {(r, b, op, block) for r in runs for b in backend_names
+                for op in ('compress', 'decompress') for block in blocks}
+    if set(lookup) != expected or not all(math.isfinite(v) and v > 0 for v in lookup.values()):
+        raise ValueError('incomplete or invalid throughput matrix')
     pairwise: list[dict[str, object]] = []
     comparison_cells: dict[str, list[float]] = defaultdict(list)
-    for comparison, numerator, denominator in COMPARISONS:
+    for comparison, numerator, denominator in comparisons:
         for operation in ("compress", "decompress"):
             for block in blocks:
                 ratios = [
@@ -105,10 +119,10 @@ def main() -> None:
         "",
         "## 实验有效性",
         "",
-        f"- 正式数据包含 {len(runs)} 个同一部署内的 outer rounds、{len(blocks)} 个 block sizes、5 个后端。",
+        f"- 数据包含 {len(runs)} 个同一部署内的 outer rounds、{len(blocks)} 个 block sizes、{len(backend_names)} 个后端。",
         f"- 每个表格比值先在相同 outer round 内配对，再报告 {len(runs)} 个配对比值的中位数与 P10–P90。",
         "- 计时核心是未修改的 LZ4 1.9.3 `programs/bench.c`；薄适配层只负责把 block API 转发到对应 DSO。",
-        "- 五个压缩器与五个解压器已在 12 个边界长度上完成全交叉正确性验证；官方 harness 还对每个 Silesia case 执行 XXH64 校验。",
+        "- 全交叉正确性结果见同部署 correctness.log；官方 harness 的校验记录保留在逐进程原始日志中。",
         "- native 版本允许 `-march=native` 和 glibc IFUNC memory helpers；no-SIMD 版本禁用编译器 SIMD，并使用测试内 `rep movsb/rep stosb` helper，机器码审计为 0 个 SIMD/MMX 命中且无外部 memory helper。",
         "",
         "## 配对性能比",
@@ -125,6 +139,7 @@ def main() -> None:
         "kernel_nosimd_vs_kernel_native",
         "upstream_nosimd_vs_native",
     }
+    selected_comparisons.update(c[0] for c in LIBC_COMPARISONS)
     for row in pairwise:
         if row["comparison"] not in selected_comparisons:
             continue
@@ -139,17 +154,24 @@ def main() -> None:
         "## 等权几何平均",
         "",
     ]
-    for comparison, _, _ in COMPARISONS:
+    for comparison, _, _ in comparisons:
         lines.append(f"- `{comparison}`: {overall[comparison]:.4f}x")
 
     lines += [
         "",
-        "## 可用于论文的结论",
+        "## 各项比较的观察范围",
         "",
-        f"1. `kernel-vkso` 相对 upstream native 的六个 operation/block 组合等权几何平均为 {overall['vkso_vs_upstream_native']:.4f}x。它在三个压缩 block 上均略快，但在三个解压 block 上均较慢，因此不能概括为 kernel 或 user-space 单方面占优。",
-        f"2. `kernel-vkso` 相对同源 kernel-userspace native 为 {overall['vkso_vs_kernel_user_native']:.4f}x，相对同源 kernel-userspace no-SIMD 为 {overall['vkso_vs_kernel_user_nosimd']:.4f}x。后者接近 1，说明 vkso 路径在本实验中基本保持了同一 kernel 算法的用户态可执行性能量级。",
-        f"3. kernel 源码的 no-SIMD+REP 版本相对 native+glibc 版本为 {overall['kernel_nosimd_vs_kernel_native']:.4f}x；upstream 对应比值为 {overall['upstream_nosimd_vs_native']:.4f}x。这里 no-SIMD 没有变慢，说明这些 LZ4 路径的性能不能只由 SIMD 可用性解释。",
-        f"4. 在相同 native 编译制度下，kernel 算法相对 upstream 为 {overall['kernel_vs_upstream_native']:.4f}x；在 no-SIMD+REP 制度下为 {overall['kernel_vs_upstream_nosimd']:.4f}x。剩余差异主要来自算法版本、控制流、内存复制策略和 Kbuild/用户态编译差异。",
+    ]
+    for comparison, _, _ in comparisons:
+        selected = [r for r in pairwise if r['comparison'] == comparison]
+        medians = [r['median_ratio'] for r in selected]
+        lines.append(f"- `{comparison}`：{len(medians)} 项 operation/block 的配对中位数范围 "
+                     f"{min(medians):.4f}–{max(medians):.4f}x；等权几何平均 {overall[comparison]:.4f}x。")
+    if 'kernel-userspace-libc' in backend_names:
+        lines += ["", "新增 libc 对照与 REP 同源 DSO 使用相同算法编译选项，只改变外部 memory-helper 的解析。",
+                  "它的算法体无 SIMD，libc helper 可以使用 SIMD；实际目标地址的匹配见 helper-targets.json。",
+                  "VKSO owner 使用 Kbuild，用户 DSO 使用 -O3/PIC；相同 helper 不等于相同机器码或单因素 PGOT 消融。"]
+    lines += [
         "",
         "## 解释限制",
         "",

@@ -1,0 +1,12 @@
+/build/
+/work/
+/kmod/*.ko
+/kmod/*.o
+/kmod/*.mod
+/kmod/*.mod.c
+/kmod/.*.cmd
+/kmod/.*.d
+/kmod/Module.symvers
+/kmod/modules.order
+__pycache__/
+*.pyc

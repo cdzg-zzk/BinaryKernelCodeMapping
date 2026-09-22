@@ -1,1 +1,0 @@
-readelf: Warning: Section '.GCC.command.line' was not dumped because it does not exist

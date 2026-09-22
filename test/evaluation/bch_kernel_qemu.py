@@ -25,12 +25,12 @@ def digest(path):
     return value.hexdigest()
 
 
-def compare_algorithm_commands(build):
+def compare_algorithm_commands(build, owner_source=None):
     """Require identical compiler invocations except namespace and build paths."""
     records = []
     for directory, module_name, api_prefix in [('kmod', 'vkso_bch', 'vkso_bch_'),
                                               ('matched', 'bch_matched', 'matched_bch_')]:
-        directory_path = build / directory
+        directory_path = Path(owner_source) if directory == 'kmod' and owner_source else build / directory
         text = (directory_path / '.bch_impl.o.cmd').read_text().splitlines()[0]
         argv = shlex.split(text.split(' := ', 1)[1])
         normalized = []

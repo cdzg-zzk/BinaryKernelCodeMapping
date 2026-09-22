@@ -1,5 +1,9 @@
 # Linux XZ Embedded vkso evaluation
 
+论文 6.3 的当前结果统一位于 [section63](../section63/README.md)，
+方法、对照和适配记录见[方法说明](../section63/methods.md)。本目录保留
+算法源码和单次运行入口；论文使用统一 runner 的三次完整部署统计。
+
 This evaluation compares two executions of the same Linux 5.15 XZ Embedded
 single-call decoder:
 
@@ -65,3 +69,5 @@ elapsed-nanosecond fields; the rounded throughput column is display-only.
 - source/build/runtime metadata and SHA-256 hashes of measured artifacts.
 
 See [ADAPTATIONS.md](ADAPTATIONS.md) for the exact functionality boundary.
+
+The current kernel-side comparison uses Stock, the original-source Matched build, and the unchanged export owner. See [plotting data and results](../section63/results/report.md) and [experiment design](../section63/methods.md).

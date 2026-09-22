@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <dlfcn.h>
+#include <link.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -77,6 +78,28 @@ __attribute__((destructor)) static void close_backend(void)
                 "compress_dso=%s\ndecompress_dso=%s\n",
                 (unsigned long long)compress_calls, (unsigned long long)decompress_calls,
                 compress_address, decode_address, compress_info.dli_fname, decode_info.dli_fname);
+        const char *offsets = getenv("VKSO_LZ4_SLOT_OFFSETS");
+        if (offsets) {
+            unsigned long slots[3];
+            struct link_map *mapping = NULL;
+            const char *names[] = {"memcpy", "memmove", "memset"};
+            const char *entries[] = {"vkso_abi_memcpy", "vkso_abi_memmove", "vkso_abi_memset"};
+            void *(*provider)(unsigned int) = (void *(*)(unsigned int))symbol("vkso_abi_memory_target");
+            if (sscanf(offsets, "%lx,%lx,%lx", &slots[0], &slots[1], &slots[2]) != 3 ||
+                    dlinfo(handle, RTLD_DI_LINKMAP, &mapping) || !mapping)
+                fail("invalid helper-slot diagnostic configuration");
+            for (unsigned int i = 0; i < 3; ++i) {
+                void **slot = (void **)(mapping->l_addr + slots[i]);
+                void *bridge = symbol(entries[i]), *native = provider(i);
+                Dl_info bridge_info = {0}, native_info = {0};
+                if (*slot != bridge || !dladdr(bridge, &bridge_info) || !dladdr(native, &native_info))
+                    fail("actual helper slot differs from its ABI bridge");
+                fprintf(stream, "%s_slot=%p\n%s_bridge=%p\n%s_bridge_dso=%s\n"
+                        "%s_provider=%p\n%s_provider_dso=%s\n", names[i], slot,
+                        names[i], bridge, names[i], bridge_info.dli_fname,
+                        names[i], native, names[i], native_info.dli_fname);
+            }
+        }
         fclose(stream);
     }
     free(workmem);

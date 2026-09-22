@@ -1,0 +1,12 @@
+{
+  "format": "vkso-private-data-bindings-v1",
+  "bindings": [
+    {
+      "slot": "vkso_xz_memcpy_slot",
+      "kernel_symbol": "memcpy",
+      "user_symbol": "vkso_abi_memcpy",
+      "user_library": "libshim.so",
+      "signature": "void *(void *, const void *, size_t)"
+    }
+  ]
+}

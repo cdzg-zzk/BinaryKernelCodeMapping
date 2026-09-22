@@ -1,0 +1,4 @@
+# Linux 5.15 LZ4 block API, namespace-renamed in the benchmark module so it
+# can coexist with the running kernel's built-in/package-provided functions.
+vkso_LZ4_compress_default
+vkso_LZ4_decompress_safe

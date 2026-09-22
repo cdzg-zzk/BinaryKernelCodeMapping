@@ -1,0 +1,53 @@
+{
+  "scope": "manual interpretation of observed six deployed cases; fixed eight-case cohort is joined separately",
+  "cases": {
+    "xxh32": {
+      "cohort": "prospective",
+      "entrypoints": ["xxh32"],
+      "adaptation": "unmodified built-in algorithm; no algorithm source edits or stored helper slots",
+      "binding": "caller input and seed; original return thunk stays source-backed",
+      "build_limits": "exact119 x86-64 default binary and matching debug ELF; this observation does not generalize to other instrumented builds",
+      "runtime": {"user": "247 independent-reference vectors pass", "kernel": "same 247 vectors pass through public built-in import"}
+    },
+    "sort": {
+      "cohort": "prospective",
+      "entrypoints": ["sort"],
+      "adaptation": "unmodified built-in algorithm; caller supplies comparison and optional swap callbacks",
+      "binding": "callback parameters are not PGOT slots; user callbacks use explicit stack realignment; swap width is int",
+      "build_limits": "exact119 x86-64 default binary; exporter generates a separate thunk page; tested callback configuration only",
+      "runtime": {"user": "1152 complete cases and callback counts pass", "kernel": "same 1152 cases and callback counts pass through public built-in import"}
+    },
+    "lz4": {
+      "cohort": "retrospective",
+      "entrypoints": ["vkso_LZ4_compress_default", "vkso_LZ4_decompress_safe"],
+      "adaptation": "private memory-helper function slots, constant-size copy preservation, API renaming and cooperative owner support; full owner API implementation retained",
+      "binding": "three slots initialized to kernel helpers; user slots relocate to unique libshim stack-alignment bridges and libc providers",
+      "build_limits": "exact119 Kbuild; algorithm objects omit ftrace entry instrumentation; native returns/indirect calls retained; complete owner APIs do not imply all APIs were exported or tested",
+      "runtime": {"user": "complete 12-file component and CLI workflows pass in the same owner registration", "kernel": "current owner and two kernel controls pass all 12 full Silesia files at 64 KiB/1 MiB blocks; 792 trials and 1584 timing rows; independent liblz4 full cross-decodes pass"}
+    },
+    "bch": {
+      "cohort": "retrospective",
+      "entrypoints": ["vkso_bch_init", "vkso_bch_free", "vkso_bch_encode", "vkso_bch_decode"],
+      "adaptation": "explicit allocator/memory helper slots, table placement, API renaming and cooperative owner support",
+      "binding": "four owner-private helper slots; control objects, lookup tables and codewords belong to the caller's execution domain",
+      "build_limits": "exact119 scalar Kbuild; ftrace, stack protector and sanitizers omitted for algorithm object; no jump tables, native return/indirect calls; runtime m/t parameters retained",
+      "runtime": {"user": "full original matrix passes with current cooperative owner in the same registration", "kernel": "current owner-kernel, matched-source-kernel and stock-kernel pass 10752 complete decode checks and the 1056-row kernel collection matrix; physical performance remains C work"}
+    },
+    "xz": {
+      "cohort": "retrospective",
+      "entrypoints": ["vkso_xz_crc32_init", "vkso_xz_dec_init", "vkso_xz_dec_reset", "vkso_xz_dec_run", "vkso_xz_dec_end"],
+      "adaptation": "explicit allocator/memory helper slots, decoder/header adaptation, API renaming, cooperative owner support and five public GPL module exports",
+      "binding": "four owner-private helper slots; internal CRC32 table is initialized in private data, not counted as source-backed RO data",
+      "build_limits": "exact119 scalar Kbuild; complete documented XZ_DEC_SINGLE configuration with x86 BCJ and internal CRC32; algorithm ftrace/stack-protector/sanitizer instrumentation omitted; native return/indirect calls",
+      "runtime": {"user": "three complete files decode correctly in the full matrix within the same owner registration", "kernel": "current owner and two kernel controls pass all three complete inputs over 99 trials; decoder reset/run, terminal status, full output and guards pass"}
+    },
+    "clocktime": {
+      "cohort": "retrospective",
+      "entrypoints": ["__vkso_clock_gettime", "__vkso_clock_getres", "__vkso_gettimeofday", "__vkso_time", "__vkso_getcpu"],
+      "adaptation": "shared reader and canonical state, kernel/user boundary classification, publication, MM and namespace lifecycle, context bootstrap, linker/build integration",
+      "binding": "40-byte private context holds two failure callbacks and three data addresses; no dynamic helper relocations; one source-backed shared-state page",
+      "build_limits": "Linux 5.15.198 Normal campaign; shared objects omit kernel-only instrumentation; retained return/indirect thunks and secondary-mapped-text ITS handling; x86-64 ABI and tested TSC/time-namespace configurations",
+      "runtime": {"user": "completed A campaign and per-boot ABI records", "kernel": "completed public kernel-reader, writer and concurrent-reader campaign"}
+    }
+  }
+}

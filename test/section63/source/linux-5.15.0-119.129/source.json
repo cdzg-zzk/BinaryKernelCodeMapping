@@ -1,0 +1,24 @@
+{
+  "package": "linux-source-5.15.0",
+  "version": "5.15.0-119.129",
+  "url": "https://security.ubuntu.com/ubuntu/pool/main/l/linux/linux-source-5.15.0_5.15.0-119.129_all.deb",
+  "files": [
+    "lib/xz/xz_dec_lzma2.c",
+    "lib/xz/xz_private.h",
+    "lib/xz/xz_stream.h",
+    "lib/xz/xz_crc32.c",
+    "lib/xz/xz_dec_bcj.c",
+    "lib/xz/xz_dec_syms.c",
+    "lib/xz/xz_dec_stream.c",
+    "lib/xz/xz_lzma2.h",
+    "lib/xz/xz_dec_test.c",
+    "lib/lz4/lz4defs.h",
+    "lib/lz4/lz4hc_compress.c",
+    "lib/lz4/lz4_decompress.c",
+    "lib/lz4/lz4_compress.c",
+    "lib/bch.c",
+    "include/linux/bch.h",
+    "include/linux/lz4.h",
+    "include/linux/xz.h"
+  ]
+}
