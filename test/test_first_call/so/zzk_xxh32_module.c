@@ -2,6 +2,9 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/types.h>
+#include "vkso_owner.h"
+
+VKSO_DECLARE_OWNER(vkso_xxh32_owner);
 
 u32 zzk_xxh32(const void *input, size_t len, u32 seed);
 EXPORT_SYMBOL(zzk_xxh32);
@@ -9,7 +12,7 @@ EXPORT_SYMBOL(zzk_xxh32);
 static int __init zzk_xxh32_module_init(void)
 {
     pr_info("zzk_xxh32 module loaded\\n");
-    return 0;
+    return vkso_initialize_owner(&vkso_xxh32_owner);
 }
 
 static void __exit zzk_xxh32_module_exit(void)

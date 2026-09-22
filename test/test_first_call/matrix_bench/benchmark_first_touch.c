@@ -281,9 +281,16 @@ static void print_statistics(const struct target_spec *target,
     }
 
     if (expected_count == 0) {
-        fprintf(stderr, "all samples had unexpected fault counts\n");
+        /* Sampling succeeded. An empty conditional view is a rejected batch,
+         * not a preparation error or a reason to discard unfiltered calls. */
+        printf("Target: %s\n", target->name);
+        printf("Condition: %s\n", condition_name(condition));
+        printf("Total Runs: %d\n", count);
+        printf("Expected-Fault Runs: 0 (0.0%%)\n");
+        printf("Valid Runs (IQR): 0 (0.0%% retained)\n");
+        printf("Fault Mismatches: %d\n", count);
         free(expected);
-        exit(EXIT_FAILURE);
+        return;
     }
 
     double q1 = (double)expected[expected_count / 4].cycles;

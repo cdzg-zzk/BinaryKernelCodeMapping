@@ -11,6 +11,35 @@ The static executable baseline is intentionally excluded. The paper question
 here is whether the stub DSO preserves native DSO hot/minor-fault performance
 while avoiding disk-backed major faults after cache dropping.
 
+## Current raw-protocol validation
+
+[The registered exact119 guest run](../../evaluation/first-touch-evidence.md#registered-raw-protocol-run--2026-09-12)
+completes all six groups: 38 attempted batches, 3,800 prepared calls and all
+30 accepted batches, with every rejected batch retained. Current protocol v2
+also preserves all measured calls when the expected fault class is empty:
+the batch is rejected without conditional statistics and later groups still
+run. Ten tests include this path through the actual compiled C statistics
+function, shell runner and independent analyzer.
+
+The independent native/Stub functional validator exits before latency
+sampling so its native mapping cannot retain the code page during cache
+eviction. The timed call and condition preparation are unchanged. These guest
+records validate collection and do not replace the historical performance
+table. Older preparation notes below retain their original context.
+
+## Reclaim pressure and recovery
+
+`pressure_probe.c` reuses the complete target definitions and timestamp
+primitives; `pressure_worker.c` supplies a bounded anonymous reservation and
+1 GiB file working set. The existing registered guest runner selects it with
+`--scenario pressure`. All calls retain their result, fault class, residency
+snapshot and post-call PFN. The
+[completed pressure scenario](../../evaluation/first-touch-evidence.md#reclaim-pressure-scenario--2026-09-12)
+contains ten Native/Stub pairs per phase, with actual reclaim in every pressure
+window. Both targets remain resident; all 60 calls are minor faults. This
+workload provides no evidence of avoided native major faults. It uses no
+`drop_caches` and does not alter the three-condition latency protocol below.
+
 ## Conditions
 
 Each experiment uses the same three conditions:

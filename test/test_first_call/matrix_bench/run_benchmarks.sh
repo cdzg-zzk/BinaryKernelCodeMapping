@@ -43,7 +43,7 @@ taskset -c "$CPU" true
 mkdir "$LOG_DIR"
 cp ./benchmark_first_touch "$LOG_DIR/benchmark_first_touch"
 {
-  printf 'protocol=first-touch-raw-v1\nstarted_at='; date -u +%Y-%m-%dT%H:%M:%SZ
+  printf 'protocol=first-touch-raw-v2\nstarted_at='; date -u +%Y-%m-%dT%H:%M:%SZ
   printf 'kernel='; uname -r
   printf 'boot_id='; cat /proc/sys/kernel/random/boot_id
   printf 'cpu=%s\nruns_per_attempt=%s\nthreshold_pct=%s\ntarget_successes=%s\nmax_attempts=%s\n' \
@@ -121,9 +121,11 @@ for target in "${TARGETS[@]}"; do
         exit 1
       fi
 
-      is_valid=$(awk "BEGIN {print ($retained >= $THRESHOLD_PCT) ? 1 : 0}")
+      is_valid=$(awk "BEGIN {print ($filtered > 0 && $retained >= $THRESHOLD_PCT) ? 1 : 0}")
       if [ "$is_valid" -ne 1 ]; then
-        echo "$target,$condition,$attempt,$status,$total,$expected,$filtered,$mismatches,$retained,rejected,retention_below_threshold" >> "$ATTEMPTS_CSV"
+        reason=retention_below_threshold
+        (( filtered > 0 )) || reason=no_expected_fault_samples
+        echo "$target,$condition,$attempt,$status,$total,$expected,$filtered,$mismatches,$retained,rejected,$reason" >> "$ATTEMPTS_CSV"
         echo "rejected (${retained}% retained)"
         continue
       fi

@@ -10,6 +10,26 @@ This directory builds the two DSO inputs used by
 Both use handwritten assembly so the benchmark compares the mapping mechanism,
 not compiler-generated code differences.
 
+## Current cooperative owner and API declaration
+
+The owner now uses the shared VKSO descriptor/pin contract through
+`vkso_owner.h`. Initialization publishes the permitted core ranges. The
+`zzk_xxh32_kernel.S` and native assembly bodies are unchanged; `check-asm`
+requires the full 338-byte function to match, permitting only trailing kernel
+int3 padding after the return.
+
+This assembly entry has no BTF FUNC prototype. `api.h` supplies its existing
+SysV x86-64 declaration explicitly for the current `vkso --api-header` route.
+The exporter still runs the closure checker and normal carrier construction;
+the manager still checks owner/kernel identities and the complete page plan.
+Header compilation checks syntax and named declarations, not semantic ABI
+equivalence. Runtime byte comparison and independent XXH32 vectors validate
+this supplied declaration and entry in the first-touch guest.
+
+The older `stub-dso` target below uses the historical builder. Current guarded
+registration is exercised by `test/evaluation/first_touch_qemu.py`, whose
+source/build evidence is kept separately from the historical performance table.
+
 ## Build Order
 
 The intended sequence is:

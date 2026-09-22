@@ -79,6 +79,11 @@ def verify_summary(path, views, total):
     for key, value in (('Total Runs', total), ('Expected-Fault Runs', expected),
                        ('Valid Runs (IQR)', len(retained)), ('Fault Mismatches', total-expected)):
         require(int(summaries[key]) == value, f'{path}: {key} disagrees with raw records')
+    if not retained:
+        require(expected == 0, f'{path}: nonempty expected class without retained samples')
+        require(not any(k in summaries for k in ('Median Cycles', 'Mean Cycles', 'P25 Cycles', 'P75 Cycles', 'P95 Cycles')),
+                f'{path}: empty view has invented statistics')
+        return
     stats = distribution(retained)
     for key, stat, tolerance in (('Median Cycles', 'median', 0), ('P25 Cycles', 'p25', 0),
                                   ('P75 Cycles', 'p75', 0), ('P95 Cycles', 'p95', 0),
@@ -90,7 +95,7 @@ def verify_summary(path, views, total):
 def audit(root):
     environment = dict(line.split('=', 1) for line in (root/'environment.txt').read_text().splitlines()
                        if '=' in line)
-    require(environment['protocol'] == 'first-touch-raw-v1', 'unsupported collection protocol')
+    require(environment['protocol'] in ('first-touch-raw-v1', 'first-touch-raw-v2'), 'unsupported collection protocol')
     targets, conditions = environment['targets'].split(), environment['conditions'].split()
     require(set(targets) == {'native', 'stub'} and len(targets) == 2, 'invalid target matrix')
     require(conditions and len(set(conditions)) == len(conditions) and
@@ -131,15 +136,17 @@ def audit(root):
                     require(len(rows) == runs and not views['preparation_failures'],
                             f'{prefix}: incomplete successful attempt')
                     expected, retained = len(views['expected_fault_calls']), len(views['iqr_retained_calls'])
-                    require(retained > 0, f'{prefix}: successful attempt retained no samples')
+                    require(retained > 0 or environment['protocol'] == 'first-touch-raw-v2',
+                            f'{prefix}: v1 successful attempt retained no samples')
                     for name, number in (('total_runs', runs), ('expected_fault_runs', expected),
                                          ('iqr_retained', retained), ('fault_mismatches', runs-expected)):
                         require(int(entry[name]) == number, f'{prefix}: ledger {name} mismatch')
                     displayed = float(f'{retained * 100.0 / runs:.1f}')
                     require(float(entry['retained_pct']) == displayed, f'{prefix}: retained percentage mismatch')
-                    accepted = displayed >= threshold
+                    accepted = retained > 0 and displayed >= threshold
                     decision = 'accepted' if accepted else 'rejected'
-                    reason = 'retention_threshold_met' if accepted else 'retention_below_threshold'
+                    reason = ('retention_threshold_met' if accepted else
+                              'retention_below_threshold' if retained else 'no_expected_fault_samples')
                     require(entry['decision'] == decision and entry['reason'] == reason,
                             f'{prefix}: acceptance decision mismatch')
                     verify_summary(Path(str(prefix)+'.stdout'), views, runs)
