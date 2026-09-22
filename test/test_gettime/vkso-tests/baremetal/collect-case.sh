@@ -96,6 +96,13 @@ for value in "$CPU" "$ITERATIONS" "$REPEATS" "$PERF_PROCESSES" \
 	[[ "$value" =~ ^[0-9]+$ ]]
 done
 (( PERF_PROCESSES > 0 && PERF_PROCESSES <= REPEATS ))
+# Reject old packages/configurations rather than falling back to old metrics.
+test "$MACRO_ENABLED" = 0
+test "$PMU" = 0
+test -s "$PACKAGE/public-api/manifest.json"
+test -x "$PACKAGE/public-api/raw-public-bench"
+test -x "$PACKAGE/public-api/vkso-public-bench"
+
 
 test "$(uname -r)" = 5.15.198 || {
 	echo "expected experimental kernel 5.15.198, got $(uname -r)" >&2
@@ -218,40 +225,90 @@ clock_module_loaded=0
 replaced=0
 irqbalance_was_active=0
 completed=0
+operation_active=0
+
+# If the shell is interrupted while a child may still use the carrier, do
+# not restore/unload behind that child. Leave an explicit recovery failure.
+run_guarded()
+{
+    local status=0
+    operation_active=1
+    "$@" || status=$?
+    operation_active=0
+    return "$status"
+}
+
+# Kept as a separate function so failure paths can be tested without root.
+# A failed restore must never be followed by unloading its backing module.
+release_resources()
+{
+    local failed=0
+    if [[ "$operation_active" != 0 ]]; then
+        echo "child operation may still be active; stop consumers before manual restore" >&2
+        return 1
+    fi
+    if [[ "$replaced" == 1 ]]; then
+        if run_guarded "$PACKAGE/manager" restore "$PACKAGE/libkernel.so" \
+                "$PACKAGE/page_mappings.txt" >>"$PARTIAL/graft-restore.log" 2>&1; then
+            replaced=0
+        else
+            echo "restore failed; page_cache_replace remains loaded; recover manually" >&2
+            failed=1
+        fi
+    fi
+    if [[ "$module_loaded" == 1 && "$replaced" == 0 ]]; then
+        if rmmod page_cache_replace; then
+            module_loaded=0
+        else
+            failed=1
+        fi
+    fi
+    if [[ "$clock_module_loaded" == 1 ]]; then
+        if rmmod vkso_m09_clock; then
+            clock_module_loaded=0
+        else
+            failed=1
+        fi
+    fi
+    if [[ "$irqbalance_was_active" == 1 ]]; then
+        if systemctl start irqbalance; then
+            irqbalance_was_active=0
+        else
+            failed=1
+        fi
+    fi
+    return "$failed"
+}
 
 cleanup()
 {
-	local status=$?
-	trap - EXIT INT TERM
-	set +e
-	if [[ "$replaced" == 1 ]]; then
-		"$PACKAGE/manager" restore "$PACKAGE/libkernel.so" \
-			"$PACKAGE/page_mappings.txt"
-		replaced=0
-	fi
-	if [[ "$module_loaded" == 1 ]]; then
-		rmmod page_cache_replace
-		module_loaded=0
-	fi
-	if [[ "$clock_module_loaded" == 1 ]]; then
-		rmmod vkso_m09_clock
-		clock_module_loaded=0
-	fi
-	if [[ "$irqbalance_was_active" == 1 ]]; then
-		systemctl start irqbalance
-	fi
-	if [[ "$completed" != 1 && -d "$PARTIAL" ]]; then
-		mkdir -p "$RESULT_ROOT/incomplete"
-		incomplete=$RESULT_ROOT/incomplete/${PARTIAL##*/}
-		mv "$PARTIAL" "$incomplete"
-		echo "incomplete_result=$incomplete" >&2
-	fi
-	if [[ -n ${SUDO_UID:-} && -n ${SUDO_GID:-} ]]; then
-		chown -R "$SUDO_UID:$SUDO_GID" "$RESULT_ROOT"
-	fi
-	exit "$status"
+    local status=$?
+    trap - EXIT INT TERM HUP
+    set +e
+    # Do not retry an already failed restore or hide the first failure.
+    if [[ "$release_attempted" == 0 ]]; then
+        release_attempted=1
+        release_resources || status=1
+    fi
+    if [[ "$completed" != 1 && -d "$PARTIAL" ]]; then
+        (( status != 0 )) || status=1
+        printf 'case=%s\nstatus=incomplete\nexit_status=%s\n' "$CASE" "$status" \
+            >"$PARTIAL/failure.txt"
+        mkdir -p "$RESULT_ROOT/incomplete"
+        incomplete=$RESULT_ROOT/incomplete/${PARTIAL##*/}
+        mv "$PARTIAL" "$incomplete"
+        echo "incomplete_result=$incomplete" >&2
+    fi
+    if [[ -n ${SUDO_UID:-} && -n ${SUDO_GID:-} ]]; then
+        chown -R "$SUDO_UID:$SUDO_GID" "$RESULT_ROOT" || status=1
+    fi
+    exit "$status"
 }
-trap cleanup EXIT INT TERM
+release_attempted=0
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+trap 'exit 129' HUP
 
 if command -v systemctl >/dev/null &&
 	systemctl is-active --quiet irqbalance; then
@@ -274,8 +331,9 @@ printf '%s\n' "$probe" >"$PARTIAL/backend-probe.txt"
 	printf 'warmup=%s\n' "$WARMUP"
 	printf 'pmu=%s\n' "$PMU"
 	printf 'seq_iterations=%s\n' "$SEQ_ITERATIONS"
-	printf 'reader_measurement_window=%s\n' \
+	printf 'legacy_probe_measurement_window=%s\n' \
 		"$reader_measurement_window"
+	printf 'reader_measurement_window=public-direct-v1\n'
 	printf 'user_address_layout=fixed-setarch-R\n'
 	printf 'clocksource=%s\n' "$clocksource"
 	printf 'isolated=%s\n' "$isolated"
@@ -286,7 +344,7 @@ printf '%s\n' "$probe" >"$PARTIAL/backend-probe.txt"
 	printf 'image_sha256=%s\n' \
 		"$(sha256sum "$PACKAGE/$BACKEND-bzImage" | awk '{print $1}')"
 	printf 'test_binary_sha256=%s\n' \
-		"$(sha256sum "$PACKAGE/vkso-time-bench" | awk '{print $1}')"
+		"$(sha256sum "$PACKAGE/public-api/$BACKEND-public-bench" | awk '{print $1}')"
 	printf 'collector_sha256=%s\n' \
 		"$(sha256sum "$0" | awk '{print $1}')"
 	printf 'package_collector_sha256=%s\n' \
@@ -341,17 +399,18 @@ if [[ "$BACKEND" == vkso ]]; then
 	fi
 	insmod "$PACKAGE/page_cache_replace.ko"
 	module_loaded=1
-	"$PACKAGE/manager" validate "$PACKAGE/libkernel.so" \
-		"$PACKAGE/page_mappings.txt"
-	"$PACKAGE/manager" replace "$PACKAGE/libkernel.so" \
-		"$PACKAGE/page_mappings.txt"
+	run_guarded "$PACKAGE/manager" validate "$PACKAGE/libkernel.so" \
+		"$PACKAGE/page_mappings.txt" >"$PARTIAL/graft-validate.log" 2>&1
+	# Mark the attempt before execution: a failing replace can be partial.
 	replaced=1
+	run_guarded "$PACKAGE/manager" replace "$PACKAGE/libkernel.so" \
+		"$PACKAGE/page_mappings.txt" >"$PARTIAL/graft-replace.log" 2>&1
 	VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
-		LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/vkso-abi-matrix" \
+		LD_LIBRARY_PATH="$PACKAGE" run_guarded "$PACKAGE/vkso-abi-matrix" \
 		>"$PARTIAL/functional.log" 2>&1
 else
 	VKSO_TEST_DYNAMIC_CLOCK=/dev/vkso-m09-clock \
-		LD_LIBRARY_PATH="$PACKAGE" "$PACKAGE/raw-abi-matrix" \
+		LD_LIBRARY_PATH="$PACKAGE" run_guarded "$PACKAGE/raw-abi-matrix" \
 		>"$PARTIAL/functional.log" 2>&1
 fi
 grep -Fq 'abi_matrix_status=pass' "$PARTIAL/functional.log"
@@ -359,130 +418,21 @@ tr -d '\r' <"$PARTIAL/functional.log" |
 	grep -E '^(semantics|path|namespace)\.' \
 	>"$PARTIAL/functional.matrix"
 
-mkdir "$PARTIAL/perf-processes"
-printf '%s\n' \
-	'process,local_repeat,global_repeat' \
-	>"$PARTIAL/perf-process-map.csv"
-repeat_offset=0
-for ((process = 0; process < PERF_PROCESSES; ++process)); do
-	remaining=$((REPEATS - repeat_offset))
-	processes_left=$((PERF_PROCESSES - process))
-	process_repeats=$(((remaining + processes_left - 1) / processes_left))
-	process_name=$(printf 'process-%02d' "$process")
-	process_csv=$PARTIAL/perf-processes/$process_name.csv
-	process_stderr=$PARTIAL/perf-processes/$process_name.stderr
-
-	LD_LIBRARY_PATH="$PACKAGE" "${BENCHMARK_RUNNER[@]}" \
-		"$PACKAGE/vkso-time-bench" \
-		--backend "$BACKEND" --mode perf --cpu "$CPU" \
-		--iterations "$ITERATIONS" --repeats "$process_repeats" \
-		--warmup "$WARMUP" --pmu "$PMU" \
-		>"$process_csv" 2>"$process_stderr"
-	if (( process == 0 )); then
-		sed -n '1p' "$process_csv" >"$PARTIAL/perf.csv"
-	fi
-	awk -F, -v OFS=, -v offset="$repeat_offset" \
-		'NR > 1 { $3 += offset; print }' "$process_csv" \
-		>>"$PARTIAL/perf.csv"
-	for ((local_repeat = 0; local_repeat < process_repeats;
-	      ++local_repeat)); do
-		printf '%d,%d,%d\n' "$process" "$local_repeat" \
-			"$((repeat_offset + local_repeat))" \
-			>>"$PARTIAL/perf-process-map.csv"
-	done
-	repeat_offset=$((repeat_offset + process_repeats))
-done
-test "$repeat_offset" -eq "$REPEATS"
-cat "$PARTIAL"/perf-processes/*.stderr >"$PARTIAL/perf.stderr"
-LD_LIBRARY_PATH="$PACKAGE" "${BENCHMARK_RUNNER[@]}" \
-	"$PACKAGE/vkso-time-bench" \
-	--backend "$BACKEND" --mode seq --cpu "$CPU" \
-	--seq-iterations "$SEQ_ITERATIONS" \
-	>"$PARTIAL/seq.csv" 2>"$PARTIAL/seq.stderr"
-
-test "$(sed -n '1p' "$PARTIAL/perf.csv")" = \
-	'backend,api,repeat,path,tsc_cycles_per_call,pmu_enabled,pmu_cycles_per_call,instructions_per_call,branches_per_call,branch_misses_per_call,cache_references_per_call,cache_misses_per_call,l1d_load_misses_per_call,llc_load_misses_per_call'
-expected_rows=$((1 + 20 * REPEATS * 2))
-test "$(wc -l <"$PARTIAL/perf.csv")" -eq "$expected_rows" || {
-	echo "incomplete perf.csv: expected $expected_rows rows" >&2
-	exit 1
-}
-test "$(wc -l <"$PARTIAL/perf-process-map.csv")" \
-	-eq "$((REPEATS + 1))"
-test "$(wc -l <"$PARTIAL/seq.csv")" -eq 3
-if [[ "$BACKEND" == raw ]]; then
-	expected_user_path=raw_vdso
-else
-	expected_user_path=vkso_wrapper
-fi
-awk -F, -v backend="$BACKEND" -v repeats="$REPEATS" \
-	-v user_path="$expected_user_path" '
-NR == 1 { next }
-$1 != backend { exit 1 }
-{
-	key = $2 SUBSEP $3 SUBSEP $4
-	if (seen[key]++)
-		exit 1
-	if (!api[$2]++)
-		api_count++
-	if (!path[$4]++)
-		path_count++
-}
-END {
-	if (api_count != 20 || path_count != 2 ||
-	    !path["syscall"] || !path[user_path])
-		exit 1
-	for (i = 0; i < repeats; ++i)
-		for (name in api)
-			if (!seen[name SUBSEP i SUBSEP "syscall"] ||
-			    !seen[name SUBSEP i SUBSEP user_path])
-				exit 1
-}
-' "$PARTIAL/perf.csv"
-
-if [[ "$MACRO_ENABLED" == 1 ]]; then
-	# Same public collect command; application code and binaries are package-owned.
-	if [[ "$BACKEND" == raw ]]; then
-		macro_methods=(native vdso)
-	else
-		macro_methods=(vkso)
-	fi
-	for method in "${macro_methods[@]}"; do
-		python3 "$PACKAGE/macro/redis_workload.py" "$PACKAGE/macro" \
-			"$PARTIAL/redis/$method" --method "$method" \
-			--carrier "$PACKAGE/libkernel.so" \
-			--rounds "$(manifest_value "$EXPERIMENT_MANIFEST" macro_rounds)" \
-			--requests "$(manifest_value "$EXPERIMENT_MANIFEST" macro_requests)" \
-			--warmup "$(manifest_value "$EXPERIMENT_MANIFEST" macro_warmup)" \
-			--server-cpu "$(manifest_value "$EXPERIMENT_MANIFEST" macro_server_cpu)" \
-			--client-cpus "$(manifest_value "$EXPERIMENT_MANIFEST" macro_client_cpus)" \
-			>"$PARTIAL/redis-$method.log" 2>&1
-		test -s "$PARTIAL/redis/$method/complete.json"
-	done
-fi
+# Protocol v5: two public paths only. The old probe and ABI matrix remain
+# validation tools; their v3 measurements are not relabelled as native libc.
+run_guarded python3 "$PACKAGE/public-api/collect.py" \
+    --package "$PACKAGE" --output "$PARTIAL/public" \
+    --backend "$BACKEND" --case "$CASE" --run-id "$RUN_ID" \
+    --cpu "$CPU" --iterations "$ITERATIONS" --repeats "$REPEATS" \
+    --processes "$PERF_PROCESSES" --warmup "$WARMUP"
 
 cat /proc/interrupts >"$PARTIAL/interrupts-after.txt"
 dmesg >"$PARTIAL/dmesg-after.txt"
+release_attempted=1
+release_resources || exit 1
 printf 'case=%s\nstatus=complete\n' "$CASE" >"$PARTIAL/complete"
 sync
 
-if [[ "$replaced" == 1 ]]; then
-	"$PACKAGE/manager" restore "$PACKAGE/libkernel.so" \
-		"$PACKAGE/page_mappings.txt"
-	replaced=0
-fi
-if [[ "$module_loaded" == 1 ]]; then
-	rmmod page_cache_replace
-	module_loaded=0
-fi
-if [[ "$clock_module_loaded" == 1 ]]; then
-	rmmod vkso_m09_clock
-	clock_module_loaded=0
-fi
-if [[ "$irqbalance_was_active" == 1 ]]; then
-	systemctl start irqbalance
-	irqbalance_was_active=0
-fi
 mv "$PARTIAL" "$FINAL"
 completed=1
 echo "case_result=$FINAL"

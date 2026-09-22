@@ -40,18 +40,21 @@ _Static_assert(offsetof(struct vkso_shared_data,
 int vkso_user_wrapper_init(void)
 {
 	unsigned long address;
+	int saved_errno = errno;
+	int result;
 	const struct vkso_shared_data *shared;
 	const struct vkso_mm_data *mm_data;
 
-	shared = __vkso_shared_data();
-	if (!shared || shared->abi_version != VKSO_TIME_ABI_VERSION) {
-		errno = EPROTO;
-		return -1;
-	}
+	/* Reject a non-VKSO kernel before touching carrier-backed state. */
 	errno = 0;
 	address = getauxval(AT_VKSO_MM_DATA);
 	if (!address || errno) {
 		errno = ENOSYS;
+		return -1;
+	}
+	shared = __vkso_shared_data();
+	if (!shared || shared->abi_version != VKSO_TIME_ABI_VERSION) {
+		errno = EPROTO;
 		return -1;
 	}
 	mm_data = (const void *)address;
@@ -63,5 +66,11 @@ int vkso_user_wrapper_init(void)
 		errno = EPROTO;
 		return -1;
 	}
-	return __vkso_bind_context(mm_data, NULL, NULL);
+	result = __vkso_bind_context(mm_data, NULL, NULL);
+	if (result) {
+		errno = result < 0 ? -result : EPROTO;
+		return -1;
+	}
+	errno = saved_errno;
+	return 0;
 }
