@@ -13,6 +13,14 @@
 #include <asm/byteorder.h>
 
 #define SCALE 1000ULL
+
+/* Separate diagnostic build only; formal builds contain no counters. */
+#ifdef PGOT_DIAGNOSTIC
+static unsigned long diag_memcpy[4];
+#define BCH_DIAG(site) (++diag_memcpy[site])
+#else
+#define BCH_DIAG(site) do { } while (0)
+#endif
 #define BCH_DATA_LEN 512
 #define BCH_ECC_MAX 128
 #define BCH_MAX_M 15
@@ -216,6 +224,7 @@ void load_ecc8_##name(struct bch_control *bch, u32 *dst, const u8 *src) \
 			 ((u32)swap_bits_##name(bch, src[1]) << 16) | \
 			 ((u32)swap_bits_##name(bch, src[2]) << 8) | \
 			 swap_bits_##name(bch, src[3]); \
+	BCH_DIAG(0); \
 	MEMCPY_OP(pad, src, BCH_ECC_BYTES(bch) - 4 * nwords); \
 	dst[nwords] = ((u32)swap_bits_##name(bch, pad[0]) << 24) | \
 		      ((u32)swap_bits_##name(bch, pad[1]) << 16) | \
@@ -237,6 +246,7 @@ void store_ecc8_##name(struct bch_control *bch, u8 *dst, const u32 *src) \
 	pad[1] = swap_bits_##name(bch, src[nwords] >> 16); \
 	pad[2] = swap_bits_##name(bch, src[nwords] >> 8); \
 	pad[3] = swap_bits_##name(bch, src[nwords]); \
+	BCH_DIAG(3); \
 	MEMCPY_OP(dst, pad, BCH_ECC_BYTES(bch) - 4 * nwords); \
 } \
 static noinline noipa BENCH_NOTRACE_ATTR BENCH_ALIGN_ATTR \
@@ -270,6 +280,7 @@ void bch_encode_##name(struct bch_control *bch, const u8 *data, \
 	mlen = len / 4; \
 	data += 4 * mlen; \
 	len -= 4 * mlen; \
+	BCH_DIAG(1); \
 	MEMCPY_OP(r, bch->ecc_buf, r_bytes); \
 	while (mlen--) { \
 		w = cpu_to_be32(*pdata++); \
@@ -287,6 +298,7 @@ void bch_encode_##name(struct bch_control *bch, const u8 *data, \
 			r[i] = r[i + 1] ^ p0[i] ^ p1[i] ^ p2[i] ^ p3[i]; \
 		r[l] = p0[l] ^ p1[l] ^ p2[l] ^ p3[l]; \
 	} \
+	BCH_DIAG(2); \
 	MEMCPY_OP(bch->ecc_buf, r, r_bytes); \
 	if (len) \
 		bch_encode_unaligned_##name(bch, data, len, bch->ecc_buf); \
@@ -543,6 +555,26 @@ static int validate_all_variants(void)
 	return validate_variant(bch_encode_all_pgot, "all_pgot");
 }
 
+#ifdef PGOT_DIAGNOSTIC
+/* Separate diagnostic build only: no timing samples are taken. */
+static int diagnose_helpers(void)
+{
+	static const char *names[] = {"origin", "data_pgot", "func_pgot", "all_pgot"};
+	body_fn_t bodies[] = {body_origin, body_data_pgot, body_func_pgot, body_all_pgot};
+	int v, site;
+	for (v = 0; v < ARRAY_SIZE(names); v++) {
+		memset(diag_memcpy, 0, sizeof(diag_memcpy));
+		sink_u64 ^= bodies[v](1);
+		for (site = 0; site < 4; site++) {
+			pr_info("PGOT_V2_BCH_HELPER,%s,%d,%lu\n", names[v], site, diag_memcpy[site]);
+			if (diag_memcpy[site] != 1)
+				return -EINVAL;
+		}
+	}
+	return 0;
+}
+#endif
+
 static int __init bench_init(void)
 {
 	int ret;
@@ -561,6 +593,11 @@ static int __init bench_init(void)
 	ret = validate_all_variants();
 	if (ret)
 		goto out_free;
+	pr_info("PGOT_V2_CORRECTNESS,pass,bch,origin,data_pgot,func_pgot,all_pgot\n");
+#ifdef PGOT_DIAGNOSTIC
+	ret = diagnose_helpers();
+	goto out_free;
+#endif
 
 	pr_info("PGOT_L3_START,experiment=layer3_bch_encode_kmod,build=%s,iterations=%lu,warmup=%lu,repeats=%d,run_id=%d,cpu=%d,irq_off=%d,ecc_bytes=%u,variants=%s\n",
 		build, iterations, warmup, repeats, run_id, cpu, irq_off,

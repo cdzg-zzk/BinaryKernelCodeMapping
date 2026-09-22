@@ -413,11 +413,29 @@ static int pin_current_cpu(void)
 static int __init pgot_l3sha_init(void)
 {
 	int ret;
+	u32 a[8], b[8];
+	u8 padding[64] = { 0x80 };
+	/* hashlib SHA-256 of the unchanged 64-byte bench_block, including padding. */
+	static const u32 expected[8] = {
+		0x21511d67U, 0x829998d6U, 0x8d531df2U, 0x822f3f24U,
+		0x7d7f0c94U, 0xbeaf0bebU, 0x7b7cbcc8U, 0x7c41da95U
+	};
 
 	if (!iterations || repeats <= 0)
 		return -EINVAL;
 
 	init_tables();
+	init_state(a);
+	init_state(b);
+	sha256_transform_origin(a, bench_block);
+	sha256_transform_data_pgot(b, bench_block);
+	if (memcmp(a, b, sizeof(a))) return -EINVAL;
+	padding[62] = 2; /* big-endian bit length: 512 */
+	sha256_transform_origin(a, padding);
+	sha256_transform_data_pgot(b, padding);
+	if (memcmp(a, expected, sizeof(a)) || memcmp(b, expected, sizeof(b)))
+		return -EINVAL;
+	pr_info("PGOT_V2_CORRECTNESS,pass,sha256,origin,data_pgot,known_digest\n");
 	ret = pin_current_cpu();
 	if (ret) {
 		pr_err("PGOT_L3SHA_ERROR,cpu_pin_failed,cpu=%d,ret=%d\n", cpu, ret);

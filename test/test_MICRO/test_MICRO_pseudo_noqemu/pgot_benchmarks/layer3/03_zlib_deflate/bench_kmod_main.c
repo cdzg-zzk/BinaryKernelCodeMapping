@@ -510,6 +510,7 @@ static int init_bench_state(void)
 	ret = validate_variants();
 	if (ret)
 		goto out_cleanup;
+	pr_info("PGOT_V2_CORRECTNESS,pass,zlib,origin,data_pgot,func_pgot,all_pgot\n");
 
 	return 0;
 
