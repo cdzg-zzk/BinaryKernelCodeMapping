@@ -22,6 +22,8 @@
 
 `revision/`、`code-size/`、`namespace-sharing/` 与根目录旧报告记录之前的实现、协议和结果。`macro-benchmark/` 的 Redis/`adapter.so` 不在当前主结果里。`baremetal/vkso_time_bench.c`、旧 QEMU 脚本、`update-bench/compare-update.py` 和若干兼容 shell 名称也属于旧测试接口；当前构建仍打包一部分旧二进制以保持包/旧验证脚本兼容，但 `experiment.sh` 不执行它们，其数字不可拼接到当前 summary。旧结果目录采用各自协议名，当前入口只写入新 `clocktime-full-v1` 结果目录。
 
+旧 `collect-update-side.sh`、`collect-update-concurrent.sh`、`boot-raw-update.sh`、`boot-vkso-update.sh` 已明确拒绝单独执行，避免绕过统一计划；新 UPDATE 包不再包含这些入口。`experiment-update.sh` 与 `experiment-concurrent.sh` 只作为指向统一控制器的兼容别名。
+
 本次清空了 `baremetal/results/`、`update-bench/results/` 中的旧正式采样，并移走旧 campaign 状态；`namespace-sharing/results/`、`optimization-audit/results/` 和 `history/redis-results/` 保留为上述历史文档所需的功能/候选依据。当前 `experiment.sh status` 为 `not-started`。
 
 ## 当前证据和缺口

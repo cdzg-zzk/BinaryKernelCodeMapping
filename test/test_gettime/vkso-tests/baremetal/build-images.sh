@@ -510,16 +510,9 @@ if [[ -s "$HERE/README.md" ]]; then
 fi
 install -m 0644 "$HERE/vkso_time_bench.c" "$OUT/vkso_time_bench.c"
 if [[ "$UPDATE_BENCH" == 1 ]]; then
-	for script in collect-update.sh \
-		collect-update-side.sh collect-update-concurrent.sh \
-		boot-raw-update.sh boot-vkso-update.sh boot-update-once.sh \
-		experiment-update.sh experiment-concurrent.sh install-update-grub.sh \
-		verify-update-packages.sh; do
-		install -m 0755 "$HERE/../update-bench/$script" "$OUT/$script"
-	done
-	for config in update-experiment.conf; do
-		install -m 0644 "$HERE/../update-bench/$config" "$OUT/$config"
-	done
+	install -m 0644 "$HERE/../update-bench/stateful.py" "$OUT/stateful.py"
+	install -m 0755 "$HERE/../update-bench/boot-update-once.sh" "$OUT/boot-update-once.sh"
+	install -m 0644 "$HERE/../update-bench/update-experiment.conf" "$OUT/update-experiment.conf"
 fi
 
 # Preserve the exact tracked candidate when performance is measured before a
@@ -613,14 +606,8 @@ candidate_patch_sha256=$(sha256sum "$OUT/source.patch" | awk '{print $1}')
 		>SHA256SUMS
 	sha256sum raw-kernel-reader.ko vkso-kernel-reader.ko >>SHA256SUMS
 	if [[ "$UPDATE_BENCH" == 1 ]]; then
-		sha256sum collect-update.sh collect-update-side.sh \
-			collect-update-concurrent.sh \
-			boot-raw-update.sh boot-vkso-update.sh \
-			boot-update-once.sh experiment-update.sh \
-			experiment-concurrent.sh \
-			install-update-grub.sh verify-update-packages.sh \
+		sha256sum stateful.py boot-update-once.sh \
 			update-experiment.conf >>SHA256SUMS
-
 	fi
 )
 

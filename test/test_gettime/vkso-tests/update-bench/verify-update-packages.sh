@@ -28,11 +28,7 @@ validate_package()
 		page_mappings.txt page_cache_replace.ko vkso_m09_clock.ko raw-m09-clock.ko \
 		raw-vmlinux-sections.txt raw-vdso-sections.txt \
 		vkso-vmlinux-sections.txt vkso-carrier-sections.txt \
-		manager collect-update.sh collect-update-side.sh \
-		collect-update-concurrent.sh \
-		boot-update-once.sh experiment-update.sh experiment-concurrent.sh \
-		install-update-grub.sh verify-update-packages.sh \
-		update-experiment.conf; do
+		manager stateful.py boot-update-once.sh update-experiment.conf; do
 		test -s "$package/$file" || {
 			echo "missing update package artifact: $package/$file" >&2
 			exit 1
