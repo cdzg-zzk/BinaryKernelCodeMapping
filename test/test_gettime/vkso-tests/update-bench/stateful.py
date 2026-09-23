@@ -22,12 +22,14 @@ import time
 HERE = Path(__file__).resolve().parent
 DIRECT = HERE.parent / 'direct-api'
 sys.dont_write_bytecode = True
+os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
 sys.path.insert(0, str(DIRECT))
 from bundle import REQUIRED, audit_binary, audit_public_library, kv_file, sha256, verify_sums, write_json
 from campaign import plan, atomic, archive
 from collect import logged, must, cpu_list
 from results import validate_sharing, summarize as summarize_read, summarize_kernel
 from package_check import check as check_read_package
+from mapping_census import COUNTS as CENSUS_COUNTS, PROTOCOL as CENSUS_PROTOCOL, summarize as census_summarize
 import workflow
 PROTOCOL = 'clocktime-stateful-v1'
 SCENARIOS = ('idle', 'monotonic', 'monotonic_raw', 'monotonic_coarse')
@@ -48,11 +50,16 @@ def seal(root):
 
 
 def check(package):
-    outer = verify_sums(package, REQUIRED | {'direct/build.json','direct/SHA256SUMS','direct/native-load','direct/vkso-load','direct/libvkso_time.so'})
+    outer = verify_sums(package, REQUIRED | {'direct/build.json','direct/SHA256SUMS',
+        'direct/native-load','direct/vkso-load','direct/libvkso_time.so',
+        'direct/native-bench.sections.txt','direct/vkso-bench.sections.txt',
+        'direct/libvkso_time.so.sections.txt'})
     m = kv_file(package/'boot-manifest.txt')
     must(m.get('update_bench') == '1' and m.get('vkso_validation_tests') == '0', 'requires UPDATE instrumentation, no validation probes')
     d = package/'direct'
-    verify_sums(d, {'build.json','native-load','vkso-load','native-bench','vkso-bench','libvkso_time.so'})
+    verify_sums(d, {'build.json','native-load','vkso-load','native-bench',
+                    'vkso-bench','libvkso_time.so','native-bench.sections.txt',
+                    'vkso-bench.sections.txt','libvkso_time.so.sections.txt'})
     b = json.loads((d/'build.json').read_text())
     must(b['protocol'] == PROTOCOL and b['scope'] == 'update', 'legacy/READ package; build explicit update public bundle')
     must(all(outer.get(k) == v for k,v in b['kernel_checksums'].items()), 'kernel inventory differs from linked public bundle')
@@ -107,12 +114,17 @@ def compatible(package):
 
 def tools_snapshot(root):
     directory = root/'tools'/str(time.time_ns())
-    for source in (HERE,DIRECT,BARE):
+    needed = {
+        HERE: ('stateful.py', 'boot-update-once.sh', 'update-experiment.conf'),
+        DIRECT: ('bundle.py', 'campaign.py', 'collect.py', 'results.py',
+                 'package_check.py', 'workflow.py', 'sharing.py', 'mapping_census.py'),
+        BARE: ('boot-once.sh', 'collect-case.sh', 'experiment.conf', 'experiment.sh'),
+    }
+    for source, names in needed.items():
         target = directory/source.name
         target.mkdir(parents=True)
-        for p in sorted(source.iterdir()):
-            if p.is_file() and p.suffix in ('.py','.sh','.conf'):
-                shutil.copy2(p,target/p.name)
+        for name in names:
+            shutil.copy2(source/name,target/name)
     seal(directory)
     return directory.relative_to(root).as_posix()
 
@@ -433,6 +445,83 @@ def aggregate_update(root, manifest):
     return result
 
 
+def section_sizes(path):
+    sections={}
+    for line in path.read_text().splitlines():
+        fields=line.split()
+        if len(fields) < 3 or not fields[1].isdecimal() or fields[0]=='Total':
+            continue
+        must(fields[0] not in sections, 'duplicate ELF section: '+fields[0])
+        sections[fields[0]]=int(fields[1])
+    must(any(name.startswith('.text') and size>0 for name,size in sections.items()),
+         'missing .text in code footprint: '+str(path))
+    return sections
+
+
+def text_bytes(sections):
+    return sum(size for name,size in sections.items() if name.startswith('.text'))
+
+
+def static_footprint(manifest):
+    rows=[]
+    for variant, identity in manifest['packages']['read'].items():
+        package=Path(identity['path'])
+        inventory=set((package/'SHA256SUMS').read_text().splitlines())
+        for name in ('raw-vmlinux-sections.txt','vkso-vmlinux-sections.txt',
+                     'raw-vdso-sections.txt','vkso-carrier-sections.txt',
+                     'direct/libvkso_time.so.sections.txt','raw-bzImage','vkso-bzImage'):
+            must(sha256(package/name)+'  '+name in inventory,
+                 'code footprint is absent from sealed package: '+name)
+        raw=section_sizes(package/'raw-vmlinux-sections.txt')
+        vkso=section_sizes(package/'vkso-vmlinux-sections.txt')
+        vdso=section_sizes(package/'raw-vdso-sections.txt')
+        carrier=section_sizes(package/'vkso-carrier-sections.txt')
+        public=section_sizes(package/'direct/libvkso_time.so.sections.txt')
+        rows.append(dict(variant=variant,
+            raw_kernel_text_bytes=text_bytes(raw),vkso_kernel_text_bytes=text_bytes(vkso),
+            kernel_text_delta_bytes=text_bytes(vkso)-text_bytes(raw),
+            raw_native_vdso_text_bytes=text_bytes(vdso),
+            vkso_carrier_text_bytes=text_bytes(carrier),
+            vkso_public_library_text_bytes=text_bytes(public),
+            raw_bzimage_bytes=(package/'raw-bzImage').stat().st_size,
+            vkso_bzimage_bytes=(package/'vkso-bzImage').stat().st_size))
+    return dict(scope='ELF .text section and compressed image file sizes; carrier pages alias kernel text, so do not sum them as extra physical memory',rows=rows)
+
+
+def mapping_footprint(directories):
+    boots=[]
+    for directory in directories:
+        verify_sums(directory, {'resource.json','run.json'})
+        run=json.loads((directory/'run.json').read_text())
+        census=json.loads((directory/'resource.json').read_text())
+        backend=run['case'].split('-',1)[0]
+        must(census['protocol']==CENSUS_PROTOCOL and census['backend']==backend and
+             census['counts']==list(CENSUS_COUNTS) and
+             len(census['groups'])==len(CENSUS_COUNTS) and
+             census['kernel_release']=='5.15.198' and
+             census['page_bytes']==4096,
+             'wrong mapping census metadata')
+        for count,group in zip(CENSUS_COUNTS,census['groups']):
+            must(group==census_summarize(group['records'],backend,count),
+                 'mapping census totals differ from raw process PFNs')
+            boots.append(dict(block=run['block'],case=run['case'],boot_id=run['boot_id'],
+                              processes=count,union_unique_pfns=group['union_unique_pfns'],
+                              category_unique_pfns=group['unique_pfns'],
+                              unresolved_present_pages=group['unresolved_present_pages']))
+    comparisons=[]
+    for variant in ('normal','no-retpoline'):
+        for count in CENSUS_COUNTS:
+            raw=[r['union_unique_pfns'] for r in boots if r['case']=='raw-'+variant and r['processes']==count]
+            vkso=[r['union_unique_pfns'] for r in boots if r['case']=='vkso-'+variant and r['processes']==count]
+            must(len(raw)==len(vkso)>=3, 'missing independent mapping census boots')
+            a,b=statistics.median(raw),statistics.median(vkso)
+            comparisons.append(dict(variant=variant,processes=count,boots_per_case=len(raw),
+                                    raw_selected_pfns=a,vkso_selected_pfns=b,
+                                    delta_selected_pfns=b-a,delta_selected_bytes=(b-a)*4096))
+    return dict(scope='resident unique PFNs in named user time mappings only; not whole-system net RAM',
+                independent_unit='boot',boot_summaries=boots,comparisons=comparisons)
+
+
 def aggregate(root, manifest):
     must(manifest['plan'] == full_plan(manifest['config']['BLOCKS']),
          'incomplete or reordered eight-image campaign plan')
@@ -449,6 +538,8 @@ def aggregate(root, manifest):
         run=json.loads((directory/'run.json').read_text())
         must(run['status']=='COMPLETE' and run['case']==case and run['block']==entry['block'],
              'incomplete or mixed acquisition')
+        must(run['tool_revision'].startswith('tools/'), 'missing frozen collection tool revision')
+        verify_sums(root/run['tool_revision'])
         must(run['boot_id'] not in boots, 'same boot reused across READ/UPDATE')
         boots.add(run['boot_id'])
         variant=case.split('-',1)[1]
@@ -465,7 +556,9 @@ def aggregate(root, manifest):
     must(len(read)==manifest['config']['BLOCKS']*4, 'missing clean READ boots')
     return dict(protocol='clocktime-full-v1', independent_unit='boot',
                 read_user=summarize_read(read), read_kernel=summarize_kernel(read),
-                stateful=aggregate_update(root,manifest))
+                stateful=aggregate_update(root,manifest),
+                mapping_footprint=mapping_footprint(read),
+                static_footprint=static_footprint(manifest))
 
 
 def run_collector(argv, env=None):

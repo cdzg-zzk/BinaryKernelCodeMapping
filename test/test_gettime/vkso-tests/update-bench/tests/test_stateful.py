@@ -50,6 +50,9 @@ class StatefulTests(unittest.TestCase):
     def test_snapshot_immutable(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp); revision=s.tools_snapshot(root);d=root/revision
+            self.assertFalse((d/'update-bench/compare-update.py').exists())
+            self.assertFalse((d/'baremetal/build-all.sh').exists())
+            self.assertTrue((d/'direct-api/sharing.py').exists())
             s.verify_sums(d);(d/'update-bench/stateful.py').write_text('changed')
             with self.assertRaises(ValueError):s.verify_sums(d)
 
@@ -111,7 +114,8 @@ class StatefulTests(unittest.TestCase):
 
     def test_aggregate_boot_unit(self):
         with tempfile.TemporaryDirectory() as tmp,patch.object(s,'validate_sharing'), \
-             patch.object(s,'summarize_read',return_value={}),patch.object(s,'summarize_kernel',return_value={}):
+             patch.object(s,'summarize_read',return_value={}),patch.object(s,'summarize_kernel',return_value={}), \
+             patch.object(s,'mapping_footprint',return_value={}),patch.object(s,'static_footprint',return_value={}):
             root=Path(tmp);m=self.fixture(root);r=s.aggregate(root,m)
             self.assertEqual(len(r['stateful']['boot_summaries']),16)
             self.assertEqual(r['stateful']['comparisons'][0]['delta_ticks'],0)
@@ -120,7 +124,8 @@ class StatefulTests(unittest.TestCase):
         for kind in ('missing','tampered','duplicate-boot','mixed-package','incomplete'):
             with self.subTest(kind=kind),tempfile.TemporaryDirectory() as tmp, \
                  patch.object(s,'validate_sharing'),patch.object(s,'summarize_read',return_value={}), \
-                 patch.object(s,'summarize_kernel',return_value={}):
+                 patch.object(s,'summarize_kernel',return_value={}), \
+                 patch.object(s,'mapping_footprint',return_value={}),patch.object(s,'static_footprint',return_value={}):
                 root=Path(tmp);m=self.fixture(root);d=root/'block-01/update/vkso-normal'
                 if kind=='missing':(d/'idle/round-00.csv').unlink()
                 elif kind=='tampered':(d/'idle/round-00.csv').write_text('corrupt')
@@ -154,6 +159,82 @@ class BuildTests(unittest.TestCase):
                         rebuild.main();run.assert_not_called()
                     self.assertFalse((root/target).exists())
 
+class FootprintTests(unittest.TestCase):
+    def record(self,pid,backend):
+        def mapping(kind,pfn):
+            return dict(kind=kind,permissions='r--p',file_offset=0,
+                        virtual_bytes=4096,present_pages=1,
+                        unresolved_present_pages=0,pfns=[pfn])
+        kinds=([mapping('vdso',10),mapping('vvar',11)] if backend=='raw' else
+               [mapping('mm_data',20),mapping('carrier',21),mapping('public',30+pid)])
+        return dict(pid=pid,time_namespace='time:[1]',mappings=kinds)
+
+    def test_mapping_census_counts_shared_pfns(self):
+        raw=s.census_summarize([self.record(1,'raw'),self.record(2,'raw')],'raw',2)
+        vkso=s.census_summarize([self.record(1,'vkso'),self.record(2,'vkso')],'vkso',2)
+        self.assertEqual(raw['union_unique_pfns'],2)
+        self.assertEqual(vkso['unique_pfns']['mm_data'],1)
+        self.assertEqual(vkso['union_unique_pfns'],4)
+        bad=self.record(3,'vkso');bad['mappings'][0]['pfns']=[99]
+        with self.assertRaisesRegex(ValueError,'MM_data'):
+            s.census_summarize([self.record(1,'vkso'),bad],'vkso',2)
+        hidden=self.record(1,'raw')
+        hidden['mappings'][1].update(pfns=[],unresolved_present_pages=1)
+        with self.assertRaisesRegex(ValueError,'PFNs are unavailable'):
+            s.census_summarize([hidden],'raw',1)
+
+    def test_section_parser_rejects_missing_text(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'sections'
+            path.write_text('name size addr\n.text 123 0\n.rodata 9 0\nTotal 132\n')
+            self.assertEqual(s.section_sizes(path)['.text'],123)
+            path.write_text('.rodata 9 0\n')
+            with self.assertRaisesRegex(ValueError,'missing .text'):
+                s.section_sizes(path)
+
+    def test_static_footprint_keeps_carrier_separate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            package=Path(tmp)
+            (package/'direct').mkdir()
+            for name,size in [('raw-vmlinux-sections.txt',1000),
+                              ('vkso-vmlinux-sections.txt',1100),
+                              ('raw-vdso-sections.txt',90),
+                              ('vkso-carrier-sections.txt',80)]:
+                (package/name).write_text(f'.text {size} 0\n')
+            (package/'direct/libvkso_time.so.sections.txt').write_text('.text 70 0\n')
+            (package/'raw-bzImage').write_bytes(b'r'*5)
+            (package/'vkso-bzImage').write_bytes(b'v'*6)
+            (package/'SHA256SUMS').write_text(''.join(
+                s.sha256(p)+'  '+str(p.relative_to(package))+'\n'
+                for p in sorted(package.rglob('*')) if p.is_file() and p.name!='SHA256SUMS'))
+            manifest={'packages':{'read':{'normal':{'path':str(package)}}}}
+            row=s.static_footprint(manifest)['rows'][0]
+            self.assertEqual(row['kernel_text_delta_bytes'],100)
+            self.assertEqual(row['vkso_carrier_text_bytes'],80)
+            self.assertEqual(row['vkso_public_library_text_bytes'],70)
+
+    def test_mapping_footprint_validates_process_records_and_checksums(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);directories=[]
+            for block in range(1,4):
+                for case in ('raw-normal','vkso-normal','raw-no-retpoline','vkso-no-retpoline'):
+                    directory=root/f'block-{block:02d}'/case;directory.mkdir(parents=True)
+                    backend=case.split('-')[0]
+                    groups=[s.census_summarize([self.record(i+1,backend) for i in range(count)],backend,count)
+                            for count in s.CENSUS_COUNTS]
+                    (directory/'run.json').write_text(json.dumps({'block':block,'case':case,'boot_id':str(block)+case}))
+                    (directory/'resource.json').write_text(json.dumps({'protocol':s.CENSUS_PROTOCOL,
+                        'backend':backend,'counts':list(s.CENSUS_COUNTS),'groups':groups,
+                        'page_bytes':s.os.sysconf('SC_PAGE_SIZE'),
+                        'kernel_release':'5.15.198'}))
+                    s.seal(directory);directories.append(directory)
+            report=s.mapping_footprint(directories)
+            self.assertEqual(len(report['comparisons']),6)
+            self.assertEqual(report['comparisons'][0]['boots_per_case'],3)
+            target=directories[-1]/'resource.json'
+            target.write_text(target.read_text()+' ')
+            with self.assertRaises(ValueError):s.mapping_footprint(directories)
+
 class ControlTests(unittest.TestCase):
     def test_full_campaign_begin_freezes_eight_image_plan(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -164,6 +245,7 @@ class ControlTests(unittest.TestCase):
             with patch.dict(os.environ,environment),patch.object(s,'BARE',bare), \
                  patch.object(s,'config',return_value={'BLOCKS':4}), \
                  patch.object(s,'check_all_packages') as checked, \
+                 patch.object(s,'tools_snapshot',return_value='tools/mock'), \
                  patch.object(s,'package_identity',return_value={'path':'/mock','sha256':'p','direct_sha256':'d'}):
                 s.campaign('begin','fixture')
                 state=json.loads((bare/'.clocktime-full-state.json').read_text())

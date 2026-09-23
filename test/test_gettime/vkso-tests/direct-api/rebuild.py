@@ -96,6 +96,10 @@ def raw_build(source, dest, work, args, manifest):
         run(['make','-C',kernel,'M='+str(module),'CC='+args.cc,'-j'+str(args.jobs),'modules'],env=env)
         shutil.copy2(module / (output+'.ko'),dest / ('raw-kernel-reader.ko' if name=='reader' else 'raw-m09-clock.ko'))
     shutil.copy2(kernel / 'arch/x86/boot/bzImage',dest / 'raw-bzImage')
+    for source_name, report_name in [('vmlinux','raw-vmlinux-sections.txt'),
+                                     ('arch/x86/entry/vdso/vdso64.so.dbg','raw-vdso-sections.txt')]:
+        with (dest/report_name).open('w') as report:
+            subprocess.run(['size','-A',str(kernel/source_name)],stdout=report,check=True)
     shutil.copy2(kernel / 'kernel/config_data',dest / 'raw.image.config')
     if (dest / 'raw.image.config').read_bytes() != (dest / 'raw.config').read_bytes():
         raise ValueError('compiled config mismatch')
@@ -158,9 +162,6 @@ def main():
                          KBUILD_BUILD_USER=manifest.get('kbuild_build_user','vkso-research'),
                          KBUILD_BUILD_HOST=manifest.get('kbuild_build_host','controlled-build'))
                 run([BARE/'build-images.sh'],env=env)
-                if (package/'raw-m09-clock.ko').exists():
-                    shutil.copy2(package/'raw-m09-clock.ko',stage/'raw-m09-clock.ko')
-                    inventory(stage)
                 # Reused raw module, benchmark and image identities remain explicit.
                 bind_existing_direct(package,stage)
             shutil.copy2(package/'boot-manifest.txt',stage/'parent-package-manifest.txt')

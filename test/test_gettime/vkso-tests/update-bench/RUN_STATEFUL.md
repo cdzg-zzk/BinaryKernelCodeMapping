@@ -4,10 +4,12 @@
 
 | 镜像 | 同次 `collect` 获取的证据 |
 | --- | --- |
-| clean Raw/VKSO | 公共时间 API 全矩阵 READ、普通内核 reader、ABI/错误与回退行为；VKSO 另核验共享物理页、权限与 restore |
+| clean Raw/VKSO | 公共时间 API 全矩阵 READ、普通内核 reader、1/8/32 进程的用户时间映射驻留 PFN 清点、ABI/错误与回退行为；VKSO 另核验共享物理页、权限与 restore |
 | UPDATE Raw/VKSO | ABI/错误与回退、fast-path 无 time syscall；空闲 periodic writer UPDATE，以及 monotonic、monotonic_raw、monotonic_coarse 三种持续用户读取负载下的 writer/reader；VKSO 另核验共享物理页与 restore |
 
 Raw 的公开入口由 libc 调用原生 vDSO；VKSO 程序在链接时绑定 `libvkso_time.so`，经 carrier-private 入口到内核驻留共享代码。测试不使用 Redis、`adapter.so`、`LD_PRELOAD` 或逐次动态查找。READ 与 UPDATE 是不同内核构建，不能把两者的计数直接解释为同一个运行环境的数值。计数单位是 **TSC ticks**，不是已校准的 core cycles；READ 与并发 reader 报告完整调用批次的 ticks/call，UPDATE 报告插桩窗口中的 ticks/update。
+
+PFN 清点由独立 Python worker 在计时前一次性定位公开函数并预触碰映射；它只产生资源证据，不进入 READ/UPDATE 计时路径。
 
 ## 构建与安装
 
@@ -15,7 +17,10 @@ Raw 的公开入口由 libc 调用原生 vDSO；VKSO 程序在链接时绑定 `l
 
 ```bash
 cd /home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/baremetal
-export RAW_TARBALL=/absolute/path/to/linux-5.15.198.tar.xz
+export RAW_TARBALL=/tmp/linux-5.15.198.tar.xz
+if [ ! -s "$RAW_TARBALL" ]; then
+  curl -fL --retry 3 https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.198.tar.xz -o "$RAW_TARBALL"
+fi
 test -s "$RAW_TARBALL"
 export NORMAL_PACKAGE="$PWD/artifacts/clocktime-full-v1-clean-normal"
 export NO_RETPOLINE_PACKAGE="$PWD/artifacts/clocktime-full-v1-clean-no-retpoline"
@@ -53,10 +58,14 @@ cd /home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/baremetal
 
 `status` 的 `next_mode` 和 `next_case` 是下次必须启动的镜像。`boot`/`collect` 可加 `read:raw-normal` 一类参数作断言，但不能跳过计划。若只修脚本，运行 `./experiment.sh refresh-tools`，保留已采集的结果；改内核或 benchmark 二进制必须生成新包并开始新的 campaign。选择性构建可用 `./build-all.sh raw-normal|vkso-normal|bench-normal --package OLD --out NEW`，UPDATE 包用 `../update-bench/build-update-images.sh` 的相同参数；先用 `--plan` 看改动范围。
 
+第一块的八个 `next_mode:next_case` 依次为 `read:raw-normal`、`update:raw-normal`、`read:vkso-normal`、`update:vkso-normal`、`read:raw-no-retpoline`、`update:raw-no-retpoline`、`read:vkso-no-retpoline`、`update:vkso-no-retpoline`。后续块自动轮换四种实现的次序；每项仍需独立重启，不能在同一启动内连续调用两次 `collect`。
+
 完成数据在 `baremetal/results/<run>/block-NN/{read,update}/<case>/`，失败尝试留在 `incomplete/`；汇总是同级 `<run>-summary.json`，原始归档是 `<run>.tar.gz`。聚合重新校验每个目录和独立 boot identity，分别输出 READ 用户、READ 内核、空闲/并发 UPDATE 的 Raw/VKSO 绝对 ticks 差和比例。脚本拒绝错误内核、镜像、config、auxv、包身份或已使用的 boot；正式执行前的功能核验不计入计时。
+
+新包还保存 Raw/VKSO `vmlinux`、Raw vDSO、VKSO carrier 和公开库的 ELF section 清单；静态主对照只取 clean 包。汇总中的 `.text` 字节数是静态代码规模；`bzImage` 是压缩文件大小。carrier 的 grafted text 与内核 text 是同一物理页，不能把两者简单相加作为 RAM。`mapping_footprint` 只清点活跃进程的 `[vdso]`/`[vvar]` 或 MM_data/carrier/公开库等命名用户映射，报告唯一驻留 PFN；不等于整机净内存。
 
 `refresh-tools` 只允许改采集/汇总代码和文档；修改 `direct-api` 的编译源需要重新打包。目标机上请记录 `./experiment.sh status` 与 `aggregate` 输出；安装、32 次目标启动、实际 UPDATE 数据和内核资源结果目前均为 **NOT_RUN**。
 
 ## 证据边界
 
-当前协议直接覆盖公共 READ、普通内核 READ、空闲 UPDATE 和三种持续读取下 UPDATE。VKSO 物理页核验证明选定 text/state 页复用，但 `sharing.json` 中的 smaps 和这些 PFN 不是全系统净 RAM 差值。历史 `code-size/` 与 `namespace-sharing/` 的数值对应旧实现，不能作为本版本的代码量或净内存结论。序列重试次数、更多 provider 和生产负载（含 Redis）属于另行设计的扩展，不在这 32 次正式启动内。不要把无显著差异解释为等价，也不要把全部差异归因于页共享。
+当前协议直接覆盖公共 READ、普通内核 READ、空闲 UPDATE、三种持续读取下 UPDATE，以及同版本静态代码规模和活进程命名映射的 PFN 规模。`sharing.json` 与 `resource.json` 仍不能证明全系统净 RAM 差值。历史 `code-size/` 与 `namespace-sharing/` 数值对应旧实现，不作为本版本结论。序列重试次数、更多 provider 和生产负载（含 Redis）属于另行设计的扩展，不在这 32 次正式启动内。不要把无显著差异解释为等价，也不要把全部差异归因于页共享。

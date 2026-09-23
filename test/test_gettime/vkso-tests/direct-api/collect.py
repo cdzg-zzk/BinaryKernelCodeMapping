@@ -194,7 +194,7 @@ def collect(options, package, build, runner, record):
     (out / 'interrupts-before.txt').write_text(text('/proc/interrupts') + '\n')
     try:
         os.sched_setaffinity(0, {0})
-        clock_module = package / ('raw-m09-clock.ko' if backend == 'raw' and (package / 'raw-m09-clock.ko').exists() else 'vkso_m09_clock.ko')
+        clock_module = package / ('raw-m09-clock.ko' if backend == 'raw' else 'vkso_m09_clock.ko')
         logged(['insmod', str(clock_module)], out / 'clock-module.log', env)
         clock_loaded = True
         for _ in range(50):
@@ -224,6 +224,10 @@ def collect(options, package, build, runner, record):
             record['pfn_identity'] = 'PASS'
         else:
             record['pfn_identity'] = 'SKIP: Raw does not graft a carrier'
+        # Live cohorts first-touch the complete public API and remain alive
+        # while their named time mappings are inspected. This runs before timing.
+        logged([sys.executable, '-B', str(Path(__file__).parent / 'mapping_census.py'),
+                'collect', backend, str(package)], out / 'resource.json', env)
         kernel = Path('/sys/kernel/debug/vkso_kernel_reader')
         (kernel / 'control').write_text(f"{options.cpu} {options.iterations} {options.repeats} {options.warmup}\n")
         data = (kernel / 'samples').read_text()

@@ -56,7 +56,7 @@ case "$VKSO_VALIDATION_TESTS" in
 	exit 2
 	;;
 esac
-for command in "$CC" g++ make tar python3 sha256sum nm readelf; do
+for command in "$CC" g++ make tar python3 sha256sum nm readelf size; do
 	command -v "$command" >/dev/null || {
 		echo "missing build dependency: $command" >&2
 		exit 1
@@ -84,7 +84,8 @@ fi
 
 reuse_raw=0
 if [[ -n "$RAW_PACKAGE" ]]; then
-	for file in raw-bzImage raw.config; do
+	for file in raw-bzImage raw.config raw-m09-clock.ko \
+		raw-vmlinux-sections.txt raw-vdso-sections.txt; do
 		test -s "$RAW_PACKAGE/$file" || {
 			echo "missing reusable raw artifact: $RAW_PACKAGE/$file" >&2
 			exit 1
@@ -473,6 +474,20 @@ install -m 0644 "$VKSO_BUILD/arch/x86/boot/bzImage" "$OUT/vkso-bzImage"
 install -m 0644 "$RAW_BUILD/.config" "$OUT/raw.config"
 install -m 0644 "$VKSO_BUILD/.config" "$OUT/vkso.config"
 install -m 0644 "$DSO_BUILD/libkernel.so" "$OUT/libkernel.so"
+if [[ "$reuse_raw" == 1 ]]; then
+	for report in raw-vmlinux-sections.txt raw-vdso-sections.txt; do
+		test -s "$RAW_PACKAGE/$report" || {
+			echo "reused Raw package lacks current code footprint: $report" >&2
+			exit 1
+		}
+		install -m 0644 "$RAW_PACKAGE/$report" "$OUT/$report"
+	done
+else
+	size -A "$RAW_BUILD/vmlinux" >"$OUT/raw-vmlinux-sections.txt"
+	size -A "$RAW_BUILD/arch/x86/entry/vdso/vdso64.so.dbg" >"$OUT/raw-vdso-sections.txt"
+fi
+size -A "$VKSO_BUILD/vmlinux" >"$OUT/vkso-vmlinux-sections.txt"
+size -A "$OUT/libkernel.so" >"$OUT/vkso-carrier-sections.txt"
 install -m 0644 "$DSO_BUILD/page_mappings.txt" "$OUT/page_mappings.txt"
 install -m 0644 "$DSO_BUILD/owner_descriptors.txt" "$OUT/owner_descriptors.txt"
 install -m 0644 "$DSO_BUILD/kernel_identity.txt" "$OUT/kernel_identity.txt"
@@ -586,6 +601,8 @@ candidate_patch_sha256=$(sha256sum "$OUT/source.patch" | awk '{print $1}')
 	sha256sum raw-bzImage vkso-bzImage raw.config vkso.config \
 		raw.image.config vkso.image.config boot-manifest.txt \
 		libkernel.so page_mappings.txt page_cache_replace.ko \
+		raw-vmlinux-sections.txt raw-vdso-sections.txt \
+		vkso-vmlinux-sections.txt vkso-carrier-sections.txt \
 		owner_descriptors.txt kernel_identity.txt \
 		vkso_m09_clock.ko raw-m09-clock.ko manager \
 		raw-abi-matrix vkso-abi-matrix vkso-time-bench \

@@ -20,7 +20,10 @@ FUNCTIONAL_BLOBS = {
 REQUIRED = {'boot-manifest.txt', 'raw-bzImage', 'vkso-bzImage', 'raw.config',
             'vkso.config', 'libkernel.so', 'page_mappings.txt', 'manager',
             'page_cache_replace.ko', 'vkso_m09_clock.ko', 'raw-m09-clock.ko', 'raw-abi-matrix',
-            'vkso-abi-matrix', 'owner_descriptors.txt', 'kernel_identity.txt', 'raw-kernel-reader.ko', 'vkso-kernel-reader.ko'}
+            'vkso-abi-matrix', 'owner_descriptors.txt', 'kernel_identity.txt',
+            'raw-kernel-reader.ko', 'vkso-kernel-reader.ko',
+            'raw-vmlinux-sections.txt', 'raw-vdso-sections.txt',
+            'vkso-vmlinux-sections.txt', 'vkso-carrier-sections.txt'}
 CFLAGS = '-O2 -g -std=gnu11 -Wall -Wextra -Werror -fno-lto -fno-builtin -fPIC'
 
 
@@ -172,6 +175,10 @@ def build(package, out, compiler, scope="read"):
             command += ['stateful']
         with (out / 'build.log').open('x') as log:
             subprocess.run(command, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
+        for binary in ('native-bench', 'vkso-bench', 'libvkso_time.so'):
+            with (out / (binary + '.sections.txt')).open('x') as report:
+                subprocess.run(['size', '-A', str(out/binary)],
+                               stdout=report, check=True)
         audit_public_library(out / 'libvkso_time.so')
         for backend in ('native', 'vkso'):
             outputs = audit_binary(out / (backend + '-bench'), backend)

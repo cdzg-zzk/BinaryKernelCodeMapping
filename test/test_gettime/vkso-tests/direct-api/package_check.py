@@ -9,10 +9,13 @@ from bundle import PROTOCOL, REQUIRED, verify_sums, sha256, kv_file, audit_binar
 
 def check(package):
     package = Path(package).resolve()
-    sums = verify_sums(package, REQUIRED | {'direct/build.json', 'direct/SHA256SUMS',
-        'direct/native-bench', 'direct/vkso-bench', 'direct/libvkso_time.so'})
+    direct_required = {'build.json', 'native-bench', 'vkso-bench',
+                       'libvkso_time.so', 'native-bench.sections.txt',
+                       'vkso-bench.sections.txt', 'libvkso_time.so.sections.txt'}
+    sums = verify_sums(package, REQUIRED | {'direct/SHA256SUMS'} |
+                       {'direct/'+name for name in direct_required})
     direct = package / 'direct'
-    verify_sums(direct, {'build.json', 'native-bench', 'vkso-bench', 'libvkso_time.so'})
+    verify_sums(direct, direct_required)
     build = json.loads((direct / 'build.json').read_text())
     manifest = kv_file(package / 'boot-manifest.txt')
     if build['protocol'] != PROTOCOL or build['build_variant'] != manifest['build_variant']:

@@ -20,4 +20,4 @@
 
 Raw 使用正常 libc/vDSO；VKSO 应用在启动时初始化并链接公开 API 库，再经 carrier 私有入口进入 grafted 内核页。没有 LD_PRELOAD 或多 provider 桥。历史三方法、Redis 和旧 sidecar 结果不能并入 direct-api-v2。
 
-共享减少了按进程重复的 namespace 元数据页；它不自动证明 API 更快或整机内存低于 vDSO。新实验保留原始样本与每次独立启动身份；当前版代码量和整机净内存仍需要单独的同版本测量。
+共享减少了按进程重复的 namespace 元数据页；它不自动证明 API 更快或整机内存低于 vDSO。新实验保留原始样本与每次独立启动身份，并记录当前版 ELF `.text` 与命名时间映射的驻留 PFN；整机净内存仍需要另行测量。

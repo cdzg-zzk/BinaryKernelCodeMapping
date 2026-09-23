@@ -25,6 +25,8 @@ validate_package()
 		raw-abi-matrix vkso-abi-matrix vkso-time-bench \
 		vkso_time_bench.c libkernel.so \
 		page_mappings.txt page_cache_replace.ko vkso_m09_clock.ko raw-m09-clock.ko \
+		raw-vmlinux-sections.txt raw-vdso-sections.txt \
+		vkso-vmlinux-sections.txt vkso-carrier-sections.txt \
 		manager owner_descriptors.txt kernel_identity.txt; do
 		test -s "$package/$file" || {
 			echo "missing package artifact: $package/$file" >&2

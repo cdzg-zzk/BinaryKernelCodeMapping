@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: GPL-2.0
 # Internal implementation of experiment.sh collect; never launch a second protocol.
 set -euo pipefail
+# Root collectors import scripts from the frozen tool snapshot. Keep it free of
+# root-owned bytecode files so checksums and later cleanup remain predictable.
+export PYTHONDONTWRITEBYTECODE=1
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 CASE=${1:?case required}
 : "${DIRECT_PACKAGE:?run ./experiment.sh collect}"
