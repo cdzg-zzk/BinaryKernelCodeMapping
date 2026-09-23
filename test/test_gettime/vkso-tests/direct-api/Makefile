@@ -24,7 +24,7 @@ $(OUT)/libvkso_time_init.a: $(OUT)/vkso_time_init.o $(OUT)/vkso_user_wrapper.o
 	$(AR) rcs "$@" $^
 # A relocatable relative link names the same carrier inode registered by manager.
 $(OUT)/libvkso_time.so: $(HERE)vkso_public.c $(OUT)/libvkso_time_init.a
-	$(CC) $(CPPFLAGS) $(CFLAGS) -shared "$<" -Wl,--whole-archive \
+	$(CC) $(CPPFLAGS) $(CFLAGS) -fno-plt -shared "$<" -Wl,--whole-archive \
 		"$(OUT)/libvkso_time_init.a" -Wl,--no-whole-archive -pthread \
 		-L"$(OUT)/carrier" -lkernel -Wl,-z,now -Wl,-soname,libvkso_time.so \
 		-Wl,-rpath,'$$ORIGIN/carrier' -o "$@"

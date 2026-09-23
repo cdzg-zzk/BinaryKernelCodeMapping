@@ -255,13 +255,43 @@ def summarize(directories):
             'groups': groups, 'comparisons': comparisons}
 
 
+def summarize_kernel(directories):
+    # Validate the entire acquisition first, including checksummed reader evidence.
+    validated = summarize(directories)
+    groups = {name: [] for name in GROUPS}
+    for case, boots in validated['groups'].items():
+        for boot in boots:
+            directory = Path(boot['path'])
+            with (directory / 'kernel-reader.csv').open() as stream:
+                rows = list(csv.DictReader(stream))
+            medians = {api: statistics.median(int(r['total_tsc_cycles']) / int(r['iterations'])
+                       for r in rows if r['api'] == api) for api in KERNEL_APIS}
+            groups[case].append(dict(boot, medians=medians))
+    rng = random.Random(20260922)
+    comparisons = []
+    for variant in ('normal', 'no-retpoline'):
+        for api in KERNEL_APIS:
+            raw = [x['medians'][api] for x in groups['raw-' + variant]]
+            vkso = [x['medians'][api] for x in groups['vkso-' + variant]]
+            r, v = statistics.median(raw), statistics.median(vkso)
+            comparisons.append(dict(variant=variant, api=api, raw_boots=len(raw), vkso_boots=len(vkso),
+                raw_median_ticks=r, vkso_median_ticks=v, vkso_minus_raw_ticks=v-r,
+                vkso_over_raw=v/r, raw_boot_range=[min(raw), max(raw)],
+                vkso_boot_range=[min(vkso), max(vkso)],
+                pointwise_bootstrap_95pct=ratio_interval(raw, vkso, rng)))
+    return dict(protocol=PROTOCOL, scope='ordinary kernel reader; no public wrapper execution',
+                unit='TSC ticks/call', estimator=validated['estimator'],
+                inference=validated['inference'], groups=groups, comparisons=comparisons)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('runs', nargs='+', type=Path)
     parser.add_argument('--out', required=True, type=Path)
+    parser.add_argument('--kernel', action='store_true', help='summarize existing ordinary kernel reader samples')
     args = parser.parse_args()
     try:
-        result = summarize(args.runs)
+        result = summarize_kernel(args.runs) if args.kernel else summarize(args.runs)
         write_json(args.out, result)
         return 0
     except (OSError, ValueError, KeyError, TypeError) as exc:

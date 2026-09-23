@@ -99,6 +99,18 @@ class WorkflowTests(unittest.TestCase):
                         command.assert_not_called()
                     self.assertFalse((Path(tmp)/target).exists())
 
+    def test_clone_excludes_transient_manager_state(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / 'source'; source.mkdir()
+            (source / 'image').write_text('image')
+            rebuild.inventory(source)
+            (source / 'runtime').mkdir()
+            (source / 'runtime/manager.lock').write_text('transient')
+            dest = Path(tmp) / 'dest'
+            rebuild.clone(source, dest)
+            self.assertFalse((dest / 'runtime').exists())
+            self.assertEqual((dest / 'image').read_text(), 'image')
+
     def test_inventory_does_not_hash_itself(self):
         with tempfile.TemporaryDirectory() as tmp:
             p=Path(tmp);(p/'image').write_text('IMAGE');(p/'SHA256SUMS').write_text('stale')

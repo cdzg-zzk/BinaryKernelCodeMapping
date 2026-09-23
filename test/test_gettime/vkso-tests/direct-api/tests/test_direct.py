@@ -95,6 +95,12 @@ class RuntimeTests(unittest.TestCase):
     def test_public_shared_library_direct_calls_no_recursion(self):
         bundle.audit_public_library(self.out / 'libvkso_time.so')
 
+    def test_public_hot_calls_bypass_plt(self):
+        assembly = run(['objdump', '-d', self.out / 'libvkso_time.so'])
+        for name in ('clock_gettime', 'clock_getres', 'gettimeofday', 'getcpu'):
+            self.assertNotIn('<__vkso_' + name + '@plt>', assembly)
+            self.assertIn('<__vkso_' + name + '@Base>', assembly)
+
     def test_native_and_vkso_link_disassembly_audit(self):
         for name in ('native', 'vkso'):
             dynamic, undefined, assembly = bundle.audit_binary(self.out / (name + '-bench'), name)
@@ -486,6 +492,14 @@ class WorkflowTests(unittest.TestCase):
                 sums(target)
                 with self.assertRaises(ValueError):
                     results.summarize(paths)
+
+    def test_kernel_summary_uses_kernel_not_user_samples(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = [synthetic_run(Path(tmp) / c, c, 'TEST-' + c) for c in results.GROUPS]
+            data = results.summarize_kernel(paths)
+            self.assertEqual(len(data['comparisons']), 6)
+            self.assertTrue(all(c['vkso_over_raw'] == 1 for c in data['comparisons']))
+            self.assertEqual(data['unit'], 'TSC ticks/call')
 
     def test_kernel_reader_matrix_validation(self):
         with tempfile.TemporaryDirectory() as tmp:

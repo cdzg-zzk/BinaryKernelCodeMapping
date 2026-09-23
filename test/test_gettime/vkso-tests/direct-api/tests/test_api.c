@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "vkso_time.h"
+/* The public IFUNC must resolve to the carrier, not to a forwarding stub. */
+_Static_assert(__builtin_types_compatible_p(time_t, int64_t), "time ABI");
 int mock_binds(void);
 int mock_reads(void);
 void mock_error(int);
@@ -25,6 +27,11 @@ static void *worker(void *argument)
 	for (int i = 0; i < 10000; ++i) {
 		errno = 0;
 		assert(clock_gettime(CLOCK_MONOTONIC, &ts) == -1 && errno == error);
+        assert(clock_getres(CLOCK_REALTIME, &ts) == -1 && errno == error);
+        struct timeval tv;
+        unsigned cpu, node;
+        assert(gettimeofday(&tv, NULL) == -1 && errno == error);
+        assert(getcpu(&cpu, &node) == -1 && errno == error);
 	}
 	return NULL;
 }
@@ -43,6 +50,7 @@ int main(void)
 		puts("MOCK initializer failure semantics PASS; NOT kernel execution");
 		return 0;
 	}
+	assert(time == __vkso_time);
 	pthread_t threads[16];
 	for (int i = 0; i < 16; ++i) assert(!pthread_create(&threads[i], NULL, worker, (void *)(intptr_t)i));
 	for (int i = 0; i < 16; ++i) assert(!pthread_join(threads[i], NULL));

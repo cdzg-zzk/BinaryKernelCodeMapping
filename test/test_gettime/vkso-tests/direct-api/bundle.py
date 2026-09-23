@@ -109,8 +109,15 @@ def audit_public_library(library):
     if '[libkernel.so]' not in dynamic or any(x in undefined for x in ('dlopen', 'dlsym', 'dlvsym')):
         raise ValueError('public API must directly depend on the carrier without dynamic lookup')
     for name in ('clock_gettime', 'clock_getres', 'gettimeofday', 'time', 'getcpu'):
-        if not re.search(r'(?:call|jmp)[^\n]*<__vkso_' + name + r'@plt>', assembly):
-            raise ValueError('missing direct carrier call: ' + name)
+        # Accept existing PLT packages as well as eager GOT calls. time may
+        # resolve directly to the carrier via IFUNC; keep legacy packages valid.
+        transfer = re.search(r'(?:call|jmp)[^\n]*<__vkso_' + name + r'(?:@plt|@Base)>', assembly)
+        if name == 'time' and not transfer:
+            symbols = subprocess.check_output(['readelf', '-Ws', str(library)], text=True)
+            transfer = (re.search(r'\bIFUNC\b[^\n]*\btime$', symbols, re.M) and
+                        re.search(r'<__vkso_time@Base>', assembly))
+        if not transfer:
+            raise ValueError('missing direct carrier call or binding: ' + name)
         if re.search(r'\b' + name + r'(?:@|\s|$)', undefined):
             raise ValueError('recursive public API fallback: ' + name)
     return dynamic, undefined, assembly

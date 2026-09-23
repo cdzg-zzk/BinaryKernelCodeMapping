@@ -34,8 +34,13 @@ def direct_inventory(direct):
 
 
 def clone(source, dest, omit_direct=False):
+    # manager creates root-owned transient locks after collection. They are not
+    # build inputs; never clone them into a new artifact inventory.
+    if any(name.startswith('runtime/') for name in verify_sums(source)):
+        raise ValueError('unexpected packaged runtime state')
     shutil.copytree(source, dest, symlinks=True,
-                    ignore=(lambda directory, names: ['direct'] if Path(directory) == source and omit_direct else []))
+                    ignore=(lambda directory, names: (['runtime'] + (['direct'] if omit_direct else []))
+                            if Path(directory) == source else []))
 
 
 def bind_existing_direct(source, dest):
@@ -159,6 +164,15 @@ def main():
             if (stage/'rebuild.json').exists():
                 provenance['parent_rebuild'] = json.loads((stage/'rebuild.json').read_text())
             (stage/'rebuild.json').write_text(json.dumps(provenance,indent=2,sort_keys=True)+'\n')
+            # A second selective rebuild replaces these provenance sidecars.
+            # Bind their final contents, not the copied grandparent records.
+            direct_manifest = stage / 'direct/build.json'
+            direct_data = json.loads(direct_manifest.read_text())
+            for name in ('parent-package-manifest.txt', 'parent-package-checksums.txt',
+                         'rebuild.json', 'rebuild.patch'):
+                if name in direct_data['kernel_checksums']:
+                    direct_data['kernel_checksums'][name] = sha256(stage / name)
+            direct_manifest.write_text(json.dumps(direct_data, indent=2, sort_keys=True) + '\n')
             direct_inventory(stage/'direct');inventory(stage)
             # Include the inner inventory in the outer inventory (no circular self-hash).
             with (stage/'SHA256SUMS').open('a') as f:f.write(sha256(stage/'direct/SHA256SUMS')+'  direct/SHA256SUMS\n')

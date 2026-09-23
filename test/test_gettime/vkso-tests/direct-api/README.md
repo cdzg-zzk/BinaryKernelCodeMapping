@@ -162,3 +162,38 @@ sudo env NORMAL_PACKAGE="$NORMAL_PACKAGE" NO_RETPOLINE_PACKAGE="$NO_RETPOLINE_PA
 
 构建/验证不会自动安装或重启。`rebuild.json` 与 parent-package-* 保存旧包身份及选择性构建来源。
 选择性构建的真实目标内核运行仍须在对应启动下由 collect 验证，构建成功不等于运行通过。
+
+## 公共入口优化候选（2026-09-23）
+
+`time` 使用 ELF IFUNC，在链接器解析阶段返回 `__vkso_time` 地址。解析器不执行
+carrier、不分配状态；应用仍必须在注册成功后先调用 `vkso_time_init`。两者在
+x86-64 LP64 下签名相同，负时间值和 errno 语义不变。正式 benchmark 使用
+`-z now`，解析发生在计时前。其他公开 API 保留 errno/参数适配，以 `-fno-plt`
+编译公共库，使用已解析 GOT 直接调用 carrier，省去 PLT 中转。没有复制共享计算。
+
+现有内核、carrier、映射和上下文不变。与原 direct-normal 包相比，候选公共库
+size 的 text 为 3106（原 3282）字节，data 696、BSS 16 字节均不变；PT_LOAD
+的页覆盖范围不变。此为静态布局证据，不等于实测 RSS 或性能收益。
+单元测试核对 public time 与 carrier 函数地址一致、负秒值/errno/TLS/初始化语义，
+并检查其他公共入口的 GOT 调用。真实共享页上的候选性能及完整功能仍为 NOT_RUN。
+
+已生成的候选包为 baremetal/artifacts/direct-{normal,no-retpoline}-entry-opt2。
+无需重建或重装内核。完成旧实验后，在 baremetal 目录运行：
+
+```bash
+export NORMAL_PACKAGE="$PWD/artifacts/direct-normal-entry-opt2"
+export NO_RETPOLINE_PACKAGE="$PWD/artifacts/direct-no-retpoline-entry-opt2"
+./verify-packages.sh "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"
+./experiment.sh begin
+./experiment.sh boot
+# 自动重启后回到 baremetal 目录
+./experiment.sh collect
+# 按 status 重复 boot/collect，complete 后 aggregate
+```
+
+新 campaign 在 begin 时保存包路径，重启后不需要重新 export。旧结果保持原位；
+不要对旧 campaign 使用 refresh-tools 来混入新公共库。
+
+进一步回退排查及冷路径候选 entry-opt4：见 [ENTRY_DIAGNOSIS.md](ENTRY_DIAGNOSIS.md)。
+
+公共 namespace/错误路径专项及 kernel READ 汇总：见 [SUPPLEMENTAL.md](SUPPLEMENTAL.md)。

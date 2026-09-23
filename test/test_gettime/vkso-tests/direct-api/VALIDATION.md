@@ -50,3 +50,30 @@
   其余 15 个 boot 带工具版本。旧样本和归档均未修改。
 - 本地 artifacts/results/validation、实验状态与 Python 缓存已有忽略规则；
   不将它们当作源码提交，也不删除实验结果和构建包。
+
+## 公共入口优化候选验证
+
+- direct 测试：40 项，37 PASS / 3 SKIP（VKSO 宿主无 native vDSO）。
+- maintenance：11 PASS，新增跳过未打包 manager runtime 锁目录的复制测试。
+- bench-normal / bench-no-retpoline 候选实际构建成功；没有重新编译内核。
+- normal 候选与原包的两内核、carrier、page_mappings、native/vkso benchmark
+  字节一致；公共库 text 减少 176 字节，data/BSS 与 PT_LOAD 页范围不变。
+- 性能、运行时 RSS、真实 carrier 上候选完整 ABI：NOT_RUN，需新 campaign collect。
+- 首次 normal 构建因旧包 runtime/manager.lock 权限失败，失败目录保留；修复为
+  排除非包输入的 runtime 目录，拒绝清单将其声明为包输入的异常情形。
+
+## opt4 专项准备与 kernel READ 复核
+
+- 扩展公共错误路径线程测试：direct 测试 38 PASS / 3 环境 SKIP（共 41）。
+- 公共 namespace/错误耗时专项针对 opt2、opt4 两包实际编译 PASS；非 root 执行拒绝 PASS。
+- 实机专项 NOT_RUN：沙箱外 sudo -n 仍要求密码，未注册 carrier 或加载模块。
+- 三轮已完成 campaign 的 kernel READ 全量校验及启动级汇总完成，新增 results.py --kernel。
+- 状态、输出及目标机唯一专项命令见 SUPPLEMENTAL.md；不需重建内核或重跑 16 次 READ。
+
+## opt4 normal 实机专项完成
+
+用户执行 `validation/opt4-public-special-normal` 后复核 PASS：两版本公共 namespace
+exec/setns/偏移/fast-path 正确，错误调用均为 -1/EINVAL；每版本 44 条诊断样本齐全、
+无 AUX 迁移，输入/二进制/包身份相符，restore/unload 成功。错误耗时差异约
+-6.005 到 +4.851 TSC ticks（-1.15% 到 +0.93%），单 boot 固定顺序，不作等效性声明。
+此结果替代前文 normal 专项的 NOT_RUN；no-retpoline 专项尚未执行。详见 SUPPLEMENTAL.md。
