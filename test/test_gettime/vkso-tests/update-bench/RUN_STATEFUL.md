@@ -56,6 +56,15 @@ cd /home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/baremetal
 ./experiment.sh aggregate
 ```
 
+Windows PowerShell 可以从当前 `status` 续跑。先将 [run-campaign.ps1](../baremetal/run-campaign.ps1) 复制到 Windows，再在该文件所在目录执行：
+
+```powershell
+.\run-campaign.ps1 -Server <实验机主机名或IP> -MaxCases 1 # 先验证一次
+.\run-campaign.ps1 -Server <实验机主机名或IP>
+```
+
+脚本使用 SSH 密钥登录；默认通过 `ssh -tt` 让 `boot`/`collect` 的 sudo 密码提示留在交互终端。它只在当前镜像不匹配下一项时重启，核对新 boot ID、镜像名和采集后 `completed_boots` 的递增，完成后自动聚合。若要无人值守，须先在实验机配置好适当的免密 sudo，再加 `-Unattended`；否则保持 PowerShell 窗口开启并按提示输入 sudo 密码。脚本不会自动 `begin`，失败即停止，保留当前实验供排查或重试。
+
 `status` 的 `next_mode` 和 `next_case` 是下次必须启动的镜像。`boot`/`collect` 可加 `read:raw-normal` 一类参数作断言，但不能跳过计划。若只修脚本，运行 `./experiment.sh refresh-tools`，保留已采集的结果；改内核或 benchmark 二进制必须生成新包并开始新的 campaign。选择性构建可用 `./build-all.sh raw-normal|vkso-normal|bench-normal --package OLD --out NEW`，UPDATE 包用 `../update-bench/build-update-images.sh` 的相同参数；先用 `--plan` 看改动范围。
 
 第一块的八个 `next_mode:next_case` 依次为 `read:raw-normal`、`update:raw-normal`、`read:vkso-normal`、`update:vkso-normal`、`read:raw-no-retpoline`、`update:raw-no-retpoline`、`read:vkso-no-retpoline`、`update:vkso-no-retpoline`。后续块自动轮换四种实现的次序；每项仍需独立重启，不能在同一启动内连续调用两次 `collect`。
