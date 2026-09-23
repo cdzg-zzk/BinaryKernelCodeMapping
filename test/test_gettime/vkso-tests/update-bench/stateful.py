@@ -145,9 +145,9 @@ def package_identity(package):
 def check_all_packages(packages):
     read = packages['read']; update = packages['update']
     subprocess.run([str(BARE/'verify-packages.sh'),
-                    *(str(p) for p in read.values())], check=True)
+                    *(str(read[v]) for v in ('normal','no-retpoline'))], check=True)
     subprocess.run([str(HERE/'verify-update-packages.sh'),
-                    *(str(p) for p in update.values())], check=True)
+                    *(str(update[v]) for v in ('normal','no-retpoline'))], check=True)
     source_ids = set(); source_fingerprints = set(); libraries = set()
     for mode, variants in packages.items():
         for variant, package in variants.items():
@@ -561,10 +561,11 @@ def aggregate(root, manifest):
                 static_footprint=static_footprint(manifest))
 
 
-def run_collector(argv, env=None):
+def run_collector(argv, env=None, needs_sudo=False):
     # Do not move a partial directory while a root collector is still restoring
-    # mappings or writing logs. Forward cancellation, then wait for its cleanup.
-    process=subprocess.Popen(argv,env=env,start_new_session=True)
+    # mappings or writing logs. A sudo password prompt needs the calling
+    # terminal: setsid() would detach it before sudo can authenticate.
+    process=subprocess.Popen(argv,env=env,start_new_session=not needs_sudo)
     try:
         code=process.wait()
         if code: raise subprocess.CalledProcessError(code,argv)
@@ -572,7 +573,13 @@ def run_collector(argv, env=None):
         handlers={sig:signal.signal(sig,signal.SIG_IGN) for sig in (signal.SIGINT,signal.SIGTERM,signal.SIGHUP)}
         try:
             if process.poll() is None:
-                try: os.killpg(process.pid,signal.SIGTERM)
+                try:
+                    if needs_sudo:
+                        # sudo forwards the signal to its command and waits for
+                        # the collector's cleanup in the foreground process group.
+                        process.terminate()
+                    else:
+                        os.killpg(process.pid,signal.SIGTERM)
                 except ProcessLookupError: pass
                 process.wait()
         finally:
@@ -683,7 +690,7 @@ def campaign(action, value):
                           '--revision',state['tools']]
                     if os.geteuid()!=0: argv=['sudo',*argv]
                 try:
-                    run_collector(argv,env)
+                    run_collector(argv,env,needs_sudo=os.geteuid()!=0)
                     must(json.loads((partial/'run.json').read_text())['status']=='COMPLETE',
                          'collector incomplete')
                     final.parent.mkdir(parents=True,exist_ok=True); partial.rename(final)

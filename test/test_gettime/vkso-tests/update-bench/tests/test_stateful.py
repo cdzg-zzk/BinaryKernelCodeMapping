@@ -236,6 +236,28 @@ class FootprintTests(unittest.TestCase):
             with self.assertRaises(ValueError):s.mapping_footprint(directories)
 
 class ControlTests(unittest.TestCase):
+    def test_package_validation_uses_variant_order_after_json_reload(self):
+        # JSON manifests sort keys alphabetically, putting no-retpoline first.
+        root=Path('/mock')
+        packages={mode:{'no-retpoline':root/(mode+'-no-retpoline'),
+                        'normal':root/(mode+'-normal')}
+                  for mode in ('read','update')}
+        identity={'git_commit':'commit','candidate_patch_sha256':'patch',
+                  'vkso_source_tree_sha256':'source'}
+        with patch.object(s.subprocess,'run') as run, \
+             patch.object(s,'check_read_package',return_value={'source_fingerprint':'same'}), \
+             patch.object(s,'compatible',return_value={'source_fingerprint':'same'}), \
+             patch.object(s.workflow,'compatible'), \
+             patch.object(s,'kv_file',side_effect=lambda path: dict(
+                 identity,build_variant=('no-retpoline' if 'no-retpoline' in str(path)
+                                         else 'normal'))), \
+             patch.object(s,'sha256',return_value='same'):
+            s.check_all_packages(packages)
+        self.assertEqual([str(x) for x in run.call_args_list[0].args[0][-2:]],
+                         ['/mock/read-normal','/mock/read-no-retpoline'])
+        self.assertEqual([str(x) for x in run.call_args_list[1].args[0][-2:]],
+                         ['/mock/update-normal','/mock/update-no-retpoline'])
+
     def test_full_campaign_begin_freezes_eight_image_plan(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);bare=root/'baremetal';bare.mkdir()
@@ -267,6 +289,20 @@ class ControlTests(unittest.TestCase):
             with self.assertRaises(KeyboardInterrupt):s.run_collector(['mock'])
             self.assertEqual(process.wait.call_count,2)
             kill.assert_called_once_with(1234,s.signal.SIGTERM)
+
+    def test_sudo_collector_keeps_terminal_and_waits_for_cleanup(self):
+        from unittest.mock import Mock
+        process=Mock(pid=1234)
+        process.wait.side_effect=[KeyboardInterrupt(),0]
+        process.poll.return_value=None
+        with patch.object(s.subprocess,'Popen',return_value=process) as popen, \
+             patch.object(s.os,'killpg') as kill:
+            with self.assertRaises(KeyboardInterrupt):
+                s.run_collector(['sudo','collector'],needs_sudo=True)
+            self.assertFalse(popen.call_args.kwargs['start_new_session'])
+            process.terminate.assert_called_once_with()
+            self.assertEqual(process.wait.call_count,2)
+            kill.assert_not_called()
 
     def test_wrong_kernel_rejected_before_config_or_tuning(self):
         with patch.object(s,'check',return_value={}),patch.object(s,'kv_file',return_value={'build_variant':'normal','raw_uts_version':'target'}), \
