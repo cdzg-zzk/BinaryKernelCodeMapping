@@ -12,6 +12,7 @@ import tarfile
 import time
 from bundle import PROTOCOL, sha256, kv_file, write_json
 from package_check import check
+import workflow
 
 HERE = Path(__file__).resolve().parent
 BARE = HERE.parent / 'baremetal'
@@ -55,7 +56,7 @@ def archive(root):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['begin', 'boot', 'collect', 'status', 'aggregate'])
+    parser.add_argument('action', choices=['begin', 'boot', 'collect', 'status', 'aggregate', 'refresh-tools', 'stop'])
     parser.add_argument('value', nargs='?')
     args = parser.parse_args()
     results = Path(os.environ.get('RESULTS_DIR', BARE / 'results')).resolve()
@@ -71,12 +72,7 @@ def main():
                         for v, e in [('normal', 'NORMAL_PACKAGE'), ('no-retpoline', 'NO_RETPOLINE_PACKAGE')]}
             subprocess.run([str(BARE / 'verify-packages.sh'), *map(str, packages.values())], check=True)
             for package in packages.values():
-                for local in [BARE / n for n in ('collect-case.sh', 'experiment.sh', 'experiment.conf', 'boot-once.sh')]:
-                    if sha256(local) != sha256(package / local.name):
-                        raise ValueError('workflow changed since build; rebuild: ' + local.name)
-                for local in HERE.glob('*.py'):
-                    if sha256(local) != sha256(package / 'direct/src/direct-api' / local.name):
-                        raise ValueError('direct API source changed since build; rebuild: ' + local.name)
+                workflow.compatible(HERE, package)
             config = kv_file(BARE / 'experiment.conf')
             blocks = int(config['BLOCKS'])
             if not 1 <= int(config['PERF_PROCESSES']) <= int(config['REPEATS']) <= 1000:
@@ -96,6 +92,7 @@ def main():
                             config=config, plan=plan(blocks), identities=frozen_inputs(packages))
             write_json(root / 'campaign.json', manifest)
             state = dict(root=str(root), next_index=0, status='active', manifest_sha256=sha256(root / 'campaign.json'))
+            state['tool_revision'] = workflow.snapshot(root, HERE, packages.values(), config)
             atomic(state_file, state)
         if not state:
             if args.action == 'status':
@@ -105,6 +102,30 @@ def main():
         if sha256(root / 'campaign.json') != state['manifest_sha256']:
             raise ValueError('campaign manifest changed')
         manifest = json.loads((root / 'campaign.json').read_text())
+        if args.action == 'stop':
+            if state['status'] != 'active':
+                raise ValueError('only an active campaign can be stopped')
+            write_json(root / 'STOPPED.json', {'completed_boots': state['next_index'],
+                       'reason': args.value or 'operator stopped; results retained',
+                       'status': 'INCOMPLETE', 'timestamp': time.time()})
+            state['status'] = 'stopped'
+            atomic(state_file, state)
+        if args.action == 'refresh-tools':
+            if state['status'] != 'active':
+                raise ValueError('refresh-tools requires an active campaign')
+            packages = [Path(p) for p in manifest['packages'].values()]
+            # Never refresh around changed artifacts or config, including old campaigns.
+            script_names = {str(p.resolve()) for p in workflow.inputs(HERE).values()
+                            if p.name != 'experiment.conf'}
+            for name, digest in manifest['identities'].items():
+                if name not in script_names and sha256(name) != digest:
+                    raise ValueError('non-tool frozen input changed: ' + name)
+            for package in packages:
+                check(package)
+            revision = workflow.snapshot(root, HERE, packages, manifest['config'])
+            state['tool_revision'] = revision
+            atomic(state_file, state)
+            print('tool_revision=' + revision + '; kernels/binaries/results unchanged')
         if args.action == 'aggregate':
             if state['status'] != 'complete':
                 raise ValueError('campaign is incomplete')
@@ -116,9 +137,16 @@ def main():
         if args.action in ('boot', 'collect'):
             if state['status'] != 'active':
                 raise ValueError('campaign is complete; begin a new campaign explicitly')
+            tool_revision = state.get('tool_revision')
+            if not tool_revision:
+                raise ValueError('run ./experiment.sh refresh-tools once to adopt separate tool versioning')
+            tool_root = root / 'tool-revisions' / tool_revision
+            workflow.current_matches(tool_root, HERE)
+            script_names = {str(p.resolve()) for p in workflow.inputs(HERE).values()
+                            if p.name != 'experiment.conf'}
             for name, digest in manifest['identities'].items():
-                if sha256(name) != digest:
-                    raise ValueError('frozen input changed: ' + name)
+                if name not in script_names and sha256(name) != digest:
+                    raise ValueError('frozen artifact/config changed: ' + name)
             entry = manifest['plan'][state['next_index']]
             case = entry['case']
             if args.value and args.value != case:
@@ -142,9 +170,9 @@ def main():
                     raise ValueError('result exists; refusing overwrite')
                 partial = root / ('.partial-' + case + '-' + str(time.time_ns()))
                 env = dict(os.environ, DIRECT_PACKAGE=str(package), DIRECT_OUT=str(partial),
-                           DIRECT_CONFIG=json.dumps(manifest['config']), DIRECT_BLOCK=str(entry['block']))
+                           DIRECT_CONFIG=json.dumps(manifest['config']), DIRECT_BLOCK=str(entry['block']), DIRECT_TOOL_REVISION=tool_revision)
                 try:
-                    subprocess.run([str(BARE / 'collect-case.sh'), case, root.name], env=env, check=True)
+                    subprocess.run([str(tool_root / 'baremetal/collect-case.sh'), case, root.name], env=env, check=True)
                     run = json.loads((partial / 'run.json').read_text())
                     if run['status'] != 'COMPLETE':
                         raise ValueError('collector did not finish')

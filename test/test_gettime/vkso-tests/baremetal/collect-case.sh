@@ -8,7 +8,7 @@ CASE=${1:?case required}
 : "${DIRECT_OUT:?run ./experiment.sh collect}"
 : "${DIRECT_CONFIG:?run ./experiment.sh collect}"
 if [[ $(id -u) -ne 0 ]]; then
-    exec sudo --preserve-env=DIRECT_PACKAGE,DIRECT_OUT,DIRECT_CONFIG,DIRECT_BLOCK "$0" "$@"
+    exec sudo --preserve-env=DIRECT_PACKAGE,DIRECT_OUT,DIRECT_CONFIG,DIRECT_BLOCK,DIRECT_TOOL_REVISION "$0" "$@"
 fi
 # Tuning is performed only after basic target identity checks. Full preflight below
 # additionally verifies installed image, auxv, controls and all checksummed artifacts.
@@ -31,7 +31,14 @@ restore() {
     trap - EXIT
     set +e
     for ((i=${#saved_paths[@]}-1; i>=0; --i)); do
-        printf '%s\n' "${saved_values[$i]}" >"${saved_paths[$i]}" || status=1
+        # BIOS may lock no_turbo; never write an unchanged value back.
+        current=$(cat "${saved_paths[$i]}") || { status=1; continue; }
+        [[ "$current" == "${saved_values[$i]}" ]] && continue
+        if ! printf '%s\n' "${saved_values[$i]}" >"${saved_paths[$i]}" ||
+           [[ $(cat "${saved_paths[$i]}") != "${saved_values[$i]}" ]]; then
+            echo "error: failed to restore ${saved_paths[$i]}" >&2
+            status=1
+        fi
     done
     if [[ $irq_active == 1 ]]; then systemctl start irqbalance || status=1; fi
     if [[ -n ${SUDO_UID:-} && -d "$DIRECT_OUT" ]]; then
@@ -53,8 +60,17 @@ RECORD
 trap restore EXIT
 set_value() {
     test -r "$1"
-    saved_paths+=("$1"); saved_values+=("$(cat "$1")")
+
+    local current
+    current="$(cat "$1")"
+
+    if [[ "$current" == "$2" ]]; then
+        return 0
+    fi
+    saved_paths+=("$1")
+    saved_values+=("$current")
     printf '%s\n' "$2" >"$1"
+    [[ $(cat "$1") == "$2" ]]
 }
 set_value /sys/devices/system/cpu/intel_pstate/no_turbo 1
 set_value /sys/devices/system/cpu/intel_pstate/max_perf_pct 100

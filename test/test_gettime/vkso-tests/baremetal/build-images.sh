@@ -286,6 +286,8 @@ fi
 if [[ "$reuse_raw" == 0 ]]; then
 	make -C "$RAW_SOURCE" O="$RAW_BUILD" CC="$CC" -j"$JOBS" \
 		bzImage modules_prepare
+	# External readers import built-in symbols from their own kernel build.
+	cp "$RAW_BUILD/vmlinux.symvers" "$RAW_BUILD/Module.symvers"
 fi
 make -C "$VKSO_COMPILE_SOURCE" O="$VKSO_BUILD" CC="$CC" -j"$JOBS" \
 	bzImage modules_prepare
@@ -363,19 +365,21 @@ cp "$HERE/../m09-posix-clock/Makefile" \
 	"$HERE/../m09-posix-clock/vkso_m09_clock.c" "$M09_CLOCK_BUILD/"
 make -C "$M09_CLOCK_BUILD" KDIR="$VKSO_BUILD" CC="$CC" -j"$JOBS"
 
-# Separate validation module, loaded only outside formal user READ timing.
-if [[ "$reuse_raw" == 0 ]]; then
-    for backend in raw vkso; do
-        reader_build="$BUILD_ROOT/kernel-reader-$backend"
-        mkdir -p "$reader_build"
-        cp "$HERE/../revision/kernel-reader/Makefile" \
-            "$HERE/../revision/kernel-reader/vkso_kernel_reader.c" "$reader_build/"
-        kernel_build=$RAW_BUILD
-        [[ "$backend" == vkso ]] && kernel_build=$VKSO_BUILD
-        make -C "$kernel_build" M="$reader_build" CC="$CC" -j"$JOBS" modules
-        cp "$reader_build/vkso_kernel_reader.ko" "$OUT/$backend-kernel-reader.ko"
-    done
-fi
+# Rebuild readers only for kernels built here; reused Raw keeps its matching module.
+for backend in raw vkso; do
+    if [[ "$backend" == raw && "$reuse_raw" == 1 ]]; then
+        install -m 0644 "$RAW_PACKAGE/raw-kernel-reader.ko" "$OUT/raw-kernel-reader.ko"
+        continue
+    fi
+    reader_build="$BUILD_ROOT/kernel-reader-$backend"
+    mkdir -p "$reader_build"
+    cp "$HERE/../revision/kernel-reader/Makefile" \
+        "$HERE/../revision/kernel-reader/vkso_kernel_reader.c" "$reader_build/"
+    kernel_build=$RAW_BUILD
+    [[ "$backend" == vkso ]] && kernel_build=$VKSO_BUILD
+    make -C "$kernel_build" M="$reader_build" CC="$CC" -j"$JOBS" modules
+    cp "$reader_build/vkso_kernel_reader.ko" "$OUT/$backend-kernel-reader.ko"
+done
 
 KRG="$BUILD_ROOT/vkso.krg"
 "$ROOT/kernel_cgd/src/krg" build "$VKSO_BUILD/vmlinux" -o "$KRG" \
@@ -565,9 +569,7 @@ candidate_patch_sha256=$(sha256sum "$OUT/source.patch" | awk '{print $1}')
 		qemu-preflight.sh qemu-guest-init verify-packages.sh \
 		source-tree-hash.sh experiment.conf source.patch \
 		>SHA256SUMS
-	if [[ "$reuse_raw" == 0 ]]; then
-		sha256sum raw-kernel-reader.ko vkso-kernel-reader.ko >>SHA256SUMS
-	fi
+	sha256sum raw-kernel-reader.ko vkso-kernel-reader.ko >>SHA256SUMS
 	if [[ "$UPDATE_BENCH" == 1 ]]; then
 		sha256sum collect-update.sh collect-update-side.sh \
 			collect-update-concurrent.sh compare-update.py boot-once.sh \
@@ -576,9 +578,7 @@ candidate_patch_sha256=$(sha256sum "$OUT/source.patch" | awk '{print $1}')
 			experiment-concurrent.sh \
 			install-update-grub.sh verify-update-packages.sh \
 			update-experiment.conf concurrent-experiment.conf >>SHA256SUMS
-	if [[ "$reuse_raw" == 0 ]]; then
-		sha256sum raw-kernel-reader.ko vkso-kernel-reader.ko >>SHA256SUMS
-	fi
+
 	fi
 )
 

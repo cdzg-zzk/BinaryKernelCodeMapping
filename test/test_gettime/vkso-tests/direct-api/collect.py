@@ -18,7 +18,7 @@ import sys
 import time
 
 from bundle import PROTOCOL, REQUIRED, kv_file, sha256, verify_sums, write_json
-from results import CASE_NAMES, validate_rows
+from results import CASE_NAMES, validate_rows, validate_sharing, validate_kernel_rows
 
 CASES = ('raw-normal', 'vkso-normal', 'raw-no-retpoline', 'vkso-no-retpoline')
 
@@ -55,9 +55,6 @@ def preflight(bundle, case, cpu):
                          'src/direct-api/collect.py', 'src/direct-api/results.py'})
     build = json.loads((bundle / 'build.json').read_text())
     must(build['protocol'] == PROTOCOL, 'wrong direct API protocol')
-    for name in ('collect.py', 'results.py', 'bundle.py'):
-        must(sha256(Path(__file__).parent / name) == sha256(bundle / 'src/direct-api' / name),
-             'collector/helper differs from bundled source: ' + name)
     package = (bundle / build['package']).resolve()
     verify_sums(package, REQUIRED)
     must(all(sha256(package / name) == value for name, value in build['kernel_checksums'].items()),
@@ -135,6 +132,7 @@ def preflight(bundle, case, cpu):
         'kernel_image_sha256': sha256(package / (backend + '-bzImage')),
         'kernel_config_sha256': sha256(package / (backend + '.config')),
         'git_commit': original['git_commit'],
+        'kernel_source_trees': {k: original[k] for k in ('raw_source_tree_sha256', 'vkso_source_tree_sha256')},
         'dirty_patch_sha256': original['candidate_patch_sha256'],
         'compiler_version': build['compiler_version'],
         'source_fingerprint': build['source_fingerprint'], 'base_cflags': build['base_cflags'],
@@ -186,7 +184,8 @@ def collect(options, package, build, runner, record):
     clock_loaded = manager_loaded = replacement_attempted = reader_loaded = False
     failure = None
     cleanup_errors = []
-    record.update(block=int(os.environ.get('DIRECT_BLOCK', '0')), iterations=options.iterations, warmup=options.warmup,
+    record.update(tool_revision=os.environ.get('DIRECT_TOOL_REVISION', 'unversioned'),
+                  collector_sha256=sha256(__file__), block=int(os.environ.get('DIRECT_BLOCK', '0')), iterations=options.iterations, warmup=options.warmup,
                   repeats=options.repeats, processes=options.processes,
                   expected_api_count=len(CASE_NAMES), status='RUNNING')
     write_json(out / 'start.json', record)
@@ -195,7 +194,8 @@ def collect(options, package, build, runner, record):
     (out / 'interrupts-before.txt').write_text(text('/proc/interrupts') + '\n')
     try:
         os.sched_setaffinity(0, {0})
-        logged(['insmod', str(package / 'vkso_m09_clock.ko')], out / 'clock-module.log', env)
+        clock_module = package / ('raw-m09-clock.ko' if backend == 'raw' and (package / 'raw-m09-clock.ko').exists() else 'vkso_m09_clock.ko')
+        logged(['insmod', str(clock_module)], out / 'clock-module.log', env)
         clock_loaded = True
         for _ in range(50):
             if (Path('/dev/vkso-m09-clock').is_char_device()):
@@ -217,9 +217,10 @@ def collect(options, package, build, runner, record):
         logged(['insmod', str(package / (backend + '-kernel-reader.ko'))], out / 'reader-module.log', env)
         reader_loaded = True
         if backend == 'vkso':
-            logged([sys.executable, str(bundle / 'src/direct-api/sharing.py'),
+            logged([sys.executable, str(Path(__file__).parent / 'sharing.py'),
                     str(package / 'libkernel.so'), str(package / 'page_mappings.txt'), 'vkso'],
                    out / 'sharing.json', env)
+            validate_sharing(json.loads((out / 'sharing.json').read_text()))
             record['pfn_identity'] = 'PASS'
         else:
             record['pfn_identity'] = 'SKIP: Raw does not graft a carrier'
@@ -228,10 +229,7 @@ def collect(options, package, build, runner, record):
         data = (kernel / 'samples').read_text()
         (out / 'kernel-reader.csv').write_text(data)
         kernel_rows = list(csv.DictReader(data.splitlines()))
-        must(len(kernel_rows) == 3 * options.repeats and
-             len({(r['api'], r['round']) for r in kernel_rows}) == len(kernel_rows) and
-             all(int(r['cpu']) == options.cpu and int(r['iterations']) == options.iterations
-                 and int(r['total_tsc_cycles']) > 0 for r in kernel_rows), 'incomplete kernel reader samples')
+        validate_kernel_rows(kernel_rows, record)
         record['kernel_reader'] = 'PASS; counter unit=TSC ticks/call'
         logged(['rmmod', 'vkso_kernel_reader'], out / 'reader-unload.log', env)
         reader_loaded = False

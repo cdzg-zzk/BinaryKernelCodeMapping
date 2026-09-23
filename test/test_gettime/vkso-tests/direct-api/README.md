@@ -45,7 +45,7 @@ no-retpoline 保留原配置含义：关闭 RETPOLINE、RETHUNK、CPU_UNRET_ENTR
 
 ## 固定启动/采集流程
 
-`experiment.conf` 默认 4 个 block，每个 block 4 次独立启动，共 16 boot；四种顺序平衡位置。参数应在构建前确定，begin 后冻结，不可中途修改源码、工具或包。
+`experiment.conf` 默认 4 个 block，每个 block 4 次独立启动，共 16 boot；四种顺序平衡位置。测量参数在 begin 后冻结；内核与测试二进制不变时，采集脚本可通过 refresh-tools 独立升级并记录快照。
 
 ```bash
 ./experiment.sh begin
@@ -105,3 +105,60 @@ python3 ../direct-api/results.py results/<run>/block-*/* --out results/<run>/sum
 ```
 
 不要重复输出到同一个 summary 文件。压缩包是汇总前的原始证据包，summary 单独保留。当前实际测试及 NOT_RUN 边界见 [VALIDATION.md](VALIDATION.md)。
+
+## 分层维护：不因脚本修复重编内核
+
+固定入口不变：`build-all.sh` 无参数构建完整四镜像；以下参数是增量维护入口。
+
+**只修改 collect/boot/统计等 Shell、Python 工具：**
+
+```bash
+./experiment.sh refresh-tools
+./experiment.sh status
+# 按 next_case 继续 boot / collect；无需 build、install 或重跑已完成组。
+```
+
+工具保存到 `results/<run>/tool-revisions/<hash>/`，每次采集记录工具版本；旧工具快照、
+旧样本和不可变 package 校验和保持不变。refresh 会拒绝参数或 C/头文件/Makefile 的变化。
+这是为修复采集编排提供的显式入口；若改变测量含义/时序/统计设计，应停止并新建 campaign，
+不能将“脚本可升级”理解为不同实验协议可以混合。已有 v2 campaign 可原位接入一次 refresh-tools。
+
+**只修改用户态公开库/benchmark：**
+
+```bash
+./build-all.sh bench-normal --out "$PWD/artifacts/direct-normal-bench2"
+./build-all.sh bench-no-retpoline --out "$PWD/artifacts/direct-no-retpoline-bench2"
+```
+
+保留旧镜像/carrier，重建 direct API 文件和身份清单，输出新包。需要新 campaign；内核镜像相同时无需重新安装。
+
+**只修改一个内核：**
+
+```bash
+JOBS=4 ./build-all.sh vkso-normal --out "$PWD/artifacts/direct-normal-kernel2"
+# 其他选择：raw-normal、raw-no-retpoline、vkso-no-retpoline
+# 可先加 --plan 检查父包并显示构建范围，不编译。
+```
+
+默认父包来自 NORMAL_PACKAGE / NO_RETPOLINE_PACKAGE（或 artifacts/direct-*），也可 `--package PATH`。
+VKSO 修复只构建 VKSO 内核和依赖它的 carrier/模块，Raw 镜像和对应 reader 模块复用已验证原件。
+Raw 修复只构建 Raw 内核及其 reader/动态时钟模块，VKSO/carrier 保留；RAW_SOURCE 或 RAW_TARBALL 提供原版源码。
+不修改旧包、不覆盖旧结果。`.work`、`.building` 保留失败日志/产物；重试请选新输出目录。
+
+内核变化后把对应的 PACKAGE 环境变量指向新包，执行 verify-packages.sh、install-grub.sh，再开始新 campaign。
+两种 mitigation 包仍要求相同内核源码、配置只差既定选项、用户态二进制相同；若改了两种配置共用的 VKSO 源码，
+须分别重建 vkso-normal 和 vkso-no-retpoline，两份 Raw 不需重建。
+Git 提交/dirty patch/构建时间可不同，源码树、镜像、carrier、依赖和工具链身份仍严格核验。
+
+```bash
+# 仅在更换内核/测量二进制或协议时结束旧 campaign；原数据保留。
+./experiment.sh stop "kernel or benchmark revision"
+export NORMAL_PACKAGE="$PWD/artifacts/direct-normal-kernel2"
+# NO_RETPOLINE_PACKAGE 指向配套包
+./verify-packages.sh "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"
+sudo env NORMAL_PACKAGE="$NORMAL_PACKAGE" NO_RETPOLINE_PACKAGE="$NO_RETPOLINE_PACKAGE" ./install-grub.sh
+./experiment.sh begin
+```
+
+构建/验证不会自动安装或重启。`rebuild.json` 与 parent-package-* 保存旧包身份及选择性构建来源。
+选择性构建的真实目标内核运行仍须在对应启动下由 collect 验证，构建成功不等于运行通过。

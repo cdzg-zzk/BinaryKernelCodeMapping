@@ -5,6 +5,12 @@ set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT=$(cd "$HERE/../../../.." && pwd)
+
+# No argument retains full construction; targeted modes never mutate old packages.
+if [[ $# -gt 0 ]]; then
+    exec python3 "$HERE/../direct-api/rebuild.py" "$@"
+fi
+
 RAW_TARBALL=${RAW_TARBALL:-/tmp/linux-5.15.198.tar.xz}
 RAW_SOURCE=${RAW_SOURCE:-/tmp/vkso-final-raw-source}
 BUILD_ROOT=${BUILD_ROOT:-/tmp/vkso-final-build}

@@ -226,6 +226,9 @@ def synthetic_run(root, case, boot_id):
                   source_fingerprint='TEST-CODE', base_cflags='TEST-FLAGS',
                   package_manifest_sha256='TEST-PACKAGE', binary_sha256='TEST-BINARY',
                   package_checksums_sha256='TEST-INVENTORY', public_library_sha256='TEST-LIBRARY',
+                  carrier_sha256='TEST-CARRIER', git_commit='TEST-COMMIT', dirty_patch_sha256='TEST-PATCH',
+                  kernel_reader='PASS; counter unit=TSC ticks/call',
+                  pfn_identity='SKIP: Raw does not graft a carrier' if backend == 'native-libc' else 'PASS',
                   cpu_info={'model name': 'SYNTHETIC', 'microcode': 'TEST'}, tuning={})
     for row in rows:
         row['backend'] = backend
@@ -241,6 +244,19 @@ def synthetic_run(root, case, boot_id):
                          ('check-fast.log', 'time_syscall_denial_check=PASS'),
                          ('legacy-abi.log', 'abi_matrix_status=pass')]:
         (root / name).write_text('SYNTHETIC TEST FIXTURE; NOT runtime evidence\n' + marker)
+    # Synthetic records model the evidence already emitted by the v2 collector.
+    (root / 'kernel-reader.csv').write_text(
+        'api,round,cpu,iterations,total_tsc_cycles,checksum\n' + ''.join(
+            f'{api},{repeat},{record["cpu"]},{record["iterations"]},5000,0\n'
+            for api in results.KERNEL_APIS for repeat in range(record['repeats'])))
+    if backend == 'vkso-direct':
+        pages = [dict(kind=kind, section='TEST-ONLY', file_offset=(i + 1) * 4096,
+                      kernel_pfn=101 + i, user_pfn=101 + i, shared=True)
+                 for i, kind in enumerate(('text', 'shared_data'))]
+        (root / 'sharing.json').write_text(json.dumps(dict(
+            method='vkso', pages=pages, distinct_source_pfns=2,
+            distinct_user_pfns=2, source_user_union_pfns=2,
+            scope='SYNTHETIC TEST ONLY; not a physical page observation')))
     sums(root)
     return root
 
@@ -279,7 +295,8 @@ class WorkflowTests(unittest.TestCase):
             env = {k:v for k,v in os.environ.items() if k not in
                    ('RESULTS_DIR','STATE_FILE','LOCK_FILE','NORMAL_PACKAGE','NO_RETPOLINE_PACKAGE')}
             with patch.object(campaign, 'BARE', bare), patch.object(campaign, 'HERE', source), \
-                 patch.dict(os.environ, env, clear=True), patch.object(campaign.subprocess, 'run'):
+                 patch.dict(os.environ, env, clear=True), patch.object(campaign.subprocess, 'run'), \
+                 patch.object(campaign.workflow, 'compatible'):
                 with patch.object(sys, 'argv', ['campaign', 'begin', 'fixture']):
                     campaign.main()
                 state=json.loads((bare / '.direct-api-state.json').read_text())
@@ -288,7 +305,7 @@ class WorkflowTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, 'already active'): campaign.main()
                 (bare / 'experiment.conf').write_text('CHANGED')
                 with patch.object(sys, 'argv', ['campaign', 'collect']):
-                    with self.assertRaisesRegex(ValueError, 'frozen input changed'): campaign.main()
+                    with self.assertRaisesRegex(ValueError, 'scripts changed|frozen artifact/config changed'): campaign.main()
 
     def test_campaign_collection_failure_preserves_and_success_advances(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -299,14 +316,15 @@ class WorkflowTests(unittest.TestCase):
             bundle.write_json(root / 'campaign.json', manifest)
             state_file = bare / '.direct-api-state.json'
             bundle.write_json(state_file, dict(root=str(root), next_index=0, status='active',
-                        manifest_sha256=bundle.sha256(root / 'campaign.json')))
+                        manifest_sha256=bundle.sha256(root / 'campaign.json'), tool_revision='TEST'))
             env = {k:v for k,v in os.environ.items() if k not in ('RESULTS_DIR','STATE_FILE','LOCK_FILE')}
             def fake_command(argv, env, check):
                 out = Path(env['DIRECT_OUT']); out.mkdir()
                 (out / 'started').write_text('TEST ONLY')
                 raise subprocess.CalledProcessError(17, argv)
             with patch.object(campaign, 'BARE', bare), patch.dict(os.environ, env, clear=True), \
-                 patch.object(campaign, 'check'), patch.object(sys, 'argv', ['campaign','collect']), \
+                 patch.object(campaign, 'check'), patch.object(campaign.workflow, 'current_matches'), \
+                 patch.object(sys, 'argv', ['campaign','collect']), \
                  patch.object(campaign.subprocess, 'run', side_effect=fake_command):
                 with self.assertRaises(subprocess.CalledProcessError): campaign.main()
             self.assertEqual(json.loads(state_file.read_text())['next_index'], 0)
@@ -315,7 +333,8 @@ class WorkflowTests(unittest.TestCase):
                 out = Path(env['DIRECT_OUT']); out.mkdir()
                 bundle.write_json(out / 'run.json', dict(status='COMPLETE', boot_id='TEST'))
             with patch.object(campaign, 'BARE', bare), patch.dict(os.environ, env, clear=True), \
-                 patch.object(campaign, 'check'), patch.object(sys, 'argv', ['campaign','collect']), \
+                 patch.object(campaign, 'check'), patch.object(campaign.workflow, 'current_matches'), \
+                 patch.object(sys, 'argv', ['campaign','collect']), \
                  patch.object(campaign.subprocess, 'run', side_effect=success):
                 campaign.main()
             self.assertEqual(json.loads(state_file.read_text())['next_index'], 1)
@@ -360,6 +379,128 @@ class WorkflowTests(unittest.TestCase):
             sums(b)
             with self.assertRaisesRegex(ValueError, 'mixed workload'):
                 results.summarize([a, b])
+
+    def test_pfn_completion_required_by_summary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = [synthetic_run(Path(tmp) / c, c, 'TEST-' + c) for c in results.GROUPS]
+            target = paths[1]
+            record = json.loads((target / 'run.json').read_text())
+            record['pfn_identity'] = 'NOT_RUN'
+            (target / 'run.json').write_text(json.dumps(record))
+            sums(target)
+            with self.assertRaisesRegex(ValueError, 'PFN evidence'):
+                results.summarize(paths)
+
+    def test_sharing_file_must_be_present_and_checksummed(self):
+        for remove in (False, True):
+            with self.subTest(remove=remove), tempfile.TemporaryDirectory() as tmp:
+                paths = [synthetic_run(Path(tmp) / c, c, 'TEST-' + c) for c in results.GROUPS]
+                target = paths[1]
+                if remove:
+                    (target / 'sharing.json').unlink()
+                inventory = target / 'SHA256SUMS'
+                inventory.write_text(''.join(line + '\n' for line in inventory.read_text().splitlines()
+                                              if not line.endswith('  sharing.json')))
+                with self.assertRaisesRegex(ValueError, 'PFN evidence'):
+                    results.summarize(paths)
+
+    def test_sharing_semantics_checked_after_checksum(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = [synthetic_run(Path(tmp) / c, c, 'TEST-' + c) for c in results.GROUPS]
+            target = paths[1]
+            original = json.loads((target / 'sharing.json').read_text())
+            bad_records = []
+            for key, value in (('method', 'compact-split'), ('pages', []),
+                               ('distinct_source_pfns', 99), ('source_user_union_pfns', 99)):
+                changed = copy.deepcopy(original); changed[key] = value; bad_records.append(changed)
+            for key, value in (('shared', False), ('shared', 1), ('user_pfn', 200),
+                               ('kernel_pfn', 0), ('user_pfn', '101'),
+                               ('file_offset', 1), ('kind', 'private_data')):
+                changed = copy.deepcopy(original); changed['pages'][0][key] = value; bad_records.append(changed)
+            changed = copy.deepcopy(original); changed['pages'].append(changed['pages'][0]); bad_records.append(changed)
+            changed = copy.deepcopy(original); changed['pages'][1]['kind'] = 'rodata'; bad_records.append(changed)
+            for index, changed in enumerate(bad_records):
+                with self.subTest(index=index):
+                    (target / 'sharing.json').write_text(json.dumps(changed))
+                    sums(target)  # Valid checksums do not imply valid evidence.
+                    with self.assertRaises(ValueError):
+                        results.summarize(paths)
+
+    def test_raw_does_not_require_sharing_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = [synthetic_run(Path(tmp) / c, c, 'TEST-' + c) for c in results.GROUPS]
+            self.assertFalse((paths[0] / 'sharing.json').exists())
+            self.assertFalse((paths[2] / 'sharing.json').exists())
+            self.assertEqual(len(results.summarize(paths)['comparisons']), 32)
+
+    def test_summary_checks_raw_vkso_package_pair(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = [synthetic_run(Path(tmp) / c, c, 'TEST-' + c) for c in results.GROUPS]
+            target = paths[1]
+            original = json.loads((target / 'run.json').read_text())
+            for key in ('package_manifest_sha256', 'package_checksums_sha256',
+                        'public_library_sha256', 'carrier_sha256'):
+                with self.subTest(key=key):
+                    changed = dict(original, **{key: 'OTHER-PACKAGE'})
+                    (target / 'run.json').write_text(json.dumps(changed)); sums(target)
+                    with self.assertRaisesRegex(ValueError, 'package mismatch'):
+                        results.summarize(paths)
+
+    def test_summary_allows_backend_binaries_and_variant_packages_to_differ(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = [synthetic_run(Path(tmp) / c, c, 'TEST-' + c) for c in results.GROUPS]
+            for target in paths:
+                record = json.loads((target / 'run.json').read_text())
+                variant = record['case'].split('-', 1)[1]
+                record['binary_sha256'] = 'BINARY-' + record['backend']
+                for key in ('package_manifest_sha256', 'package_checksums_sha256',
+                            'public_library_sha256', 'carrier_sha256'):
+                    record[key] = key + '-' + variant
+                (target / 'run.json').write_text(json.dumps(record)); sums(target)
+            data = results.summarize(paths)
+            self.assertTrue(all(c['vkso_over_raw'] == 2 for c in data['comparisons']))
+
+    def test_summary_checks_kernel_source_identity_across_variants(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = [synthetic_run(Path(tmp) / c, c, 'TEST-' + c) for c in results.GROUPS]
+            target = paths[-1]
+            original = json.loads((target / 'run.json').read_text())
+            for key in ('git_commit', 'dirty_patch_sha256'):
+                with self.subTest(key=key):
+                    changed = dict(original, **{key: 'OTHER-SOURCE'})
+                    (target / 'run.json').write_text(json.dumps(changed)); sums(target)
+                    with self.assertRaisesRegex(ValueError, 'mixed workload'):
+                        results.summarize(paths)
+
+    def test_kernel_reader_evidence_required_by_summary(self):
+        for mode in ('missing-file', 'not-run'):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as tmp:
+                paths = [synthetic_run(Path(tmp) / c, c, 'TEST-' + c) for c in results.GROUPS]
+                target = paths[0]
+                if mode == 'missing-file':
+                    (target / 'kernel-reader.csv').unlink()
+                else:
+                    record = json.loads((target / 'run.json').read_text())
+                    record['kernel_reader'] = 'NOT_RUN'
+                    (target / 'run.json').write_text(json.dumps(record))
+                sums(target)
+                with self.assertRaises(ValueError):
+                    results.summarize(paths)
+
+    def test_kernel_reader_matrix_validation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = synthetic_run(Path(tmp) / 'data', 'raw-normal', 'TEST-BOOT')
+            record = json.loads((target / 'run.json').read_text())
+            rows = list(csv.DictReader((target / 'kernel-reader.csv').read_text().splitlines()))
+            results.validate_kernel_rows(rows, record)
+            for bad in (rows[:-1], rows + [rows[0]]):
+                with self.assertRaises(ValueError):
+                    results.validate_kernel_rows(bad, record)
+            for key, value in (('api', 'unknown'), ('round', '99'), ('cpu', '0'),
+                               ('iterations', '1'), ('total_tsc_cycles', '0'), ('checksum', '-1')):
+                changed = copy.deepcopy(rows); changed[0][key] = value
+                with self.subTest(key=key), self.assertRaises(ValueError):
+                    results.validate_kernel_rows(changed, record)
 
     def check_mock_cleanup(self, restore_fails):
         with tempfile.TemporaryDirectory() as tmp:

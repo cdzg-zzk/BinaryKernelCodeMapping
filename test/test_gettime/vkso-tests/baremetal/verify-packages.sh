@@ -107,11 +107,10 @@ for config in "$NO_RETPOLINE_PACKAGE"/{raw,vkso}.config; do
 	fi
 done
 
-for key in git_commit git_worktree_dirty candidate_patch_sha256 \
-	vkso_source_tree_sha256 raw_source_tree_sha256 \
+for key in vkso_source_tree_sha256 raw_source_tree_sha256 \
 	cc_path cc_version benchmark_cflags experiment_config_sha256 \
 	reader_measurement_window load_measurement_window \
-	kbuild_build_timestamp kbuild_build_user kbuild_build_host; do
+	kbuild_build_user kbuild_build_host; do
 	normal_value=$(manifest_value "$NORMAL_PACKAGE" "$key")
 	no_retpoline_value=$(manifest_value "$NO_RETPOLINE_PACKAGE" "$key")
 	if [[ -z "$normal_value" || "$normal_value" != "$no_retpoline_value" ]]; then
