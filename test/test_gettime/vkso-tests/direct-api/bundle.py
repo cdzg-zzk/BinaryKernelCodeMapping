@@ -19,7 +19,7 @@ FUNCTIONAL_BLOBS = {
 }
 REQUIRED = {'boot-manifest.txt', 'raw-bzImage', 'vkso-bzImage', 'raw.config',
             'vkso.config', 'libkernel.so', 'page_mappings.txt', 'manager',
-            'page_cache_replace.ko', 'vkso_m09_clock.ko', 'raw-abi-matrix',
+            'page_cache_replace.ko', 'vkso_m09_clock.ko', 'raw-m09-clock.ko', 'raw-abi-matrix',
             'vkso-abi-matrix', 'owner_descriptors.txt', 'kernel_identity.txt', 'raw-kernel-reader.ko', 'vkso-kernel-reader.ko'}
 CFLAGS = '-O2 -g -std=gnu11 -Wall -Wextra -Werror -fno-lto -fno-builtin -fPIC'
 
@@ -123,14 +123,16 @@ def audit_public_library(library):
     return dynamic, undefined, assembly
 
 
-def build(package, out, compiler):
+def build(package, out, compiler, scope="read"):
+    if scope not in ("read", "update"):
+        raise ValueError("unknown build scope")
     package = package.resolve()
     package_sums = verify_sums(package, REQUIRED)
     original = kv_file(package / 'boot-manifest.txt')
     if original.get('build_variant') not in ('normal', 'no-retpoline'):
         raise ValueError('unknown package mitigation variant')
-    if original.get('update_bench') != '0' or original.get('vkso_validation_tests') != '0':
-        raise ValueError('this public-READ workflow requires non-instrumented production images')
+    if original.get('update_bench') != ('1' if scope == 'update' else '0') or original.get('vkso_validation_tests') != '0':
+        raise ValueError('kernel instrumentation does not match explicit build scope: ' + scope)
     if original.get('cc_version') != '11.4.0':
         raise ValueError('expected paper kernel toolchain GCC 11.4.0; do not silently mix builds')
     compiler = shutil.which(compiler)
@@ -166,6 +168,8 @@ def build(package, out, compiler):
         flags = CFLAGS + ' -ffile-prefix-map=' + str(out) + '=/vkso-direct'
         command = ['make', '-C', str(out / 'src' / 'direct-api'), 'native', 'vkso',
                    'OUT=' + str(out), 'CC=' + compiler, 'CFLAGS=' + flags]
+        if scope == 'update':
+            command += ['stateful']
         with (out / 'build.log').open('x') as log:
             subprocess.run(command, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
         audit_public_library(out / 'libvkso_time.so')
@@ -179,7 +183,8 @@ def build(package, out, compiler):
         source_hashes['direct-api/Makefile'] = sha256(out / 'src/direct-api/Makefile')
         source_fingerprint = hashlib.sha256(json.dumps(source_hashes, sort_keys=True).encode()).hexdigest()
         manifest = {
-            'protocol': PROTOCOL,
+            'protocol': PROTOCOL if scope == 'read' else 'clocktime-stateful-v1',
+            'scope': scope,
             'source_git_commit': subprocess.check_output(['git', '-C', str(here), 'rev-parse', 'HEAD'], text=True).strip(),
             'source_dirty_patch_sha256': hashlib.sha256(subprocess.check_output(
                 ['git', '-C', str(here), 'diff', '--binary', '--no-ext-diff', 'HEAD', '--'])).hexdigest(),
@@ -210,11 +215,12 @@ def main():
     parser.add_argument('--package', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--cc', default='gcc')
+    parser.add_argument('--scope', choices=['read', 'update'], default='read')
     args = parser.parse_args()
     try:
         if args.out.resolve() != args.package.resolve() / 'direct':
             raise ValueError('direct API must be built inside the coherent package at PACKAGE/direct')
-        build(args.package, args.out, args.cc)
+        build(args.package, args.out, args.cc, args.scope)
         return 0
     except (OSError, ValueError, subprocess.SubprocessError) as exc:
         print('BUILD FAILED: ' + str(exc), file=sys.stderr)

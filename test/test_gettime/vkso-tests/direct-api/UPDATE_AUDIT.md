@@ -1,6 +1,8 @@
 # UPDATE / concurrent workflow audit — 2026-09-23
 
-Status: source audit complete; **not ready for the opt4 formal experiment**.
+Status: historical pre-migration audit. The migrated implementation and commands
+are now in [RUN_STATEFUL.md](../update-bench/RUN_STATEFUL.md). Target execution
+remains NOT_RUN; the findings below describe the old workflow, not the new one.
 No instrumented kernel was built, installed, booted or sampled in this audit.
 The existing historical experiments/results are preserved. This is an engineering
 migration record, not a claim that the old data were invalid for their original scope.

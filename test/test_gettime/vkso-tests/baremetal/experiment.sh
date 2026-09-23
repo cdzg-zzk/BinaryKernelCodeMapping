@@ -2,4 +2,4 @@
 # SPDX-License-Identifier: GPL-2.0
 set -euo pipefail
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-exec python3 "$HERE/../direct-api/campaign.py" "$@"
+exec python3 "$HERE/../update-bench/stateful.py" "$@"

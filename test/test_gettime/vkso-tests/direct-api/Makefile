@@ -33,3 +33,12 @@ $(OUT)/vkso-bench: $(HERE)time_bench.c $(HERE)vkso_time.h $(OUT)/libvkso_time.so
 		-lvkso_time -Wl,-z,now -Wl,-rpath,'$$ORIGIN' -o "$@"
 check:
 	python3 "$(HERE)tests/test_direct.py"
+
+# Stateful instrumentation uses the same opt4 public library as READ.
+.PHONY: stateful
+stateful: $(OUT)/native-load $(OUT)/vkso-load
+$(OUT)/native-load: $(HERE)stateful_reader.c | $(OUT)
+	$(CC) $(CPPFLAGS) $(CFLAGS) "$<" -Wl,-z,now -o "$@"
+$(OUT)/vkso-load: $(HERE)stateful_reader.c $(OUT)/libvkso_time.so
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DUSE_VKSO "$<" -L"$(OUT)" \
+		-lvkso_time -Wl,-z,now -Wl,-rpath,'$$ORIGIN' -o "$@"

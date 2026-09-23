@@ -130,6 +130,18 @@ if [[ "$UPDATE_BENCH" == 1 ]]; then
 	fi
 	test -f "$VKSO_SOURCE/include/linux/timekeeping_update_bench.h"
 	test -f "$VKSO_SOURCE/kernel/time/timekeeping_update_bench.c"
+    if [[ "$reuse_raw" == 1 ]]; then
+        for item in "update_bench_header_sha256:include/linux/timekeeping_update_bench.h" \
+                    "update_bench_recorder_sha256:kernel/time/timekeeping_update_bench.c"; do
+            key=${item%%:*}
+            recorded=$(awk -F= -v key="$key" '$1 == key {print $2}' "$RAW_PACKAGE/boot-manifest.txt")
+            current=$(sha256sum "$VKSO_SOURCE/${item#*:}" | awk '{print $1}')
+            [[ "$recorded" == "$current" ]] || {
+                echo 'Recorder changed: both instrumented kernels must be rebuilt; cannot reuse Raw.' >&2
+                exit 1
+            }
+        done
+    fi
 fi
 vkso_source_tree_sha256=$("$HERE/source-tree-hash.sh" "$VKSO_SOURCE")
 if [[ "$reuse_raw" == 0 ]]; then
@@ -365,6 +377,21 @@ cp "$HERE/../m09-posix-clock/Makefile" \
 	"$HERE/../m09-posix-clock/vkso_m09_clock.c" "$M09_CLOCK_BUILD/"
 make -C "$M09_CLOCK_BUILD" KDIR="$VKSO_BUILD" CC="$CC" -j"$JOBS"
 
+if [[ "$reuse_raw" == 1 ]]; then
+	test -s "$RAW_PACKAGE/raw-m09-clock.ko" || {
+		echo 'reused Raw package lacks its matching clock module' >&2
+		exit 1
+	}
+	install -m 0644 "$RAW_PACKAGE/raw-m09-clock.ko" "$OUT/raw-m09-clock.ko"
+else
+	RAW_M09_CLOCK_BUILD="$BUILD_ROOT/raw-m09-posix-clock"
+	mkdir -p "$RAW_M09_CLOCK_BUILD"
+	cp "$HERE/../m09-posix-clock/Makefile" \
+		"$HERE/../m09-posix-clock/vkso_m09_clock.c" "$RAW_M09_CLOCK_BUILD/"
+	make -C "$RAW_M09_CLOCK_BUILD" KDIR="$RAW_BUILD" CC="$CC" -j"$JOBS"
+	install -m 0644 "$RAW_M09_CLOCK_BUILD/vkso_m09_clock.ko" "$OUT/raw-m09-clock.ko"
+fi
+
 # Rebuild readers only for kernels built here; reused Raw keeps its matching module.
 for backend in raw vkso; do
     if [[ "$backend" == raw && "$reuse_raw" == 1 ]]; then
@@ -468,14 +495,14 @@ if [[ -s "$HERE/README.md" ]]; then
 fi
 install -m 0644 "$HERE/vkso_time_bench.c" "$OUT/vkso_time_bench.c"
 if [[ "$UPDATE_BENCH" == 1 ]]; then
-	for script in collect-update.sh compare-update.py \
+	for script in collect-update.sh \
 		collect-update-side.sh collect-update-concurrent.sh \
 		boot-raw-update.sh boot-vkso-update.sh boot-update-once.sh \
 		experiment-update.sh experiment-concurrent.sh install-update-grub.sh \
 		verify-update-packages.sh; do
 		install -m 0755 "$HERE/../update-bench/$script" "$OUT/$script"
 	done
-	for config in update-experiment.conf concurrent-experiment.conf; do
+	for config in update-experiment.conf; do
 		install -m 0644 "$HERE/../update-bench/$config" "$OUT/$config"
 	done
 fi
@@ -547,8 +574,6 @@ candidate_patch_sha256=$(sha256sum "$OUT/source.patch" | awk '{print $1}')
 	if [[ "$UPDATE_BENCH" == 1 ]]; then
 		printf 'update_experiment_config_sha256=%s\n' \
 			"$(sha256sum "$HERE/../update-bench/update-experiment.conf" | awk '{print $1}')"
-		printf 'concurrent_experiment_config_sha256=%s\n' \
-			"$(sha256sum "$HERE/../update-bench/concurrent-experiment.conf" | awk '{print $1}')"
 		printf 'update_bench_header_sha256=%s\n' \
 			"$(sha256sum "$VKSO_SOURCE/include/linux/timekeeping_update_bench.h" | awk '{print $1}')"
 		printf 'update_bench_recorder_sha256=%s\n' \
@@ -562,7 +587,7 @@ candidate_patch_sha256=$(sha256sum "$OUT/source.patch" | awk '{print $1}')
 		raw.image.config vkso.image.config boot-manifest.txt \
 		libkernel.so page_mappings.txt page_cache_replace.ko \
 		owner_descriptors.txt kernel_identity.txt \
-		vkso_m09_clock.ko manager \
+		vkso_m09_clock.ko raw-m09-clock.ko manager \
 		raw-abi-matrix vkso-abi-matrix vkso-time-bench \
 		vkso_time_bench.c \
 		collect-case.sh experiment.sh boot-once.sh install-grub.sh \
@@ -572,12 +597,12 @@ candidate_patch_sha256=$(sha256sum "$OUT/source.patch" | awk '{print $1}')
 	sha256sum raw-kernel-reader.ko vkso-kernel-reader.ko >>SHA256SUMS
 	if [[ "$UPDATE_BENCH" == 1 ]]; then
 		sha256sum collect-update.sh collect-update-side.sh \
-			collect-update-concurrent.sh compare-update.py boot-once.sh \
+			collect-update-concurrent.sh \
 			boot-raw-update.sh boot-vkso-update.sh \
 			boot-update-once.sh experiment-update.sh \
 			experiment-concurrent.sh \
 			install-update-grub.sh verify-update-packages.sh \
-			update-experiment.conf concurrent-experiment.conf >>SHA256SUMS
+			update-experiment.conf >>SHA256SUMS
 
 	fi
 )

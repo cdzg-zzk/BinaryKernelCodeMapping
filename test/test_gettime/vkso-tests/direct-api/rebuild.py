@@ -70,6 +70,12 @@ def raw_build(source, dest, work, args, manifest):
         run(['tar', '-xf', archive, '-C', raw_source, '--strip-components=1'])
     if subprocess.check_output(['make','-s','-C',str(raw_source),'kernelversion'],text=True).strip() != '5.15.198':
         raise ValueError('Raw source must be Linux 5.15.198')
+    if args.scope == 'update':
+        run([BARE.parent/'update-bench/prepare-raw-source.sh',raw_source])
+        for key,name in [('update_bench_header_sha256','include/linux/timekeeping_update_bench.h'),
+                         ('update_bench_recorder_sha256','kernel/time/timekeeping_update_bench.c')]:
+            if sha256(raw_source/name) != manifest[key]:
+                raise ValueError('recorder changed: rebuild both instrumented implementations')
     raw_hash = subprocess.check_output([str(BARE/'source-tree-hash.sh'),str(raw_source)],text=True).strip()
     kernel = work / 'raw'; kernel.mkdir()
     shutil.copy2(source / 'raw.config', kernel / '.config')
@@ -110,15 +116,20 @@ def main():
     p.add_argument('--out',type=Path,required=True,help='new package path (never overwrite parent)')
     p.add_argument('--cc',default=os.environ.get('CC','gcc'))
     p.add_argument('--jobs',type=int,default=int(os.environ.get('JOBS','4')))
+    p.add_argument('--scope',choices=['read','update'],default='read')
     p.add_argument('--plan',action='store_true',help='validate parent and print actions without building')
     args=p.parse_args();backend,variant=args.target.split('-',1)
     package=(args.package or Path(os.environ.get('NORMAL_PACKAGE' if variant=='normal' else 'NO_RETPOLINE_PACKAGE',BARE/'artifacts'/('direct-'+variant)))).resolve()
-    parent=check(package);manifest=kv_file(package/'boot-manifest.txt')
+    checker=check
+    if args.scope=='update':
+        sys.path.insert(0,str(BARE.parent/'update-bench'))
+        from stateful import check as checker
+    parent=checker(package);manifest=kv_file(package/'boot-manifest.txt')
     if manifest['build_variant']!=variant:raise ValueError('wrong parent build variant')
     if args.jobs<1:raise ValueError('jobs must be positive')
     if subprocess.check_output([args.cc,'-dumpfullversion','-dumpversion'],text=True).strip()!=manifest['cc_version']:
         raise ValueError('compiler must match parent package')
-    if backend!='bench':workflow.compatible(HERE,package)
+    if backend!='bench' and args.scope=='read':workflow.compatible(HERE,package)
     dest=args.out.resolve()
     if dest.exists() or package in dest.parents or dest in package.parents:
         raise ValueError('output must be a new directory outside the parent package')
@@ -134,13 +145,13 @@ def main():
             if backend=='bench':
                 clone(package,stage,omit_direct=True)
                 inventory(stage)
-                build(stage,stage/'direct',args.cc)
+                build(stage,stage/'direct',args.cc,args.scope)
             elif backend=='raw':
                 raw_build(package,stage,work,args,manifest)
                 inventory(stage)
                 bind_existing_direct(package,stage)
             else:
-                env=dict(os.environ,RAW_PACKAGE=str(package),BUILD_VARIANT=variant,UPDATE_BENCH='0',
+                env=dict(os.environ,RAW_PACKAGE=str(package),BUILD_VARIANT=variant,UPDATE_BENCH='1' if args.scope=='update' else '0',
                          VKSO_VALIDATION_TESTS='0',BUILD_ROOT=str(work),OUT=str(stage),CURRENT_LINK='',
                          JOBS=str(args.jobs),CC=args.cc,
                          KBUILD_BUILD_TIMESTAMP=time.strftime('%Y-%m-%d %H:%M:%S UTC',time.gmtime()),
@@ -176,7 +187,7 @@ def main():
             direct_inventory(stage/'direct');inventory(stage)
             # Include the inner inventory in the outer inventory (no circular self-hash).
             with (stage/'SHA256SUMS').open('a') as f:f.write(sha256(stage/'direct/SHA256SUMS')+'  direct/SHA256SUMS\n')
-            check(stage)
+            checker(stage)
             other='vkso' if backend=='raw' else 'raw'
             for name in ([other+'-bzImage',other+'.config'] if backend!='bench' else ['raw-bzImage','vkso-bzImage','libkernel.so']):
                 if sha256(stage/name)!=sha256(package/name):raise ValueError('unexpected change to retained artifact: '+name)

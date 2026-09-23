@@ -1,6 +1,6 @@
-# Clocktime：四组公开 API READ（v2）
+# Clocktime：公开 API READ 子协议（v2）
 
-唯一正式入口是 `../baremetal/experiment.sh`。协议为 `clocktime-direct-api-v2`；旧 Redis、v1 sidecar、revision 数据不兼容，不能混入。测试内容先验证功能与物理共享，再测完整公开时间 API，另存普通内核 reader 的批量成本。
+当前全量构建与采集命令见 [RUN_STATEFUL.md](../update-bench/RUN_STATEFUL.md)。本文件解释 clean READ 子协议 `clocktime-direct-api-v2` 的调用路径和测量方法；下文 16-boot 独立 READ 命令是旧版操作说明，不应与当前 32-boot 全量 campaign 混用。旧 Redis、v1 sidecar、revision 数据不兼容，不能混入。
 
 ## 调用路径
 
@@ -198,4 +198,4 @@ export NO_RETPOLINE_PACKAGE="$PWD/artifacts/direct-no-retpoline-entry-opt2"
 
 公共 namespace/错误路径专项及 kernel READ 汇总：见 [SUPPLEMENTAL.md](SUPPLEMENTAL.md)。
 
-UPDATE／并发旧流程的迁移审查与阻塞项：见 [UPDATE_AUDIT.md](UPDATE_AUDIT.md)。
+UPDATE／并发的新执行流程和完整命令：见 [RUN_STATEFUL.md](../update-bench/RUN_STATEFUL.md)。历史迁移审查见 [UPDATE_AUDIT.md](UPDATE_AUDIT.md)。

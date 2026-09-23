@@ -1,13 +1,12 @@
-> 当前正式 READ 入口： [direct-api/README.md](direct-api/README.md)。
-> 使用正常 libc/vDSO 对比直接链接的 VKSO 公开 API，四组、独立启动重复。
-> 下文保留功能设计与历史验证背景；旧 revision/Redis 性能不是新协议结果。
+> 当前全量实验入口：[RUN_STATEFUL.md](update-bench/RUN_STATEFUL.md)。
+> 四种 Raw/VKSO × mitigation 组合分别构建 clean/UPDATE 镜像；READ、内核 reader、UPDATE 和持续读取在同一 campaign 内分镜像采集。
+> 下文保留实现设计与历史验证背景；旧 revision/Redis 性能不是当前协议结果。
 
 # VKSO clocktime experiments
 
-项目全貌、目录导航和应用级 macro-benchmark 接入边界见
-[项目索引](../README.md)。当前正式性能结论以 2026-09-12 完成的
-[Normal 20-boot 三方法结果](revision/NORMAL_RESULTS.md)为准；下文链接的
-2026-08-01 报告保留为历史实验，不覆盖较新的跨启动结果。
+项目全貌和目录导航见[项目索引](../README.md)。旧
+[Normal 20-boot 三方法结果](revision/NORMAL_RESULTS.md)和 2026-08-01 报告
+只描述各自的历史实现；当前全量协议还没有目标机结果。
 
 后续实现优化的独立调查见 [优化空间与候选验证](../optimization-audit/README.md)，
 包含 namespace 元数据物理页核验、代码生成对照及候选入口诊断。
@@ -114,9 +113,9 @@ clocktime 实验验证了下列可推广能力：
 
 - `functional/`：用户 ABI matrix、private `libkernel.so` 入口和 namespace/provider
   功能验证。
-- `baremetal/`：可复现的四镜像独立 READ 实验。
-- `update-bench/`：UPDATE 与 READ/UPDATE CONCURRENT 实验。
-- `revision/`：当前正式的 Raw/VKSO/Copy 多启动采集、结果分析与记录审计。
+- `baremetal/`：统一构建、安装、启动/采集入口与 clean READ 采集器。
+- `update-bench/`：UPDATE 插桩构建、统一 campaign 控制器、UPDATE/持续读取采集器。
+- `revision/`：历史 Raw/VKSO/Copy 协议及其分析。
 
 历史 READ、UPDATE、CONCURRENT 结果、测量窗口、完整表格与统一解释见
 [`VKSO_READ_UPDATE性能报告_20260801.md`](VKSO_READ_UPDATE性能报告_20260801.md)。

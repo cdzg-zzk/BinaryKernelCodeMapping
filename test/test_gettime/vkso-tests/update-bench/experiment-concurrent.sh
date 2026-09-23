@@ -4,6 +4,5 @@
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-exec env EXPERIMENT_SCOPE=concurrent \
-	EXPERIMENT_COMMAND=./experiment-concurrent.sh \
-	"$HERE/experiment-update.sh" "$@"
+# Compatibility entry: concurrent load is a phase of the full campaign.
+exec "$HERE/experiment-update.sh" "$@"

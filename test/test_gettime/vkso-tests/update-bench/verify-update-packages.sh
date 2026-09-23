@@ -25,12 +25,12 @@ validate_package()
 		raw.image.config vkso.image.config boot-manifest.txt SHA256SUMS \
 		raw-abi-matrix vkso-abi-matrix vkso-time-bench \
 		vkso_time_bench.c libkernel.so \
-		page_mappings.txt page_cache_replace.ko vkso_m09_clock.ko \
+		page_mappings.txt page_cache_replace.ko vkso_m09_clock.ko raw-m09-clock.ko \
 		manager collect-update.sh collect-update-side.sh \
-		collect-update-concurrent.sh compare-update.py \
+		collect-update-concurrent.sh \
 		boot-update-once.sh experiment-update.sh experiment-concurrent.sh \
 		install-update-grub.sh verify-update-packages.sh \
-		update-experiment.conf concurrent-experiment.conf; do
+		update-experiment.conf; do
 		test -s "$package/$file" || {
 			echo "missing update package artifact: $package/$file" >&2
 			exit 1
@@ -45,8 +45,7 @@ validate_package()
 	test "$(manifest_value "$package" update_bench)" = 1
 	grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_BENCH=y' "$package/raw.config"
 	grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_BENCH=y' "$package/vkso.config"
-	grep -Fqx 'BENCH_SCOPE=update-side' "$package/update-experiment.conf"
-	grep -Fqx 'BENCH_SCOPE=concurrent' "$package/concurrent-experiment.conf"
+	grep -Fqx 'BENCH_SCOPE=all' "$package/update-experiment.conf"
 	dirty=$(manifest_value "$package" git_worktree_dirty)
 	patch_sha=$(manifest_value "$package" candidate_patch_sha256)
 	case "$dirty" in
@@ -83,6 +82,9 @@ config_without_retpoline_family()
 		sort
 }
 
+python3 "$HERE/stateful.py" verify --package "$NORMAL_PACKAGE"
+python3 "$HERE/stateful.py" verify --package "$NO_RETPOLINE_PACKAGE"
+
 validate_package "$NORMAL_PACKAGE" normal
 validate_package "$NO_RETPOLINE_PACKAGE" no-retpoline
 
@@ -114,37 +116,30 @@ for config in "$NO_RETPOLINE_PACKAGE"/{raw,vkso}.config; do
 	fi
 done
 
-for key in git_commit git_worktree_dirty candidate_patch_sha256 \
-	vkso_source_tree_sha256 raw_source_tree_sha256 cc_path cc_version \
-	benchmark_cflags experiment_config_sha256 \
-	reader_measurement_window load_measurement_window \
-	update_experiment_config_sha256 concurrent_experiment_config_sha256 \
-	update_bench_header_sha256 \
-	update_bench_recorder_sha256 kbuild_build_timestamp \
-	kbuild_build_user kbuild_build_host; do
-	normal_value=$(manifest_value "$NORMAL_PACKAGE" "$key")
-	no_retpoline_value=$(manifest_value "$NO_RETPOLINE_PACKAGE" "$key")
-	if [[ -z "$normal_value" || "$normal_value" != "$no_retpoline_value" ]]; then
-		echo "update package manifest mismatch for $key" >&2
-		echo "normal=$normal_value" >&2
-		echo "no-retpoline=$no_retpoline_value" >&2
-		exit 1
-	fi
+# Compare implementation/toolchain identity, not collection scripts or build time.
+for key in vkso_source_tree_sha256 raw_source_tree_sha256 cc_version \
+    update_bench_header_sha256 update_bench_recorder_sha256; do
+    normal_value=$(manifest_value "$NORMAL_PACKAGE" "$key")
+    no_retpoline_value=$(manifest_value "$NO_RETPOLINE_PACKAGE" "$key")
+    if [[ -z "$normal_value" || "$normal_value" != "$no_retpoline_value" ]]; then
+        echo "update package manifest mismatch for $key" >&2; exit 1
+    fi
 done
 
-for file in raw-abi-matrix vkso-abi-matrix vkso-time-bench \
-	vkso_time_bench.c \
-	collect-update.sh collect-update-side.sh collect-update-concurrent.sh \
-	compare-update.py boot-update-once.sh experiment-update.sh \
-	experiment-concurrent.sh \
-	install-update-grub.sh verify-update-packages.sh \
-	update-experiment.conf concurrent-experiment.conf; do
-	cmp -s "$NORMAL_PACKAGE/$file" "$NO_RETPOLINE_PACKAGE/$file" || {
-		echo "update experiment artifact differs across variants: $file" >&2
-		exit 1
-	}
-done
-
-echo "four_image_update_package_validation=pass"
+echo "kernel_update_package_validation=pass"
 echo "normal_package=$NORMAL_PACKAGE"
 echo "no_retpoline_package=$NO_RETPOLINE_PACKAGE"
+
+python3 - "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE" <<'CHECK'
+import json,sys
+from pathlib import Path
+p,q=map(Path,sys.argv[1:])
+a,b=[json.loads((x/'direct/build.json').read_text()) for x in (p,q)]
+for key in ('source_fingerprint','compiler_version','base_cflags'):
+    if a[key]!=b[key]: sys.exit('public build mismatch: '+key)
+for name in ('native-load','vkso-load','libvkso_time.so'):
+    if (p/'direct'/name).read_bytes()!=(q/'direct'/name).read_bytes():
+        sys.exit('public binary mismatch: '+name)
+CHECK
+
+echo "four_image_update_package_validation=pass"

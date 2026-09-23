@@ -7,3 +7,5 @@
 
 /.direct-api-state.json*
 /.direct-api.lock
+/.clocktime-full-state.json*
+/.clocktime-full.lock
