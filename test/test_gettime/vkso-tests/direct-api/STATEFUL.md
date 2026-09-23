@@ -1,5 +1,8 @@
 # 内核状态成本：与无插桩公开 READ 分开
 
+> 2026-09-23 审查：以下 UPDATE/CONCURRENT 命令是历史流程参考，尚不能作为 opt4 正式协议执行。
+> 旧并发 reader 绕过公共库，且重复启动、清理和身份管理仍需迁移。详见 [UPDATE_AUDIT.md](UPDATE_AUDIT.md)。
+
 新 collect 每次都会用同包构建的 kernel-reader 模块测量普通内核
 `ktime_get_ts64`、`ktime_get_raw_ts64`、`ktime_get_coarse_ts64`，保存原始轮次。
 这是同一 Raw/VKSO 实现的附加指标，不是另一种后端。

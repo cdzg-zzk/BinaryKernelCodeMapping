@@ -197,3 +197,5 @@ export NO_RETPOLINE_PACKAGE="$PWD/artifacts/direct-no-retpoline-entry-opt2"
 进一步回退排查及冷路径候选 entry-opt4：见 [ENTRY_DIAGNOSIS.md](ENTRY_DIAGNOSIS.md)。
 
 公共 namespace/错误路径专项及 kernel READ 汇总：见 [SUPPLEMENTAL.md](SUPPLEMENTAL.md)。
+
+UPDATE／并发旧流程的迁移审查与阻塞项：见 [UPDATE_AUDIT.md](UPDATE_AUDIT.md)。
