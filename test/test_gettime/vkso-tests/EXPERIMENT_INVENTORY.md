@@ -14,8 +14,15 @@
 | `update-bench/stateful.py`、`boot-update-once.sh` | 八镜像计划、身份核验、UPDATE 和持续 reader、全量汇总 | 正式 |
 | `direct-api/bundle.py`、`package_check.py`、`rebuild.py` | 链接/审计/选择性重建；包内保存源码和校验和 | 正式 |
 | `direct-api/tests/`、`update-bench/tests/` | 源码与模拟控制测试 | 本地校验；不能替代目标内核 |
+| `revision/kernel-reader/` | 当前普通内核 reader 测试模块源码 | 构建仍依赖；`revision/` 其余采集/分析属于历史协议 |
+| `code-size/` | 旧语义范围 SLOC 清单与旧机器码分析 | 历史；新包改用当前 ELF section 证据 |
+| `namespace-sharing/` | time namespace MM_data 的独立生命周期/KVM 核验 | 历史功能依据；其旧结果不并入本次统计 |
+| `optimization-audit/` | 旧候选入口、代码生成和内存诊断 | 历史候选依据；不作为本次性能结果 |
+| `../vkso-timekeeper-unification/`、`../history/` | 设计报告和 Redis 历史记录 | 不进入当前构建/采集 |
 
 `revision/`、`code-size/`、`namespace-sharing/` 与根目录旧报告记录之前的实现、协议和结果。`macro-benchmark/` 的 Redis/`adapter.so` 不在当前主结果里。`baremetal/vkso_time_bench.c`、旧 QEMU 脚本、`update-bench/compare-update.py` 和若干兼容 shell 名称也属于旧测试接口；当前构建仍打包一部分旧二进制以保持包/旧验证脚本兼容，但 `experiment.sh` 不执行它们，其数字不可拼接到当前 summary。旧结果目录采用各自协议名，当前入口只写入新 `clocktime-full-v1` 结果目录。
+
+本次清空了 `baremetal/results/`、`update-bench/results/` 中的旧正式采样，并移走旧 campaign 状态；`namespace-sharing/results/`、`optimization-audit/results/` 和 `history/redis-results/` 保留为上述历史文档所需的功能/候选依据。当前 `experiment.sh status` 为 `not-started`。
 
 ## 当前证据和缺口
 
