@@ -13,6 +13,58 @@ import stateful as s
 
 WRITER='# tsc_pair_min=8 seen=3 dropped=0\nsample,cycles,action,cpu\n0,30,0,0\n1,40,0,1\n2,99,1,0\n'
 class StatefulTests(unittest.TestCase):
+    def test_diagnostic_rows_require_state_and_full_calibration(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'round-00.csv'
+            path.write_text('# tsc_pair_min=33 seen=1 dropped=0\n'
+                'sample,cycles,action,cpu,phase_nsec,ktime_carry,realtime_carry,monotonic_carry,leap_pending,clock_mode,shift\n'
+                '0,140,0,0,500000000,1,0,1,0,1,24\n')
+            calibration=path.with_name('round-00-calibration.csv')
+            calibration.write_text('# cpu=0 unit=TSC_ticks\nsample,ticks\n'+
+                ''.join(f'{i},33\n' for i in range(4096)))
+            rows,pairs=s.diagnostic_rows(path)
+            self.assertEqual(rows[0]['ktime_carry'],'1')
+            self.assertEqual(len(pairs),4096)
+            path.write_text(path.read_text().replace('500000000','1000000000'))
+            with self.assertRaises(ValueError):s.diagnostic_rows(path)
+            path.write_text(path.read_text().replace('1000000000','500000000'))
+            calibration.write_text(calibration.read_text().replace('# cpu=0','# cpu=2'))
+            with self.assertRaises(ValueError):s.diagnostic_rows(path)
+
+    def test_diagnosis_report_keeps_boots_and_state_groups(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); package=root/'package'; package.mkdir()
+            (package/'SHA256SUMS').write_text('package\n')
+            paths=[]
+            for boot in range(2):
+                path=root/f'boot{boot}'; path.mkdir(); paths.append(path)
+                run=dict(status='COMPLETE',scope='diagnostic',environment_cleanup='PASS',
+                         boot_id=str(boot),case='raw-normal',package=str(package),
+                         package_sha256=s.sha256(package/'SHA256SUMS'),
+                         config={'REPEATS':1})
+                (path/'run.json').write_text(json.dumps(run))
+                for name in ('start.json','abi.log','check.log','check-fast.log'):
+                    (path/name).write_text('ok\n')
+                for scenario in s.SCENARIOS:
+                    directory=path/scenario; directory.mkdir()
+                    rows=['# tsc_pair_min=33 seen=1000 dropped=0',
+                          'sample,cycles,action,cpu,phase_nsec,ktime_carry,realtime_carry,monotonic_carry,leap_pending,clock_mode,shift']
+                    for i in range(1000):
+                        state=i%2
+                        rows.append(f'{i},{100 if state==0 else 150},0,0,{i%10*100000000},{state},0,{state},0,1,24')
+                    (directory/'round-00.csv').write_text('\n'.join(rows)+'\n')
+                    (directory/'round-00-calibration.csv').write_text(
+                        '# cpu=0 unit=TSC_ticks\nsample,ticks\n'+
+                        ''.join(f'{i},33\n' for i in range(4096)))
+                s.seal(path)
+            report=s.diagnosis_report(paths)
+            self.assertEqual(report['boots'],2)
+            self.assertEqual(len(report['boot_scenarios']),8)
+            idle=report['boot_scenarios'][0]
+            self.assertEqual(idle['high_fraction'],.5)
+            self.assertEqual(idle['flag_groups']['ktime_carry']['1']['high_fraction'],1)
+            with self.assertRaises(ValueError):s.diagnosis_report([paths[0],paths[0]])
+
     def test_balanced_boots(self):
         p=s.full_plan(4)
         self.assertEqual(len(p),32)

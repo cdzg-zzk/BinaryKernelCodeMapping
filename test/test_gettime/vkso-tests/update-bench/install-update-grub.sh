@@ -15,6 +15,39 @@ if [[ $(id -u) -ne 0 ]]; then
 	exec sudo --preserve-env=NORMAL_PACKAGE,NO_RETPOLINE_PACKAGE "$0" "$@"
 fi
 
+if [[ ${1:-} == --normal-only ]]; then
+	[[ $# == 1 ]] || { echo 'usage: install-update-grub.sh --normal-only' >&2; exit 2; }
+	python3 "$HERE/stateful.py" verify --package "$NORMAL_PACKAGE"
+	for case_name in raw-normal vkso-normal; do
+		grep -Fq -- "--id vkso-update-$case_name" /boot/grub/grub.cfg || {
+			echo "missing existing GRUB entry: vkso-update-$case_name" >&2
+			exit 1
+		}
+	done
+	for item in \
+		"raw-normal:$NORMAL_PACKAGE/raw-bzImage:raw.config" \
+		"vkso-normal:$NORMAL_PACKAGE/vkso-bzImage:vkso.config"; do
+		IFS=: read -r case_name source_image source_config <<<"$item"
+		install -m 0644 "$source_image" "/boot/vkso-update-$case_name-5.15.198.bzImage.new.$$"
+		mv "/boot/vkso-update-$case_name-5.15.198.bzImage.new.$$" \
+			"/boot/vkso-update-$case_name-5.15.198.bzImage"
+		install -m 0644 "$NORMAL_PACKAGE/$source_config" \
+			"/boot/config-vkso-update-$case_name-5.15.198.new.$$"
+		mv "/boot/config-vkso-update-$case_name-5.15.198.new.$$" \
+			"/boot/config-vkso-update-$case_name-5.15.198"
+		cmp -s "$source_image" "/boot/vkso-update-$case_name-5.15.198.bzImage"
+		echo "installed_update_case=$case_name"
+	done
+	install -m 0644 "$NORMAL_PACKAGE/boot-manifest.txt" \
+		/boot/vkso-update-normal-manifest-5.15.198.txt.new.$$
+	mv /boot/vkso-update-normal-manifest-5.15.198.txt.new.$$ \
+		/boot/vkso-update-normal-manifest-5.15.198.txt
+	sync
+	echo 'update_normal_installation=pass'
+	exit 0
+fi
+[[ $# == 0 ]] || { echo 'usage: install-update-grub.sh [--normal-only]' >&2; exit 2; }
+
 "$HERE/verify-update-packages.sh" \
 	"$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"
 

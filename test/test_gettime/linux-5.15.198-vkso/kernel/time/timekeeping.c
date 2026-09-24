@@ -848,7 +848,7 @@ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 		memcpy(&shadow_timekeeper, &tk_core.timekeeper,
 		       sizeof(tk_core.timekeeper));
 
-	timekeeping_update_bench_finish(update_bench_start, action);
+	timekeeping_update_bench_finish(update_bench_start, action, tk);
 }
 
 /**

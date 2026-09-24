@@ -252,6 +252,36 @@ def writer_rows(path):
                 other_actions=len(rows)-len(normal),cpu_counts=dict(Counter(x['cpu'] for x in rows)),dropped=0)
 
 
+DIAG_FIELDS = {'phase_nsec','ktime_carry','realtime_carry',
+               'monotonic_carry','leap_pending','clock_mode','shift'}
+
+
+def diagnostic_rows(path):
+    lines = path.read_text().splitlines()
+    header = next((i for i,line in enumerate(lines) if line.startswith('sample,')), None)
+    must(header is not None, 'missing diagnostic sample header')
+    rows = list(csv.DictReader(lines[header:]))
+    must(bool(rows) and DIAG_FIELDS <= set(rows[0]), 'diagnostic state columns missing')
+    for row in rows:
+        must(0 <= int(row['phase_nsec']) < 1000000000 and
+             all(int(row[field]) in (0,1) for field in
+                 ('ktime_carry','realtime_carry','monotonic_carry','leap_pending')) and
+             0 <= int(row['shift']) <= 32, 'invalid diagnostic state')
+    calibration = path.with_name(path.stem+'-calibration.csv')
+    lines = calibration.read_text().splitlines()
+    must(lines[:2] == ['# cpu=0 unit=TSC_ticks','sample,ticks'],
+         'invalid TSC calibration header')
+    pairs = list(csv.DictReader(lines[1:]))
+    must(len(pairs) == 4096 and all(int(row['sample']) == i and
+         int(row['ticks']) > 0 for i,row in enumerate(pairs)),
+         'invalid TSC pair distribution')
+    ticks=[int(row['ticks']) for row in pairs]
+    metadata=next((line for line in path.read_text().splitlines() if line.startswith('# tsc_pair_min=')), '')
+    must(metadata and int(metadata.split('tsc_pair_min=')[1].split()[0])==min(ticks),
+         'TSC pair minimum differs from writer metadata')
+    return rows,ticks
+
+
 def reader_rows(path, batch):
     with path.open() as stream:
         rows = list(csv.DictReader(stream))
@@ -262,7 +292,7 @@ def reader_rows(path, batch):
     return dict(batches=len(rows),median_ticks_per_call=statistics.median(int(r['tsc_ticks'])/batch for r in rows))
 
 
-def window(recorder, seconds, dest, reader=None):
+def window(recorder, seconds, dest, reader=None, diagnostic=False):
     """Writer starts after READY + first completed reader batch; stops before reader.
     Reader batch distribution covers the enclosing sustained-load interval, not
     exact writer wall time. No throughput inference from a nominal duration.
@@ -283,7 +313,7 @@ def window(recorder, seconds, dest, reader=None):
                 time.sleep(.01)
             must(struct.unpack_from('Q',control,0)[0] == 1, 'reader not ready')
         running = True
-        recorder.joinpath('control').write_text('start\n')
+        recorder.joinpath('control').write_text('diagnose\n' if diagnostic else 'start\n')
         start = time.monotonic_ns(); deadline = time.monotonic()+seconds
         first_batch = struct.unpack_from('Q',control,16)[0] if control else None
         while time.monotonic()<deadline:
@@ -297,6 +327,11 @@ def window(recorder, seconds, dest, reader=None):
             struct.pack_into('Q',control,8,1)
             must(proc.wait(timeout=30) == 0,'reader failed')
         dest.write_bytes(recorder.joinpath('samples').read_bytes())
+        if diagnostic:
+            calibration = dest.with_name(dest.stem+'-calibration.csv')
+            calibration.write_bytes(recorder.joinpath('calibration').read_bytes())
+            must(calibration.read_text().startswith('# cpu=0 unit=TSC_ticks\n'),
+                 'TSC calibration did not run on writer CPU 0')
         write_json(dest.with_suffix('.json'),dict(writer_start_ns=start,writer_end_ns=end,
                    load_batch_before_start=first_batch,load_batch_after_stop=last_batch,
                    reader_window='enclosing load interval; writer window is nested'))
@@ -314,10 +349,11 @@ def window(recorder, seconds, dest, reader=None):
             if control: control.close()
 
 
-def collect(package,case,c,out,block,revision):
+def collect(package,case,c,out,block,revision,diagnostic=False):
     record = preflight(package,case,c)
     out.mkdir(parents=True,exist_ok=False)
-    record.update(scope='all',block=block,tool_revision=revision)
+    record.update(scope='diagnostic' if diagnostic else 'all',
+                  block=block,tool_revision=revision)
     for origin,name in ((package/'SHA256SUMS','package-SHA256SUMS'),(package/'direct/SHA256SUMS','direct-SHA256SUMS')):
         (out/name).write_bytes(origin.read_bytes())
     write_json(out/'start.json',record)
@@ -329,6 +365,10 @@ def collect(package,case,c,out,block,revision):
     try:
         must(recorder.joinpath('control').is_file(), 'mount debugfs; recorder missing')
         must(kv_file(recorder/'control').get('enabled') == '0', 'recorder already running; refusing interference')
+        if diagnostic:
+            must(kv_file(recorder/'control').get('diagnostic_schema') == '1' and
+                 recorder.joinpath('calibration').is_file(),
+                 'boot a diagnostic UPDATE kernel; recorder schema missing')
         os.sched_setaffinity(0,{0})
         with tune(record):
             try:
@@ -366,8 +406,9 @@ def collect(package,case,c,out,block,revision):
                             reader=[str(package/'direct'/('native-load' if backend=='raw' else 'vkso-load')),
                                     str(c['CPU']),operation,str(c['READER_ITERATIONS']),str(c['WARMUP'])]
                         # Disable ASLR in controller, inherited by reader, via outer setarch.
-                        window(recorder,c['UPDATE_SECONDS'],dest,reader)
+                        window(recorder,c['UPDATE_SECONDS'],dest,reader,diagnostic)
                         writer_rows(dest)
+                        if diagnostic: diagnostic_rows(dest)
                         if reader: reader_rows(dest.with_name(dest.stem+'-reader.csv'),c['READER_ITERATIONS'])
             finally:
                 if attempt:
@@ -389,6 +430,67 @@ def collect(package,case,c,out,block,revision):
         uid,gid=int(os.environ['SUDO_UID']),int(os.environ['SUDO_GID'])
         for p in [out,*out.rglob('*')]: os.chown(p,uid,gid)
     must(record['status']=='COMPLETE','collection failed: '+str(error or cleanup))
+
+
+def diagnosis_report(paths):
+    """Descriptive within-boot mode/state tables; never infer independence per tick."""
+    summaries=[]; boots=set()
+    for path in paths:
+        verify_sums(path, {'run.json','start.json','abi.log','check.log','check-fast.log'})
+        run=json.loads((path/'run.json').read_text())
+        must(run['status']=='COMPLETE' and run['scope']=='diagnostic' and
+             run['environment_cleanup']=='PASS', 'not a complete diagnostic run')
+        must(sha256(Path(run['package'])/'SHA256SUMS')==run['package_sha256'],
+             'diagnostic package identity changed')
+        must(run['boot_id'] not in boots, 'duplicate diagnostic boot')
+        boots.add(run['boot_id'])
+        backend=run['case'].split('-',1)[0]
+        must(run['case'] in ('raw-normal','vkso-normal'),
+             'initial diagnostic thresholds apply to normal only')
+        threshold=120 if backend=='raw' else 110
+        for scenario in SCENARIOS:
+            rows=[]; pairs=[]
+            for i in range(run['config']['REPEATS']):
+                round_path=path/scenario/('round-%02d.csv'%i)
+                writer_rows(round_path)
+                data,calibration=diagnostic_rows(round_path)
+                rows.extend(r for r in data if int(r['action'])==0 and int(r['cpu'])==0)
+                pairs.extend(calibration)
+            must(len(rows)>=1000, 'too few CPU0 periodic samples')
+            low=[int(r['cycles']) for r in rows if int(r['cycles'])<=threshold]
+            high=[int(r['cycles']) for r in rows if int(r['cycles'])>threshold]
+            must(low and high, 'no two descriptive mode groups')
+            flags={}
+            for field in ('ktime_carry','realtime_carry','monotonic_carry','leap_pending'):
+                groups={str(value):[r for r in rows if int(r[field])==value]
+                        for value in (0,1)}
+                flags[field]={value:dict(count=len(group),
+                    high_fraction=(sum(int(r['cycles'])>threshold for r in group)/len(group)
+                                   if group else None))
+                    for value,group in groups.items()}
+            phase=[]
+            for bin_no in range(10):
+                group=[r for r in rows if int(r['phase_nsec'])//100000000==bin_no]
+                phase.append(dict(phase_decile=bin_no,count=len(group),
+                    high_fraction=(sum(int(r['cycles'])>threshold for r in group)/len(group)
+                                   if group else None)))
+            summaries.append(dict(path=str(path),boot_id=run['boot_id'],case=run['case'],
+                scenario=scenario,unit='TSC ticks',periodic_cpu0_samples=len(rows),
+                historical_valley_threshold=threshold,low_count=len(low),high_count=len(high),
+                high_fraction=len(high)/len(rows),low_median=statistics.median(low),
+                high_median=statistics.median(high),
+                writer_histogram=dict(sorted(Counter(int(r['cycles']) for r in rows).items())),
+                clock_modes=dict(Counter(r['clock_mode'] for r in rows)),
+                shifts=dict(Counter(r['shift'] for r in rows)),
+                tsc_pair=dict(count=len(pairs),median=statistics.median(pairs),
+                              p90=sorted(pairs)[int(.9*(len(pairs)-1))],
+                              p99=sorted(pairs)[int(.99*(len(pairs)-1))],
+                              minimum=min(pairs),maximum=max(pairs),
+                              histogram=dict(sorted(Counter(pairs).items()))),
+                flag_groups=flags,phase_deciles=phase))
+    return dict(protocol='clocktime-update-bimodal-diagnosis-v1',
+                scope='descriptive; boot is independent unit; mode labels use prior normal peaks',
+                boots=len(boots),boot_scenarios=summaries)
 
 
 def aggregate_update(root, manifest):
@@ -711,14 +813,46 @@ def campaign(action, value):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('action',choices=['begin','boot','collect','status','aggregate','refresh-tools','stop','verify','_collect'])
+    p.add_argument('action',choices=['begin','boot','collect','status','aggregate','refresh-tools','stop','verify','_collect',
+                                     'diagnose','_diagnose','diagnose-report'])
     p.add_argument('value',nargs='?')
     p.add_argument('--package',type=Path); p.add_argument('--case'); p.add_argument('--out',type=Path)
     p.add_argument('--config'); p.add_argument('--block',type=int); p.add_argument('--revision')
+    p.add_argument('--runs',nargs='+',type=Path)
     a=p.parse_args()
     def interrupted(signum,frame): raise InterruptedError('signal '+str(signum))
     for sig in (signal.SIGTERM,signal.SIGHUP): signal.signal(sig,interrupted)
     if a.action=='verify': check(a.package.resolve()); print('stateful_package=PASS'); return
+    if a.action=='diagnose-report':
+        must(a.runs and a.out and not a.out.exists(),
+             'provide --runs RUN [RUN ...] --out NEW.json')
+        report=diagnosis_report([path.resolve() for path in a.runs])
+        write_json(a.out,report)
+        print('diagnosis_report='+str(a.out)); print('independent_boots='+str(report['boots']))
+        return
+    if a.action=='diagnose':
+        must(a.package and a.case and a.out and
+             a.case in ('raw-normal','vkso-normal') and not a.out.exists(),
+             'use diagnose --package PACKAGE --case raw-normal|vkso-normal --out NEW_DIRECTORY')
+        package=a.package.resolve(); out=a.out.resolve()
+        check(package)
+        c=config(); c.update(REPEATS=3,UPDATE_SECONDS=10,STABILIZE_SECONDS=30)
+        argv=['setarch','x86_64','-R',sys.executable,str(Path(__file__).resolve()),
+              '_diagnose','--package',str(package),'--case',a.case,'--out',str(out),
+              '--config',json.dumps(c)]
+        if os.geteuid()!=0: argv=['sudo',*argv]
+        run_collector(argv,needs_sudo=os.geteuid()!=0)
+        must(json.loads((out/'run.json').read_text())['status']=='COMPLETE',
+             'diagnostic collection incomplete')
+        print('diagnosis_run='+str(out))
+        return
+    if a.action=='_diagnose':
+        must(os.geteuid()==0,'root required')
+        with open('/run/vkso-direct-api.lock','a') as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            collect(a.package.resolve(),a.case,json.loads(a.config),a.out,
+                    0,'standalone-diagnostic',diagnostic=True)
+        return
     if a.action=='_collect':
         must(os.geteuid()==0,'root required')
         with open('/run/vkso-direct-api.lock','a') as lock:

@@ -4,12 +4,15 @@
 
 #include <linux/types.h>
 
+struct timekeeper;
+
 #ifdef CONFIG_TIMEKEEPING_UPDATE_BENCH
 #include <linux/jump_label.h>
 #include <asm/msr.h>
 
 extern struct static_key_false timekeeping_update_bench_key;
-void timekeeping_update_bench_record(u64 start, u64 end, unsigned int action);
+void timekeeping_update_bench_record(u64 start, u64 end, unsigned int action,
+				     const struct timekeeper *tk);
 
 static __always_inline u64 timekeeping_update_bench_start(void)
 {
@@ -19,14 +22,15 @@ static __always_inline u64 timekeeping_update_bench_start(void)
 }
 
 static __always_inline void
-timekeeping_update_bench_finish(u64 start, unsigned int action)
+timekeeping_update_bench_finish(u64 start, unsigned int action,
+				const struct timekeeper *tk)
 {
 	u64 end;
 
 	if (!start)
 		return;
 	end = rdtsc_ordered();
-	timekeeping_update_bench_record(start, end, action);
+	timekeeping_update_bench_record(start, end, action, tk);
 }
 #else
 static inline u64 timekeeping_update_bench_start(void)
@@ -35,7 +39,8 @@ static inline u64 timekeeping_update_bench_start(void)
 }
 
 static inline void
-timekeeping_update_bench_finish(u64 start, unsigned int action)
+timekeeping_update_bench_finish(u64 start, unsigned int action,
+				const struct timekeeper *tk)
 {
 }
 #endif

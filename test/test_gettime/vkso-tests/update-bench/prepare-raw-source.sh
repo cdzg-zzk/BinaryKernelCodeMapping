@@ -16,6 +16,21 @@ if ! grep -q '^config TIMEKEEPING_UPDATE_BENCH$' \
 	patch -d "$SOURCE" -p1 <"$HERE/raw-integration.patch"
 fi
 
+# An incremental Raw source may already contain the previous two-argument
+# hook. Upgrade that exact call without reapplying the integration patch.
+python3 - "$SOURCE/kernel/time/timekeeping.c" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1])
+s = p.read_text()
+old = 'timekeeping_update_bench_finish(update_bench_start, action);'
+new = 'timekeeping_update_bench_finish(update_bench_start, action, tk);'
+if old in s:
+    p.write_text(s.replace(old, new))
+elif new not in s:
+    raise SystemExit('missing Raw UPDATE finish hook')
+PY
+
 install -m 0644 "$CANONICAL/include/linux/timekeeping_update_bench.h" \
 	"$SOURCE/include/linux/timekeeping_update_bench.h"
 install -m 0644 "$CANONICAL/kernel/time/timekeeping_update_bench.c" \
