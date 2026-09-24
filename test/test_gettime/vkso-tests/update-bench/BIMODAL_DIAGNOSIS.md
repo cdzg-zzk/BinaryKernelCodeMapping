@@ -7,8 +7,10 @@ writer CPU 上的 4096 个空 `rdtsc_ordered` 计时对。诊断内核和正式�
 UPDATE 耗时不可直接合并。
 
 在 `test/test_gettime/vkso-tests/baremetal/` 执行一次构建和安装。输出路径必须
-尚不存在；如果 `/tmp/vkso-raw-update-source` 不在，需要提供未修改的 Linux
-5.15.198 源码目录作为 `RAW_SOURCE`，或提供 tarball 作为 `RAW_TARBALL`。
+尚不存在。若本地没有 Raw 源码，固定构建入口会从 Linux Kernel Archives 下载
+原版 5.15.198 tarball，校验 SHA-256，缓存到 `artifacts/source-cache/`，之后
+不再重复下载。无网络时也可以设置 `RAW_SOURCE` 指向已有源码，或设置
+`RAW_TARBALL` 指向同一原版 `.tar.xz` 文件。
 
 ```bash
 cd test/test_gettime/vkso-tests/baremetal
