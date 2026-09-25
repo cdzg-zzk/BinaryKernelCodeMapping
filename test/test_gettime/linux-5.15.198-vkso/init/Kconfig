@@ -2056,6 +2056,29 @@ config TIMEKEEPING_UPDATE_BENCH
 	  This option is intended only for research benchmark kernels. If
 	  unsure, say N.
 
+config TIMEKEEPING_UPDATE_STAGE_DIAG
+	bool "Timekeeping update stage diagnosis"
+	depends on TIMEKEEPING_UPDATE_BENCH
+	help
+	  Add ordered TSC timestamps between timekeeping_update() stages for
+	  standalone diagnosis. Keep this disabled in formal UPDATE kernels:
+	  the extra timestamps perturb the complete writer latency.
+
+config TIMEKEEPING_UPDATE_CACHE_PREP_DIAG
+	bool "Timekeeping update cache-preparation diagnosis"
+	depends on TIMEKEEPING_UPDATE_BENCH
+	help
+	  Permit controlled cache-line preparation immediately before UPDATE
+	  timing. This is for standalone diagnosis, not formal measurements.
+
+config TIMEKEEPING_UPDATE_PERCALL_PMU_DIAG
+	bool "Timekeeping update per-call RFO diagnosis"
+	depends on TIMEKEEPING_UPDATE_BENCH && PERF_EVENTS
+	depends on !TIMEKEEPING_UPDATE_CACHE_PREP_DIAG
+	help
+	  Count CPU-local RFO hits and misses around each complete UPDATE
+	  without placing counter reads inside its timed body. Diagnosis only.
+
 #
 # Place an empty function call at each tracepoint site. Can be
 # dynamically changed for a probe function.

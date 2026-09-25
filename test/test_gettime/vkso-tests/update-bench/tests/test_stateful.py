@@ -13,6 +13,166 @@ import stateful as s
 
 WRITER='# tsc_pair_min=8 seen=3 dropped=0\nsample,cycles,action,cpu\n0,30,0,0\n1,40,0,1\n2,99,1,0\n'
 class StatefulTests(unittest.TestCase):
+    def test_order_report_binds_mode_absolute_tsc_and_pt_coverage(self):
+        sequence=(('normal-before',False),('swapped-before',True),
+                  ('swapped-after',True),('normal-after',False))
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            for name,swapped in sequence:
+                directory=root/name; directory.mkdir()
+                path=directory/'round-00.csv'
+                path.write_text(
+                    '# tsc_pair_min=30 seen=1000 dropped=0\n'
+                    f'# order_swapped={int(swapped)}\n'
+                    'sample,cycles,action,cpu,phase_nsec,ktime_carry,realtime_carry,monotonic_carry,leap_pending,clock_mode,shift,start_tsc\n'+
+                    ''.join(f'{i},{100 if i%2 else 140},0,0,500000000,0,0,0,0,1,24,{100000+i*10000}\n'
+                            for i in range(1000)))
+                (directory/'round-00-calibration.csv').write_text(
+                    '# cpu=0 unit=TSC_ticks\nsample,ticks\n'+
+                    ''.join(f'{i},30\n' for i in range(4096)))
+                (directory/'pt-shape.json').write_text(json.dumps(
+                    {'groups':{'traced':{'distribution_sufficient':True,
+                                          'histogram':{'100':500,'140':500}}}}))
+                (directory/'pt-validation.json').write_text(json.dumps(
+                    {'validation':'PASS'}))
+            report=s.order_shape(root,sequence)
+            self.assertEqual(report['interpretation'],'READY_FOR_PT_ORDER_ANALYSIS')
+            self.assertEqual(report['groups']['swapped-after']['quarter_high_fraction'],[.5]*4)
+            path=root/'normal-before'/'round-00.csv'
+            path.write_text(path.read_text().replace('# order_swapped=0','# order_swapped=1'))
+            with self.assertRaisesRegex(ValueError,'publisher order mode mismatch'):
+                s.order_shape(root,sequence)
+
+    def test_percall_pmu_report_requires_real_per_update_counters(self):
+        sequence=(('baseline-before',False),('percall-before',True),
+                  ('baseline-middle',False),('percall-after',True),
+                  ('baseline-after',False))
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            for name,armed in sequence:
+                directory=root/name; directory.mkdir()
+                path=directory/'round-00.csv'
+                header=('sample,cycles,action,cpu,phase_nsec,ktime_carry,'
+                        'realtime_carry,monotonic_carry,leap_pending,clock_mode,shift')
+                if armed: header+=',rfo_hit,rfo_miss,pmu_valid'
+                rows=[]
+                for i in range(1000):
+                    row=f'{i},{100 if i%2 else 150},0,0,500000000,0,0,0,0,1,24'
+                    if armed: row+=',0,'+str(i%2)+',1'
+                    rows.append(row)
+                path.write_text('# tsc_pair_min=30 seen=1000 dropped=0\n'+
+                                f'# percall_pmu_active={int(armed)} rfo_hit_config=0xc224 rfo_miss_config=0x2224\n'+
+                                header+'\n'+'\n'.join(rows)+'\n')
+                (directory/'round-00-calibration.csv').write_text(
+                    '# cpu=0 unit=TSC_ticks\nsample,ticks\n'+
+                    ''.join(f'{i},30\n' for i in range(4096)))
+            report=s.percall_pmu_shape(root,sequence)
+            self.assertEqual(report['groups']['percall-before']['event_groups']
+                             ['hit=0,miss=0']['high_fraction'],1)
+            self.assertEqual(report['groups']['percall-before']['event_groups']
+                             ['hit=0,miss=1']['high_fraction'],0)
+            path=root/'percall-before'/'round-00.csv'
+            path.write_text(path.read_text().replace(',0,1,1\n',',0,1,0\n',1))
+            with self.assertRaisesRegex(ValueError,'missing/invalid per-call PMU'):
+                s.percall_pmu_shape(root,sequence)
+
+    def test_cacheprep_report_checks_recorded_modes_and_keeps_distributions(self):
+        sequence=(('baseline-before',None),('control-before',1),
+                  ('fast-raw',2),('control-after',1),('baseline-after',None))
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            for name,mode in sequence:
+                directory=root/name; directory.mkdir()
+                path=directory/'round-00.csv'
+                path.write_text(
+                    '# tsc_pair_min=30 seen=1000 dropped=0\n'
+                    f'# prep_mode={mode or 0}\n'
+                    'sample,cycles,action,cpu,phase_nsec,ktime_carry,realtime_carry,monotonic_carry,leap_pending,clock_mode,shift\n'+
+                    ''.join(f'{i},{100 if i%2 else 140},0,0,500000000,0,0,0,0,1,24\n'
+                            for i in range(1000)))
+                (directory/'round-00-calibration.csv').write_text(
+                    '# cpu=0 unit=TSC_ticks\nsample,ticks\n'+
+                    ''.join(f'{i},30\n' for i in range(4096)))
+            report=s.cacheprep_shape(root,sequence)
+            self.assertEqual(report['groups']['fast-raw']['samples'],1000)
+            self.assertEqual(report['groups']['control-before']['high_fraction'],.5)
+            self.assertEqual(report['modes']['fast-raw'],2)
+            path=root/'fast-raw'/'round-00.csv'
+            path.write_text(path.read_text().replace('# prep_mode=2','# prep_mode=1'))
+            with self.assertRaisesRegex(ValueError,'writer mode mismatch'):
+                s.cacheprep_shape(root,sequence)
+
+    def test_prefetch_report_requires_target_and_control_modes(self):
+        sequence=(('baseline-before',None),
+                  ('read-control-before',5),('read-raw-before',6),
+                  ('write-control-before',3),('write-raw-before',4),
+                  ('baseline-middle',None),
+                  ('write-raw-after',4),('write-control-after',3),
+                  ('read-raw-after',6),('read-control-after',5),
+                  ('baseline-after',None))
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            for name,mode in sequence:
+                directory=root/name; directory.mkdir()
+                (directory/'round-00.csv').write_text(
+                    '# tsc_pair_min=30 seen=1000 dropped=0\n'
+                    f'# prep_mode={mode or 0}\n'
+                    'sample,cycles,action,cpu,phase_nsec,ktime_carry,realtime_carry,monotonic_carry,leap_pending,clock_mode,shift\n'+
+                    ''.join(f'{i},{100 if i%2 else 140},0,0,500000000,0,0,0,0,1,24\n'
+                            for i in range(1000)))
+                (directory/'round-00-calibration.csv').write_text(
+                    '# cpu=0 unit=TSC_ticks\nsample,ticks\n'+
+                    ''.join(f'{i},30\n' for i in range(4096)))
+            report=s.prefetch_shape(root,sequence)
+            self.assertEqual(report['groups']['write-raw-after']['samples'],1000)
+            self.assertEqual(report['modes']['read-control-after'],5)
+            path=root/'read-raw-after'/'round-00.csv'
+            path.write_text(path.read_text().replace('# prep_mode=6','# prep_mode=5'))
+            with self.assertRaisesRegex(ValueError,'prefetch writer mode mismatch'):
+                s.prefetch_shape(root,sequence)
+
+    def test_cacheline_reader_evidence_keeps_writer_interval_immutable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dest=Path(tmp)/'run'/'static-read'/'round-00.csv'
+            dest.parent.mkdir(parents=True)
+            interval=dest.with_suffix('.json')
+            interval.write_text('{"writer_start_ns":100,"writer_end_ns":1000}\n')
+            original=interval.read_bytes()
+            tail=''.join(f'PROGRESS monotonic_ns={t} reads={1000*i}\n'
+                         for i,t in enumerate((200,400,600),1))+'DONE reads=5000\n'
+            result=s.record_cacheline_reader(dest,
+                {'symbol':'linux_banner','address':'0x1000','offset':4096},
+                'READY {}\n',tail,0)
+            self.assertEqual(interval.read_bytes(),original)
+            self.assertEqual(result['progress_reports_inside_writer'],3)
+            self.assertEqual(json.loads(dest.with_name('round-00-cacheline-reader.json').read_text())['reads'],5000)
+            with self.assertRaises(FileExistsError):
+                s.record_cacheline_reader(dest,
+                    {'symbol':'linux_banner','address':'0x1000','offset':4096},
+                    'READY {}\n',tail,0)
+
+    def test_kcore_target_uses_elf_load_mapping_and_rejects_ambiguous_symbol(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); symbols=root/'kallsyms'; core=root/'kcore'
+            symbols.write_text('0000000000100080 d tk_fast_raw\n')
+            elf=bytearray(0x2000)
+            elf[:6]=b'\x7fELF\x02\x01'
+            s.struct.pack_into('<H',elf,16,4)
+            s.struct.pack_into('<Q',elf,32,64)
+            s.struct.pack_into('<HH',elf,54,56,1)
+            s.struct.pack_into('<IIQQQQQQ',elf,64,1,0,0x1000,0x100000,0,0x1000,0x1000,0)
+            elf[0x1080:0x1100]=bytes(range(128))
+            core.write_bytes(elf)
+            target=s.kcore_target('tk_fast_raw',symbols,core)
+            self.assertEqual(target['offset'],0x1080)
+            self.assertEqual(target['address'],'0x100080')
+            symbols.write_text('0000000000100080 d tk_fast_raw\n0000000000100080 d tk_fast_raw\n')
+            with self.assertRaisesRegex(ValueError,'symbol unavailable'):
+                s.kcore_target('tk_fast_raw',symbols,core)
+            symbols.write_text('0000000000100081 d tk_fast_raw\n')
+            with self.assertRaisesRegex(ValueError,'not cacheline aligned'):
+                s.kcore_target('tk_fast_raw',symbols,core)
+
     def test_diagnostic_rows_require_state_and_full_calibration(self):
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/'round-00.csv'
@@ -63,7 +223,102 @@ class StatefulTests(unittest.TestCase):
             idle=report['boot_scenarios'][0]
             self.assertEqual(idle['high_fraction'],.5)
             self.assertEqual(idle['flag_groups']['ktime_carry']['1']['high_fraction'],1)
+            state=s.no_marker_state_report(paths)
+            self.assertEqual(state['protocol'],'clocktime-update-no-marker-state-v1')
+            self.assertEqual(state['boots'],2)
+            self.assertEqual(len(state['boot_scenarios']),4)
+            idle=state['boot_scenarios'][0]
+            self.assertEqual(idle['carry']['ktime_carry']['fraction_of_all_high'],1)
+            self.assertEqual(idle['carry']['ktime_carry']['high_fraction_without'],0)
+            self.assertEqual(idle['phase_clock'],'realtime')
+            self.assertEqual(idle['phase_bands'][1]['count'],800)
+            self.assertEqual(idle['middle_second_transitions']['high_after_high'],0)
+            self.assertEqual(idle['middle_second_transitions']['high_after_low'],1)
             with self.assertRaises(ValueError):s.diagnosis_report([paths[0],paths[0]])
+            with self.assertRaisesRegex(ValueError,'duplicate diagnostic boot'):
+                s.no_marker_state_report([paths[0],paths[0]])
+
+    def test_stage_report_locates_changed_raw_segment(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); package=root/'package'; package.mkdir()
+            (package/'SHA256SUMS').write_text('package\n')
+            run=root/'run';run.mkdir()
+            (run/'run.json').write_text(json.dumps(dict(
+                status='COMPLETE',scope='diagnostic',stage_diagnostic=True,
+                environment_cleanup='PASS',boot_id='stage-boot',case='raw-normal',
+                package=str(package),package_sha256=s.sha256(package/'SHA256SUMS'),
+                config={'REPEATS':1})))
+            for name in ('start.json','abi.log','check.log','check-fast.log'):
+                (run/name).write_text('ok\n')
+            columns=','.join(s.STAGE_FIELDS)
+            for scenario in s.SCENARIOS:
+                directory=run/scenario;directory.mkdir()
+                lines=['# tsc_pair_min=33 seen=1000 dropped=0',
+                       '# stage_schema=1 invalid_stages=0',
+                       'sample,cycles,action,cpu,phase_nsec,ktime_carry,realtime_carry,monotonic_carry,leap_pending,clock_mode,shift,'+columns]
+                for i in range(1000):
+                    parts=[10,10,60 if i%2 else 10,10,10,10,10,30]
+                    lines.append(f'{i},{sum(parts)},0,0,500000000,0,0,0,0,1,24,'+
+                                 ','.join(map(str,parts)))
+                (directory/'round-00.csv').write_text('\n'.join(lines)+'\n')
+                (directory/'round-00-calibration.csv').write_text(
+                    '# cpu=0 unit=TSC_ticks\nsample,ticks\n'+
+                    ''.join(f'{i},33\n' for i in range(4096)))
+            s.seal(run)
+            result=s.diagnosis_report([run])
+            self.assertEqual(result['protocol'],'clocktime-update-stage-diagnosis-v1')
+            idle=result['boot_scenarios'][0]
+            self.assertEqual(idle['partition'],'outer-quartiles-of-instrumented-total')
+            self.assertEqual(idle['stage_segments']['update_vsyscall']['high_minus_low_ticks'],50)
+            self.assertEqual(idle['total_high_minus_low_median_ticks'],50)
+            sample=run/'idle/round-00.csv'
+            sample.write_text(sample.read_text().replace('0,100,0,0,','0,101,0,0,',1))
+            with self.assertRaisesRegex(ValueError,'stage intervals'):
+                s.diagnostic_rows(sample,staged=True)
+
+    def test_split_report_validates_boundaries_and_preserves_boots(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);package=root/'package';package.mkdir()
+            (package/'SHA256SUMS').write_text('package\n')
+            paths=[]
+            for backend in ('raw','vkso'):
+                run=root/backend;run.mkdir();paths.append(run)
+                (run/'run.json').write_text(json.dumps(dict(
+                    status='COMPLETE',scope='diagnostic',split_diagnostic=True,
+                    stage_diagnostic=False,environment_cleanup='PASS',
+                    boot_id=backend,case=backend+'-normal',package=str(package),
+                    package_sha256=s.sha256(package/'SHA256SUMS'),
+                    split_parts=s.SPLIT_PARTS[backend],config={'REPEATS':1})))
+                for name in ('start.json','abi.log','check.log','check-fast.log'):
+                    (run/name).write_text('ok\n')
+                for scenario in s.SPLIT_SCENARIOS:
+                    for part in s.SPLIT_PARTS[backend]:
+                        directory=run/f'split-{part}'/scenario;directory.mkdir(parents=True)
+                        lines=['# tsc_pair_min=33 seen=1000 dropped=0',
+                               '# stage_schema=0 invalid_stages=0',
+                               f'# split_schema=1 split_part={part} invalid_splits=0',
+                               'sample,cycles,action,cpu,phase_nsec,ktime_carry,realtime_carry,monotonic_carry,leap_pending,clock_mode,shift,prefix_ticks,suffix_ticks']
+                        for i in range(1000):
+                            total=100 if i%2==0 else 140
+                            prefix=40 if part==s.SPLIT_PARTS[backend][0] else 50+(total-100)
+                            lines.append(f'{i},{total},0,0,500000000,0,0,0,0,1,24,{prefix},{total-prefix}')
+                        (directory/'round-00.csv').write_text('\n'.join(lines)+'\n')
+                        (directory/'round-00-calibration.csv').write_text(
+                            '# cpu=0 unit=TSC_ticks\nsample,ticks\n'+
+                            ''.join(f'{i},33\n' for i in range(4096)))
+                s.seal(run)
+            report=s.diagnosis_report(paths)
+            self.assertEqual(report['protocol'],'clocktime-update-split-diagnosis-v1')
+            self.assertEqual(report['boots'],2)
+            self.assertEqual(len(report['boot_boundaries']),8)
+            self.assertEqual(report['boot_boundaries'][0]['boundary'],'before_update_vsyscall')
+            self.assertEqual(report['boot_boundaries'][1]['boundary'],'after_update_vsyscall')
+            with self.assertRaisesRegex(ValueError,'not a complete no-marker'):
+                s.no_marker_state_report(paths)
+            sample=paths[0]/'split-1/idle/round-00.csv'
+            sample.write_text(sample.read_text().replace('0,100,0,0,','0,101,0,0,',1))
+            with self.assertRaisesRegex(ValueError,'split intervals'):
+                s.diagnostic_rows(sample,split_part=1)
 
     def test_balanced_boots(self):
         p=s.full_plan(4)
@@ -196,6 +451,21 @@ class StatefulTests(unittest.TestCase):
             self.assertEqual((rec/'control').read_text(),'stop\n')
 
 class BuildTests(unittest.TestCase):
+    def test_verify_reports_unfinished_package(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError, 'finish the build before verify/install'):
+                s.check(Path(tmp)/'unfinished')
+
+    def test_diagnostic_config_tolerates_only_new_optional_kconfig_lines(self):
+        import rebuild
+        parent='CONFIG_PERF_EVENTS=y\nCONFIG_TIMEKEEPING_UPDATE_BENCH=y\n'
+        result=parent+('# CONFIG_TIMEKEEPING_UPDATE_CACHE_PREP_DIAG is not set\n'
+                       'CONFIG_TIMEKEEPING_UPDATE_PERCALL_PMU_DIAG=y\n')
+        self.assertEqual(rebuild.ordinary_config_symbols(parent),
+                         rebuild.ordinary_config_symbols(result))
+        self.assertNotEqual(rebuild.ordinary_config_symbols(parent),
+                            rebuild.ordinary_config_symbols(result+'CONFIG_OTHER=y\n'))
+
     def test_update_selective_plans_do_not_build(self):
         import rebuild
         with tempfile.TemporaryDirectory() as tmp:
@@ -288,6 +558,132 @@ class FootprintTests(unittest.TestCase):
             with self.assertRaises(ValueError):s.mapping_footprint(directories)
 
 class ControlTests(unittest.TestCase):
+    def test_pmu_parser_requires_complete_unmultiplexed_counts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'perf.csv'
+            lines=['# started on test','']
+            lines += [f'123,,{event},8000000000,100.00,,' for event in s.PMU_EVENTS]
+            path.write_text('\n'.join(lines)+'\n')
+            result=s.parse_perf_stat(path)
+            self.assertEqual(set(result),set(s.PMU_EVENTS))
+            self.assertTrue(all(row['count']==123 for row in result.values()))
+            path.write_text(path.read_text().replace('100.00','50.00',1))
+            with self.assertRaisesRegex(ValueError,'multiplexed'):
+                s.parse_perf_stat(path)
+            path.write_text('\n'.join(lines[:-1])+'\n')
+            with self.assertRaisesRegex(ValueError,'missing or unsupported'):
+                s.parse_perf_stat(path)
+
+    def test_valid_pmu_counts_survive_perf_interrupt_exit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dest=Path(tmp)/'raw-share'/'round-00.csv'
+            dest.parent.mkdir()
+            dest.with_suffix('.json').write_text(json.dumps(dict(
+                writer_start_ns=10_000_000,writer_end_ns=8_010_000_000)))
+            stat=dest.with_name('round-00-pmu.csv')
+            stat.write_text('\n'.join(
+                f'123,,{event},8020000000,100.00,,' for event in s.PMU_EVENTS)+'\n')
+            result=s.record_pmu_window(dest,8,
+                dict(enable_ns=1_000_000,disable_ns=8_020_000_000),130)
+            self.assertEqual(result['validation'],'PASS')
+            self.assertEqual(result['perf_exit_code'],130)
+            self.assertTrue(dest.with_name('round-00-pmu.json').is_file())
+            stat.write_text(stat.read_text().replace('8020000000','1000000000',1))
+            with self.assertRaisesRegex(ValueError,'did not run'):
+                s.record_pmu_window(dest,8,
+                    dict(enable_ns=1_000_000,disable_ns=8_020_000_000),130)
+
+    def test_pt_recording_accepts_valid_trace_after_nonzero_stop(self):
+        header=('name = intel_pt/tsc=1,cyc=1/k\n'
+                'contains AUX area data\n'
+                'time of first sample : 100.000000\n'
+                'time of last sample : 105.000000\n')
+        trace=''.join('100.1: ffffffff timekeeping_update ([kernel.kallsyms])\n'
+                      for _ in range(6))
+        completed=s.subprocess.CompletedProcess
+        with patch.object(s.subprocess,'run',side_effect=[
+                completed([],0,header,''),completed([],0,trace,'')]):
+            result=s.validate_pt_recording(Path('/mock/perf'),
+                {'data':'/mock/trace/data','perf_exit_code':1})
+        self.assertEqual(result['validation'],'PASS')
+        self.assertEqual(result['perf_exit_code'],1)
+        self.assertEqual(result['decoded_target_calls_in_100ms'],6)
+        with patch.object(s.subprocess,'run',side_effect=[
+                completed([],0,header,''),completed([],0,'','')]):
+            with self.assertRaisesRegex(ValueError,'cannot decode'):
+                s.validate_pt_recording(Path('/mock/perf'),
+                    {'data':'/mock/trace/data','perf_exit_code':1})
+
+    def test_business_pt_requires_branch_events_in_target_function(self):
+        header=('name = intel_pt/tsc=1,cyc=1/k\n'
+                'contains AUX area data\n'
+                'time of first sample : 100.000000\n'
+                'time of last sample : 110.000000\n')
+        trace=''.join(f'100.1: ffffffff update_vsyscall+0x{i:x} ([kernel.kallsyms])\n'
+                      for i in range(6))
+        completed=s.subprocess.CompletedProcess
+        interval={'data':'/mock/trace/data','perf_exit_code':0,
+                  'filter':'filter update_vsyscall','requested_seconds':10}
+        with patch.object(s.subprocess,'run',side_effect=[
+                completed([],0,header,''),completed([],0,trace,'')]) as run:
+            result=s.validate_pt_recording(Path('/mock/perf'),interval)
+        self.assertEqual(result['target'],'update_vsyscall')
+        self.assertEqual(result['itrace'],'b')
+        self.assertEqual(result['decoded_target_events_in_100ms'],6)
+        self.assertNotIn('decoded_target_calls_in_100ms',result)
+        self.assertIn('--itrace=b',run.call_args_list[1].args[0])
+        with patch.object(s.subprocess,'run',side_effect=[
+                completed([],0,header,''),completed([],0,'','')]):
+            with self.assertRaisesRegex(ValueError,'cannot decode update_vsyscall'):
+                s.validate_pt_recording(Path('/mock/perf'),interval)
+
+    def test_pt_shape_separates_traced_samples_without_boundary_leakage(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            samples=Path(tmp)/'samples.csv'
+            samples.write_text('sample,cycles,action,cpu\n'+''.join(
+                f'{i},{84 if i<1000 else 140 if i<2200 else 100},0,0\n'
+                for i in range(3000)))
+            report=s.pt_shape(samples,dict(traced_sample_start=1000,
+                                           traced_sample_end=2200),'vkso')
+            groups=report['groups']
+            self.assertEqual(groups['before']['samples'],950)
+            self.assertEqual(groups['traced']['samples'],1100)
+            self.assertEqual(groups['after']['samples'],750)
+            self.assertEqual(groups['before']['high_fraction_at_historical_valley'],0)
+            self.assertEqual(groups['traced']['high_fraction_at_historical_valley'],1)
+            self.assertEqual(groups['after']['high_fraction_at_historical_valley'],0)
+
+    def test_business_shape_uses_only_pt_covered_samples(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            samples=Path(tmp)/'samples.csv'
+            rows=['sample,cycles,action,cpu,phase_nsec,ktime_carry']
+            for i in range(1200):
+                boundary=i%25==0
+                rows.append(f'{i},{150 if boundary else 100},0,0,'
+                            f'{10000000 if boundary else 500000000},{int(boundary)}')
+            samples.write_text('\n'.join(rows)+'\n')
+            result=s.business_shape(samples,dict(traced_sample_start=50,
+                                                 traced_sample_end=1150))
+            self.assertEqual(result['phase']['second_start_0_40ms']['samples'],40)
+            self.assertEqual(result['phase']['second_start_0_40ms']
+                             ['high_fraction_at_historical_valley'],1)
+            self.assertEqual(result['phase']['interior_40_900ms']
+                             ['high_fraction_at_historical_valley'],0)
+
+    def test_intel_pt_control_acknowledges_before_collection(self):
+        for acknowledgement in (b'ack\n',b'ack\n\x00'):
+            with self.subTest(acknowledgement=acknowledgement):
+                command_read,command_write=os.pipe()
+                ack_read,ack_write=os.pipe()
+                try:
+                    os.write(ack_write,acknowledgement)
+                    with patch.object(s.subprocess,'Popen') as process:
+                        process.return_value.poll.return_value=None
+                        s.perf_control(command_write,ack_read,process.return_value,'enable')
+                    self.assertEqual(os.read(command_read,32),b'enable\n')
+                finally:
+                    for fd in (command_read,command_write,ack_read,ack_write):os.close(fd)
+
     def test_package_validation_uses_variant_order_after_json_reload(self):
         # JSON manifests sort keys alphabetically, putting no-retpoline first.
         root=Path('/mock')

@@ -820,7 +820,48 @@ static void tk_publish_read_state(struct timekeeper *tk)
 /* must hold timekeeper_lock */
 static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 {
+#if defined(CONFIG_TIMEKEEPING_UPDATE_CACHE_PREP_DIAG) || \
+	defined(CONFIG_TIMEKEEPING_UPDATE_PERCALL_PMU_DIAG)
+	u64 update_bench_start;
+#else
 	u64 update_bench_start = timekeeping_update_bench_start();
+#endif
+#ifdef CONFIG_TIMEKEEPING_UPDATE_PERCALL_PMU_DIAG
+	struct timekeeping_update_bench_pmu_snapshot update_bench_pmu_before;
+#endif
+#ifdef CONFIG_TIMEKEEPING_UPDATE_CACHE_PREP_DIAG
+	const struct tk_read_base *first_tkr = &tk->tkr_mono;
+	const struct tk_read_base *second_tkr = &tk->tkr_raw;
+	struct tk_fast *first_fast = &tk_fast_mono;
+	struct tk_fast *second_fast = &tk_fast_raw;
+#endif
+#ifdef CONFIG_TIMEKEEPING_UPDATE_STAGE_DIAG
+	struct timekeeping_update_bench_stages update_bench_stages;
+#define UPDATE_BENCH_MARK(part) timekeeping_update_bench_stage_mark(&update_bench_stages, part)
+#define UPDATE_BENCH_STAGES (&update_bench_stages)
+#else
+#define UPDATE_BENCH_MARK(part) do { } while (0)
+#define UPDATE_BENCH_STAGES NULL
+#endif
+
+#ifdef CONFIG_TIMEKEEPING_UPDATE_CACHE_PREP_DIAG
+	BUILD_BUG_ON(L1_CACHE_BYTES != 64);
+	BUILD_BUG_ON(sizeof(tk_fast_raw) < 68);
+	timekeeping_update_bench_prepare(&tk_fast_raw);
+	if (static_branch_unlikely(&timekeeping_update_bench_order_swap_key)) {
+		first_tkr = &tk->tkr_raw;
+		second_tkr = &tk->tkr_mono;
+		first_fast = &tk_fast_raw;
+		second_fast = &tk_fast_mono;
+	}
+#endif
+#ifdef CONFIG_TIMEKEEPING_UPDATE_PERCALL_PMU_DIAG
+	timekeeping_update_bench_pmu_before(&update_bench_pmu_before);
+#endif
+#if defined(CONFIG_TIMEKEEPING_UPDATE_CACHE_PREP_DIAG) || \
+	defined(CONFIG_TIMEKEEPING_UPDATE_PERCALL_PMU_DIAG)
+	update_bench_start = timekeeping_update_bench_start();
+#endif
 
 	if (action & TK_CLEAR_NTP) {
 		tk->ntp_error = 0;
@@ -828,14 +869,27 @@ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 	}
 
 	tk_update_leap_state(tk);
+	UPDATE_BENCH_MARK(0);
 	tk_update_ktime_data(tk);
+	UPDATE_BENCH_MARK(1);
 
 	update_pvclock_gtod(tk, action & TK_CLOCK_WAS_SET);
+	UPDATE_BENCH_MARK(2);
 
 	tk->tkr_mono.base_real = tk->tkr_mono.base + tk->offs_real;
+	UPDATE_BENCH_MARK(3);
 	tk_publish_read_state(tk);
+	UPDATE_BENCH_MARK(4);
+#ifdef CONFIG_TIMEKEEPING_UPDATE_CACHE_PREP_DIAG
+	update_fast_timekeeper(first_tkr, first_fast);
+	UPDATE_BENCH_MARK(5);
+	update_fast_timekeeper(second_tkr, second_fast);
+#else
 	update_fast_timekeeper(&tk->tkr_mono, &tk_fast_mono);
-	update_fast_timekeeper(&tk->tkr_raw,  &tk_fast_raw);
+	UPDATE_BENCH_MARK(5);
+	update_fast_timekeeper(&tk->tkr_raw, &tk_fast_raw);
+#endif
+	UPDATE_BENCH_MARK(6);
 
 	if (action & TK_CLOCK_WAS_SET)
 		tk->clock_was_set_seq++;
@@ -848,7 +902,16 @@ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
 		memcpy(&shadow_timekeeper, &tk_core.timekeeper,
 		       sizeof(tk_core.timekeeper));
 
-	timekeeping_update_bench_finish(update_bench_start, action, tk);
+#ifdef CONFIG_TIMEKEEPING_UPDATE_PERCALL_PMU_DIAG
+	timekeeping_update_bench_pmu_finish(update_bench_start, action, tk,
+					UPDATE_BENCH_STAGES,
+					&update_bench_pmu_before);
+#else
+	timekeeping_update_bench_finish(update_bench_start, action, tk,
+					UPDATE_BENCH_STAGES);
+#endif
+#undef UPDATE_BENCH_MARK
+#undef UPDATE_BENCH_STAGES
 }
 
 /**

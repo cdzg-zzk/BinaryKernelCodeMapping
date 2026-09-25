@@ -1,10 +1,11 @@
 diff --git a/kernel/time/Kconfig b/kernel/time/Kconfig
 --- a/kernel/time/Kconfig
 +++ b/kernel/time/Kconfig
-@@ -74,5 +74,16 @@ config TIME_KUNIT_TEST
+@@ -72,6 +72,25 @@
+ 	  Enable this option to test RTC library functions.
  
  	  If unsure, say N.
- 
++
 +config TIMEKEEPING_UPDATE_BENCH
 +	bool "Timekeeping update path benchmark"
 +	depends on X86_64 && DEBUG_FS
@@ -16,6 +17,14 @@ diff --git a/kernel/time/Kconfig b/kernel/time/Kconfig
 +	  This option is intended only for research benchmark kernels.  If
 +	  unsure, say N.
 +
++config TIMEKEEPING_UPDATE_STAGE_DIAG
++	bool "Timekeeping update stage diagnosis"
++	depends on TIMEKEEPING_UPDATE_BENCH
++	help
++	  Add ordered TSC timestamps between timekeeping_update() stages for
++	  standalone diagnosis. Keep this disabled in formal UPDATE kernels:
++	  the extra timestamps perturb the complete writer latency.
+ 
  if GENERIC_CLOCKEVENTS
  menu "Timers subsystem"
 diff --git a/kernel/time/Makefile b/kernel/time/Makefile
@@ -31,8 +40,7 @@ diff --git a/kernel/time/Makefile b/kernel/time/Makefile
 diff --git a/kernel/time/timekeeping.c b/kernel/time/timekeeping.c
 --- a/kernel/time/timekeeping.c
 +++ b/kernel/time/timekeeping.c
-@@ -3,7 +3,8 @@
-  *  Kernel timekeeping code and accessor functions. Based on code from
+@@ -4,6 +4,7 @@
   *  timer.c, moved in commit 8524070b7982.
   */
  #include <linux/timekeeper_internal.h>
@@ -40,21 +48,53 @@ diff --git a/kernel/time/timekeeping.c b/kernel/time/timekeeping.c
  #include <linux/module.h>
  #include <linux/interrupt.h>
  #include <linux/percpu.h>
-@@ -741,6 +742,8 @@ static void tk_update_ktime_data(struct timekeeper *tk)
+@@ -739,20 +740,37 @@
  /* must hold timekeeper_lock */
  static void timekeeping_update(struct timekeeper *tk, unsigned int action)
  {
 +	u64 update_bench_start = timekeeping_update_bench_start();
++#ifdef CONFIG_TIMEKEEPING_UPDATE_STAGE_DIAG
++	struct timekeeping_update_bench_stages update_bench_stages;
++#define UPDATE_BENCH_MARK(part) timekeeping_update_bench_stage_mark(&update_bench_stages, part)
++#define UPDATE_BENCH_STAGES (&update_bench_stages)
++#else
++#define UPDATE_BENCH_MARK(part) do { } while (0)
++#define UPDATE_BENCH_STAGES NULL
++#endif
 +
  	if (action & TK_CLEAR_NTP) {
  		tk->ntp_error = 0;
  		ntp_clear();
-@@ -768,6 +771,8 @@ static void timekeeping_update(struct timekeeper *tk, unsigned int action)
+ 	}
+ 
+ 	tk_update_leap_state(tk);
++	UPDATE_BENCH_MARK(0);
+ 	tk_update_ktime_data(tk);
++	UPDATE_BENCH_MARK(1);
+ 
+ 	update_vsyscall(tk);
++	UPDATE_BENCH_MARK(2);
+ 	update_pvclock_gtod(tk, action & TK_CLOCK_WAS_SET);
++	UPDATE_BENCH_MARK(3);
+ 
+ 	tk->tkr_mono.base_real = tk->tkr_mono.base + tk->offs_real;
++	UPDATE_BENCH_MARK(4);
+ 	update_fast_timekeeper(&tk->tkr_mono, &tk_fast_mono);
++	UPDATE_BENCH_MARK(5);
+ 	update_fast_timekeeper(&tk->tkr_raw,  &tk_fast_raw);
++	UPDATE_BENCH_MARK(6);
+ 
+ 	if (action & TK_CLOCK_WAS_SET)
+ 		tk->clock_was_set_seq++;
+@@ -764,6 +782,11 @@
  	if (action & TK_MIRROR)
  		memcpy(&shadow_timekeeper, &tk_core.timekeeper,
  		       sizeof(tk_core.timekeeper));
 +
-+	timekeeping_update_bench_finish(update_bench_start, action, tk);
++	timekeeping_update_bench_finish(update_bench_start, action, tk,
++					UPDATE_BENCH_STAGES);
++#undef UPDATE_BENCH_MARK
++#undef UPDATE_BENCH_STAGES
  }
  
  /**

@@ -13,29 +13,14 @@ PFN 清点由独立 Python worker 在计时前一次性定位公开函数并预�
 
 ## 构建与安装
 
-以下命令在实验机、仓库分支的最终源码上执行。要求 GCC 11.4.0、Linux 5.15.198 原始源码压缩包，及可用的 `/boot`/GRUB。使用全新的输出路径；脚本拒绝覆盖旧包。构建和启动会占用很长时间，助手没有代替研究者执行。
+以下命令在实验机、仓库分支的最终源码上执行。要求 GCC 11.4.0 及可用的 `/boot`/GRUB。`build-all.sh` 自动判定四个包各自需要复用、仅更新元数据、编译公共库/carrier，还是增量构建 VKSO 内核；第一次没有 Kbuild 缓存的配置仍需完整编译一次。旧包和结果不会被覆盖。
 
 ```bash
 cd /home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/baremetal
-export RAW_TARBALL=/tmp/linux-5.15.198.tar.xz
-if [ ! -s "$RAW_TARBALL" ]; then
-  curl -fL --retry 3 https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.198.tar.xz -o "$RAW_TARBALL"
-fi
-test -s "$RAW_TARBALL"
-export NORMAL_PACKAGE="$PWD/artifacts/clocktime-full-v1-clean-normal"
-export NO_RETPOLINE_PACKAGE="$PWD/artifacts/clocktime-full-v1-clean-no-retpoline"
 JOBS=4 ./build-all.sh
+source artifacts/clocktime-auto-current.env
 ./verify-packages.sh "$NORMAL_PACKAGE" "$NO_RETPOLINE_PACKAGE"
-
-cd ../update-bench
-export UPDATE_NORMAL_PACKAGE="$PWD/../baremetal/artifacts/clocktime-full-v1-update-normal"
-export UPDATE_NO_RETPOLINE_PACKAGE="$PWD/../baremetal/artifacts/clocktime-full-v1-update-no-retpoline"
-export RAW_SOURCE=/tmp/clocktime-full-v1-raw-update-source
-JOBS=4 CC=gcc BUILD_VARIANT=normal OUT="$UPDATE_NORMAL_PACKAGE" ./build-update-images.sh
-JOBS=4 CC=gcc BUILD_VARIANT=no-retpoline OUT="$UPDATE_NO_RETPOLINE_PACKAGE" ./build-update-images.sh
-./verify-update-packages.sh "$UPDATE_NORMAL_PACKAGE" "$UPDATE_NO_RETPOLINE_PACKAGE"
-
-cd ../baremetal
+../update-bench/verify-update-packages.sh "$UPDATE_NORMAL_PACKAGE" "$UPDATE_NO_RETPOLINE_PACKAGE"
 sudo env NORMAL_PACKAGE="$NORMAL_PACKAGE" NO_RETPOLINE_PACKAGE="$NO_RETPOLINE_PACKAGE" ./install-grub.sh
 sudo env NORMAL_PACKAGE="$UPDATE_NORMAL_PACKAGE" NO_RETPOLINE_PACKAGE="$UPDATE_NO_RETPOLINE_PACKAGE" ../update-bench/install-update-grub.sh
 ```
@@ -55,15 +40,6 @@ cd /home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/baremetal
 # 若 status=active，再执行 ./experiment.sh boot；重复到 completed_boots=32、status=complete
 ./experiment.sh aggregate
 ```
-
-Windows PowerShell 可以从当前 `status` 续跑。先将 [run-campaign.ps1](../baremetal/run-campaign.ps1) 复制到 Windows，再在该文件所在目录执行：
-
-```powershell
-.\run-campaign.ps1 -Server <实验机主机名或IP> -MaxCases 1 # 先验证一次
-.\run-campaign.ps1 -Server <实验机主机名或IP>
-```
-
-脚本使用 SSH 密钥登录；默认通过 `ssh -tt` 让 `boot`/`collect` 的 sudo 密码提示留在交互终端。它只在当前镜像不匹配下一项时重启，核对新 boot ID、镜像名和采集后 `completed_boots` 的递增，完成后自动聚合。若要无人值守，须先在实验机配置好适当的免密 sudo，再加 `-Unattended`；否则保持 PowerShell 窗口开启并按提示输入 sudo 密码。脚本不会自动 `begin`，失败即停止，保留当前实验供排查或重试。
 
 `status` 的 `next_mode` 和 `next_case` 是下次必须启动的镜像。`boot`/`collect` 可加 `read:raw-normal` 一类参数作断言，但不能跳过计划。若只修脚本，运行 `./experiment.sh refresh-tools`，保留已采集的结果；改内核或 benchmark 二进制必须生成新包并开始新的 campaign。选择性构建可用 `./build-all.sh raw-normal|vkso-normal|bench-normal --package OLD --out NEW`，UPDATE 包用 `../update-bench/build-update-images.sh` 的相同参数；先用 `--plan` 看改动范围。
 
