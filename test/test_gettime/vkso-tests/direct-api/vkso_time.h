@@ -57,14 +57,9 @@ static inline int vkso_time_clock_getres(clockid_t clock, struct timespec *ts)
 	return vkso_time_result(__vkso_clock_getres(clock, (struct vkso_time_value *)ts));
 }
 
-/* This entry exposes VKSO's raw timezone semantics. For comparison with libc,
- * use tz == NULL: libc need not forward its obsolete timezone argument.
- */
-static inline int vkso_time_gettimeofday(struct timeval *tv, void *tz)
-{
-	return vkso_time_result(__vkso_gettimeofday((struct vkso_timeval *)tv,
-						 (struct vkso_timezone *)tz));
-}
+/* Explicit name for callers that do not want libc-name interposition. This
+ * resolves to the same carrier entry and fallback as public gettimeofday. */
+int vkso_time_gettimeofday(struct timeval *tv, void *tz);
 
 /* Valid writable tloc or NULL. Negative seconds are valid timestamps, not a
  * generic -errno encoding: do NOT run this value through vkso_time_result().

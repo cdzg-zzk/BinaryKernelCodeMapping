@@ -7,6 +7,8 @@
 
 static pthread_once_t init_once = PTHREAD_ONCE_INIT;
 static int init_error;
+extern __attribute__((visibility("hidden"))) int vkso_public_gettimeofday_failure(
+	struct vkso_timeval *, struct vkso_timezone *, int);
 
 static void initialize(void)
 {
@@ -18,8 +20,13 @@ static void initialize(void)
 		init_error = ENOSYS;
 		return;
 	}
-	if (vkso_user_wrapper_init() != 0)
+	if (vkso_user_wrapper_init() != 0) {
 		init_error = errno ? errno : EPROTO;
+		return;
+	}
+	if (__vkso_bind_gettimeofday_failure(
+			vkso_public_gettimeofday_failure) != 0)
+		init_error = EPROTO;
 }
 
 int vkso_time_init(void)

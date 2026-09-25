@@ -51,6 +51,8 @@ int main(void)
 		return 0;
 	}
 	assert(time == __vkso_time);
+	assert((void *)gettimeofday == (void *)__vkso_gettimeofday);
+	assert((void *)vkso_time_gettimeofday == (void *)__vkso_gettimeofday);
 	pthread_t threads[16];
 	for (int i = 0; i < 16; ++i) assert(!pthread_create(&threads[i], NULL, worker, (void *)(intptr_t)i));
 	for (int i = 0; i < 16; ++i) assert(!pthread_join(threads[i], NULL));
@@ -65,6 +67,9 @@ int main(void)
 	assert(!clock_getres(CLOCK_REALTIME, &ts) && ts.tv_sec == 0 && ts.tv_nsec == 1);
 	assert(!clock_getres(CLOCK_REALTIME, NULL));
 	assert(!gettimeofday(&tv, NULL) && tv.tv_sec == 42 && tv.tv_usec == 1234);
+	assert(!vkso_time_gettimeofday(&tv, NULL) && tv.tv_sec == 42);
+	struct timezone tz;
+	assert(!gettimeofday(&tv, &tz) && tz.tz_minuteswest == 0 && tz.tz_dsttime == 0);
 	assert(!getcpu(&cpu, &node) && cpu == 7 && node == 0);
 	mock_seconds(-10);
 	assert(time(&t) == -10 && t == -10 && errno == EBUSY);
@@ -72,9 +77,16 @@ int main(void)
 	assert(time(NULL) == -1 && errno == EBUSY); /* seconds != encoded errno */
 	assert(clock_gettime(-1, &ts) == -1 && errno == EINVAL);
 	assert(clock_getres(-1, &ts) == -1 && errno == EINVAL);
-	mock_error(EPERM);
-	assert(gettimeofday(&tv, NULL) == -1 && errno == EPERM);
-	assert(getcpu(&cpu, &node) == -1 && errno == EPERM);
+	mock_error(EFAULT);
+	assert(gettimeofday(&tv, NULL) == -1 && errno == EFAULT);
+	assert(getcpu(&cpu, &node) == -1 && errno == EFAULT);
+	mock_error(1); /* unsupported provider uses the libc syscall fallback */
+	errno = 0;
+	assert(gettimeofday((struct timeval *)(uintptr_t)-1, NULL) == -1 &&
+	       errno == EFAULT);
+	errno = 0;
+	assert(vkso_time_gettimeofday((struct timeval *)(uintptr_t)-1, NULL) == -1 &&
+	       errno == EFAULT);
 	puts("MOCK direct-link ABI/errno/once/TLS PASS; NOT kernel execution");
 	return 0;
 }

@@ -1,6 +1,6 @@
 # Run the existing Clocktime campaign from an interactive Windows PowerShell.
-# SSH key login is required. sudo may prompt through ssh -tt; unattended use
-# additionally requires the research machine's sudo policy to allow it.
+# SSH key login is required. Interactive mode uses ssh -tt for sudo prompts.
+# -Unattended needs passwordless sudo, or -PromptSudoPassword to ask once locally.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][string]$Server,
@@ -10,7 +10,8 @@ param(
     [int]$BootTimeoutSeconds = 600,
     [int]$PollSeconds = 8,
     [int]$MaxCases = 0,
-    [switch]$Unattended
+    [switch]$Unattended,
+    [switch]$PromptSudoPassword
 )
 
 $ErrorActionPreference = 'Stop'
@@ -21,6 +22,9 @@ if ($RemoteDir -notmatch '^/[A-Za-z0-9._/-]+$' -or
     $BootTimeoutSeconds -lt 30 -or $PollSeconds -lt 1 -or $MaxCases -lt 0) {
     throw 'Invalid SSH target, remote directory, port, or timeout.'
 }
+if ($PromptSudoPassword -and -not $Unattended) {
+    throw '-PromptSudoPassword requires -Unattended.'
+}
 
 $target = "${User}@${Server}"
 $sshArgs = @('-o', 'BatchMode=yes', '-o', 'ConnectTimeout=10',
@@ -28,15 +32,75 @@ $sshArgs = @('-o', 'BatchMode=yes', '-o', 'ConnectTimeout=10',
              '-p', [string]$Port)
 $ttyArg = if ($Unattended) { '-T' } else { '-tt' }
 $script:LastSshCode = 0
+$script:SudoSecret = $null
+if ($PromptSudoPassword) {
+    $script:SudoSecret = Read-Host 'Server sudo password (kept only in this PowerShell process)' -AsSecureString
+    if ($script:SudoSecret.Length -eq 0) { throw 'Empty sudo password.' }
+}
 
 function Invoke-SSHText([string]$command) {
-    $lines = & ssh.exe @sshArgs -T $target $command
-    $code = $LASTEXITCODE
-    if ($code -ne 0) { throw "SSH command exited $code`: $command" }
-    return (@($lines) -join "`n")
+    # A live TCP connection can still leave an SSH query waiting forever.
+    # These are read-only, short commands; bound the whole process to 45 s.
+    $start = New-Object System.Diagnostics.ProcessStartInfo
+    $start.FileName = 'ssh.exe'
+    $start.Arguments = (($sshArgs + @('-n', '-T', $target, $command)) -join ' ')
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $start
+    try {
+        if (-not $process.Start()) { throw 'Failed to start ssh.exe.' }
+        $output = $process.StandardOutput.ReadToEndAsync()
+        $errors = $process.StandardError.ReadToEndAsync()
+        if (-not $process.WaitForExit(45000)) {
+            $process.Kill()
+            [void]$process.WaitForExit(5000)
+            throw "SSH query timed out after 45 s: $command"
+        }
+        $stderr = $errors.Result.Trim()
+        if ($process.ExitCode -ne 0) {
+            throw "SSH query exited $($process.ExitCode): $stderr"
+        }
+        return $output.Result.TrimEnd()
+    }
+    finally { $process.Dispose() }
 }
 
 function Invoke-SSHConsole([string]$command) {
+    if ($PromptSudoPassword) {
+        # sudo -S reads one password line from SSH stdin. The password is never
+        # placed in the SSH command line, environment, a file, or campaign logs.
+        $start = New-Object System.Diagnostics.ProcessStartInfo
+        $start.FileName = 'ssh.exe'
+        $start.Arguments = (($sshArgs + @('-T', $target, $command)) -join ' ')
+        $start.UseShellExecute = $false
+        $start.RedirectStandardInput = $true
+        $process = New-Object System.Diagnostics.Process
+        $process.StartInfo = $start
+        try {
+            if (-not $process.Start()) { throw 'Failed to start ssh.exe.' }
+            $secretPtr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($script:SudoSecret)
+            try {
+                $length = [Runtime.InteropServices.Marshal]::ReadInt32($secretPtr, -4) / 2
+                for ($i = 0; $i -lt $length; $i++) {
+                    $unit = [int][Runtime.InteropServices.Marshal]::ReadInt16($secretPtr, 2 * $i) -band 0xffff
+                    $process.StandardInput.Write([char]$unit)
+                }
+                $process.StandardInput.WriteLine()
+                $process.StandardInput.Flush()
+            }
+            finally {
+                [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($secretPtr)
+                $process.StandardInput.Close()
+            }
+            $process.WaitForExit()
+            $script:LastSshCode = $process.ExitCode
+        }
+        finally { $process.Dispose() }
+        return
+    }
     & ssh.exe @sshArgs $ttyArg $target $command
     $script:LastSshCode = $LASTEXITCODE
 }
@@ -78,7 +142,7 @@ function Get-CampaignState {
 }
 
 function Get-BootIdentity {
-    $text = Invoke-SSHText 'printf "BOOT_ID="; cat /proc/sys/kernel/random/boot_id; printf "KERNEL="; uname -r; printf "CMDLINE="; cat /proc/cmdline'
+    $text = Invoke-SSHText 'printf BOOT_ID=; cat /proc/sys/kernel/random/boot_id; printf KERNEL=; uname -r; printf CMDLINE=; cat /proc/cmdline'
     $cmdline = Get-Field $text 'CMDLINE'
     $image = [regex]::Match($cmdline, '(?:^|\s)BOOT_IMAGE=([^\s]+)')
     if (-not $image.Success) { throw "Missing BOOT_IMAGE in: $cmdline" }
@@ -91,21 +155,33 @@ function Get-BootIdentity {
 
 function Wait-NewBoot([string]$oldBootId, [string]$expectedImage) {
     $deadline = (Get-Date).AddSeconds($BootTimeoutSeconds)
-    do {
+    $lastReport = (Get-Date).AddSeconds(-30)
+    while ((Get-Date) -lt $deadline) {
         Start-Sleep -Seconds $PollSeconds
         try { $boot = Get-BootIdentity }
         catch {
             # SSH may be down while the machine reboots. Malformed output from
             # a reachable server is a real error and must not be hidden.
-            if ($_.Exception.Message -notlike 'SSH command exited*') { throw }
+            if ($_.Exception.Message -notlike 'SSH query exited*' -and
+                $_.Exception.Message -notlike 'SSH query timed out*') { throw }
+            if (((Get-Date) - $lastReport).TotalSeconds -ge 30) {
+                Write-Host "Waiting for SSH/new boot: $($_.Exception.Message)"
+                $lastReport = Get-Date
+            }
             continue
         }
-        if ($boot.BootId -eq $oldBootId) { continue }
+        if ($boot.BootId -eq $oldBootId) {
+            if (((Get-Date) - $lastReport).TotalSeconds -ge 30) {
+                Write-Host "Waiting for new boot ID; still on $oldBootId"
+                $lastReport = Get-Date
+            }
+            continue
+        }
         if ($boot.Kernel -ne '5.15.198' -or $boot.Image -ne $expectedImage) {
             throw "Wrong boot: kernel=$($boot.Kernel) image=$($boot.Image); expected $expectedImage"
         }
         return $boot
-    } while ((Get-Date) -lt $deadline)
+    }
     throw "No new boot with $expectedImage within $BootTimeoutSeconds seconds. Check the server and GRUB before retrying."
 }
 
@@ -124,7 +200,11 @@ try {
         $boot = Get-BootIdentity
         if ($boot.Kernel -ne '5.15.198' -or $boot.Image -ne $expectedImage) {
             Write-Host "BOOT $($state.Mode):$($state.Case) (currently $($boot.Image))"
-            Invoke-SSHConsole "cd $RemoteDir && ./experiment.sh boot $($state.Mode):$($state.Case)"
+            $bootCommand = "cd $RemoteDir && ./experiment.sh boot $($state.Mode):$($state.Case)"
+            if ($PromptSudoPassword) {
+                $bootCommand = "cd $RemoteDir && sudo -S -p '' ./experiment.sh boot $($state.Mode):$($state.Case)"
+            }
+            Invoke-SSHConsole $bootCommand
             # A reboot often closes SSH with exit 255. Trust the new boot ID
             # and exact BOOT_IMAGE, rather than that connection's exit code.
             if ($script:LastSshCode -notin @(0, 255)) {
@@ -140,7 +220,11 @@ try {
         }
 
         Write-Host "COLLECT $($state.Mode):$($state.Case)"
-        Invoke-SSHConsole "cd $RemoteDir && ./experiment.sh collect $($state.Mode):$($state.Case)"
+        $collectCommand = "cd $RemoteDir && ./experiment.sh collect $($state.Mode):$($state.Case)"
+        if ($PromptSudoPassword) {
+            $collectCommand = "cd $RemoteDir && sudo -S -p '' ./experiment.sh collect $($state.Mode):$($state.Case)"
+        }
+        Invoke-SSHConsole $collectCommand
         $collectCode = $script:LastSshCode
         $after = Get-CampaignState
         if ($after.Completed -ne $state.Completed + 1) {

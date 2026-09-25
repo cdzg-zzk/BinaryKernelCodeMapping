@@ -5,13 +5,14 @@
 ## 调用路径
 
 - Raw：应用 → libc 的 `clock_gettime/clock_getres/gettimeofday/time/getcpu` → 原生 vDSO 或 syscall。
-- VKSO：应用 → 动态链接的 `libvkso_time.so` 同名公开函数 → `libkernel.so` 的 `__vkso_*` 私有入口/context → grafted 内核驻留计算页；不支持的路径由 carrier 汇编直接 syscall。
+- VKSO：应用 → 动态链接的 `libvkso_time.so` 同名公开函数 → `libkernel.so` 的 `__vkso_*` 私有入口/context → grafted 内核驻留计算页。`time` 和 `gettimeofday` 在装载时通过 IFUNC 直接绑定 carrier；后者仅在共享 provider 失败时经预绑定回调调用 libc 的 `syscall`，保留公开的 errno 语义。其余不支持的路径由 carrier 汇编直接 syscall。
 
 没有 LD_PRELOAD、provider selector 或热路径 dlopen/dlsym/dlvsym。`libvkso_time.so` 是部署用的固定公开 API 库，不是多后端实验桥。库只做 ABI/errno 转换；时间计算没有复制进该库。私有 context 注入仍保留。共享库与执行文件反汇编均在构建时检查。
 
 应用需要显式链接这个库，在任何时间 API 调用前调用一次 `vkso_time_init()`；初始化使用 pthread_once，失败后保持失败状态。manager 必须在应用启动前完成注册，所有使用者退出后才能 restore。不是任意未修改应用二进制的透明兼容方案。构造函数中提前调用时间函数的第三方库不在此初始化契约内。
 
-公开函数成功不改 errno；失败转换为 -1/errno。time() 的负秒数不当作通用负错误码。gettimeofday 的过时 timezone 参数与 glibc 公共接口一致忽略，正式测量使用非空 tv、NULL timezone。原始带 timezone 的 carrier 语义仍由 ABI matrix 验证。公开 fallback 不调用同名 libc 函数，所以不会递归。
+公开函数成功不改 errno；失败转换为 -1/errno。time() 的负秒数不当作通用负错误码。gettimeofday 转发过时的 timezone 参数，正式测量仍使用非空 tv、NULL timezone；其原始 carrier 语义由 ABI matrix 验证。公开 fallback 不调用同名 libc 函数，所以不会递归。
+显式名称 `vkso_time_gettimeofday` 与公开 `gettimeofday` 解析到同一 carrier 地址，保留显式 VKSO 调用方式。
 
 ## 测试内容与单位
 
@@ -84,6 +85,8 @@ no-retpoline 保留原配置含义：关闭 RETPOLINE、RETHUNK、CPU_UNRET_ENTR
 每次收集先执行原 ABI matrix（含动态 clock、namespace 与权限），独立 PFN 观察确认 carrier 的声明代码/只读数据确实映射到内核源 PFN，代码 RX、数据 R--；再跑公开 API syscall-bracket/errno 检查和无时间 syscall 诊断，之后才收 READ。PFN 辅助模块在正式用户态计时前卸载。
 
 同次启动还测三种普通内核 ktime reader，存 `kernel-reader.csv`；旧字段 total_tsc_cycles 的真实单位仍是 TSC ticks。collector 在失败时尝试 restore，restore 失败则保留 backing module 并记录 FAIL，不卸载后伪报成功。捕获不到的断电/SIGKILL 必须人工恢复或重启。
+
+多进程 PFN 清点按映射和权限保留原始记录：carrier 的 RX/R-- 共享页、MM-data 页，与每进程独有的 carrier RW context、公开库 GNU_RELRO/GOT 和 RW 初始化页应分开解读。Raw 的 `[vvar]` 在本机 pagemap 清点中没有可见的 present PFN；因此 selected-PFN 差值不能当作全系统净 RAM 差值。
 
 publisher/update 与持续读写交互的插桩和采集工具保留在 `../update-bench/`，它们需要另外构建的 UPDATE 镜像，不能混入无插桩 READ 样本。入口见 [状态成本说明](STATEFUL.md)。此版本不会把历史 writer 结果作为新 READ 包的证据，也不把 Raw/VKSO 所有差异归因于物理页共享。
 

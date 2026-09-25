@@ -13,7 +13,7 @@ import sys
 
 PROTOCOL = 'clocktime-direct-api-v2'
 FUNCTIONAL_BLOBS = {
-    'vkso_abi.h': '85fb8caa676e019e1dca7763d14bc5d595961097',
+    'vkso_abi.h': '2df75c320867c5987b77106070c1a401ff1511e9',
     'vkso_user_wrapper.c': '6a4c2148371fd07529f13ed27e6d3f0573f0c2d6',
     'vkso_user_wrapper.h': 'f96e83a43ab85e2b88b7ba238ffe02536289998c',
 }
@@ -112,13 +112,13 @@ def audit_public_library(library):
     if '[libkernel.so]' not in dynamic or any(x in undefined for x in ('dlopen', 'dlsym', 'dlvsym')):
         raise ValueError('public API must directly depend on the carrier without dynamic lookup')
     for name in ('clock_gettime', 'clock_getres', 'gettimeofday', 'time', 'getcpu'):
-        # Accept existing PLT packages as well as eager GOT calls. time may
-        # resolve directly to the carrier via IFUNC; keep legacy packages valid.
+        # Accept existing PLT packages as well as eager GOT calls. time and
+        # gettimeofday may resolve directly to the carrier via IFUNC.
         transfer = re.search(r'(?:call|jmp)[^\n]*<__vkso_' + name + r'(?:@plt|@Base)>', assembly)
-        if name == 'time' and not transfer:
+        if name in ('time', 'gettimeofday') and not transfer:
             symbols = subprocess.check_output(['readelf', '-Ws', str(library)], text=True)
-            transfer = (re.search(r'\bIFUNC\b[^\n]*\btime$', symbols, re.M) and
-                        re.search(r'<__vkso_time@Base>', assembly))
+            transfer = (re.search(r'\bIFUNC\b[^\n]*\b' + name + r'$', symbols, re.M) and
+                        re.search(r'<__vkso_' + name + r'@Base>', assembly))
         if not transfer:
             raise ValueError('missing direct carrier call or binding: ' + name)
         if re.search(r'\b' + name + r'(?:@|\s|$)', undefined):

@@ -15,6 +15,7 @@ VKSO_BUILD=${VKSO_BUILD:-$BUILD_ROOT/vkso}
 BASE_CONFIG=${BASE_CONFIG:-$HERE/base.config}
 BUILD_VARIANT=${BUILD_VARIANT:-normal}
 UPDATE_BENCH=${UPDATE_BENCH:-0}
+UPDATE_STAGE_DIAG=${UPDATE_STAGE_DIAG:-0}
 VKSO_VALIDATION_TESTS=${VKSO_VALIDATION_TESTS:-0}
 STAMP=${STAMP:-$(date -u +%Y%m%dT%H%M%SZ)}
 OUT=${OUT:-$HERE/artifacts/prepared-$STAMP}
@@ -48,6 +49,18 @@ case "$UPDATE_BENCH" in
 	exit 2
 	;;
 esac
+case "$UPDATE_STAGE_DIAG" in
+0|1)
+	;;
+*)
+	echo "UPDATE_STAGE_DIAG must be 0 or 1" >&2
+	exit 2
+	;;
+esac
+if [[ "$UPDATE_STAGE_DIAG" == 1 && "$UPDATE_BENCH" != 1 ]]; then
+	echo "UPDATE_STAGE_DIAG requires UPDATE_BENCH=1" >&2
+	exit 2
+fi
 case "$VKSO_VALIDATION_TESTS" in
 0|1)
 	;;
@@ -158,7 +171,32 @@ mkdir -p "$RAW_BUILD" "$VKSO_BUILD" "$OUT"
 
 # Kbuild rejects O= against an in-tree configured source. Clean only a copy.
 VKSO_COMPILE_SOURCE=$VKSO_SOURCE
-if [[ -e "$VKSO_SOURCE/.config" || -d "$VKSO_SOURCE/include/config" ]]; then
+if [[ ${INCREMENTAL_BUILD:-0} == 1 ]]; then
+	: "${VKSO_PREPARED_SOURCE:?INCREMENTAL_BUILD requires VKSO_PREPARED_SOURCE}"
+	command -v rsync >/dev/null
+	VKSO_COMPILE_SOURCE=$VKSO_PREPARED_SOURCE
+	mkdir -p "$VKSO_COMPILE_SOURCE"
+	# Keep a stable source pathname for Kbuild's .cmd dependencies. --checksum
+	# detects edits even when a file's size/mtime was preserved by checkout.
+	changes=$BUILD_ROOT/source-sync.$$.txt
+	rsync -a --checksum --delete --exclude=.git --exclude=.config \
+		--exclude=include/config --exclude=include/generated \
+		--exclude=arch/x86/include/generated --exclude='*.o' \
+		--exclude='.*.cmd' --exclude=vmlinux \
+		--itemize-changes --out-format='%i %n' \
+		"$VKSO_SOURCE/" "$VKSO_COMPILE_SOURCE/" >"$changes"
+	while IFS= read -r change; do
+		item=${change%% *}
+		path=${change#* }
+		if [[ $item == '>f'* && -f "$VKSO_COMPILE_SOURCE/$path" ]]; then
+			# Kbuild is timestamp-based; mark content-changed files newer than
+			# cached objects without touching the research source tree.
+			touch -- "$VKSO_COMPILE_SOURCE/$path"
+		fi
+	done <"$changes"
+	rm -- "$changes"
+	make -C "$VKSO_COMPILE_SOURCE" mrproper
+elif [[ -e "$VKSO_SOURCE/.config" || -d "$VKSO_SOURCE/include/config" ]]; then
 	VKSO_COMPILE_SOURCE=$(mktemp -d "$BUILD_ROOT/vkso-source.XXXXXX")
 	cp -a "$VKSO_SOURCE/." "$VKSO_COMPILE_SOURCE/"
 	make -C "$VKSO_COMPILE_SOURCE" mrproper
@@ -212,7 +250,16 @@ configure_tree()
 		--set-str SYSTEM_REVOCATION_KEYS ""
 	if [[ "$UPDATE_BENCH" == 1 ]]; then
 		"$source/scripts/config" --file "$build/.config" \
-			--enable DEBUG_FS --enable TIMEKEEPING_UPDATE_BENCH
+			--enable DEBUG_FS --enable TIMEKEEPING_UPDATE_BENCH \
+			--disable TIMEKEEPING_UPDATE_CACHE_PREP_DIAG \
+			--disable TIMEKEEPING_UPDATE_PERCALL_PMU_DIAG
+		if [[ "$UPDATE_STAGE_DIAG" == 1 ]]; then
+			"$source/scripts/config" --file "$build/.config" \
+				--enable TIMEKEEPING_UPDATE_STAGE_DIAG
+		else
+			"$source/scripts/config" --file "$build/.config" \
+				--disable TIMEKEEPING_UPDATE_STAGE_DIAG
+		fi
 	fi
 	if [[ "$BUILD_VARIANT" == no-retpoline ]]; then
 		"$source/scripts/config" --file "$build/.config" \
@@ -239,7 +286,19 @@ if [[ "$reuse_raw" == 1 ]]; then
 else
 	configure_tree "$RAW_SOURCE" "$RAW_BUILD" raw
 fi
-configure_tree "$VKSO_COMPILE_SOURCE" "$VKSO_BUILD" vkso
+if [[ ${INCREMENTAL_BUILD:-0} == 1 && -s "$VKSO_BUILD/.config" ]]; then
+	# Recompute the desired config in a probe directory. Rewriting the live
+	# .config on every invocation would invalidate much of the Kbuild cache.
+	config_probe=$(mktemp -d "$BUILD_ROOT/config-probe.XXXXXX")
+	configure_tree "$VKSO_COMPILE_SOURCE" "$config_probe" vkso
+	if ! cmp -s "$config_probe/.config" "$VKSO_BUILD/.config"; then
+		cp "$config_probe/.config" "$VKSO_BUILD/.config"
+		make -C "$VKSO_COMPILE_SOURCE" O="$VKSO_BUILD" olddefconfig
+	fi
+	rm -rf -- "$config_probe"
+else
+	configure_tree "$VKSO_COMPILE_SOURCE" "$VKSO_BUILD" vkso
+fi
 
 config_symbols()
 {
@@ -247,6 +306,7 @@ config_symbols()
 		grep -Ev \
 		'^(CONFIG_CC_VERSION_TEXT=|CONFIG_VKSO_TIME=|CONFIG_VKSO_TIME_TEST=|# CONFIG_VKSO_TIME|CONFIG_GENERIC_GETTIMEOFDAY=|CONFIG_GENERIC_TIME_VSYSCALL=|CONFIG_GENERIC_VDSO_TIME_NS=|CONFIG_HAVE_GENERIC_VDSO=|# CONFIG_IA32_EMULATION is not set|# CONFIG_X86_X32 is not set)' |
 		grep -Ev '^# CONFIG_TIMEKEEPING_UPDATE_BENCH is not set' |
+		grep -Ev '^# CONFIG_TIMEKEEPING_UPDATE_STAGE_DIAG is not set' |
 		sort
 }
 
@@ -268,6 +328,13 @@ fi
 if [[ "$UPDATE_BENCH" == 1 ]]; then
 	grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_BENCH=y' "$RAW_BUILD/.config"
 	grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_BENCH=y' "$VKSO_BUILD/.config"
+	if [[ "$UPDATE_STAGE_DIAG" == 1 ]]; then
+		grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_STAGE_DIAG=y' "$RAW_BUILD/.config"
+		grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_STAGE_DIAG=y' "$VKSO_BUILD/.config"
+	else
+		! grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_STAGE_DIAG=y' "$RAW_BUILD/.config"
+		! grep -Fqx 'CONFIG_TIMEKEEPING_UPDATE_STAGE_DIAG=y' "$VKSO_BUILD/.config"
+	fi
 else
 	if grep -Eq '^CONFIG_TIMEKEEPING_UPDATE_BENCH=y' \
 		"$RAW_BUILD/.config" "$VKSO_BUILD/.config"; then
@@ -532,6 +599,8 @@ candidate_patch_sha256=$(sha256sum "$OUT/source.patch" | awk '{print $1}')
 	printf 'candidate_patch_sha256=%s\n' "$candidate_patch_sha256"
 	printf 'build_variant=%s\n' "$BUILD_VARIANT"
 	printf 'update_bench=%s\n' "$UPDATE_BENCH"
+	printf 'update_stage_diag=%s\n' "$UPDATE_STAGE_DIAG"
+	printf 'update_split_diag=%s\n' "$UPDATE_STAGE_DIAG"
 	printf 'vkso_validation_tests=%s\n' "$VKSO_VALIDATION_TESTS"
 	printf 'vkso_source_tree_sha256=%s\n' "$vkso_source_tree_sha256"
 	printf 'raw_source_tree_sha256=%s\n' "$raw_source_tree_sha256"

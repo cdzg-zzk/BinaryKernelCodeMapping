@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
-/* Conventional dynamically linked API. The carrier's fallback uses raw syscalls,
- * never these public symbols. Initialization is explicit, before first use. */
+/* Conventional dynamically linked API. Fallbacks use syscalls, never these
+ * public symbols. Initialization is explicit, before first use. */
 #include "vkso_time.h"
+#include <sys/syscall.h>
+#include <unistd.h>
 /* Keep errno's TLS lookup and result preservation off successful calls.
  * This also avoids duplicating the error conversion in every public entry.
  * No provider selection or state is introduced on the hot path.
@@ -25,11 +27,27 @@ int clock_getres(clockid_t c, struct timespec *v)
 {
     return public_result(__vkso_clock_getres(c, (struct vkso_time_value *)v));
 }
-int gettimeofday(struct timeval *v, void *tz)
+/* The carrier normally returns zero directly. Only an unsupported provider
+ * reaches this callback; libc's syscall helper supplies public errno semantics.
+ * Other negative statuses are used by the mock ABI test. */
+__attribute__((visibility("hidden")))
+int vkso_public_gettimeofday_failure(struct vkso_timeval *v,
+				     struct vkso_timezone *tz, int status)
 {
-    (void)tz;
-    return public_result(__vkso_gettimeofday((struct vkso_timeval *)v, NULL));
+    if (status != VKSO_TIME_UNSUPPORTED_MODE)
+        return public_error(status);
+    return (int)syscall(SYS_gettimeofday, v, tz);
 }
+/* Resolve once at load time, as time() already does. The steady-state public
+ * call enters the carrier directly and keeps the shared clock computation. */
+static int (*resolve_gettimeofday(void))(struct timeval *, void *)
+{
+    return (int (*)(struct timeval *, void *))(void *)__vkso_gettimeofday;
+}
+int gettimeofday(struct timeval *, void *)
+    __attribute__((ifunc("resolve_gettimeofday")));
+int vkso_time_gettimeofday(struct timeval *, void *)
+    __attribute__((ifunc("resolve_gettimeofday")));
 /* Same LP64 signature and semantics: resolve the address, never execute the
  * carrier during relocation. Registration and vkso_time_init still precede use.
  * No extra state, copied computation, or per-call forwarding stub is needed.

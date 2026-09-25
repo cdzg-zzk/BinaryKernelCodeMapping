@@ -113,6 +113,17 @@ __vkso_bind_context:
 	ret
 	.size __vkso_bind_context, .-__vkso_bind_context
 
+	/* The public gettimeofday IFUNC needs libc errno handling only when the
+	 * shared provider fails. Keep that callback in the existing context page. */
+	.p2align 4
+	.globl __vkso_bind_gettimeofday_failure
+	.type __vkso_bind_gettimeofday_failure, @function
+__vkso_bind_gettimeofday_failure:
+	movq	%rdi, vkso_user_context+24(%rip)
+	xorl	%eax, %eax
+	ret
+	.size __vkso_bind_gettimeofday_failure, .-__vkso_bind_gettimeofday_failure
+
 	.p2align 4
 	.globl __vkso_shared_data
 	.type __vkso_shared_data, @function

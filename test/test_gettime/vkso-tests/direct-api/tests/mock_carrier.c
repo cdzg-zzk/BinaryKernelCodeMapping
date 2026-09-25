@@ -10,6 +10,7 @@ const int vkso_test_only_mock_carrier = 1;
 static struct vkso_shared_data shared = {.abi_version = VKSO_TIME_ABI_VERSION};
 static struct vkso_mm_data mm = {.abi_version = VKSO_MM_DATA_ABI_VERSION};
 static atomic_int binds, reads;
+static vkso_gettimeofday_failure_t gettimeofday_failure;
 static _Thread_local int forced_error;
 static _Thread_local int64_t seconds = 1700000000;
 static int mode(const char *name)
@@ -37,6 +38,11 @@ int __vkso_bind_context(const struct vkso_mm_data *data, const void *pv, const v
 	if (data != &mm || pv || hv) { errno = EPROTO; return -1; }
 	return 0;
 }
+int __vkso_bind_gettimeofday_failure(vkso_gettimeofday_failure_t failure)
+{
+	gettimeofday_failure = failure;
+	return failure ? 0 : -EINVAL;
+}
 int __vkso_clock_gettime(int clock, struct vkso_time_value *value)
 {
 	if (forced_error) return -forced_error;
@@ -53,7 +59,9 @@ int __vkso_clock_getres(int clock, struct vkso_time_value *value)
 }
 int __vkso_gettimeofday(struct vkso_timeval *tv, struct vkso_timezone *tz)
 {
-	if (forced_error) return -forced_error;
+	if (forced_error)
+		return gettimeofday_failure ?
+			gettimeofday_failure(tv, tz, -forced_error) : -forced_error;
 	if (tv) *tv = (struct vkso_timeval){42, 1234};
 	if (tz) *tz = (struct vkso_timezone){0, 0};
 	return 0;

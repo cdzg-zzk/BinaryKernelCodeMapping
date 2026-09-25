@@ -6,8 +6,18 @@ set -euo pipefail
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT=$(cd "$HERE/../../../.." && pwd)
 
-# No argument retains full construction; targeted modes never mutate old packages.
-if [[ $# -gt 0 ]]; then
+# The default is a single automatic incremental campaign build. Keep the
+# original full construction explicitly available for a clean-room rebuild.
+if [[ $# -eq 0 || ( $# -ge 1 && $1 == auto ) ]]; then
+    if [[ $# -eq 0 ]]; then
+        exec python3 "$HERE/../direct-api/auto_build.py"
+    fi
+    shift
+    exec python3 "$HERE/../direct-api/auto_build.py" "$@"
+fi
+if [[ $# -eq 1 && $1 == full ]]; then
+    shift
+else
     exec python3 "$HERE/../direct-api/rebuild.py" "$@"
 fi
 
