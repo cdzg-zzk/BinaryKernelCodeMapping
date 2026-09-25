@@ -1,7 +1,7 @@
 # Clocktime / VKSO
 
 本项目让 Linux 5.15.198/x86-64 的普通内核时间 reader 与用户路径复用驻留时间计算代码。
-当前正式实验设计为 **Raw/VKSO × Normal/no-retpoline × clean/UPDATE** 的八镜像 Clocktime campaign；目标机数据尚未收集。
+当前正式实验设计为 **Raw/VKSO × Normal/no-retpoline × clean/UPDATE** 的八镜像 Clocktime campaign；`20260924T065535Z-clocktime-full` 已完成 32 次独立启动采集。
 
 从[全量执行说明](vkso-tests/update-bench/RUN_STATEFUL.md)开始；固定入口在 `vkso-tests/baremetal/`，目录清单见[实验梳理](vkso-tests/EXPERIMENT_INVENTORY.md)。
 
@@ -15,6 +15,7 @@
 | `vkso-tests/baremetal/` | 构建、安装、启动、收集；结果保留在 results |
 | `namespace-sharing/`、`optimization-audit/` | 页共享验证及其依赖的旧基线证据 |
 | `vkso-tests/update-bench/` | UPDATE 插桩构建、统一 campaign 控制器、读写交互采集 |
+| [源码改造账本](vkso-tests/code-size/CHANGE_AUDIT.md) | 当前实现的分类修改量、用户适配代码与可复算依据 |
 | `vkso-tests/revision/`、`vkso-timekeeper-unification/` | 既有验证工具和历史设计/结果 |
 | `history/` | 已停用 Redis 的结果说明；旧源代码在 Git 历史中 |
 

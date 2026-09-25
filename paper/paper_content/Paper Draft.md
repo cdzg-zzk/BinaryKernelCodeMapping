@@ -506,11 +506,32 @@ Raw 程序经 libc 调用原生 vDSO，原生不支持的 clock 走 Linux fallba
 
 每种 Raw/VKSO 构建各有四次独立启动，分别使用无插桩 READ 镜像和带 UPDATE recorder 的镜像，共 32 次启动。每次启动在计时前执行相同的 ABI、错误与 fallback 检查；VKSO 还核对用户映射与内核源页的 PFN 及 RX/R-- 权限。四种构建的 READ 和 UPDATE 功能检查均通过。READ 与 UPDATE 来自不同镜像，下面分别报告；性能计数单位是 TSC ticks，而非由频率换算的 core cycles。
 
-### Code and Mapping Footprint
+### Code Adaptation and Mapping Footprint
 
-该实现把 clock conversion、normalization 与 clock classification 的可共享部分放在同一内核执行体中，同时增加全局快照发布、每 MM namespace 页、carrier 私有绑定和公开 ABI 库。表 10 取本次被测 clean 包的最终 ELF 与镜像；`.text` 是段规模，`bzImage` 是压缩文件规模。VKSO carrier 中映射的共享代码页与内核源页具有相同 PFN，不能再把 carrier `.text` 全额加到 kernel `.text` 当成新增物理代码。公开库仅承担入口与错误语义，不复制时间计算。
+Clocktime 将用户态的实现工作集中到 ABI 适配与一次性初始化。时间换算、sequence snapshot、normalization 和 namespace offset 计算由同一驻留核心完成，内核和用户入口向它传入各自的 context。应用继续使用 `clock_gettime`、`clock_getres`、`gettimeofday`、`time` 和 `getcpu` 的常规签名，通过链接公开库并在首次调用前初始化即可接入。
 
-**Table 10: Clocktime static artifacts.** Sizes are bytes. Entries in different rows have different accounting scopes and are not additive.
+表 10(a) 以原版 Linux 5.15.198 为基线，按源码职责统计非空、非注释行的新增与删除；头文件、汇编和编译期 ABI 断言均计入，构建配置单列。共享计算与 ABI 为 494 行，内核 reader、状态发布和 MM/namespace 分别需要独立改造。所列功能与接入代码共新增 1,494 行、删除 340 行，反映了把现有内核子系统改造成两域共用实现所需的适配量。
+
+**Table 10(a): Classified Clocktime integration changes against Linux 5.15.198.** Counts are nonblank, noncomment source lines, including declarations and ABI assertions; Kconfig help text is excluded. A replacement contributes to both columns. Platform-wide native-vDSO withdrawal and experimental instrumentation are recorded separately.
+
+| Adaptation category | Added | Deleted |
+| --- | ---: | ---: |
+| Shared computation and ABI | 494 | 0 |
+| Kernel readers and syscall boundaries | 238 | 182 |
+| Shared-state publication | 102 | 14 |
+| Per-MM mapping and time namespace | 173 | 57 |
+| Clock-provider integration | 10 | 22 |
+| Build, linking and platform integration | 84 | 65 |
+| User ABI and initialization | 393 | 0 |
+| **Total** | **1,494** | **340** |
+
+用户交付层的 393 行由 112 行 carrier 私有汇编入口、143 行公开 API 与初始化 C 实现、138 行头文件组成。其中保留了 clock 分类、errno 转换、native fallback 和 context 绑定，时间计算本身不再有独立的用户副本。作为参照，原生 x86-64 vDSO 的时间读取、架构 shim 与入口实现切片为 406 行，另有数据 ABI、映射和发布代码。复用将这些计算逻辑的后续维护集中到共享核心；源码行数度量的是实现与适配规模，不能换算为节省的开发工时。
+
+原生 vDSO 的退出还涉及平台映射及构建代码，旧 no-vDSO 基线包含 32 位、UML 和 SGX 支持的裁剪；这些删除不用于计算同功能的代码节省率。内核验证与 UPDATE 诊断另外包含 1,213 行，也不计入表 10(a)。通用 exporter 和 page-grafting 机制作为各案例共享的平台支撑。完整分类、逐文件与逐行记录见[源码改造账本](../../test/test_gettime/vkso-tests/code-size/CHANGE_AUDIT.md)。
+
+该实现把 clock conversion、normalization 与 clock classification 的可共享部分放在同一内核执行体中，同时增加全局快照发布、每 MM namespace 页、carrier 私有绑定和公开 ABI 库。表 10(b) 取本次被测 clean 包的最终 ELF 与镜像；`.text` 是段规模，`bzImage` 是压缩文件规模。VKSO carrier 中映射的共享代码页与内核源页具有相同 PFN，不能再把 carrier `.text` 全额加到 kernel `.text` 当成新增物理代码。公开库仅承担入口与错误语义，不复制时间计算。
+
+**Table 10(b): Clocktime static artifacts.** Sizes are bytes. Entries in different rows have different accounting scopes and are not additive.
 
 | Artifact | Normal Raw | Normal VKSO | No-retpoline Raw | No-retpoline VKSO |
 | --- | ---: | ---: | ---: | ---: |
@@ -621,7 +642,7 @@ Reader 在 writer 记录窗口前进入稳态，退出发生在记录窗口之�
 | Fast-path syscall-denial check | 32 / 32 |
 | VKSO physical-page sharing and permissions | 16 / 16 |
 
-**Takeaway.** Clocktime 证明一份内核驻留时间计算代码可以同时服务内核与用户 fast path，并维持公开 API、namespace 和 fallback 行为。相对原生 vDSO，normal 构建的公开非 fallback 路径等权几何平均成本降低 4.99%，但七种 `clock_gettime` 的集合增加 2.40%，coarse 路径各增加约一 tick；idle writer 均值增加 3.05 ticks/update，持续读取下则随负载降低 1.95–7.95 ticks/update。共享执行页减少了单独用户算法副本，当前实现的每 MM 支持页却增加了所选映射的驻留 PFN。这个案例展示的是代码复用与状态/入口适配的实际成本，而非所有接口同时加速或整机内存减少。
+**Takeaway.** Clocktime 将两域的时间计算收敛到一个驻留核心，用户侧以 393 行 ABI 与初始化代码接入，并在所测 API、namespace 和 fallback 矩阵中保持功能语义。原有内核调用者与用户接口的性能变化取决于具体路径。相对原生 vDSO，normal 构建的公开非 fallback 路径等权几何平均成本降低 4.99%，但七种 `clock_gettime` 的集合增加 2.40%，coarse 路径各增加约一 tick；idle writer 均值增加 3.05 ticks/update，持续读取下则随负载降低 1.95–7.95 ticks/update。共享执行页减少了单独用户算法副本，当前实现的每 MM 支持页却增加了所选映射的驻留 PFN。这个案例展示的是代码复用与状态/入口适配的实际成本，而非所有接口同时加速或整机内存减少。
 
 ## Registration and Mapping Behavior
 
@@ -718,7 +739,7 @@ Sort 的五个间接调用点通过显式用户回调完成绑定。两侧各记
 | BCH | 1 | 41 / 11 | 19 | 17 |
 | XZ | 8 | 64 / 19 | 27 | 26 |
 
-这些修改包括显式 helper 绑定、API/头文件适配、BCH syndrome 与 XZ 字典循环的局部缓存，以及支持可复用代码的构建设置。两项循环改写应用于 Adapted DSO 和内核 owner，Native DSO 与内核 Matched 保留原始循环。三个 owner 的合作 descriptor 与初始化调用计入各自 support；通用 owner 实现单列。源基线为保留的 Ubuntu 5.15.0-119.129 源码包，与新 Matched 使用的发行版版本一致。Clocktime 的改造还涉及共享 reader/state、publication、MM/namespace 和两个域的入口；表 10 分别给出其内核、carrier 和公开库的最终机器码规模。表 23 的新增/删除行与表 10 的 ELF 段字节数属于不同指标，均不换算为人工工时。
+这些修改包括显式 helper 绑定、API/头文件适配、BCH syndrome 与 XZ 字典循环的局部缓存，以及支持可复用代码的构建设置。两项循环改写应用于 Adapted DSO 和内核 owner，Native DSO 与内核 Matched 保留原始循环。三个 owner 的合作 descriptor 与初始化调用计入各自 support；通用 owner 实现单列。源基线为保留的 Ubuntu 5.15.0-119.129 源码包，与新 Matched 使用的发行版版本一致。Clocktime 的改造还涉及共享 reader/state、publication、MM/namespace 和两个域的入口；表 10(a) 按职责给出源码改造量，表 10(b) 分别给出内核、carrier 和公开库的最终机器码规模。源码行数与 ELF 段字节数属于不同指标，均不换算为人工工时。
 
 构建条件也是适用范围的一部分。LZ4 的算法对象移除 ftrace 入口，BCH/XZ 还关闭所用算法对象的 stack protector、sanitizer 与 jump-table 生成；XZ 使用完整的 XZ_SINGLE/x86-BCJ/internal-CRC 配置。表中 LZ4/BCH/XZ 实际请求导出的 API 数分别为 2/4/5。六个成功案例均有两域功能记录，三算法的内核与用户工作负载使用同一次注册的 owner。XZ 的 support 包含五个公开模块导出，算法源码差分为新增 64 行、删除 19 行。源码、完整补丁重放、构建限制和逐案例记录见[跨案例适配账本](../../test/evaluation/applicability-ledger-evidence.md)。
 
@@ -778,7 +799,7 @@ Sort 的五个间接调用点通过显式用户回调完成绑定。两侧各记
 
 First-touch、PGOT、LZ4、BCH 和 XZ 均提供单命令入口，正式参数和数据来源记录于对应 README 与 results directory。结果保留原始 CSV、环境与构建信息、功能校验、disassembly 和 page-map audit，分别支持数值复算与被测执行体核对。Clocktime 的 READ/UPDATE/CONCURRENT 由固定 boot/collect 流程生成，归档中记录内核变体、测量协议和逐轮样本。
 
-表 3–8 来自 first-touch 汇总及 PGOT 各层的 paper tables；表 9 和用户端主图来自[新三算法六版本采集](../../test/section63/README.md)，BCH 有十二次、LZ4/XZ 各三次完整物理机部署；完整结果及独立原因诊断见[实验报告](../../test/section63/results/report.md)；表 24–26 及附录 B 使用[独立 LZ4 应用与 setup 记录](../../test/evaluation/results/application-setup/README.md)。两组分别从原始记录重建配对轮次、部署统计和表格。Clocktime 的表 10–17 取自[32 次启动的完整 Raw/VKSO 采集](../../test/test_gettime/vkso-tests/baremetal/results/20260924T065535Z-clocktime-full-summary.json)及其同名原始结果目录；双峰路径的单独诊断不混入正式采集。算法性能采用当前完整采集。
+表 3–8 来自 first-touch 汇总及 PGOT 各层的 paper tables；表 9 和用户端主图来自[新三算法六版本采集](../../test/section63/README.md)，BCH 有十二次、LZ4/XZ 各三次完整物理机部署；完整结果及独立原因诊断见[实验报告](../../test/section63/results/report.md)；表 24–26 及附录 B 使用[独立 LZ4 应用与 setup 记录](../../test/evaluation/results/application-setup/README.md)。两组分别从原始记录重建配对轮次、部署统计和表格。Clocktime 的表 10(a) 来自[源码改造账本](../../test/test_gettime/vkso-tests/code-size/CHANGE_AUDIT.md)，表 10(b)–17 取自[32 次启动的完整 Raw/VKSO 采集](../../test/test_gettime/vkso-tests/baremetal/results/20260924T065535Z-clocktime-full-summary.json)及其同名原始结果目录；双峰路径的单独诊断不混入正式采集。算法性能采用当前完整采集。
 
 表 18 汇总[事务与恢复](../../test/evaluation/registration-transaction-evidence.md)、[文件/VMA 检查](../../test/evaluation/registration-notification-evidence.md)和[源页准入](../../test/evaluation/registration-typed-evidence.md)；原版本及完整事务观察分别列于附录表 A1–A2。表 19 来自[BCH 多进程资源记录](../../test/evaluation/results/bch_resource-qemu-20260912-attempt03/README.md)，表 20 来自[BCH 活动对象记录](../../test/evaluation/bch-heap-evidence.md)。Guest 提供独立的功能和 PFN 证据，其计时字段不加入物理机性能样本。
 

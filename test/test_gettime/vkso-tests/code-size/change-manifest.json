@@ -1,0 +1,240 @@
+{
+  "revision": "ff79171885356e05800c6c488679befb03db7f68",
+  "kernel_version": "5.15.198",
+  "kernel_root": "test/test_gettime/linux-5.15.198-vkso",
+  "kernel_files": [
+    {
+      "path": "arch/x86/Kconfig",
+      "category": "build_platform",
+      "diagnostic_ranges": "44-50"
+    },
+    {
+      "path": "arch/x86/configs/no_vdso_defconfig",
+      "category": "experiment_config"
+    },
+    {
+      "path": "arch/x86/entry/Makefile",
+      "category": "build_platform"
+    },
+    {
+      "path": "arch/x86/include/asm/elf.h",
+      "category": "build_platform"
+    },
+    {
+      "path": "arch/x86/include/asm/mmu.h",
+      "category": "mm_namespace"
+    },
+    {
+      "path": "arch/x86/include/asm/mmu_context.h",
+      "category": "mm_namespace"
+    },
+    {
+      "path": "arch/x86/include/asm/vkso.h",
+      "category": "mm_namespace"
+    },
+    {
+      "path": "arch/x86/include/uapi/asm/auxvec.h",
+      "category": "build_platform"
+    },
+    {
+      "path": "arch/x86/kernel/Makefile",
+      "category": "build_platform"
+    },
+    {
+      "path": "arch/x86/kernel/alternative.c",
+      "category": "build_platform"
+    },
+    {
+      "path": "arch/x86/kernel/cpu/mshyperv.c",
+      "category": "clock_providers"
+    },
+    {
+      "path": "arch/x86/kernel/kvmclock.c",
+      "category": "clock_providers"
+    },
+    {
+      "path": "arch/x86/kernel/pvclock.c",
+      "category": "clock_providers"
+    },
+    {
+      "path": "arch/x86/kernel/vkso.c",
+      "category": "mm_namespace"
+    },
+    {
+      "path": "arch/x86/kernel/vkso_getcpu.c",
+      "category": "shared_core"
+    },
+    {
+      "path": "arch/x86/kernel/vmlinux.lds.S",
+      "category": "build_platform"
+    },
+    {
+      "path": "drivers/clocksource/hyperv_timer.c",
+      "category": "clock_providers"
+    },
+    {
+      "path": "include/linux/clocksource.h",
+      "category": "clock_providers"
+    },
+    {
+      "path": "include/linux/time_namespace.h",
+      "category": "mm_namespace"
+    },
+    {
+      "path": "include/linux/timekeeper_internal.h",
+      "category": "publisher"
+    },
+    {
+      "path": "include/linux/timekeeping_update_bench.h",
+      "category": "diagnostics"
+    },
+    {
+      "path": "include/linux/vkso.h",
+      "category": "build_platform"
+    },
+    {
+      "path": "include/linux/vkso_getcpu.h",
+      "category": "kernel_readers"
+    },
+    {
+      "path": "include/linux/vkso_time.h",
+      "category": "kernel_readers",
+      "diagnostic_ranges": "28-30"
+    },
+    {
+      "path": "include/uapi/linux/auxvec.h",
+      "category": "build_platform"
+    },
+    {
+      "path": "include/vkso/getcpu.h",
+      "category": "shared_core"
+    },
+    {
+      "path": "include/vkso/time.h",
+      "category": "shared_core",
+      "diagnostic_ranges": "107-120,190-194"
+    },
+    {
+      "path": "init/Kconfig",
+      "category": "build_platform",
+      "diagnostic_ranges": "2048-2080"
+    },
+    {
+      "path": "kernel/nsproxy.c",
+      "category": "mm_namespace"
+    },
+    {
+      "path": "kernel/sys.c",
+      "category": "kernel_readers"
+    },
+    {
+      "path": "kernel/time/Makefile",
+      "category": "build_platform",
+      "diagnostic_ranges": "3,5,25-31"
+    },
+    {
+      "path": "kernel/time/namespace.c",
+      "category": "mm_namespace"
+    },
+    {
+      "path": "kernel/time/posix-timers.c",
+      "category": "kernel_readers"
+    },
+    {
+      "path": "kernel/time/time.c",
+      "category": "kernel_readers"
+    },
+    {
+      "path": "kernel/time/timekeeping.c",
+      "category": "kernel_readers",
+      "diagnostic_ranges": "7,823-864,872,874,877,880,882-887,889,891-892,905-914,1156-1174",
+      "overrides": {
+        "old": [
+          {
+            "ranges": "175,750",
+            "category": "publisher"
+          }
+        ],
+        "new": [
+          {
+            "ranges": "60-66,184,748-818,881",
+            "category": "publisher"
+          }
+        ]
+      }
+    },
+    {
+      "path": "kernel/time/timekeeping_update_bench.c",
+      "category": "diagnostics"
+    },
+    {
+      "path": "kernel/time/vkso_time.c",
+      "category": "publisher"
+    },
+    {
+      "path": "kernel/time/vkso_time_core.c",
+      "category": "shared_core"
+    },
+    {
+      "path": "kernel/time/vkso_time_cycles.c",
+      "category": "shared_core"
+    },
+    {
+      "path": "kernel/time/vkso_time_internal.h",
+      "category": "shared_core",
+      "diagnostic_ranges": "16-34,103-144"
+    },
+    {
+      "path": "kernel/time/vkso_time_test.c",
+      "category": "diagnostics"
+    }
+  ],
+  "project_files": [
+    {
+      "path": "test/test_gettime/vkso-tests/functional/vkso_user_entry.S",
+      "category": "user_adapter"
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/functional/vkso_user_wrapper.c",
+      "category": "user_adapter"
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/functional/vkso_user_wrapper.h",
+      "category": "user_adapter"
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/functional/vkso_abi.h",
+      "category": "user_adapter"
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/direct-api/vkso_public.c",
+      "category": "user_adapter"
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/direct-api/vkso_time_init.c",
+      "category": "user_adapter"
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/direct-api/vkso_time.h",
+      "category": "user_adapter"
+    }
+  ],
+  "raw_user_implementation": [
+    {
+      "path": "lib/vdso/gettimeofday.c",
+      "ranges": "20-32,48-95,110-269,298-412"
+    },
+    {
+      "path": "arch/x86/include/asm/vdso/gettimeofday.h",
+      "ranges": "1-104,196-323"
+    },
+    {
+      "path": "arch/x86/entry/vdso/vclock_gettime.c",
+      "ranges": "1-56"
+    },
+    {
+      "path": "arch/x86/entry/vdso/vgetcpu.c",
+      "ranges": "1-22"
+    }
+  ]
+}

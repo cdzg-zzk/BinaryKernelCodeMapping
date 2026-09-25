@@ -1,0 +1,914 @@
+{
+  "source_revision": "ff79171885356e05800c6c488679befb03db7f68",
+  "baseline": "Linux 5.15.198",
+  "metric": "nonblank noncomment source lines; Kconfig help prose excluded; whitespace normalized; no macro expansion",
+  "diff": "SequenceMatcher(autojunk=False) after diagnostic projection; replacement counts once added and once deleted",
+  "categories": {
+    "build_platform": {
+      "added": 84,
+      "deleted": 65
+    },
+    "clock_providers": {
+      "added": 10,
+      "deleted": 22
+    },
+    "diagnostics": {
+      "added": 1213,
+      "deleted": 0
+    },
+    "experiment_config": {
+      "added": 19,
+      "deleted": 0
+    },
+    "kernel_readers": {
+      "added": 238,
+      "deleted": 182
+    },
+    "mm_namespace": {
+      "added": 173,
+      "deleted": 57
+    },
+    "native_vdso_withdrawal": {
+      "added": 21,
+      "deleted": 1418
+    },
+    "platform_scope_cleanup": {
+      "added": 4,
+      "deleted": 1734
+    },
+    "publisher": {
+      "added": 102,
+      "deleted": 14
+    },
+    "shared_core": {
+      "added": 494,
+      "deleted": 0
+    },
+    "user_adapter": {
+      "added": 393,
+      "deleted": 0
+    }
+  },
+  "files": [
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/Kconfig",
+      "category": "build_platform",
+      "added": 5,
+      "deleted": 11
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/Kconfig",
+      "category": "diagnostics",
+      "added": 3,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/configs/no_vdso_defconfig",
+      "category": "experiment_config",
+      "added": 19,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/Makefile",
+      "category": "build_platform",
+      "added": 0,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/elf.h",
+      "category": "build_platform",
+      "added": 11,
+      "deleted": 29
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/mmu.h",
+      "category": "mm_namespace",
+      "added": 6,
+      "deleted": 2
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/mmu_context.h",
+      "category": "mm_namespace",
+      "added": 8,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/vkso.h",
+      "category": "mm_namespace",
+      "added": 7,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/uapi/asm/auxvec.h",
+      "category": "build_platform",
+      "added": 2,
+      "deleted": 9
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/Makefile",
+      "category": "build_platform",
+      "added": 8,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/alternative.c",
+      "category": "build_platform",
+      "added": 5,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/kvmclock.c",
+      "category": "clock_providers",
+      "added": 0,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/pvclock.c",
+      "category": "clock_providers",
+      "added": 2,
+      "deleted": 2
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/vkso.c",
+      "category": "mm_namespace",
+      "added": 118,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/vkso_getcpu.c",
+      "category": "shared_core",
+      "added": 19,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/vmlinux.lds.S",
+      "category": "build_platform",
+      "added": 16,
+      "deleted": 12
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/drivers/clocksource/hyperv_timer.c",
+      "category": "clock_providers",
+      "added": 2,
+      "deleted": 8
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/linux/clocksource.h",
+      "category": "clock_providers",
+      "added": 1,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/linux/time_namespace.h",
+      "category": "mm_namespace",
+      "added": 1,
+      "deleted": 9
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/linux/timekeeper_internal.h",
+      "category": "publisher",
+      "added": 0,
+      "deleted": 12
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/linux/timekeeping_update_bench.h",
+      "category": "diagnostics",
+      "added": 90,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/linux/vkso.h",
+      "category": "build_platform",
+      "added": 22,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h",
+      "category": "kernel_readers",
+      "added": 10,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h",
+      "category": "diagnostics",
+      "added": 3,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h",
+      "category": "kernel_readers",
+      "added": 57,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/vkso/getcpu.h",
+      "category": "shared_core",
+      "added": 6,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/vkso/time.h",
+      "category": "diagnostics",
+      "added": 18,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/vkso/time.h",
+      "category": "shared_core",
+      "added": 128,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/init/Kconfig",
+      "category": "build_platform",
+      "added": 0,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/init/Kconfig",
+      "category": "diagnostics",
+      "added": 13,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/sys.c",
+      "category": "kernel_readers",
+      "added": 8,
+      "deleted": 2
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/Makefile",
+      "category": "build_platform",
+      "added": 15,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/Makefile",
+      "category": "diagnostics",
+      "added": 9,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/namespace.c",
+      "category": "mm_namespace",
+      "added": 33,
+      "deleted": 45
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/posix-timers.c",
+      "category": "kernel_readers",
+      "added": 69,
+      "deleted": 81
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/time.c",
+      "category": "kernel_readers",
+      "added": 28,
+      "deleted": 7
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c",
+      "category": "diagnostics",
+      "added": 82,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c",
+      "category": "kernel_readers",
+      "added": 66,
+      "deleted": 92
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c",
+      "category": "publisher",
+      "added": 58,
+      "deleted": 2
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping_update_bench.c",
+      "category": "diagnostics",
+      "added": 750,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time.c",
+      "category": "publisher",
+      "added": 44,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_core.c",
+      "category": "shared_core",
+      "added": 214,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_cycles.c",
+      "category": "shared_core",
+      "added": 48,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_internal.h",
+      "category": "diagnostics",
+      "added": 58,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_internal.h",
+      "category": "shared_core",
+      "added": 79,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_test.c",
+      "category": "diagnostics",
+      "added": 187,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/functional/vkso_user_entry.S",
+      "category": "user_adapter",
+      "added": 112,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/functional/vkso_user_wrapper.c",
+      "category": "user_adapter",
+      "added": 61,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/functional/vkso_user_wrapper.h",
+      "category": "user_adapter",
+      "added": 4,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/functional/vkso_abi.h",
+      "category": "user_adapter",
+      "added": 79,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/direct-api/vkso_public.c",
+      "category": "user_adapter",
+      "added": 47,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/direct-api/vkso_time_init.c",
+      "category": "user_adapter",
+      "added": 35,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/direct-api/vkso_time.h",
+      "category": "user_adapter",
+      "added": 55,
+      "deleted": 0
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/Makefile",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 3
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/calling.h",
+      "category": "native_vdso_withdrawal",
+      "added": 1,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/common.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/Makefile",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 131
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/checkundef.sh",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 9
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/extable.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 33
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/extable.h",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 19
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vclock_gettime.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 55
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vdso-layout.lds.S",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 61
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vdso-note.S",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 8
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vdso.lds.S",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 21
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vdso2c.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 159
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vdso2c.h",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 167
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vdso32-setup.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 63
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vdso32/note.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 7
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vdso32/sigreturn.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 106
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vdso32/system_call.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 42
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vdso32/vclock_gettime.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 18
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vdso32/vdso32.lds.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 22
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vdsox32.lds.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 13
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vgetcpu.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 12
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vma.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 310
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vdso/vsgx.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 86
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/entry/vsyscall/vsyscall_64.c",
+      "category": "native_vdso_withdrawal",
+      "added": 1,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/ia32/ia32_signal.c",
+      "category": "platform_scope_cleanup",
+      "added": 1,
+      "deleted": 7
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/clocksource.h",
+      "category": "clock_providers",
+      "added": 5,
+      "deleted": 10
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/dwarf2.h",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 4
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/linkage.h",
+      "category": "native_vdso_withdrawal",
+      "added": 2,
+      "deleted": 2
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/pgtable_types.h",
+      "category": "native_vdso_withdrawal",
+      "added": 2,
+      "deleted": 2
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/processor.h",
+      "category": "native_vdso_withdrawal",
+      "added": 8,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/segment.h",
+      "category": "native_vdso_withdrawal",
+      "added": 4,
+      "deleted": 16
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/vdso.h",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 42
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/vdso/clocksource.h",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 8
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/vdso/gettimeofday.h",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 194
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/vdso/processor.h",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 13
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/vdso/vsyscall.h",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 18
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/vgtod.h",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 15
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/asm/vvar.h",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 21
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/uapi/asm/prctl.h",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 3
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/include/uapi/asm/sgx.h",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 18
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/cpu/common.c",
+      "category": "native_vdso_withdrawal",
+      "added": 1,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/process_64.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 23
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/signal.c",
+      "category": "native_vdso_withdrawal",
+      "added": 1,
+      "deleted": 7
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/sys_ia32.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/sys_x86_64.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 6
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/traps.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 8
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/kernel/tsc.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 2
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/mm/fault.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 5
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/tools/relocs.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 2
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/um/Makefile",
+      "category": "platform_scope_cleanup",
+      "added": 1,
+      "deleted": 2
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/um/asm/elf.h",
+      "category": "platform_scope_cleanup",
+      "added": 2,
+      "deleted": 21
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/um/elfcore.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 66
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/um/mem_64.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 3
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/um/vdso/Makefile",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 37
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/um/vdso/checkundef.sh",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 9
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/um/vdso/um_vdso.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 46
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/um/vdso/vdso-layout.lds.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 37
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/um/vdso/vdso-note.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 6
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/um/vdso/vdso.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 7
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/um/vdso/vdso.lds.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 17
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/um/vdso/vma.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 48
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/xen/setup.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/arch/x86/xen/time.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/linux/cpuhotplug.h",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/include/vdso/clocksource.h",
+      "category": "native_vdso_withdrawal",
+      "added": 1,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/entry/syscall_user_dispatch.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 2
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/Kconfig",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 2
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/vsyscall.c",
+      "category": "native_vdso_withdrawal",
+      "added": 0,
+      "deleted": 95
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/tools/arch/x86/include/uapi/asm/prctl.h",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 3
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/tools/testing/selftests/Makefile",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 1
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/tools/testing/selftests/sgx/Makefile",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 42
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/tools/testing/selftests/sgx/call.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 38
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/tools/testing/selftests/sgx/defines.h",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 19
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/tools/testing/selftests/sgx/load.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 235
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/tools/testing/selftests/sgx/main.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 218
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/tools/testing/selftests/sgx/main.h",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 30
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/tools/testing/selftests/sgx/sign_key.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 6
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/tools/testing/selftests/sgx/sigstruct.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 300
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/tools/testing/selftests/sgx/test_encl.c",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 24
+    },
+    {
+      "path": "test/test_gettime/linux-5.15.198-vkso/tools/testing/selftests/sgx/test_encl_bootstrap.S",
+      "category": "platform_scope_cleanup",
+      "added": 0,
+      "deleted": 67
+    }
+  ],
+  "platform_non_source_excluded": [
+    "Documentation/x86/elf_auxvec.rst",
+    "Documentation/x86/sgx.rst",
+    "arch/x86/entry/vdso/.gitignore",
+    "arch/x86/entry/vdso/vdso32/.gitignore",
+    "arch/x86/um/vdso/.gitignore",
+    "tools/testing/selftests/sgx/.gitignore",
+    "tools/testing/selftests/sgx/sign_key.pem",
+    "tools/testing/selftests/sgx/test_encl.lds"
+  ],
+  "vkso_user_inventory": [
+    {
+      "path": "test/test_gettime/vkso-tests/functional/vkso_user_entry.S",
+      "sloc": 112
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/functional/vkso_user_wrapper.c",
+      "sloc": 61
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/functional/vkso_user_wrapper.h",
+      "sloc": 4
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/functional/vkso_abi.h",
+      "sloc": 79
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/direct-api/vkso_public.c",
+      "sloc": 47
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/direct-api/vkso_time_init.c",
+      "sloc": 35
+    },
+    {
+      "path": "test/test_gettime/vkso-tests/direct-api/vkso_time.h",
+      "sloc": 55
+    }
+  ],
+  "raw_user_implementation": [
+    {
+      "path": "lib/vdso/gettimeofday.c",
+      "ranges": "20-32,48-95,110-269,298-412",
+      "sloc": 240
+    },
+    {
+      "path": "arch/x86/include/asm/vdso/gettimeofday.h",
+      "ranges": "1-104,196-323",
+      "sloc": 121
+    },
+    {
+      "path": "arch/x86/entry/vdso/vclock_gettime.c",
+      "ranges": "1-56",
+      "sloc": 33
+    },
+    {
+      "path": "arch/x86/entry/vdso/vgetcpu.c",
+      "ranges": "1-22",
+      "sloc": 12
+    }
+  ]
+}

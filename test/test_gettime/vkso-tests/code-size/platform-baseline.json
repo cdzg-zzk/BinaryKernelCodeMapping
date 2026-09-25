@@ -1,0 +1,1165 @@
+[
+  {
+    "path": "Documentation/x86/elf_auxvec.rst",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 42,
+        "end": 47,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "Documentation/x86/sgx.rst",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 110,
+        "end": 124,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/Makefile",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 268,
+        "end": 272,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/calling.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 412,
+        "end": 413,
+        "lines": [
+          "\tandq\t$CPUNODE_MASK, \\reg\n"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/common.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 29,
+        "end": 30,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/.gitignore",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 8,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/Makefile",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 215,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/checkundef.sh",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 10,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/extable.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 46,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/extable.h",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 28,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vclock_gettime.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 85,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdso-layout.lds.S",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 112,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdso-note.S",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 15,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdso.lds.S",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 35,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdso2c.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 254,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdso2c.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 222,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdso32-setup.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 99,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdso32/.gitignore",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 2,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdso32/note.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 18,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdso32/sigreturn.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 140,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdso32/system_call.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 85,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdso32/vclock_gettime.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 29,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdso32/vdso32.lds.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 40,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vdsox32.lds.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 27,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vgetcpu.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 22,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vma.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 458,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vdso/vsgx.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 151,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/entry/vsyscall/vsyscall_64.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 7,
+        "end": 10,
+        "lines": []
+      },
+      {
+        "start": 20,
+        "end": 23,
+        "lines": [
+          " * As of mid-2014, there should be no new userspace code that uses this\n",
+          " * interface.\n"
+        ]
+      },
+      {
+        "start": 375,
+        "end": 376,
+        "lines": [
+          "\t\t\t     PAGE_KERNEL_VSYSCALL);\n"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/ia32/ia32_signal.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 33,
+        "end": 34,
+        "lines": []
+      },
+      {
+        "start": 256,
+        "end": 262,
+        "lines": [
+          "\t\trestorer = &frame->retcode;\n"
+        ]
+      },
+      {
+        "start": 339,
+        "end": 341,
+        "lines": [
+          "\t\trestorer = &frame->retcode;\n"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/clocksource.h",
+    "category": "clock_providers",
+    "edits": [
+      {
+        "start": 6,
+        "end": 7,
+        "lines": [
+          "#define VDSO_ARCH_CLOCKMODES\t\\\n",
+          "\tVDSO_CLOCKMODE_TSC,\t\\\n",
+          "\tVDSO_CLOCKMODE_PVCLOCK,\t\\\n",
+          "\tVDSO_CLOCKMODE_HVCLOCK\n"
+        ]
+      },
+      {
+        "start": 8,
+        "end": 19,
+        "lines": [
+          "#define HAVE_VDSO_CLOCKMODE_HVCLOCK\n"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/dwarf2.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 23,
+        "end": 24,
+        "lines": []
+      },
+      {
+        "start": 32,
+        "end": 39,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/linkage.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 22,
+        "end": 23,
+        "lines": [
+          "#if defined(CONFIG_RETHUNK) && !defined(__DISABLE_EXPORTS)\n"
+        ]
+      },
+      {
+        "start": 34,
+        "end": 35,
+        "lines": [
+          "#if defined(CONFIG_RETHUNK) && !defined(__DISABLE_EXPORTS)\n"
+        ]
+      },
+      {
+        "start": 47,
+        "end": 48,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/pgtable_types.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 196,
+        "end": 197,
+        "lines": [
+          "#define __PAGE_KERNEL_VSYSCALL\t (__PP|   0|_USR|___A|__NX|___D|   0|___G)\n"
+        ]
+      },
+      {
+        "start": 224,
+        "end": 225,
+        "lines": [
+          "#define PAGE_KERNEL_VSYSCALL\t__pgprot_mask(__PAGE_KERNEL_VSYSCALL   | _ENC)\n"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/processor.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 28,
+        "end": 29,
+        "lines": [
+          "\n",
+          "/* REP NOP (PAUSE) is a good thing to insert into busy-wait loops. */\n",
+          "static __always_inline void rep_nop(void)\n",
+          "{\n",
+          "\tasm volatile(\"rep; nop\" ::: \"memory\");\n",
+          "}\n",
+          "\n",
+          "static __always_inline void cpu_relax(void)\n",
+          "{\n",
+          "\trep_nop();\n",
+          "}\n"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/segment.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 230,
+        "end": 232,
+        "lines": [
+          "#define CPUNODE_BITS\t\t12\n",
+          "#define CPUNODE_MASK\t\t0xfff\n"
+        ]
+      },
+      {
+        "start": 237,
+        "end": 238,
+        "lines": [
+          "static inline unsigned long encode_cpunode(int cpu, unsigned long node)\n"
+        ]
+      },
+      {
+        "start": 239,
+        "end": 263,
+        "lines": [
+          "\treturn (node << CPUNODE_BITS) | cpu;\n"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/vdso.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 57,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/vdso/clocksource.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 12,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/vdso/gettimeofday.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 323,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/vdso/processor.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 23,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/vdso/vsyscall.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 29,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/vgtod.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 24,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/asm/vvar.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 55,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/uapi/asm/prctl.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 12,
+        "end": 16,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/include/uapi/asm/sgx.h",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 76,
+        "end": 167,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/kernel/cpu/common.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 2138,
+        "end": 2139,
+        "lines": [
+          "\tunsigned long cpudata = encode_cpunode(cpu, early_cpu_to_node(cpu));\n"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/kernel/process_64.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 53,
+        "end": 54,
+        "lines": []
+      },
+      {
+        "start": 732,
+        "end": 745,
+        "lines": []
+      },
+      {
+        "start": 820,
+        "end": 833,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/kernel/signal.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 34,
+        "end": 35,
+        "lines": []
+      },
+      {
+        "start": 340,
+        "end": 345,
+        "lines": [
+          "\trestorer = &frame->retcode;\n"
+        ]
+      },
+      {
+        "start": 405,
+        "end": 407,
+        "lines": [
+          "\trestorer = &frame->retcode;\n"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/kernel/sys_ia32.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 48,
+        "end": 49,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/kernel/sys_x86_64.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 52,
+        "end": 59,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/kernel/traps.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 62,
+        "end": 63,
+        "lines": []
+      },
+      {
+        "start": 120,
+        "end": 123,
+        "lines": []
+      },
+      {
+        "start": 591,
+        "end": 594,
+        "lines": []
+      },
+      {
+        "start": 1091,
+        "end": 1094,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/kernel/tsc.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 20,
+        "end": 21,
+        "lines": []
+      },
+      {
+        "start": 1120,
+        "end": 1121,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/mm/fault.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 33,
+        "end": 34,
+        "lines": []
+      },
+      {
+        "start": 794,
+        "end": 797,
+        "lines": []
+      },
+      {
+        "start": 908,
+        "end": 911,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/tools/relocs.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 52,
+        "end": 53,
+        "lines": []
+      },
+      {
+        "start": 82,
+        "end": 83,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/Makefile",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 20,
+        "end": 21,
+        "lines": []
+      },
+      {
+        "start": 28,
+        "end": 29,
+        "lines": [
+          "obj-y += syscalls_64.o\n"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/asm/elf.h",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 71,
+        "end": 75,
+        "lines": []
+      },
+      {
+        "start": 79,
+        "end": 97,
+        "lines": [
+          "#define FIXADDR_USER_START      0\n",
+          "#define FIXADDR_USER_END        0\n"
+        ]
+      },
+      {
+        "start": 183,
+        "end": 192,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/elfcore.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 77,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/mem_64.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 2,
+        "end": 3,
+        "lines": []
+      },
+      {
+        "start": 6,
+        "end": 9,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/vdso/.gitignore",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 2,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/vdso/Makefile",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 78,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/vdso/checkundef.sh",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 11,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/vdso/um_vdso.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 72,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/vdso/vdso-layout.lds.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 65,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/vdso/vdso-note.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 12,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/vdso/vdso.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 11,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/vdso/vdso.lds.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 33,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/um/vdso/vma.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 72,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/xen/setup.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 17,
+        "end": 18,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "arch/x86/xen/time.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 150,
+        "end": 151,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "include/linux/cpuhotplug.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 205,
+        "end": 206,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "include/vdso/clocksource.h",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 8,
+        "end": 9,
+        "lines": [
+          "#endif\n"
+        ]
+      },
+      {
+        "start": 12,
+        "end": 13,
+        "lines": [
+          "#if defined(CONFIG_GENERIC_GETTIMEOFDAY) || defined(CONFIG_X86)\n"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "kernel/entry/syscall_user_dispatch.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 39,
+        "end": 42,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "kernel/time/Kconfig",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 22,
+        "end": 26,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "kernel/time/vsyscall.c",
+    "category": "native_vdso_withdrawal",
+    "edits": [
+      {
+        "start": 0,
+        "end": 170,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/arch/x86/include/uapi/asm/prctl.h",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 12,
+        "end": 16,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/Makefile",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 59,
+        "end": 60,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/.gitignore",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 2,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/Makefile",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 57,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/call.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 44,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/defines.h",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 31,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/load.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 305,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/main.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 293,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/main.h",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 41,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/sign_key.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 12,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/sign_key.pem",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 39,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/sigstruct.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 383,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/test_encl.c",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 35,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/test_encl.lds",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 37,
+        "lines": []
+      }
+    ]
+  },
+  {
+    "path": "tools/testing/selftests/sgx/test_encl_bootstrap.S",
+    "category": "platform_scope_cleanup",
+    "edits": [
+      {
+        "start": 0,
+        "end": 89,
+        "lines": []
+      }
+    ]
+  }
+]
