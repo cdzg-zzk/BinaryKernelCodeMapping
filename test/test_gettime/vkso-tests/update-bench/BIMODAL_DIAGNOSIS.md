@@ -905,3 +905,119 @@ PT 解码和环境恢复通过。PT 中按 `update_vsyscall` 返回点重组出�
 解释，也没有发现另一条能把整个双峰分开的外层业务分支。秒边界是额外
 慢情形，但不是整个高峰；相同分支序列内仍会出现两个耗时簇。可把峰按
 耗时作为**描述性分组**报告，不能称为已经识别出的两种业务状态。
+
+## 2026-09-26：重新审计业务条件与计时边界
+
+### 被解释的对象
+
+现有反复出现双峰的逐次记录是 **`timekeeping_update()` 的发布成本**。
+它不是 `clock_gettime()` 用户 READ 的逐次延迟；正式 READ CSV 记录的是
+完整公开调用批次的平均 TSC ticks/call。不能把 UPDATE 的双峰直接表述为
+“获取时间有两种 latency”，也不能由这些数据推断用户调用发生 syscall
+fallback 或 sequence retry。
+
+Raw 的周期路径按下面顺序执行：
+
+```text
+update_wall_time -> timekeeping_advance(TK_ADV_TICK)
+  读取 clocksource、计算经过的 cycle intervals
+  logarithmic_accumulation：累积 tick，处理实时时间/raw 时间的秒进位
+  timekeeping_adjust：NTP tick length 与误差补偿，必要时调整 mult
+  accumulate_nsecs_to_secs：修正调整后可能跨秒的结果
+  write_seqcount_begin
+  timekeeping_update                  <-- 现有 UPDATE 计时区
+    tk_update_leap_state / tk_update_ktime_data
+    update_vsyscall / update_pvclock_gtod
+    base_real / 两次 fast-timekeeper 发布
+  memcpy(real_tk, shadow_tk)
+  write_seqcount_end
+```
+
+`timekeeping_advance(TK_ADV_FREQ)` 也可能产生 `action=0` 的更新。因此
+`action=0` 是更新标志筛选，不是唯一的调用来源标签。绝大多数现有样本
+呈现正常约 4 ms 的时间推进，但此前的记录不能逐次标识调用来源。
+
+### 已有状态字段不能回答的业务问题
+
+`timekeeping_update_bench_record()` 在整段结束后读取
+`tk->tkr_mono.xtime_nsec`。周期路径进入计时区之前已调用
+`accumulate_nsecs_to_secs()`，把超出一秒的值归一化。因此其
+`realtime_carry = (xtime_nsec >= shifted_second)` 通常为零，**不是
+“本次没有发生过秒进位”证据**。`leap_pending` 表示未来闰秒状态，
+也不等于本次是否执行了 `second_overflow()` 的 NTP 处理。
+
+`ktime_carry` 则是另一种状态：把 wall-to-monotonic 的纳秒偏移加到当前
+时间后是否需要进位。已有分支 PT 验证了它在 `update_vsyscall()` 中的
+含义，且该分支两侧各自都有快、慢样本。这个排除仍成立，但不能扩大为
+“已经排除了所有 timekeeping 业务情形”。
+
+缺失的条件具体包括 `timekeeping_adjust()` 的两个分岔：
+
+- `tk->ntp_tick == ntp_tick_length()`：沿用倍率，还是重新计算倍率；
+- `mult_adj == 0 / -1 / +1 / other`：不调整、单位误差补偿，还是较大调整。
+
+这些操作发生在计时开始之前，它们的指令耗时不会直接计入 UPDATE。
+若它们与 UPDATE 的双峰有关，只能先证明同一次调用的条件关联，再验证
+是否通过此前的访问和执行历史影响后续发布；不能把“存在这个分支”当作
+已经找到根因。之前过滤 `timekeeping_update` 或 `update_vsyscall` 的 PT
+没有覆盖这段业务路径。
+
+### 从现有逐次相位记录新增的检验
+
+重新读取 `update-business-vsyscall-raw-normal-pilot1/idle/round-00.csv`。
+5,000 个样本 CPU/action 均为 0。相邻 4,999 次推进的
+`(phase_nsec[i]-phase_nsec[i-1]) mod 10^9` 全部位于
+4,000,038–4,000,041 ns，未出现足以把这一运行分成“单 tick 与多 tick
+补账”的另一组时间推进。该相位是归一化后的纳秒余数，不包含秒数，
+因而这个检验不是对任意长暂停的通用证明。
+
+在此前已对齐的 PT 覆盖样本 75–2574 中，再固定秒内 100–900 ms、
+clock mode=1、shift=24，以及 wall-to-monotonic 进位状态，仍能观察到
+低/高两侧。例如进一步固定相邻相位增量为 4,000,040 ns：
+
+| `ktime_carry` | 样本数 | ≤120 ticks | >120 ticks | 低/高侧中位 ticks |
+| --- | ---: | ---: | ---: | ---: |
+| 0 | 400 | 134 | 266 | 108 / 148 |
+| 1 | 540 | 141 | 399 | 110 / 155 |
+
+这排除了该运行中“秒边界、已知进位、不同 tick 推进量”简单组合就能把
+两侧分开的解释。它不直接观测 NTP 分支，也没有证明缓存或其他硬件根因。
+相位量化、倍率调整和取样时刻都可能影响几纳秒的增量，不能由增量反推出
+唯一的 `mult_adj`。
+
+### 下一次采集只补外层业务控制流
+
+固定入口 `diagnose-business` 现在支持
+`--business-target timekeeping_advance`。默认仍为 `update_vsyscall`，
+旧命令的过滤范围不变。新选项仅改变 Intel PT 的过滤函数；继续保留
+完整 UPDATE 逐次 TSC、`start_tsc`、相位及同次运行的 kcore 代码快照。
+PT 用 branch 模式验证外层函数可解码，不把 branch 事件数当作 UPDATE
+调用数。必须在分析时通过实际进入 `timekeeping_update` 的调用点配对，
+排除外层函数提前返回而没有 UPDATE 样本的路径。
+
+当前 Raw order 诊断内核已有所需符号和 recorder。无需重编、安装或重启，
+也不执行 `begin`；运行环境不匹配时原有 preflight 会拒绝。由研究者执行：
+
+```bash
+cd ~/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/baremetal
+./experiment.sh diagnose-business \
+  --business-target timekeeping_advance \
+  --package "$PWD/artifacts/update-order-raw-normal-pilot" \
+  --case raw-normal \
+  --out "$PWD/results/update-business-advance-raw-normal-pilot1"
+```
+
+这是 20 秒 writer 窗口中的 10 秒 PT，另含稳定期和原有功能核验。
+分析目标是将 **同一次 UPDATE** 前面的累积次数、倍率调整路径、秒进位
+路径与其整段耗时关联。需要先检查跟踪前后分布和调用对齐；若这些不同
+外层业务路径内部仍各有双峰，就不能继续把两峰命名为这些业务状态。
+截至此审计，外层采集为 **NOT_RUN**，主双峰的具体根因仍未证实。
+
+外层追踪的静态可行性已核对：构建缓存的 Raw bzImage 与该诊断包逐字节
+摘要一致。对应 `vmlinux` 中，`timekeeping_advance` 为
+`0xffffffff8111e5a0`，调用 UPDATE 的指令位于 `0xffffffff8111e8d9`；
+NTP 倍率调整逻辑已内联进这个外层函数，包括 `0xffffffff8111eadd` 的
+除法路径。新过滤范围确实覆盖这些分岔。`second_overflow` 的调用点也在
+范围内，但其函数内部不在此过滤范围内；不会将调用次数误报为该函数的
+完整内部追踪。脚本验证包通过，45 项 host 单元测试通过；这些静态/工具
+检查不替代尚未执行的外层 PT 运行。

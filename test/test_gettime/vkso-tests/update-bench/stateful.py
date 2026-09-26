@@ -395,7 +395,7 @@ def pt_capture(recorder,dest,perf,seconds,filter_symbol='timekeeping_update'):
     """Trace the writer's function without adding a timestamp to its body."""
     pt=dest.with_name(dest.stem+'-pt')
     log=dest.with_name(dest.stem+'-pt.log')
-    must(filter_symbol in ('timekeeping_update','update_vsyscall'),
+    must(filter_symbol in ('timekeeping_update','update_vsyscall','timekeeping_advance'),
          'unsupported Intel PT target')
     filter_text='filter '+filter_symbol
     read_ctl,write_ctl=os.pipe()
@@ -520,10 +520,10 @@ def validate_pt_recording(perf,interval):
          float(last[1])-float(first[1])>=seconds-.5,
          'Intel PT file does not cover the requested capture window')
     target=interval.get('filter','filter timekeeping_update').removeprefix('filter ')
-    must(target in ('timekeeping_update','update_vsyscall'),
+    must(target in ('timekeeping_update','update_vsyscall','timekeeping_advance'),
          'unexpected Intel PT filter target')
     begin=float(first[1])+.05
-    itrace='b' if target=='update_vsyscall' else 'c'
+    itrace='c' if target=='timekeeping_update' else 'b'
     trace=subprocess.run([str(perf),'script','-i',str(recording),'--itrace='+itrace,
                           '-F','time,ip,sym,dso','--time',
                           f'{begin:.6f},{begin+.1:.6f}'],
@@ -973,7 +973,8 @@ def percall_pmu_shape(out,sequence):
 
 def collect(package,case,c,out,block,revision,diagnostic=False,staged=False,
             split=False,pt=False,cacheline=False,pmu=False,cacheprep=False,
-            percall_pmu=False,prefetch=False,order=False,business=False):
+            percall_pmu=False,prefetch=False,order=False,business=False,
+            business_target='update_vsyscall'):
     record = preflight(package,case,c)
     must(sum((staged,split,pt,cacheline,cacheprep,percall_pmu,prefetch,order,business))<=1 and
          (diagnostic or not any((staged,split,pt,cacheline,pmu,cacheprep,percall_pmu,prefetch,order,business))) and
@@ -994,6 +995,8 @@ def collect(package,case,c,out,block,revision,diagnostic=False,staged=False,
              kv_file(package/'boot-manifest.txt').get('raw_order_diagnostic')=='1',
              'order diagnosis requires the new Raw normal diagnostic package')
     if business:
+        must(business_target in ('update_vsyscall','timekeeping_advance'),
+             'unsupported business trace target')
         must(case=='raw-normal' and
              kv_file(package/'boot-manifest.txt').get('raw_order_diagnostic')=='1',
              'business-path diagnosis requires the Raw order diagnostic package')
@@ -1034,7 +1037,7 @@ def collect(package,case,c,out,block,revision,diagnostic=False,staged=False,
                   split_parts=SPLIT_PARTS[case.split('-')[0]] if split else [],
                   block=block,tool_revision=revision)
     if business:
-        record.update(business_pt_filter='update_vsyscall',
+        record.update(business_pt_filter=business_target,
                       business_pt_seconds=10,
                       diagnostic_tool_sha256=sha256(Path(__file__)))
     for origin,name in ((package/'SHA256SUMS','package-SHA256SUMS'),(package/'direct/SHA256SUMS','direct-SHA256SUMS')):
@@ -1151,7 +1154,7 @@ def collect(package,case,c,out,block,revision,diagnostic=False,staged=False,
                                        percall_pmu=mode)
                             elif business:
                                 window(recorder,c['UPDATE_SECONDS'],dest,diagnostic=True,
-                                       pt_perf=perf,pt_target='update_vsyscall',
+                                       pt_perf=perf,pt_target=business_target,
                                        pt_seconds=10)
                             else:
                                 window(recorder,c['UPDATE_SECONDS'],dest,reader,diagnostic,
@@ -1793,8 +1796,14 @@ def main():
     p.add_argument('--prefetch',action='store_true',help=argparse.SUPPRESS)
     p.add_argument('--order',action='store_true',help=argparse.SUPPRESS)
     p.add_argument('--business',action='store_true',help=argparse.SUPPRESS)
+    p.add_argument('--business-target', choices=('update_vsyscall','timekeeping_advance'),
+                   default='update_vsyscall',
+                   help='diagnose-business PT target; timekeeping_advance includes tick/NTP work before UPDATE')
     p.add_argument('--symbol',choices=('linux_banner','tk_fast_mono','tk_fast_raw'),help=argparse.SUPPRESS)
     a=p.parse_args()
+    must(a.business_target=='update_vsyscall' or
+         a.action=='diagnose-business' or (a.action=='_diagnose' and a.business),
+         '--business-target is only valid for diagnose-business')
     def interrupted(signum,frame): raise InterruptedError('signal '+str(signum))
     for sig in (signal.SIGTERM,signal.SIGHUP): signal.signal(sig,interrupted)
     if a.action=='_cacheline_reader':
@@ -1863,7 +1872,8 @@ def main():
         if a.action=='diagnose-percall-pmu': argv.append('--percall-pmu')
         if a.action=='diagnose-prefetch': argv.append('--prefetch')
         if a.action=='diagnose-order': argv.append('--order')
-        if a.action=='diagnose-business': argv.append('--business')
+        if a.action=='diagnose-business':
+            argv.extend(('--business','--business-target',a.business_target))
         if os.geteuid()!=0: argv=['sudo',*argv]
         run_collector(argv,needs_sudo=os.geteuid()!=0)
         must(json.loads((out/'run.json').read_text())['status']=='COMPLETE',
@@ -1886,7 +1896,8 @@ def main():
                     0,'standalone-diagnostic',diagnostic=True,staged=a.stage,
                     split=a.split,pt=a.pt,cacheline=a.cacheline,pmu=a.pmu,
                     cacheprep=a.cacheprep,percall_pmu=a.percall_pmu,
-                    prefetch=a.prefetch,order=a.order,business=a.business)
+                    prefetch=a.prefetch,order=a.order,business=a.business,
+                    business_target=a.business_target)
         return
     if a.action=='_collect':
         must(os.geteuid()==0,'root required')

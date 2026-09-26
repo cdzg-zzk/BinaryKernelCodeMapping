@@ -637,6 +637,30 @@ class ControlTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'cannot decode update_vsyscall'):
                 s.validate_pt_recording(Path('/mock/perf'),interval)
 
+    def test_outer_business_trace_validates_branches_not_nested_call_count(self):
+        header=('name = intel_pt/tsc=1,cyc=1/k\n'
+                'contains AUX area data\n'
+                'time of first sample : 100.000000\n'
+                'time of last sample : 110.000000\n')
+        trace=''.join(f'100.1: ffffffff timekeeping_advance+0x{i:x} ([kernel.kallsyms])\n'
+                      for i in range(6))
+        completed=s.subprocess.CompletedProcess
+        interval={'data':'/mock/trace/data','perf_exit_code':0,
+                  'filter':'filter timekeeping_advance','requested_seconds':10}
+        with patch.object(s.subprocess,'run',side_effect=[
+                completed([],0,header,''),completed([],0,trace,'')]) as run:
+            result=s.validate_pt_recording(Path('/mock/perf'),interval)
+        self.assertEqual(result['target'],'timekeeping_advance')
+        self.assertEqual(result['itrace'],'b')
+        self.assertNotIn('decoded_target_calls_in_100ms',result)
+        self.assertIn('--itrace=b',run.call_args_list[1].args[0])
+        # Seeing the old inner target does not validate the new outer scope.
+        with patch.object(s.subprocess,'run',side_effect=[
+                completed([],0,header,''),
+                completed([],0,trace.replace('timekeeping_advance','update_vsyscall'),'')]):
+            with self.assertRaisesRegex(ValueError,'cannot decode timekeeping_advance'):
+                s.validate_pt_recording(Path('/mock/perf'),interval)
+
     def test_pt_shape_separates_traced_samples_without_boundary_leakage(self):
         with tempfile.TemporaryDirectory() as tmp:
             samples=Path(tmp)/'samples.csv'
