@@ -1775,7 +1775,7 @@ def campaign(action, value):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('action',choices=['begin','boot','collect','status','aggregate','refresh-tools','stop','verify','_collect',
+    p.add_argument('action',choices=['begin','boot','collect','status','aggregate','distribution-report','refresh-tools','stop','verify','_collect',
                                      'diagnose','_diagnose','diagnose-report',
                                      'diagnose-state-report','diagnose-pt',
                                      'diagnose-cacheline','diagnose-pmu','diagnose-cacheprep',
@@ -1809,6 +1809,11 @@ def main():
     if a.action=='_cacheline_reader':
         cacheline_reader(a.symbol); return
     if a.action=='verify': check(a.package.resolve()); print('stateful_package=PASS'); return
+    if a.action=='distribution-report':
+        must(a.runs and a.out, 'provide --runs CAMPAIGN [CAMPAIGN ...] --out NEW_DIRECTORY')
+        from distributions import generate
+        generate(a.runs,a.out,aggregate)
+        return
     if a.action=='diagnose-report':
         must(a.runs and a.out and not a.out.exists(),
              'provide --runs RUN [RUN ...] --out NEW.json')
