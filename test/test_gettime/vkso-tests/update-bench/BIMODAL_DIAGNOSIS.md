@@ -1021,3 +1021,96 @@ NTP 倍率调整逻辑已内联进这个外层函数，包括 `0xffffffff8111ead
 范围内，但其函数内部不在此过滤范围内；不会将调用次数误报为该函数的
 完整内部追踪。脚本验证包通过，45 项 host 单元测试通过；这些静态/工具
 检查不替代尚未执行的外层 PT 运行。
+
+## 2026-09-26：外层业务 PT 已完成，倍率调整关联峰占比，但未分离两峰
+
+运行：`results/update-business-advance-raw-normal-pilot1`，Raw normal，
+boot ID `7c202ec9-965e-4bda-876b-6a7b47b8709f`。这是诊断启动中的
+`timekeeping_update()` 发布成本，不是用户 READ 的逐次调用延迟。
+原始结果目录不修改；离线配对、报告和分布图保存在相邻的
+`results/update-business-advance-raw-normal-pilot1-analysis/`。
+
+### 数据与逐次配对
+
+- 原始结果 `SHA256SUMS` 校验通过；5,000 个 UPDATE 样本，dropped=0，
+  CPU/action 全为 0。ABI、公开 API、fast syscall-denial 检查通过，
+  环境恢复 PASS，采集状态 COMPLETE。
+- 用同次运行记录的 perf 5.15.160 和 kcore 解码全部外层 branch 事件。
+  得到 2,500 次完整外层调用，每次恰好有一次 `+0x339` 的 UPDATE 调用；
+  返回点全部为 `update_wall_time+0xb`。对应 CSV 样本 85–2584。
+- 对 PT 调用时刻与 `start_tsc` 做线性时间轴匹配：相邻间隔残差的绝对值
+  中位数 2.03 ticks、P95 8.13 ticks；错位前/后一个样本的中位数均约
+  348 ticks。拟合比例为 2.803200002 ticks/ns；这用于时轴配对，不是
+  将 TSC ticks 声称为 core cycles。残差不是逐次 latency 测量误差。
+- 单独用 `--itrace=e` 检查发现 **5 个 Overflow packet**。原有 100 ms
+  smoke 验证 PASS 不能证明全程没有溢出。五个错误的时间均在完整外层
+  调用结束之后约 35–71 us；数量和时间轴检查未发现缺失的 UPDATE。
+  为检验结论是否依赖这些邻近样本，排除跟踪首尾各 50 次，再排除距离
+  每个错误前后 8 ms 内的样本，保留 2,380 次。以下主表采用此筛选。
+
+### 实际观察到的业务路径
+
+全窗共有 8 种外层 taken-branch 序列。有效累积每次均执行一次；没有
+进入调整后的时间下溢或第二次秒进位分支。普通路径的主要差别是
+`timekeeping_apply_adjustment()` 的 `mult_adj=0/+1/-1`。
+另有 10 次 realtime 秒进位调用 `second_overflow()`，这 10 次也都
+执行了 NTP tick length 变化后的倍率重算；还有另外 10 次 raw 秒进位。
+没有观察到 `mult_adj` 的 other 路径。
+
+普通路径的静态判别点为 `timekeeping_advance+0x269`（零调整跳过）、
+`+0x271`（负一调整）和 `+0x27a`（正一调整）。NTP tick 重算的入口
+为 `+0x22d`，秒进位调用点为 `+0x15d`。这些解释来自匹配镜像的
+反汇编和 Raw `timekeeping.c`，不是从耗时大小反推的标签。
+
+排除 realtime/raw 秒进位后，三种完整普通外层序列的结果如下。
+沿用历史 120 TSC ticks 谷值描述低/高侧，**不是根据业务标签定义峰**：
+
+| 外层倍率调整 | 样本数 | 低侧 / 高侧次数 | 高侧占比 | 低侧 / 高侧中位 ticks |
+| --- | ---: | ---: | ---: | ---: |
+| `mult_adj=0` | 1,699 | 409 / 1,290 | 75.93% | 112 / 154 |
+| `mult_adj=+1` | 331 | 170 / 161 | 48.64% | 109 / 151 |
+| `mult_adj=-1` | 330 | 183 / 147 | 44.55% | 108 / 150 |
+
+不做 PT 错误邻域筛选、使用全部 2,500 次配对时，三条普通路径的高侧
+比例分别为 75.70%、49.57%、44.38%，结论不依赖上述筛选。
+分路径直方图仍能看到低、高两个耗时集中区，并非仅有少量跨阈值尾部。
+
+进一步固定秒内 100–900 ms、`ktime_carry`、倍率调整和完整外层序列，
+六个组合仍都含低/高两侧。例如 `mult_adj=0, ktime_carry=0` 有 541 次，
+低/高侧 177/364 次，中位数 107/150 ticks；`mult_adj=0, ktime_carry=1`
+有 808 次，低/高侧 163/645 次，中位数 115/158 ticks。
+因此把外层调整分支与此前已验证的进位字段联合使用，仍不能分离两峰。
+
+### 本轮能改变什么结论
+
+**新增的是同次调用的真实业务路径证据：倍率调整路径与后续 UPDATE 的
+高侧占比有关，但这三条路径内部各自仍呈低、高耗时集中区。**
+因此不能把主双峰命名为“NTP 调整 / 不调整”，也不能用每秒仅一次的
+秒进位 / 倍率重算解释占多数的高侧样本。实际秒进位十次中九次在高侧，
+但非秒进位的同一路径也有大量高侧样本。
+
+倍率调整发生在 UPDATE 计时区之前，其运算耗时没有直接计入本表。
+这里是关联证据，未证明调整分支通过何种机制改变随后发布的耗时。
+相同外层 taken-branch 序列也不等于所有操作数、无分支条件值和
+过滤范围外的函数内部状态都相同，不能据此声称排除了全部业务原因，
+更不能直接改称为缓存等硬件根因。当前具体根因仍未证实。
+
+对正式 Raw/VKSO 比较，保留完整分布和 boot 级统计；低/高侧位置及
+占比可以作为分布描述，但没有依据只选择一个峰或把它们命名为两种
+已确定的业务状态。本轮仅有 Raw normal，不能据它给 VKSO 分配同一
+状态标签，也不并入正式性能样本。
+
+离线证据目录中的 `aligned.csv` 保留每次耗时、路径、进位、调整、
+错误邻域和边界筛选；`report.json` 保留全部 8 条序列及分层统计；
+`path-distributions.png/.pdf` 为普通三路径直方图。`analysis.py` 是
+该次结果的离线分析副本，不改变 build/boot/collect 的执行入口。
+输入、输出各有校验记录；报告可用以下方式在新的目录重算（需 numpy
+和 matplotlib；`branches.txt` 与 `pt-errors.txt` 为保存的 perf 解码）：
+
+```bash
+# 在 baremetal/ 下执行；NEW_OUTPUT 必须是尚不存在的目录。
+RUN="$PWD/results/update-business-advance-raw-normal-pilot1"
+ANALYSIS="${RUN}-analysis"
+python3 "$ANALYSIS/analysis.py" "$RUN" "$ANALYSIS/branches.txt" \
+  "$ANALYSIS/pt-errors.txt" "$NEW_OUTPUT"
+```
