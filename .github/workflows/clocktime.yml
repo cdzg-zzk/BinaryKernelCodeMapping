@@ -1,8 +1,8 @@
-name: Clocktime host regression
+name: Clocktime regression
 
 on:
   push:
-    branches: ['codex/clocktime-reader-contract', 'paper-writing-revision']
+    branches: ['paper-writing-revision']
     paths: ['test/test_gettime/**', '.github/workflows/clocktime.yml']
   pull_request:
     paths: ['test/test_gettime/**', '.github/workflows/clocktime.yml']
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: clocktime-host-${{ github.ref }}
+  group: clocktime-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -37,8 +37,10 @@ jobs:
             git count-objects -v
           } > validation/environment.txt
           git bundle create validation/repository.bundle HEAD
-          sha256sum validation/repository.bundle > validation/SHA256SUMS
-      - name: Existing direct API tests
+          (cd validation && sha256sum repository.bundle > SHA256SUMS)
+      - name: Direct API and production-reader host fixtures
+        env:
+          VKSO_TEST_ARTIFACTS: validation/codegen
         shell: bash
         run: |
           set -euo pipefail
@@ -53,6 +55,43 @@ jobs:
         if: always()
         with:
           name: clocktime-host-${{ github.sha }}
+          path: validation/
+          retention-days: 14
+          if-no-files-found: error
+
+  kernel-objects:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [normal, no-retpoline]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare Linux 5.15.198 and Kbuild dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends bc bison flex libelf-dev libssl-dev
+          mkdir -p validation
+          curl -fL --retry 2 --max-time 180 https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.198.tar.xz -o "$RUNNER_TEMP/linux-5.15.198.tar.xz"
+          sha256sum "$RUNNER_TEMP/linux-5.15.198.tar.xz" > validation/upstream-source.sha256
+          tar -xJf "$RUNNER_TEMP/linux-5.15.198.tar.xz" -C "$RUNNER_TEMP"
+      - name: Compare baseline and candidate Kbuild objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 test/test_gettime/vkso-tests/revision/kernel-reader/validate_build.py \
+            --source "$RUNNER_TEMP/linux-5.15.198" --out "$PWD/validation/objects" \
+            --variant '${{ matrix.variant }}' --cc gcc --jobs 2 2>&1 | tee validation/build-driver.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: clocktime-objects-${{ matrix.variant }}-${{ github.sha }}
           path: validation/
           retention-days: 14
           if-no-files-found: error

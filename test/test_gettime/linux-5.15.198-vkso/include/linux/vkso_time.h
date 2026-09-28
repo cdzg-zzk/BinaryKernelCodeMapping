@@ -34,6 +34,13 @@ int vkso_timekeeping_writer_context_selftest(void);
  * select root-namespace semantics with a NULL MM_data pointer. Constant clock
  * IDs fold to one direct shared entry. Special NMI, writer-locked and
  * early-boot readers remain on their private paths.
+ *
+ * This is a completing kernel adapter, not a provider probe. For a shared
+ * clock, the fixed kernel failure callbacks complete a private read and
+ * return success. Report class support here, rather than propagating an
+ * opaque callee result and making every ktime_get_* caller retry that same
+ * fallback. Keep NOT_SHARED for callers passing a native-only clock.
+ * User adapters still propagate their own syscall/errno results.
  */
 static __always_inline int
 vkso_time_get_root(s32 clock_id, struct timespec64 *tp)
@@ -42,11 +49,13 @@ vkso_time_get_root(s32 clock_id, struct timespec64 *tp)
 
 	switch (vkso_clock_classify(clock_id)) {
 	case VKSO_CLOCK_HRES:
-		return vkso_clock_gettime_hres(
+		(void)vkso_clock_gettime_hres(
 			clock_id, value, NULL, &vkso_kernel_context);
+		return VKSO_TIME_OK;
 	case VKSO_CLOCK_COARSE:
-		return vkso_clock_gettime_coarse(
+		(void)vkso_clock_gettime_coarse(
 			clock_id, value, NULL);
+		return VKSO_TIME_OK;
 	default:
 		return VKSO_TIME_NOT_SHARED;
 	}
