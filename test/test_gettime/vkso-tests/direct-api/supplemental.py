@@ -18,12 +18,14 @@ from collect import preflight
 HERE = Path(__file__).resolve().parent
 
 @contextmanager
-def controlled_tuning(package):
+def controlled_tuning(package, backend='vkso'):
+    if backend not in ('raw', 'vkso'):
+        raise ValueError('unknown tuning backend')
     manifest = kv_file(package / 'boot-manifest.txt')
-    if platform.release() != '5.15.198' or platform.version() != manifest['vkso_uts_version']:
+    if platform.release() != '5.15.198' or platform.version() != manifest[backend + '_uts_version']:
         raise ValueError('wrong target kernel; no tuning performed')
     with gzip.open('/proc/config.gz', 'rb') as f:
-        if f.read() != (package / 'vkso.config').read_bytes():
+        if f.read() != (package / (backend + '.config')).read_bytes():
             raise ValueError('wrong target config; no tuning performed')
     saved, irq_active = [], False
     try:
