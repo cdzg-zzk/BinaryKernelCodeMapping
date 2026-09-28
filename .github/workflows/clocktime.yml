@@ -1,0 +1,57 @@
+name: Clocktime host regression
+
+on:
+  push:
+    branches: ['codex/clocktime-reader-contract', 'paper-writing-revision']
+    paths: ['test/test_gettime/**', '.github/workflows/clocktime.yml']
+  pull_request:
+    paths: ['test/test_gettime/**', '.github/workflows/clocktime.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: clocktime-host-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  host:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record environment and exact tested source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p validation
+          {
+            git rev-parse HEAD
+            uname -a
+            gcc --version
+            python3 --version
+          } > validation/environment.txt
+          git archive HEAD test/test_gettime/linux-5.15.198-vkso test/test_gettime/vkso-tests/direct-api test/test_gettime/vkso-tests/functional test/test_gettime/vkso-tests/revision/kernel-reader | gzip -1 > validation/clocktime-source.tar.gz
+          sha256sum validation/clocktime-source.tar.gz > validation/SHA256SUMS
+      - name: Existing direct API tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s test/test_gettime/vkso-tests/direct-api/tests -p 'test_*.py' -v 2>&1 | tee validation/direct-api.log
+      - name: Source audit unit tests
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s test/test_gettime/vkso-tests/code-size -p 'test_audit_changes.py' -v 2>&1 | tee validation/source-audit.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: clocktime-host-${{ github.sha }}
+          path: validation/
+          retention-days: 14
+          if-no-files-found: error
