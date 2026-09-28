@@ -508,22 +508,24 @@ Linux vDSO 将常用时间查询放在用户态执行，已经消除了这些调
 
 ### Code Adaptation and Mapping Footprint
 
-共享核心承担时间换算、归一化和 namespace 偏移计算，两个执行域的入口负责提供各自的状态与失败处理。表 10(a) 以原版 Linux 5.15.198 为基线，统计非空、非注释源码行，包含头文件、汇编和编译期 ABI 断言。共享计算与 ABI 为 494 行，内核 reader、状态发布及 MM/namespace 接入需要相应改造。所列部分共新增 1,494 行、删除 340 行，净增 1,154 行；这项重构合并了计算实现，同时增加了跨域适配代码。
+共享核心承担时间换算、归一化和 namespace 偏移计算，两个执行域的入口负责提供各自的状态与失败处理。表 10(a) 以原版 Linux 5.15.198 为基线，将每处改动按其在 Clocktime 中的职责归入一类：共享计算、内核读取、状态发布、进程与 namespace 状态、时钟源接入、用户入口或构建接入。统计单位为非空、非注释源码行，包含头文件、汇编和编译期 ABI 断言；同一行只归入一类，替换同时计入新增与删除。表中的净变化是新增减删除，并非执行代码大小。
 
 **Table 10(a): Clocktime integration changes against Linux 5.15.198.** Counts include nonblank, noncomment source lines, declarations and ABI assertions. Replacements contribute to both columns; platform-wide vDSO withdrawal and diagnostic instrumentation are excluded.
 
-| Adaptation category | Added | Deleted |
-| --- | ---: | ---: |
-| Shared computation and ABI | 494 | 0 |
-| Kernel readers and syscall boundaries | 238 | 182 |
-| Shared-state publication | 102 | 14 |
-| Per-MM mapping and time namespace | 173 | 57 |
-| Clock-provider integration | 10 | 22 |
-| Build, linking and platform integration | 84 | 65 |
-| User ABI and initialization | 393 | 0 |
-| **Total** | **1,494** | **340** |
+| Adaptation category | Added | Deleted | Net |
+| --- | ---: | ---: | ---: |
+| Shared computation and ABI | 494 | 0 | +494 |
+| Kernel readers and syscall boundaries | 238 | 182 | +56 |
+| Shared-state publication | 102 | 14 | +88 |
+| Per-MM mapping and time namespace | 173 | 57 | +116 |
+| Clock-provider integration | 10 | 22 | −12 |
+| User ABI and initialization | 393 | 0 | +393 |
+| Build, linking and platform integration | 84 | 65 | +19 |
+| **Total** | **1,494** | **340** | **+1,154** |
 
-用户交付层共 393 行，包括 112 行 carrier 私有汇编入口、143 行公开 API 与初始化 C 代码，以及 138 行头文件。这些代码完成 ABI、errno、fallback 与 context 适配，时间计算由共享核心执行。原生 x86-64 vDSO 的时间读取、架构 shim 与入口实现切片为 406 行，但该切片不包含其数据 ABI 和初始化支持，两者不能用于计算同口径代码缩减率。表 10(a) 衡量的是重构规模，复用的直接效果是消除独立的用户计算副本。
+共享计算与 ABI 新增 494 行，在两端维持一份时间换算实现。内核 reader 与 syscall 边界改写了调用和失败路径，净增 56 行；状态发布为只读快照和序列协议净增 88 行；每 MM 映射、生命周期及 time namespace 偏移净增 116 行。时钟源接入调整 TSC、PVClock 和 Hyper-V 钩子，净减 12 行。构建、链接和平台接入净增 19 行。这五项内核与构建接入合计净增 267 行。
+
+用户 ABI 与初始化新增 393 行，包括 112 行 carrier 私有汇编入口、143 行公开 API 与初始化 C 代码，以及 138 行头文件。这些代码完成 ABI、errno、fallback 与 context 适配，时间计算由共享核心执行。七类合计新增 1,494 行、删除 340 行，净增 1,154 行。原生 x86-64 vDSO 的时间读取、架构 shim 与入口实现切片为 406 行，但该切片不包含其数据 ABI 和初始化支持，两者不能用于计算同口径代码缩减率。因此，本例证实消除了独立的用户计算副本，同时揭示完整接入增加了源码维护量。
 
 原型的 no-vDSO 平台基线还裁剪了部分 32 位、UML 和 SGX 支持；这些删除与另计的 1,213 行验证及诊断代码均不进入上述改造量。通用 exporter 和 page-grafting 机制由各案例共用。分类边界及逐文件计数见[源码改造账本](../../test/test_gettime/vkso-tests/code-size/CHANGE_AUDIT.md)。
 
@@ -650,7 +652,9 @@ Normal 的 idle publisher 增加 3.05 ticks/update；monotonic-raw 和 coarse �
 | Fast-path syscall-denial check | 32 / 32 |
 | VKSO physical-page sharing and permissions | 16 / 16 |
 
-Clocktime 将内核与用户态的时间计算合并到同一驻留执行体，用户侧通过 393 行 ABI 与初始化代码接入，并保留所测时间、namespace 和 fallback 语义。其成本由接口和负载共同决定：公开库中的若干短入口降低了调用成本，normal 的 coarse reader 与 idle publisher 则付出额外开销。共享执行页消除了独立用户计算副本，MM 与入口支持页增加了所测映射的驻留规模。该案例量化的是共享计算、状态重组及入口适配组成的完整子系统改造。
+综合性能结果，normal 构建的 13 个非 fallback 用户路径等权几何平均成本降低 3.87%，但七个 `clock_gettime` fast path 的集合增加 2.57%；普通内核 monotonic 与 monotonic-raw reader 分别降低 0.993 和 1.439 ticks/call，coarse reader 增加 1.843 ticks/call。Idle 发布增加 3.05 ticks/update，持续 monotonic-raw 读取时发布降低 7.95 ticks/update，而并发用户 reader 增加 0.523 ticks/call。No-retpoline 下，对应用户路径总体降低 3.63%，普通内核三条 reader 均降低，四种发布场景降低 2.59–16.34 ticks/update；并发 coarse reader 仍增加 0.064 ticks/call。收益随入口和负载变化。
+
+代码量与映射账本给出另一面：共享计算与 ABI 的 494 行支持两端复用，消除了独立用户计算副本，但七类改造合计净增 1,154 行源码；指定时间映射中的额外驻留 PFN 也随进程数增加。Clocktime 因此展示了共享驻留计算在完整有状态子系统中的性能收益及其接入代价，而非总体源码或内存的净节省。
 
 ## Registration and Mapping Behavior
 

@@ -46,16 +46,16 @@ from scratch.
 
 ## Classified case-specific changes
 
-| Category | Added | Deleted | Content |
-| --- | ---: | ---: | --- |
-| Shared computation and ABI | 494 | 0 | `vkso_time_core.c`, cycles/internal helpers, shared ABI, shared getcpu |
-| Kernel readers and syscall boundaries | 238 | 182 | Ordinary readers, dispatch, output conversion, native failure paths |
-| State publication | 102 | 14 | Canonical shared state, sequence publication, timezone, boot offset |
-| Per-MM and time namespace | 173 | 57 | Mapping lifetime, offsets, fork/join and MM hooks |
-| Clock providers | 10 | 22 | TSC/PVClock/Hyper-V declarations and provider hookup |
-| Build, linking and platform integration | 84 | 65 | Shared sections, build flags, auxv, alternative thunk placement, configuration |
-| User ABI and initialization | 393 | 0 | Private carrier entry, public library, initialization and headers |
-| **Total** | **1,494** | **340** | **Net +1,154 source lines within these categories** |
+| Category | Added | Deleted | Net | Content |
+| --- | ---: | ---: | ---: | --- |
+| Shared computation and ABI | 494 | 0 | +494 | `vkso_time_core.c`, cycles/internal helpers, shared ABI, shared getcpu |
+| Kernel readers and syscall boundaries | 238 | 182 | +56 | Ordinary readers, dispatch, output conversion, native failure paths |
+| State publication | 102 | 14 | +88 | Canonical shared state, sequence publication, timezone, boot offset |
+| Per-MM and time namespace | 173 | 57 | +116 | Mapping lifetime, offsets, fork/join and MM hooks |
+| Clock providers | 10 | 22 | −12 | TSC/PVClock/Hyper-V declarations and provider hookup |
+| User ABI and initialization | 393 | 0 | +393 | Private carrier entry, public library, initialization and headers |
+| Build, linking and platform integration | 84 | 65 | +19 | Shared sections, build flags, auxv, alternative thunk placement, configuration |
+| **Total** | **1,494** | **340** | **+1,154** | Case-specific source changes |
 
 The shared computation is maintained once and executes from the kernel-resident
 pages in both domains. This is a consolidation of execution and maintenance, with
@@ -124,12 +124,13 @@ kernel files are the recorder/header, diagnostic Kconfig and diagnostic hooks in
 `timekeeping.c`; the added diagnostic ranges are excluded from functional totals.
 
 Performance evidence remains the 32-boot `20260924T065535Z-clocktime-full` campaign.
-It supports preserved tested API behavior and mixed performance effects, not a
-blanket no-slowdown claim. In normal builds the kernel monotonic/raw readers cost
-0.674/1.401 fewer TSC ticks, while the kernel coarse reader costs 2.007 more; the
-idle publisher costs 3.05 more ticks/update. Public non-fallback paths have a
-4.99% lower equal-weight geometric mean cost, while the seven clock_gettime paths
-have a 2.40% higher mean ratio. Public compatibility requires explicit linking,
-initialization and successful carrier registration; it is not drop-in deployment
-on an arbitrary kernel. Existing formal correctness records provide functional
-evidence; this audit does not create new runtime test results.
+The complete-distribution, equal-boot-weight recomputation is in
+`../baremetal/results/clocktime-distribution-analysis/20260924T065535Z-clocktime-full/report.json`.
+In normal builds the ordinary kernel monotonic/raw readers cost 0.993/1.439
+fewer TSC ticks/call, while the kernel coarse reader costs 1.843 more;
+the idle publisher costs 3.05 more ticks/update. The 13 public non-fallback
+paths have a 3.87% lower equal-weight geometric mean cost, while the seven
+`clock_gettime` fast paths have a 2.57% higher mean ratio. Public compatibility
+requires explicit linking, initialization and successful carrier registration.
+Existing formal correctness records provide functional evidence; this audit
+does not create new runtime test results.
