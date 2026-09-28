@@ -124,7 +124,10 @@ uname -r
 control=/sys/devices/system/clocksource/clocksource0/current_clocksource
 available=/sys/devices/system/clocksource/clocksource0/available_clocksource
 tries=0
-until grep -qw '{clock}' "$available"; do
+while :; do
+    case " $(cat "$available") " in
+        *" {clock} "*) break ;;
+    esac
     tries=$((tries + 1))
     test "$tries" -lt 20
     sleep 1
