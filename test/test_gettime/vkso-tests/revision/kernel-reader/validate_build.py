@@ -47,6 +47,18 @@ def symbol_sizes(text):
             if (m := re.fullmatch(r'([0-9a-f]+) ([0-9a-f]+) [tTwW] (\S+)', line))}
 
 
+def validate_config(config, variant):
+    """Fail closed if Kconfig dependencies silently erased a requested variant."""
+    lines = set(config.splitlines())
+    for name in ('VKSO_TIME', 'CPU_MITIGATIONS'):
+        if 'CONFIG_' + name + '=y' not in lines:
+            raise ValueError('configuration missing ' + name)
+    for name in ('RETPOLINE', 'RETHUNK', 'CPU_UNRET_ENTRY'):
+        enabled = 'CONFIG_' + name + '=y' in lines
+        if enabled != (variant == 'normal'):
+            raise ValueError('configuration does not implement ' + variant + ': ' + name)
+
+
 def initramfs(entries):
     """Create deterministic newc bytes without privileged filesystem operations."""
     result = bytearray()
@@ -70,7 +82,7 @@ def boot_smoke(source, work, out, options, env, run):
     cmd = ['make', '-C', source, 'O=' + str(build), 'CC=' + options.cc,
            '-j' + str(options.jobs)]
     run([*cmd, 'tinyconfig'], 'smoke-build.log')
-    enable = ['64BIT', 'SMP', 'ACPI', 'MODULES', 'MODULE_UNLOAD', 'PRINTK', 'TTY',
+    enable = ['64BIT', 'SMP', 'ACPI', 'CPU_MITIGATIONS', 'MODULES', 'MODULE_UNLOAD', 'PRINTK', 'TTY',
               'SERIAL_8250', 'SERIAL_8250_CONSOLE', 'BINFMT_ELF', 'BINFMT_SCRIPT', 'BLK_DEV_INITRD',
               'RD_GZIP', 'PROC_FS', 'SYSFS', 'DEBUG_FS', 'DEVTMPFS', 'TMPFS',
               'NAMESPACES', 'TIME_NS', 'POSIX_TIMERS', 'FUTEX', 'HIGH_RES_TIMERS', 'SHMEM',
@@ -85,6 +97,7 @@ def boot_smoke(source, work, out, options, env, run):
     run([source / 'scripts/config', '--file', build / '.config', *flags], 'smoke-build.log')
     run([*cmd, 'olddefconfig'], 'smoke-build.log')
     config = (build / '.config').read_text()
+    validate_config(config, options.variant)
     for name in ['64BIT', 'SMP', 'MODULES', 'PROC_FS', 'SYSFS', 'DEBUG_FS',
                  'SERIAL_8250_CONSOLE', 'BINFMT_ELF', 'BLK_DEV_INITRD', 'VKSO_TIME']:
         if 'CONFIG_' + name + '=y\n' not in config:
@@ -106,8 +119,10 @@ def boot_smoke(source, work, out, options, env, run):
     if 'INTERP' in readelf:
         raise ValueError('BusyBox must be statically linked')
     probe = work / 'syscall-smoke'
+    probe_source = work / 'syscall_smoke.c'
+    probe_source.write_bytes(git('show', options.head + ':' + READER + '/syscall_smoke.c'))
     run([options.cc, '-O2', '-static', '-D_GNU_SOURCE', '-Wall', '-Wextra', '-Werror',
-         ROOT / READER / 'syscall_smoke.c', '-o', probe], 'smoke-build.log')
+         probe_source, '-o', probe], 'smoke-build.log')
     for clock in ('tsc', 'jiffies'):
         init = f"""#!/bin/busybox sh
 /bin/busybox --install -s /bin
@@ -254,6 +269,7 @@ def main():
                 cmd = ['make', '-C', source, 'O=' + str(build), 'CC=' + a.cc, '-j' + str(a.jobs)]
                 run([*cmd, 'defconfig'], label + '.log')
                 flags = ['--enable', 'TIME_NS', '--enable', 'MODULES', '--enable', 'DEBUG_FS',
+                         '--enable', 'CPU_MITIGATIONS',
                          '--disable', 'IA32_EMULATION', '--disable', 'X86_X32',
                          '--disable', 'VKSO_TIME_TEST', '--disable', 'DEBUG_INFO',
                          '--disable', 'DEBUG_INFO_BTF', '--disable', 'FUNCTION_TRACER',
@@ -265,6 +281,7 @@ def main():
                         flags += ['--disable', flag]
                 run([source / 'scripts/config', '--file', build / '.config', *flags], label + '.log')
                 run([*cmd, 'olddefconfig'], label + '.log')
+                validate_config((build / '.config').read_text(), a.variant)
                 run([*cmd, 'modules_prepare'], label + '.log')
                 shutil.copy2(build / '.config', out / (label + '.config'))
                 run([*cmd, *OBJECTS], label + '.log')
