@@ -1,0 +1,15 @@
+variant,object,function,base_bytes,candidate_bytes,delta_bytes
+normal,timekeeping.o,ktime_get_ts64,68,36,-32
+normal,timekeeping.o,ktime_get_raw_ts64,54,22,-32
+normal,timekeeping.o,ktime_get_real_ts64,62,47,-15
+normal,timekeeping.o,ktime_get,123,97,-26
+normal,timekeeping.o,ktime_get_raw,109,83,-26
+normal,timekeeping.o,ktime_get_with_offset,141,120,-21
+normal,sys.o,__x64_sys_getcpu,171,130,-41
+no-retpoline,timekeeping.o,ktime_get_ts64,64,36,-28
+no-retpoline,timekeeping.o,ktime_get_raw_ts64,50,22,-28
+no-retpoline,timekeeping.o,ktime_get_real_ts64,58,47,-11
+no-retpoline,timekeeping.o,ktime_get,119,93,-26
+no-retpoline,timekeeping.o,ktime_get_raw,105,79,-26
+no-retpoline,timekeeping.o,ktime_get_with_offset,137,116,-21
+no-retpoline,sys.o,__x64_sys_getcpu,167,126,-41

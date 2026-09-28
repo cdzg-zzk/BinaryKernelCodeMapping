@@ -1,0 +1,117 @@
+{
+  "artifact_digests": {
+    "host": {
+      "id": 10962352760,
+      "sha256": "160cd2d16f5825b707b16673dc0af640b44dedbb042c84fe2bd3ca5288eb9225"
+    },
+    "no-retpoline": {
+      "id": 10962890430,
+      "sha256": "6b9b6351bd7f2860f78cb33a6837bac440fcdbc2a35757a2888735bd72f3f038"
+    },
+    "normal": {
+      "id": 10962895220,
+      "sha256": "739506153912af1977fe981276ed207353813e20fdd4e302f150eac03d44eccb"
+    }
+  },
+  "baseline_commit": "09b9505667f1d1c3da71ac8aaaa7d6054255bc62",
+  "ci_merge_commit": "b0e96200e0d7d6bfc687dab58cdf336b4e7d1d60",
+  "ci_run_id": 36406043860,
+  "ci_tests": {
+    "compiler": "GCC 11.4.0",
+    "direct_api": 74,
+    "source_audit_unit": 5
+  },
+  "formal_nuc_performance": "NOT_RUN",
+  "local_tests": {
+    "compiler": "GCC 14.2.0",
+    "direct_api": 74,
+    "source_audit_unit": 5,
+    "update": 45
+  },
+  "object_sizes_unit": "bytes; named function plus its .cold symbols; not source lines or latency",
+  "production_change_commit": "0b9c66617e3c520c76b05cf99dc30eb5c19618d8",
+  "production_noncomment_source_line_delta": 3,
+  "scope": "kernel contract/code-generation/VM functional validation; NOT NUC performance",
+  "shared_object_text_sha256": {
+    "no-retpoline": {
+      "arch/x86/kernel/vkso_getcpu.o": {
+        "base": "37458650d53e243bd0ce1d9de1cb3e3c70359e343a76da263b573d4ade0b119c",
+        "candidate": "37458650d53e243bd0ce1d9de1cb3e3c70359e343a76da263b573d4ade0b119c"
+      },
+      "kernel/time/vkso_time_core.o": {
+        "base": "1c8310613e73f86f0e523fb9966648094a32464d6c4c6953f8637ca5329fdfec",
+        "candidate": "1c8310613e73f86f0e523fb9966648094a32464d6c4c6953f8637ca5329fdfec"
+      },
+      "kernel/time/vkso_time_cycles.o": {
+        "base": "6bb85a84f216f985079851003e61f47f0bb3b473e493f4648c66543e1cfb352f",
+        "candidate": "6bb85a84f216f985079851003e61f47f0bb3b473e493f4648c66543e1cfb352f"
+      }
+    },
+    "normal": {
+      "arch/x86/kernel/vkso_getcpu.o": {
+        "base": "5d08d8c97b785892a397773cb44b7d65de1c4efe221ff6d7e78763d4c92f885f",
+        "candidate": "5d08d8c97b785892a397773cb44b7d65de1c4efe221ff6d7e78763d4c92f885f"
+      },
+      "kernel/time/vkso_time_core.o": {
+        "base": "f49710d479850f45b523b948be2d76789d79b42a2faf357cc9f545041152c553",
+        "candidate": "f49710d479850f45b523b948be2d76789d79b42a2faf357cc9f545041152c553"
+      },
+      "kernel/time/vkso_time_cycles.o": {
+        "base": "be178fb3664b87b4afd56c86cec5bd983b9783d58d80f215ee56fbdf475df598",
+        "candidate": "be178fb3664b87b4afd56c86cec5bd983b9783d58d80f215ee56fbdf475df598"
+      }
+    }
+  },
+  "target_carrier_registration_pfn_validation": "NOT_RUN",
+  "validated_code_commit": "da35e634392b6ceba2c6d11d4bff2b7a3b7af774",
+  "vm": {
+    "no-retpoline": {
+      "accelerator": "TCG",
+      "boots": {
+        "jiffies": {
+          "status": "PASS",
+          "suites": {
+            "SCALAR": 15,
+            "TIMESPEC": 9,
+            "syscall_abi": "PASS"
+          }
+        },
+        "tsc": {
+          "status": "PASS",
+          "suites": {
+            "SCALAR": 15,
+            "TIMESPEC": 9,
+            "syscall_abi": "PASS"
+          }
+        }
+      },
+      "kernel_sha256": "976d44ba8acca84c76ad705dc6f7be7a58cc34a5ee57a6d932a6143f4a91e60c",
+      "module_sha256": "088e8f371642578ba18009572e6c9d6ba2f7b1f3d927afd2215fe3fa5c956898",
+      "scope": "minimal VM; functional only; NOT formal timing"
+    },
+    "normal": {
+      "accelerator": "TCG",
+      "boots": {
+        "jiffies": {
+          "status": "PASS",
+          "suites": {
+            "SCALAR": 15,
+            "TIMESPEC": 9,
+            "syscall_abi": "PASS"
+          }
+        },
+        "tsc": {
+          "status": "PASS",
+          "suites": {
+            "SCALAR": 15,
+            "TIMESPEC": 9,
+            "syscall_abi": "PASS"
+          }
+        }
+      },
+      "kernel_sha256": "c8817c2d5b4f915d02856f8945c49f24e2c4b23f449ad094d7a3138c27daed0c",
+      "module_sha256": "3dbd169390bfd4c6f7441687c8dee60ba9d6af83685f9c24d5be40d264980768",
+      "scope": "minimal VM; functional only; NOT formal timing"
+    }
+  }
+}
