@@ -70,7 +70,7 @@ def boot_smoke(source, work, out, options, env, run):
     cmd = ['make', '-C', source, 'O=' + str(build), 'CC=' + options.cc,
            '-j' + str(options.jobs)]
     run([*cmd, 'tinyconfig'], 'smoke-build.log')
-    enable = ['64BIT', 'SMP', 'MODULES', 'MODULE_UNLOAD', 'PRINTK', 'TTY',
+    enable = ['64BIT', 'SMP', 'ACPI', 'MODULES', 'MODULE_UNLOAD', 'PRINTK', 'TTY',
               'SERIAL_8250', 'SERIAL_8250_CONSOLE', 'BINFMT_ELF', 'BINFMT_SCRIPT', 'BLK_DEV_INITRD',
               'RD_GZIP', 'PROC_FS', 'SYSFS', 'DEBUG_FS', 'DEVTMPFS', 'TMPFS',
               'NAMESPACES', 'TIME_NS', 'POSIX_TIMERS', 'FUTEX', 'HIGH_RES_TIMERS', 'SHMEM',
@@ -119,7 +119,23 @@ mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 mount -t debugfs debugfs /sys/kernel/debug
 uname -r
-test "$(cat /sys/devices/system/clocksource/clocksource0/current_clocksource)" = '{clock}'
+# init may run before late TSC registration; do not mistake tsc-early for
+# the requested clock. Wait with a bound, select explicitly, then verify.
+control=/sys/devices/system/clocksource/clocksource0/current_clocksource
+available=/sys/devices/system/clocksource/clocksource0/available_clocksource
+tries=0
+until grep -qw '{clock}' "$available"; do
+    tries=$((tries + 1))
+    test "$tries" -lt 20
+    sleep 1
+done
+printf '%s\\n' '{clock}' >"$control"
+echo EXPECTED_CLOCK={clock}
+cat "$control"
+test "$(cat "$control")" = '{clock}'
+# Require the configured SMP VM, rather than silently testing one CPU.
+cat /sys/devices/system/cpu/online
+test "$(cat /sys/devices/system/cpu/online)" = '0-1'
 /syscall-smoke
 insmod /reader.ko
 printf '0 2000 3 100\\n' >/sys/kernel/debug/vkso_kernel_reader/control
