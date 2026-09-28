@@ -134,3 +134,37 @@ add calls or invite a second inlined binary, without eliminating state or
 domain obligations. No such split is made. Object-size and disassembly checks
 can establish code-generation effects; target READ/UPDATE/scalar comparisons
 are still needed before claiming latency non-regression.
+
+The older “252 Raw / 592 VKSO kernel reader LOC” numbers were selected source
+ranges, not a function-level count of the same responsibilities. In particular,
+the VKSO side included a retained private path and integration work, while
+Raw's vDSO reader lived outside its kernel-reader range. Do not subtract those
+two figures as algorithm LOC. The broader source-change ledger in
+`../../code-size/CHANGE_AUDIT.md` separates shared computation, kernel
+boundaries, publisher, namespace/mapping, user ABI, and build integration;
+its pinned revision also predates this narrow adapter cleanup. A paper table
+must recompute a matched-scope ledger at the final evaluated commit.
+
+## Validation of the narrow-adapter revision
+
+The production change is `0e6a5ab`, compared with `d7ccc5c` using GCC 11.4
+and real Linux 5.15.198 Kbuild. Normal and no-retpoline configs both passed
+the paired object build. All measured function symbol sizes were unchanged;
+the disassembled instruction bytes of the eight ordinary hres/coarse
+`ktime_get*` functions matched within each variant. Their positions in
+`timekeeping.o` changed, so this is not a claim of identical whole-object
+layout or physical-machine latency. The three `.vkso.text` payloads were
+byte-identical to the base in both variants. Exact build/boot identities and
+per-function byte counts are in
+[normal](validation/minimal-adapter-normal.json) and
+[no-retpoline](validation/minimal-adapter-no-retpoline.json).
+
+The host direct-api/reader/scalar suite passed 74 tests, UPDATE tooling passed
+45 tests, and source-audit utilities passed 5 tests. Two minimal QEMU TCG
+boots per variant, selecting TSC and jiffies, passed syscall ABI behavior and
+produced the required 9 timespec and 15 scalar diagnostic rows per boot. These
+VM timings are functional evidence only. Real carrier registration, PFN
+sharing, target-machine READ/UPDATE/scalar timing and a candidate package
+installed on the NUC are **NOT_RUN** for this revision. The currently running
+NUC image is a prior Raw UPDATE kernel; it cannot validate this candidate's
+runtime performance. Formal latency non-regression therefore remains open.

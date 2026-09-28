@@ -1,5 +1,9 @@
 # Kernel reader regression and scalar diagnostics
 
+The [function-level architecture audit](ARCHITECTURE_AUDIT.md) traces Raw and
+VKSO calls, state, adapters, and fallback ownership. It covers the subsequent
+fixed-clock adapter cleanup separately from the contract change below.
+
 The historical READ campaign measures three timespec APIs. This directory also
 provides **separate scalar diagnostics**, plus deterministic host and Kbuild/VM
 validation for the completing kernel-reader contract. Nothing here installs a
@@ -7,15 +11,15 @@ kernel, edits GRUB, changes campaign state, or replaces a frozen package in plac
 
 ## What changed, and what deliberately did not
 
-`vkso_time_get_root()` is a **completing** kernel adapter for supported clocks.
-The fixed kernel failure callback already performs the private read and returns
-success. Returning the opaque shared callee status previously retained a second
-fallback in callers such as `ktime_get_ts64()`, even though the provider failure
-had already been handled. The adapter now returns class support: `OK` after a
-supported read completes, `NOT_SHARED` for a native-only clock. This lets normal
-inlining remove that redundant branch across all callers. The getcpu adapter
-similarly exposes its shared reader's unconditional-success contract; syscall
-`put_user()` faults are still checked in the syscall boundary.
+The previous contract revision made `vkso_time_get_root()` a **completing**
+adapter for supported clocks. Its fixed kernel callback already performs the
+private read on provider failure, so compiler inlining removed the second
+fallback from ordinary `ktime_get_*` machine code. This revision expresses the
+same contract in source: known hres and coarse kernel calls use separate narrow
+root adapters, while dynamic POSIX clock IDs remain classified at their
+boundary. The private callback remains in place. The getcpu adapter likewise
+exposes its shared reader's unconditional-success contract; syscall
+`put_user()` faults are still checked at the syscall boundary.
 
 This is not permission to discard new errors in future implementations. A future
 change to kernel callback return semantics must update this contract and its tests.
