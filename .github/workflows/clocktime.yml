@@ -34,9 +34,10 @@ jobs:
             uname -a
             gcc --version
             python3 --version
+            git count-objects -v
           } > validation/environment.txt
-          git archive HEAD test/test_gettime/linux-5.15.198-vkso test/test_gettime/vkso-tests/direct-api test/test_gettime/vkso-tests/functional test/test_gettime/vkso-tests/revision/kernel-reader | gzip -1 > validation/clocktime-source.tar.gz
-          sha256sum validation/clocktime-source.tar.gz > validation/SHA256SUMS
+          git bundle create validation/repository.bundle HEAD
+          sha256sum validation/repository.bundle > validation/SHA256SUMS
       - name: Existing direct API tests
         shell: bash
         run: |
