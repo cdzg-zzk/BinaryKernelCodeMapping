@@ -109,6 +109,24 @@ savings. Documentation, ignore patterns and non-source fixture material are list
 but not counted. User tests, collectors, build campaigns, archived data and this
 auditor are excluded from feature implementation counts.
 
+The seven case-specific categories have net **+1,154** source lines. Adding the
+native-vDSO withdrawal (net **−1,397**) produces a mechanical net **−243**
+against upstream Linux 5.15.198, before the separate compatibility/platform
+cleanup, test instrumentation and experiment configuration. The withdrawal
+includes native mapping and build machinery serving more than the measured
+time/getcpu scope. Therefore −243 describes this selected source diff, not an
+equal-function code-size reduction. Conversely, +1,154 describes integration
+churn, not the net size of the entire modified kernel tree.
+
+Historical reports used a different, hand-selected functional SLOC inventory
+at earlier implementation revisions: the July report counted Raw 1,201 versus
+VKSO 1,102 runtime SLOC (−99), while the August report counted Raw 1,505 versus
+VKSO 1,305 product SLOC (−200). The July report also found 467 fewer
+user-exclusive SLOC after moving calculation into the shared core. These
+figures do not measure source diff against upstream, and their manifests
+precede the current direct-linked public library and carrier adaptation.
+They must not be substituted for a matched-scope count of the present build.
+
 The broad no-vDSO platform removes capabilities beyond the five time/getcpu APIs.
 Consequently its source deletion total cannot be described as equal-function code
 reduction, nor can it support compatibility claims for 32-bit, UML or SGX users.
