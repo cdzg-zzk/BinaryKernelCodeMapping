@@ -124,9 +124,10 @@ class KernelContractTests(unittest.TestCase):
                      '-fno-optimize-sibling-calls', '-I' + str(cls.headers),
                      '-I' + str(KERNEL / 'include')]
         callers = (KERNEL / 'kernel/time/timekeeping.c').read_text()
-        names = ['ktime_get_real_ts64', 'ktime_get_ts64', 'ktime_get_raw_ts64',
-                 'ktime_get', 'ktime_get_raw', 'ktime_get_with_offset']
-        (cls.out / 'callers.inc').write_text(''.join(definition(callers, n) for n in names))
+        cls.caller_names = ['ktime_get_real_ts64', 'ktime_get_ts64', 'ktime_get_raw_ts64',
+                            'ktime_get', 'ktime_get_raw', 'ktime_get_with_offset']
+        (cls.out / 'callers.inc').write_text(''.join(
+            definition(callers, n) for n in cls.caller_names))
         (cls.out / 'callbacks.inc').write_text(
             definition((KERNEL / 'kernel/time/posix-timers.c').read_text(),
                        'vkso_posix_clock_gettime_failure') +
@@ -156,7 +157,7 @@ class KernelContractTests(unittest.TestCase):
     def test_ordinary_and_scalar_callers_on_success(self):
         self.check_case('callers')
 
-    def test_root_rejects_native_clocks_without_touching_output(self):
+    def test_dispatch_classifier_routes_native_clocks(self):
         self.check_case('unsupported')
 
     def test_retry_rejects_mixed_generation(self):
@@ -190,9 +191,14 @@ class KernelContractTests(unittest.TestCase):
         old = self.out / 'old/include/linux/vkso_time.h'
         old.parent.mkdir(parents=True)
         old.write_text(base)
+        old_callers = run(['git', '-C', REPO, 'show', BASE + ':' +
+                           str((KERNEL / 'kernel/time/timekeeping.c').relative_to(REPO))])
+        old_source = self.out / 'old-codegen.c'
+        old_source.write_text('#include <linux/vkso_time.h>\n' + ''.join(
+            definition(old_callers, n) for n in self.caller_names))
         before = self.out / 'before.o'
         run([self.cc, '-I' + str(old.parents[1]), *self.flags, '-I' + str(self.out),
-             '-c', source, '-o', before])
+             '-c', old_source, '-o', before])
         self.assertIn('vkso_timekeeping_get_private', run(['nm', '-u', before]))
         if artifacts:
             (target / 'root-before.txt').write_text(run(['objdump', '-dr', before]))

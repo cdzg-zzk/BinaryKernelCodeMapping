@@ -30,35 +30,30 @@ int vkso_timekeeping_writer_context_selftest(void);
 #endif
 
 /*
- * Ordinary kernel readers cross the same class boundary as userspace, but
- * select root-namespace semantics with a NULL MM_data pointer. Constant clock
- * IDs fold to one direct shared entry. Special NMI, writer-locked and
+ * Ordinary kernel readers use only known shared clocks and select root-
+ * namespace semantics with a NULL MM_data pointer. Dynamic clock IDs are
+ * classified by the POSIX dispatcher. Special NMI, writer-locked and
  * early-boot readers remain on their private paths.
  *
- * This is a completing kernel adapter, not a provider probe. For a shared
- * clock, the fixed kernel failure callbacks complete a private read and
- * return success. Report class support here, rather than propagating an
- * opaque callee result and making every ktime_get_* caller retry that same
- * fallback. Keep NOT_SHARED for callers passing a native-only clock.
- * User adapters still propagate their own syscall/errno results.
+ * This is a completing kernel adapter, not a provider probe. The fixed kernel
+ * failure callback completes a private read when the shared provider fails.
+ * Thus callers do not retry the same fallback. User adapters still propagate
+ * their own syscall/errno results.
  */
-static __always_inline int
-vkso_time_get_root(s32 clock_id, struct timespec64 *tp)
+static __always_inline void
+vkso_time_get_root_hres(s32 clock_id, struct timespec64 *tp)
 {
 	struct vkso_time_value *value = (struct vkso_time_value *)tp;
 
-	switch (vkso_clock_classify(clock_id)) {
-	case VKSO_CLOCK_HRES:
-		(void)vkso_clock_gettime_hres(
-			clock_id, value, NULL, &vkso_kernel_context);
-		return VKSO_TIME_OK;
-	case VKSO_CLOCK_COARSE:
-		(void)vkso_clock_gettime_coarse(
-			clock_id, value, NULL);
-		return VKSO_TIME_OK;
-	default:
-		return VKSO_TIME_NOT_SHARED;
-	}
+	(void)vkso_clock_gettime_hres(clock_id, value, NULL,
+				      &vkso_kernel_context);
+}
+
+static __always_inline void
+vkso_time_get_root_coarse(s32 clock_id, struct timespec64 *tp)
+{
+	(void)vkso_clock_gettime_coarse(
+		clock_id, (struct vkso_time_value *)tp, NULL);
 }
 
 static __always_inline u32 vkso_time_get_root_resolution(void)

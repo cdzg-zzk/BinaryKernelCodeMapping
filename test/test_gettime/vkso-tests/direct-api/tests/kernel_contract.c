@@ -203,10 +203,10 @@ static void unsupported(void)
 {
 	const int ids[] = {-1, CLOCK_PROCESS_CPUTIME_ID, CLOCK_REALTIME_ALARM, INT32_MAX};
 	for (unsigned i = 0; i < sizeof(ids)/sizeof(ids[0]); ++i) {
-		struct timespec64 ts = {88, 99};
-		assert(vkso_time_get_root(ids[i], &ts) == VKSO_TIME_NOT_SHARED);
-		assert(ts.tv_sec == 88 && ts.tv_nsec == 99);
+		assert(vkso_clock_classify(ids[i]) == VKSO_CLOCK_NATIVE);
 	}
+	assert(vkso_clock_classify(CLOCK_MONOTONIC) == VKSO_CLOCK_HRES);
+	assert(vkso_clock_classify(CLOCK_MONOTONIC_COARSE) == VKSO_CLOCK_COARSE);
 	assert(!private_calls && !counter_calls);
 }
 

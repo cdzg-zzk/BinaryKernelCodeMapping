@@ -985,10 +985,7 @@ vkso_timekeeping_get_private(clockid_t clock_id, struct timespec64 *ts)
 void ktime_get_real_ts64(struct timespec64 *ts)
 {
 	WARN_ON(timekeeping_suspended);
-	if (likely(vkso_time_get_root(CLOCK_REALTIME, ts) ==
-		   VKSO_TIME_OK))
-		return;
-	vkso_timekeeping_get_private(CLOCK_REALTIME, ts);
+	vkso_time_get_root_hres(CLOCK_REALTIME, ts);
 }
 EXPORT_SYMBOL(ktime_get_real_ts64);
 
@@ -997,9 +994,7 @@ ktime_t ktime_get(void)
 	struct timespec64 ts;
 
 	WARN_ON(timekeeping_suspended);
-	if (unlikely(vkso_time_get_root(CLOCK_MONOTONIC, &ts) !=
-		     VKSO_TIME_OK))
-		vkso_timekeeping_get_private(CLOCK_MONOTONIC, &ts);
+	vkso_time_get_root_hres(CLOCK_MONOTONIC, &ts);
 	return timespec64_to_ktime(ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get);
@@ -1021,7 +1016,6 @@ ktime_t ktime_get_with_offset(enum tk_offsets offs)
 {
 	struct timespec64 ts;
 	clockid_t clock_id;
-	int status;
 
 	WARN_ON(timekeeping_suspended);
 	if (offs == TK_OFFS_REAL) {
@@ -1031,9 +1025,7 @@ ktime_t ktime_get_with_offset(enum tk_offsets offs)
 	} else {
 		clock_id = CLOCK_TAI;
 	}
-	status = vkso_time_get_root(clock_id, &ts);
-	if (unlikely(status != VKSO_TIME_OK))
-		vkso_timekeeping_get_private(clock_id, &ts);
+	vkso_time_get_root_hres(clock_id, &ts);
 	return timespec64_to_ktime(ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get_with_offset);
@@ -1084,9 +1076,7 @@ ktime_t ktime_get_raw(void)
 {
 	struct timespec64 ts;
 
-	if (unlikely(vkso_time_get_root(CLOCK_MONOTONIC_RAW, &ts) !=
-		     VKSO_TIME_OK))
-		vkso_timekeeping_get_private(CLOCK_MONOTONIC_RAW, &ts);
+	vkso_time_get_root_hres(CLOCK_MONOTONIC_RAW, &ts);
 	return timespec64_to_ktime(ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get_raw);
@@ -1102,10 +1092,7 @@ EXPORT_SYMBOL_GPL(ktime_get_raw);
 void ktime_get_ts64(struct timespec64 *ts)
 {
 	WARN_ON(timekeeping_suspended);
-	if (likely(vkso_time_get_root(CLOCK_MONOTONIC, ts) ==
-		   VKSO_TIME_OK))
-		return;
-	vkso_timekeeping_get_private(CLOCK_MONOTONIC, ts);
+	vkso_time_get_root_hres(CLOCK_MONOTONIC, ts);
 }
 EXPORT_SYMBOL_GPL(ktime_get_ts64);
 
@@ -1641,10 +1628,7 @@ int timekeeping_notify(struct clocksource *clock)
  */
 void ktime_get_raw_ts64(struct timespec64 *ts)
 {
-	if (likely(vkso_time_get_root(CLOCK_MONOTONIC_RAW, ts) ==
-		   VKSO_TIME_OK))
-		return;
-	vkso_timekeeping_get_private(CLOCK_MONOTONIC_RAW, ts);
+	vkso_time_get_root_hres(CLOCK_MONOTONIC_RAW, ts);
 }
 EXPORT_SYMBOL(ktime_get_raw_ts64);
 
@@ -2370,13 +2354,13 @@ EXPORT_SYMBOL_GPL(getboottime64);
 
 void ktime_get_coarse_real_ts64(struct timespec64 *ts)
 {
-	(void)vkso_time_get_root(CLOCK_REALTIME_COARSE, ts);
+	vkso_time_get_root_coarse(CLOCK_REALTIME_COARSE, ts);
 }
 EXPORT_SYMBOL(ktime_get_coarse_real_ts64);
 
 void ktime_get_coarse_ts64(struct timespec64 *ts)
 {
-	(void)vkso_time_get_root(CLOCK_MONOTONIC_COARSE, ts);
+	vkso_time_get_root_coarse(CLOCK_MONOTONIC_COARSE, ts);
 }
 EXPORT_SYMBOL(ktime_get_coarse_ts64);
 
