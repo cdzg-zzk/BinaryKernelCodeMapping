@@ -1,5 +1,5 @@
 {
-  "source_revision": "ff79171885356e05800c6c488679befb03db7f68",
+  "source_revision": "cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb",
   "baseline": "Linux 5.15.198",
   "metric": "nonblank noncomment source lines; Kconfig help prose excluded; whitespace normalized; no macro expansion",
   "diff": "SequenceMatcher(autojunk=False) after diagnostic projection; replacement counts once added and once deleted",
@@ -21,7 +21,7 @@
       "deleted": 0
     },
     "kernel_readers": {
-      "added": 238,
+      "added": 221,
       "deleted": 182
     },
     "mm_namespace": {
@@ -185,7 +185,7 @@
     {
       "path": "test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h",
       "category": "kernel_readers",
-      "added": 10,
+      "added": 11,
       "deleted": 0
     },
     {
@@ -197,7 +197,7 @@
     {
       "path": "test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h",
       "category": "kernel_readers",
-      "added": 57,
+      "added": 55,
       "deleted": 0
     },
     {
@@ -275,7 +275,7 @@
     {
       "path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c",
       "category": "kernel_readers",
-      "added": 66,
+      "added": 50,
       "deleted": 92
     },
     {

@@ -1,0 +1,8 @@
+Command: python3 -m unittest discover -s test/test_gettime/vkso-tests/direct-api/tests -p test_kernel_contract.py
+Source: cf9dc817; current production files match this revision.
+Scope: production reader/adapter code compiled with deterministic host environment fixtures.
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.419s
+
+OK

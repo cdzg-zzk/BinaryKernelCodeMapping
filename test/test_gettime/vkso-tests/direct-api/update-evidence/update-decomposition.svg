@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="565" viewBox="0 0 1080 565">
+<style>text{font-family:DejaVu Sans,sans-serif;fill:#222}</style>
+<rect width="1080" height="565" fill="white"/>
+<text x="20.000" y="28.000" font-size="19" text-anchor="start" font-weight="600">Exact decomposition of the complete mean difference</text>
+<rect x="45.000" y="49.000" width="10.000" height="10.000" fill="#0072B2"/>
+<text x="61.000" y="59.000" font-size="12" text-anchor="start" font-weight="400">Low-side cost</text>
+<rect x="305.000" y="49.000" width="10.000" height="10.000" fill="#CC79A7"/>
+<text x="321.000" y="59.000" font-size="12" text-anchor="start" font-weight="400">Capped high-side cost</text>
+<rect x="565.000" y="49.000" width="10.000" height="10.000" fill="#E69F00"/>
+<text x="581.000" y="59.000" font-size="12" text-anchor="start" font-weight="400">Occupancy</text>
+<rect x="825.000" y="49.000" width="10.000" height="10.000" fill="#009E73"/>
+<text x="841.000" y="59.000" font-size="12" text-anchor="start" font-weight="400">Tail excess (&gt;300)</text>
+<text x="85.000" y="81.000" font-size="12" text-anchor="start" font-weight="400">Bars sum to black total marker; per-block identity, then equal boot weighting</text>
+<line x1="85.000" y1="450.000" x2="1040.000" y2="450.000" stroke="#ddd" stroke-width="1"/>
+<text x="73.000" y="454.000" font-size="12" text-anchor="end" font-weight="400">-20</text>
+<line x1="85.000" y1="405.625" x2="1040.000" y2="405.625" stroke="#ddd" stroke-width="1"/>
+<text x="73.000" y="409.625" font-size="12" text-anchor="end" font-weight="400">-15</text>
+<line x1="85.000" y1="361.250" x2="1040.000" y2="361.250" stroke="#ddd" stroke-width="1"/>
+<text x="73.000" y="365.250" font-size="12" text-anchor="end" font-weight="400">-10</text>
+<line x1="85.000" y1="316.875" x2="1040.000" y2="316.875" stroke="#ddd" stroke-width="1"/>
+<text x="73.000" y="320.875" font-size="12" text-anchor="end" font-weight="400">-5</text>
+<line x1="85.000" y1="272.500" x2="1040.000" y2="272.500" stroke="#777" stroke-width="1"/>
+<text x="73.000" y="276.500" font-size="12" text-anchor="end" font-weight="400">0</text>
+<line x1="85.000" y1="228.125" x2="1040.000" y2="228.125" stroke="#ddd" stroke-width="1"/>
+<text x="73.000" y="232.125" font-size="12" text-anchor="end" font-weight="400">5</text>
+<line x1="85.000" y1="183.750" x2="1040.000" y2="183.750" stroke="#ddd" stroke-width="1"/>
+<text x="73.000" y="187.750" font-size="12" text-anchor="end" font-weight="400">10</text>
+<line x1="85.000" y1="139.375" x2="1040.000" y2="139.375" stroke="#ddd" stroke-width="1"/>
+<text x="73.000" y="143.375" font-size="12" text-anchor="end" font-weight="400">15</text>
+<line x1="85.000" y1="95.000" x2="1040.000" y2="95.000" stroke="#ddd" stroke-width="1"/>
+<text x="73.000" y="99.000" font-size="12" text-anchor="end" font-weight="400">20</text>
+<rect x="110.000" y="272.500" width="14.000" height="71.273" fill="#0072B2"/>
+<rect x="128.000" y="260.270" width="14.000" height="12.230" fill="#CC79A7"/>
+<rect x="146.000" y="164.017" width="14.000" height="108.483" fill="#E69F00"/>
+<rect x="164.000" y="272.500" width="14.000" height="1.180" fill="#009E73"/>
+<rect x="141.000" y="220.239" width="8" height="8" fill="#111" stroke="#111"/>
+<text x="145.000" y="477.000" font-size="12" text-anchor="middle" font-weight="400">Idle</text>
+<rect x="228.000" y="272.500" width="14.000" height="124.364" fill="#0072B2"/>
+<rect x="246.000" y="272.500" width="14.000" height="7.406" fill="#CC79A7"/>
+<rect x="264.000" y="145.762" width="14.000" height="126.738" fill="#E69F00"/>
+<rect x="282.000" y="272.500" width="14.000" height="0.666" fill="#009E73"/>
+<rect x="259.000" y="274.198" width="8" height="8" fill="#111" stroke="#111"/>
+<text x="263.000" y="477.000" font-size="12" text-anchor="middle" font-weight="400">Mono</text>
+<rect x="346.000" y="272.500" width="14.000" height="131.077" fill="#0072B2"/>
+<rect x="364.000" y="272.500" width="14.000" height="57.543" fill="#CC79A7"/>
+<rect x="382.000" y="165.319" width="14.000" height="107.181" fill="#E69F00"/>
+<rect x="400.000" y="272.500" width="14.000" height="5.317" fill="#009E73"/>
+<rect x="377.000" y="355.256" width="8" height="8" fill="#111" stroke="#111"/>
+<text x="381.000" y="477.000" font-size="12" text-anchor="middle" font-weight="400">Raw</text>
+<rect x="464.000" y="272.500" width="14.000" height="133.175" fill="#0072B2"/>
+<rect x="482.000" y="272.500" width="14.000" height="51.887" fill="#CC79A7"/>
+<rect x="500.000" y="175.096" width="14.000" height="97.404" fill="#E69F00"/>
+<rect x="518.000" y="272.500" width="14.000" height="5.713" fill="#009E73"/>
+<rect x="495.000" y="361.871" width="8" height="8" fill="#111" stroke="#111"/>
+<text x="499.000" y="477.000" font-size="12" text-anchor="middle" font-weight="400">Coarse</text>
+<rect x="582.000" y="272.500" width="14.000" height="45.790" fill="#0072B2"/>
+<rect x="600.000" y="187.614" width="14.000" height="84.886" fill="#CC79A7"/>
+<rect x="618.000" y="221.407" width="14.000" height="51.093" fill="#E69F00"/>
+<rect x="636.000" y="272.500" width="14.000" height="5.401" fill="#009E73"/>
+<rect x="613.000" y="183.712" width="8" height="8" fill="#111" stroke="#111"/>
+<text x="617.000" y="477.000" font-size="12" text-anchor="middle" font-weight="400">Idle</text>
+<rect x="700.000" y="272.500" width="14.000" height="134.059" fill="#0072B2"/>
+<rect x="718.000" y="242.864" width="14.000" height="29.636" fill="#CC79A7"/>
+<rect x="736.000" y="139.866" width="14.000" height="132.634" fill="#E69F00"/>
+<rect x="754.000" y="272.500" width="14.000" height="1.900" fill="#009E73"/>
+<rect x="731.000" y="242.189" width="8" height="8" fill="#111" stroke="#111"/>
+<text x="735.000" y="477.000" font-size="12" text-anchor="middle" font-weight="400">Mono</text>
+<rect x="818.000" y="272.500" width="14.000" height="140.382" fill="#0072B2"/>
+<rect x="836.000" y="262.710" width="14.000" height="9.790" fill="#CC79A7"/>
+<rect x="854.000" y="191.162" width="14.000" height="81.338" fill="#E69F00"/>
+<rect x="872.000" y="272.500" width="14.000" height="10.471" fill="#009E73"/>
+<rect x="849.000" y="328.226" width="8" height="8" fill="#111" stroke="#111"/>
+<text x="853.000" y="477.000" font-size="12" text-anchor="middle" font-weight="400">Raw</text>
+<rect x="936.000" y="272.500" width="14.000" height="142.379" fill="#0072B2"/>
+<rect x="954.000" y="267.385" width="14.000" height="5.115" fill="#CC79A7"/>
+<rect x="972.000" y="182.158" width="14.000" height="90.342" fill="#E69F00"/>
+<rect x="990.000" y="272.500" width="14.000" height="14.440" fill="#009E73"/>
+<rect x="967.000" y="329.861" width="8" height="8" fill="#111" stroke="#111"/>
+<text x="971.000" y="477.000" font-size="12" text-anchor="middle" font-weight="400">Coarse</text>
+<text x="320.000" y="509.000" font-size="15" text-anchor="middle" font-weight="600">Retpoline</text>
+<text x="790.000" y="509.000" font-size="15" text-anchor="middle" font-weight="600">No-retpoline</text>
+<text x="85.000" y="541.000" font-size="13" text-anchor="start" font-weight="400">Contribution to VKSO − Raw (TSC ticks/update)</text>
+</svg>

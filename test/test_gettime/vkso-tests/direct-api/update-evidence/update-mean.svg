@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="640" viewBox="0 0 1040 640">
+<style>text{font-family:DejaVu Sans,sans-serif;fill:#222}</style>
+<rect width="1040" height="640" fill="white"/>
+<text x="20.000" y="28.000" font-size="19" text-anchor="start" font-weight="600">Periodic UPDATE function: VKSO − Raw</text>
+<text x="20.000" y="53.000" font-size="13" text-anchor="start" font-weight="400">Instrumented function-internal interval; all samples retained</text>
+<text x="285.000" y="82.000" font-size="12" text-anchor="start" font-weight="400">Filled: mean difference + 95% CI; hollow: four block differences</text>
+<line x1="285.000" y1="96.000" x2="285.000" y2="554.000" stroke="#ddd" stroke-width="1"/>
+<text x="285.000" y="577.000" font-size="12" text-anchor="middle" font-weight="400">-16</text>
+<line x1="373.125" y1="96.000" x2="373.125" y2="554.000" stroke="#ddd" stroke-width="1"/>
+<text x="373.125" y="577.000" font-size="12" text-anchor="middle" font-weight="400">-12</text>
+<line x1="461.250" y1="96.000" x2="461.250" y2="554.000" stroke="#ddd" stroke-width="1"/>
+<text x="461.250" y="577.000" font-size="12" text-anchor="middle" font-weight="400">-8</text>
+<line x1="549.375" y1="96.000" x2="549.375" y2="554.000" stroke="#ddd" stroke-width="1"/>
+<text x="549.375" y="577.000" font-size="12" text-anchor="middle" font-weight="400">-4</text>
+<line x1="637.500" y1="96.000" x2="637.500" y2="554.000" stroke="#888" stroke-width="1"/>
+<text x="637.500" y="577.000" font-size="12" text-anchor="middle" font-weight="400">0</text>
+<line x1="725.625" y1="96.000" x2="725.625" y2="554.000" stroke="#ddd" stroke-width="1"/>
+<text x="725.625" y="577.000" font-size="12" text-anchor="middle" font-weight="400">4</text>
+<line x1="813.750" y1="96.000" x2="813.750" y2="554.000" stroke="#ddd" stroke-width="1"/>
+<text x="813.750" y="577.000" font-size="12" text-anchor="middle" font-weight="400">8</text>
+<line x1="901.875" y1="96.000" x2="901.875" y2="554.000" stroke="#ddd" stroke-width="1"/>
+<text x="901.875" y="577.000" font-size="12" text-anchor="middle" font-weight="400">12</text>
+<line x1="990.000" y1="96.000" x2="990.000" y2="554.000" stroke="#ddd" stroke-width="1"/>
+<text x="990.000" y="577.000" font-size="12" text-anchor="middle" font-weight="400">16</text>
+<text x="270.000" y="114.000" font-size="13" text-anchor="end" font-weight="400">Retpoline / Idle</text>
+<line x1="742.670" y1="110.000" x2="771.937" y2="110.000" stroke="#0072B2" stroke-width="2"/>
+<line x1="742.670" y1="106.000" x2="742.670" y2="114.000" stroke="#0072B2" stroke-width="1"/>
+<line x1="771.937" y1="106.000" x2="771.937" y2="114.000" stroke="#0072B2" stroke-width="1"/>
+<circle cx="757.303" cy="110.000" r="4" fill="#0072B2" stroke="#0072B2"/>
+<circle cx="769.087" cy="122.000" r="2.3" fill="white" stroke="#0072B2"/>
+<circle cx="744.509" cy="122.000" r="2.3" fill="white" stroke="#0072B2"/>
+<circle cx="740.830" cy="122.000" r="2.3" fill="white" stroke="#0072B2"/>
+<circle cx="774.787" cy="122.000" r="2.3" fill="white" stroke="#0072B2"/>
+<text x="270.000" y="170.000" font-size="13" text-anchor="end" font-weight="400">Retpoline / Monotonic</text>
+<line x1="589.633" y1="166.000" x2="663.168" y2="166.000" stroke="#0072B2" stroke-width="2"/>
+<line x1="589.633" y1="162.000" x2="589.633" y2="170.000" stroke="#0072B2" stroke-width="1"/>
+<line x1="663.168" y1="162.000" x2="663.168" y2="170.000" stroke="#0072B2" stroke-width="1"/>
+<circle cx="623.354" cy="166.000" r="4" fill="#0072B2" stroke="#0072B2"/>
+<circle cx="613.942" cy="178.000" r="2.3" fill="white" stroke="#0072B2"/>
+<circle cx="620.582" cy="178.000" r="2.3" fill="white" stroke="#0072B2"/>
+<circle cx="579.316" cy="178.000" r="2.3" fill="white" stroke="#0072B2"/>
+<circle cx="679.576" cy="178.000" r="2.3" fill="white" stroke="#0072B2"/>
+<text x="270.000" y="226.000" font-size="13" text-anchor="end" font-weight="400">Retpoline / Monotonic raw</text>
+<line x1="387.452" y1="222.000" x2="440.579" y2="222.000" stroke="#0072B2" stroke-width="2"/>
+<line x1="387.452" y1="218.000" x2="387.452" y2="226.000" stroke="#0072B2" stroke-width="1"/>
+<line x1="440.579" y1="218.000" x2="440.579" y2="226.000" stroke="#0072B2" stroke-width="1"/>
+<circle cx="422.137" cy="222.000" r="4" fill="#0072B2" stroke="#0072B2"/>
+<circle cx="439.852" cy="234.000" r="2.3" fill="white" stroke="#0072B2"/>
+<circle cx="369.985" cy="234.000" r="2.3" fill="white" stroke="#0072B2"/>
+<circle cx="441.306" cy="234.000" r="2.3" fill="white" stroke="#0072B2"/>
+<circle cx="437.404" cy="234.000" r="2.3" fill="white" stroke="#0072B2"/>
+<text x="270.000" y="282.000" font-size="13" text-anchor="end" font-weight="400">Retpoline / Monotonic coarse</text>
+<line x1="359.318" y1="278.000" x2="441.660" y2="278.000" stroke="#0072B2" stroke-width="2"/>
+<line x1="359.318" y1="274.000" x2="359.318" y2="282.000" stroke="#0072B2" stroke-width="1"/>
+<line x1="441.660" y1="274.000" x2="441.660" y2="282.000" stroke="#0072B2" stroke-width="1"/>
+<circle cx="405.716" cy="278.000" r="4" fill="#0072B2" stroke="#0072B2"/>
+<circle cx="406.635" cy="290.000" r="2.3" fill="white" stroke="#0072B2"/>
+<circle cx="332.908" cy="290.000" r="2.3" fill="white" stroke="#0072B2"/>
+<circle cx="444.773" cy="290.000" r="2.3" fill="white" stroke="#0072B2"/>
+<circle cx="438.547" cy="290.000" r="2.3" fill="white" stroke="#0072B2"/>
+<text x="270.000" y="338.000" font-size="13" text-anchor="end" font-weight="400">No-retpoline / Idle</text>
+<line x1="787.233" y1="334.000" x2="901.961" y2="334.000" stroke="#D55E00" stroke-width="2"/>
+<line x1="787.233" y1="330.000" x2="787.233" y2="338.000" stroke="#D55E00" stroke-width="1"/>
+<line x1="901.961" y1="330.000" x2="901.961" y2="338.000" stroke="#D55E00" stroke-width="1"/>
+<rect x="843.977" y="330.000" width="8" height="8" fill="#D55E00" stroke="#D55E00"/>
+<rect x="920.973" y="343.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<rect x="756.861" y="343.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<rect x="869.151" y="343.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<rect x="835.723" y="343.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<text x="270.000" y="394.000" font-size="13" text-anchor="end" font-weight="400">No-retpoline / Monotonic</text>
+<line x1="634.915" y1="390.000" x2="770.712" y2="390.000" stroke="#D55E00" stroke-width="2"/>
+<line x1="634.915" y1="386.000" x2="634.915" y2="394.000" stroke="#D55E00" stroke-width="1"/>
+<line x1="770.712" y1="386.000" x2="770.712" y2="394.000" stroke="#D55E00" stroke-width="1"/>
+<rect x="698.814" y="386.000" width="8" height="8" fill="#D55E00" stroke="#D55E00"/>
+<rect x="758.601" y="399.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<rect x="673.826" y="399.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<rect x="591.405" y="399.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<rect x="778.222" y="399.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<text x="270.000" y="450.000" font-size="13" text-anchor="end" font-weight="400">No-retpoline / Monotonic raw</text>
+<line x1="405.292" y1="446.000" x2="573.183" y2="446.000" stroke="#D55E00" stroke-width="2"/>
+<line x1="405.292" y1="442.000" x2="405.292" y2="450.000" stroke="#D55E00" stroke-width="1"/>
+<line x1="573.183" y1="442.000" x2="573.183" y2="450.000" stroke="#D55E00" stroke-width="1"/>
+<rect x="485.238" y="442.000" width="8" height="8" fill="#D55E00" stroke="#D55E00"/>
+<rect x="584.693" y="455.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<rect x="416.408" y="455.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<rect x="389.577" y="455.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<rect x="557.073" y="455.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<text x="270.000" y="506.000" font-size="13" text-anchor="end" font-weight="400">No-retpoline / Monotonic coarse</text>
+<line x1="433.869" y1="502.000" x2="522.664" y2="502.000" stroke="#D55E00" stroke-width="2"/>
+<line x1="433.869" y1="498.000" x2="433.869" y2="506.000" stroke="#D55E00" stroke-width="1"/>
+<line x1="522.664" y1="498.000" x2="522.664" y2="506.000" stroke="#D55E00" stroke-width="1"/>
+<rect x="481.177" y="498.000" width="8" height="8" fill="#D55E00" stroke="#D55E00"/>
+<rect x="529.697" y="511.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<rect x="492.364" y="511.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<rect x="408.414" y="511.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<rect x="501.034" y="511.700" width="4.6" height="4.6" fill="white" stroke="#D55E00"/>
+<text x="637.500" y="612.000" font-size="14" text-anchor="middle" font-weight="400">VKSO − Raw (TSC ticks/update)</text>
+</svg>

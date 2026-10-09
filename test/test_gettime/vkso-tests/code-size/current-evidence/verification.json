@@ -1,0 +1,84 @@
+{
+  "status": "PASS",
+  "source_revision": "cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb",
+  "scope": "work 1 and work 2; no new target experiment or performance claim",
+  "commands": [
+    {
+      "command": "/usr/bin/python3 test/test_gettime/vkso-tests/code-size/audit_changes.py --check",
+      "exit_code": 0
+    },
+    {
+      "command": "/usr/bin/python3 test/test_gettime/vkso-tests/code-size/audit_current.py --check",
+      "exit_code": 0
+    },
+    {
+      "command": "/usr/bin/python3 test/test_gettime/vkso-tests/code-size/audit_binary_current.py --check",
+      "exit_code": 0
+    },
+    {
+      "command": "/usr/bin/python3 test/test_gettime/vkso-tests/code-size/collect_work12.py --check",
+      "exit_code": 0
+    },
+    {
+      "command": "/usr/bin/python3 test/test_gettime/vkso-tests/code-size/build_work12_report.py --check",
+      "exit_code": 0
+    },
+    {
+      "command": "/usr/bin/python3 test/test_gettime/vkso-tests/code-size/check_maintenance_case.py",
+      "exit_code": 0
+    },
+    {
+      "command": "/usr/bin/python3 -m unittest discover -s test/test_gettime/vkso-tests/code-size -p test_audit_current.py",
+      "exit_code": 0
+    },
+    {
+      "command": "/usr/bin/python3 -m unittest discover -s test/test_gettime/vkso-tests/direct-api/tests -p test_kernel_contract.py",
+      "exit_code": 0
+    }
+  ],
+  "production_addition_lines_accounted": 1477,
+  "missing_production_additions": 0,
+  "independent_vkso_read_boots": 8,
+  "campaign_read_build_groups_consistent": 4,
+  "source_feature_sloc": {
+    "Raw": 1487,
+    "VKSO": 1624
+  },
+  "source_plus_selected_retained_sloc": {
+    "Raw": 1578,
+    "VKSO": 1771
+  },
+  "maintenance_helper_cases": 100100,
+  "deliverables": {
+    "responsibilities_and_paths": [
+      "README.md",
+      "mechanism.mmd",
+      "interfaces.csv",
+      "binary-user-transfers.csv"
+    ],
+    "physical_identity": [
+      "mechanism-boots.csv",
+      "shared-pages.csv",
+      "resource-pages.csv"
+    ],
+    "source_size": [
+      "source-manifest.json",
+      "source-lines.csv",
+      "source-slices.csv",
+      "source-summary.csv",
+      "source-totals.json"
+    ],
+    "actual_binary_size": [
+      "binary-identities.json",
+      "binary-symbols.csv",
+      "binary-sections.csv",
+      "binary-summary.csv"
+    ],
+    "maintenance": [
+      "maintenance-aa1855e.patch",
+      "maintenance-validation.json",
+      "maintenance-helper.c",
+      "kernel-contract-validation.log"
+    ]
+  }
+}

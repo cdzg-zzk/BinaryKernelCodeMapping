@@ -1,0 +1,12 @@
+\begin{tabular}{lrrrrl}
+\toprule
+Interface & Raw & VKSO & $\Delta$ & $\Delta\%$ & 95\% CI \\
+\midrule
+clock\_getres(REALTIME) & 15.095 & 13.045 & -2.050 & -13.580 & [-2.050, -2.050] \\
+clock\_getres(REALTIME\_COARSE) & 14.049 & 13.080 & -0.969 & -6.896 & [-0.969, -0.969] \\
+gettimeofday(tv, NULL) & 56.204 & 55.201 & -1.002 & -1.784 & [-1.003, -1.002] \\
+time(NULL) & 7.024 & 6.021 & -1.003 & -14.284 & [-1.003, -1.003] \\
+time(\&seconds) & 7.024 & 5.034 & -1.991 & -28.342 & [-1.991, -1.991] \\
+getcpu(cpu, node) & 14.049 & 13.045 & -1.004 & -7.144 & [-1.652, -1.003] \\
+\bottomrule
+\end{tabular}

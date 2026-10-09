@@ -1,0 +1,18 @@
+test_bad_benchmark_arguments_refused (__main__.RuntimeTests) ... ok
+test_exported_abi_header_builds_without_kernel_source_tree (__main__.RuntimeTests) ... ok
+test_header_cpp_compatibility (__main__.RuntimeTests) ... ok
+test_mock_direct_link_api_errno_threads_once (__main__.RuntimeTests) ... ok
+test_mock_initialization_failure_paths (__main__.RuntimeTests) ... ok
+test_native_and_vkso_link_disassembly_audit (__main__.RuntimeTests) ... ok
+test_native_fast_api_check (__main__.RuntimeTests) ... skipped 'native runtime smoke requires a Raw boot (native_vdso=0, vkso_mm_auxv=1)'
+test_native_no_time_syscall_diagnostic (__main__.RuntimeTests) ... skipped 'native runtime smoke requires a Raw boot (native_vdso=0, vkso_mm_auxv=1)'
+test_native_probe_not_kernel_evidence (__main__.RuntimeTests) ... ok
+test_native_smoke_csv_not_accepted_as_formal_full_matrix (__main__.RuntimeTests) ... skipped 'native runtime smoke requires a Raw boot (native_vdso=0, vkso_mm_auxv=1)'
+test_public_hot_calls_bypass_plt (__main__.RuntimeTests) ... ok
+test_public_shared_library_direct_calls_no_recursion (__main__.RuntimeTests) ... ok
+test_real_functional_inputs_match_pinned_git_blobs (__main__.RuntimeTests) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.935s
+
+OK (skipped=3)

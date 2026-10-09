@@ -13,9 +13,10 @@ import sys
 
 PROTOCOL = 'clocktime-direct-api-v2'
 FUNCTIONAL_BLOBS = {
-    'vkso_abi.h': '2df75c320867c5987b77106070c1a401ff1511e9',
-    'vkso_user_wrapper.c': '6a4c2148371fd07529f13ed27e6d3f0573f0c2d6',
+    'vkso_abi.h': '73072070df9ac4733f872bfc8913f5c5ade6da9c',
+    'vkso_user_wrapper.c': '19a264e4f111ae253f81224573b668b4e9ec343a',
     'vkso_user_wrapper.h': 'f96e83a43ab85e2b88b7ba238ffe02536289998c',
+    'vkso_time_abi.h': 'a4cdd497102b67c1cfd77e2885d3123b53c00e3a',
 }
 REQUIRED = {'boot-manifest.txt', 'raw-bzImage', 'vkso-bzImage', 'raw.config',
             'vkso.config', 'libkernel.so', 'page_mappings.txt', 'manager',

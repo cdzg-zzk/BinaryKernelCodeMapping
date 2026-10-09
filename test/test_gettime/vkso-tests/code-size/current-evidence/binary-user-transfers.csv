@@ -1,0 +1,15 @@
+variant,artifact,disassembly
+normal,kernel:ktime_get,ffffffff8111e063:	e8 f8 2f ee ff       	call   ffffffff81001060 <vkso_clock_gettime_hres>
+normal,kernel:ktime_get_ts64,ffffffff8111e17f:	e8 dc 2e ee ff       	call   ffffffff81001060 <vkso_clock_gettime_hres>
+normal,kernel:ktime_get_raw_ts64,ffffffff8111df75:	e8 e6 30 ee ff       	call   ffffffff81001060 <vkso_clock_gettime_hres>
+normal,kernel:ktime_get_coarse_ts64,ffffffff8111e35e:	e8 bd 2e ee ff       	call   ffffffff81001220 <vkso_clock_gettime_coarse>
+normal,libkernel.so,1601032:	e9 29 00 a0 fe       	jmp    1060 <vkso_clock_gettime_hres>
+normal,libkernel.so,160103e:	e9 dd 01 a0 fe       	jmp    1220 <vkso_clock_gettime_coarse>
+normal,libkernel.so,1601097:	e9 94 02 a0 fe       	jmp    1330 <vkso_gettimeofday_core>
+no-retpoline,kernel:ktime_get,ffffffff811137b3:	e8 a8 d8 ee ff       	call   ffffffff81001060 <vkso_clock_gettime_hres>
+no-retpoline,kernel:ktime_get_ts64,ffffffff811138cf:	e8 8c d7 ee ff       	call   ffffffff81001060 <vkso_clock_gettime_hres>
+no-retpoline,kernel:ktime_get_raw_ts64,ffffffff811136c5:	e8 96 d9 ee ff       	call   ffffffff81001060 <vkso_clock_gettime_hres>
+no-retpoline,kernel:ktime_get_coarse_ts64,ffffffff81113aae:	e8 6d d7 ee ff       	call   ffffffff81001220 <vkso_clock_gettime_coarse>
+no-retpoline,libkernel.so,1601032:	e9 29 00 a0 fe       	jmp    1060 <vkso_clock_gettime_hres>
+no-retpoline,libkernel.so,160103e:	e9 dd 01 a0 fe       	jmp    1220 <vkso_clock_gettime_coarse>
+no-retpoline,libkernel.so,1601097:	e9 84 02 a0 fe       	jmp    1320 <vkso_gettimeofday_core>

@@ -1,0 +1,9 @@
+block,variant,boot_id,source_revision,public_api,selected_fast_path_denial,abi_namespace_lifecycle,pfn_identity,text_pages,data_pages,evidence
+1,normal,ca2b28c3-8c2b-4fac-9cea-07925906d901,cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb,PASS,PASS,PASS,PASS,2,1,test/test_gettime/vkso-tests/baremetal/results/20260929T040650Z-clocktime-full/block-01/read/vkso-normal
+1,no-retpoline,44e3cee9-29bf-4058-afcd-f4d0945deb13,cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb,PASS,PASS,PASS,PASS,1,1,test/test_gettime/vkso-tests/baremetal/results/20260929T040650Z-clocktime-full/block-01/read/vkso-no-retpoline
+2,normal,ae37c581-5e09-4f48-a79d-b8049db165bc,cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb,PASS,PASS,PASS,PASS,2,1,test/test_gettime/vkso-tests/baremetal/results/20260929T040650Z-clocktime-full/block-02/read/vkso-normal
+2,no-retpoline,e0be1a2c-acfd-4290-a447-8bc785ff6938,cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb,PASS,PASS,PASS,PASS,1,1,test/test_gettime/vkso-tests/baremetal/results/20260929T040650Z-clocktime-full/block-02/read/vkso-no-retpoline
+3,normal,47290ad8-6bd1-4327-ae81-1cc669450d0c,cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb,PASS,PASS,PASS,PASS,2,1,test/test_gettime/vkso-tests/baremetal/results/20260929T040650Z-clocktime-full/block-03/read/vkso-normal
+3,no-retpoline,12377c24-a70b-4811-a252-0982acd62b00,cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb,PASS,PASS,PASS,PASS,1,1,test/test_gettime/vkso-tests/baremetal/results/20260929T040650Z-clocktime-full/block-03/read/vkso-no-retpoline
+4,normal,bbda2bfd-4d61-4eb1-8ea4-9ec8987e3eae,cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb,PASS,PASS,PASS,PASS,2,1,test/test_gettime/vkso-tests/baremetal/results/20260929T040650Z-clocktime-full/block-04/read/vkso-normal
+4,no-retpoline,3a3b8728-5ba6-4fed-bc99-55b34c1afdc7,cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb,PASS,PASS,PASS,PASS,1,1,test/test_gettime/vkso-tests/baremetal/results/20260929T040650Z-clocktime-full/block-04/read/vkso-no-retpoline

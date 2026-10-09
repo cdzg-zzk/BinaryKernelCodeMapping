@@ -1,0 +1,90 @@
+{
+  "status": "PASS",
+  "step": {
+    "index": 3,
+    "block": 0,
+    "position": 3,
+    "backend": "raw",
+    "recorder": "current"
+  },
+  "boot_id": "df9f6b69-92c3-4446-8db4-d3fef0650a94",
+  "verified_files": 88,
+  "windows": 16,
+  "periodic_samples": 32002,
+  "cpu_counts": {
+    "0": 32002
+  },
+  "action_counts": {
+    "0": 32002
+  },
+  "functional_checks": "PASS",
+  "environment_restored": true,
+  "sharing": null,
+  "sharing_coverage": null,
+  "reader_windows": [
+    {
+      "scenario": "monotonic",
+      "round": 0,
+      "enclosing_batch_progress": 830
+    },
+    {
+      "scenario": "monotonic_coarse",
+      "round": 0,
+      "enclosing_batch_progress": 2800
+    },
+    {
+      "scenario": "monotonic_raw",
+      "round": 0,
+      "enclosing_batch_progress": 830
+    },
+    {
+      "scenario": "monotonic",
+      "round": 1,
+      "enclosing_batch_progress": 829
+    },
+    {
+      "scenario": "monotonic_raw",
+      "round": 1,
+      "enclosing_batch_progress": 830
+    },
+    {
+      "scenario": "monotonic_coarse",
+      "round": 1,
+      "enclosing_batch_progress": 2800
+    },
+    {
+      "scenario": "monotonic_raw",
+      "round": 2,
+      "enclosing_batch_progress": 830
+    },
+    {
+      "scenario": "monotonic_coarse",
+      "round": 2,
+      "enclosing_batch_progress": 2799
+    },
+    {
+      "scenario": "monotonic",
+      "round": 2,
+      "enclosing_batch_progress": 830
+    },
+    {
+      "scenario": "monotonic_coarse",
+      "round": 3,
+      "enclosing_batch_progress": 2800
+    },
+    {
+      "scenario": "monotonic_raw",
+      "round": 3,
+      "enclosing_batch_progress": 830
+    },
+    {
+      "scenario": "monotonic",
+      "round": 3,
+      "enclosing_batch_progress": 830
+    }
+  ],
+  "source": "/home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/baremetal/results/full-publication-recorder-normal-20261004/step-03",
+  "report_sha256": "fbbd22972c7f10c232d2ce868e4e19a58b72bd180a7b566b8a6cf75c3a5ab08f",
+  "verifier_sha256": "b37b73414be31037802b41096f9aedc4133f0352bffefeec43161bb91f64be06",
+  "scope": "Independent archived-file, CSV count/statistic/histogram, functionality/PFN, service and cleanup verification. No recorder-effect inference from one cell."
+}

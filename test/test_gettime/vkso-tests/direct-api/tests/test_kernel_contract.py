@@ -26,14 +26,15 @@ COMPAT = r'''
 #ifndef CLOCKTIME_HOST_COMPAT_H
 #define CLOCKTIME_HOST_COMPAT_H
 #include <stdint.h>
+#include <asm-generic/int-ll64.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <time.h>
 #include <sys/time.h>
 #include <errno.h>
-typedef int64_t s64;
+typedef __s64 s64;
 typedef int32_t s32;
-typedef uint64_t u64;
+typedef __u64 u64;
 typedef uint32_t u32;
 typedef uint8_t u8;
 typedef int64_t time64_t;

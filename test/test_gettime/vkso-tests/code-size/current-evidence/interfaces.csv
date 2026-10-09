@@ -1,0 +1,32 @@
+domain,interface,mode,path,namespace,evidence
+user,clock_gettime(realtime),shared_code,clock_gettime -> __vkso_clock_gettime -> vkso_clock_gettime_hres,MM_data; offset only for masked namespace clocks,8 boots: check.log + legacy-abi.log; actual carrier transfers in binary-user-transfers.csv
+user,clock_gettime(monotonic),shared_code,clock_gettime -> __vkso_clock_gettime -> vkso_clock_gettime_hres,MM_data; offset only for masked namespace clocks,8 boots: check.log + legacy-abi.log; actual carrier transfers in binary-user-transfers.csv
+user,clock_gettime(monotonic_raw),shared_code,clock_gettime -> __vkso_clock_gettime -> vkso_clock_gettime_hres,MM_data; offset only for masked namespace clocks,8 boots: check.log + legacy-abi.log; actual carrier transfers in binary-user-transfers.csv
+user,clock_gettime(boottime),shared_code,clock_gettime -> __vkso_clock_gettime -> vkso_clock_gettime_hres,MM_data; offset only for masked namespace clocks,8 boots: check.log + legacy-abi.log; actual carrier transfers in binary-user-transfers.csv
+user,clock_gettime(tai),shared_code,clock_gettime -> __vkso_clock_gettime -> vkso_clock_gettime_hres,MM_data; offset only for masked namespace clocks,8 boots: check.log + legacy-abi.log; actual carrier transfers in binary-user-transfers.csv
+user,clock_gettime(realtime_coarse),shared_code,clock_gettime -> __vkso_clock_gettime -> vkso_clock_gettime_coarse,MM_data; offset only for masked namespace clocks,8 boots: check.log + legacy-abi.log; actual carrier transfers in binary-user-transfers.csv
+user,clock_gettime(monotonic_coarse),shared_code,clock_gettime -> __vkso_clock_gettime -> vkso_clock_gettime_coarse,MM_data; offset only for masked namespace clocks,8 boots: check.log + legacy-abi.log; actual carrier transfers in binary-user-transfers.csv
+user,clock_getres(shared clocks),shared_code,__vkso_clock_getres -> vkso_clock_getres_hres/coarse,ABI-specific; realtime/time not namespace-offset clocks,8 boots: public API and ABI checks; selected denial scope in check-fast.log
+user,gettimeofday,shared_code,IFUNC -> __vkso_gettimeofday -> vkso_gettimeofday_core,ABI-specific; realtime/time not namespace-offset clocks,8 boots: public API and ABI checks; selected denial scope in check-fast.log
+user,time,shared_code,IFUNC -> __vkso_time,ABI-specific; realtime/time not namespace-offset clocks,8 boots: public API and ABI checks; selected denial scope in check-fast.log
+user,getcpu,shared_code,getcpu -> __vkso_getcpu,ABI-specific; realtime/time not namespace-offset clocks,8 boots: public API and ABI checks; selected denial scope in check-fast.log
+kernel,ktime_get,shared_code,root adapter -> vkso_clock_gettime_hres,root semantics; NULL MM_data,current source; exact compiled transfers for 4 representatives; host contract for tested callers
+kernel,ktime_get_coarse_real_ts64,shared_code,root adapter -> vkso_clock_gettime_coarse,root semantics; NULL MM_data,current source; exact compiled transfers for 4 representatives; host contract for tested callers
+kernel,ktime_get_coarse_ts64,shared_code,root adapter -> vkso_clock_gettime_coarse,root semantics; NULL MM_data,current source; exact compiled transfers for 4 representatives; host contract for tested callers
+kernel,ktime_get_raw,shared_code,root adapter -> vkso_clock_gettime_hres,root semantics; NULL MM_data,current source; exact compiled transfers for 4 representatives; host contract for tested callers
+kernel,ktime_get_raw_ts64,shared_code,root adapter -> vkso_clock_gettime_hres,root semantics; NULL MM_data,current source; exact compiled transfers for 4 representatives; host contract for tested callers
+kernel,ktime_get_real_seconds,shared_state_only,root scalar adapter -> shared state scalar,root semantics; NULL MM_data,current source; exact compiled transfers for 4 representatives; host contract for tested callers
+kernel,ktime_get_real_ts64,shared_code,root adapter -> vkso_clock_gettime_hres,root semantics; NULL MM_data,current source; exact compiled transfers for 4 representatives; host contract for tested callers
+kernel,ktime_get_resolution_ns,shared_state_only,root scalar adapter -> shared state scalar,root semantics; NULL MM_data,current source; exact compiled transfers for 4 representatives; host contract for tested callers
+kernel,ktime_get_seconds,shared_state_only,root scalar adapter -> shared state scalar,root semantics; NULL MM_data,current source; exact compiled transfers for 4 representatives; host contract for tested callers
+kernel,ktime_get_ts64,shared_code,root adapter -> vkso_clock_gettime_hres,root semantics; NULL MM_data,current source; exact compiled transfers for 4 representatives; host contract for tested callers
+kernel,ktime_get_with_offset,shared_code,root adapter -> vkso_clock_gettime_hres,root semantics; NULL MM_data,current source; exact compiled transfers for 4 representatives; host contract for tested callers
+kernel syscall,clock_gettime/getres(shared clocks),shared_code,POSIX dispatch -> shared hres/coarse entries,current MM_data,current source; 8-boot syscall/namespace ABI checks
+both,native clock IDs / provider failure,domain_fallback,user syscall; kernel native k_clock or vkso_timekeeping_get_private,offset applied once by the completing path,8-boot native-ID checks; host contract for provider failure; no bare-metal PV/HV claim
+kernel,ktime_get_mono_fast_ns,private_retained,private timekeeper / fast-timekeeper path,original kernel contract,source-only classification; not claimed shared
+kernel,ktime_get_raw_fast_ns,private_retained,private timekeeper / fast-timekeeper path,original kernel contract,source-only classification; not claimed shared
+kernel,ktime_get_boot_fast_ns,private_retained,private timekeeper / fast-timekeeper path,original kernel contract,source-only classification; not claimed shared
+kernel,ktime_get_real_fast_ns,private_retained,private timekeeper / fast-timekeeper path,original kernel contract,source-only classification; not claimed shared
+kernel,ktime_get_coarse_with_offset,private_retained,private timekeeper / fast-timekeeper path,original kernel contract,source-only classification; not claimed shared
+kernel,ktime_get_snapshot,private_retained,private timekeeper / fast-timekeeper path,original kernel contract,source-only classification; not claimed shared
+kernel,ktime_get_update_offsets_now,private_retained,private timekeeper / fast-timekeeper path,original kernel contract,source-only classification; not claimed shared

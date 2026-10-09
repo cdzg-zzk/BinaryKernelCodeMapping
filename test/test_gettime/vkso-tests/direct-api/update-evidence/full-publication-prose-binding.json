@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "cost_table_rows": 8,
+  "absolute_cost_values": 32,
+  "contrast_table_rows": 8,
+  "contrast_values": 48,
+  "checked_claims": [
+    "all loaded backend deltas negative",
+    "Normal recorder effects negative in both blocks",
+    "MONOTONIC recorder effects positive in no-retpoline",
+    "Normal RAW/COARSE negative body and opposing top-1% contributions",
+    "Normal Current Raw COARSE bandwidth-dependent dominant peaks and +3.086 mean change"
+  ],
+  "text_sha256": "85a7fc91a13a9e958f22bd94bf2c006b726f28c730a66efb3946aab4738e8c52",
+  "comparison_sha256": "56a060dab6840ab2c020454bb05888a1f610de899b96fc07510dc4646cdd8537",
+  "normal_audits": {
+    "block-0-audit.json": "52e0b95d7319d1bfd6d35d697d6d42540f409b99164f17a1292d69958c1ab034",
+    "block-1-audit.json": "86d4092d06ee35288f334aca1797f901b0d51376b2ba7be0fed5df085925c8cd"
+  },
+  "verifier_sha256": "b11552c7c130da649f6cede589127500a88dcbc098c591f7d5d855b906046aa4",
+  "scope": "Two added tables and listed new Normal/cross-configuration claims; not a re-audit of historical prose."
+}

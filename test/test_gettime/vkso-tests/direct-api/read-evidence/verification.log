@@ -1,0 +1,17 @@
+$ /usr/bin/python3 test/test_gettime/vkso-tests/direct-api/read_evaluation.py --check
+READ evidence: PASS; 16 boots, 38 comparisons, all archived batches retained
+
+$ /usr/bin/python3 test/test_gettime/vkso-tests/direct-api/read_paths.py --check
+READ paths: PASS; 19 API workloads and two actual package variants
+
+$ /usr/bin/python3 test/test_gettime/vkso-tests/direct-api/read_report.py --check
+READ presentation: PASS; 38 rows, 6 LaTeX fragments, 3 vector figures
+
+$ /usr/bin/python3 -m unittest discover -s test/test_gettime/vkso-tests/direct-api/tests -p test_read_evaluation.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.025s
+
+OK
+
+Requirement, numerical and render checks: PASS

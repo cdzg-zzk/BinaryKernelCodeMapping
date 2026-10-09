@@ -1,0 +1,258 @@
+{
+  "status": "PASS",
+  "step": {
+    "index": 7,
+    "block": 1,
+    "position": 3,
+    "backend": "vkso",
+    "recorder": "current"
+  },
+  "boot_id": "e00f450f-b98b-4c2e-9a60-8d30ef52e2cc",
+  "cells": {
+    "idle": {
+      "count": 8000,
+      "mean": 407.3865,
+      "mean_exact": "814773/2000",
+      "cuts": [
+        258,
+        393,
+        460,
+        602
+      ],
+      "regions": [
+        {
+          "count": 1,
+          "probability": 0.000125,
+          "conditional_mean": 250.0,
+          "contribution_to_whole_mean": 0.03125
+        },
+        {
+          "count": 6603,
+          "probability": 0.825375,
+          "conditional_mean": 371.88293200060576,
+          "contribution_to_whole_mean": 306.942875
+        },
+        {
+          "count": 654,
+          "probability": 0.08175,
+          "conditional_mean": 419.8822629969419,
+          "contribution_to_whole_mean": 34.325375
+        },
+        {
+          "count": 397,
+          "probability": 0.049625,
+          "conditional_mean": 538.4408060453401,
+          "contribution_to_whole_mean": 26.720125
+        },
+        {
+          "count": 345,
+          "probability": 0.043125,
+          "conditional_mean": 912.8550724637681,
+          "contribution_to_whole_mean": 39.366875
+        }
+      ],
+      "rank_contributions": [
+        338.0445,
+        52.34025,
+        17.00175
+      ],
+      "peaks": {
+        "2": 376,
+        "3": 376,
+        "5": 376
+      }
+    },
+    "monotonic": {
+      "count": 8000,
+      "mean": 445.846375,
+      "mean_exact": "3566771/8000",
+      "cuts": [
+        381,
+        394,
+        486,
+        876
+      ],
+      "regions": [
+        {
+          "count": 4867,
+          "probability": 0.608375,
+          "conditional_mean": 375.32977193342924,
+          "contribution_to_whole_mean": 228.34125
+        },
+        {
+          "count": 1243,
+          "probability": 0.155375,
+          "conditional_mean": 385.266291230893,
+          "contribution_to_whole_mean": 59.86075
+        },
+        {
+          "count": 300,
+          "probability": 0.0375,
+          "conditional_mean": 417.8466666666667,
+          "contribution_to_whole_mean": 15.66925
+        },
+        {
+          "count": 1360,
+          "probability": 0.17,
+          "conditional_mean": 635.8742647058823,
+          "contribution_to_whole_mean": 108.098625
+        },
+        {
+          "count": 230,
+          "probability": 0.02875,
+          "conditional_mean": 1178.3130434782609,
+          "contribution_to_whole_mean": 33.8765
+        }
+      ],
+      "rank_contributions": [
+        361.686875,
+        67.481125,
+        16.678375
+      ],
+      "peaks": {
+        "2": 377,
+        "3": 377,
+        "5": 377
+      }
+    },
+    "monotonic_coarse": {
+      "count": 8000,
+      "mean": 448.3865,
+      "mean_exact": "896773/2000",
+      "cuts": [
+        396,
+        649,
+        1022,
+        1289
+      ],
+      "regions": [
+        {
+          "count": 6385,
+          "probability": 0.798125,
+          "conditional_mean": 377.0878621769773,
+          "contribution_to_whole_mean": 300.96325
+        },
+        {
+          "count": 862,
+          "probability": 0.10775,
+          "conditional_mean": 551.9895591647331,
+          "contribution_to_whole_mean": 59.476875
+        },
+        {
+          "count": 661,
+          "probability": 0.082625,
+          "conditional_mean": 772.2889561270802,
+          "contribution_to_whole_mean": 63.810375
+        },
+        {
+          "count": 79,
+          "probability": 0.009875,
+          "conditional_mean": 1099.620253164557,
+          "contribution_to_whole_mean": 10.85875
+        },
+        {
+          "count": 13,
+          "probability": 0.001625,
+          "conditional_mean": 8170.615384615385,
+          "contribution_to_whole_mean": 13.27725
+        }
+      ],
+      "rank_contributions": [
+        356.67825,
+        69.119625,
+        22.588625
+      ],
+      "peaks": {
+        "2": 377,
+        "3": 377,
+        "5": 377
+      }
+    },
+    "monotonic_raw": {
+      "count": 8000,
+      "mean": 443.632625,
+      "mean_exact": "3549061/8000",
+      "cuts": [
+        396,
+        679,
+        985,
+        1122
+      ],
+      "regions": [
+        {
+          "count": 6428,
+          "probability": 0.8035,
+          "conditional_mean": 376.9954884878656,
+          "contribution_to_whole_mean": 302.915875
+        },
+        {
+          "count": 1031,
+          "probability": 0.128875,
+          "conditional_mean": 562.4781765276431,
+          "contribution_to_whole_mean": 72.489375
+        },
+        {
+          "count": 474,
+          "probability": 0.05925,
+          "conditional_mean": 797.2848101265823,
+          "contribution_to_whole_mean": 47.239125
+        },
+        {
+          "count": 36,
+          "probability": 0.0045,
+          "conditional_mean": 1048.6944444444443,
+          "contribution_to_whole_mean": 4.719125
+        },
+        {
+          "count": 31,
+          "probability": 0.003875,
+          "conditional_mean": 4198.4838709677415,
+          "contribution_to_whole_mean": 16.269125
+        }
+      ],
+      "rank_contributions": [
+        354.823125,
+        66.24375,
+        22.56575
+      ],
+      "peaks": {
+        "2": 377,
+        "3": 377,
+        "5": 377
+      }
+    }
+  },
+  "loaded_minus_idle": {
+    "monotonic": {
+      "mean_delta": 38.45987500000001,
+      "round_deltas": [
+        59.32499999999999,
+        21.008500000000026,
+        32.83100000000002,
+        40.674999999999955
+      ]
+    },
+    "monotonic_coarse": {
+      "mean_delta": 41.0,
+      "round_deltas": [
+        43.684500000000014,
+        21.37850000000003,
+        46.515499999999975,
+        52.42149999999998
+      ]
+    },
+    "monotonic_raw": {
+      "mean_delta": 36.246125000000006,
+      "round_deltas": [
+        35.827499999999986,
+        27.984500000000025,
+        34.73950000000002,
+        46.43299999999999
+      ]
+    }
+  },
+  "cdf_series": 20,
+  "report_sha256": "fbbd22972c7f10c232d2ce868e4e19a58b72bd180a7b566b8a6cf75c3a5ab08f",
+  "script_sha256": "fbd132bb888ac9f93564313a5b125293ee45655842f62d936155492f9a88191a",
+  "scope": "One boot descriptive distribution, all periodic CPUs/tails. ECDF round=-1 aggregates four windows; other rounds remain separate. Fixed regions follow precollected anchors; rank bands are 0-90%, 90-99%, 99-100%. Neither is a physical-mode classification; no backend/recorder contrast from this cell alone."
+}

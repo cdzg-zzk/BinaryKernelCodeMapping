@@ -153,6 +153,18 @@ class RuntimeTests(unittest.TestCase):
         run(['g++', '-D_GNU_SOURCE', '-std=c++17', '-Wall', '-Wextra', '-Werror',
              '-I' + str(HERE), '-I' + str(HERE.parent / 'functional'), '-c', source, '-o', self.out / 'header.o'])
 
+    def test_exported_abi_header_builds_without_kernel_source_tree(self):
+        import shutil
+        exported = self.out / 'exported-headers'
+        exported.mkdir()
+        for name in bundle.FUNCTIONAL_BLOBS:
+            shutil.copy2(HERE.parent / 'functional' / name, exported / name)
+        shutil.copy2(HERE / 'vkso_time.h', exported / 'vkso_time.h')
+        self.assertFalse((exported / 'vkso_time_abi.h').is_symlink())
+        run([self.cc, '-D_GNU_SOURCE', '-O2', '-Wall', '-Wextra', '-Werror',
+             '-I' + str(exported), '-c', exported / 'vkso_user_wrapper.c',
+             '-o', exported / 'wrapper.o'])
+
 
 class DataTests(unittest.TestCase):
     def test_full_matrix_accepts(self):

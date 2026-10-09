@@ -1,0 +1,118 @@
+{
+  "status": "PASS",
+  "completed_steps": 8,
+  "windows": 128,
+  "periodic_samples": 255997,
+  "verified_archived_files": 736,
+  "quality": [
+    {
+      "step": 0,
+      "verified_files": 96,
+      "periodic_samples": 32000,
+      "cpu_counts": {
+        "0": 32000
+      },
+      "action_counts": {
+        "0": 32000
+      },
+      "boot_id": "0d66158b-9597-4fa1-8904-307c7a6cd8f5"
+    },
+    {
+      "step": 1,
+      "verified_files": 88,
+      "periodic_samples": 31999,
+      "cpu_counts": {
+        "0": 31999
+      },
+      "action_counts": {
+        "0": 31999
+      },
+      "boot_id": "d7a8bedc-39c9-4471-a142-b6339cfbcdbe"
+    },
+    {
+      "step": 2,
+      "verified_files": 96,
+      "periodic_samples": 32000,
+      "cpu_counts": {
+        "0": 31999,
+        "2": 1
+      },
+      "action_counts": {
+        "0": 32000
+      },
+      "boot_id": "6f939844-1a26-4bc6-b214-4c596aab731c"
+    },
+    {
+      "step": 3,
+      "verified_files": 88,
+      "periodic_samples": 32000,
+      "cpu_counts": {
+        "0": 32000
+      },
+      "action_counts": {
+        "0": 32000
+      },
+      "boot_id": "abbc679f-b155-4740-9120-2f735f6f1c24"
+    },
+    {
+      "step": 4,
+      "verified_files": 88,
+      "periodic_samples": 32000,
+      "cpu_counts": {
+        "0": 32000
+      },
+      "action_counts": {
+        "0": 32000
+      },
+      "boot_id": "702eead3-8bed-4106-acb7-f7ebe12540f3"
+    },
+    {
+      "step": 5,
+      "verified_files": 96,
+      "periodic_samples": 32001,
+      "cpu_counts": {
+        "0": 32001
+      },
+      "action_counts": {
+        "0": 32001
+      },
+      "boot_id": "a833b4f1-75bd-4fbd-bd97-b9c8e5cb4d89"
+    },
+    {
+      "step": 6,
+      "verified_files": 88,
+      "periodic_samples": 31999,
+      "cpu_counts": {
+        "0": 31999
+      },
+      "action_counts": {
+        "0": 31999
+      },
+      "boot_id": "7d3a845c-c825-4b64-8c62-ef152a82d544"
+    },
+    {
+      "step": 7,
+      "verified_files": 96,
+      "periodic_samples": 31998,
+      "cpu_counts": {
+        "0": 31998
+      },
+      "action_counts": {
+        "0": 31998
+      },
+      "boot_id": "43c75382-7f5f-4650-8b82-4463eab1f7eb"
+    }
+  ],
+  "recorded_environment_equal_fields": [
+    "config",
+    "cmdline except BOOT_IMAGE",
+    "tuning_before/after snapshots",
+    "irqbalance inactive",
+    "diagnostic switches"
+  ],
+  "all_known_service_snapshots_inactive_without_restarts": true,
+  "reader_exposure_scope": "All CSV batches in enclosing reader interval; not an exact count of calls within writer timestamps.",
+  "stop_decision": "STOP_PLANNED_MATRIX",
+  "inference": "Two blocks only, no population confidence intervals or uninstrumented cost. COARSE mean interaction reverses; peak interaction remains positive. Recorded configuration/cleanup/service checks do not identify a physical cause or exclude unrecorded interference.",
+  "report_sha256": "6f0a205d745d4e2f575d89ad82391c6d39f28a82f6da9e87ee08cb7c4208ef26"
+}

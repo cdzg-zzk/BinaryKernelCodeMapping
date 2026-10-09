@@ -1,0 +1,306 @@
+variant,system,artifact,section,bytes,scope
+normal,Raw,kernel,.text,14683442,whole-kernel context
+normal,Raw,kernel,.rodata,4484552,whole-kernel context
+normal,Raw,kernel,.pci_fixup,14256,whole-kernel context
+normal,Raw,kernel,.tracedata,120,whole-kernel context
+normal,Raw,kernel,__ksymtab,63984,whole-kernel context
+normal,Raw,kernel,__ksymtab_gpl,70116,whole-kernel context
+normal,Raw,kernel,__ksymtab_strings,211544,whole-kernel context
+normal,Raw,kernel,__init_rodata,680,whole-kernel context
+normal,Raw,kernel,__param,16600,whole-kernel context
+normal,Raw,kernel,__modver,1800,whole-kernel context
+normal,Raw,kernel,__ex_table,4764,whole-kernel context
+normal,Raw,kernel,.notes,492,whole-kernel context
+normal,Raw,kernel,.data,2745600,whole-kernel context
+normal,Raw,kernel,__bug_table,100428,whole-kernel context
+normal,Raw,kernel,.vvar,4096,whole-kernel context
+normal,Raw,kernel,.data..percpu,176128,whole-kernel context
+normal,Raw,kernel,.init.text,480386,whole-kernel context
+normal,Raw,kernel,.altinstr_aux,7868,whole-kernel context
+normal,Raw,kernel,.init.data,1437032,whole-kernel context
+normal,Raw,kernel,.x86_cpu_dev.init,40,whole-kernel context
+normal,Raw,kernel,.parainstructions,136300,whole-kernel context
+normal,Raw,kernel,.retpoline_sites,37868,whole-kernel context
+normal,Raw,kernel,.return_sites,269988,whole-kernel context
+normal,Raw,kernel,.altinstructions,107784,whole-kernel context
+normal,Raw,kernel,.altinstr_replacement,23900,whole-kernel context
+normal,Raw,kernel,.iommu_table,240,whole-kernel context
+normal,Raw,kernel,.apicdrivers,64,whole-kernel context
+normal,Raw,kernel,.exit.text,9451,whole-kernel context
+normal,Raw,kernel,.smp_locks,40960,whole-kernel context
+normal,Raw,kernel,.data_nosave,4096,whole-kernel context
+normal,Raw,kernel,.bss,17477632,whole-kernel context
+normal,Raw,kernel,.brk,196608,whole-kernel context
+normal,Raw,kernel,.init.scratch,4194304,whole-kernel context
+normal,Raw,embedded-vdso,.hash,72,native DSO including SGX
+normal,Raw,embedded-vdso,.gnu.hash,92,native DSO including SGX
+normal,Raw,embedded-vdso,.dynsym,312,native DSO including SGX
+normal,Raw,embedded-vdso,.dynstr,139,native DSO including SGX
+normal,Raw,embedded-vdso,.gnu.version,26,native DSO including SGX
+normal,Raw,embedded-vdso,.gnu.version_d,56,native DSO including SGX
+normal,Raw,embedded-vdso,.dynamic,288,native DSO including SGX
+normal,Raw,embedded-vdso,.note,84,native DSO including SGX
+normal,Raw,embedded-vdso,.eh_frame_hdr,68,native DSO including SGX
+normal,Raw,embedded-vdso,.eh_frame,256,native DSO including SGX
+normal,Raw,embedded-vdso,.text,1853,native DSO including SGX
+normal,Raw,embedded-vdso,.altinstructions,156,native DSO including SGX
+normal,Raw,embedded-vdso,.altinstr_replacement,52,native DSO including SGX
+normal,VKSO,kernel,.text,14683442,whole-kernel context
+normal,VKSO,kernel,.rodata,4475192,whole-kernel context
+normal,VKSO,kernel,.pci_fixup,14256,whole-kernel context
+normal,VKSO,kernel,.tracedata,120,whole-kernel context
+normal,VKSO,kernel,__ksymtab,63984,whole-kernel context
+normal,VKSO,kernel,__ksymtab_gpl,70116,whole-kernel context
+normal,VKSO,kernel,__ksymtab_strings,211544,whole-kernel context
+normal,VKSO,kernel,__init_rodata,680,whole-kernel context
+normal,VKSO,kernel,__param,16600,whole-kernel context
+normal,VKSO,kernel,__modver,1800,whole-kernel context
+normal,VKSO,kernel,__ex_table,4764,whole-kernel context
+normal,VKSO,kernel,.notes,492,whole-kernel context
+normal,VKSO,kernel,.data,2770240,whole-kernel context
+normal,VKSO,kernel,__bug_table,100392,whole-kernel context
+normal,VKSO,kernel,.data..percpu,176128,whole-kernel context
+normal,VKSO,kernel,.init.text,480302,whole-kernel context
+normal,VKSO,kernel,.altinstr_aux,7868,whole-kernel context
+normal,VKSO,kernel,.init.data,1437008,whole-kernel context
+normal,VKSO,kernel,.x86_cpu_dev.init,40,whole-kernel context
+normal,VKSO,kernel,.parainstructions,136300,whole-kernel context
+normal,VKSO,kernel,.retpoline_sites,37848,whole-kernel context
+normal,VKSO,kernel,.return_sites,270032,whole-kernel context
+normal,VKSO,kernel,.altinstructions,107868,whole-kernel context
+normal,VKSO,kernel,.altinstr_replacement,23928,whole-kernel context
+normal,VKSO,kernel,.iommu_table,240,whole-kernel context
+normal,VKSO,kernel,.apicdrivers,64,whole-kernel context
+normal,VKSO,kernel,.exit.text,9451,whole-kernel context
+normal,VKSO,kernel,.smp_locks,40960,whole-kernel context
+normal,VKSO,kernel,.data_nosave,4096,whole-kernel context
+normal,VKSO,kernel,.bss,17461248,whole-kernel context
+normal,VKSO,kernel,.brk,196608,whole-kernel context
+normal,VKSO,kernel,.init.scratch,4194304,whole-kernel context
+normal,VKSO,libkernel.so,.text1,4096,shared backing: count once with kernel
+normal,VKSO,libkernel.so,.text2,4096,shared backing: count once with kernel
+normal,VKSO,libkernel.so,.text3,4096,user private
+normal,VKSO,libkernel.so,.shared_data,4096,shared backing: count once with kernel
+normal,VKSO,libkernel.so,.data,40,user private
+normal,VKSO,libkernel.so,.dynstr,160,user private
+normal,VKSO,libkernel.so,.dynsym,216,user private
+normal,VKSO,libkernel.so,.gnu.hash,88,user private
+normal,VKSO,libkernel.so,.dynamic,96,user private
+normal,VKSO,direct/libvkso_time.so,.note.gnu.property,32,user private
+normal,VKSO,direct/libvkso_time.so,.note.gnu.build-id,36,user private
+normal,VKSO,direct/libvkso_time.so,.gnu.hash,68,user private
+normal,VKSO,direct/libvkso_time.so,.dynsym,600,user private
+normal,VKSO,direct/libvkso_time.so,.dynstr,442,user private
+normal,VKSO,direct/libvkso_time.so,.gnu.version,50,user private
+normal,VKSO,direct/libvkso_time.so,.gnu.version_r,64,user private
+normal,VKSO,direct/libvkso_time.so,.rela.dyn,336,user private
+normal,VKSO,direct/libvkso_time.so,.rela.plt,144,user private
+normal,VKSO,direct/libvkso_time.so,.init,27,user private
+normal,VKSO,direct/libvkso_time.so,.plt,112,user private
+normal,VKSO,direct/libvkso_time.so,.plt.got,32,user private
+normal,VKSO,direct/libvkso_time.so,.plt.sec,96,user private
+normal,VKSO,direct/libvkso_time.so,.text,760,user private
+normal,VKSO,direct/libvkso_time.so,.fini,13,user private
+normal,VKSO,direct/libvkso_time.so,.eh_frame_hdr,148,user private
+normal,VKSO,direct/libvkso_time.so,.eh_frame,516,user private
+normal,VKSO,direct/libvkso_time.so,.init_array,8,user private
+normal,VKSO,direct/libvkso_time.so,.fini_array,8,user private
+normal,VKSO,direct/libvkso_time.so,.dynamic,528,user private
+normal,VKSO,direct/libvkso_time.so,.got,160,user private
+normal,VKSO,direct/libvkso_time.so,.data,8,user private
+normal,VKSO,direct/libvkso_time.so,.bss,16,user private
+normal,VKSO,manager,.note.gnu.property,48,general infrastructure
+normal,VKSO,manager,.note.gnu.build-id,36,general infrastructure
+normal,VKSO,manager,.note.ABI-tag,32,general infrastructure
+normal,VKSO,manager,.rela.plt,816,general infrastructure
+normal,VKSO,manager,.init,27,general infrastructure
+normal,VKSO,manager,.plt,544,general infrastructure
+normal,VKSO,manager,.text,1635076,general infrastructure
+normal,VKSO,manager,__libc_freeres_fn,5408,general infrastructure
+normal,VKSO,manager,.fini,13,general infrastructure
+normal,VKSO,manager,.rodata,149176,general infrastructure
+normal,VKSO,manager,.stapsdt.base,1,general infrastructure
+normal,VKSO,manager,.eh_frame,197088,general infrastructure
+normal,VKSO,manager,.gcc_except_table,24573,general infrastructure
+normal,VKSO,manager,.tdata,104,general infrastructure
+normal,VKSO,manager,.tbss,88,general infrastructure
+normal,VKSO,manager,.init_array,72,general infrastructure
+normal,VKSO,manager,.fini_array,8,general infrastructure
+normal,VKSO,manager,.data.rel.ro,42280,general infrastructure
+normal,VKSO,manager,.got,168,general infrastructure
+normal,VKSO,manager,.got.plt,296,general infrastructure
+normal,VKSO,manager,.data,6960,general infrastructure
+normal,VKSO,manager,__libc_subfreeres,80,general infrastructure
+normal,VKSO,manager,__libc_IO_vtables,2088,general infrastructure
+normal,VKSO,manager,__libc_atexit,8,general infrastructure
+normal,VKSO,manager,.bss,30816,general infrastructure
+normal,VKSO,manager,__libc_freeres_ptrs,40,general infrastructure
+normal,VKSO,page_cache_replace.ko,.note.gnu.build-id,36,general infrastructure
+normal,VKSO,page_cache_replace.ko,.note.Linux,48,general infrastructure
+normal,VKSO,page_cache_replace.ko,.text,11297,general infrastructure
+normal,VKSO,page_cache_replace.ko,.altinstr_replacement,34,general infrastructure
+normal,VKSO,page_cache_replace.ko,.altinstr_aux,54,general infrastructure
+normal,VKSO,page_cache_replace.ko,.text.unlikely,46,general infrastructure
+normal,VKSO,page_cache_replace.ko,.init.text,169,general infrastructure
+normal,VKSO,page_cache_replace.ko,.exit.text,94,general infrastructure
+normal,VKSO,page_cache_replace.ko,.altinstructions,156,general infrastructure
+normal,VKSO,page_cache_replace.ko,.parainstructions,108,general infrastructure
+normal,VKSO,page_cache_replace.ko,.smp_locks,36,general infrastructure
+normal,VKSO,page_cache_replace.ko,.rodata,80,general infrastructure
+normal,VKSO,page_cache_replace.ko,.modinfo,238,general infrastructure
+normal,VKSO,page_cache_replace.ko,__param,120,general infrastructure
+normal,VKSO,page_cache_replace.ko,.retpoline_sites,4,general infrastructure
+normal,VKSO,page_cache_replace.ko,.return_sites,668,general infrastructure
+normal,VKSO,page_cache_replace.ko,__jump_table,16,general infrastructure
+normal,VKSO,page_cache_replace.ko,.data,64,general infrastructure
+normal,VKSO,page_cache_replace.ko,.gnu.linkonce.this_module,768,general infrastructure
+normal,VKSO,page_cache_replace.ko,.bss,24,general infrastructure
+no-retpoline,Raw,kernel,.text,14681453,whole-kernel context
+no-retpoline,Raw,kernel,.rodata,4632008,whole-kernel context
+no-retpoline,Raw,kernel,.pci_fixup,14256,whole-kernel context
+no-retpoline,Raw,kernel,.tracedata,120,whole-kernel context
+no-retpoline,Raw,kernel,__ksymtab,63672,whole-kernel context
+no-retpoline,Raw,kernel,__ksymtab_gpl,70116,whole-kernel context
+no-retpoline,Raw,kernel,__ksymtab_strings,210985,whole-kernel context
+no-retpoline,Raw,kernel,__init_rodata,680,whole-kernel context
+no-retpoline,Raw,kernel,__param,16600,whole-kernel context
+no-retpoline,Raw,kernel,__modver,1800,whole-kernel context
+no-retpoline,Raw,kernel,__ex_table,4764,whole-kernel context
+no-retpoline,Raw,kernel,.notes,492,whole-kernel context
+no-retpoline,Raw,kernel,.data,2745600,whole-kernel context
+no-retpoline,Raw,kernel,__bug_table,100308,whole-kernel context
+no-retpoline,Raw,kernel,.vvar,4096,whole-kernel context
+no-retpoline,Raw,kernel,.data..percpu,176128,whole-kernel context
+no-retpoline,Raw,kernel,.init.text,469532,whole-kernel context
+no-retpoline,Raw,kernel,.altinstr_aux,7700,whole-kernel context
+no-retpoline,Raw,kernel,.init.data,1436872,whole-kernel context
+no-retpoline,Raw,kernel,.x86_cpu_dev.init,40,whole-kernel context
+no-retpoline,Raw,kernel,.parainstructions,136284,whole-kernel context
+no-retpoline,Raw,kernel,.altinstructions,106992,whole-kernel context
+no-retpoline,Raw,kernel,.altinstr_replacement,23634,whole-kernel context
+no-retpoline,Raw,kernel,.iommu_table,240,whole-kernel context
+no-retpoline,Raw,kernel,.apicdrivers,64,whole-kernel context
+no-retpoline,Raw,kernel,.exit.text,8659,whole-kernel context
+no-retpoline,Raw,kernel,.smp_locks,40960,whole-kernel context
+no-retpoline,Raw,kernel,.data_nosave,4096,whole-kernel context
+no-retpoline,Raw,kernel,.bss,17801216,whole-kernel context
+no-retpoline,Raw,kernel,.brk,196608,whole-kernel context
+no-retpoline,Raw,kernel,.init.scratch,4194304,whole-kernel context
+no-retpoline,Raw,embedded-vdso,.hash,72,native DSO including SGX
+no-retpoline,Raw,embedded-vdso,.gnu.hash,92,native DSO including SGX
+no-retpoline,Raw,embedded-vdso,.dynsym,312,native DSO including SGX
+no-retpoline,Raw,embedded-vdso,.dynstr,139,native DSO including SGX
+no-retpoline,Raw,embedded-vdso,.gnu.version,26,native DSO including SGX
+no-retpoline,Raw,embedded-vdso,.gnu.version_d,56,native DSO including SGX
+no-retpoline,Raw,embedded-vdso,.dynamic,288,native DSO including SGX
+no-retpoline,Raw,embedded-vdso,.note,84,native DSO including SGX
+no-retpoline,Raw,embedded-vdso,.eh_frame_hdr,68,native DSO including SGX
+no-retpoline,Raw,embedded-vdso,.eh_frame,256,native DSO including SGX
+no-retpoline,Raw,embedded-vdso,.text,1853,native DSO including SGX
+no-retpoline,Raw,embedded-vdso,.altinstructions,156,native DSO including SGX
+no-retpoline,Raw,embedded-vdso,.altinstr_replacement,52,native DSO including SGX
+no-retpoline,VKSO,kernel,.text,14681453,whole-kernel context
+no-retpoline,VKSO,kernel,.rodata,4621432,whole-kernel context
+no-retpoline,VKSO,kernel,.pci_fixup,14256,whole-kernel context
+no-retpoline,VKSO,kernel,.tracedata,120,whole-kernel context
+no-retpoline,VKSO,kernel,__ksymtab,63672,whole-kernel context
+no-retpoline,VKSO,kernel,__ksymtab_gpl,70116,whole-kernel context
+no-retpoline,VKSO,kernel,__ksymtab_strings,210985,whole-kernel context
+no-retpoline,VKSO,kernel,__init_rodata,680,whole-kernel context
+no-retpoline,VKSO,kernel,__param,16600,whole-kernel context
+no-retpoline,VKSO,kernel,__modver,1800,whole-kernel context
+no-retpoline,VKSO,kernel,__ex_table,4764,whole-kernel context
+no-retpoline,VKSO,kernel,.notes,492,whole-kernel context
+no-retpoline,VKSO,kernel,.data,2770240,whole-kernel context
+no-retpoline,VKSO,kernel,__bug_table,100272,whole-kernel context
+no-retpoline,VKSO,kernel,.data..percpu,176128,whole-kernel context
+no-retpoline,VKSO,kernel,.init.text,469448,whole-kernel context
+no-retpoline,VKSO,kernel,.altinstr_aux,7700,whole-kernel context
+no-retpoline,VKSO,kernel,.init.data,1436848,whole-kernel context
+no-retpoline,VKSO,kernel,.x86_cpu_dev.init,40,whole-kernel context
+no-retpoline,VKSO,kernel,.parainstructions,136284,whole-kernel context
+no-retpoline,VKSO,kernel,.altinstructions,107076,whole-kernel context
+no-retpoline,VKSO,kernel,.altinstr_replacement,23662,whole-kernel context
+no-retpoline,VKSO,kernel,.iommu_table,240,whole-kernel context
+no-retpoline,VKSO,kernel,.apicdrivers,64,whole-kernel context
+no-retpoline,VKSO,kernel,.exit.text,8659,whole-kernel context
+no-retpoline,VKSO,kernel,.smp_locks,40960,whole-kernel context
+no-retpoline,VKSO,kernel,.data_nosave,4096,whole-kernel context
+no-retpoline,VKSO,kernel,.bss,17776640,whole-kernel context
+no-retpoline,VKSO,kernel,.brk,196608,whole-kernel context
+no-retpoline,VKSO,kernel,.init.scratch,4194304,whole-kernel context
+no-retpoline,VKSO,libkernel.so,.text1,4096,shared backing: count once with kernel
+no-retpoline,VKSO,libkernel.so,.text2,4096,user private
+no-retpoline,VKSO,libkernel.so,.shared_data,4096,shared backing: count once with kernel
+no-retpoline,VKSO,libkernel.so,.data,40,user private
+no-retpoline,VKSO,libkernel.so,.dynstr,160,user private
+no-retpoline,VKSO,libkernel.so,.dynsym,216,user private
+no-retpoline,VKSO,libkernel.so,.gnu.hash,88,user private
+no-retpoline,VKSO,libkernel.so,.dynamic,96,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.note.gnu.property,32,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.note.gnu.build-id,36,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.gnu.hash,68,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.dynsym,600,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.dynstr,442,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.gnu.version,50,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.gnu.version_r,64,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.rela.dyn,336,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.rela.plt,144,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.init,27,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.plt,112,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.plt.got,32,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.plt.sec,96,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.text,760,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.fini,13,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.eh_frame_hdr,148,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.eh_frame,516,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.init_array,8,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.fini_array,8,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.dynamic,528,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.got,160,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.data,8,user private
+no-retpoline,VKSO,direct/libvkso_time.so,.bss,16,user private
+no-retpoline,VKSO,manager,.note.gnu.property,48,general infrastructure
+no-retpoline,VKSO,manager,.note.gnu.build-id,36,general infrastructure
+no-retpoline,VKSO,manager,.note.ABI-tag,32,general infrastructure
+no-retpoline,VKSO,manager,.rela.plt,816,general infrastructure
+no-retpoline,VKSO,manager,.init,27,general infrastructure
+no-retpoline,VKSO,manager,.plt,544,general infrastructure
+no-retpoline,VKSO,manager,.text,1635076,general infrastructure
+no-retpoline,VKSO,manager,__libc_freeres_fn,5408,general infrastructure
+no-retpoline,VKSO,manager,.fini,13,general infrastructure
+no-retpoline,VKSO,manager,.rodata,149176,general infrastructure
+no-retpoline,VKSO,manager,.stapsdt.base,1,general infrastructure
+no-retpoline,VKSO,manager,.eh_frame,197088,general infrastructure
+no-retpoline,VKSO,manager,.gcc_except_table,24573,general infrastructure
+no-retpoline,VKSO,manager,.tdata,104,general infrastructure
+no-retpoline,VKSO,manager,.tbss,88,general infrastructure
+no-retpoline,VKSO,manager,.init_array,72,general infrastructure
+no-retpoline,VKSO,manager,.fini_array,8,general infrastructure
+no-retpoline,VKSO,manager,.data.rel.ro,42280,general infrastructure
+no-retpoline,VKSO,manager,.got,168,general infrastructure
+no-retpoline,VKSO,manager,.got.plt,296,general infrastructure
+no-retpoline,VKSO,manager,.data,6960,general infrastructure
+no-retpoline,VKSO,manager,__libc_subfreeres,80,general infrastructure
+no-retpoline,VKSO,manager,__libc_IO_vtables,2088,general infrastructure
+no-retpoline,VKSO,manager,__libc_atexit,8,general infrastructure
+no-retpoline,VKSO,manager,.bss,30816,general infrastructure
+no-retpoline,VKSO,manager,__libc_freeres_ptrs,40,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.note.gnu.build-id,36,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.note.Linux,48,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.text,10702,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.altinstr_replacement,34,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.altinstr_aux,54,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.text.unlikely,43,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.init.text,166,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.exit.text,91,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.altinstructions,156,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.parainstructions,108,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.smp_locks,36,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.rodata,80,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.modinfo,226,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,__param,120,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,__jump_table,16,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.data,64,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.gnu.linkonce.this_module,768,general infrastructure
+no-retpoline,VKSO,page_cache_replace.ko,.bss,24,general infrastructure

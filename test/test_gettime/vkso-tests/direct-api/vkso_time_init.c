@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 #include <errno.h>
 #include <pthread.h>
-#include <sys/auxv.h>
 #include "vkso_time.h"
 #include "vkso_user_wrapper.h"
 
@@ -12,14 +11,6 @@ extern __attribute__((visibility("hidden"))) int vkso_public_gettimeofday_failur
 
 static void initialize(void)
 {
-	/* Reject a non-VKSO boot before executing any carrier code. This is not
-	 * proof of registration: the external manager must establish backing.
-	 */
-	errno = 0;
-	if (!getauxval(AT_VKSO_MM_DATA) || errno) {
-		init_error = ENOSYS;
-		return;
-	}
 	if (vkso_user_wrapper_init() != 0) {
 		init_error = errno ? errno : EPROTO;
 		return;

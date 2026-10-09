@@ -1,0 +1,14 @@
+test_actual_kernel_callback_completes_once (__main__.KernelContractTests) ... ok
+test_coarse_resolution_seconds (__main__.KernelContractTests) ... ok
+test_dispatch_classifier_routes_native_clocks (__main__.KernelContractTests) ... ok
+test_getcpu_kernel_completion_and_optional_outputs (__main__.KernelContractTests) ... ok
+test_hres_against_integer_oracle (__main__.KernelContractTests) ... ok
+test_ordinary_and_scalar_callers_on_success (__main__.KernelContractTests) ... ok
+test_retry_rejects_mixed_generation (__main__.KernelContractTests) ... ok
+test_root_codegen_removes_second_private_fallback (__main__.KernelContractTests) ... ok
+test_user_failure_propagated_and_offset_not_reapplied (__main__.KernelContractTests) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.305s
+
+OK

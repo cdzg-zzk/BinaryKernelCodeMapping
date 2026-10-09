@@ -1,0 +1,277 @@
+{
+  "revision": "cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb",
+  "metric": "nonblank noncomment physical source lines",
+  "deduplication": "system/origin/path/line; duplicate ownership is an error",
+  "rows": [
+    {
+      "system": "Raw",
+      "scope": "common",
+      "category": "math_helpers",
+      "component": "common",
+      "sloc": 21
+    },
+    {
+      "system": "Raw",
+      "scope": "common",
+      "category": "provider_contract",
+      "component": "common",
+      "sloc": 10
+    },
+    {
+      "system": "Raw",
+      "scope": "common_libc_reference",
+      "category": "libc_entry_and_vdso_support",
+      "component": "common",
+      "sloc": 367
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "build",
+      "component": "time",
+      "sloc": 158
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "data_abi",
+      "component": "time",
+      "sloc": 89
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "getcpu",
+      "component": "getcpu",
+      "sloc": 23
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "integration",
+      "component": "time",
+      "sloc": 91
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "kernel_adapter",
+      "component": "time",
+      "sloc": 103
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "kernel_computation",
+      "component": "time",
+      "sloc": 163
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "mapping_namespace",
+      "component": "time",
+      "sloc": 335
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "provider_integration",
+      "component": "time",
+      "sloc": 17
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "publisher",
+      "component": "time",
+      "sloc": 80
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "user_adapter_provider",
+      "component": "time",
+      "sloc": 147
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "user_computation",
+      "component": "time",
+      "sloc": 281
+    },
+    {
+      "system": "Raw",
+      "scope": "infrastructure",
+      "category": "build",
+      "component": "time",
+      "sloc": 336
+    },
+    {
+      "system": "Raw",
+      "scope": "retained",
+      "category": "native_dispatch",
+      "component": "time",
+      "sloc": 11
+    },
+    {
+      "system": "Raw",
+      "scope": "retained",
+      "category": "special_reader",
+      "component": "time",
+      "sloc": 80
+    },
+    {
+      "system": "VKSO",
+      "scope": "common",
+      "category": "math_helpers",
+      "component": "common",
+      "sloc": 21
+    },
+    {
+      "system": "VKSO",
+      "scope": "common",
+      "category": "provider_contract",
+      "component": "common",
+      "sloc": 10
+    },
+    {
+      "system": "VKSO",
+      "scope": "common_libc_reference",
+      "category": "libc_entry_and_vdso_support",
+      "component": "common",
+      "sloc": 367
+    },
+    {
+      "system": "VKSO",
+      "scope": "diagnostics",
+      "category": "diagnostics",
+      "component": "time",
+      "sloc": 79
+    },
+    {
+      "system": "VKSO",
+      "scope": "excluded_platform",
+      "category": "compat32",
+      "component": "time",
+      "sloc": 20
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "build",
+      "component": "time",
+      "sloc": 87
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "data_abi",
+      "component": "time",
+      "sloc": 182
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "getcpu",
+      "component": "getcpu",
+      "sloc": 62
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "integration",
+      "component": "time",
+      "sloc": 22
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "kernel_adapter",
+      "component": "time",
+      "sloc": 265
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "mapping_namespace",
+      "component": "time",
+      "sloc": 232
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "provider_integration",
+      "component": "time",
+      "sloc": 13
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "publisher",
+      "component": "time",
+      "sloc": 85
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "shared_computation",
+      "component": "time",
+      "sloc": 292
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "user_adapter_provider",
+      "component": "time",
+      "sloc": 384
+    },
+    {
+      "system": "VKSO",
+      "scope": "infrastructure",
+      "category": "general_vkso_facility",
+      "component": "common",
+      "sloc": 3974
+    },
+    {
+      "system": "VKSO",
+      "scope": "retained",
+      "category": "native_dispatch",
+      "component": "time",
+      "sloc": 11
+    },
+    {
+      "system": "VKSO",
+      "scope": "retained",
+      "category": "private_reader",
+      "component": "time",
+      "sloc": 56
+    },
+    {
+      "system": "VKSO",
+      "scope": "retained",
+      "category": "special_reader",
+      "component": "time",
+      "sloc": 80
+    }
+  ],
+  "totals": {
+    "Raw": {
+      "common": 31,
+      "common_libc_reference": 367,
+      "feature": 1487,
+      "infrastructure": 336,
+      "retained": 91
+    },
+    "VKSO": {
+      "common": 31,
+      "common_libc_reference": 367,
+      "diagnostics": 79,
+      "excluded_platform": 20,
+      "feature": 1624,
+      "infrastructure": 3974,
+      "retained": 147
+    }
+  }
+}

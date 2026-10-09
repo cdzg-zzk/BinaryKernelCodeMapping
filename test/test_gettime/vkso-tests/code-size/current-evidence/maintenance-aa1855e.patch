@@ -1,0 +1,97 @@
+commit aa1855e812107757f57ef68fc537f91c48c8034c
+Author:     cdzg-zzk <1146990450@qq.com>
+AuthorDate: Thu Jul 30 11:50:14 2026 +0000
+Commit:     cdzg-zzk <1146990450@qq.com>
+CommitDate: Thu Jul 30 11:50:14 2026 +0000
+
+    vkso: specialize x86 cycle delta for full-width counters
+
+diff --git a/test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_core.c b/test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_core.c
+index f26c872..0887066 100644
+--- a/test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_core.c
++++ b/test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_core.c
+@@ -75,7 +75,7 @@ vkso_read_hres_time(const struct vkso_shared_data *shared,
+ 		    struct vkso_time_value *value,
+ 		    bool outline_normalize)
+ {
+-	u64 cycles, cycle_last, mask, ns;
++	u64 cycles, cycle_last, ns;
+ 	s64 sec;
+ 	u32 mult, shift;
+ 	u32 seq;
+@@ -88,10 +88,9 @@ vkso_read_hres_time(const struct vkso_shared_data *shared,
+ 		if (unlikely((s64)cycles < 0))
+ 			return VKSO_TIME_UNSUPPORTED_MODE;
+ 		cycle_last = READ_ONCE(cycle_data->cycle_last);
+-		mask = READ_ONCE(cycle_data->mask);
+ 		mult = READ_ONCE(*multiplier);
+ 		ns = READ_ONCE(base->shifted_nsec);
+-		ns += vkso_cycle_delta(cycles, cycle_last, mask) * mult;
++		ns += vkso_cycle_delta(cycles, cycle_last) * mult;
+ 		shift = READ_ONCE(cycle_data->shift);
+ 		sec = READ_ONCE(base->sec);
+ 		if (!vkso_read_retry(shared, seq))
+diff --git a/test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_internal.h b/test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_internal.h
+index 889b38d..f868e63 100644
+--- a/test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_internal.h
++++ b/test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_internal.h
+@@ -71,21 +71,18 @@ vkso_cycles_read(const struct vkso_context *context, s32 clock_mode)
+ }
+ 
+ /*
+- * All x86 clocks exported to userspace currently have a U64_MAX mask.  Clamp
+- * their rare backward observation exactly as the native x86 vDSO does.  The
+- * finite-mask case retains the generic clocksource wrap rule, which keeps the
+- * canonical state expressive without charging the common x86 path an
+- * unnecessary mask operation.
++ * clocksource_arch_init() disables the userspace mode of every x86
++ * clocksource whose mask is not CLOCKSOURCE_MASK(64).  vkso_cycles_read()
++ * rejects disabled modes before this helper, so every successful TSC,
++ * PVClock and Hyper-V read is full-width.  Clamp a rare backward observation
++ * exactly as the native x86 vDSO does.
+  */
+ static __always_inline u64
+-vkso_cycle_delta(u64 cycles, u64 cycle_last, u64 mask)
++vkso_cycle_delta(u64 cycles, u64 cycle_last)
+ {
+-	if (likely(mask == U64_MAX)) {
+-		if (likely(cycles > cycle_last))
+-			return cycles - cycle_last;
+-		return 0;
+-	}
+-	return (cycles - cycle_last) & mask;
++	if (likely(cycles > cycle_last))
++		return cycles - cycle_last;
++	return 0;
+ }
+ 
+ static __always_inline void
+diff --git a/test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_test.c b/test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_test.c
+index 80bd033..69f010e 100644
+--- a/test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_test.c
++++ b/test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_test.c
+@@ -66,16 +66,20 @@ static int __init vkso_cycle_delta_selftest(void)
+ 		.state = {
+ 			.cycles = {
+ 				.clock_mode = S32_MAX,
+-				.mask = U64_MAX,
++				/*
++				 * A finite-mask clocksource cannot retain a
++				 * userspace mode after clocksource_arch_init().
++				 * Model that unsupported-provider exit here.
++				 */
++				.mask = 0xff,
+ 				.mono_mult = 1,
+ 			},
+ 		},
+ 	};
+ 	u32 seq;
+ 
+-	if (vkso_cycle_delta(105, 100, U64_MAX) != 5 ||
+-	    vkso_cycle_delta(95, 100, U64_MAX) != 0 ||
+-	    vkso_cycle_delta(3, 0xfe, 0xff) != 5 ||
++	if (vkso_cycle_delta(105, 100) != 5 ||
++	    vkso_cycle_delta(95, 100) != 0 ||
+ 	    vkso_hres_sample(&synthetic, &sample) !=
+ 		    VKSO_TIME_UNSUPPORTED_MODE) {
+ 		pr_err("VKSO cycle-delta selftest failed\n");

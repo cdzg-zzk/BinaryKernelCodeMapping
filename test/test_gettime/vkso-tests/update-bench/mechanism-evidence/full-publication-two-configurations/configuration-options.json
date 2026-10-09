@@ -1,0 +1,171 @@
+{
+  "status": "PASS",
+  "pairs": [
+    {
+      "recorder": "current",
+      "backend": "raw",
+      "differences": [
+        {
+          "option": "CONFIG_CPU_SRSO",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_CPU_UNRET_ENTRY",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_MITIGATION_ITS",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_RETHUNK",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_RETPOLINE",
+          "normal": "y",
+          "no_retpoline": "n"
+        }
+      ],
+      "sources": {
+        "normal": {
+          "path": "baremetal/artifacts/update-full-publication-normal-20261002/raw.image.config",
+          "sha256": "43bf54842b53294e4473794b8a9e5871743834e7416effba9696ac3f0ad2c1f2"
+        },
+        "no-retpoline": {
+          "path": "baremetal/artifacts/update-full-publication-no-retpoline-20261002/raw.image.config",
+          "sha256": "d974efbda9be0b5189c2021e7fa8189c9c97af3d5ec023307d2649f773a29fd5"
+        }
+      }
+    },
+    {
+      "recorder": "current",
+      "backend": "vkso",
+      "differences": [
+        {
+          "option": "CONFIG_CPU_SRSO",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_CPU_UNRET_ENTRY",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_MITIGATION_ITS",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_RETHUNK",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_RETPOLINE",
+          "normal": "y",
+          "no_retpoline": "n"
+        }
+      ],
+      "sources": {
+        "normal": {
+          "path": "baremetal/artifacts/update-full-publication-normal-20261002/vkso.image.config",
+          "sha256": "6bb6dfeeddbd6e77d8b7ca6c18f28eec183f834b88a3e3a8c4bd35acc106e0a5"
+        },
+        "no-retpoline": {
+          "path": "baremetal/artifacts/update-full-publication-no-retpoline-20261002/vkso.image.config",
+          "sha256": "90d6b7567def97d4b4688f86d41fc570939cc0d68c9ab699254a2fa7fc0e2ea1"
+        }
+      }
+    },
+    {
+      "recorder": "legacy",
+      "backend": "raw",
+      "differences": [
+        {
+          "option": "CONFIG_CPU_SRSO",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_CPU_UNRET_ENTRY",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_MITIGATION_ITS",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_RETHUNK",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_RETPOLINE",
+          "normal": "y",
+          "no_retpoline": "n"
+        }
+      ],
+      "sources": {
+        "normal": {
+          "path": "baremetal/artifacts/update-full-publication-legacy-normal-20261004/raw.image.config",
+          "sha256": "43bf54842b53294e4473794b8a9e5871743834e7416effba9696ac3f0ad2c1f2"
+        },
+        "no-retpoline": {
+          "path": "baremetal/artifacts/update-full-publication-legacy-no-retpoline-20261002/raw.image.config",
+          "sha256": "d974efbda9be0b5189c2021e7fa8189c9c97af3d5ec023307d2649f773a29fd5"
+        }
+      }
+    },
+    {
+      "recorder": "legacy",
+      "backend": "vkso",
+      "differences": [
+        {
+          "option": "CONFIG_CPU_SRSO",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_CPU_UNRET_ENTRY",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_MITIGATION_ITS",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_RETHUNK",
+          "normal": "y",
+          "no_retpoline": "ABSENT"
+        },
+        {
+          "option": "CONFIG_RETPOLINE",
+          "normal": "y",
+          "no_retpoline": "n"
+        }
+      ],
+      "sources": {
+        "normal": {
+          "path": "baremetal/artifacts/update-full-publication-legacy-normal-20261004/vkso.image.config",
+          "sha256": "6bb6dfeeddbd6e77d8b7ca6c18f28eec183f834b88a3e3a8c4bd35acc106e0a5"
+        },
+        "no-retpoline": {
+          "path": "baremetal/artifacts/update-full-publication-legacy-no-retpoline-20261002/vkso.image.config",
+          "sha256": "90d6b7567def97d4b4688f86d41fc570939cc0d68c9ab699254a2fa7fc0e2ea1"
+        }
+      }
+    }
+  ],
+  "within_configuration_current_legacy_equal": true,
+  "scope": "Effective packaged image.config values. ABSENT means no entry in the configuration file, not a runtime mitigation-state measurement. These five coupled differences cannot identify a single causal option."
+}

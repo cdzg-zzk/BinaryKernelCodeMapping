@@ -1,0 +1,17 @@
+variant,system,metric,bytes,scope
+normal,Raw,11 ordinary kernel entry extents,1456,kallsyms extents including padding; shared callees separate
+normal,VKSO,11 ordinary kernel entry extents,736,kallsyms extents including padding; shared callees separate
+normal,Raw,native time/getcpu vDSO symbols,1515,ELF st_size; SGX excluded
+normal,VKSO,shared time/getcpu function bodies,1188,ELF st_size; alignment and general thunk page separate
+normal,Raw,embedded-vdso .text,1853,native DSO including SGX
+normal,VKSO,direct/libvkso_time.so .text,760,user private
+normal,VKSO,carrier shared backing: count once with kernel executable sections,8192,"reserved page bytes, not function body bytes"
+normal,VKSO,carrier user private executable sections,4096,"reserved page bytes, not function body bytes"
+no-retpoline,Raw,11 ordinary kernel entry extents,1392,kallsyms extents including padding; shared callees separate
+no-retpoline,VKSO,11 ordinary kernel entry extents,704,kallsyms extents including padding; shared callees separate
+no-retpoline,Raw,native time/getcpu vDSO symbols,1515,ELF st_size; SGX excluded
+no-retpoline,VKSO,shared time/getcpu function bodies,1149,ELF st_size; alignment and general thunk page separate
+no-retpoline,Raw,embedded-vdso .text,1853,native DSO including SGX
+no-retpoline,VKSO,direct/libvkso_time.so .text,760,user private
+no-retpoline,VKSO,carrier shared backing: count once with kernel executable sections,4096,"reserved page bytes, not function body bytes"
+no-retpoline,VKSO,carrier user private executable sections,4096,"reserved page bytes, not function body bytes"

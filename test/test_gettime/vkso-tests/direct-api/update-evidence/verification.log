@@ -1,0 +1,15 @@
+$ /usr/bin/python3 test/test_gettime/vkso-tests/direct-api/update_evaluation.py --check
+UPDATE evidence PASS: 16 boots, 64 boot/scenario units, 960 rounds, 3,599,774 observations
+
+$ /usr/bin/python3 test/test_gettime/vkso-tests/direct-api/update_report.py --check
+UPDATE tables and five vector figures: PASS
+
+$ /usr/bin/python3 -m unittest discover -s test/test_gettime/vkso-tests/direct-api/tests -p test_update_evaluation.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.008s
+
+OK
+
+Numerical identity, complete coverage and rendered-artifact checks: PASS
+Final layout update: report --check PASS; all five PNGs independently re-rendered from SVG and matched.

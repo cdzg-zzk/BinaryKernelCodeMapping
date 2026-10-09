@@ -13,6 +13,7 @@
 _Static_assert(__builtin_types_compatible_p(time_t, int64_t), "time ABI");
 int mock_binds(void);
 int mock_reads(void);
+int mock_aux_reads(void);
 void mock_error(int);
 void mock_seconds(int64_t);
 
@@ -47,6 +48,7 @@ int main(void)
 		unsetenv("VKSO_TEST_MODE");
 		errno = 0;
 		assert(vkso_time_init() == -1 && errno == expected); /* sticky failure */
+		assert(mock_aux_reads() == 1);
 		puts("MOCK initializer failure semantics PASS; NOT kernel execution");
 		return 0;
 	}
@@ -57,6 +59,7 @@ int main(void)
 	for (int i = 0; i < 16; ++i) assert(!pthread_create(&threads[i], NULL, worker, (void *)(intptr_t)i));
 	for (int i = 0; i < 16; ++i) assert(!pthread_join(threads[i], NULL));
 	assert(mock_binds() == 1 && mock_reads() == 1);
+	assert(mock_aux_reads() == 1);
 	struct timespec ts;
 	struct timeval tv;
 	time_t t;

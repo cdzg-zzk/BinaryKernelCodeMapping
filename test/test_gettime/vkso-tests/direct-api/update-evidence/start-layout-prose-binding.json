@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "paragraph_start": "起始计时块的位置控制没有复现持续的大幅峰移。",
+  "source": "test/test_gettime/vkso-tests/update-bench/mechanism-evidence/start-layout-boot1-review/report.json",
+  "windows": 40,
+  "samples": 79992,
+  "peak_delta_range": [
+    -2,
+    1
+  ],
+  "pooled_position_mean_delta": {
+    "idle": -2.53666666666669,
+    "monotonic_coarse": 7.999286913497883
+  },
+  "coarse_block6_relocation_cdf_distance": 0.11850000000000005,
+  "same_boot_as_matrix_step7": "43c75382-7f5f-4650-8b82-4463eab1f7eb",
+  "scope": "Numeric binding for the added start-layout ablation prose; no new root-cause or native cadence result claim."
+}

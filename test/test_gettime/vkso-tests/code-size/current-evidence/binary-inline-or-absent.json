@@ -1,0 +1,230 @@
+[
+  {
+    "variant": "normal",
+    "system": "Raw",
+    "symbol": "vdso_calc_delta",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "Raw",
+    "symbol": "tk_clock_read",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "Raw",
+    "symbol": "timekeeping_get_delta",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "Raw",
+    "symbol": "timekeeping_delta_to_ns",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "Raw",
+    "symbol": "timekeeping_get_ns",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "Raw",
+    "symbol": "clockid_to_kclock",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "Raw",
+    "symbol": "clone_time_ns",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "Raw",
+    "symbol": "offset_from_ts",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "Raw",
+    "symbol": "timens_setup_vdso_data",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "Raw",
+    "symbol": "timens_set_vvar_page",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "VKSO",
+    "symbol": "tk_clock_read",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "VKSO",
+    "symbol": "timekeeping_get_delta",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "VKSO",
+    "symbol": "timekeeping_delta_to_ns",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "VKSO",
+    "symbol": "tk_set_read_base",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "VKSO",
+    "symbol": "tk_publish_read_state",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "VKSO",
+    "symbol": "vkso_current_mm_data",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "VKSO",
+    "symbol": "clockid_to_kclock",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "VKSO",
+    "symbol": "clone_time_ns",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "normal",
+    "system": "VKSO",
+    "symbol": "vkso_clock_classify",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "Raw",
+    "symbol": "vdso_calc_delta",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "Raw",
+    "symbol": "tk_clock_read",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "Raw",
+    "symbol": "timekeeping_get_delta",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "Raw",
+    "symbol": "timekeeping_delta_to_ns",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "Raw",
+    "symbol": "timekeeping_get_ns",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "Raw",
+    "symbol": "clockid_to_kclock",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "Raw",
+    "symbol": "clone_time_ns",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "Raw",
+    "symbol": "offset_from_ts",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "Raw",
+    "symbol": "timens_setup_vdso_data",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "Raw",
+    "symbol": "timens_set_vvar_page",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "VKSO",
+    "symbol": "tk_clock_read",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "VKSO",
+    "symbol": "timekeeping_get_delta",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "VKSO",
+    "symbol": "timekeeping_delta_to_ns",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "VKSO",
+    "symbol": "tk_set_read_base",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "VKSO",
+    "symbol": "tk_publish_read_state",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "VKSO",
+    "symbol": "vkso_current_mm_data",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "VKSO",
+    "symbol": "clockid_to_kclock",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "VKSO",
+    "symbol": "clone_time_ns",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "VKSO",
+    "symbol": "vkso_clock_classify",
+    "reason": "inlined/absent as standalone symbol; not counted as zero implementation"
+  }
+]

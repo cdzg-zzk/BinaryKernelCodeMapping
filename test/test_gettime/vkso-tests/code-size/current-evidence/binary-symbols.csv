@@ -1,0 +1,270 @@
+variant,system,artifact,scope,category,symbol,address,bytes,metric
+normal,Raw,kernel,feature,kernel_computation,ktime_get_real_ts64,0xffffffff8111d2d0,224,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_computation,ktime_get,0xffffffff8111d0a0,160,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_computation,ktime_get_resolution_ns,0xffffffff8111bca0,64,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_computation,ktime_get_with_offset,0xffffffff8111d140,192,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_computation,ktime_get_raw,0xffffffff8111cc90,144,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_computation,ktime_get_ts64,0xffffffff8111bd40,240,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_computation,ktime_get_seconds,0xffffffff8111be30,48,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_computation,ktime_get_real_seconds,0xffffffff8111b9e0,16,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_computation,ktime_get_raw_ts64,0xffffffff8111d200,208,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_computation,ktime_get_coarse_real_ts64,0xffffffff8111bc60,64,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_computation,ktime_get_coarse_ts64,0xffffffff8111c060,96,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,retained,special_reader,ktime_get_mono_fast_ns,0xffffffff8111ba60,144,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,retained,special_reader,ktime_get_raw_fast_ns,0xffffffff8111bb10,144,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,retained,special_reader,ktime_get_boot_fast_ns,0xffffffff8111baf0,32,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,retained,special_reader,ktime_get_real_fast_ns,0xffffffff8111bba0,144,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,retained,special_reader,ktime_get_coarse_with_offset,0xffffffff8111bce0,96,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,retained,special_reader,ktime_get_snapshot,0xffffffff8111cb40,336,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,retained,special_reader,ktime_get_update_offsets_now,0xffffffff8111dfe0,272,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_adapter,posix_get_realtime_timespec,0xffffffff811231a0,32,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_adapter,posix_get_monotonic_timespec,0xffffffff811235e0,128,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_adapter,posix_get_monotonic_raw,0xffffffff81123660,128,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_adapter,posix_get_realtime_coarse,0xffffffff81123150,32,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_adapter,posix_get_monotonic_coarse,0xffffffff811230d0,128,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_adapter,posix_get_boottime_timespec,0xffffffff81123030,160,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_adapter,posix_get_tai_timespec,0xffffffff81122d80,48,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_adapter,posix_get_coarse_res,0xffffffff81122db0,48,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,kernel_adapter,posix_get_hrtimer_res,0xffffffff81122ac0,32,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,common,provider_contract,clocksource_arch_init,0xffffffff8102d8e0,48,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,common,provider_contract,clocksource_arch_init.cold,0xffffffff81afd04c,28,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,mapping_namespace,free_time_ns,0xffffffff8112c850,128,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,mapping_namespace,timens_commit,0xffffffff8112ca90,320,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,mapping_namespace,timens_on_fork,0xffffffff8112cbd0,160,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,host_container,publisher_with_common_timekeeping,timekeeping_update,0xffffffff8111c2f0,304,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,host_container,publisher_with_common_timekeeping,update_wall_time,0xffffffff8111dfa0,32,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,publication_or_mapping,update_vsyscall,0xffffffff8112c0e0,560,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,publication_or_mapping,update_vsyscall_tz,0xffffffff8112c310,32,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,publication_or_mapping,vdso_fault,0xffffffff810036c0,144,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,publication_or_mapping,vvar_fault,0xffffffff81003880,464,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,publication_or_mapping,vdso_join_timens,0xffffffff81003a60,128,kallsyms next distinct text address (includes padding)
+normal,Raw,kernel,feature,publication_or_mapping,arch_setup_additional_pages,0xffffffff81003b80,192,kallsyms next distinct text address (includes padding)
+normal,Raw,embedded-vdso,feature,user_time,__vdso_gettimeofday,0x730,574,ELF symbol st_size
+normal,Raw,embedded-vdso,feature,user_time,__vdso_clock_getres,0xca0,99,ELF symbol st_size
+normal,Raw,embedded-vdso,feature,user_time,__vdso_time,0x970,42,ELF symbol st_size
+normal,Raw,embedded-vdso,excluded_platform,user_time,__vdso_sgx_enter_enclave,0xd40,157,ELF symbol st_size
+normal,Raw,embedded-vdso,feature,user_time,__vdso_clock_gettime,0x9a0,761,ELF symbol st_size
+normal,Raw,embedded-vdso,feature,getcpu,__vdso_getcpu,0xd10,39,ELF symbol st_size
+normal,VKSO,kernel-shared-core,feature,shared_time,vkso_finish_hres_cold,0xffffffff81001030,47,ELF symbol st_size
+normal,VKSO,kernel-shared-core,feature,shared_time,vkso_clock_getres_hres,0xffffffff810012e0,33,ELF symbol st_size
+normal,VKSO,kernel-shared-core,feature,getcpu,__vkso_getcpu,0xffffffff81001000,42,ELF symbol st_size
+normal,VKSO,kernel-shared-core,feature,shared_time,vkso_time_apply_offset,0xffffffff810012b0,46,ELF symbol st_size
+normal,VKSO,kernel-shared-core,feature,shared_time,__vkso_time,0xffffffff81001450,24,ELF symbol st_size
+normal,VKSO,kernel-shared-core,feature,shared_time,vkso_cycles_read_cold,0xffffffff81001470,111,ELF symbol st_size
+normal,VKSO,kernel-shared-core,feature,shared_time,vkso_clock_getres_coarse,0xffffffff81001310,27,ELF symbol st_size
+normal,VKSO,kernel-shared-core,feature,shared_time,vkso_gettimeofday_core,0xffffffff81001330,282,ELF symbol st_size
+normal,VKSO,kernel-shared-core,feature,shared_time,vkso_clock_gettime_hres,0xffffffff81001060,440,ELF symbol st_size
+normal,VKSO,kernel-shared-core,feature,shared_time,vkso_clock_gettime_coarse,0xffffffff81001220,136,ELF symbol st_size
+normal,VKSO,kernel,feature,kernel_adapter,ktime_get_real_ts64,0xffffffff8111df80,48,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,ktime_get,0xffffffff8111e030,144,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,ktime_get_resolution_ns,0xffffffff8111dd90,48,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,ktime_get_with_offset,0xffffffff8111e0c0,160,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,ktime_get_raw,0xffffffff8111dfb0,128,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,ktime_get_ts64,0xffffffff8111e160,48,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,ktime_get_seconds,0xffffffff8111de20,48,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,ktime_get_real_seconds,0xffffffff8111db10,16,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,ktime_get_raw_ts64,0xffffffff8111df60,32,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,ktime_get_coarse_real_ts64,0xffffffff8111e330,32,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,ktime_get_coarse_ts64,0xffffffff8111e350,32,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,retained,private_reader,timekeeping_get_ns,0xffffffff8111dac0,80,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,retained,special_reader,ktime_get_mono_fast_ns,0xffffffff8111db90,144,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,retained,special_reader,ktime_get_raw_fast_ns,0xffffffff8111dc40,144,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,retained,special_reader,ktime_get_boot_fast_ns,0xffffffff8111dc20,32,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,retained,special_reader,ktime_get_real_fast_ns,0xffffffff8111dcd0,144,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,retained,special_reader,ktime_get_coarse_with_offset,0xffffffff8111ddc0,96,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,retained,special_reader,ktime_get_snapshot,0xffffffff8111eea0,336,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,retained,special_reader,ktime_get_update_offsets_now,0xffffffff8111ffa0,272,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,retained,private_reader,vkso_timekeeping_get_private,0xffffffff81b0dad2,227,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,__x64_sys_time,0xffffffff81119f30,64,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,__x64_sys_gettimeofday,0xffffffff8111a0a0,208,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,__x64_sys_clock_gettime,0xffffffff81126540,112,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,__x64_sys_clock_getres,0xffffffff81126640,112,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,getcpu,__x64_sys_getcpu,0xffffffff810a4d30,176,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,vkso_kernel_gettimeofday_failure,0xffffffff81119e90,160,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,vkso_posix_clock_gettime_failure,0xffffffff81b0e051,94,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,posix_clock_gettime_dispatch,0xffffffff81125760,208,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,kernel_adapter,posix_clock_getres_dispatch,0xffffffff81125140,160,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,excluded_platform,compat32,__x64_sys_clock_gettime32,0xffffffff81126770,112,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,excluded_platform,compat32,__x64_sys_clock_getres_time32,0xffffffff81126800,128,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,mapping_namespace,free_time_ns,0xffffffff8112e380,192,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,mapping_namespace,timens_commit,0xffffffff8112e600,48,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,mapping_namespace,timens_on_fork,0xffffffff8112e630,160,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,mapping_namespace,timens_freeze_offsets,0xffffffff8112df40,208,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,host_container,publisher_with_common_timekeeping,timekeeping_update,0xffffffff8111e4f0,656,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,host_container,publisher_with_common_timekeeping,update_wall_time,0xffffffff8111ff60,32,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,publication_or_mapping,vkso_mm_fault,0xffffffff8102f4e0,64,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,publication_or_mapping,vkso_mm_mremap,0xffffffff8102f4d0,16,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,publication_or_mapping,vkso_dup_mmap,0xffffffff8102f550,160,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,publication_or_mapping,vkso_destroy_context,0xffffffff8102f5f0,144,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,publication_or_mapping,vkso_time_join_namespace,0xffffffff8102f680,384,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,publication_or_mapping,arch_setup_additional_pages,0xffffffff8102f800,320,kallsyms next distinct text address (includes padding)
+normal,VKSO,kernel,feature,publication_or_mapping,vkso_time_update_timezone,0xffffffff8111daa0,32,kallsyms next distinct text address (includes padding)
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_time,0x1450,32,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__x86_return_thunk,0xe00d30,2,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,getcpu,__vkso_getcpu,0x1000,48,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__x86_indirect_its_thunk_rax,0xe008e0,64,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__x86_indirect_thunk_rax,0xe00580,32,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,its_return_thunk,0xe00d20,16,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_finish_hres_cold,0x1030,48,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__indirect_thunk_start,0xe00580,32,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_cycles_read_cold,0x1470,2960,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_clock_gettime_hres,0x1060,448,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_clock_gettime_coarse,0x1220,144,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_clock_getres_hres,0x12e0,48,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_clock_getres_coarse,0x1310,32,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_gettimeofday_core,0x1330,288,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_clock_gettime,0x1601000,67,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_clock_getres,0x1601050,52,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_gettimeofday,0x1601090,12,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_bind_context,0x16010b0,52,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_bind_gettimeofday_failure,0x16010f0,10,ELF symbol st_size; aliases not additive
+normal,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_shared_data,0x1601100,8,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,public_error,0x1110,18,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,clock_gettime.cold,0x1122,5,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,clock_getres.cold,0x1127,5,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,vkso_public_gettimeofday_failure.cold,0x112c,4,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,resolve_gettimeofday,0x1270,12,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,resolve_time,0x1280,12,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,getcpu,getcpu.cold,0x1130,5,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,initialize,0x12b0,116,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,vkso_public_gettimeofday_failure,0x1240,41,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,clock_gettime,0x1200,27,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,clock_getres,0x1220,27,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,vkso_time_gettimeofday,0x1270,12,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,getcpu,getcpu,0x1290,29,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,vkso_time_init,0x1330,73,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,vkso_user_wrapper_init,0x1380,136,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,gettimeofday,0x1270,12,ELF symbol st_size; aliases not additive
+normal,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,time,0x1280,12,ELF symbol st_size; aliases not additive
+no-retpoline,Raw,kernel,feature,kernel_computation,ktime_get_real_ts64,0xffffffff81113990,224,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_computation,ktime_get,0xffffffff81113790,144,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_computation,ktime_get_resolution_ns,0xffffffff811123d0,64,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_computation,ktime_get_with_offset,0xffffffff81113820,176,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_computation,ktime_get_raw,0xffffffff81113380,144,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_computation,ktime_get_ts64,0xffffffff81112470,240,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_computation,ktime_get_seconds,0xffffffff81112560,32,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_computation,ktime_get_real_seconds,0xffffffff81112120,16,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_computation,ktime_get_raw_ts64,0xffffffff811138d0,192,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_computation,ktime_get_coarse_real_ts64,0xffffffff81112390,64,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_computation,ktime_get_coarse_ts64,0xffffffff81112780,96,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,retained,special_reader,ktime_get_mono_fast_ns,0xffffffff81112190,144,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,retained,special_reader,ktime_get_raw_fast_ns,0xffffffff81112240,144,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,retained,special_reader,ktime_get_boot_fast_ns,0xffffffff81112220,32,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,retained,special_reader,ktime_get_real_fast_ns,0xffffffff811122d0,144,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,retained,special_reader,ktime_get_coarse_with_offset,0xffffffff81112410,96,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,retained,special_reader,ktime_get_snapshot,0xffffffff81113230,336,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,retained,special_reader,ktime_get_update_offsets_now,0xffffffff81114680,256,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_adapter,posix_get_realtime_timespec,0xffffffff811195b0,32,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_adapter,posix_get_monotonic_timespec,0xffffffff811199b0,128,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_adapter,posix_get_monotonic_raw,0xffffffff81119a30,128,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_adapter,posix_get_realtime_coarse,0xffffffff81119570,32,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_adapter,posix_get_monotonic_coarse,0xffffffff811194f0,128,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_adapter,posix_get_boottime_timespec,0xffffffff81119460,144,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_adapter,posix_get_tai_timespec,0xffffffff811191e0,48,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_adapter,posix_get_coarse_res,0xffffffff81119210,48,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,kernel_adapter,posix_get_hrtimer_res,0xffffffff81118f50,32,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,common,provider_contract,clocksource_arch_init,0xffffffff8102aea0,48,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,common,provider_contract,clocksource_arch_init.cold,0xffffffff81ab2f85,28,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,mapping_namespace,free_time_ns,0xffffffff81122840,128,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,mapping_namespace,timens_commit,0xffffffff81122a70,320,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,mapping_namespace,timens_on_fork,0xffffffff81122bb0,160,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,host_container,publisher_with_common_timekeeping,timekeeping_update,0xffffffff81112a10,304,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,host_container,publisher_with_common_timekeeping,update_wall_time,0xffffffff81114640,32,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,publication_or_mapping,update_vsyscall,0xffffffff81122120,560,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,publication_or_mapping,update_vsyscall_tz,0xffffffff81122350,16,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,publication_or_mapping,vdso_fault,0xffffffff81002160,144,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,publication_or_mapping,vvar_fault,0xffffffff81002310,464,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,publication_or_mapping,vdso_join_timens,0xffffffff810024f0,128,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,kernel,feature,publication_or_mapping,arch_setup_additional_pages,0xffffffff81002610,176,kallsyms next distinct text address (includes padding)
+no-retpoline,Raw,embedded-vdso,feature,user_time,__vdso_gettimeofday,0x730,574,ELF symbol st_size
+no-retpoline,Raw,embedded-vdso,feature,user_time,__vdso_clock_getres,0xca0,99,ELF symbol st_size
+no-retpoline,Raw,embedded-vdso,feature,user_time,__vdso_time,0x970,42,ELF symbol st_size
+no-retpoline,Raw,embedded-vdso,excluded_platform,user_time,__vdso_sgx_enter_enclave,0xd40,157,ELF symbol st_size
+no-retpoline,Raw,embedded-vdso,feature,user_time,__vdso_clock_gettime,0x9a0,761,ELF symbol st_size
+no-retpoline,Raw,embedded-vdso,feature,getcpu,__vdso_getcpu,0xd10,39,ELF symbol st_size
+no-retpoline,VKSO,kernel-shared-core,feature,shared_time,vkso_finish_hres_cold,0xffffffff81001030,44,ELF symbol st_size
+no-retpoline,VKSO,kernel-shared-core,feature,shared_time,vkso_clock_getres_hres,0xffffffff810012e0,30,ELF symbol st_size
+no-retpoline,VKSO,kernel-shared-core,feature,getcpu,__vkso_getcpu,0xffffffff81001000,39,ELF symbol st_size
+no-retpoline,VKSO,kernel-shared-core,feature,shared_time,vkso_time_apply_offset,0xffffffff810012b0,43,ELF symbol st_size
+no-retpoline,VKSO,kernel-shared-core,feature,shared_time,__vkso_time,0xffffffff81001440,21,ELF symbol st_size
+no-retpoline,VKSO,kernel-shared-core,feature,shared_time,vkso_cycles_read_cold,0xffffffff81001460,105,ELF symbol st_size
+no-retpoline,VKSO,kernel-shared-core,feature,shared_time,vkso_clock_getres_coarse,0xffffffff81001300,24,ELF symbol st_size
+no-retpoline,VKSO,kernel-shared-core,feature,shared_time,vkso_gettimeofday_core,0xffffffff81001320,276,ELF symbol st_size
+no-retpoline,VKSO,kernel-shared-core,feature,shared_time,vkso_clock_gettime_hres,0xffffffff81001060,434,ELF symbol st_size
+no-retpoline,VKSO,kernel-shared-core,feature,shared_time,vkso_clock_gettime_coarse,0xffffffff81001220,133,ELF symbol st_size
+no-retpoline,VKSO,kernel,feature,kernel_adapter,ktime_get_real_ts64,0xffffffff811136d0,48,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,ktime_get,0xffffffff81113780,144,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,ktime_get_resolution_ns,0xffffffff81113500,32,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,ktime_get_with_offset,0xffffffff81113810,160,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,ktime_get_raw,0xffffffff81113700,128,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,ktime_get_ts64,0xffffffff811138b0,48,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,ktime_get_seconds,0xffffffff81113580,32,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,ktime_get_real_seconds,0xffffffff81113290,16,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,ktime_get_raw_ts64,0xffffffff811136b0,32,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,ktime_get_coarse_real_ts64,0xffffffff81113a80,32,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,ktime_get_coarse_ts64,0xffffffff81113aa0,32,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,retained,private_reader,timekeeping_get_ns,0xffffffff81113240,80,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,retained,special_reader,ktime_get_mono_fast_ns,0xffffffff81113300,144,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,retained,special_reader,ktime_get_raw_fast_ns,0xffffffff811133b0,144,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,retained,special_reader,ktime_get_boot_fast_ns,0xffffffff81113390,32,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,retained,special_reader,ktime_get_real_fast_ns,0xffffffff81113440,144,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,retained,special_reader,ktime_get_coarse_with_offset,0xffffffff81113520,96,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,retained,special_reader,ktime_get_snapshot,0xffffffff811145c0,336,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,retained,special_reader,ktime_get_update_offsets_now,0xffffffff811156a0,256,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,retained,private_reader,vkso_timekeeping_get_private,0xffffffff81ac255f,224,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,__x64_sys_time,0xffffffff8110f850,64,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,__x64_sys_gettimeofday,0xffffffff8110f9b0,208,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,__x64_sys_clock_gettime,0xffffffff8111b910,112,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,__x64_sys_clock_getres,0xffffffff8111ba00,112,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,getcpu,__x64_sys_getcpu,0xffffffff8109d3b0,176,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,vkso_kernel_gettimeofday_failure,0xffffffff8110f7b0,160,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,vkso_posix_clock_gettime_failure,0xffffffff81ac2ad4,91,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,posix_clock_gettime_dispatch,0xffffffff8111ab70,192,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,kernel_adapter,posix_clock_getres_dispatch,0xffffffff8111a5b0,144,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,excluded_platform,compat32,__x64_sys_clock_gettime32,0xffffffff8111bb30,112,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,excluded_platform,compat32,__x64_sys_clock_getres_time32,0xffffffff8111bbc0,112,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,mapping_namespace,free_time_ns,0xffffffff811233e0,192,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,mapping_namespace,timens_commit,0xffffffff81123650,48,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,mapping_namespace,timens_on_fork,0xffffffff81123680,160,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,mapping_namespace,timens_freeze_offsets,0xffffffff81122fe0,192,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,host_container,publisher_with_common_timekeeping,timekeeping_update,0xffffffff81113c40,656,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,host_container,publisher_with_common_timekeeping,update_wall_time,0xffffffff81115660,32,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,publication_or_mapping,vkso_mm_fault,0xffffffff8102ca80,64,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,publication_or_mapping,vkso_mm_mremap,0xffffffff8102ca70,16,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,publication_or_mapping,vkso_dup_mmap,0xffffffff8102caf0,160,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,publication_or_mapping,vkso_destroy_context,0xffffffff8102cb90,144,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,publication_or_mapping,vkso_time_join_namespace,0xffffffff8102cc20,384,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,publication_or_mapping,arch_setup_additional_pages,0xffffffff8102cda0,320,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,kernel,feature,publication_or_mapping,vkso_time_update_timezone,0xffffffff81113220,32,kallsyms next distinct text address (includes padding)
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_time,0x1440,32,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,getcpu,__vkso_getcpu,0x1000,48,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_finish_hres_cold,0x1030,48,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_cycles_read_cold,0x1460,2976,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_clock_gettime_hres,0x1060,448,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_clock_gettime_coarse,0x1220,144,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_clock_getres_hres,0x12e0,32,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_clock_getres_coarse,0x1300,32,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,vkso_gettimeofday_core,0x1320,288,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_clock_gettime,0x1601000,67,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_clock_getres,0x1601050,52,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_gettimeofday,0x1601090,12,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_bind_context,0x16010b0,52,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_bind_gettimeofday_failure,0x16010f0,10,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,libkernel.so,carrier/public symbol inventory,time_or_adapter,__vkso_shared_data,0x1601100,8,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,public_error,0x1110,18,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,clock_gettime.cold,0x1122,5,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,clock_getres.cold,0x1127,5,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,vkso_public_gettimeofday_failure.cold,0x112c,4,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,resolve_gettimeofday,0x1270,12,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,resolve_time,0x1280,12,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,getcpu,getcpu.cold,0x1130,5,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,initialize,0x12b0,116,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,vkso_public_gettimeofday_failure,0x1240,41,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,clock_gettime,0x1200,27,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,clock_getres,0x1220,27,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,vkso_time_gettimeofday,0x1270,12,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,getcpu,getcpu,0x1290,29,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,vkso_time_init,0x1330,73,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,vkso_user_wrapper_init,0x1380,136,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,gettimeofday,0x1270,12,ELF symbol st_size; aliases not additive
+no-retpoline,VKSO,direct/libvkso_time.so,carrier/public symbol inventory,time_or_adapter,time,0x1280,12,ELF symbol st_size; aliases not additive

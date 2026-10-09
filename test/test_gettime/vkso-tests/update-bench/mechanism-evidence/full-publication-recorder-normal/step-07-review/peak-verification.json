@@ -1,0 +1,681 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "step": 0,
+      "scenario": "idle",
+      "sigma": 2,
+      "dominant_peak": 376,
+      "boundary_maximum": null
+    },
+    {
+      "step": 0,
+      "scenario": "idle",
+      "sigma": 3,
+      "dominant_peak": 376,
+      "boundary_maximum": null
+    },
+    {
+      "step": 0,
+      "scenario": "idle",
+      "sigma": 5,
+      "dominant_peak": 376,
+      "boundary_maximum": null
+    },
+    {
+      "step": 0,
+      "scenario": "monotonic",
+      "sigma": 2,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 0,
+      "scenario": "monotonic",
+      "sigma": 3,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 0,
+      "scenario": "monotonic",
+      "sigma": 5,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 0,
+      "scenario": "monotonic_coarse",
+      "sigma": 2,
+      "dominant_peak": 378,
+      "boundary_maximum": null
+    },
+    {
+      "step": 0,
+      "scenario": "monotonic_coarse",
+      "sigma": 3,
+      "dominant_peak": 378,
+      "boundary_maximum": null
+    },
+    {
+      "step": 0,
+      "scenario": "monotonic_coarse",
+      "sigma": 5,
+      "dominant_peak": 378,
+      "boundary_maximum": null
+    },
+    {
+      "step": 0,
+      "scenario": "monotonic_raw",
+      "sigma": 2,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 0,
+      "scenario": "monotonic_raw",
+      "sigma": 3,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 0,
+      "scenario": "monotonic_raw",
+      "sigma": 5,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 1,
+      "scenario": "idle",
+      "sigma": 2,
+      "dominant_peak": 255,
+      "boundary_maximum": null
+    },
+    {
+      "step": 1,
+      "scenario": "idle",
+      "sigma": 3,
+      "dominant_peak": 255,
+      "boundary_maximum": null
+    },
+    {
+      "step": 1,
+      "scenario": "idle",
+      "sigma": 5,
+      "dominant_peak": 256,
+      "boundary_maximum": null
+    },
+    {
+      "step": 1,
+      "scenario": "monotonic",
+      "sigma": 2,
+      "dominant_peak": 386,
+      "boundary_maximum": null
+    },
+    {
+      "step": 1,
+      "scenario": "monotonic",
+      "sigma": 3,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 1,
+      "scenario": "monotonic",
+      "sigma": 5,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 1,
+      "scenario": "monotonic_coarse",
+      "sigma": 2,
+      "dominant_peak": 836,
+      "boundary_maximum": null
+    },
+    {
+      "step": 1,
+      "scenario": "monotonic_coarse",
+      "sigma": 3,
+      "dominant_peak": 836,
+      "boundary_maximum": null
+    },
+    {
+      "step": 1,
+      "scenario": "monotonic_coarse",
+      "sigma": 5,
+      "dominant_peak": 837,
+      "boundary_maximum": null
+    },
+    {
+      "step": 1,
+      "scenario": "monotonic_raw",
+      "sigma": 2,
+      "dominant_peak": 859,
+      "boundary_maximum": null
+    },
+    {
+      "step": 1,
+      "scenario": "monotonic_raw",
+      "sigma": 3,
+      "dominant_peak": 860,
+      "boundary_maximum": null
+    },
+    {
+      "step": 1,
+      "scenario": "monotonic_raw",
+      "sigma": 5,
+      "dominant_peak": 860,
+      "boundary_maximum": null
+    },
+    {
+      "step": 2,
+      "scenario": "idle",
+      "sigma": 2,
+      "dominant_peak": 385,
+      "boundary_maximum": null
+    },
+    {
+      "step": 2,
+      "scenario": "idle",
+      "sigma": 3,
+      "dominant_peak": 386,
+      "boundary_maximum": null
+    },
+    {
+      "step": 2,
+      "scenario": "idle",
+      "sigma": 5,
+      "dominant_peak": 386,
+      "boundary_maximum": null
+    },
+    {
+      "step": 2,
+      "scenario": "monotonic",
+      "sigma": 2,
+      "dominant_peak": 386,
+      "boundary_maximum": null
+    },
+    {
+      "step": 2,
+      "scenario": "monotonic",
+      "sigma": 3,
+      "dominant_peak": 386,
+      "boundary_maximum": null
+    },
+    {
+      "step": 2,
+      "scenario": "monotonic",
+      "sigma": 5,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 2,
+      "scenario": "monotonic_coarse",
+      "sigma": 2,
+      "dominant_peak": 386,
+      "boundary_maximum": null
+    },
+    {
+      "step": 2,
+      "scenario": "monotonic_coarse",
+      "sigma": 3,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 2,
+      "scenario": "monotonic_coarse",
+      "sigma": 5,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 2,
+      "scenario": "monotonic_raw",
+      "sigma": 2,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 2,
+      "scenario": "monotonic_raw",
+      "sigma": 3,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 2,
+      "scenario": "monotonic_raw",
+      "sigma": 5,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 3,
+      "scenario": "idle",
+      "sigma": 2,
+      "dominant_peak": 247,
+      "boundary_maximum": null
+    },
+    {
+      "step": 3,
+      "scenario": "idle",
+      "sigma": 3,
+      "dominant_peak": 247,
+      "boundary_maximum": null
+    },
+    {
+      "step": 3,
+      "scenario": "idle",
+      "sigma": 5,
+      "dominant_peak": 247,
+      "boundary_maximum": null
+    },
+    {
+      "step": 3,
+      "scenario": "monotonic",
+      "sigma": 2,
+      "dominant_peak": 374,
+      "boundary_maximum": null
+    },
+    {
+      "step": 3,
+      "scenario": "monotonic",
+      "sigma": 3,
+      "dominant_peak": 374,
+      "boundary_maximum": null
+    },
+    {
+      "step": 3,
+      "scenario": "monotonic",
+      "sigma": 5,
+      "dominant_peak": 374,
+      "boundary_maximum": null
+    },
+    {
+      "step": 3,
+      "scenario": "monotonic_coarse",
+      "sigma": 2,
+      "dominant_peak": 641,
+      "boundary_maximum": null
+    },
+    {
+      "step": 3,
+      "scenario": "monotonic_coarse",
+      "sigma": 3,
+      "dominant_peak": 641,
+      "boundary_maximum": null
+    },
+    {
+      "step": 3,
+      "scenario": "monotonic_coarse",
+      "sigma": 5,
+      "dominant_peak": 775,
+      "boundary_maximum": null
+    },
+    {
+      "step": 3,
+      "scenario": "monotonic_raw",
+      "sigma": 2,
+      "dominant_peak": 818,
+      "boundary_maximum": null
+    },
+    {
+      "step": 3,
+      "scenario": "monotonic_raw",
+      "sigma": 3,
+      "dominant_peak": 818,
+      "boundary_maximum": null
+    },
+    {
+      "step": 3,
+      "scenario": "monotonic_raw",
+      "sigma": 5,
+      "dominant_peak": 817,
+      "boundary_maximum": null
+    },
+    {
+      "step": 4,
+      "scenario": "idle",
+      "sigma": 2,
+      "dominant_peak": 246,
+      "boundary_maximum": null
+    },
+    {
+      "step": 4,
+      "scenario": "idle",
+      "sigma": 3,
+      "dominant_peak": 246,
+      "boundary_maximum": null
+    },
+    {
+      "step": 4,
+      "scenario": "idle",
+      "sigma": 5,
+      "dominant_peak": 247,
+      "boundary_maximum": null
+    },
+    {
+      "step": 4,
+      "scenario": "monotonic",
+      "sigma": 2,
+      "dominant_peak": 374,
+      "boundary_maximum": null
+    },
+    {
+      "step": 4,
+      "scenario": "monotonic",
+      "sigma": 3,
+      "dominant_peak": 374,
+      "boundary_maximum": null
+    },
+    {
+      "step": 4,
+      "scenario": "monotonic",
+      "sigma": 5,
+      "dominant_peak": 374,
+      "boundary_maximum": null
+    },
+    {
+      "step": 4,
+      "scenario": "monotonic_coarse",
+      "sigma": 2,
+      "dominant_peak": 772,
+      "boundary_maximum": null
+    },
+    {
+      "step": 4,
+      "scenario": "monotonic_coarse",
+      "sigma": 3,
+      "dominant_peak": 773,
+      "boundary_maximum": null
+    },
+    {
+      "step": 4,
+      "scenario": "monotonic_coarse",
+      "sigma": 5,
+      "dominant_peak": 774,
+      "boundary_maximum": null
+    },
+    {
+      "step": 4,
+      "scenario": "monotonic_raw",
+      "sigma": 2,
+      "dominant_peak": 823,
+      "boundary_maximum": null
+    },
+    {
+      "step": 4,
+      "scenario": "monotonic_raw",
+      "sigma": 3,
+      "dominant_peak": 821,
+      "boundary_maximum": null
+    },
+    {
+      "step": 4,
+      "scenario": "monotonic_raw",
+      "sigma": 5,
+      "dominant_peak": 820,
+      "boundary_maximum": null
+    },
+    {
+      "step": 5,
+      "scenario": "idle",
+      "sigma": 2,
+      "dominant_peak": 385,
+      "boundary_maximum": null
+    },
+    {
+      "step": 5,
+      "scenario": "idle",
+      "sigma": 3,
+      "dominant_peak": 386,
+      "boundary_maximum": null
+    },
+    {
+      "step": 5,
+      "scenario": "idle",
+      "sigma": 5,
+      "dominant_peak": 386,
+      "boundary_maximum": null
+    },
+    {
+      "step": 5,
+      "scenario": "monotonic",
+      "sigma": 2,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 5,
+      "scenario": "monotonic",
+      "sigma": 3,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 5,
+      "scenario": "monotonic",
+      "sigma": 5,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 5,
+      "scenario": "monotonic_coarse",
+      "sigma": 2,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 5,
+      "scenario": "monotonic_coarse",
+      "sigma": 3,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 5,
+      "scenario": "monotonic_coarse",
+      "sigma": 5,
+      "dominant_peak": 388,
+      "boundary_maximum": null
+    },
+    {
+      "step": 5,
+      "scenario": "monotonic_raw",
+      "sigma": 2,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 5,
+      "scenario": "monotonic_raw",
+      "sigma": 3,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 5,
+      "scenario": "monotonic_raw",
+      "sigma": 5,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 6,
+      "scenario": "idle",
+      "sigma": 2,
+      "dominant_peak": 254,
+      "boundary_maximum": null
+    },
+    {
+      "step": 6,
+      "scenario": "idle",
+      "sigma": 3,
+      "dominant_peak": 255,
+      "boundary_maximum": null
+    },
+    {
+      "step": 6,
+      "scenario": "idle",
+      "sigma": 5,
+      "dominant_peak": 256,
+      "boundary_maximum": null
+    },
+    {
+      "step": 6,
+      "scenario": "monotonic",
+      "sigma": 2,
+      "dominant_peak": 386,
+      "boundary_maximum": null
+    },
+    {
+      "step": 6,
+      "scenario": "monotonic",
+      "sigma": 3,
+      "dominant_peak": 386,
+      "boundary_maximum": null
+    },
+    {
+      "step": 6,
+      "scenario": "monotonic",
+      "sigma": 5,
+      "dominant_peak": 387,
+      "boundary_maximum": null
+    },
+    {
+      "step": 6,
+      "scenario": "monotonic_coarse",
+      "sigma": 2,
+      "dominant_peak": 835,
+      "boundary_maximum": null
+    },
+    {
+      "step": 6,
+      "scenario": "monotonic_coarse",
+      "sigma": 3,
+      "dominant_peak": 836,
+      "boundary_maximum": null
+    },
+    {
+      "step": 6,
+      "scenario": "monotonic_coarse",
+      "sigma": 5,
+      "dominant_peak": 836,
+      "boundary_maximum": null
+    },
+    {
+      "step": 6,
+      "scenario": "monotonic_raw",
+      "sigma": 2,
+      "dominant_peak": 865,
+      "boundary_maximum": null
+    },
+    {
+      "step": 6,
+      "scenario": "monotonic_raw",
+      "sigma": 3,
+      "dominant_peak": 865,
+      "boundary_maximum": null
+    },
+    {
+      "step": 6,
+      "scenario": "monotonic_raw",
+      "sigma": 5,
+      "dominant_peak": 866,
+      "boundary_maximum": null
+    },
+    {
+      "step": 7,
+      "scenario": "idle",
+      "sigma": 2,
+      "dominant_peak": 376,
+      "boundary_maximum": null
+    },
+    {
+      "step": 7,
+      "scenario": "idle",
+      "sigma": 3,
+      "dominant_peak": 376,
+      "boundary_maximum": null
+    },
+    {
+      "step": 7,
+      "scenario": "idle",
+      "sigma": 5,
+      "dominant_peak": 376,
+      "boundary_maximum": null
+    },
+    {
+      "step": 7,
+      "scenario": "monotonic",
+      "sigma": 2,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 7,
+      "scenario": "monotonic",
+      "sigma": 3,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 7,
+      "scenario": "monotonic",
+      "sigma": 5,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 7,
+      "scenario": "monotonic_coarse",
+      "sigma": 2,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 7,
+      "scenario": "monotonic_coarse",
+      "sigma": 3,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 7,
+      "scenario": "monotonic_coarse",
+      "sigma": 5,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 7,
+      "scenario": "monotonic_raw",
+      "sigma": 2,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 7,
+      "scenario": "monotonic_raw",
+      "sigma": 3,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    },
+    {
+      "step": 7,
+      "scenario": "monotonic_raw",
+      "sigma": 5,
+      "dominant_peak": 377,
+      "boundary_maximum": null
+    }
+  ],
+  "reported_boots": 8,
+  "report_sha256": "fbbd22972c7f10c232d2ce868e4e19a58b72bd180a7b566b8a6cf75c3a5ab08f",
+  "verifier_sha256": "397cc5d153f6d81c5b70bf411e2862b26e759802d47a3c77e91cf49d5387b7cd",
+  "scope": "Original periodic CSV values, all CPUs, independently smoothed with scalar math.fsum and Gaussian weights. Checks highest interior peak and boundary flag for sigma 2/3/5 on the prescribed 0..1600 display range. Tails still normalize every density; this does not identify physical modes."
+}

@@ -43,15 +43,15 @@ int vkso_user_wrapper_init(void)
 	const struct vkso_shared_data *shared;
 	const struct vkso_mm_data *mm_data;
 
-	shared = __vkso_shared_data();
-	if (!shared || shared->abi_version != VKSO_TIME_ABI_VERSION) {
-		errno = EPROTO;
-		return -1;
-	}
 	errno = 0;
 	address = getauxval(AT_VKSO_MM_DATA);
 	if (!address || errno) {
 		errno = ENOSYS;
+		return -1;
+	}
+	shared = __vkso_shared_data();
+	if (!shared || shared->abi_version != VKSO_TIME_ABI_VERSION) {
+		errno = EPROTO;
 		return -1;
 	}
 	mm_data = (const void *)address;

@@ -1,0 +1,17 @@
+{
+  "status": "PASS_MANUSCRIPT_TRANSCRIPTION_AND_SCOPE",
+  "manuscript": "paper/paper_content/Paper Draft.md",
+  "checks": {
+    "source_table": "17 rows checked against individual source-line ownership",
+    "maintenance_and_refactor": "main responsibility table and all 17 refactored-source cells checked; required fallback included; performance revision separate",
+    "binary_table": "all populated cells bound to measured artifact summaries",
+    "read": "38 rows / 228 numbers; medians reconstructed from 304 boot-interface summaries",
+    "publication": "32 appendix means and 32 backend contrasts recalculated from 64 boot-load summaries",
+    "main_update": "all eight Current cells and percentages verified; loaded range from unrounded means",
+    "tail_and_load": "64 per-boot p95/p99 values and 24 load increments reconstructed",
+    "recorder_appendix": "all 16 recorder interactions preserved and checked",
+    "mechanism_and_maintenance": "8 shared-compute / 3 shared-state kernel entries; 8 boot records; 20 PFNs; actual 2-function maintenance case",
+    "links_and_scope": "9 local targets exist; old headline percentages removed; scope/design/sharing/performance present; material recorder comparison retained; reboot remains withdrawn"
+  },
+  "scope": "Document and existing evidence tables only. No new experiment; no claim that unresolved physical mechanisms were identified. Scope, design rationale and performance interpretation receive a separate editorial review."
+}

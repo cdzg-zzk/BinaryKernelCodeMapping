@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "text_sha256": "85a7fc91a13a9e958f22bd94bf2c006b726f28c730a66efb3946aab4738e8c52",
+  "report_sha256": "e260dd71456103a93b02295710f412548d34e522cdad6eba621fd01a701a0641",
+  "verification_sha256": "3e1ac562bf73ff8fed903de61aca8f01444e3717ac5ca0e84452fbc1793c9ac7",
+  "checked": [
+    "40 windows, 79997 periodic samples",
+    "48 peak differences range -1 to +1",
+    "each scenario has both positive and negative block mean differences",
+    "no persistent occupancy candidate",
+    "idle/coarse references pass; mono/raw have failed references",
+    "STOP_SAME_RETURN_PILOT"
+  ],
+  "scope": "New return-control paragraph only."
+}

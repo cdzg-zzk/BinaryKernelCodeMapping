@@ -1,0 +1,26 @@
+{
+  "status": "WITHDRAWN_BY_USER_SCOPE_CHANGE",
+  "date": "2026-10-04",
+  "requires_user_reboot": false,
+  "requires_install": false,
+  "collection_authorized": false,
+  "reason": "用户决定停止新增机制探究，收集已有证据说明未解决机制；取消四次后端匹配启动计划。",
+  "prior_read_only_preparation": {
+    "status": "READY_FOR_USER_RAW_REBOOT",
+    "current_boot_id": "e00f450f-b98b-4c2e-9a60-8d30ef52e2cc",
+    "next_case": "raw-normal",
+    "entry": "vkso-update-raw-normal",
+    "image_sha256": "a8bf36e8991569faabfd1267380796fe706679caa3dc2ee44ee343970e1fb8a5",
+    "requires_install": false,
+    "requires_user_reboot": true,
+    "thread_affinity_restored": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "tracer_pid": "0",
+    "scope": "Read-only boot preparation; no next_entry change or reboot performed."
+  },
+  "scope": "No reboot or collection requested. Frozen protocol and offline validation remain historical, unexecuted preparation."
+}

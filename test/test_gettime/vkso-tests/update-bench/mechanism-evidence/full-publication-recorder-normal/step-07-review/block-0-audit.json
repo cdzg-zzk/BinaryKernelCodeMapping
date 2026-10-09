@@ -1,0 +1,918 @@
+{
+  "status": "PASS",
+  "block": 0,
+  "cells": {
+    "vkso/current": {
+      "idle": {
+        "count": 8000,
+        "mean": 403.022375,
+        "cpu0_mean": 403.022375,
+        "cuts": [
+          258,
+          393,
+          460,
+          602
+        ],
+        "regions": [
+          {
+            "count": 3,
+            "probability": 0.000375,
+            "conditional_mean": 189.66666666666666,
+            "contribution_to_whole_mean": 0.071125
+          },
+          {
+            "count": 6656,
+            "probability": 0.832,
+            "conditional_mean": 372.5109675480769,
+            "contribution_to_whole_mean": 309.929125
+          },
+          {
+            "count": 647,
+            "probability": 0.080875,
+            "conditional_mean": 417.2457496136012,
+            "contribution_to_whole_mean": 33.74475
+          },
+          {
+            "count": 499,
+            "probability": 0.062375,
+            "conditional_mean": 514.5370741482966,
+            "contribution_to_whole_mean": 32.09425
+          },
+          {
+            "count": 195,
+            "probability": 0.024375,
+            "conditional_mean": 1115.2051282051282,
+            "contribution_to_whole_mean": 27.183125
+          }
+        ],
+        "rank_contributions": [
+          337.81925,
+          47.61275,
+          17.590375
+        ]
+      },
+      "monotonic": {
+        "count": 8000,
+        "mean": 429.0305,
+        "cpu0_mean": 428.93761720215025,
+        "cuts": [
+          381,
+          394,
+          486,
+          876
+        ],
+        "regions": [
+          {
+            "count": 5255,
+            "probability": 0.656875,
+            "conditional_mean": 375.4184586108468,
+            "contribution_to_whole_mean": 246.603
+          },
+          {
+            "count": 1310,
+            "probability": 0.16375,
+            "conditional_mean": 385.30916030534354,
+            "contribution_to_whole_mean": 63.094375
+          },
+          {
+            "count": 268,
+            "probability": 0.0335,
+            "conditional_mean": 409.8059701492537,
+            "contribution_to_whole_mean": 13.7285
+          },
+          {
+            "count": 1028,
+            "probability": 0.1285,
+            "conditional_mean": 635.1857976653697,
+            "contribution_to_whole_mean": 81.621375
+          },
+          {
+            "count": 139,
+            "probability": 0.017375,
+            "conditional_mean": 1380.3309352517986,
+            "contribution_to_whole_mean": 23.98325
+          }
+        ],
+        "rank_contributions": [
+          349.597125,
+          62.1785,
+          17.254875
+        ]
+      },
+      "monotonic_raw": {
+        "count": 8000,
+        "mean": 436.439,
+        "cpu0_mean": 436.439,
+        "cuts": [
+          396,
+          679,
+          985,
+          1122
+        ],
+        "regions": [
+          {
+            "count": 6429,
+            "probability": 0.803625,
+            "conditional_mean": 377.64504588582986,
+            "contribution_to_whole_mean": 303.485
+          },
+          {
+            "count": 1086,
+            "probability": 0.13575,
+            "conditional_mean": 556.98802946593,
+            "contribution_to_whole_mean": 75.611125
+          },
+          {
+            "count": 411,
+            "probability": 0.051375,
+            "conditional_mean": 790.6861313868613,
+            "contribution_to_whole_mean": 40.6215
+          },
+          {
+            "count": 46,
+            "probability": 0.00575,
+            "conditional_mean": 1049.5652173913043,
+            "contribution_to_whole_mean": 6.035
+          },
+          {
+            "count": 28,
+            "probability": 0.0035,
+            "conditional_mean": 3053.25,
+            "contribution_to_whole_mean": 10.686375
+          }
+        ],
+        "rank_contributions": [
+          354.230375,
+          64.758625,
+          17.45
+        ]
+      },
+      "monotonic_coarse": {
+        "count": 8000,
+        "mean": 455.9685,
+        "cpu0_mean": 455.9685,
+        "cuts": [
+          396,
+          649,
+          1022,
+          1289
+        ],
+        "regions": [
+          {
+            "count": 6270,
+            "probability": 0.78375,
+            "conditional_mean": 377.9819776714514,
+            "contribution_to_whole_mean": 296.243375
+          },
+          {
+            "count": 879,
+            "probability": 0.109875,
+            "conditional_mean": 542.8521046643914,
+            "contribution_to_whole_mean": 59.645875
+          },
+          {
+            "count": 765,
+            "probability": 0.095625,
+            "conditional_mean": 784.437908496732,
+            "contribution_to_whole_mean": 75.011875
+          },
+          {
+            "count": 71,
+            "probability": 0.008875,
+            "conditional_mean": 1089.9154929577464,
+            "contribution_to_whole_mean": 9.673
+          },
+          {
+            "count": 15,
+            "probability": 0.001875,
+            "conditional_mean": 8210.333333333334,
+            "contribution_to_whole_mean": 15.394375
+          }
+        ],
+        "rank_contributions": [
+          360.24175,
+          71.428875,
+          24.297875
+        ]
+      }
+    },
+    "raw/legacy": {
+      "idle": {
+        "count": 8000,
+        "mean": 424.287625,
+        "cpu0_mean": 424.287625,
+        "cuts": [
+          258,
+          393,
+          460,
+          602
+        ],
+        "regions": [
+          {
+            "count": 2676,
+            "probability": 0.3345,
+            "conditional_mean": 253.05156950672645,
+            "contribution_to_whole_mean": 84.64575
+          },
+          {
+            "count": 1921,
+            "probability": 0.240125,
+            "conditional_mean": 268.49297241020304,
+            "contribution_to_whole_mean": 64.471875
+          },
+          {
+            "count": 180,
+            "probability": 0.0225,
+            "conditional_mean": 440.49444444444447,
+            "contribution_to_whole_mean": 9.911125
+          },
+          {
+            "count": 1506,
+            "probability": 0.18825,
+            "conditional_mean": 527.7450199203187,
+            "contribution_to_whole_mean": 99.348
+          },
+          {
+            "count": 1717,
+            "probability": 0.214625,
+            "conditional_mean": 773.0267909143855,
+            "contribution_to_whole_mean": 165.910875
+          }
+        ],
+        "rank_contributions": [
+          334.550625,
+          72.427,
+          17.31
+        ]
+      },
+      "monotonic": {
+        "count": 8000,
+        "mean": 621.27125,
+        "cpu0_mean": 621.27125,
+        "cuts": [
+          381,
+          394,
+          486,
+          876
+        ],
+        "regions": [
+          {
+            "count": 598,
+            "probability": 0.07475,
+            "conditional_mean": 379.1655518394649,
+            "contribution_to_whole_mean": 28.342625
+          },
+          {
+            "count": 2741,
+            "probability": 0.342625,
+            "conditional_mean": 387.5906603429405,
+            "contribution_to_whole_mean": 132.79825
+          },
+          {
+            "count": 417,
+            "probability": 0.052125,
+            "conditional_mean": 401.1606714628297,
+            "contribution_to_whole_mean": 20.9105
+          },
+          {
+            "count": 3026,
+            "probability": 0.37825,
+            "conditional_mean": 714.2630535360212,
+            "contribution_to_whole_mean": 270.17
+          },
+          {
+            "count": 1218,
+            "probability": 0.15225,
+            "conditional_mean": 1110.3440065681446,
+            "contribution_to_whole_mean": 169.049875
+          }
+        ],
+        "rank_contributions": [
+          500.600875,
+          101.4665,
+          19.203875
+        ]
+      },
+      "monotonic_raw": {
+        "count": 7999,
+        "mean": 915.7722215276909,
+        "cpu0_mean": 915.7722215276909,
+        "cuts": [
+          396,
+          679,
+          985,
+          1122
+        ],
+        "regions": [
+          {
+            "count": 0,
+            "probability": 0.0,
+            "conditional_mean": null,
+            "contribution_to_whole_mean": 0.0
+          },
+          {
+            "count": 470,
+            "probability": 0.05875734466808351,
+            "conditional_mean": 669.6446808510639,
+            "contribution_to_whole_mean": 39.34654331791474
+          },
+          {
+            "count": 6053,
+            "probability": 0.7567195899487436,
+            "conditional_mean": 843.5610441103585,
+            "contribution_to_whole_mean": 638.3391673959245
+          },
+          {
+            "count": 333,
+            "probability": 0.041630203775471934,
+            "conditional_mean": 1054.021021021021,
+            "contribution_to_whole_mean": 43.87910988873609
+          },
+          {
+            "count": 1143,
+            "probability": 0.14289286160770096,
+            "conditional_mean": 1359.1119860017498,
+            "contribution_to_whole_mean": 194.20740092511565
+          }
+        ],
+        "rank_contributions": [
+          771.6980247530942,
+          111.79660957619703,
+          32.2775871983998
+        ]
+      },
+      "monotonic_coarse": {
+        "count": 8000,
+        "mean": 980.785,
+        "cpu0_mean": 980.785,
+        "cuts": [
+          396,
+          649,
+          1022,
+          1289
+        ],
+        "regions": [
+          {
+            "count": 0,
+            "probability": 0.0,
+            "conditional_mean": null,
+            "contribution_to_whole_mean": 0.0
+          },
+          {
+            "count": 151,
+            "probability": 0.018875,
+            "conditional_mean": 647.066225165563,
+            "contribution_to_whole_mean": 12.213375
+          },
+          {
+            "count": 4610,
+            "probability": 0.57625,
+            "conditional_mean": 810.1527114967462,
+            "contribution_to_whole_mean": 466.8505
+          },
+          {
+            "count": 2732,
+            "probability": 0.3415,
+            "conditional_mean": 1144.0204978038068,
+            "contribution_to_whole_mean": 390.683
+          },
+          {
+            "count": 507,
+            "probability": 0.063375,
+            "conditional_mean": 1752.0808678500987,
+            "contribution_to_whole_mean": 111.038125
+          }
+        ],
+        "rank_contributions": [
+          825.57775,
+          123.2335,
+          31.97375
+        ]
+      }
+    },
+    "vkso/legacy": {
+      "idle": {
+        "count": 7998,
+        "mean": 420.60302575643914,
+        "cpu0_mean": 420.60302575643914,
+        "cuts": [
+          258,
+          393,
+          460,
+          602
+        ],
+        "regions": [
+          {
+            "count": 4,
+            "probability": 0.0005001250312578145,
+            "conditional_mean": 253.5,
+            "contribution_to_whole_mean": 0.12678169542385595
+          },
+          {
+            "count": 6148,
+            "probability": 0.7686921730432608,
+            "conditional_mean": 381.4881262199089,
+            "contribution_to_whole_mean": 293.2469367341835
+          },
+          {
+            "count": 1021,
+            "probability": 0.12765691422855713,
+            "conditional_mean": 415.4064642507346,
+            "contribution_to_whole_mean": 53.02950737684421
+          },
+          {
+            "count": 446,
+            "probability": 0.05576394098524631,
+            "conditional_mean": 536.8542600896861,
+            "contribution_to_whole_mean": 29.93710927731933
+          },
+          {
+            "count": 379,
+            "probability": 0.04738684671167792,
+            "conditional_mean": 934.0712401055409,
+            "contribution_to_whole_mean": 44.262690672668164
+          }
+        ],
+        "rank_contributions": [
+          347.86921730432607,
+          55.48376594148537,
+          17.250042510627658
+        ]
+      },
+      "monotonic": {
+        "count": 8000,
+        "mean": 446.699625,
+        "cpu0_mean": 446.699625,
+        "cuts": [
+          381,
+          394,
+          486,
+          876
+        ],
+        "regions": [
+          {
+            "count": 1152,
+            "probability": 0.144,
+            "conditional_mean": 369.9791666666667,
+            "contribution_to_whole_mean": 53.277
+          },
+          {
+            "count": 4620,
+            "probability": 0.5775,
+            "conditional_mean": 387.2017316017316,
+            "contribution_to_whole_mean": 223.609
+          },
+          {
+            "count": 698,
+            "probability": 0.08725,
+            "conditional_mean": 413.7808022922636,
+            "contribution_to_whole_mean": 36.102375
+          },
+          {
+            "count": 1379,
+            "probability": 0.172375,
+            "conditional_mean": 616.595358955765,
+            "contribution_to_whole_mean": 106.285625
+          },
+          {
+            "count": 151,
+            "probability": 0.018875,
+            "conditional_mean": 1453.0132450331125,
+            "contribution_to_whole_mean": 27.425625
+          }
+        ],
+        "rank_contributions": [
+          364.618875,
+          62.7775,
+          19.30325
+        ]
+      },
+      "monotonic_raw": {
+        "count": 8001,
+        "mean": 466.95138107736534,
+        "cpu0_mean": 466.95138107736534,
+        "cuts": [
+          396,
+          679,
+          985,
+          1122
+        ],
+        "regions": [
+          {
+            "count": 5464,
+            "probability": 0.6829146356705412,
+            "conditional_mean": 385.0285505124451,
+            "contribution_to_whole_mean": 262.941632295963
+          },
+          {
+            "count": 1975,
+            "probability": 0.24684414448193975,
+            "conditional_mean": 566.032911392405,
+            "contribution_to_whole_mean": 139.72190976127985
+          },
+          {
+            "count": 473,
+            "probability": 0.05911761029871266,
+            "conditional_mean": 792.3615221987314,
+            "contribution_to_whole_mean": 46.84251968503937
+          },
+          {
+            "count": 42,
+            "probability": 0.005249343832020997,
+            "conditional_mean": 1054.404761904762,
+            "contribution_to_whole_mean": 5.53493313335833
+          },
+          {
+            "count": 47,
+            "probability": 0.005874265716785402,
+            "conditional_mean": 2027.5531914893618,
+            "contribution_to_whole_mean": 11.910386201724785
+          }
+        ],
+        "rank_contributions": [
+          383.4731658542682,
+          67.15786526684164,
+          16.32034995625547
+        ]
+      },
+      "monotonic_coarse": {
+        "count": 8000,
+        "mean": 471.98325,
+        "cpu0_mean": 471.98325,
+        "cuts": [
+          396,
+          649,
+          1022,
+          1289
+        ],
+        "regions": [
+          {
+            "count": 5565,
+            "probability": 0.695625,
+            "conditional_mean": 384.14070080862535,
+            "contribution_to_whole_mean": 267.217875
+          },
+          {
+            "count": 1604,
+            "probability": 0.2005,
+            "conditional_mean": 543.5561097256858,
+            "contribution_to_whole_mean": 108.983
+          },
+          {
+            "count": 690,
+            "probability": 0.08625,
+            "conditional_mean": 785.627536231884,
+            "contribution_to_whole_mean": 67.760375
+          },
+          {
+            "count": 122,
+            "probability": 0.01525,
+            "conditional_mean": 1107.7459016393443,
+            "contribution_to_whole_mean": 16.893125
+          },
+          {
+            "count": 19,
+            "probability": 0.002375,
+            "conditional_mean": 4685.8421052631575,
+            "contribution_to_whole_mean": 11.128875
+          }
+        ],
+        "rank_contributions": [
+          378.7595,
+          73.22475,
+          19.999
+        ]
+      }
+    },
+    "raw/current": {
+      "idle": {
+        "count": 8000,
+        "mean": 467.20675,
+        "cpu0_mean": 467.20675,
+        "cuts": [
+          258,
+          393,
+          460,
+          602
+        ],
+        "regions": [
+          {
+            "count": 2991,
+            "probability": 0.373875,
+            "conditional_mean": 246.3380140421264,
+            "contribution_to_whole_mean": 92.099625
+          },
+          {
+            "count": 357,
+            "probability": 0.044625,
+            "conditional_mean": 288.4621848739496,
+            "contribution_to_whole_mean": 12.872625
+          },
+          {
+            "count": 144,
+            "probability": 0.018,
+            "conditional_mean": 433.9236111111111,
+            "contribution_to_whole_mean": 7.810625
+          },
+          {
+            "count": 2782,
+            "probability": 0.34775,
+            "conditional_mean": 537.020129403307,
+            "contribution_to_whole_mean": 186.74875
+          },
+          {
+            "count": 1726,
+            "probability": 0.21575,
+            "conditional_mean": 777.1732329084589,
+            "contribution_to_whole_mean": 167.675125
+          }
+        ],
+        "rank_contributions": [
+          376.789125,
+          74.380375,
+          16.03725
+        ]
+      },
+      "monotonic": {
+        "count": 8001,
+        "mean": 628.0144981877265,
+        "cpu0_mean": 628.0144981877265,
+        "cuts": [
+          381,
+          394,
+          486,
+          876
+        ],
+        "regions": [
+          {
+            "count": 3466,
+            "probability": 0.43319585051868514,
+            "conditional_mean": 373.6145412579342,
+            "contribution_to_whole_mean": 161.8482689663792
+          },
+          {
+            "count": 444,
+            "probability": 0.05549306336707911,
+            "conditional_mean": 385.14864864864865,
+            "contribution_to_whole_mean": 21.37307836520435
+          },
+          {
+            "count": 24,
+            "probability": 0.0029996250468691415,
+            "conditional_mean": 410.2916666666667,
+            "contribution_to_whole_mean": 1.230721159855018
+          },
+          {
+            "count": 2711,
+            "probability": 0.3388326459192601,
+            "conditional_mean": 727.6993729251199,
+            "contribution_to_whole_mean": 246.56830396200476
+          },
+          {
+            "count": 1356,
+            "probability": 0.16947881514810648,
+            "conditional_mean": 1162.3525073746312,
+            "contribution_to_whole_mean": 196.99412573428322
+          }
+        ],
+        "rank_contributions": [
+          496.50083739532556,
+          105.11452943382078,
+          26.399131358580178
+        ]
+      },
+      "monotonic_raw": {
+        "count": 8001,
+        "mean": 969.2507186601675,
+        "cpu0_mean": 969.2507186601675,
+        "cuts": [
+          396,
+          679,
+          985,
+          1122
+        ],
+        "regions": [
+          {
+            "count": 0,
+            "probability": 0.0,
+            "conditional_mean": null,
+            "contribution_to_whole_mean": 0.0
+          },
+          {
+            "count": 401,
+            "probability": 0.050118735158105235,
+            "conditional_mean": 663.8304239401497,
+            "contribution_to_whole_mean": 33.270341207349084
+          },
+          {
+            "count": 3837,
+            "probability": 0.47956505436820396,
+            "conditional_mean": 827.7930675006515,
+            "contribution_to_whole_mean": 396.9806274215723
+          },
+          {
+            "count": 2461,
+            "probability": 0.3075865516810399,
+            "conditional_mean": 1056.1088988216172,
+            "contribution_to_whole_mean": 324.84489438820145
+          },
+          {
+            "count": 1302,
+            "probability": 0.16272965879265092,
+            "conditional_mean": 1316.016129032258,
+            "contribution_to_whole_mean": 214.1548556430446
+          }
+        ],
+        "rank_contributions": [
+          827.1617422822147,
+          115.00740157480315,
+          27.081574803149607
+        ]
+      },
+      "monotonic_coarse": {
+        "count": 8000,
+        "mean": 1023.28975,
+        "cpu0_mean": 1023.28975,
+        "cuts": [
+          396,
+          649,
+          1022,
+          1289
+        ],
+        "regions": [
+          {
+            "count": 0,
+            "probability": 0.0,
+            "conditional_mean": null,
+            "contribution_to_whole_mean": 0.0
+          },
+          {
+            "count": 722,
+            "probability": 0.09025,
+            "conditional_mean": 640.8393351800554,
+            "contribution_to_whole_mean": 57.83575
+          },
+          {
+            "count": 3273,
+            "probability": 0.409125,
+            "conditional_mean": 846.7372441185457,
+            "contribution_to_whole_mean": 346.421375
+          },
+          {
+            "count": 2457,
+            "probability": 0.307125,
+            "conditional_mean": 1119.933658933659,
+            "contribution_to_whole_mean": 343.959625
+          },
+          {
+            "count": 1548,
+            "probability": 0.1935,
+            "conditional_mean": 1421.5658914728683,
+            "contribution_to_whole_mean": 275.073
+          }
+        ],
+        "rank_contributions": [
+          872.822375,
+          128.339875,
+          22.1275
+        ]
+      }
+    }
+  },
+  "comparisons": [
+    {
+      "scenario": "idle",
+      "mean_interaction": -60.49977575643911,
+      "mean_interaction_exact": "-967754413/15996000",
+      "cpu0_mean_interaction": -60.49977575643911,
+      "fixed_region_contributions": [
+        -7.509531695423856,
+        68.28143826581645,
+        -17.18425737684421,
+        -85.24360927731934,
+        -18.843815672668168
+      ],
+      "fixed_region_probability_interaction_pp": [
+        -3.950012503125781,
+        25.880782695673922,
+        -4.228191422855714,
+        -15.28889409852463,
+        -2.413684671167792
+      ],
+      "rank_contributions": [
+        -52.28846730432608,
+        -9.82439094148537,
+        1.613082489372343
+      ],
+      "peak_interactions_by_sigma": {
+        "2": -1,
+        "3": -2,
+        "5": -1
+      }
+    },
+    {
+      "scenario": "monotonic",
+      "mean_interaction": -24.412373187726534,
+      "mean_interaction_exact": "-1562587183/64008000",
+      "cpu0_mean_interaction": -24.505255985576266,
+      "fixed_region_contributions": [
+        59.8203560336208,
+        -49.08945336520435,
+        -2.694096159855018,
+        -1.0625539620047495,
+        -31.386625734283214
+      ],
+      "fixed_region_probability_interaction_pp": [
+        15.442914948131484,
+        -12.661806336707912,
+        -0.4624625046869142,
+        -0.4457645919260092,
+        -1.8728815148106488
+      ],
+      "rank_contributions": [
+        -10.921712395325585,
+        -4.247029433820773,
+        -9.243631358580178
+      ],
+      "peak_interactions_by_sigma": {
+        "2": 3,
+        "3": 4,
+        "5": 3
+      }
+    },
+    {
+      "scenario": "monotonic_raw",
+      "mean_interaction": -83.99087820984185,
+      "mean_interaction_exact": "-255972196259/3047619000",
+      "cpu0_mean_interaction": -83.99087820984185,
+      "fixed_region_contributions": [
+        40.543367704036996,
+        -58.034582650714185,
+        235.13752028931282,
+        -280.4657176328237,
+        -21.171465919653766
+      ],
+      "fixed_region_probability_interaction_pp": [
+        12.071036432945883,
+        -10.245553497196148,
+        26.941192528182693,
+        -26.545569173758892,
+        -2.2211062901735357
+      ],
+      "rank_contributions": [
+        -84.70650838338881,
+        -5.61003226544777,
+        6.325662438994725
+      ],
+      "peak_interactions_by_sigma": {
+        "2": 31,
+        "3": 32,
+        "5": 33
+      }
+    },
+    {
+      "scenario": "monotonic_coarse",
+      "mean_interaction": -58.5195,
+      "mean_interaction_exact": "-117039/2000",
+      "cpu0_mean_interaction": -58.5195,
+      "fixed_region_contributions": [
+        29.0255,
+        -94.9595,
+        127.680625,
+        39.50325,
+        -159.769375
+      ],
+      "fixed_region_probability_interaction_pp": [
+        8.8125,
+        -16.2,
+        17.65,
+        2.8000000000000003,
+        -13.0625
+      ],
+      "rank_contributions": [
+        -65.762375,
+        -6.90225,
+        14.145125
+      ],
+      "peak_interactions_by_sigma": {
+        "2": 187,
+        "3": 186,
+        "5": 53
+      }
+    }
+  ],
+  "non_cpu0_samples": [
+    {
+      "cell": "vkso/current",
+      "scenario": "monotonic",
+      "round": 3,
+      "sample": 1333,
+      "cycles": 1172,
+      "action": 0,
+      "cpu": 2
+    }
+  ],
+  "report_sha256": "fbbd22972c7f10c232d2ce868e4e19a58b72bd180a7b566b8a6cf75c3a5ab08f",
+  "auditor_sha256": "e768a2072d3aa37abf094807115aeebdc3086a59a637a02c3e1b3c86f3b86996",
+  "inference": "Raw-CSV exact-arithmetic mean/region/rank contrast audit. Peak contrasts reuse reported density estimates. Rank bands [0,.90], (.90,.99], (.99,1] are per-cell quantile mass, not matched events or physical modes; regions use frozen common cuts with all tails. One boot per cell in this block; no population interval or mechanism claim."
+}

@@ -1,0 +1,22 @@
+{
+  "commit": "aa1855e812107757f57ef68fc537f91c48c8034c",
+  "source_path": "test/test_gettime/linux-5.15.198-vkso/kernel/time/vkso_time_internal.h",
+  "case": "full-width cycle delta specialization",
+  "input_domain": "mask=UINT64_MAX; arbitrary 64-bit helper arguments; provider acceptance is separate",
+  "result": "helper_equivalence=PASS cases=100100 mask=UINT64_MAX",
+  "cases": 100100,
+  "compiler": "11.4.0",
+  "production_functions_changed": [
+    "vkso_cycle_delta",
+    "vkso_read_hres_time"
+  ],
+  "test_functions_changed": [
+    "vkso_cycle_delta_selftest"
+  ],
+  "user_adapter_functions_changed": [],
+  "kernel_adapter_functions_changed": [],
+  "publisher_functions_changed": [],
+  "mapping_functions_changed": [],
+  "raw_comparison": "x86 vDSO already specializes this operation; no claimed two-to-one patch saving",
+  "scope": "arithmetic equivalence; not a kernel boot, hardware ordering or performance experiment"
+}

@@ -1,0 +1,21 @@
+variant,method,symbol,value
+normal,raw,CONFIG_RETPOLINE,y
+normal,raw,CONFIG_RETHUNK,y
+normal,raw,CONFIG_CPU_UNRET_ENTRY,y
+normal,raw,CONFIG_CPU_SRSO,y
+normal,raw,CONFIG_MITIGATION_ITS,y
+normal,vkso,CONFIG_RETPOLINE,y
+normal,vkso,CONFIG_RETHUNK,y
+normal,vkso,CONFIG_CPU_UNRET_ENTRY,y
+normal,vkso,CONFIG_CPU_SRSO,y
+normal,vkso,CONFIG_MITIGATION_ITS,y
+no-retpoline,raw,CONFIG_RETPOLINE,not set
+no-retpoline,raw,CONFIG_RETHUNK,not set
+no-retpoline,raw,CONFIG_CPU_UNRET_ENTRY,not set
+no-retpoline,raw,CONFIG_CPU_SRSO,not set
+no-retpoline,raw,CONFIG_MITIGATION_ITS,not set
+no-retpoline,vkso,CONFIG_RETPOLINE,not set
+no-retpoline,vkso,CONFIG_RETHUNK,not set
+no-retpoline,vkso,CONFIG_CPU_UNRET_ENTRY,not set
+no-retpoline,vkso,CONFIG_CPU_SRSO,not set
+no-retpoline,vkso,CONFIG_MITIGATION_ITS,not set

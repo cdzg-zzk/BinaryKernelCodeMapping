@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "source": "/home/zzk/BinaryKernelCodeMapping/test/test_gettime/vkso-tests/baremetal/results/full-publication-recorder-normal-20261004/step-07/measurement",
+  "step": {
+    "index": 7,
+    "block": 1,
+    "position": 3,
+    "backend": "vkso",
+    "recorder": "current"
+  },
+  "boot_id": "e00f450f-b98b-4c2e-9a60-8d30ef52e2cc",
+  "cdf_series": 20,
+  "periodic_samples": 32000,
+  "cdf_sha256": "2c4cffa0f6a1ffbae7ba2c672d5f8105ab69e5f54b7f1b64e800450304e0988d",
+  "distribution_sha256": "1b2336c15adc13758dbe17e7880d79d0a858c8d5e838f2cf83db33a01706e452",
+  "report_sha256": "fbbd22972c7f10c232d2ce868e4e19a58b72bd180a7b566b8a6cf75c3a5ab08f",
+  "verifier_sha256": "15233cc7a3505e7e21563ebdf27b0d8346233a7134454749638346d64ccf1369",
+  "scope": "Raw CSV verification of every ECDF point, regional counts/probabilities/conditional costs/contributions, independent quantile-prefix rank contributions and loaded-minus-idle responses. All periodic CPUs and tails retained; peak estimates remain those in the main report."
+}

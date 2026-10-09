@@ -1,0 +1,26 @@
+flowchart TB
+  subgraph RAW["Raw: separate ordinary readers"]
+    RU["User public API / libc"] --> RV["Native vDSO: do_hres / do_coarse"]
+    RK["Ordinary kernel API"] --> RC["timekeeping_get_ns + kernel conversion"]
+    RT["timekeeper / tk_core.seq"] --> RC
+    RT --> RP["update_vsyscall"] --> RD["vvar read state"] --> RV
+    RV -. "unsupported clock/provider" .-> RS["Syscall + native kernel dispatch"] --> RC
+  end
+  subgraph VKSO["VKSO: one shared ordinary-reader implementation"]
+    U["User public API"] --> UA["Private carrier entry: classify + bind context"]
+    K["Ordinary kernel API"] --> KA["Root adapter: NULL MM_data + kernel context"]
+    P["POSIX syscall"] --> PA["Dynamic dispatch + current MM_data"]
+    UA --> C["Shared text: hres / coarse / scalar entries"]
+    KA --> C
+    PA --> C
+    T["timekeeper"] --> W["tk_publish_read_state"] --> D["Shared read-state page"] --> C
+    N["Namespace offsets"] --> M["Read-only MM_data mapping"] --> C
+    L["exec / fork / setns / exit"] -. "install / retain / switch / release" .-> M
+    C --> V["Result in caller ABI storage"]
+    C -. "provider failure" .-> F["Domain callback"]
+    F --> US["User: syscall fallback"]
+    F --> KS["Kernel: private timekeeper fallback"]
+    T --> KS
+    T --> S["Retained special readers"]
+    D --> Q["Kernel scalar state-only adapters"]
+  end

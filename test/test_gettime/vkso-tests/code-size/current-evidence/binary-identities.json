@@ -1,0 +1,44 @@
+[
+  {
+    "variant": "normal",
+    "system": "Raw",
+    "image": "test/test_gettime/vkso-tests/baremetal/artifacts/clocktime-auto-53f692884c64-clean-normal/raw-bzImage",
+    "build_id": "b08b4bea4d223bac75d119e5213d121a40b71a12",
+    "campaign_image_identity": "PASS",
+    "kallsyms_symbols": 115679,
+    "exported_function_addresses_checked": 17,
+    "embedded_vdso_file_offset": 23154688
+  },
+  {
+    "variant": "normal",
+    "system": "VKSO",
+    "image": "test/test_gettime/vkso-tests/baremetal/artifacts/clocktime-auto-53f692884c64-clean-normal/vkso-bzImage",
+    "build_id": "042aaaf3ec0dcc3cc1012fbe3b4ac0640e4f9093",
+    "campaign_image_identity": "PASS",
+    "kallsyms_symbols": 115672,
+    "exported_function_addresses_checked": 17,
+    "decoder_elf_function_addresses_checked": 50524,
+    "shared_core_reserved_bytes": 4096
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "Raw",
+    "image": "test/test_gettime/vkso-tests/baremetal/artifacts/clocktime-auto-53f692884c64-clean-no-retpoline/raw-bzImage",
+    "build_id": "9fe5a03b92a843613e7baa86088903fdbac8e80b",
+    "campaign_image_identity": "PASS",
+    "kallsyms_symbols": 115575,
+    "exported_function_addresses_checked": 17,
+    "embedded_vdso_file_offset": 23302144
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "VKSO",
+    "image": "test/test_gettime/vkso-tests/baremetal/artifacts/clocktime-auto-53f692884c64-clean-no-retpoline/vkso-bzImage",
+    "build_id": "742aafff67c61e407c817fc32201575b4ac21ea5",
+    "campaign_image_identity": "PASS",
+    "kallsyms_symbols": 115568,
+    "exported_function_addresses_checked": 17,
+    "decoder_elf_function_addresses_checked": 50528,
+    "shared_core_reserved_bytes": 4096
+  }
+]

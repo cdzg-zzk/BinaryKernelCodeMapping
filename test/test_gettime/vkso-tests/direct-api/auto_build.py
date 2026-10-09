@@ -70,7 +70,7 @@ def measured_fingerprint():
                    (p.suffix in ('.c', '.h') or p.name == 'Makefile') and
                    not {'build', '__pycache__'}.intersection(p.relative_to(HERE).parts))
     files += [HERE.parent/'functional'/n for n in
-              ('vkso_abi.h', 'vkso_user_wrapper.c', 'vkso_user_wrapper.h', 'vkso_user_entry.S')]
+              ('vkso_abi.h', 'vkso_time_abi.h', 'vkso_user_wrapper.c', 'vkso_user_wrapper.h', 'vkso_user_entry.S')]
     return hashlib.sha256(''.join(str(p.relative_to(HERE.parent)) + sha256(p)
                                    for p in files).encode()).hexdigest()
 

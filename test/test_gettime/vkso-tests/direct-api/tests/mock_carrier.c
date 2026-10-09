@@ -9,7 +9,7 @@
 const int vkso_test_only_mock_carrier = 1;
 static struct vkso_shared_data shared = {.abi_version = VKSO_TIME_ABI_VERSION};
 static struct vkso_mm_data mm = {.abi_version = VKSO_MM_DATA_ABI_VERSION};
-static atomic_int binds, reads;
+static atomic_int binds, reads, aux_reads;
 static vkso_gettimeofday_failure_t gettimeofday_failure;
 static _Thread_local int forced_error;
 static _Thread_local int64_t seconds = 1700000000;
@@ -20,6 +20,7 @@ static int mode(const char *name)
 }
 unsigned long getauxval(unsigned long tag)
 {
+	atomic_fetch_add(&aux_reads, 1);
 	if (tag != AT_VKSO_MM_DATA || mode("missing")) { errno = ENOENT; return 0; }
 	if (mode("mm-version")) mm.abi_version = 0;
 	if (mode("mask")) mm.clock_mask = 1U << 31;
@@ -77,5 +78,6 @@ int __vkso_getcpu(unsigned *cpu, unsigned *node, void *unused)
 }
 int mock_binds(void) { return atomic_load(&binds); }
 int mock_reads(void) { return atomic_load(&reads); }
+int mock_aux_reads(void) { return atomic_load(&aux_reads); }
 void mock_error(int error) { forced_error = error; }
 void mock_seconds(int64_t value) { seconds = value; }

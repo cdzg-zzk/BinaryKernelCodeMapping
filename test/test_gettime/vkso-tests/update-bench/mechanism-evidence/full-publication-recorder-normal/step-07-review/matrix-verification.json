@@ -1,0 +1,189 @@
+{
+  "status": "PASS",
+  "completed_steps": 8,
+  "windows": 128,
+  "periodic_samples": 255999,
+  "verified_archived_files": 736,
+  "cpu_counts": {
+    "0": 255998,
+    "2": 1
+  },
+  "action_counts": {
+    "0": 255999
+  },
+  "boot_ids": [
+    "19e152ab-16fe-49bb-bfe5-e4fbcd255349",
+    "3d5b1279-fc98-4735-b92a-a915e9a9bf0f",
+    "dd180e9e-69cf-4c78-b040-901f772308a4",
+    "df9f6b69-92c3-4446-8db4-d3fef0650a94",
+    "ca5e5ecd-5ed9-4545-b9ca-ecb1c8598b16",
+    "70baf4dd-68a1-4312-8776-7b278fb29c41",
+    "f61af0e9-291e-4f07-8143-c2dd3cd79ef5",
+    "e00f450f-b98b-4c2e-9a60-8d30ef52e2cc"
+  ],
+  "quality": [
+    {
+      "step": {
+        "index": 0,
+        "block": 0,
+        "position": 0,
+        "backend": "vkso",
+        "recorder": "current"
+      },
+      "boot_id": "19e152ab-16fe-49bb-bfe5-e4fbcd255349",
+      "verified_files": 96,
+      "periodic_samples": 32000,
+      "functional_checks": "PASS",
+      "environment_restored": true,
+      "sharing_coverage": {
+        "declared_pages": 3,
+        "page_mappings_sha256": "661fef19754952932d165b62530a88d069ff729a26f63d5e5bb506a7aebe4954",
+        "distinct_source_pfns": 3,
+        "distinct_user_pfns": 3
+      }
+    },
+    {
+      "step": {
+        "index": 1,
+        "block": 0,
+        "position": 1,
+        "backend": "raw",
+        "recorder": "legacy"
+      },
+      "boot_id": "3d5b1279-fc98-4735-b92a-a915e9a9bf0f",
+      "verified_files": 88,
+      "periodic_samples": 31999,
+      "functional_checks": "PASS",
+      "environment_restored": true,
+      "sharing_coverage": null
+    },
+    {
+      "step": {
+        "index": 2,
+        "block": 0,
+        "position": 2,
+        "backend": "vkso",
+        "recorder": "legacy"
+      },
+      "boot_id": "dd180e9e-69cf-4c78-b040-901f772308a4",
+      "verified_files": 96,
+      "periodic_samples": 31999,
+      "functional_checks": "PASS",
+      "environment_restored": true,
+      "sharing_coverage": {
+        "declared_pages": 3,
+        "page_mappings_sha256": "661fef19754952932d165b62530a88d069ff729a26f63d5e5bb506a7aebe4954",
+        "distinct_source_pfns": 3,
+        "distinct_user_pfns": 3
+      }
+    },
+    {
+      "step": {
+        "index": 3,
+        "block": 0,
+        "position": 3,
+        "backend": "raw",
+        "recorder": "current"
+      },
+      "boot_id": "df9f6b69-92c3-4446-8db4-d3fef0650a94",
+      "verified_files": 88,
+      "periodic_samples": 32002,
+      "functional_checks": "PASS",
+      "environment_restored": true,
+      "sharing_coverage": null
+    },
+    {
+      "step": {
+        "index": 4,
+        "block": 1,
+        "position": 0,
+        "backend": "raw",
+        "recorder": "current"
+      },
+      "boot_id": "ca5e5ecd-5ed9-4545-b9ca-ecb1c8598b16",
+      "verified_files": 88,
+      "periodic_samples": 32001,
+      "functional_checks": "PASS",
+      "environment_restored": true,
+      "sharing_coverage": null
+    },
+    {
+      "step": {
+        "index": 5,
+        "block": 1,
+        "position": 1,
+        "backend": "vkso",
+        "recorder": "legacy"
+      },
+      "boot_id": "70baf4dd-68a1-4312-8776-7b278fb29c41",
+      "verified_files": 96,
+      "periodic_samples": 31998,
+      "functional_checks": "PASS",
+      "environment_restored": true,
+      "sharing_coverage": {
+        "declared_pages": 3,
+        "page_mappings_sha256": "661fef19754952932d165b62530a88d069ff729a26f63d5e5bb506a7aebe4954",
+        "distinct_source_pfns": 3,
+        "distinct_user_pfns": 3
+      }
+    },
+    {
+      "step": {
+        "index": 6,
+        "block": 1,
+        "position": 2,
+        "backend": "raw",
+        "recorder": "legacy"
+      },
+      "boot_id": "f61af0e9-291e-4f07-8143-c2dd3cd79ef5",
+      "verified_files": 88,
+      "periodic_samples": 32000,
+      "functional_checks": "PASS",
+      "environment_restored": true,
+      "sharing_coverage": null
+    },
+    {
+      "step": {
+        "index": 7,
+        "block": 1,
+        "position": 3,
+        "backend": "vkso",
+        "recorder": "current"
+      },
+      "boot_id": "e00f450f-b98b-4c2e-9a60-8d30ef52e2cc",
+      "verified_files": 96,
+      "periodic_samples": 32000,
+      "functional_checks": "PASS",
+      "environment_restored": true,
+      "sharing_coverage": {
+        "declared_pages": 3,
+        "page_mappings_sha256": "661fef19754952932d165b62530a88d069ff729a26f63d5e5bb506a7aebe4954",
+        "distinct_source_pfns": 3,
+        "distinct_user_pfns": 3
+      }
+    }
+  ],
+  "equal_recorded_fields": [
+    "config",
+    "tuning_before",
+    "tuning_after",
+    "irqbalance_was_active",
+    "business_diagnostic",
+    "cacheline_diagnostic",
+    "cacheprep_diagnostic",
+    "order_diagnostic",
+    "percall_pmu_diagnostic",
+    "prefetch_diagnostic",
+    "split_diagnostic",
+    "stage_diagnostic",
+    "cmdline except BOOT_IMAGE"
+  ],
+  "service_scope": "Each boot: recorded inactive/failed snapshots with unchanged restart/start counters.",
+  "verified_full_ecdf_series": 32,
+  "independently_verified_peaks": 96,
+  "stop_decision": "STOP_PLANNED_MATRIX",
+  "report_sha256": "fbbd22972c7f10c232d2ce868e4e19a58b72bd180a7b566b8a6cf75c3a5ab08f",
+  "cdf_sha256": "8302a59d6b28a92a2057e4d11b057748e113907e0c11d7cddee01748def33d83",
+  "verifier_sha256": "afec069500a764e2983741d7889b37dae80ed690615ff4dc8fbd8c41a4f688ff",
+  "inference": "Two independent boots per cell; descriptive blocks, no population CI, physical-mode identification, or uninstrumented cost inference."
+}

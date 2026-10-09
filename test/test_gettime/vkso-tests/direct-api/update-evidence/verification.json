@@ -1,0 +1,70 @@
+{
+  "status": "PASS",
+  "scope": "UPDATE offline distribution decomposition; matched recorder and causal mechanism remain separate next task",
+  "commands": [
+    {
+      "command": "/usr/bin/python3 test/test_gettime/vkso-tests/direct-api/update_evaluation.py --check",
+      "exit_code": 0
+    },
+    {
+      "command": "/usr/bin/python3 test/test_gettime/vkso-tests/direct-api/update_report.py --check",
+      "exit_code": 0
+    },
+    {
+      "command": "/usr/bin/python3 -m unittest discover -s test/test_gettime/vkso-tests/direct-api/tests -p test_update_evaluation.py",
+      "exit_code": 0
+    }
+  ],
+  "full_samples": 3599774,
+  "full_sample_means_reproduced": true,
+  "max_four_term_reconstruction_error": 1.9539925233402755e-14,
+  "load_response_all_four_blocks": 6,
+  "low_side_negative_and_occupancy_positive_in_all_resolved_sensitivities": 123,
+  "unresolved_sensitivity_settings": 5,
+  "workload_mean_ranges": {
+    "normal/raw": {
+      "min_mean": 116.71757911635794,
+      "max_mean": 132.30303212304514,
+      "range_width": 15.585453006687203
+    },
+    "normal/vkso": {
+      "min_mean": 121.64935959495392,
+      "max_mean": 122.52769179640568,
+      "range_width": 0.8783322014517552
+    },
+    "no-retpoline/raw": {
+      "min_mean": 114.77944236814032,
+      "max_mean": 132.62282626120077,
+      "range_width": 17.843383893060448
+    },
+    "no-retpoline/vkso": {
+      "min_mean": 124.33301202999,
+      "max_mean": 126.41627381480873,
+      "range_width": 2.083261784818731
+    }
+  },
+  "figures": [
+    "update-decomposition.svg",
+    "update-distribution-no-retpoline.svg",
+    "update-distribution-normal.svg",
+    "update-load-response.svg",
+    "update-mean.svg"
+  ],
+  "render_check": "All five PNGs inspected; density headings combined and row spacing expanded; final PNGs match current SVG; PDFs present",
+  "deliverables": [
+    "tables.md",
+    "boot-results.md",
+    "summary.csv",
+    "decomposition-blocks.csv",
+    "load-response.csv",
+    "groups.csv",
+    "boots.csv",
+    "rounds.csv",
+    "sensitivity.csv",
+    "histograms.csv",
+    "cdfs.csv",
+    "evaluation-text.md",
+    "measurement-and-mechanism.md"
+  ],
+  "latex": "two booktabs content fragments; syntax checked"
+}

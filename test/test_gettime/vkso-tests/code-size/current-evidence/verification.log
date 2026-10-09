@@ -1,0 +1,403 @@
+$ /usr/bin/python3 test/test_gettime/vkso-tests/code-size/audit_changes.py --check
+{
+  "build_platform": {
+    "added": 84,
+    "deleted": 65
+  },
+  "clock_providers": {
+    "added": 10,
+    "deleted": 22
+  },
+  "diagnostics": {
+    "added": 1213,
+    "deleted": 0
+  },
+  "experiment_config": {
+    "added": 19,
+    "deleted": 0
+  },
+  "kernel_readers": {
+    "added": 221,
+    "deleted": 182
+  },
+  "mm_namespace": {
+    "added": 173,
+    "deleted": 57
+  },
+  "native_vdso_withdrawal": {
+    "added": 21,
+    "deleted": 1418
+  },
+  "platform_scope_cleanup": {
+    "added": 4,
+    "deleted": 1734
+  },
+  "publisher": {
+    "added": 102,
+    "deleted": 14
+  },
+  "shared_core": {
+    "added": 494,
+    "deleted": 0
+  },
+  "user_adapter": {
+    "added": 393,
+    "deleted": 0
+  }
+}
+vkso_user_total= 393
+raw_user_implementation= 406
+audit_check=PASS
+
+$ /usr/bin/python3 test/test_gettime/vkso-tests/code-size/audit_current.py --check
+{
+  "revision": "cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb",
+  "metric": "nonblank noncomment physical source lines",
+  "deduplication": "system/origin/path/line; duplicate ownership is an error",
+  "rows": [
+    {
+      "system": "Raw",
+      "scope": "common",
+      "category": "math_helpers",
+      "component": "common",
+      "sloc": 21
+    },
+    {
+      "system": "Raw",
+      "scope": "common",
+      "category": "provider_contract",
+      "component": "common",
+      "sloc": 10
+    },
+    {
+      "system": "Raw",
+      "scope": "common_libc_reference",
+      "category": "libc_entry_and_vdso_support",
+      "component": "common",
+      "sloc": 367
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "build",
+      "component": "time",
+      "sloc": 158
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "data_abi",
+      "component": "time",
+      "sloc": 89
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "getcpu",
+      "component": "getcpu",
+      "sloc": 23
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "integration",
+      "component": "time",
+      "sloc": 91
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "kernel_adapter",
+      "component": "time",
+      "sloc": 103
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "kernel_computation",
+      "component": "time",
+      "sloc": 163
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "mapping_namespace",
+      "component": "time",
+      "sloc": 335
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "provider_integration",
+      "component": "time",
+      "sloc": 17
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "publisher",
+      "component": "time",
+      "sloc": 80
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "user_adapter_provider",
+      "component": "time",
+      "sloc": 147
+    },
+    {
+      "system": "Raw",
+      "scope": "feature",
+      "category": "user_computation",
+      "component": "time",
+      "sloc": 281
+    },
+    {
+      "system": "Raw",
+      "scope": "infrastructure",
+      "category": "build",
+      "component": "time",
+      "sloc": 336
+    },
+    {
+      "system": "Raw",
+      "scope": "retained",
+      "category": "native_dispatch",
+      "component": "time",
+      "sloc": 11
+    },
+    {
+      "system": "Raw",
+      "scope": "retained",
+      "category": "special_reader",
+      "component": "time",
+      "sloc": 80
+    },
+    {
+      "system": "VKSO",
+      "scope": "common",
+      "category": "math_helpers",
+      "component": "common",
+      "sloc": 21
+    },
+    {
+      "system": "VKSO",
+      "scope": "common",
+      "category": "provider_contract",
+      "component": "common",
+      "sloc": 10
+    },
+    {
+      "system": "VKSO",
+      "scope": "common_libc_reference",
+      "category": "libc_entry_and_vdso_support",
+      "component": "common",
+      "sloc": 367
+    },
+    {
+      "system": "VKSO",
+      "scope": "diagnostics",
+      "category": "diagnostics",
+      "component": "time",
+      "sloc": 79
+    },
+    {
+      "system": "VKSO",
+      "scope": "excluded_platform",
+      "category": "compat32",
+      "component": "time",
+      "sloc": 20
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "build",
+      "component": "time",
+      "sloc": 87
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "data_abi",
+      "component": "time",
+      "sloc": 182
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "getcpu",
+      "component": "getcpu",
+      "sloc": 62
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "integration",
+      "component": "time",
+      "sloc": 22
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "kernel_adapter",
+      "component": "time",
+      "sloc": 265
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "mapping_namespace",
+      "component": "time",
+      "sloc": 232
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "provider_integration",
+      "component": "time",
+      "sloc": 13
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "publisher",
+      "component": "time",
+      "sloc": 85
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "shared_computation",
+      "component": "time",
+      "sloc": 292
+    },
+    {
+      "system": "VKSO",
+      "scope": "feature",
+      "category": "user_adapter_provider",
+      "component": "time",
+      "sloc": 384
+    },
+    {
+      "system": "VKSO",
+      "scope": "infrastructure",
+      "category": "general_vkso_facility",
+      "component": "common",
+      "sloc": 3974
+    },
+    {
+      "system": "VKSO",
+      "scope": "retained",
+      "category": "native_dispatch",
+      "component": "time",
+      "sloc": 11
+    },
+    {
+      "system": "VKSO",
+      "scope": "retained",
+      "category": "private_reader",
+      "component": "time",
+      "sloc": 56
+    },
+    {
+      "system": "VKSO",
+      "scope": "retained",
+      "category": "special_reader",
+      "component": "time",
+      "sloc": 80
+    }
+  ],
+  "totals": {
+    "Raw": {
+      "common": 31,
+      "common_libc_reference": 367,
+      "feature": 1487,
+      "infrastructure": 336,
+      "retained": 91
+    },
+    "VKSO": {
+      "common": 31,
+      "common_libc_reference": 367,
+      "diagnostics": 79,
+      "excluded_platform": 20,
+      "feature": 1624,
+      "infrastructure": 3974,
+      "retained": 147
+    }
+  }
+}
+
+source_inventory_check=PASS
+
+$ /usr/bin/python3 test/test_gettime/vkso-tests/code-size/audit_binary_current.py --check
+binary_evidence_check=PASS
+[
+  {
+    "variant": "normal",
+    "system": "Raw",
+    "image": "test/test_gettime/vkso-tests/baremetal/artifacts/clocktime-auto-53f692884c64-clean-normal/raw-bzImage",
+    "build_id": "b08b4bea4d223bac75d119e5213d121a40b71a12",
+    "campaign_image_identity": "PASS",
+    "kallsyms_symbols": 115679,
+    "exported_function_addresses_checked": 17,
+    "embedded_vdso_file_offset": 23154688
+  },
+  {
+    "variant": "normal",
+    "system": "VKSO",
+    "image": "test/test_gettime/vkso-tests/baremetal/artifacts/clocktime-auto-53f692884c64-clean-normal/vkso-bzImage",
+    "build_id": "042aaaf3ec0dcc3cc1012fbe3b4ac0640e4f9093",
+    "campaign_image_identity": "PASS",
+    "kallsyms_symbols": 115672,
+    "exported_function_addresses_checked": 17,
+    "decoder_elf_function_addresses_checked": 50524,
+    "shared_core_reserved_bytes": 4096
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "Raw",
+    "image": "test/test_gettime/vkso-tests/baremetal/artifacts/clocktime-auto-53f692884c64-clean-no-retpoline/raw-bzImage",
+    "build_id": "9fe5a03b92a843613e7baa86088903fdbac8e80b",
+    "campaign_image_identity": "PASS",
+    "kallsyms_symbols": 115575,
+    "exported_function_addresses_checked": 17,
+    "embedded_vdso_file_offset": 23302144
+  },
+  {
+    "variant": "no-retpoline",
+    "system": "VKSO",
+    "image": "test/test_gettime/vkso-tests/baremetal/artifacts/clocktime-auto-53f692884c64-clean-no-retpoline/vkso-bzImage",
+    "build_id": "742aafff67c61e407c817fc32201575b4ac21ea5",
+    "campaign_image_identity": "PASS",
+    "kallsyms_symbols": 115568,
+    "exported_function_addresses_checked": 17,
+    "decoder_elf_function_addresses_checked": 50528,
+    "shared_core_reserved_bytes": 4096
+  }
+]
+
+$ /usr/bin/python3 test/test_gettime/vkso-tests/code-size/collect_work12.py --check
+mechanism_evidence_check=PASS
+
+$ /usr/bin/python3 test/test_gettime/vkso-tests/code-size/build_work12_report.py --check
+report_check=PASS
+
+$ /usr/bin/python3 test/test_gettime/vkso-tests/code-size/check_maintenance_case.py
+helper_equivalence=PASS cases=100100 mask=UINT64_MAX
+
+$ /usr/bin/python3 -m unittest discover -s test/test_gettime/vkso-tests/code-size -p test_audit_current.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+
+$ /usr/bin/python3 -m unittest discover -s test/test_gettime/vkso-tests/direct-api/tests -p test_kernel_contract.py
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.325s
+
+OK
+
+Cross-layer evidence checks: PASS

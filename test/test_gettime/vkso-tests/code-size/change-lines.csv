@@ -447,12 +447,13 @@ test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,2,kernel_r
 test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,3,kernel_readers,#define _LINUX_VKSO_GETCPU_H
 test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,5,kernel_readers,#include <linux/compiler_types.h>
 test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,6,kernel_readers,#include <vkso/getcpu.h>
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,8,kernel_readers,static __always_inline int
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,9,kernel_readers,"vkso_getcpu(unsigned int *cpu, unsigned int *node)"
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,10,kernel_readers,{
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,11,kernel_readers,"return __vkso_getcpu(cpu, node, (void *)0);"
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,12,kernel_readers,}
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,14,kernel_readers,#endif
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,10,kernel_readers,static __always_inline int
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,11,kernel_readers,"vkso_getcpu(unsigned int *cpu, unsigned int *node)"
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,12,kernel_readers,{
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,13,kernel_readers,"(void)__vkso_getcpu(cpu, node, (void *)0);"
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,14,kernel_readers,return VKSO_GETCPU_OK;
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,15,kernel_readers,}
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_getcpu.h,new,17,kernel_readers,#endif
 test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,2,kernel_readers,#ifndef _LINUX_VKSO_TIME_H
 test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,3,kernel_readers,#define _LINUX_VKSO_TIME_H
 test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,5,kernel_readers,#include <linux/time64.h>
@@ -474,42 +475,40 @@ test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,24,kernel_re
 test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,25,kernel_readers,struct time_namespace *ns);
 test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,26,kernel_readers,void vkso_time_set_pvclock_page(const void *page);
 test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,27,kernel_readers,void vkso_time_set_hvclock_page(const void *page);
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,38,kernel_readers,static __always_inline int
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,39,kernel_readers,"vkso_time_get_root(s32 clock_id, struct timespec64 *tp)"
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,40,kernel_readers,{
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,41,kernel_readers,struct vkso_time_value *value = (struct vkso_time_value *)tp;
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,43,kernel_readers,switch (vkso_clock_classify(clock_id)) {
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,44,kernel_readers,case VKSO_CLOCK_HRES:
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,45,kernel_readers,return vkso_clock_gettime_hres(
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,46,kernel_readers,"clock_id, value, NULL, &vkso_kernel_context);"
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,47,kernel_readers,case VKSO_CLOCK_COARSE:
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,48,kernel_readers,return vkso_clock_gettime_coarse(
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,49,kernel_readers,"clock_id, value, NULL);"
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,50,kernel_readers,default:
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,51,kernel_readers,return VKSO_TIME_NOT_SHARED;
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,52,kernel_readers,}
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,53,kernel_readers,}
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,55,kernel_readers,static __always_inline u32 vkso_time_get_root_resolution(void)
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,56,kernel_readers,{
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,57,kernel_readers,return READ_ONCE(
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,58,kernel_readers,vkso_shared_page.data.state.clocksource_resolution);
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,59,kernel_readers,}
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,61,kernel_readers,static __always_inline time64_t vkso_time_get_root_monotonic_seconds(void)
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,62,kernel_readers,{
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,63,kernel_readers,return READ_ONCE(vkso_shared_page.data.state.monotonic_coarse.sec);
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,64,kernel_readers,}
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,66,kernel_readers,static __always_inline time64_t vkso_time_get_root_realtime_seconds(void)
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,67,kernel_readers,{
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,68,kernel_readers,return READ_ONCE(vkso_shared_page.data.state.realtime_base.sec);
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,69,kernel_readers,}
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,71,kernel_readers,static __always_inline int
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,72,kernel_readers,"vkso_time_gettimeofday(struct __kernel_old_timeval *tv, struct timezone *tz)"
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,73,kernel_readers,{
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,74,kernel_readers,"return vkso_gettimeofday_core((struct vkso_timeval *)tv,"
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,75,kernel_readers,"(struct vkso_timezone *)tz,"
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,76,kernel_readers,&vkso_kernel_context);
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,77,kernel_readers,}
-test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,79,kernel_readers,#endif
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,43,kernel_readers,static __always_inline void
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,44,kernel_readers,"vkso_time_get_root_hres(s32 clock_id, struct timespec64 *tp)"
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,45,kernel_readers,{
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,46,kernel_readers,struct vkso_time_value *value = (struct vkso_time_value *)tp;
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,48,kernel_readers,"(void)vkso_clock_gettime_hres(clock_id, value, NULL,"
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,49,kernel_readers,&vkso_kernel_context);
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,50,kernel_readers,}
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,52,kernel_readers,static __always_inline void
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,53,kernel_readers,"vkso_time_get_root_coarse(s32 clock_id, struct timespec64 *tp)"
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,54,kernel_readers,{
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,55,kernel_readers,(void)vkso_clock_gettime_coarse(
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,56,kernel_readers,"clock_id, (struct vkso_time_value *)tp, NULL);"
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,57,kernel_readers,}
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,59,kernel_readers,static __always_inline u32 vkso_time_get_root_resolution(void)
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,60,kernel_readers,{
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,61,kernel_readers,return READ_ONCE(
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,62,kernel_readers,vkso_shared_page.data.state.clocksource_resolution);
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,63,kernel_readers,}
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,65,kernel_readers,static __always_inline time64_t vkso_time_get_root_monotonic_seconds(void)
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,66,kernel_readers,{
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,67,kernel_readers,return READ_ONCE(vkso_shared_page.data.state.monotonic_coarse.sec);
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,68,kernel_readers,}
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,70,kernel_readers,static __always_inline time64_t vkso_time_get_root_realtime_seconds(void)
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,71,kernel_readers,{
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,72,kernel_readers,return READ_ONCE(vkso_shared_page.data.state.realtime_base.sec);
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,73,kernel_readers,}
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,75,kernel_readers,static __always_inline int
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,76,kernel_readers,"vkso_time_gettimeofday(struct __kernel_old_timeval *tv, struct timezone *tz)"
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,77,kernel_readers,{
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,78,kernel_readers,"return vkso_gettimeofday_core((struct vkso_timeval *)tv,"
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,79,kernel_readers,"(struct vkso_timezone *)tz,"
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,80,kernel_readers,&vkso_kernel_context);
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,81,kernel_readers,}
+test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,83,kernel_readers,#endif
 test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,28,diagnostics,#ifdef CONFIG_VKSO_TIME_TEST
 test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,29,diagnostics,int vkso_timekeeping_writer_context_selftest(void);
 test/test_gettime/linux-5.15.198-vkso/include/linux/vkso_time.h,new,30,diagnostics,#endif
@@ -1065,25 +1064,20 @@ test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,977,kernel_r
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,985,kernel_readers,void ktime_get_real_ts64(struct timespec64 *ts)
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,986,kernel_readers,{
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,987,kernel_readers,WARN_ON(timekeeping_suspended);
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,988,kernel_readers,"if (likely(vkso_time_get_root(CLOCK_REALTIME, ts) =="
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,989,kernel_readers,VKSO_TIME_OK))
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,990,kernel_readers,return;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,991,kernel_readers,"vkso_timekeeping_get_private(CLOCK_REALTIME, ts);"
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,988,kernel_readers,"vkso_time_get_root_hres(CLOCK_REALTIME, ts);"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,821,kernel_readers,struct timekeeper *tk = &tk_core.timekeeper;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,822,kernel_readers,unsigned int seq;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,823,kernel_readers,ktime_t base;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,824,kernel_readers,u64 nsecs;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,997,kernel_readers,struct timespec64 ts;
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,994,kernel_readers,struct timespec64 ts;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,828,kernel_readers,do {
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,829,kernel_readers,seq = read_seqcount_begin(&tk_core.seq);
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,830,kernel_readers,base = tk->tkr_mono.base;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,831,kernel_readers,nsecs = timekeeping_get_ns(&tk->tkr_mono);
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,833,kernel_readers,"} while (read_seqcount_retry(&tk_core.seq, seq));"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,835,kernel_readers,"return ktime_add_ns(base, nsecs);"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1000,kernel_readers,"if (unlikely(vkso_time_get_root(CLOCK_MONOTONIC, &ts) !="
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1001,kernel_readers,VKSO_TIME_OK))
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1002,kernel_readers,"vkso_timekeeping_get_private(CLOCK_MONOTONIC, &ts);"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1003,kernel_readers,return timespec64_to_ktime(ts);
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,997,kernel_readers,"vkso_time_get_root_hres(CLOCK_MONOTONIC, &ts);"
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,998,kernel_readers,return timespec64_to_ktime(ts);
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,841,kernel_readers,struct timekeeper *tk = &tk_core.timekeeper;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,842,kernel_readers,unsigned int seq;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,843,kernel_readers,u32 nsecs;
@@ -1092,31 +1086,28 @@ test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,848,kernel_r
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,849,kernel_readers,nsecs = tk->tkr_mono.mult >> tk->tkr_mono.shift;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,850,kernel_readers,"} while (read_seqcount_retry(&tk_core.seq, seq));"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,852,kernel_readers,return nsecs;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1010,kernel_readers,return vkso_time_get_root_resolution();
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1005,kernel_readers,return vkso_time_get_root_resolution();
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,864,kernel_readers,struct timekeeper *tk = &tk_core.timekeeper;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,865,kernel_readers,unsigned int seq;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,866,kernel_readers,"ktime_t base, *offset = offsets[offs];"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,867,kernel_readers,u64 nsecs;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1022,kernel_readers,struct timespec64 ts;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1023,kernel_readers,clockid_t clock_id;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1024,kernel_readers,int status;
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1017,kernel_readers,struct timespec64 ts;
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1018,kernel_readers,clockid_t clock_id;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,871,kernel_readers,do {
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,872,kernel_readers,seq = read_seqcount_begin(&tk_core.seq);
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,873,kernel_readers,"base = ktime_add(tk->tkr_mono.base, *offset);"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,874,kernel_readers,nsecs = timekeeping_get_ns(&tk->tkr_mono);
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,876,kernel_readers,"} while (read_seqcount_retry(&tk_core.seq, seq));"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,878,kernel_readers,"return ktime_add_ns(base, nsecs);"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1027,kernel_readers,if (offs == TK_OFFS_REAL) {
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1028,kernel_readers,clock_id = CLOCK_REALTIME;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1029,kernel_readers,} else if (offs == TK_OFFS_BOOT) {
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1030,kernel_readers,clock_id = CLOCK_BOOTTIME;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1031,kernel_readers,} else {
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1032,kernel_readers,clock_id = CLOCK_TAI;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1033,kernel_readers,}
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1034,kernel_readers,"status = vkso_time_get_root(clock_id, &ts);"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1035,kernel_readers,if (unlikely(status != VKSO_TIME_OK))
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1036,kernel_readers,"vkso_timekeeping_get_private(clock_id, &ts);"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1037,kernel_readers,return timespec64_to_ktime(ts);
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1021,kernel_readers,if (offs == TK_OFFS_REAL) {
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1022,kernel_readers,clock_id = CLOCK_REALTIME;
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1023,kernel_readers,} else if (offs == TK_OFFS_BOOT) {
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1024,kernel_readers,clock_id = CLOCK_BOOTTIME;
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1025,kernel_readers,} else {
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1026,kernel_readers,clock_id = CLOCK_TAI;
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1027,kernel_readers,}
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1028,kernel_readers,"vkso_time_get_root_hres(clock_id, &ts);"
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1029,kernel_readers,return timespec64_to_ktime(ts);
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,928,kernel_readers,struct timekeeper *tk = &tk_core.timekeeper;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,929,kernel_readers,unsigned int seq;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,930,kernel_readers,ktime_t base;
@@ -1127,11 +1118,9 @@ test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,935,kernel_r
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,936,kernel_readers,nsecs = timekeeping_get_ns(&tk->tkr_raw);
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,938,kernel_readers,"} while (read_seqcount_retry(&tk_core.seq, seq));"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,940,kernel_readers,"return ktime_add_ns(base, nsecs);"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1085,kernel_readers,struct timespec64 ts;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1087,kernel_readers,"if (unlikely(vkso_time_get_root(CLOCK_MONOTONIC_RAW, &ts) !="
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1088,kernel_readers,VKSO_TIME_OK))
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1089,kernel_readers,"vkso_timekeeping_get_private(CLOCK_MONOTONIC_RAW, &ts);"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1090,kernel_readers,return timespec64_to_ktime(ts);
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1077,kernel_readers,struct timespec64 ts;
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1079,kernel_readers,"vkso_time_get_root_hres(CLOCK_MONOTONIC_RAW, &ts);"
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1080,kernel_readers,return timespec64_to_ktime(ts);
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,954,kernel_readers,struct timekeeper *tk = &tk_core.timekeeper;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,955,kernel_readers,struct timespec64 tomono;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,956,kernel_readers,unsigned int seq;
@@ -1145,13 +1134,10 @@ test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,967,kernel_r
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,969,kernel_readers,ts->tv_sec += tomono.tv_sec;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,970,kernel_readers,ts->tv_nsec = 0;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,971,kernel_readers,"timespec64_add_ns(ts, nsec + tomono.tv_nsec);"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1105,kernel_readers,"if (likely(vkso_time_get_root(CLOCK_MONOTONIC, ts) =="
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1106,kernel_readers,VKSO_TIME_OK))
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1107,kernel_readers,return;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1108,kernel_readers,"vkso_timekeeping_get_private(CLOCK_MONOTONIC, ts);"
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1095,kernel_readers,"vkso_time_get_root_hres(CLOCK_MONOTONIC, ts);"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,986,kernel_readers,struct timekeeper *tk = &tk_core.timekeeper;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,989,kernel_readers,return tk->ktime_sec;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1124,kernel_readers,return vkso_time_get_root_monotonic_seconds();
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1111,kernel_readers,return vkso_time_get_root_monotonic_seconds();
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1005,kernel_readers,struct timekeeper *tk = &tk_core.timekeeper;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1006,kernel_readers,time64_t seconds;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1007,kernel_readers,unsigned int seq;
@@ -1162,7 +1148,7 @@ test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1013,kernel_
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1014,kernel_readers,seconds = tk->xtime_sec;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1016,kernel_readers,"} while (read_seqcount_retry(&tk_core.seq, seq));"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1018,kernel_readers,return seconds;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1140,kernel_readers,return vkso_time_get_root_realtime_seconds();
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1127,kernel_readers,return vkso_time_get_root_realtime_seconds();
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1502,kernel_readers,struct timekeeper *tk = &tk_core.timekeeper;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1503,kernel_readers,unsigned int seq;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1504,kernel_readers,u64 nsecs;
@@ -1173,17 +1159,14 @@ test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1509,kernel_
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1511,kernel_readers,"} while (read_seqcount_retry(&tk_core.seq, seq));"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1513,kernel_readers,ts->tv_nsec = 0;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,1514,kernel_readers,"timespec64_add_ns(ts, nsecs);"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1644,kernel_readers,"if (likely(vkso_time_get_root(CLOCK_MONOTONIC_RAW, ts) =="
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1645,kernel_readers,VKSO_TIME_OK))
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1646,kernel_readers,return;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1647,kernel_readers,"vkso_timekeeping_get_private(CLOCK_MONOTONIC_RAW, ts);"
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1631,kernel_readers,"vkso_time_get_root_hres(CLOCK_MONOTONIC_RAW, ts);"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2240,kernel_readers,struct timekeeper *tk = &tk_core.timekeeper;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2241,kernel_readers,unsigned int seq;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2243,kernel_readers,do {
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2244,kernel_readers,seq = read_seqcount_begin(&tk_core.seq);
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2246,kernel_readers,*ts = tk_xtime(tk);
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2247,kernel_readers,"} while (read_seqcount_retry(&tk_core.seq, seq));"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,2373,kernel_readers,"(void)vkso_time_get_root(CLOCK_REALTIME_COARSE, ts);"
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,2357,kernel_readers,"vkso_time_get_root_coarse(CLOCK_REALTIME_COARSE, ts);"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2253,kernel_readers,struct timekeeper *tk = &tk_core.timekeeper;
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2254,kernel_readers,"struct timespec64 now, mono;"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2255,kernel_readers,unsigned int seq;
@@ -1194,7 +1177,7 @@ test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2261,kernel_
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2262,kernel_readers,"} while (read_seqcount_retry(&tk_core.seq, seq));"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2264,kernel_readers,"set_normalized_timespec64(ts, now.tv_sec + mono.tv_sec,"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,old,2265,kernel_readers,now.tv_nsec + mono.tv_nsec);
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,2379,kernel_readers,"(void)vkso_time_get_root(CLOCK_MONOTONIC_COARSE, ts);"
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,2363,kernel_readers,"vkso_time_get_root_coarse(CLOCK_MONOTONIC_COARSE, ts);"
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,7,diagnostics,#include <linux/timekeeping_update_bench.h>
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,823,diagnostics,#if defined(CONFIG_TIMEKEEPING_UPDATE_CACHE_PREP_DIAG) || \
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,824,diagnostics,defined(CONFIG_TIMEKEEPING_UPDATE_PERCALL_PMU_DIAG)
@@ -1260,23 +1243,23 @@ test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,911,diagnost
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,912,diagnostics,#endif
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,913,diagnostics,#undef UPDATE_BENCH_MARK
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,914,diagnostics,#undef UPDATE_BENCH_STAGES
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1156,diagnostics,#ifdef CONFIG_VKSO_TIME_TEST
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1157,diagnostics,int __init vkso_timekeeping_writer_context_selftest(void)
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1158,diagnostics,{
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1159,diagnostics,unsigned long flags;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1160,diagnostics,time64_t seconds;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1161,diagnostics,"u64 monotonic, raw, real;"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1163,diagnostics,"raw_spin_lock_irqsave(&timekeeper_lock, flags);"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1164,diagnostics,write_seqcount_begin(&tk_core.seq);
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1165,diagnostics,seconds = __ktime_get_real_seconds();
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1166,diagnostics,monotonic = ktime_get_mono_fast_ns();
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1167,diagnostics,raw = ktime_get_raw_fast_ns();
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1168,diagnostics,real = ktime_get_real_fast_ns();
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1169,diagnostics,write_seqcount_end(&tk_core.seq);
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1170,diagnostics,"raw_spin_unlock_irqrestore(&timekeeper_lock, flags);"
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1172,diagnostics,return seconds > 0 && monotonic && raw && real ? 0 : -EINVAL;
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1173,diagnostics,}
-test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1174,diagnostics,#endif
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1143,diagnostics,#ifdef CONFIG_VKSO_TIME_TEST
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1144,diagnostics,int __init vkso_timekeeping_writer_context_selftest(void)
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1145,diagnostics,{
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1146,diagnostics,unsigned long flags;
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1147,diagnostics,time64_t seconds;
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1148,diagnostics,"u64 monotonic, raw, real;"
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1150,diagnostics,"raw_spin_lock_irqsave(&timekeeper_lock, flags);"
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1151,diagnostics,write_seqcount_begin(&tk_core.seq);
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1152,diagnostics,seconds = __ktime_get_real_seconds();
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1153,diagnostics,monotonic = ktime_get_mono_fast_ns();
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1154,diagnostics,raw = ktime_get_raw_fast_ns();
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1155,diagnostics,real = ktime_get_real_fast_ns();
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1156,diagnostics,write_seqcount_end(&tk_core.seq);
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1157,diagnostics,"raw_spin_unlock_irqrestore(&timekeeper_lock, flags);"
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1159,diagnostics,return seconds > 0 && monotonic && raw && real ? 0 : -EINVAL;
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1160,diagnostics,}
+test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping.c,new,1161,diagnostics,#endif
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping_update_bench.c,new,3,diagnostics,#include <linux/debugfs.h>
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping_update_bench.c,new,4,diagnostics,#include <linux/cache.h>
 test/test_gettime/linux-5.15.198-vkso/kernel/time/timekeeping_update_bench.c,new,5,diagnostics,#include <linux/fs.h>

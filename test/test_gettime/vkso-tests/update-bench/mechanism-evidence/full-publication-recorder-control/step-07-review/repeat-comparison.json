@@ -1,0 +1,199 @@
+{
+  "status": "PASS",
+  "steps": [
+    0,
+    7
+  ],
+  "image_sha256": "a5a04cc3be0b5741660a5a9ce070aabed30d520ea9fcab240402a06478980b85",
+  "boot_ids": [
+    "0d66158b-9597-4fa1-8904-307c7a6cd8f5",
+    "43c75382-7f5f-4650-8b82-4463eab1f7eb"
+  ],
+  "comparisons": [
+    {
+      "scenario": "idle",
+      "new_minus_old_mean": 10.447625,
+      "mean_delta_exact": "83581/8000",
+      "cpu0_mean_change": 10.447625,
+      "rank_contributions": [
+        -0.474875,
+        6.408125,
+        4.514375
+      ],
+      "cuts": [
+        258,
+        393,
+        460,
+        602
+      ],
+      "fixed_region_contributions": [
+        0.76,
+        -10.818375,
+        3.518625,
+        1.20675,
+        15.780625
+      ],
+      "fixed_region_probability_changes_pp": [
+        0.3125,
+        -2.6875,
+        0.9125,
+        0.21250000000000002,
+        1.25
+      ],
+      "peaks_by_sigma": {
+        "2": [
+          393,
+          394
+        ],
+        "3": [
+          393,
+          394
+        ],
+        "5": [
+          394,
+          394
+        ]
+      }
+    },
+    {
+      "scenario": "monotonic",
+      "new_minus_old_mean": 4.418930326331583,
+      "mean_delta_exact": "47123473/10664000",
+      "cpu0_mean_change": 4.418930326331583,
+      "rank_contributions": [
+        -0.023847524381095275,
+        7.4576238434608655,
+        -3.014845992748187
+      ],
+      "cuts": [
+        381,
+        394,
+        486,
+        876
+      ],
+      "fixed_region_contributions": [
+        1.7636308139534884,
+        -10.858712990747687,
+        -0.4041481932983246,
+        11.202820392598149,
+        2.7153403038259567
+      ],
+      "fixed_region_probability_changes_pp": [
+        0.6878219554888723,
+        -2.7764691172793197,
+        -0.13890972743185798,
+        1.7018660915228807,
+        0.5256907976994248
+      ],
+      "peaks_by_sigma": {
+        "2": [
+          394,
+          394
+        ],
+        "3": [
+          394,
+          394
+        ],
+        "5": [
+          394,
+          394
+        ]
+      }
+    },
+    {
+      "scenario": "monotonic_raw",
+      "new_minus_old_mean": 4.478375,
+      "mean_delta_exact": "35827/8000",
+      "cpu0_mean_change": 4.478375,
+      "rank_contributions": [
+        5.050375,
+        6.46425,
+        -7.03625
+      ],
+      "cuts": [
+        396,
+        679,
+        985,
+        1122
+      ],
+      "fixed_region_contributions": [
+        -7.835375,
+        4.72,
+        6.528125,
+        5.36425,
+        -4.298625
+      ],
+      "fixed_region_probability_changes_pp": [
+        -1.8499999999999999,
+        0.2625,
+        0.8125,
+        0.5125000000000001,
+        0.2625
+      ],
+      "peaks_by_sigma": {
+        "2": [
+          394,
+          394
+        ],
+        "3": [
+          394,
+          394
+        ],
+        "5": [
+          394,
+          394
+        ]
+      }
+    },
+    {
+      "scenario": "monotonic_coarse",
+      "new_minus_old_mean": 18.67625,
+      "mean_delta_exact": "14941/800",
+      "cpu0_mean_change": 18.67625,
+      "rank_contributions": [
+        14.00475,
+        17.56925,
+        -12.89775
+      ],
+      "cuts": [
+        396,
+        649,
+        1022,
+        1289
+      ],
+      "fixed_region_contributions": [
+        -18.68,
+        8.81625,
+        27.563625,
+        15.59725,
+        -14.620875
+      ],
+      "fixed_region_probability_changes_pp": [
+        -4.5875,
+        -0.3125,
+        3.6249999999999996,
+        1.3875,
+        -0.11249999999999999
+      ],
+      "peaks_by_sigma": {
+        "2": [
+          395,
+          394
+        ],
+        "3": [
+          395,
+          394
+        ],
+        "5": [
+          395,
+          394
+        ]
+      }
+    }
+  ],
+  "non_cpu0_samples": [],
+  "report_sha256": "6f0a205d745d4e2f575d89ad82391c6d39f28a82f6da9e87ee08cb7c4208ef26",
+  "script_sha256": "336bf532335d76fff9f78ca9fda1bf4c7e7d89adb081b7743422abbaf75cb8bc",
+  "helper_sha256": "e768a2072d3aa37abf094807115aeebdc3086a59a637a02c3e1b3c86f3b86996",
+  "inference": "Same-image two-boot descriptive variation, no recorder intervention. All CPUs retained; CPU0 subset separate. Per-boot rank bands 0-90%, 90-99%, 99-100% are not physical states. Mean/region/rank contributions independently recomputed from raw CSV with exact arithmetic; peak estimates reused from report. No precise population interval from two boots."
+}

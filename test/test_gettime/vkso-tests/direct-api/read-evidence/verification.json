@@ -1,0 +1,92 @@
+{
+  "status": "PASS",
+  "scope": "complete clean READ evidence; all 38 comparisons",
+  "commands": [
+    {
+      "command": "/usr/bin/python3 test/test_gettime/vkso-tests/direct-api/read_evaluation.py --check",
+      "exit_code": 0
+    },
+    {
+      "command": "/usr/bin/python3 test/test_gettime/vkso-tests/direct-api/read_paths.py --check",
+      "exit_code": 0
+    },
+    {
+      "command": "/usr/bin/python3 test/test_gettime/vkso-tests/direct-api/read_report.py --check",
+      "exit_code": 0
+    },
+    {
+      "command": "/usr/bin/python3 -m unittest discover -s test/test_gettime/vkso-tests/direct-api/tests -p test_read_evaluation.py",
+      "exit_code": 0
+    }
+  ],
+  "required_deliverables": {
+    "data_matrix": "16 distinct READ boots; archived inputs and actual packages verified",
+    "statistics": "boot-level delta CI + block/leave-one-out/mean sensitivity",
+    "paths": "19 workloads; actual carrier/public/kernel module instructions",
+    "presentation": "38 rows; six LaTeX fragments; three SVG/PDF/PNG figures; Chinese evaluation prose"
+  },
+  "claims": {
+    "clock_gettime_fast": {
+      "comparisons": 14,
+      "min_delta": -1.0059959999999961,
+      "max_delta": 1.0058559999999979,
+      "min_mean_delta": -0.8215195161290367,
+      "max_mean_delta": 1.1748759354838718,
+      "all_four_blocks_faster": 4
+    },
+    "kernel_read": {
+      "comparisons": 6,
+      "min_delta": -2.728496000000007,
+      "max_delta": 1.0871679999999984,
+      "min_mean_delta": -2.050752532258066,
+      "max_mean_delta": 0.6650391451612947,
+      "all_four_blocks_faster": 2
+    },
+    "other_time_fast": {
+      "comparisons": 10,
+      "min_delta": -2.0498910000000006,
+      "max_delta": -0.9688090000000003,
+      "min_mean_delta": -2.0483842741935483,
+      "max_mean_delta": -0.5843286935483869,
+      "all_four_blocks_faster": 10
+    },
+    "getcpu": {
+      "comparisons": 2,
+      "min_delta": -1.003639999999999,
+      "max_delta": -1.0036200000000015,
+      "min_mean_delta": -1.773282225806451,
+      "max_mean_delta": -1.6578991935483867,
+      "all_four_blocks_faster": 2
+    },
+    "fallback": {
+      "comparisons": 6,
+      "min_delta": -9.22135800000001,
+      "max_delta": -1.7384640000000218,
+      "min_mean_delta": -9.746616096774233,
+      "max_mean_delta": -1.1661878709677467,
+      "all_four_blocks_faster": 5
+    }
+  },
+  "render": [
+    {
+      "figure": "main",
+      "data_markers": 100,
+      "png_matches_svg": true,
+      "pdf_present": true
+    },
+    {
+      "figure": "other",
+      "data_markers": 60,
+      "png_matches_svg": true,
+      "pdf_present": true
+    },
+    {
+      "figure": "fallback",
+      "data_markers": 30,
+      "png_matches_svg": true,
+      "pdf_present": true
+    }
+  ],
+  "visual_review": "Three actual PNGs inspected: labels, intervals, axes and legend clear; full ranges retained",
+  "latex": "booktabs fragments; syntax checked, no full manuscript compilation requested"
+}

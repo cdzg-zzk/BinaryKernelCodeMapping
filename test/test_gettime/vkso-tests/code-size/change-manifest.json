@@ -1,5 +1,5 @@
 {
-  "revision": "ff79171885356e05800c6c488679befb03db7f68",
+  "revision": "cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb",
   "kernel_version": "5.15.198",
   "kernel_root": "test/test_gettime/linux-5.15.198-vkso",
   "kernel_files": [
@@ -147,7 +147,7 @@
     {
       "path": "kernel/time/timekeeping.c",
       "category": "kernel_readers",
-      "diagnostic_ranges": "7,823-864,872,874,877,880,882-887,889,891-892,905-914,1156-1174",
+      "diagnostic_ranges": "7,823-864,872,874,877,880,882-887,889,891-892,905-914,1143-1161",
       "overrides": {
         "old": [
           {

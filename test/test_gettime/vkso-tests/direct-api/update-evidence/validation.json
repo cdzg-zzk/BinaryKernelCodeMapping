@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "revision": "cf9dc817f29f9c8d6f88dde0c58c4ccb75347aeb",
+  "update_boots": 16,
+  "boot_scenario_units": 64,
+  "rounds": 960,
+  "samples": 3599774,
+  "archived_files_verified": 4288,
+  "non_cpu0_samples": [
+    {
+      "case": "vkso-no-retpoline",
+      "scenario": "monotonic",
+      "block": 2,
+      "round": 3,
+      "sample": 1474,
+      "cycles": 684,
+      "action": 0,
+      "cpu": 2
+    },
+    {
+      "case": "vkso-no-retpoline",
+      "scenario": "monotonic",
+      "block": 2,
+      "round": 8,
+      "sample": 173,
+      "cycles": 672,
+      "action": 0,
+      "cpu": 2
+    },
+    {
+      "case": "raw-no-retpoline",
+      "scenario": "monotonic",
+      "block": 2,
+      "round": 13,
+      "sample": 2608,
+      "cycles": 799,
+      "action": 0,
+      "cpu": 2
+    },
+    {
+      "case": "vkso-normal",
+      "scenario": "monotonic",
+      "block": 4,
+      "round": 13,
+      "sample": 1698,
+      "cycles": 657,
+      "action": 0,
+      "cpu": 2
+    }
+  ],
+  "estimator": "mean of complete within-boot sample means, equal boot weight",
+  "bootstrap": "256 matched four-block resamples, pointwise percentile intervals; cut-dependent terms conditional on fitted cuts",
+  "decomposition": "cap=300; low + capped high + capped occupancy + excess tail = complete mean difference, per block",
+  "primary_samples": "all periodic action=0 observations including four CPU2 samples; no pair-calibration subtraction; no dropped observations",
+  "scopes": "instrumented timekeeping_update interval; end timestamp precedes record append; no calibration subtraction or clean-image UPDATE inference",
+  "means_match_prior": true,
+  "max_reconstruction_residual": 1.9539925233402755e-14,
+  "window_duration_range": [
+    15.012177911,
+    15.030736478
+  ]
+}

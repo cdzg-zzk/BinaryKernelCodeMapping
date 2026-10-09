@@ -2,7 +2,7 @@
 
 ## Abstract
 
-操作系统内核和用户态经常重复实现 checksum、compression、format parsing 以及只读状态转换等计算。让应用通过 syscall 请求内核执行可以避免代码复制，却为高频短函数保留 privilege-crossing cost；重新维护一份用户态实现则会带来代码重复和 semantic drift。我们提出 VKSO，一种将**当前运行内核中已经驻留的机器码页**零拷贝重宿主为标准 user-space shared object 的机制。VKSO 从最终机器码出发，以 state、control 和 code-shape constraints 界定可复用的 binary closure；standard carrier 保留 ELF/loader 语义，page grafting 复用 resident physical pages，Shim 则显式承接 kernel/user execution environments 之间的依赖。Linux 5.15 原型的字节一致 XXH32 对照得到相同的 hot-call 批次中位数均值；真实算法的用户与内核执行成本随依赖适配、构建条件及输入路径变化。作为完整子系统案例，我们重构 Linux clocktime，使内核 reader 与用户态 fast path 共享内核驻留时间计算代码，并以 VKSO 替换原生 x86-64 vDSO time/getcpu 路径。32 次独立启动显示，normal 构建的 13 个非 fallback 公开 READ 路径以完整均值计算的等权几何平均成本降低 3.87%，其中七种 `clock_gettime` fast path 的集合增加 2.57%；UPDATE 成本还随持续读取负载变化。共享代码页保持内核与用户 PFN 一致，而每 MM 支持页增加了所测用户映射的驻留页数。完整 LZ4 应用进一步显示，注册复用后的执行成本与每次建立、释放的成本需要分别评估。经过显式状态和环境解耦的内核计算能够由两域共享同一执行体，其实际代价由适配方式与使用负载共同决定。
+操作系统内核和用户态经常重复实现 checksum、compression、format parsing 以及只读状态转换等计算。让应用通过 syscall 请求内核执行可以避免代码复制，却为高频短函数保留 privilege-crossing cost；重新维护一份用户态实现则会带来代码重复和 semantic drift。我们提出 VKSO，一种将**当前运行内核中已经驻留的机器码页**零拷贝重宿主为标准 user-space shared object 的机制。VKSO 从最终机器码出发，以 state、control 和 code-shape constraints 界定可复用的 binary closure；standard carrier 保留 ELF/loader 语义，page grafting 复用 resident physical pages，Shim 则显式承接 kernel/user execution environments 之间的依赖。Linux 5.15 原型的字节一致 XXH32 对照得到相同的 hot-call 批次中位数均值；真实算法的用户与内核执行成本随依赖适配、构建条件及输入路径变化。作为完整子系统案例，我们重构 Linux clocktime，使内核 reader 与用户态 fast path 共享内核驻留时间计算代码，并以 VKSO 替换原生 x86-64 vDSO time/getcpu 路径。16次无发布插桩启动中，七类用户 `clock_gettime` 快路径的中位成本差为−1.006～+1.006 TSC ticks；在Current记录器下，三种持续读取负载的完整发布均值降低18.03%～55.88%，Legacy对照呈现相同改善方向。实际调用路径与PFN记录验证了两域对同一执行体的复用，入口与映射支持分别计量。完整 LZ4 应用进一步显示，注册复用后的执行成本与每次建立、释放的成本需要分别评估。经过显式状态和环境解耦的内核计算能够由两域共享同一执行体，其实际代价由适配方式与使用负载共同决定。
 
 # Introduction
 
@@ -18,7 +18,7 @@ VKSO 的关键洞察是把三个通常耦合的问题分开处理。最终机器
 - 设计并实现函数级 resident binary rehosting mechanism：构造可跨地址空间执行的代码闭包，以标准 Stub DSO 保留对象语义，通过 page grafting 复用同一物理执行体，并以 Shim 分离 kernel/user execution environments。
 - 用机制级 microbenchmarks、代表性 kernel algorithms 和完整 Linux clocktime case study 评估这一路径：XXH32 hot-call 基准比较字节一致的两种代码后备，copied closures 和同源算法给出所测配置的适配成本，clocktime 则检验共享状态与并发 publisher/readers 下的端到端行为。
 
-在 Linux 5.15 原型的 XXH32 基准中，两种后备的 hot-call 批次中位数均值均为 71 cycles。BCH 的 t=8、两错误 precomputed decode 相对原始源码用户 DSO 的成本变化为 −10.00%，完整错误数扫描仍保留路径相关的开销。完整 LZ4 CLI 在活动注册下的同源成本接近，包含注册和释放的单遍完整任务则为 native 的 1.717 倍。Clocktime 的 13 个非 fallback 公开路径在 normal 构建下，以完整均值计算的等权几何平均成本降低 3.87%，但七种 `clock_gettime` fast path 的集合增加 2.57%；状态发布及每 MM 支持页也有独立代价。这些结果区分了同一执行体复用、部署摊销和具体调用成本；BCH 的库与专用 owner 账本也没有显示净页节省。
+在 Linux 5.15 原型的 XXH32 基准中，两种后备的 hot-call 批次中位数均值均为 71 cycles。BCH 的 t=8、两错误 precomputed decode 相对原始源码用户 DSO 的成本变化为 −10.00%，完整错误数扫描仍保留路径相关的开销。完整 LZ4 CLI 在活动注册下的同源成本接近，包含注册和释放的单遍完整任务则为 native 的 1.717 倍。Clocktime将读取计算集中到292行共同核心与协议，同时接入公开ABI、namespace和周期发布；ABI定义与初始化的合并进一步减少了适配层的重复维护。七类用户快路径的中位成本差为−1.006～+1.006 TSC ticks，持续读取下的完整发布在两种记录器中均获得更低均值。这些结果区分了同一执行体复用、部署摊销和具体调用成本；BCH 的库与专用 owner 账本也没有显示净页节省。
 
 # Background and Motivation
 
@@ -315,7 +315,7 @@ Provider failure 发生在 shared core 读取 counter 时，由 context callback
 
 PGOT 使用轮内 paired delta。LZ4 和 XZ 各完成三次、BCH 完成十二次完整部署，每次重新装载 owner、构造并注册 carrier、运行工作负载、恢复映射并卸载 owner。这些部署均位于同一次物理机启动中，因此重复单位是部署，不是独立启动。算法与应用先计算同轮配对成本比，取部署内中位数，再对各算法的全部部署等权取中位数；方括号列出部署中位数的最小值与最大值。绝对值同样先取部署内中位数再跨部署汇总，不用两侧已舍入绝对值反推配对比值。LZ4 每个 round/block/backend 启动一个进程，BCH/XZ 则在单个进程中轮换 backend 并完成该部署的各轮。
 
-Clocktime 使用四种实现/构建组合，每种分别运行无插桩 READ 内核和带 UPDATE recorder 的内核；每种镜像独立启动四次，共 32 次。READ、普通内核 reader、UPDATE 与并发公开 reader 均先取每次启动中全部观测的均值，再对四次启动等权平均。READ 观测是批次平均调用成本，UPDATE 观测是逐次发布成本；完整均值保留分布中各耗时区间及其出现比例。Raw/VKSO 比较在同 block 的独立启动之间进行，不把轮次或逐次调用当作独立系统实验。表 2 列出各组重复层次与主指标。
+Clocktime 的无发布插桩 READ 使用16次独立启动，每后端/配置4次，以启动内批次中位数的跨启动中位数为主统计，另报完整均值。完整软件发布 UPDATE 使用两配置、两后端、两记录器的16次独立启动，每单元2次，以完整样本均值及逐启动差值描述成本。READ 观测为批次平均调用成本，UPDATE 为逐次发布成本；两者均以启动作为系统重复单位。历史函数内 UPDATE 与机制先导单列。表2列出各组重复层次与主指标。
 
 算法和 CLI 的稳态计时位于活动注册期间，不包含 owner 构建、carrier 构造、注册或释放。事务 manager 通过完成通知衔接工作负载与释放；setup 实验另外测量这些生命周期阶段。First-touch 则从装载和符号解析完成后计时，只包围首次目标调用。不同计时窗口对应调用、首次触达和完整任务三个问题。
 
@@ -341,7 +341,8 @@ Clocktime 使用四种实现/构建组合，每种分别运行无插桩 READ 内
 | Kernel algorithms | Actual owner vs. compiler-matched and stock kernel implementations | BCH: 12 deployments; LZ4/XZ: 3 each; 11 rounds | ns/op or ms/full input; cost ratio |
 | LZ4 CLI | Carrier vs. same-source DSO, upstream DSO and stock CLI | 3 deployments × 4 rounds × 2 block sizes × 12 files × 2 operations | complete command time |
 | LZ4 setup | Same-source DSO vs. active/ready carrier | 3 deployments × 3 paired rounds; 1/3 corpus passes, trace on/off | full command and first-valid-result time |
-| Clocktime | Raw native vDSO vs. VKSO; normal and no-retpoline | 4 boots per case/image role; equal-weight mean of boot means | TSC ticks/call, TSC ticks/update, selected resident PFNs |
+| Clocktime READ | Raw native vDSO/kernel readers vs. VKSO; two configurations | 4 boots per backend/configuration; boot-level medians and intervals | TSC ticks/call, selected resident PFNs |
+| Clocktime UPDATE | Raw vs. VKSO; two configurations and two recorders | 2 boots per cell; complete means and per-boot contrasts | TSC ticks/update and complete distributions |
 
 
 这组实验由机制分解走向完整功能：字节一致的 DSO 控制计算逻辑差异，copied closures 在同一执行域内隔离 PGOT transformation，实际 kernel-backed algorithms 再引入构建域、Shim 和 page rehosting，clocktime 最后检验共享状态及入口适配的组合效果。后一层的端到端结果与前一层的机制解释互补。
@@ -498,171 +499,108 @@ The [experiment report](../../test/section63/results/report.md) provides the six
 
 ## Stateful System Case: Consolidating Kernel and vDSO Time Reads
 
-### Evaluation Goals and Baselines
+### A Stateful Case for Cross-domain Reuse
 
-Linux vDSO 将常用时间查询放在用户态执行，已经消除了这些调用的 syscall 开销。[31] 内核 reader 与 vDSO reader 却分别实现了时钟状态读取和时间换算。Clocktime 用这一有状态子系统检验 VKSO 能否将两端的计算收敛到同一驻留执行体，并量化为共享代码而引入的入口、状态发布和映射成本。相较于前述算法案例，它还要求共享计算与持续更新、time namespace 和原生 fallback 协同工作。
+Clocktime将VKSO的评估从独立算法推进到Linux时间读取子系统。这个案例同时要求处理持续更新的时间状态、无锁读取重试、time namespace、公开ABI和原生fallback，并服务用户与内核两个执行域。我们选择原生vDSO作为用户侧基线：它已经在用户态完成常用时间查询，具有很短的读取路径。Clocktime因而检验了一个更进一步的能力：在保留这种低成本调用方式的同时，让用户与内核直接共享驻留的计算实现，并集中维护共同规则。
 
-我们在 Linux 5.15.198 中抽出共享时间核心，由内核发布只读状态快照，并通过 MM context 提供 namespace 偏移等局部输入。用户程序链接 `libvkso_time.so`，以常规 API 签名调用 `clock_gettime`、`clock_getres`、`gettimeofday`、`time` 和 `getcpu`；公开入口经 `libkernel.so` 的私有 ABI 适配进入内核驻留页。初始化、符号绑定和 context 准备在计时前完成。Raw 基线使用 libc 的原生 vDSO 路径。两端都保留原生不支持的 clock 的 syscall fallback，稳态路径均不经过实验性 provider bridge、预加载库或逐次动态符号查找。
+原型面向Linux 5.15.198的x86-64 LP64接口，覆盖五类高精度和两类粗粒度`clock_gettime`快路径，以及`clock_getres`、`gettimeofday`和`time`；getcpu单列。普通内核侧有8个入口进入共享计算，另3个入口读取共享状态。CPU time、alarm等时钟继续由原生路径完成，NMI/fast与snapshot等特殊读者保持原有协议。这一范围把周期发布、真实公开调用及进程语义接入同一实现，功能覆盖见附录C。
 
-比较包含 normal 与 no-retpoline 两种构建条件。后者关闭 RETPOLINE、RETHUNK 和 CPU_UNRET_ENTRY，以及由 Kconfig 联动关闭的依赖选项。每个 block 轮换四种 Raw/VKSO 构建的执行顺序，每种构建分别启动无插桩 READ 镜像和带 UPDATE recorder 的镜像；四个 block 共 32 次启动。READ、普通内核 reader、UPDATE 与并发公开 reader 分别统计。性能主指标均先取每次启动的完整观测均值，再对四次启动等权平均；差值 Δ 为 VKSO 减 Raw，负值表示成本下降。单位为 TSC ticks。
+这个基线使结构收益与性能收益可以分别观察。原生vDSO的快路径已经避免了系统调用，用户查询本身无需再通过内核服务完成；VKSO进一步把两域的读取规则收敛到同一执行体。对于周期发布者，我们比较读取负载存在时的完整发布成本；对于开发者，则考察同一计算规则的修改需要触及哪些职责。因此，案例同时衡量复用是否成立、集成需要多少工作，以及复用之后的执行效果。
 
-### Code Adaptation and Mapping Footprint
+### From Separate Readers to a Shared Execution Body
 
-共享核心承担时间换算、归一化和 namespace 偏移计算，两个执行域的入口负责提供各自的状态与失败处理。表 10(a) 以原版 Linux 5.15.198 为基线，将每处改动按其在 Clocktime 中的职责归入一类：共享计算、内核读取、状态发布、进程与 namespace 状态、时钟源接入、用户入口或构建接入。统计单位为非空、非注释源码行，包含头文件、汇编和编译期 ABI 断言；同一行只归入一类，替换同时计入新增与删除。表中的净变化是新增减删除，并非执行代码大小。
+原生内核读者从timekeeper读取时间，vDSO读者从内核发布的vvar状态读取时间；两侧分别组织快照验证、周期差换算与结果生成。我们的第一项改造是抽取共同读取核心，将序列读取与重试、周期换算、归一化和适用时钟的偏移处理集中到内核驻留代码中。内核入口调用这一核心，用户通过carrier映射执行相同物理页上的代码。高精度与粗粒度读取各有共享入口，因此两侧维护一份计算规则，并保留两类查询各自的计算路径。
 
-**Table 10(a): Clocktime integration changes against Linux 5.15.198.** Counts include nonblank, noncomment source lines, declarations and ABI assertions. Replacements contribute to both columns; platform-wide vDSO withdrawal and diagnostic instrumentation are excluded.
+第二项改造将状态所有权与执行位置分离。全局时间不断变化，而namespace偏移随进程视图的生命周期改变，我们为两者分别提供全局只读快照和MM_data。统一发布者从timekeeper生成基址与转换参数，并以序列协议发布；MM_data提供当前地址空间的namespace视图。普通内核读取绑定root语义，动态POSIX分派使用当前视图。用户初始化从auxv获取MM_data，exec、fork和setns接入负责映射与视图更新。这使多个读者复用全局快照，同时保持各自应见的时间语义。
 
-| Adaptation category | Added | Deleted | Net |
-| --- | ---: | ---: | ---: |
-| Shared computation and ABI | 494 | 0 | +494 |
-| Kernel readers and syscall boundaries | 238 | 182 | +56 |
-| Shared-state publication | 102 | 14 | +88 |
-| Per-MM mapping and time namespace | 173 | 57 | +116 |
-| Clock-provider integration | 10 | 22 | −12 |
-| User ABI and initialization | 393 | 0 | +393 |
-| Build, linking and platform integration | 84 | 65 | +19 |
-| **Total** | **1,494** | **340** | **+1,154** |
+这种状态组织保留了时间子系统的读写分工：内核拥有更新权，用户以只读映射消费快照。读者使用序列协议检查一次查询期间的状态一致性，namespace视图作为显式输入参与结果生成。共享的对象因此既有稳定的代码页，也有按原时间更新节奏发布的数据；地址空间绑定提供了将这套计算同时用于内核和用户的条件。
 
-共享计算与 ABI 新增 494 行，在两端维持一份时间换算实现。内核 reader 与 syscall 边界改写了调用和失败路径，净增 56 行；状态发布为只读快照和序列协议净增 88 行；每 MM 映射、生命周期及 time namespace 偏移净增 116 行。时钟源接入调整 TSC、PVClock 和 Hyper-V 钩子，净减 12 行。构建、链接和平台接入净增 19 行。这五项内核与构建接入合计净增 267 行。
+第三项改造把执行环境差异放到入口。用户链接`libvkso_time.so`，通过原有API签名查询时间；公开库与carrier完成clock ID分类、ABI、errno和context绑定，接替原生vDSO时间入口的调用路径。普通内核入口则提供内核context并转换返回类型。共享代码通过显式参数取得数据地址和依赖目标，时钟源读取失败由领域callback分别进入用户syscall或内核私有读取。这样，用户路径复用内核计算体，公共计算、环境适配和状态发布各有明确职责。
 
-用户 ABI 与初始化新增 393 行，包括 112 行 carrier 私有汇编入口、143 行公开 API 与初始化 C 代码，以及 138 行头文件。这些代码完成 ABI、errno、fallback 与 context 适配，时间计算由共享核心执行。七类接入合计新增 1,494 行、删除 340 行，净增 1,154 行。另有原生 vDSO 映射、入口和构建路径的撤除，新增 21 行、删除 1,418 行，净减 1,397 行；与七类接入作源码差分相加为净减 243 行。后一个撤除范围覆盖目标接口以外的平台能力，因此 −243 不是同等功能范围下的节省量。
+```mermaid
+flowchart LR
+  subgraph RAW[Raw]
+    RU[用户 API / libc] --> RV[vDSO 读取计算]
+    RK[普通内核 API] --> RC[内核读取计算]
+    RT[timekeeper] --> RC
+    RT --> RP[update_vsyscall] --> RD[vvar] --> RV
+  end
+  subgraph SHARED[VKSO]
+    U[用户 API] --> UA[用户 ABI / context] --> C[内核驻留共同计算]
+    K[普通内核 API] --> KA[root adapter] --> C
+    T[timekeeper] --> W[统一状态发布] --> D[全局只读快照] --> C
+    N[namespace / MM 生命周期] --> M[MM_data] --> C
+    C -. provider 失败 .-> F[领域 callback]
+    T --> S[保留的特殊内核读者]
+  end
+```
 
-原生 x86-64 vDSO 的时间读取、架构 shim 与入口实现切片为 406 行，但该切片不包含其数据 ABI 和初始化支持，也不能与 VKSO 的 393 行用户接入直接相减为同口径收益。现有账本分别量化了共享计算、接入改造和原生路径撤除；它证实独立的用户计算副本不再维护，但不支持从这些异口径数字推出当前实现的等功能源码缩减率。
+**Figure 4: Consolidating time reads across domains.** Raw分别组织内核与vDSO计算；VKSO以统一状态和显式领域绑定连接同一驻留核心。普通内核计算路径覆盖8个入口，另3个标量入口直接读取共享状态。
 
-原型的 no-vDSO 平台基线还裁剪了部分 32 位、UML 和 SGX 支持；这些删除与另计的 1,213 行验证及诊断代码均不进入上述改造量。通用 exporter 和 page-grafting 机制由各案例共用。分类边界及逐文件计数见[源码改造账本](../../test/test_gettime/vkso-tests/code-size/CHANGE_AUDIT.md)。
+共享代码的物理复用与各进程的环境绑定分别管理：核心页与全局数据页由内核提供，用户入口及context保留在私有支持中。跨进程地址差异由绑定层吸收，两域执行的计算体保持一致。
 
-表 10(b) 给出被测无插桩镜像的静态规模。两种构建的最终 kernel `.text` 规模分别保持不变，原生 vDSO 的 1,853 字节 `.text` 由 carrier 映射与 760 字节公开库入口替代。Carrier 的共享页与内核源页具有相同 PFN，其 `.text` 大小描述用户可见代码映射，不能作为第二份物理代码相加。压缩镜像的文件大小另外反映链接布局与压缩效果。
+### Integration and Maintenance
 
-**Table 10(b): Clocktime static artifacts.** Sizes are bytes. Kernel text, carrier mappings and compressed image sizes have different accounting scopes and are not additive.
+这一改造在实际运行中保持所测接口语义。两配置各4次VKSO裸机启动均通过公开API、ABI、namespace及exec/setns检查；选定快路径在禁用相应syscall后仍正确完成。Carrier转移指令与内核调用目标指向共同入口，20条text/data页记录的用户与内核PFN全部一致。这些证据将源码层的共同实现、实际执行路径和物理共享对应起来。
 
-| Artifact | Normal Raw | Normal VKSO | No-retpoline Raw | No-retpoline VKSO |
-| --- | ---: | ---: | ---: | ---: |
-| Kernel `.text` | 14,683,442 | 14,683,442 | 14,681,453 | 14,681,453 |
-| Native vDSO `.text` | 1,853 | — | 1,853 | — |
-| Carrier `.text` | — | 12,288 | — | 8,192 |
-| VKSO public library `.text` | — | 760 | — | 760 |
-| Compressed `bzImage` | 8,422,432 | 8,414,368 | 7,982,208 | 7,975,712 |
+功能检查同时验证了共享计算与领域语义的组合：普通内核接口保持root时间视图，用户和动态POSIX分派按照当前namespace完成读取。共享核心及内核callback的契约另通过生产代码的主机夹具检查。这里的功能与物理证据各有作用，接口检查确认调用结果及生命周期行为，调用转移和页身份确认这些结果由共享执行体生成。
 
-表 11 清点指定时间接口用户映射中观测到的唯一驻留 PFN。Raw 的 vDSO 代码页在进程间共享；VKSO 在共享执行页之外还需要 MM 映射和入口支持页。Normal 下，所选映射从单进程的 10 个 PFN 增至 32 进程的 103 个，而 Raw 均为 1 个。代码页共享因而没有转化为这一映射范围的净页数下降。该清点不包含完整内核、页表及其他进程内存。
+共同计算与领域适配承担不同的维护职责，见表10。序列重试、周期换算及时间归一化在292行共同读取核心与协议中维护，用户与内核入口提供各自的上下文和返回语义。一次算法修改由两域共同采用：提交`aa1855e`修改两个共同生产函数和一个测试函数，用户入口、内核适配、发布与映射无需同步修改；前后helper在100,100组全宽输入上结果一致。
 
-**Table 11: Observed resident unique PFNs in named time-related user mappings.** One PFN is 4 KiB. Counts are medians across four independent READ boots per case and do not represent total system RAM.
+**Table 10: Shared implementation and maintenance responsibilities.** 共享范围为所列普通读取路径，领域接入保留各自的公开接口与失败完成方式。
 
-| Build | Processes | Raw PFNs | VKSO PFNs | Additional VKSO PFNs |
-| --- | ---: | ---: | ---: | ---: |
-| Normal | 1 | 1 | 10 | 9 |
-| Normal | 8 | 1 | 31 | 30 |
-| Normal | 32 | 1 | 103 | 102 |
-| No-retpoline | 1 | 1 | 9 | 8 |
-| No-retpoline | 8 | 1 | 30 | 29 |
-| No-retpoline | 32 | 1 | 102 | 101 |
+| 维护对象 | 共用实现 | 领域接入职责 |
+| --- | --- | --- |
+| 时间读取规则 | 序列重试、周期换算与归一化 | 选择时钟、绑定上下文、转换返回类型 |
+| 时间与上下文ABI | 同一份9个结构定义 | 用户接口声明与内核入口声明 |
+| namespace与失败处理 | 显式输入及回调契约 | root/current视图、syscall或内核私有回退 |
 
-### Public and Kernel READ Cost
+我们进一步将原先分别维护的9个用户/内核ABI结构合并为一份头文件，并把辅助向量查询集中到初始化入口。这项精简减少63行源码，同时将这些结构的定义位置由两份收敛为一份。9个结构的45项大小、对齐和字段布局检查与原版本一致；公开读取入口与载体对象逐字节一致，7个相关内核编译单元的可执行节及重定位目标也保持一致。初始化、错误处理和namespace计算通过相应主机契约检查。按声明的功能及保留读取/分派范围，Raw为1,578行，VKSO由性能实验版本的1,771行降至1,708行；完整源码职责与通用设施在附录C列示。
 
-用户 READ 覆盖 16 个 API/参数路径，包括七种 `clock_gettime` fast path 和三种 native fallback。每条路径在每次启动中由七个新进程合计执行 31 个批次，每批次包含 500,000 次完整公开调用。初始化与预热在计时前完成，有序 TSC 读取覆盖调用批次，CPU 与 TSC_AUX 检查用于检测迁移。表 12 对启动内批次成本取均值，再跨启动等权平均；这些数值是批次平均调用成本，不是逐次调用尾延迟。
+与源码职责对应，实际READ产物中的普通内核入口也变得更集中。Normal的11个入口extent合计由1,456降至736字节，共同time/getcpu函数体为1,188字节；no-retpoline对应为1,392、704和1,149字节。入口保留时钟与返回类型适配，共同计算由共享函数体承担。这些数据将源码层的职责划分与最终执行代码联系起来，支持复用确实落在被测实现上。
 
-**Table 12: Complete public READ cost.** R/V denotes Raw/VKSO TSC ticks per call, averaged within each boot and then equally across four boots. Δ is VKSO minus Raw.
+### Read Performance
 
-| Public path | Normal R/V | Normal Δ | No-retpoline R/V | No-retpoline Δ |
-| --- | ---: | ---: | ---: | ---: |
-| `clock_gettime` realtime | 54.191 / 54.016 | −0.175 | 54.190 / 54.463 | +0.273 |
-| `clock_gettime` monotonic | 54.198 / 54.647 | +0.449 | 54.198 / 53.473 | −0.726 |
-| `clock_gettime` monotonic raw | 54.193 / 54.673 | +0.480 | 54.206 / 53.609 | −0.597 |
-| `clock_gettime` boottime | 54.202 / 54.950 | +0.748 | 54.192 / 53.570 | −0.622 |
-| `clock_gettime` TAI | 54.193 / 55.115 | +0.922 | 54.194 / 55.046 | +0.851 |
-| `clock_gettime` realtime coarse | 15.097 / 16.102 | +1.004 | 15.097 / 15.095 | −0.002 |
-| `clock_gettime` monotonic coarse | 15.099 / 16.172 | +1.073 | 15.097 / 15.237 | +0.140 |
-| `clock_getres` realtime | 15.094 / 13.045 | −2.049 | 15.093 / 13.045 | −2.047 |
-| `clock_getres` realtime coarse | 14.052 / 13.078 | −0.973 | 14.052 / 13.079 | −0.973 |
-| `gettimeofday(tv, NULL)` | 56.211 / 55.203 | −1.008 | 56.210 / 55.201 | −1.008 |
-| `time(NULL)` | 7.024 / 6.022 | −1.002 | 7.025 / 6.023 | −1.002 |
-| `time(&t)` | 7.024 / 5.918 | −1.107 | 7.025 / 7.303 | +0.279 |
-| `getcpu(&cpu, &node)` | 14.600 / 12.825 | −1.774 | 14.609 / 12.906 | −1.703 |
-| `clock_gettime` process CPU fallback | 870.070 / 867.993 | −2.078 | 843.772 / 842.718 | −1.054 |
-| `clock_getres` process CPU fallback | 592.303 / 585.086 | −7.217 | 575.675 / 563.165 | −12.510 |
-| `clock_gettime` realtime alarm fallback | 684.827 / 671.805 | −13.022 | 670.648 / 662.287 | −8.361 |
+实验运行于Intel Core i7-1165G7，使用TSC时钟源，并分别比较Normal和no-retpoline两组缓解配置下的Raw与VKSO。以下READ与发布性能对应ABI合并前的实验产物。READ采用无发布记录器的镜像，每后端/配置4次独立启动；每接口每启动31批，每批500,000次调用，读者固定CPU 2。主统计为启动内批次中位数的跨启动中位数，差值定义为VKSO−Raw；图5给出95%启动级bootstrap区间。完整均值和全部38项对照见附录C。
 
-成本变化依赖具体入口。两种构建的 `clock_getres` realtime 均降低约 2.05 ticks，`gettimeofday` 和 `time(NULL)` 各降低约一 tick。Normal 下，monotonic、monotonic-raw、boottime 和 TAI 增加 0.45–0.92 ticks，两种 coarse 查询各增加约一 tick；no-retpoline 下前三者降低 0.60–0.73 ticks，TAI 仍增加 0.85 ticks。原生 fallback 单列，以区分共享 fast path 与需要进入内核的查询。
+七类用户`clock_gettime`快路径的中位成本差为−1.006～+1.006 TSC ticks/call。Normal中BOOTTIME和TAI分别增加0.833与1.001 ticks，两种coarse查询增加约1 tick，对应6.624%和6.662%。no-retpoline中MONOTONIC、MONOTONIC_RAW和BOOTTIME分别降低1.002、1.006和1.005 ticks。共享核心与入口适配因此保留了原生vDSO的低读取成本，同时给出各条短路径的具体代价。
 
-完整分布还会改变单纯使用中位数时的判断。No-retpoline 的 `time(&t)` 中，111/124 个 VKSO 批次约为 5.03 ticks/call，另外 13 个约为 26–27 ticks/call，分布在全部四次启动中。Raw 均值为 7.025 ticks/call。VKSO 的批次中位数较低，完整均值却为 7.303 ticks/call，差值 +0.279 ticks；同 block 启动均值差的 bootstrap 95% 区间为 [−0.407, +1.140]。这些高成本批次保留在主结果中。
+其他公开入口取得了持续的收益。`clock_getres`直接读取分辨率，`gettimeofday`与`time`在初始化时绑定稳定入口，复用时间转换或共享秒值读取。五项时间快路径在两配置中均降低0.969～2.050 ticks；`time(&t)`下降约28.33%～28.34%，四个启动块方向一致。getcpu另降低约1.004 ticks。内核端三种普通读取接口的中位差为−2.728～+1.087 ticks，Normal的raw读取与no-retpoline的monotonic读取分别降低1.516和2.728 ticks。收益同时覆盖公开用户入口和原有内核调用者。
 
-表 13 对各路径的 VKSO/Raw 均值比取等权几何平均。Normal 的 13 个非 fallback 路径总体成本下降 3.87%，七种 `clock_gettime` fast path 的集合则增加 2.57%。No-retpoline 对应变化为 −3.63% 和 −0.09%。这一汇总描述所测接口集合，不按应用调用频率加权。
+![主要READ差值与启动区间](../../test/test_gettime/vkso-tests/direct-api/read-evidence/read-main.png)
 
-**Table 13: Equal-weight geometric mean of VKSO/Raw ratios of boot-averaged mean costs.** Negative changes favor VKSO; path groups overlap.
+**Figure 5: User and kernel READ cost.** 实心点为跨启动中位成本差，横线为95%启动级区间，空心点为四个启动块差值；负值表示VKSO更快。图例Retpoline对应Normal配置。
 
-| Path group | Number of paths | Normal change | No-retpoline change |
-| --- | ---: | ---: | ---: |
-| All public paths | 16 | −3.36% | −3.18% |
-| Non-fallback paths | 13 | −3.87% | −3.63% |
-| `clock_gettime` fast paths | 7 | +2.57% | −0.09% |
-| Native fallback paths | 3 | −1.12% | −1.19% |
+各接口的变化与其执行路径一同呈现。高精度查询执行计数器读取和转换，coarse查询直接消费快照，后者较短的基线使约一个tick对应更高百分比。公开库和共享入口的改造因此需要按接口评价。我们对两配置使用相同统计量，完整附表同时列出均值、启动级区间及系统调用fallback，图5将共同计算的用户端与内核端结果并列展示。
 
-普通内核 reader 使用共享核心而不经过用户公开库。表 14 显示，normal 下 monotonic 与 monotonic-raw 分别降低 0.993 和 1.439 ticks，coarse 增加 1.843 ticks；no-retpoline 下三条路径均降低。这些方向在各配置的四个 block 中一致。两种构建同时改变一组 mitigation 配置，因此配置间差异不归因于单条指令。
+### Publication under Concurrent Reads
 
-**Table 14: Ordinary kernel READ cost.** R/V denotes Raw/VKSO boot-averaged mean TSC ticks per call; Δ is VKSO minus Raw.
+我们进一步评估共享状态的发布成本。完整软件区间覆盖序列开始、timekeeping更新、正式状态复制与序列结束，记录追加位于终点后；发布与控制活动安排在CPU 0，持续公开读取固定CPU 2。两配置、两后端和Current/Legacy两种记录器各运行两次启动，共16次启动、256个窗口和511,996条样本。各次启动使用完整样本均值，再跨启动等权平均，尾部全部保留。
 
-| Kernel reader | Normal R/V | Normal Δ | No-retpoline R/V | No-retpoline Δ |
-| --- | ---: | ---: | ---: | ---: |
-| Monotonic | 56.194 / 55.202 | −0.993 | 58.567 / 55.484 | −3.083 |
-| Monotonic raw | 55.718 / 54.279 | −1.439 | 54.656 / 53.353 | −1.303 |
-| Monotonic coarse | 9.197 / 11.039 | +1.843 | 11.023 / 8.753 | −2.270 |
+表11报告Current记录器下的绝对成本。持续读取MONOTONIC、MONOTONIC_RAW和MONOTONIC_COARSE时，VKSO的发布均值分别在Normal中降低30.77%、54.58%和55.88%，在no-retpoline中降低18.03%、54.17%和53.82%。Legacy记录器下三个负载的改善方向相同，两次启动均重复这一方向。具体幅度随记录器及运行条件变化，附录C列出完整匹配对照。
 
-### Publisher and Concurrent Readers
+**Table 11: Complete publication cost with the Current recorder.** 单位为TSC ticks/update，数值为两次启动完整均值的等权平均。变化率为VKSO相对Raw的成本变化。
 
-UPDATE recorder 在持有 timekeeper 锁后测量 `timekeeping_update()` 的发布区间，不包含锁等待或完整定时器中断。每次启动分别在 idle 和三种持续公开读取负载下采集 15 个窗口，每个窗口为 15 秒。主结果纳入全部 `action=0` 更新的原始 TSC 差，不扣除固定计时开销。逐次记录呈现低、高耗时集中区，高侧还包含子峰；完整均值同时保留各区间的位置和出现比例。
+| 配置 | 读取负载 | Raw | VKSO | 成本变化 |
+| --- | --- | ---: | ---: | ---: |
+| Normal | idle | 473.709 | 405.204 | -14.46% |
+| Normal | MONOTONIC | 631.831 | 437.438 | -30.77% |
+| Normal | MONOTONIC_RAW | 968.889 | 440.036 | -54.58% |
+| Normal | MONOTONIC_COARSE | 1024.833 | 452.178 | -55.88% |
+| no-retpoline | idle | 400.350 | 414.606 | +3.56% |
+| no-retpoline | MONOTONIC | 534.374 | 438.012 | -18.03% |
+| no-retpoline | MONOTONIC_RAW | 960.007 | 439.924 | -54.17% |
+| no-retpoline | MONOTONIC_COARSE | 976.829 | 451.141 | -53.82% |
 
-表 15 给出启动均值的等权平均。区间通过同 block 的 Raw/VKSO 启动均值差进行 percentile bootstrap，四个 block 枚举 256 种重采样序列。它描述启动间不确定性，不把窗口或逐次调用当成独立实验。该区间基于四个 block，逐项报告且未作多重比较校正。
+读取负载引起的增量也明显较小。Normal Current中，COARSE使Raw的发布均值较idle增加551.124 ticks，VKSO增加46.973 ticks；对应p99在两次启动中由Raw的1,643/1,709降至VKSO的1,030.040/1,038 ticks。两种记录器、两组配置下，VKSO的三种读取负载增量均小于Raw。Idle的方向随配置与记录器变化，说明主要发布收益出现在这些持续读取场景中。
 
-**Table 15: Complete UPDATE cost under idle and sustained public readers.** Costs are boot-averaged means in TSC ticks/update. The pointwise 95% interval resamples block-level Raw/VKSO differences.
-
-| Build and reader load | Raw | VKSO | Δ ticks/update | 95% interval for Δ |
-| --- | ---: | ---: | ---: | --- |
-| Normal, idle | 123.27 | 126.32 | +3.05 | [+2.22, +3.87] |
-| Normal, monotonic | 129.96 | 128.00 | −1.95 | [−4.00, +0.23] |
-| Normal, monotonic raw | 136.56 | 128.61 | −7.95 | [−10.71, −6.33] |
-| Normal, monotonic coarse | 134.03 | 128.05 | −5.98 | [−8.33, −3.63] |
-| No-retpoline, idle | 120.78 | 118.19 | −2.59 | [−4.19, −0.86] |
-| No-retpoline, monotonic | 128.33 | 118.68 | −9.65 | [−12.58, −7.22] |
-| No-retpoline, monotonic raw | 135.03 | 118.69 | −16.34 | [−18.23, −14.91] |
-| No-retpoline, monotonic coarse | 135.50 | 120.53 | −14.97 | [−18.70, −12.74] |
-
-Normal 的 idle publisher 增加 3.05 ticks/update；monotonic-raw 和 coarse 负载下分别降低 7.95 和 5.98 ticks。Monotonic 负载的均值差为 −1.95 ticks，但四个 block 中有一个为正，区间也跨零。No-retpoline 的四种负载均降低，范围为 2.59–16.34 ticks/update，方向在各自四个 block 中一致。
-
-分布解释了为何单个峰或中位数不足以概括发布成本。Normal idle 中，以 Raw 120、VKSO 110 ticks 的历史谷值划分低、高侧，VKSO 的低侧均值为 84.10 ticks，低于 Raw 的 97.91 ticks；高侧占比却从 47.84% 增至 60.56%，最终完整均值增加 3.05 ticks。Normal monotonic-raw 的中位数汇总差为 +6 ticks，完整均值差则为 −7.95 ticks。阈值改变会影响分层描述，但不会改变完整均值。Raw normal 的独立诊断中，同一进位状态及倍率调整路径内部仍有低、高耗时样本，尚不能将这些集中区对应为已识别的业务状态。
-
-长尾敏感性检查中，将 UPDATE 成本截顶到 300 ticks 后，八项均值差均保持原有符号，变化不超过 0.93 ticks。完整样本仍用于表 15。[分布报告](../../test/test_gettime/vkso-tests/direct-api/DISTRIBUTION_ANALYSIS.md)给出每次启动的直方图、全范围 CDF 和阈值敏感性；诊断追踪数据与正式性能样本分别分析。
-
-持续 reader 在 writer 窗口开始前进入稳态，并在其结束后退出。表 16 测量包围该窗口的完整公开调用批次，采用相同的启动均值统计。Normal 的三种 reader 分别增加 0.806、0.523 和 1.014 ticks/call；no-retpoline 的 monotonic 与 monotonic-raw 各降低约一 tick，coarse 增加 0.064 ticks。这说明 publisher 与 reader 的收益需要分别衡量。
-
-**Table 16: Public reader cost during periodic UPDATE.** R/V denotes Raw/VKSO boot-averaged mean TSC ticks per call over the enclosing load interval; Δ is VKSO minus Raw.
-
-| Reader load | Normal R/V | Normal Δ | No-retpoline R/V | No-retpoline Δ |
-| --- | ---: | ---: | ---: | ---: |
-| Monotonic | 54.192 / 54.998 | +0.806 | 54.192 / 53.201 | −0.991 |
-| Monotonic raw | 54.199 / 54.722 | +0.523 | 54.197 / 53.210 | −0.987 |
-| Monotonic coarse | 16.056 / 17.070 | +1.014 | 16.056 / 16.121 | +0.064 |
-
-### Functional and Sharing Evidence
-
-每次启动在计时前检查公开 API 返回值与 errno、namespace 偏移、本地 context、fallback 及初始化语义。Fast-path 验证禁用时间与 getcpu syscall，确认受支持调用在用户态完成；VKSO 另外检查共享映射与内核源页的 PFN 一致性及 RX/R-- 权限。表 17 汇总各启动中的功能与共享证据，映射恢复在采集结束时检查。
-
-**Table 17: Functional and sharing evidence across the Clocktime campaign.** Denominators count applicable boots; VKSO sharing checks cover both READ and UPDATE images.
-
-| Check | Completed / applicable boots |
-| --- | ---: |
-| Correct kernel, package and completed collection | 32 / 32 |
-| ABI and fallback matrix | 32 / 32 |
-| Fast-path syscall-denial check | 32 / 32 |
-| VKSO physical-page sharing and permissions | 16 / 16 |
-
-综合性能结果，normal 构建的 13 个非 fallback 用户路径等权几何平均成本降低 3.87%，但七个 `clock_gettime` fast path 的集合增加 2.57%；普通内核 monotonic 与 monotonic-raw reader 分别降低 0.993 和 1.439 ticks/call，coarse reader 增加 1.843 ticks/call。Idle 发布增加 3.05 ticks/update，持续 monotonic-raw 读取时发布降低 7.95 ticks/update，而并发用户 reader 增加 0.523 ticks/call。No-retpoline 下，对应用户路径总体降低 3.63%，普通内核三条 reader 均降低，四种发布场景降低 2.59–16.34 ticks/update；并发 coarse reader 仍增加 0.064 ticks/call。收益随入口和负载变化。
-
-代码量与映射账本给出另一面：共享计算与 ABI 的 494 行支持两端复用，消除了独立用户计算副本；七类接入净增 1,154 行，原生 vDSO 路径撤除净减 1,397 行，两者范围不同，不能据此声称等功能源码缩减。指定时间映射中的额外驻留 PFN 也随进程数增加。Clocktime 因此展示了共享驻留计算在完整有状态子系统中的性能收益及其接入代价。
+Clocktime表明，VKSO能够把具有状态与进程语义的内核计算组织为两域共用的执行体：共同规则集中维护，用户读取保持低成本，多项公开入口及所测并发发布获得改善。适配仍带来额外源码和支持页，短coarse路径也存在约一个tick的增量；进一步精简领域入口并压缩私有支持页，是后续优化的直接方向。
 
 ## Registration and Mapping Behavior
 
-物理共享及释放行为在独立 KVM guest 中验证，API 性能使用前述物理机记录。实际 LZ4、BCH 和 XZ carrier 分别有五、四、四张声明页与源 kernel PFN 相同，同一注册会话中的完整算法工作负载通过。正常释放后，新映射恢复文件后备，owner 引用归零并可卸载。表 18 汇总与复用契约直接相关的结果；完整恢复矩阵见[附录 A](#appendix-a-registration-and-recovery-evidence)。
+物理共享及释放行为在独立 KVM guest 中验证，API 性能使用前述物理机记录。实际 LZ4、BCH 和 XZ carrier 分别有五、四、四张声明页与源 kernel PFN 相同，同一注册会话中的完整算法工作负载通过。正常释放后，新映射恢复文件后备，owner 引用归零并可卸载。表 12 汇总与复用契约直接相关的结果；完整恢复矩阵见[附录 A](#appendix-a-registration-and-recovery-evidence)。
 
-**Table 18: Evidence for the registration and mapping contract.** These observations use the transaction implementation on Linux 5.15.0-119; they are functional checks rather than deployment-performance measurements.
+**Table 12: Evidence for the registration and mapping contract.** These observations use the transaction implementation on Linux 5.15.0-119; they are functional checks rather than deployment-performance measurements.
 
 | 需要验证的性质 | 关键观察 |
 | --- | --- |
@@ -672,7 +610,7 @@ Normal 的 idle publisher 增加 3.05 ticks/update；monotonic-raw 和 coarse �
 | 失败结果可见且可恢复 | 源页预检失败不应用绑定；跨批提交失败回滚，释放残留可重试，manager 反映内核结果 |
 | 声明类型符合实际权限 | 正常只读 text/rodata 可注册；相同 owner 在关闭只读保护后，其可写源页被拒绝 |
 
-原注册实现没有持有 owner 引用，部分失败还会留下绑定并被 manager 误报成功。表 9–12 及内核端、应用和 setup 结果使用事务实现；旧实验和原始失败在独立归档及附录 A 中保留。源页权限检查发生在注册时，既不自动判定整页内容的公开性，也不验证其后发生的运行时代码改写。当前完整两端功能记录见[源页准入实验](../../test/evaluation/registration-typed-evidence.md)。
+原注册实现没有持有 owner 引用，部分失败还会留下绑定并被 manager 误报成功。算法内核端、应用和setup结果使用事务实现；旧实验和原始失败在独立归档及附录 A 中保留。源页权限检查发生在注册时，既不自动判定整页内容的公开性，也不验证其后发生的运行时代码改写。当前完整两端功能记录见[源页准入实验](../../test/evaluation/registration-typed-evidence.md)。
 
 ## Resident Pages and Per-process Support
 
@@ -680,7 +618,7 @@ Normal 的 idle publisher 增加 3.05 ticks/update；monotonic-raw 和 coarse �
 
 我们在同一 5.15.0-119 guest 中比较 BCH 普通同源 DSO 与完整 registered carrier 的页面占用，分别启动 1、4、16 个独立 loader。每组 loader 同时存活，在装载后触达目标及所需 shim 的全部可读 PT_LOAD 页，再从原始 pagemap 按 PFN 求并集。三个场景分别为装载专用 owner 前的普通 DSO、owner 已装载时的普通 DSO，以及保持注册的 VKSO。完整 BCH 功能矩阵由同一注册会话中的另一进程执行；这里的 loader 观测不包含 BCH control objects 和算法工作堆。
 
-**Table 19: Observed BCH library and owner page unions after touching all readable PT_LOAD pages.** Counts are distinct 4 KiB PFNs across simultaneous loaders. Library scope includes code, read-only content, relocated private data and metadata. The table excludes manager, page tables and allocations outside the module core and selected libraries.
+**Table 13: Observed BCH library and owner page unions after touching all readable PT_LOAD pages.** Counts are distinct 4 KiB PFNs across simultaneous loaders. Library scope includes code, read-only content, relocated private data and metadata. The table excludes manager, page tables and allocations outside the module core and selected libraries.
 
 | 观测范围 | 1 loader | 4 loaders | 16 loaders |
 | --- | ---: | ---: | ---: |
@@ -691,11 +629,11 @@ Normal 的 idle publisher 增加 3.05 ticks/update；monotonic-raw 和 coarse �
 
 全部 registered loader 的三个 text 页和一个 rodata 页均匹配源 PFN，kernel/user 并集始终为四页。普通 DSO 的三个 executable PFN 也在进程间共享。普通 DSO 有五个组内共享 PFN，加上每 loader 两个不同 PFN；registered carrier 与 shim 合计有七个组内共享 PFN，加上每 loader 四个不同 PFN。计入相同的六页 owner core 后，两者在单 loader 时均为 13 页，VKSO 在 4 和 16 loaders 时分别多六页和三十页。该结果表明，所测小闭包的支持页成本抵消了目标页共享的空间收益。这里的专用 owner 与发行版 BCH 模块分别构建，普通 DSO 并不需要它；若与未装载 owner 的普通 DSO 比较，VKSO 的库、Shim 与 owner 合计分别多六、十二和三十六页。
 
-完整 owner core 为 24 KiB，其中四页用于共享、两页用于其他 core 内容；page-cache 模块 core 为 48 KiB，PFN observer 为 16 KiB。活动 manager 的 VmRSS 为 1,216 KiB、PSS 为 1,212 KiB、VmPTE 为 28 KiB。Loader 的 VmPTE 为 88–100 KiB，本次布局中装载前后的增量为零，反映已有页表分配粒度。这些进程指标与库的 PFN 并集可能重叠，故分别呈现。表 19 计量选定库和完整 owner core，表 20 补充 BCH 工作对象；模块外分配及 allocator/slab 的完整物理占用在这一账本之外。原始记录与重建步骤见[BCH 资源证据](../../test/evaluation/results/bch_resource-qemu-20260912-attempt03/README.md)。
+完整 owner core 为 24 KiB，其中四页用于共享、两页用于其他 core 内容；page-cache 模块 core 为 48 KiB，PFN observer 为 16 KiB。活动 manager 的 VmRSS 为 1,216 KiB、PSS 为 1,212 KiB、VmPTE 为 28 KiB。Loader 的 VmPTE 为 88–100 KiB，本次布局中装载前后的增量为零，反映已有页表分配粒度。这些进程指标与库的 PFN 并集可能重叠，故分别呈现。表 13 计量选定库和完整 owner core，表 14 补充 BCH 工作对象；模块外分配及 allocator/slab 的完整物理占用在这一账本之外。原始记录与重建步骤见[BCH 资源证据](../../test/evaluation/results/bch_resource-qemu-20260912-attempt03/README.md)。
 
-我们在另一 exact119 guest 中补充观测 BCH 的活动对象。每个进程使用一个后端，同时保留 m=13、t=4/8 的两个 control 和对应的 512 B payload 加 parity；依次建立、验证并释放一个 full-decode context。观测复用原 benchmark 的 C 分配和校验函数，原有完整三后端正确性矩阵在同一注册会话中另行通过。普通 DSO 与 registered carrier 的分配请求量相同：两个 control 及其持久表分别请求 41,448 B 和 49,896 B，表 20 给出同时存活的对象总量。
+我们在另一 exact119 guest 中补充观测 BCH 的活动对象。每个进程使用一个后端，同时保留 m=13、t=4/8 的两个 control 和对应的 512 B payload 加 parity；依次建立、验证并释放一个 full-decode context。观测复用原 benchmark 的 C 分配和校验函数，原有完整三后端正确性矩阵在同一注册会话中另行通过。普通 DSO 与 registered carrier 的分配请求量相同：两个 control 及其持久表分别请求 41,448 B 和 49,896 B，表 14 给出同时存活的对象总量。
 
-**Table 20: Live BCH allocation requests per process, identical for the native DSO and registered carrier.** Both parameter cases remain initialized; at most one decode context is live. Bytes exclude allocator metadata and initialization temporaries already freed before observation.
+**Table 14: Live BCH allocation requests per process, identical for the native DSO and registered carrier.** Both parameter cases remain initialized; at most one decode context is live. Bytes exclude allocator metadata and initialization temporaries already freed before observation.
 
 | 活动状态 | 分配对象数 | Control 及持久表 (B) | Codeword 与工作缓冲区 (B) | 合计 (B) |
 | --- | ---: | ---: | ---: | ---: |
@@ -707,9 +645,9 @@ Normal 的 idle publisher 增加 3.05 ticks/update；monotonic-raw 和 coarse �
 
 ## Applicability across Dependency Shapes
 
-我们在尝试导出前固定八个 Linux API，覆盖显式输入、只读表、局部工作状态、格式化、回调以及内核私有状态。该分层案例集与已有 LZ4、BCH、XZ、clocktime 集成分别统计，用于检验依赖形态和当前构建的导出条件。它不是 Linux API 的随机样本。所有静态检查使用同一个 Ubuntu 5.15.0-119-generic final image；表 21 分别列出 checker 结果和实际运行证据。
+我们在尝试导出前固定八个 Linux API，覆盖显式输入、只读表、局部工作状态、格式化、回调以及内核私有状态。该分层案例集与已有 LZ4、BCH、XZ、clocktime 集成分别统计，用于检验依赖形态和当前构建的导出条件。它不是 Linux API 的随机样本。所有静态检查使用同一个 Ubuntu 5.15.0-119-generic final image；表 15 分别列出 checker 结果和实际运行证据。
 
-**Table 21: Prospective API cases on the default exact119 kernel build.** Visited functions count the static checker traversal. Source-backed and generated executable pages are separate; neither count includes loader metadata or registration support. The revised checker batch has terminal records for all eight cases.
+**Table 15: Prospective API cases on the default exact119 kernel build.** Visited functions count the static checker traversal. Source-backed and generated executable pages are separate; neither count includes loader metadata or registration support. The revised checker batch has terminal records for all eight cases.
 
 | API | Checker | Visited functions | Source-backed / generated text pages | 实际运行结果或当前构建障碍 |
 | --- | --- | ---: | --- | --- |
@@ -730,9 +668,9 @@ Sort 的五个间接调用点通过显式用户回调完成绑定。两侧各记
 
 两个 carrier 的全部声明页均在活动注册期间由独立 loader 观测到 kernel/user PFN 一致；功能 driver 使用同一注册 inode，其 API 地址另与实际 ELF symbol 和 built-in root 对齐。恢复后的新映射不再使用原 source PFN。这组结果支持显式输入计算及所测回调配置的完整功能，并保留生成支持页的成本；它不改变前述物理机性能结果或 BCH 资源账本。这两个入口在加入类型和实际权限检查的 v4 注册流程下再次通过相同完整矩阵，manager 在发送页面计划前确认运行内核身份。原始 PFN 记录覆盖 4 KiB 与 2 MiB 内核映射，见[源页准入实验](../../test/evaluation/registration-typed-evidence.md)。完整输入、独立重放和构建记录见[适用范围证据](../../test/evaluation/applicability-evidence.md)。
 
-将两个新导出入口与四个既有集成放在同一结构口径下，可以区分无需算法修改的入口、依赖绑定改造和状态重构。表 22 从实际 carrier 的符号、重定位、page-map 与 PFN 记录提取数据。函数数仅包含声明的源代码闭包，按入口地址去重，并将 thunk 单列；它不等于整份 owner 的函数数，也不包含同页相邻代码。私有支持页只统计 carrier，外部 Shim 与其他运行资源另行计费。
+将两个新导出入口与四个既有集成放在同一结构口径下，可以区分无需算法修改的入口、依赖绑定改造和状态重构。表 16 从实际 carrier 的符号、重定位、page-map 与 PFN 记录提取数据。函数数仅包含声明的源代码闭包，按入口地址去重，并将 thunk 单列；它不等于整份 owner 的函数数，也不包含同页相邻代码。私有支持页只统计 carrier，外部 Shim 与其他运行资源另行计费。
 
-**Table 22: Structure of the six deployed cases.** Source functions and resident thunk bodies are separate. Source pages are text/read-only data/shared state; generated pages belong to the carrier. Helper slots count stored external function pointers, while callback parameters and context fields are listed explicitly.
+**Table 16: Structure of the six deployed cases.** Source functions and resident thunk bodies are separate. Source pages are text/read-only data/shared state; generated pages belong to the carrier. Helper slots count stored external function pointers, while callback parameters and context fields are listed explicitly.
 
 | Case | Source functions / thunks | Source pages T / RO / state | Generated text pages | Dependency binding |
 | --- | ---: | --- | ---: | --- |
@@ -745,7 +683,7 @@ Sort 的五个间接调用点通过显式用户回调完成绑定。两侧各记
 
 三算法共十一处 helper slots 均为八字节对象，其内核与用户目标可分别从 owner 和 carrier 重定位重建。LZ4 的用户目标为三个唯一命名的 Shim bridge；XZ 的 memcpy 也通过显式 bridge 绑定到默认 libc 实现，其余槽位和 BCH 使用域内分配与内存 helper。Clocktime 不使用动态 helper 重定位，私有 binder 将 context 写入五个地址槽。不同归档中的二十个声明源页均有 PFN 匹配记录，这一跨案例总数不表示单次部署的资源占用。
 
-**Table 23: Source changes for algorithm adaptation.** Counts compare full C/header files with the retained Ubuntu 5.15.0-119.129 source baseline using the same lexical policy. Owner support and Kbuild are separate; common exporter/Shim code and tests are excluded.
+**Table 17: Source changes for algorithm adaptation.** Counts compare full C/header files with the retained Ubuntu 5.15.0-119.129 source baseline using the same lexical policy. Owner support and Kbuild are separate; common exporter/Shim code and tests are excluded.
 
 | Algorithm | Compared files | Added / deleted code lines | Owner support SLOC | Kbuild noncomment lines |
 | --- | ---: | ---: | ---: | ---: |
@@ -753,7 +691,7 @@ Sort 的五个间接调用点通过显式用户回调完成绑定。两侧各记
 | BCH | 1 | 41 / 11 | 19 | 17 |
 | XZ | 8 | 64 / 19 | 27 | 26 |
 
-这些修改包括显式 helper 绑定、API/头文件适配、BCH syndrome 与 XZ 字典循环的局部缓存，以及支持可复用代码的构建设置。两项循环改写应用于 Adapted DSO 和内核 owner，Native DSO 与内核 Matched 保留原始循环。三个 owner 的合作 descriptor 与初始化调用计入各自 support；通用 owner 实现单列。源基线为保留的 Ubuntu 5.15.0-119.129 源码包，与新 Matched 使用的发行版版本一致。Clocktime 的改造还涉及共享 reader/state、publication、MM/namespace 和两个域的入口；表 10(a) 按职责给出源码改造量，表 10(b) 分别给出内核、carrier 和公开库的最终机器码规模。源码行数与 ELF 段字节数属于不同指标，均不换算为人工工时。
+这些修改包括显式 helper 绑定、API/头文件适配、BCH syndrome 与 XZ 字典循环的局部缓存，以及支持可复用代码的构建设置。两项循环改写应用于 Adapted DSO 和内核 owner，Native DSO 与内核 Matched 保留原始循环。三个 owner 的合作 descriptor 与初始化调用计入各自 support；通用 owner 实现单列。源基线为保留的 Ubuntu 5.15.0-119.129 源码包，与新 Matched 使用的发行版版本一致。Clocktime 的改造还涉及共享 reader/state、publication、MM/namespace 和两个域的入口；表10说明共同维护与领域接入的职责，附录C给出包含保留回退的源码存量、集成差分与实验产物的二进制规模。源码行数与 ELF 段字节数属于不同指标，均不换算为人工工时。
 
 构建条件也是适用范围的一部分。LZ4 的算法对象移除 ftrace 入口，BCH/XZ 还关闭所用算法对象的 stack protector、sanitizer 与 jump-table 生成；XZ 使用完整的 XZ_SINGLE/x86-BCJ/internal-CRC 配置。表中 LZ4/BCH/XZ 实际请求导出的 API 数分别为 2/4/5。六个成功案例均有两域功能记录，三算法的内核与用户工作负载使用同一次注册的 owner。XZ 的 support 包含五个公开模块导出，算法源码差分为新增 64 行、删除 19 行。源码、完整补丁重放、构建限制和逐案例记录见[跨案例适配账本](../../test/evaluation/applicability-ledger-evidence.md)。
 
@@ -767,7 +705,7 @@ Sort 的五个间接调用点通过显式用户回调完成绑定。两侧各记
 
 每次部署执行四轮，共 768 次完整命令，压缩输出由 stock CLI 交叉解码，解压结果逐文件核对。额外十二份诊断调用记录覆盖两种 block sizes、两种操作和三个可选 DSO，确认命令调用选中的 API；诊断插桩不进入性能样本。每轮先累加十二个文件的完整命令时间，再计算 backend 成本比。
 
-**Table 24: Complete LZ4 CLI file workflows.** Times sum twelve file commands, in ms. Commands include process startup, framing and buffered file I/O; output is closed without fsync. Inputs are pre-read. Cost ratios retain matching rounds; brackets span deployment medians.
+**Table 18: Complete LZ4 CLI file workflows.** Times sum twelve file commands, in ms. Commands include process startup, framing and buffered file I/O; output is closed without fsync. Inputs are pre-read. Cost ratios retain matching rounds; brackets span deployment medians.
 
 | Operation | Block size | Same-source ms | VKSO ms | Cost / same-source | Cost / stock CLI |
 | --- | --- | --- | --- | --- | --- |
@@ -782,9 +720,9 @@ Sort 的五个间接调用点通过显式用户回调完成绑定。两侧各记
 
 ### Full-task Setup and Release
 
-部署成本使用同源 Linux LZ4 DSO 与相同实际 carrier，按 64 KiB blocks 完成全部十二个文件的压缩、解压及逐字节比较。每个新进程执行一遍或三遍完整语料任务。Active 模式复用已有注册，只计新进程及完整任务；ready 模式复用已构造 carrier，将注册、任务和释放一并纳入命令时间。每种模式/backend/任务遍数保留三轮配对测量及 trace on/off 两种观察条件。表 25 使用无插桩的完整命令耗时。
+部署成本使用同源 Linux LZ4 DSO 与相同实际 carrier，按 64 KiB blocks 完成全部十二个文件的压缩、解压及逐字节比较。每个新进程执行一遍或三遍完整语料任务。Active 模式复用已有注册，只计新进程及完整任务；ready 模式复用已构造 carrier，将注册、任务和释放一并纳入命令时间。每种模式/backend/任务遍数保留三轮配对测量及 trace on/off 两种观察条件。表 19 使用无插桩的完整命令耗时。
 
-**Table 25: Complete LZ4 task cost with and without registration in the command.** Trace-off elapsed times are in ms and include full input, compression, decompression and validation. Active starts a new process under an existing registration; ready additionally registers and releases a constructed carrier. Offline construction is separate.
+**Table 19: Complete LZ4 task cost with and without registration in the command.** Trace-off elapsed times are in ms and include full input, compression, decompression and validation. Active starts a new process under an existing registration; ready additionally registers and releases a constructed carrier. Offline construction is separate.
 
 | Registration scope | Corpus passes | Native ms | VKSO ms | Cost / native |
 | --- | --- | --- | --- | --- |
@@ -797,7 +735,7 @@ Sort 的五个间接调用点通过显式用户回调完成绑定。两侧各记
 
 首次有效结果定义为第一遍完整语料校验完成。插桩记录另行报告该时刻、DSO 装载、输入读取、计算及释放；阶段存在嵌套，不相加为总耗时，也不从无插桩主结果中扣除固定校准值。阶段结果见附录 B，完整协议及原始时间戳见[setup 对照](../../test/evaluation/setup-comparison-evidence.md)。
 
-**Table 26: Offline LZ4 export stages.** Seconds are medians and ranges across complete deployments. Timings retain shell observer overhead and exclude owner compilation/loading. The benchmark application interval is excluded.
+**Table 20: Offline LZ4 export stages.** Seconds are medians and ranges across complete deployments. Timings retain shell observer overhead and exclude owner compilation/loading. The benchmark application interval is excluded.
 
 | Stage | Median seconds | Deployment range |
 | --- | --- | --- |
@@ -807,17 +745,17 @@ Sort 的五个间接调用点通过显式用户回调完成绑定。两侧各记
 | carrier | 0.330 | [0.325, 0.356] |
 | install | 0.103 | [0.101, 0.120] |
 
-离线分析、闭包检查和 carrier 生成按阶段单列于表 26，每次完整算法部署构造一次。该表不包含 owner 编译及装载；ready 命令从可用 carrier 和已装载 owner 开始。离线成本与表 25 的注册后任务属于不同复用层次，不能用整组 benchmark runner 的耗时替代其中任一阶段。
+离线分析、闭包检查和 carrier 生成按阶段单列于表 20，每次完整算法部署构造一次。该表不包含 owner 编译及装载；ready 命令从可用 carrier 和已装载 owner 开始。离线成本与表 19 的注册后任务属于不同复用层次，不能用整组 benchmark runner 的耗时替代其中任一阶段。
 
 ## Reproducibility
 
-First-touch、PGOT、LZ4、BCH 和 XZ 均提供单命令入口，正式参数和数据来源记录于对应 README 与 results directory。结果保留原始 CSV、环境与构建信息、功能校验、disassembly 和 page-map audit，分别支持数值复算与被测执行体核对。Clocktime 的 READ/UPDATE/CONCURRENT 由固定 boot/collect 流程生成，归档中记录内核变体、测量协议和逐轮样本。
+First-touch、PGOT、LZ4、BCH 和 XZ 均提供单命令入口，正式参数和数据来源记录于对应 README 与 results directory。结果保留原始 CSV、环境与构建信息、功能校验、disassembly 和 page-map audit，分别支持数值复算与被测执行体核对。Clocktime 的 READ 与完整发布 UPDATE 分别由固定启动/采集流程生成，归档记录内核变体、记录器、测量协议和逐轮样本。
 
-表 3–8 来自 first-touch 汇总及 PGOT 各层的 paper tables；表 9 和用户端主图来自[新三算法六版本采集](../../test/section63/README.md)，BCH 有十二次、LZ4/XZ 各三次完整物理机部署；完整结果及独立原因诊断见[实验报告](../../test/section63/results/report.md)；表 24–26 及附录 B 使用[独立 LZ4 应用与 setup 记录](../../test/evaluation/results/application-setup/README.md)。两组分别从原始记录重建配对轮次、部署统计和表格。Clocktime 的表 10(a) 来自[源码改造账本](../../test/test_gettime/vkso-tests/code-size/CHANGE_AUDIT.md)，表 10(b)、11、17 取自[32 次启动的完整 Raw/VKSO 采集](../../test/test_gettime/vkso-tests/baremetal/results/20260924T065535Z-clocktime-full-summary.json)及其原始记录；表 12–16 依据同轮原始数据的[完整均值与分布重算](../../test/test_gettime/vkso-tests/baremetal/results/clocktime-distribution-analysis/20260924T065535Z-clocktime-full/report.json)，表 13 对表 12 对应的未舍入均值比取几何平均。双峰路径的单独诊断不混入正式采集。算法性能采用当前完整采集。
+表 3–8 来自 first-touch 汇总及 PGOT 各层的 paper tables；表 9 和用户端主图来自[新三算法六版本采集](../../test/section63/README.md)，BCH 有十二次、LZ4/XZ 各三次完整物理机部署；完整结果及独立原因诊断见[实验报告](../../test/section63/results/report.md)；表18–20 及附录 B 使用[独立 LZ4 应用与 setup 记录](../../test/evaluation/results/application-setup/README.md)。两组分别从原始记录重建配对轮次、部署统计和表格。Clocktime表10及附录C的性能版本规模来自[实现与实际产物证据](../../test/test_gettime/vkso-tests/code-size/current-evidence/README.md)，图5来自[16次clean READ启动](../../test/test_gettime/vkso-tests/direct-api/read-evidence/README.md)，表11来自[两配置完整发布矩阵](../../test/test_gettime/vkso-tests/update-bench/mechanism-evidence/full-publication-two-configurations/README.md)。附录C保留完整接口、源码、READ、两记录器UPDATE及资源表。算法性能采用当前完整采集。
 
-表 18 汇总[事务与恢复](../../test/evaluation/registration-transaction-evidence.md)、[文件/VMA 检查](../../test/evaluation/registration-notification-evidence.md)和[源页准入](../../test/evaluation/registration-typed-evidence.md)；原版本及完整事务观察分别列于附录表 A1–A2。表 19 来自[BCH 多进程资源记录](../../test/evaluation/results/bch_resource-qemu-20260912-attempt03/README.md)，表 20 来自[BCH 活动对象记录](../../test/evaluation/bch-heap-evidence.md)。Guest 提供独立的功能和 PFN 证据，其计时字段不加入物理机性能样本。
+表 12 汇总[事务与恢复](../../test/evaluation/registration-transaction-evidence.md)、[文件/VMA 检查](../../test/evaluation/registration-notification-evidence.md)和[源页准入](../../test/evaluation/registration-typed-evidence.md)；原版本及完整事务观察分别列于附录表 A1–A2。表 13 来自[BCH 多进程资源记录](../../test/evaluation/results/bch_resource-qemu-20260912-attempt03/README.md)，表 14 来自[BCH 活动对象记录](../../test/evaluation/bch-heap-evidence.md)。Guest 提供独立的功能和 PFN 证据，其计时字段不加入物理机性能样本。
 
-表 21 来自固定八例的修订静态记录及[xxh32/sort 实际导出记录](../../test/evaluation/applicability-evidence.md)。原始 CSV 保留完整输入和输出，独立重放使用 libxxhash 0.8.1 与按元素字节排序的参考，并核对 API 地址、生成 thunk、page map 和 PFN。两个已通过入口各在同一 guest 内完成一次注册会话；功能组合数不作为性能重复次数。六个静态失败项不构造 carrier，也不计入运行时成功率。
+表 15 来自固定八例的修订静态记录及[xxh32/sort 实际导出记录](../../test/evaluation/applicability-evidence.md)。原始 CSV 保留完整输入和输出，独立重放使用 libxxhash 0.8.1 与按元素字节排序的参考，并核对 API 地址、生成 thunk、page map 和 PFN。两个已通过入口各在同一 guest 内完成一次注册会话；功能组合数不作为性能重复次数。六个静态失败项不构造 carrier，也不计入运行时成功率。
 
 # Related Work
 
@@ -851,7 +789,7 @@ Carrier 的部署依赖指定的内核和 owner 构建及其运行地址。Kerne
 
 # Conclusion
 
-VKSO 将跨 privilege domain 的代码复用转化为一个有明确边界的 binary-closure problem：state、control 和 code-shape constraints 决定什么可以复用，PIC-compatible construction、standard carrier、page grafting 和 Shim 决定如何复用。字节一致的 XXH32 对照得到相同的 hot-call 批次中位数均值，真实算法的两端成本则随适配和构建条件变化。Clocktime 使内核与用户共享驻留时间计算页；相对原生 vDSO，normal 构建的 13 个非 fallback 公开路径以完整均值计算的等权几何平均成本降低 3.87%，七种 `clock_gettime` fast path 的集合增加 2.57%，每 MM 支持页也增加了所选映射的驻留 PFN。LZ4 的完整应用和 setup 对照说明，复用后的执行成本接近同源 DSO，并不意味着每次建立和释放均能回本。BCH 所测库与专用 owner 范围没有净页节省，纠错路径也存在退化；共享执行体的价值需要结合实现重复、支持资源和实际使用方式判断。
+VKSO 将跨 privilege domain 的代码复用转化为一个有明确边界的 binary-closure problem：state、control 和 code-shape constraints 决定什么可以复用，PIC-compatible construction、standard carrier、page grafting 和 Shim 决定如何复用。字节一致的 XXH32 对照得到相同的 hot-call 批次中位数均值，真实算法的两端成本则随适配和构建条件变化。Clocktime 使内核与用户共享驻留时间计算页，并将共同计算与跨域ABI定义集中维护。七类用户快路径的中位成本差为 −1.006～+1.006 TSC ticks，三种普通内核接口为 −2.728～+1.087 ticks；Current记录器下，三种持续读取负载的完整发布均值降低18.03%～55.88%，Legacy下改善方向一致。这个案例将共享执行体的能力扩展到具有周期更新和进程语义的实际子系统。LZ4 的完整应用和 setup 对照说明，复用后的执行成本接近同源 DSO，并不意味着每次建立和释放均能回本。BCH 所测库与专用 owner 范围没有净页节省，纠错路径也存在退化；共享执行体的价值需要结合实现重复、支持资源和实际使用方式判断。
 
 # References
 
@@ -1011,3 +949,232 @@ VKSO 将跨 privilege domain 的代码复用转化为一个有明确边界的 bi
 | Release wrapper | n/a | n/a | n/a | 22.586 |
 
 Trace-on/trace-off 的部署汇总比值在所测模式、backend 和任务遍数组合中为 0.9999–1.0027。独立时钟 helper 每部署测量三十次，部署中位数的中位数为 0.390 ms，范围为 0.389–0.390 ms。原始阶段记录保留部署间范围；主结果使用 trace-off 命令时间，不减去这些诊断值。
+
+
+# Appendix C: Clocktime Implementation and Performance Details
+
+## Interface and Functional Coverage
+
+**Table C1: Clocktime interface scope.** 公开入口、普通内核读取及原生完成路径分别列出。性能使用TSC provider和root namespace；其他视图由功能检查覆盖。
+
+| 接口范围 | 改造后的执行路径与语义 |
+| --- | --- |
+| 高精度 `clock_gettime`：REALTIME、MONOTONIC、MONOTONIC_RAW、BOOTTIME、TAI | 进入共同高精度核心，执行状态快照、周期换算和结果归一化；按时钟语义使用namespace偏移 |
+| 粗粒度 `clock_gettime`：REALTIME_COARSE、MONOTONIC_COARSE | 进入共同粗粒度核心，读取已发布快照 |
+| `clock_getres`、`gettimeofday`、`time` | 复用分辨率、时间转换及秒值读取入口，保持各自公开ABI |
+| `getcpu` | 复用CPU/node读取入口，与时间换算分别计量 |
+| 普通内核计算入口 | `ktime_get`、`ktime_get_raw`、`ktime_get_with_offset`、`ktime_get_ts64`、`ktime_get_raw_ts64`、`ktime_get_real_ts64`、`ktime_get_coarse_ts64`、`ktime_get_coarse_real_ts64`进入共同计算，保持root时间语义 |
+| 普通内核标量入口 | `ktime_get_seconds`、`ktime_get_real_seconds`、`ktime_get_resolution_ns`直接读取共享状态 |
+| POSIX动态时钟分派及原生fallback | 共享时钟使用当前MM_data；CPU time、alarm等由原生路径完成 |
+| 特殊内核读者 | NMI/fast、snapshot等保留原有读取协议 |
+
+## Source and Binary Accounting
+
+源码存量按声明的接口与职责范围计数，每个源位置只归入一类；非空、非注释的声明、汇编和ABI断言均计入。Raw原内核函数混合计算与接口处理，分类用于解释职责，总量比较同时纳入列明的保留读取与分派。共同Linux/libc环境与通用设施单列。表C2分别报告性能实验版本和ABI/初始化精简版本。
+
+**Table C2: Matched Clocktime source slices.** 单位为源码行。性能版本为`cf9dc817`，精简版本合并ABI定义及初始化查询；必需的私有回退计入“功能加保留切片”。符号链接引用同一ABI头文件，源码定义计一次。
+
+| 职责 | Raw | VKSO 性能版本 | VKSO 精简版本 |
+| --- | ---: | ---: | ---: |
+| 用户读取计算 | 281 | 0 | 0 |
+| 普通内核读取实现（含原入口） | 163 | 0 | 0 |
+| 共同读取计算与协议 | 0 | 292 | 292 |
+| 数据 ABI 与布局断言 | 89 | 182 | 187 |
+| 用户适配、初始化与 provider/fallback | 147 | 384 | 316 |
+| 内核适配与 syscall 边界 | 103 | 265 | 265 |
+| 状态发布 | 80 | 85 | 85 |
+| 映射与 namespace | 335 | 232 | 232 |
+| provider 接入 | 17 | 13 | 13 |
+| 其余运行接入声明 | 91 | 22 | 22 |
+| 构建与链接 | 158 | 87 | 87 |
+| getcpu 专属实现与适配 | 23 | 62 | 62 |
+| **功能切片合计** | **1,487** | **1,624** | 1,561 |
+| 保留读取与分派切片（另列） | 91 | 147 | 147 |
+| 功能加上述保留切片 | 1,578 | 1,771 | 1,708 |
+| 共同数学/provider 契约（另列） | 31 | 31 | 31 |
+| 通用构建/注册设施（另列完整文件） | 336 | 3,974 | 3,974 |
+
+性能版本的集成差分另计新增1,477行、删除340行、净增1,137行。源码存量与集成差分分别描述改造后维护规模和改动规模。平台裁剪、兼容代码、测试及诊断单列；共同Linux/libc设施保留为运行环境。通用构建/注册设施按所列完整文件计量，不向本案例分摊假定比例。
+
+精简版将`include/vkso/time_abi.h`作为内核与用户的数据布局来源，导出的用户包包含该头文件内容。初始化中的辅助向量检查在执行carrier代码前完成，一次性初始化仍保留线程安全和错误状态语义。VKSO必需的56行私有回退在上述保留项中列出；完整计入后，精简前后的VKSO源码分别为1,771与1,708行，Raw为1,578行。该比较描述实现规模，维护收益由共同定义和实际修改范围说明。[精简计数与编译核对](../../test/test_gettime/vkso-tests/code-size/adapter-evidence/report.json)保存逐文件变化、ABI布局、相关执行代码比较及主机验证结果。性能和二进制规模仍使用原实验产物。
+
+维护提交`aa1855e`修改`vkso_cycle_delta`与`vkso_read_hres_time`，同步更新一个测试函数。全宽计数器输入域包含100个边界组合和100,000个固定种子输入；Raw vDSO已有相应特化，该例量化实际修改范围与共同采用方式。
+
+**Table C3: Binary components in the measured READ images.** 单位为字节。共享backing在内核与carrier中是同一物理对象；函数体、入口extent和页容量分别计量。
+
+| 项目 | Normal Raw | Normal VKSO | no-retpoline Raw | no-retpoline VKSO |
+| --- | ---: | ---: | ---: | ---: |
+| 11个普通内核入口 extent | 1,456 | 736 | 1,392 | 704 |
+| 原生 time/getcpu vDSO 函数体 | 1,515 | — | 1,515 | — |
+| 共同 time/getcpu 函数体 | — | 1,188 | — | 1,149 |
+| 原生 vDSO .text（含 SGX） | 1,853 | — | 1,853 | — |
+| 公开库 .text | — | 760 | — | 760 |
+| Carrier 共享代码 backing | — | 8,192 | — | 4,096 |
+| Carrier 用户私有可执行页容量 | — | 4,096 | — | 4,096 |
+
+内核入口extent包含对齐，函数体采用ELF symbol size；共享函数体属于共享backing页。Normal额外共享text页包含通用thunk，时间/getcpu核心在两配置中均预留4 KiB。[逐行与二进制证据](../../test/test_gettime/vkso-tests/code-size/current-evidence/README.md)绑定实际READ实验产物。
+
+## Functional Validation
+
+**Table C4: Functional and sharing coverage.** 裸机性能与功能记录采用TSC provider；主机夹具覆盖共享核心、内核调用者及callback契约。
+
+| 检查 | 环境与范围 | 结果 |
+| --- | --- | --- |
+| 公开 API、ABI 与原生 fallback | 两配置各4次 VKSO 裸机 READ 启动 | 8/8启动通过 |
+| 选定快路径 syscall denial | 同8次启动，覆盖被禁用 syscall 对应快路径 | 8/8启动通过 |
+| namespace、exec/setns 生命周期 | 同8次启动的 ABI/namespace 用例 | 8/8启动通过 |
+| 用户/内核共享页身份 | Normal每启动2个text页及1个data页；no-retpoline各1页 | 20/20条PFN记录相同 |
+| 共享核心、内核调用者与 callback 契约 | 当前生产代码及确定性主机环境夹具 | 9项通过 |
+| cycle-delta 修改前后等价 | 全宽计数器输入域，历史helper编译对照 | 100,100组输入一致 |
+
+## Measurement and READ Results
+
+实验使用 Intel Core i7-1165G7、Linux 5.15.198、GCC 11.4.0 和 TSC clocksource，关闭 SMT 与 turbo，使用 performance governor。读者固定 CPU 2；周期发布矩阵将发布与控制活动安排在 CPU 0。Raw 采用 libc 的原生 vDSO/系统调用路径，VKSO 采用完整公开 API 和普通内核导出接口。初始化、符号绑定、首次触页及预热均在 READ 计时之前完成。
+
+Normal 与 no-retpoline 是两组构建配置。它们涉及 RETPOLINE、RETHUNK、CPU_UNRET_ENTRY、CPU_SRSO 和 MITIGATION_ITS 的联动差异；同一组内 Raw 与 VKSO 使用匹配配置。我们分别报告组内后端差，组间变化表示这组构建条件及对应运行的差异。
+
+READ 使用不含发布记录器的镜像，每个后端/配置4次独立启动，共16次。每接口每启动31个批次，每批预热10,000次、计时500,000次调用；用户批次分配给依次运行的7个进程。19个用户/内核工作负载共得到9,424批次。用户批次以 LFENCE/RDTSCP/LFENCE 包围，内核批次使用 rdtsc_ordered，保留循环和结果校验成本。单位为每批总 TSC ticks 除以调用数。
+
+READ 主统计先取每启动31批的中位数，再取4次启动中位数的中位数。差值 Δ 为 VKSO 减 Raw；95%区间以启动为重采样单位，分别枚举两后端4次启动的有放回抽样，计算中位数差的逐接口 percentile bootstrap 区间。这一统计量描述批次平均调用成本。表C5–C6同时给出全部批次参与的等权启动均值差，呈现集中位置与完整均值的差异。
+
+UPDATE 采用独立的完整软件发布矩阵：两配置、两后端、两记录器，每组合2次启动，共16次、256个8秒窗口及511,996次周期发布。每配置含两个启动块，每块覆盖四种后端/记录器组合，第二块反转顺序；每次启动覆盖 idle 和三种持续公开读取负载。UPDATE 主统计使用每启动完整样本均值，再对两启动等权平均，逐块差值及观察范围同时报告。窗口和逐次发布属于启动内观测。
+
+**Table C5(a): Normal user clock_gettime and kernel READ.** 单位为 TSC ticks/call。Raw/VKSO 为跨启动中位成本；区间对应 Δ中位成本，末列为完整均值之差。
+
+| 接口 | Raw | VKSO | Δ中位成本 | Δ的95%区间 | Δ完整均值 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 用户 REALTIME | 54.188 | 54.211 | +0.023 | [-0.001, +0.110] | -0.043 |
+| 用户 MONOTONIC | 54.188 | 54.190 | +0.002 | [+0.002, +0.003] | +0.350 |
+| 用户 MONOTONIC_RAW | 54.191 | 54.190 | -0.001 | [-0.002, +0.513] | +0.430 |
+| 用户 BOOTTIME | 54.191 | 55.024 | +0.833 | [+0.722, +0.885] | +0.802 |
+| 用户 TAI | 54.191 | 55.192 | +1.001 | [+0.799, +1.002] | +0.817 |
+| 用户 REALTIME_COARSE | 15.099 | 16.100 | +1.000 | [+1.000, +1.042] | +1.046 |
+| 用户 MONOTONIC_COARSE | 15.099 | 16.105 | +1.006 | [+1.006, +1.012] | +1.175 |
+| 内核 ktime_get_ts64 | 55.197 | 56.195 | +0.998 | [-0.107, +1.000] | +0.528 |
+| 内核 ktime_get_raw_ts64 | 55.704 | 54.189 | -1.516 | [-2.403, -1.011] | -1.635 |
+| 内核 ktime_get_coarse_ts64 | 9.031 | 9.032 | +0.001 | [+0.000, +1.004] | +0.448 |
+
+**Table C5(b): no-retpoline user clock_gettime and kernel READ.** 单位为 TSC ticks/call。Raw/VKSO 为跨启动中位成本；区间对应 Δ中位成本，末列为完整均值之差。
+
+| 接口 | Raw | VKSO | Δ中位成本 | Δ的95%区间 | Δ完整均值 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 用户 REALTIME | 54.188 | 53.890 | -0.298 | [-1.002, +0.408] | -0.098 |
+| 用户 MONOTONIC | 54.188 | 53.186 | -1.002 | [-1.003, -1.002] | -0.822 |
+| 用户 MONOTONIC_RAW | 54.192 | 53.186 | -1.006 | [-1.007, -1.004] | -0.760 |
+| 用户 BOOTTIME | 54.191 | 53.186 | -1.005 | [-1.006, -1.005] | -0.676 |
+| 用户 TAI | 54.191 | 54.196 | +0.005 | [-0.001, +1.176] | +0.734 |
+| 用户 REALTIME_COARSE | 15.099 | 15.095 | -0.004 | [-0.005, -0.003] | +0.128 |
+| 用户 MONOTONIC_COARSE | 15.099 | 15.098 | -0.001 | [-0.002, +0.000] | +0.164 |
+| 内核 ktime_get_ts64 | 58.603 | 55.875 | -2.728 | [-2.961, -0.493] | -2.051 |
+| 内核 ktime_get_raw_ts64 | 54.195 | 55.282 | +1.087 | [+0.494, +1.397] | +0.665 |
+| 内核 ktime_get_coarse_ts64 | 11.039 | 9.032 | -2.007 | [-2.009, +0.000] | -1.403 |
+
+**Table C6(a): Normal other public paths and fallback.** 统计口径和单位同表C5。getcpu 为独立的共享功能。
+
+| 接口 | Raw | VKSO | Δ中位成本 | Δ的95%区间 | Δ完整均值 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| clock_getres(REALTIME) | 15.095 | 13.045 | -2.049 | [-2.050, -2.048] | -2.048 |
+| clock_getres(REALTIME_COARSE) | 14.049 | 13.080 | -0.969 | [-0.969, -0.969] | -0.973 |
+| gettimeofday(tv, NULL) | 56.204 | 55.192 | -1.012 | [-1.012, -1.011] | -1.012 |
+| time(NULL) | 7.024 | 6.021 | -1.003 | [-1.003, -1.003] | -1.002 |
+| time(&t) | 7.024 | 5.034 | -1.990 | [-1.990, -1.990] | -1.286 |
+| getcpu(&cpu, &node) | 14.049 | 13.045 | -1.004 | [-2.007, -1.003] | -1.773 |
+| clock_gettime(PROCESS_CPUTIME)，fallback | 869.619 | 867.344 | -2.276 | [-8.176, -0.316] | -2.910 |
+| clock_getres(PROCESS_CPUTIME)，fallback | 591.499 | 589.761 | -1.738 | [-3.302, -0.580] | -2.003 |
+| clock_gettime(REALTIME_ALARM)，fallback | 682.872 | 673.651 | -9.221 | [-11.169, -7.137] | -9.747 |
+
+**Table C6(b): no-retpoline other public paths and fallback.** 统计口径和单位同表C5。getcpu 为独立的共享功能。
+
+| 接口 | Raw | VKSO | Δ中位成本 | Δ的95%区间 | Δ完整均值 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| clock_getres(REALTIME) | 15.095 | 13.045 | -2.050 | [-2.050, -2.050] | -2.048 |
+| clock_getres(REALTIME_COARSE) | 14.049 | 13.080 | -0.969 | [-0.969, -0.969] | -0.974 |
+| gettimeofday(tv, NULL) | 56.204 | 55.201 | -1.002 | [-1.003, -1.002] | -1.002 |
+| time(NULL) | 7.024 | 6.021 | -1.003 | [-1.003, -1.003] | -1.010 |
+| time(&t) | 7.024 | 5.034 | -1.991 | [-1.991, -1.991] | -0.584 |
+| getcpu(&cpu, &node) | 14.049 | 13.045 | -1.004 | [-1.652, -1.003] | -1.658 |
+| clock_gettime(PROCESS_CPUTIME)，fallback | 843.650 | 841.226 | -2.424 | [-43.209, +2.522] | -9.146 |
+| clock_getres(PROCESS_CPUTIME)，fallback | 574.723 | 571.913 | -2.810 | [-6.349, -0.908] | -3.517 |
+| clock_gettime(REALTIME_ALARM)，fallback | 669.544 | 664.353 | -5.191 | [-10.477, -2.907] | -1.166 |
+
+主表之外的四个匹配启动块、删除单块敏感性及进程内批次结果见[READ完整记录](../../test/test_gettime/vkso-tests/direct-api/read-evidence/README.md)。Fallback的六项中位差为−9.221～−1.738 ticks；no-retpoline PROCESS_CPUTIME的clock_gettime区间为[−43.209, +2.522] ticks。全部38项对照保留同一统计口径。
+
+## Complete Publication Statistics
+
+计时使用RDTSCP，覆盖持锁后的完整软件发布区间，记录追加位于终点后。Current采用当前记录器，Legacy恢复旧接口与记录主体；两者具有相同功能实现和计时边界，各自保留链接布局。全部周期样本进入完整均值，使用原始TSC差值。
+
+**Table C7: Complete software publication cost.** 单位为 TSC ticks/update，数值为两次启动完整均值的等权平均。MONOTONIC、RAW、COARSE 分别表示 CPU 2 持续调用对应 `clock_gettime` 公开接口；idle 没有该读取负载。
+
+| 配置 | 后端 | 记录器 | idle | MONOTONIC | RAW | COARSE |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Normal | Raw | Current | 473.709 | 631.831 | 968.889 | 1024.833 |
+| Normal | VKSO | Current | 405.204 | 437.438 | 440.036 | 452.178 |
+| Normal | Raw | Legacy | 426.313 | 626.942 | 919.077 | 982.190 |
+| Normal | VKSO | Legacy | 427.058 | 453.921 | 466.922 | 476.584 |
+| no-retpoline | Raw | Current | 400.350 | 534.374 | 960.007 | 976.829 |
+| no-retpoline | VKSO | Current | 414.606 | 438.012 | 439.924 | 451.141 |
+| no-retpoline | Raw | Legacy | 337.647 | 552.068 | 872.333 | 944.896 |
+| no-retpoline | VKSO | Legacy | 392.757 | 406.361 | 415.551 | 420.024 |
+
+**Table C8: Backend publication cost differences.** 每格为块1 / 块2，单位 TSC ticks/update；Δ为VKSO−Raw，分别列出两个独立启动块的观察值。
+
+| 配置 | 负载 | Current Δ | Legacy Δ |
+| --- | ---: | ---: | ---: |
+| Normal | idle | -64.184 / -72.825 | -3.685 / +5.174 |
+| Normal | MONOTONIC | -198.984 / -189.800 | -174.572 / -171.471 |
+| Normal | RAW | -532.812 / -524.895 | -448.821 / -455.490 |
+| Normal | COARSE | -567.321 / -577.989 | -508.802 / -502.412 |
+| no-retpoline | idle | +11.686 / +16.826 | +63.145 / +47.075 |
+| no-retpoline | MONOTONIC | -91.812 / -100.911 | -158.616 / -132.798 |
+| no-retpoline | RAW | -522.537 / -517.629 | -449.752 / -463.813 |
+| no-retpoline | COARSE | -493.845 / -557.530 | -537.210 / -512.534 |
+
+记录器对照以D=(VKSO−Raw)Current−(VKSO−Raw)Legacy度量更换记录器及其链接布局后后端差值的变化。Normal四负载的D均为负；no-retpoline的MONOTONIC为正，COARSE两个启动块符号相反。结果按配置、记录器和启动分别报告。
+
+**Table C9: Backend differences and recorder interaction.** 每格为块1 / 块2，单位 TSC ticks/update；Δ 为 VKSO−Raw。两块分别来自独立启动，所列值是观察结果，不是总体置信区间。
+
+| 配置 | 负载 | Current Δ | Legacy Δ | D |
+| --- | ---: | ---: | ---: | ---: |
+| Normal | idle | -64.184 / -72.825 | -3.685 / +5.174 | -60.500 / -77.999 |
+| Normal | MONOTONIC | -198.984 / -189.800 | -174.572 / -171.471 | -24.412 / -18.329 |
+| Normal | RAW | -532.812 / -524.895 | -448.821 / -455.490 | -83.991 / -69.405 |
+| Normal | COARSE | -567.321 / -577.989 | -508.802 / -502.412 | -58.519 / -75.577 |
+| no-retpoline | idle | +11.686 / +16.826 | +63.145 / +47.075 | -51.459 / -30.250 |
+| no-retpoline | MONOTONIC | -91.812 / -100.911 | -158.616 / -132.798 | +66.804 / +31.887 |
+| no-retpoline | RAW | -522.537 / -517.629 | -449.752 / -463.813 | -72.785 / -53.817 |
+| no-retpoline | COARSE | -493.845 / -557.530 | -537.210 / -512.534 | +43.365 / -44.996 |
+
+**Table C10: Publication tail cost with the Current recorder.** 单位为TSC ticks/update，每格为块1 / 块2；分位数在各次启动的完整发布样本中计算。
+
+| 配置 | 负载 | Raw p95 | VKSO p95 | Raw p99 | VKSO p99 |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Normal | idle | 819.000 / 835.050 | 517.000 / 582.000 | 1020.000 / 1047.010 | 759.000 / 817.020 |
+| Normal | MONOTONIC | 1132.000 / 1123.000 | 637.000 / 744.000 | 1445.000 / 1436.000 | 959.040 / 978.010 |
+| Normal | RAW | 1250.000 / 1277.000 | 730.000 / 736.000 | 1468.000 / 1478.020 | 963.060 / 954.080 |
+| Normal | COARSE | 1411.000 / 1423.000 | 748.000 / 740.050 | 1643.000 / 1709.000 | 1030.040 / 1038.000 |
+| no-retpoline | idle | 659.000 / 673.000 | 459.000 / 470.000 | 884.020 / 872.020 | 817.020 / 987.010 |
+| no-retpoline | MONOTONIC | 904.000 / 913.000 | 615.000 / 627.000 | 1074.010 / 1072.010 | 1020.060 / 1143.060 |
+| no-retpoline | RAW | 1156.000 / 1139.000 | 624.050 / 711.050 | 1249.020 / 1274.000 | 967.000 / 1107.040 |
+| no-retpoline | COARSE | 1273.000 / 1333.000 | 621.050 / 757.050 | 1379.010 / 1405.000 | 1061.010 / 1149.010 |
+
+**Table C11: Increase in publication cost under continuous reads.** 单位为TSC ticks/update；对每次启动计算负载均值减idle均值，再对两个启动等权平均。表中Raw/VKSO分别报告各自相对idle的增量。
+
+| 配置 | 记录器 | MONOTONIC Raw/VKSO | RAW Raw/VKSO | COARSE Raw/VKSO |
+| --- | --- | ---: | ---: | ---: |
+| Normal | Current | +158.122 / +32.234 | +495.180 / +34.831 | +551.124 / +46.973 |
+| Normal | Legacy | +200.629 / +26.862 | +492.764 / +39.864 | +555.877 / +49.525 |
+| no-retpoline | Current | +134.024 / +23.406 | +559.658 / +25.318 | +576.479 / +36.536 |
+| no-retpoline | Legacy | +214.422 / +13.604 | +534.687 / +22.794 | +607.249 / +27.267 |
+
+![Normal 完整发布成本分布](../../test/test_gettime/vkso-tests/update-bench/mechanism-evidence/full-publication-recorder-normal/step-07-review/density-central.png)
+
+![no-retpoline 完整发布成本分布](../../test/test_gettime/vkso-tests/update-bench/mechanism-evidence/full-publication-recorder-control/step-07-review/density-central.png)
+
+**Figure C1: Complete publication cost distributions.** 上图为Normal，下图为no-retpoline，分别展示两后端、两记录器和两次启动。密度按全部样本归一化；[Normal完整ECDF](../../test/test_gettime/vkso-tests/update-bench/mechanism-evidence/full-publication-recorder-normal/step-07-review/ecdf-full.pdf)与[no-retpoline完整ECDF](../../test/test_gettime/vkso-tests/update-bench/mechanism-evidence/full-publication-recorder-control/step-07-review/ecdf-full.pdf)给出完整观测范围。
+
+
+完整发布的[64个逐启动负载单元](../../test/test_gettime/vkso-tests/update-bench/mechanism-evidence/full-publication-two-configurations/per-boot-costs.csv)保留样本数、均值、中位数、p95、p99及最大值。两配置各有一条CPU 2样本，均纳入主统计；CPU 0子集的记录器效应方向保持一致。
+
+## Mapping Footprint
+
+1、8、32进程的映射清点显示，Raw vDSO 在各组均记录到1个共享代码 PFN。Normal VKSO 的 carrier 映射分别记录到5、12、36个唯一 PFN，公开库为4、18、66个，MM_data 均为1个；no-retpoline 的 carrier 对应为4、11、35个，其余两类相同。这是各指定映射的观测值，Raw vvar的清点字段为0个present PFN。跨域计算页共享与随进程增加的支持页同时存在，因而本案例的空间效果以共享页身份和各类映射成本分别呈现。

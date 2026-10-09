@@ -16,9 +16,9 @@ $(OUT):
 	mkdir -p "$@"
 $(OUT)/native-bench: $(HERE)time_bench.c $(HERE)vkso_time.h | $(OUT)
 	$(CC) $(CPPFLAGS) $(CFLAGS) "$<" -o "$@"
-$(OUT)/vkso_time_init.o: $(HERE)vkso_time_init.c $(HERE)vkso_time.h $(FUNCTIONAL)/vkso_abi.h | $(OUT)
+$(OUT)/vkso_time_init.o: $(HERE)vkso_time_init.c $(HERE)vkso_time.h $(FUNCTIONAL)/vkso_abi.h $(FUNCTIONAL)/vkso_time_abi.h | $(OUT)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -pthread -c "$<" -o "$@"
-$(OUT)/vkso_user_wrapper.o: $(FUNCTIONAL)/vkso_user_wrapper.c $(FUNCTIONAL)/vkso_abi.h $(FUNCTIONAL)/vkso_user_wrapper.h | $(OUT)
+$(OUT)/vkso_user_wrapper.o: $(FUNCTIONAL)/vkso_user_wrapper.c $(FUNCTIONAL)/vkso_abi.h $(FUNCTIONAL)/vkso_user_wrapper.h $(FUNCTIONAL)/vkso_time_abi.h | $(OUT)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -pthread -c "$<" -o "$@"
 $(OUT)/libvkso_time_init.a: $(OUT)/vkso_time_init.o $(OUT)/vkso_user_wrapper.o
 	$(AR) rcs "$@" $^
