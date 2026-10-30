@@ -233,6 +233,13 @@ not a population confidence interval or a whole-machine memory measurement.}
 \input{tables/filesystem-detail.tex}
 \end{document}
 '''.replace('__CAMPAIGNS__',str(len(data['inputs']))).replace('__OBSERVATIONS__',f"{data['observations']:,}")
+        if '48-slot' in data.get('scope',''):
+            supplement=supplement.replace('The final XZ-composed owner is evaluated',
+                'The word-copy XZ owner with a 48-slot private data cache is evaluated')
+            supplement=supplement.replace('PX the final XZ-composed owner.',
+                'PX the preceding common-XZ owner. PW denotes the word-copy owner; NW and NWR are normal and relaxed native references with the same XZ edit. C0 denotes the preceding one-slot private data cache on identical owner instructions; CU denotes the unbounded-metadata copied control.')
+            supplement=supplement.replace('The table retains all paired comparisons.',
+                'The table retains all paired comparisons. Four completed native campaigns use unchanged binaries and runners; all user campaigns use the new private bridge.')
         preview=prefix+supplement
     (PAPER/'filesystem-section-preview.tex').write_text(preview)
     print(json.dumps(dict(section=str(PAPER/'filesystem-section.tex'),source_datasets=len(provenance['sources']))))

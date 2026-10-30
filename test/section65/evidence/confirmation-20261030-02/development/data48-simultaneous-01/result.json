@@ -1,0 +1,510 @@
+{
+  "status": "complete",
+  "scope": "Integration correctness and physical/private-state identity, not timing or throughput.",
+  "ownership_scope": "Native retains image uid/gid; Apptainer supplies uid/gid=invoking user through FUSE mount options. Compare those specified application semantics; preserve differing mode, mtime, content and links.",
+  "cases": [
+    {
+      "variant": "copied",
+      "status": "pass",
+      "phases": 8,
+      "three_consumer_overlap_phases": [
+        0,
+        1,
+        2
+      ],
+      "consumer_cleanup_order": [
+        "C",
+        "A",
+        "B"
+      ],
+      "private_objects_disjoint": true,
+      "user_code_shared_between_processes": true,
+      "user_code_shared_with_kernel": false
+    },
+    {
+      "variant": "shared",
+      "status": "pass",
+      "phases": 8,
+      "three_consumer_overlap_phases": [
+        0,
+        1,
+        2
+      ],
+      "consumer_cleanup_order": [
+        "C",
+        "A",
+        "B"
+      ],
+      "private_objects_disjoint": true,
+      "user_code_shared_between_processes": true,
+      "user_code_shared_with_kernel": true
+    }
+  ],
+  "phases": [
+    {
+      "variant": "copied",
+      "phase": 0,
+      "live": [
+        "A",
+        "B",
+        "C"
+      ],
+      "release_ns": 166345722818899,
+      "complete_ns": 166345926310762,
+      "native": {
+        "start_ns": 166345735679988,
+        "end_ns": 166345764176031,
+        "wall_start_ns": 1793347150698273638,
+        "wall_end_ns": 1793347150726765928
+      },
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347150688695690,
+          "wall_end_ns": 1793347150844695694
+        },
+        "C": {
+          "wall_start_ns": 1793347150688695690,
+          "wall_end_ns": 1793347150844695694
+        },
+        "A": {
+          "wall_start_ns": 1793347150698273638,
+          "wall_end_ns": 1793347150726765928
+        }
+      },
+      "task_lifecycle_overlap_ns": 28492290,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "copied",
+      "phase": 1,
+      "live": [
+        "A",
+        "B",
+        "C"
+      ],
+      "release_ns": 166345926480268,
+      "complete_ns": 166346012630743,
+      "native": {
+        "start_ns": 166345939406980,
+        "end_ns": 166345965856953,
+        "wall_start_ns": 1793347150901996996,
+        "wall_end_ns": 1793347150928447329
+      },
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347150884695695,
+          "wall_end_ns": 1793347150908695696
+        },
+        "C": {
+          "wall_start_ns": 1793347150884695695,
+          "wall_end_ns": 1793347150912695696
+        },
+        "A": {
+          "wall_start_ns": 1793347150901996996,
+          "wall_end_ns": 1793347150928447329
+        }
+      },
+      "task_lifecycle_overlap_ns": 6698700,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "copied",
+      "phase": 2,
+      "live": [
+        "A",
+        "B",
+        "C"
+      ],
+      "release_ns": 166346012836771,
+      "complete_ns": 166346096444042,
+      "native": {
+        "start_ns": 166346027702242,
+        "end_ns": 166346050429141,
+        "wall_start_ns": 1793347150990292425,
+        "wall_end_ns": 1793347151013019548
+      },
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347150972695698,
+          "wall_end_ns": 1793347150996695698
+        },
+        "C": {
+          "wall_start_ns": 1793347150972695698,
+          "wall_end_ns": 1793347151000695698
+        },
+        "A": {
+          "wall_start_ns": 1793347150990292425,
+          "wall_end_ns": 1793347151013019548
+        }
+      },
+      "task_lifecycle_overlap_ns": 6403273,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "copied",
+      "phase": 3,
+      "live": [
+        "A",
+        "B"
+      ],
+      "release_ns": 166350537453681,
+      "complete_ns": 166350610454789,
+      "native": {
+        "start_ns": 166350555678176,
+        "end_ns": 166350582790113,
+        "wall_start_ns": 1793347155518267861,
+        "wall_end_ns": 1793347155545380316
+      },
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347155504695825,
+          "wall_end_ns": 1793347155528695826
+        },
+        "A": {
+          "wall_start_ns": 1793347155518267861,
+          "wall_end_ns": 1793347155545380316
+        }
+      },
+      "task_lifecycle_overlap_ns": 10427965,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "copied",
+      "phase": 4,
+      "live": [
+        "A",
+        "B"
+      ],
+      "release_ns": 166350610736914,
+      "complete_ns": 166350675117179,
+      "native": {
+        "start_ns": 166350623672862,
+        "end_ns": 166350650504418,
+        "wall_start_ns": 1793347155586262756,
+        "wall_end_ns": 1793347155613094622
+      },
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347155572695827,
+          "wall_end_ns": 1793347155596695828
+        },
+        "A": {
+          "wall_start_ns": 1793347155586262756,
+          "wall_end_ns": 1793347155613094622
+        }
+      },
+      "task_lifecycle_overlap_ns": 10433072,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "copied",
+      "phase": 5,
+      "live": [
+        "A",
+        "B"
+      ],
+      "release_ns": 166350675459872,
+      "complete_ns": 166350747036338,
+      "native": {
+        "start_ns": 166350699705374,
+        "end_ns": 166350722172836,
+        "wall_start_ns": 1793347155662295210,
+        "wall_end_ns": 1793347155684763148
+      },
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347155648695830,
+          "wall_end_ns": 1793347155672695830
+        },
+        "A": {
+          "wall_start_ns": 1793347155662295210,
+          "wall_end_ns": 1793347155684763148
+        }
+      },
+      "task_lifecycle_overlap_ns": 10400620,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "copied",
+      "phase": 6,
+      "live": [
+        "B"
+      ],
+      "release_ns": 166350755544737,
+      "complete_ns": 166350804492677,
+      "native": null,
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347155724695832,
+          "wall_end_ns": 1793347155748695832
+        }
+      },
+      "task_lifecycle_overlap_ns": 24000000,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "copied",
+      "phase": 7,
+      "live": [
+        "B"
+      ],
+      "release_ns": 166350804853107,
+      "complete_ns": 166350855768826,
+      "native": null,
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347155768695833,
+          "wall_end_ns": 1793347155792695834
+        }
+      },
+      "task_lifecycle_overlap_ns": 24000001,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "shared",
+      "phase": 0,
+      "live": [
+        "A",
+        "B",
+        "C"
+      ],
+      "release_ns": 166352703831826,
+      "complete_ns": 166352909975591,
+      "native": {
+        "start_ns": 166352731592762,
+        "end_ns": 166352757247836,
+        "wall_start_ns": 1793347157694182363,
+        "wall_end_ns": 1793347157719837465
+      },
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347157680695887,
+          "wall_end_ns": 1793347157832695891
+        },
+        "C": {
+          "wall_start_ns": 1793347157680695887,
+          "wall_end_ns": 1793347157832695891
+        },
+        "A": {
+          "wall_start_ns": 1793347157694182363,
+          "wall_end_ns": 1793347157719837465
+        }
+      },
+      "task_lifecycle_overlap_ns": 25655102,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "shared",
+      "phase": 1,
+      "live": [
+        "A",
+        "B",
+        "C"
+      ],
+      "release_ns": 166352910442898,
+      "complete_ns": 166352998270509,
+      "native": {
+        "start_ns": 166352923687118,
+        "end_ns": 166352950837566,
+        "wall_start_ns": 1793347157886276967,
+        "wall_end_ns": 1793347157913427847
+      },
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347157872695892,
+          "wall_end_ns": 1793347157900695893
+        },
+        "C": {
+          "wall_start_ns": 1793347157872695892,
+          "wall_end_ns": 1793347157896695893
+        },
+        "A": {
+          "wall_start_ns": 1793347157886276967,
+          "wall_end_ns": 1793347157913427847
+        }
+      },
+      "task_lifecycle_overlap_ns": 10418926,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "shared",
+      "phase": 2,
+      "live": [
+        "A",
+        "B",
+        "C"
+      ],
+      "release_ns": 166352998737650,
+      "complete_ns": 166353123956066,
+      "native": {
+        "start_ns": 166353011674757,
+        "end_ns": 166353039100511,
+        "wall_start_ns": 1793347157974264945,
+        "wall_end_ns": 1793347158001691017
+      },
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347157960695895,
+          "wall_end_ns": 1793347157984695895
+        },
+        "C": {
+          "wall_start_ns": 1793347157960695895,
+          "wall_end_ns": 1793347157984695895
+        },
+        "A": {
+          "wall_start_ns": 1793347157974264945,
+          "wall_end_ns": 1793347158001691017
+        }
+      },
+      "task_lifecycle_overlap_ns": 10430950,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "shared",
+      "phase": 3,
+      "live": [
+        "A",
+        "B"
+      ],
+      "release_ns": 166357287640633,
+      "complete_ns": 166358618967521,
+      "native": {
+        "start_ns": 166357856103529,
+        "end_ns": 166357895494895,
+        "wall_start_ns": 1793347162818693197,
+        "wall_end_ns": 1793347162858084873
+      },
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347162792696031,
+          "wall_end_ns": 1793347162824696032
+        },
+        "A": {
+          "wall_start_ns": 1793347162818693197,
+          "wall_end_ns": 1793347162858084873
+        }
+      },
+      "task_lifecycle_overlap_ns": 6002835,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "shared",
+      "phase": 4,
+      "live": [
+        "A",
+        "B"
+      ],
+      "release_ns": 166358619527652,
+      "complete_ns": 166358685144751,
+      "native": {
+        "start_ns": 166358631668380,
+        "end_ns": 166358658407382,
+        "wall_start_ns": 1793347163594258109,
+        "wall_end_ns": 1793347163620997386
+      },
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347163580696053,
+          "wall_end_ns": 1793347163604696054
+        },
+        "A": {
+          "wall_start_ns": 1793347163594258109,
+          "wall_end_ns": 1793347163620997386
+        }
+      },
+      "task_lifecycle_overlap_ns": 10437945,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "shared",
+      "phase": 5,
+      "live": [
+        "A",
+        "B"
+      ],
+      "release_ns": 166358685755348,
+      "complete_ns": 166358748142054,
+      "native": {
+        "start_ns": 166358699689553,
+        "end_ns": 166358723266018,
+        "wall_start_ns": 1793347163662279242,
+        "wall_end_ns": 1793347163685856433
+      },
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347163648696055,
+          "wall_end_ns": 1793347163672696056
+        },
+        "A": {
+          "wall_start_ns": 1793347163662279242,
+          "wall_end_ns": 1793347163685856433
+        }
+      },
+      "task_lifecycle_overlap_ns": 10416814,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "shared",
+      "phase": 6,
+      "live": [
+        "B"
+      ],
+      "release_ns": 166358768618446,
+      "complete_ns": 166358815228825,
+      "native": null,
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347163736696058,
+          "wall_end_ns": 1793347163760696059
+        }
+      },
+      "task_lifecycle_overlap_ns": 24000001,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    },
+    {
+      "variant": "shared",
+      "phase": 7,
+      "live": [
+        "B"
+      ],
+      "release_ns": 166358815862174,
+      "complete_ns": 166358865199189,
+      "native": null,
+      "task_intervals": {
+        "B": {
+          "wall_start_ns": 1793347163780696059,
+          "wall_end_ns": 1793347163804696060
+        }
+      },
+      "task_lifecycle_overlap_ns": 24000001,
+      "overlap_scope": "Tar/read task envelopes, not sampled simultaneous instruction execution or throughput.",
+      "outputs": "match own image; content, metadata, links, and boundary range"
+    }
+  ],
+  "binaries": {
+    "vkso_sq_core.ko": "64ab8c7e8bb313d56b8721ae7c8c5e752dfc824a091073f9f18f6044f574ec98",
+    "vkso_squashfs.ko": "31a6187c8370c30eec97f75a6f1e2cdb68aca2757e7180e5ab5a84ea9b79dd22",
+    "libsq-bridge.so": "c3a687df6f9e26d1ccb66c1ec1c71bd9208710168f057c371994548f5083d316",
+    "vkso-squashfuse": "7d5d40526cc92483c3a4fd70e5b374dd263ec658c67c7de0d2947cb29026f46a"
+  },
+  "xz_user_execution": "Hardware breakpoint at the shared decoder entry during actual SIF phase 3; arguments, stack and unchanged shared PFNs recorded.",
+  "restored": true,
+  "native_after": true,
+  "real_fd_and_partition_offsets": true,
+  "modules_unloaded": true
+}

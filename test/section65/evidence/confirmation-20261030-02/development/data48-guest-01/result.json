@@ -1,0 +1,34 @@
+{
+  "status": "complete",
+  "scope": "Guest-only repaired-negative-offset and five-format regression of candidate; no timing.",
+  "fixture": {
+    "valid": "f3e32927eeeadfb133614d002ac0b0dc70ca8acc11fa720e965316371c380826",
+    "negative": "79d07250b2102650c8fe99be48649e0600346bf308b0bd2388a9dd395fb73a43",
+    "field": "squashfs_reg_inode.offset",
+    "byte_offset": 218,
+    "old": 0,
+    "new": -2147483648,
+    "payload": "SquashFS maintenance regression\nSquashFS maintenance regression\nSquashFS maintenance regression\n"
+  },
+  "binaries": {
+    "vkso_sq_core.ko": "64ab8c7e8bb313d56b8721ae7c8c5e752dfc824a091073f9f18f6044f574ec98",
+    "vkso_squashfs.ko": "31a6187c8370c30eec97f75a6f1e2cdb68aca2757e7180e5ab5a84ea9b79dd22",
+    "libsq-bridge.so": "c3a687df6f9e26d1ccb66c1ec1c71bd9208710168f057c371994548f5083d316",
+    "vkso-squashfuse": "7d5d40526cc92483c3a4fd70e5b374dd263ec658c67c7de0d2947cb29026f46a"
+  },
+  "native_negative": {
+    "errno": 5
+  },
+  "copied": {
+    "client_errno": 5,
+    "daemon_alive_after_read": true,
+    "daemon_returncode": 0
+  },
+  "shared": {
+    "client_errno": 5,
+    "daemon_alive_after_read": true,
+    "daemon_returncode": 0
+  },
+  "restored": true,
+  "modules_unloaded": true
+}

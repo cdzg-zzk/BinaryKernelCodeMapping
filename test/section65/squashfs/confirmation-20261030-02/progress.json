@@ -1,13 +1,21 @@
 {
   "status": "active",
-  "phase": "private data working-set candidate correctness before complete-task pilots",
+  "phase": "Frozen 8172-observation confirmation; all correctness and resource prerequisites complete",
   "completed": [
     "313 baseline identities verified",
     "3 Python decoder campaigns / 120 complete observations",
     "3 repetitions full Python decoder work plus keep-cache diagnostic",
     "1/4/16 live libfuse memory attribution",
     "bit-tree candidate state/stream/200-observation diagnostic",
-    "Python data/fragment/metadata cache request trace"
+    "Python data/fragment/metadata cache request trace",
+    "448 data-cache pilot observations",
+    "416 stream-admission pilot observations; candidate rejected",
+    "48-slot ASAN/UBSAN and 30 normal-format/BCJ mounts",
+    "48-slot simultaneous native and two SIF consumers with XZ breakpoint",
+    "48-slot isolated malformed-image EIO regression and minimal deployment",
+    "48-slot original 1/4/16 resource replay",
+    "Final metadata work: 76 common vs 137 stock decoder calls, three replays",
+    "8172-observation registration and same-native reuse audit"
   ],
   "findings": {
     "python_library_vs_stock": 1.130081,
@@ -20,16 +28,15 @@
     ],
     "libfuse_16x_node_slab_bytes": 14786560
   },
-  "candidate": "data-cache-controls-02/data-16",
-  "scope": "Existing word-copy owner unchanged; 16/48 lazy data-cache controls only. Tree build remains unpromoted; no paper data mixed.",
+  "candidate": "data-cache-controls-02/data-48",
+  "scope": "Same owner/native consumer; private data-cache policy change. Rejected 16-slot and stream-admission tradeoffs retained. No final paper estimates yet.",
   "protocols": [
     "PROTOCOL.md",
     "CACHE_PROTOCOL.md"
   ],
   "next": [
-    "Finish data-cache sanitizer and functional checks",
-    "Run fixed 5 pilot groups / 448 observations",
-    "Measure original memory scale and choose from recorded criteria",
-    "Confirm final version and update paper/figures/status"
+    "Finish 1/4/16 resource replay and final metadata counts",
+    "Freeze 30 campaigns / 8172 observations; reuse four identical native campaigns only",
+    "Run 26 pending campaigns, audit, regenerate publication, and commit"
   ]
 }

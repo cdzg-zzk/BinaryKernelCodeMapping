@@ -1,0 +1,1585 @@
+{
+  "status": "complete",
+  "build": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48",
+  "owner_executable_text": [
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/evaluation-improved-01/build/vkso_sq_core.ko",
+      "text_bytes": 16695
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/refine-xz-01/vkso_sq_core.ko",
+      "text_bytes": 27828
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso_sq_core.ko",
+      "text_bytes": 28052
+    }
+  ],
+  "filesystem_original_functions": 34,
+  "filesystem_original_physical_lines": 2103,
+  "filesystem_semantically_edited_bodies": [
+    {
+      "function": "squashfs_fill_super",
+      "source": "super.c",
+      "original_lines": 285,
+      "added": 1,
+      "removed": 1,
+      "body_changed": true
+    },
+    {
+      "function": "squashfs_copy_data",
+      "source": "cache.c",
+      "original_lines": 30,
+      "added": 3,
+      "removed": 3,
+      "body_changed": true
+    },
+    {
+      "function": "squashfs_read_data",
+      "source": "block.c",
+      "original_lines": 95,
+      "added": 8,
+      "removed": 22,
+      "body_changed": true
+    }
+  ],
+  "filesystem_service_slots": 46,
+  "native_operation_fields": 10,
+  "xz": {
+    "original_sources": [
+      {
+        "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/native/linux-5.15.198/lib/xz/xz_dec_stream.c",
+        "physical_lines": 837,
+        "sha256": "2bbe132a973b3405522f735897fb6973fab15bd9397a56d1b5b8ba9eb031795c",
+        "body_edits": 0
+      },
+      {
+        "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/native/linux-5.15.198/lib/xz/xz_dec_lzma2.c",
+        "physical_lines": 1193,
+        "sha256": "aa32c0f61f17d6211b9529102e63d9740fd9470cc5a1a85ba79a87515d38fa03",
+        "body_edits": 0
+      },
+      {
+        "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/native/linux-5.15.198/lib/xz/xz_dec_bcj.c",
+        "physical_lines": 574,
+        "sha256": "8a28ce7be16894feba0382f7b2e4d76949d1a79ec057d535ba061fd417764d6b",
+        "body_edits": 0
+      }
+    ],
+    "additional_service_slots": 9,
+    "additional_callable_exports": 6,
+    "original_algorithm_physical_lines": 2604,
+    "candidate_algorithm_physical_lines": 2637,
+    "algorithm_deltas": [
+      {
+        "file": "xz_dec_stream.c",
+        "original_sha256": "2bbe132a973b3405522f735897fb6973fab15bd9397a56d1b5b8ba9eb031795c",
+        "candidate_sha256": "2bbe132a973b3405522f735897fb6973fab15bd9397a56d1b5b8ba9eb031795c",
+        "original_physical_lines": 837,
+        "candidate_physical_lines": 837,
+        "added": 0,
+        "removed": 0,
+        "body_edits": [],
+        "unchanged": true,
+        "patch": ""
+      },
+      {
+        "file": "xz_dec_lzma2.c",
+        "original_sha256": "aa32c0f61f17d6211b9529102e63d9740fd9470cc5a1a85ba79a87515d38fa03",
+        "candidate_sha256": "03b3e9aacb0bbb25f7e0d25e1a60d1983d3eca0221849075ab4423f36ffb9099",
+        "original_physical_lines": 1193,
+        "candidate_physical_lines": 1226,
+        "added": 35,
+        "removed": 2,
+        "body_edits": [
+          "dict_repeat"
+        ],
+        "unchanged": false,
+        "patch": "--- upstream/xz_dec_lzma2.c\n+++ optimized/xz_dec_lzma2.c\n@@ -358,11 +358,44 @@\n \tif (dist >= dict->pos)\n \t\tback += dict->end;\n \n-\tdo {\n+\t/* Preserve forward LZ repetition. A scalar word is safe only when it\n+\t * cannot consume bytes that this same word has yet to produce. Builtins\n+\t * use fixed eight-byte copies, legal under the existing no-SIMD flags.\n+\t * Dictionary wrapping is handled before each word, as in the byte path.\n+\t */\n+\tif (dist == 0 && left >= 8) {\n+\t\tuint64_t word = (uint64_t)dict->buf[back] * 0x0101010101010101ULL;\n+\t\tdo {\n+\t\t\t__builtin_memcpy(dict->buf + dict->pos, &word, 8);\n+\t\t\tdict->pos += 8;\n+\t\t\tleft -= 8;\n+\t\t} while (left >= 8);\n+\t\tback = dict->pos - 1;\n+\t} else if (dist >= 7) {\n+\t\twhile (left >= 8) {\n+\t\t\tif (dict->end - back < 8) {\n+\t\t\t\tdict->buf[dict->pos++] = dict->buf[back++];\n+\t\t\t\tif (back == dict->end)\n+\t\t\t\t\tback = 0;\n+\t\t\t\t--left;\n+\t\t\t} else {\n+\t\t\t\tuint64_t word;\n+\t\t\t\t__builtin_memcpy(&word, dict->buf + back, 8);\n+\t\t\t\t__builtin_memcpy(dict->buf + dict->pos, &word, 8);\n+\t\t\t\tdict->pos += 8;\n+\t\t\t\tback += 8;\n+\t\t\t\tleft -= 8;\n+\t\t\t\tif (back == dict->end)\n+\t\t\t\t\tback = 0;\n+\t\t\t}\n+\t\t}\n+\t}\n+\twhile (left > 0) {\n \t\tdict->buf[dict->pos++] = dict->buf[back++];\n \t\tif (back == dict->end)\n \t\t\tback = 0;\n-\t} while (--left > 0);\n+\t\t--left;\n+\t}\n \n \tif (dict->full < dict->pos)\n \t\tdict->full = dict->pos;\n"
+      },
+      {
+        "file": "xz_dec_bcj.c",
+        "original_sha256": "8a28ce7be16894feba0382f7b2e4d76949d1a79ec057d535ba061fd417764d6b",
+        "candidate_sha256": "8a28ce7be16894feba0382f7b2e4d76949d1a79ec057d535ba061fd417764d6b",
+        "original_physical_lines": 574,
+        "candidate_physical_lines": 574,
+        "added": 0,
+        "removed": 0,
+        "body_edits": [],
+        "unchanged": true,
+        "patch": ""
+      }
+    ],
+    "edited_algorithm_bodies": [
+      "dict_repeat"
+    ],
+    "interpretation": "Originally 2604 physical algorithm lines; this version modifies dict_repeat in the shared native/user XZ core. It is not a zero-body-edit port. Lines include comments/blanks and conditional paths; executed coverage requires runtime evidence and source size is not developer time.",
+    "native_changes": "XZ wrapper include redirects the public API to owner exports; native PREALLOC allocation semantics are retained. Kernel support binds nine private environment services.",
+    "user_changes": "Bind private allocator/memory/CRC services and select the common XZ SINGLE-mode API for complete contiguous compressed blocks; remove liblzma dependency."
+  },
+  "lz4": {
+    "additional_service_slots": 3,
+    "additional_callable_exports": 2,
+    "source": "Existing adapted Section 6.3 safe LZ4 decoder and header; retain the generic decoder plus safe entry, omit other API entries.",
+    "handwritten_changes": "Rename exported safe entry, define/bind private memory-helper slots, redirect native wrapper and user dispatch, update export/build lists.",
+    "source_reuse_accounting": "The assembled codec and header include reused code and generated binding additions. They are not new handwritten lines or an independent implementation.",
+    "user_source_directory": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz-user-source"
+  },
+  "source_inventory": [
+    {
+      "category": "handwritten_preparation_generator",
+      "path": "test/section65/squashfs/prepare.py",
+      "sha256": "73be5c924ec3322c30a480845f443e3623450d3b2c363b2773a444e9e6c8dcdb",
+      "physical_lines": 364,
+      "nonblank_lines": 348
+    },
+    {
+      "category": "first_user_integration",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz-user-source/user_bridge.c",
+      "sha256": "1a7a8d1d190684abdf2ee42547e432500dafb92a85294521ed8cd4242b06a813",
+      "physical_lines": 535,
+      "nonblank_lines": 528
+    },
+    {
+      "category": "first_user_integration",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz-user-source/posix_io.c",
+      "sha256": "d339bb28eee91b3532843d419e0bbb6a16fc977430e83f2f718fb3f8bd1def42",
+      "physical_lines": 154,
+      "nonblank_lines": 149
+    },
+    {
+      "category": "first_user_integration",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz-user-source/fuse_frontend.c",
+      "sha256": "e6dd46f3401b68a14f1e7542aaa6103505e70032fbc6f7b94ac4d7420c6356e3",
+      "physical_lines": 314,
+      "nonblank_lines": 312
+    },
+    {
+      "category": "specific_apptainer_integration",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz-user-source/apptainer_helper.c",
+      "sha256": "b9f612e8d8f1390407566c29982c4722ec56a3e9c06a8193600c7018a7a1ec07",
+      "physical_lines": 96,
+      "nonblank_lines": 95
+    },
+    {
+      "category": "user_build_generator",
+      "path": "test/section65/squashfs/build_user.py",
+      "sha256": "dd4bc81051501a23e67e8973623fc372bc9f844f477f50bea3dd17d094c447bf",
+      "physical_lines": 68,
+      "nonblank_lines": 63
+    },
+    {
+      "category": "generated_native_support",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/kernel_support.c",
+      "sha256": "08473dc07cdf6fa51657cce1bfaa007da6a0837474972bacf3dccb6758677b78",
+      "physical_lines": 115,
+      "nonblank_lines": 112
+    },
+    {
+      "category": "generated_native_support",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/core_metadata.c",
+      "sha256": "993d4b06ec234dbcb1abe067d2504857fb163c672058e4d2986cd7c27f277e9d",
+      "physical_lines": 66,
+      "nonblank_lines": 64
+    },
+    {
+      "category": "generated_native_support",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/shared_types.h",
+      "sha256": "3513697cfd2af786988a8bcf036d80662caf5b3e399ac2cf040258a794fbc028",
+      "physical_lines": 114,
+      "nonblank_lines": 114
+    },
+    {
+      "category": "generated_native_support",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/shared_remap.h",
+      "sha256": "852be339c29414123058d988077e7a479836642696fc85ffde42ec1c1d0d62dd",
+      "physical_lines": 95,
+      "nonblank_lines": 95
+    },
+    {
+      "category": "generated_common_owner",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/shared_core.c",
+      "sha256": "d4388043a3f2573c8cca0a030958c7cb5a977f8d8590368975c4a2afa2ecb40b",
+      "physical_lines": 2259,
+      "nonblank_lines": 1918
+    },
+    {
+      "category": "inherited_owner_runtime_header",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/owner.h",
+      "sha256": "9d8433b363e41c8628de05561d07e156f1d9287ab518e87860754bbf8319b4ca",
+      "physical_lines": 45,
+      "nonblank_lines": 43
+    },
+    {
+      "category": "lkl_application_generator",
+      "path": "test/section65/lkl/sif_frontend.py",
+      "sha256": "c736d4c7bec93a32412484f8cb8501ff8e9806a0ba103fef03115aa42be56c6e",
+      "physical_lines": 72,
+      "nonblank_lines": 64
+    },
+    {
+      "category": "lkl_cache_diagnostic_generator",
+      "path": "test/section65/lkl/cache_frontend.py",
+      "sha256": "de282e14fd758f131d9ac7b7ca6103e2a0b4f4d2ed0a152037f362b0b62f9d0f",
+      "physical_lines": 44,
+      "nonblank_lines": 40
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/final_analysis.py",
+      "sha256": "bd96aa1e87e509a20cb1f54486722934df59573c9169030b31985d9acce86633",
+      "physical_lines": 83,
+      "nonblank_lines": 78
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/monitor_environment.py",
+      "sha256": "579de07cdee2113d41c037c29831399413fdc86df55686f39deacd083bafe663",
+      "physical_lines": 33,
+      "nonblank_lines": 29
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/final_evidence.py",
+      "sha256": "c3335ae0f9c40fbae498da1a541c62a41d7eeafe5be08724dc04ba23f2a6e826",
+      "physical_lines": 72,
+      "nonblank_lines": 65
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/fixtures.py",
+      "sha256": "a2040b8d6789ed70408a485e11772978756def5fdae791414157d7088097d09e",
+      "physical_lines": 56,
+      "nonblank_lines": 51
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/native_images.py",
+      "sha256": "828e46f87c159ec3dafb8f410ec90aa5f930633b806772eaf7a6cca7a40b44de",
+      "physical_lines": 37,
+      "nonblank_lines": 32
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/resource_ledger.py",
+      "sha256": "a10d7ecc83a3aa8cb8f37604c7377e2cbdb4faf229b7ec76eaf8638be3a4b510",
+      "physical_lines": 150,
+      "nonblank_lines": 144
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/analyze_campaigns.py",
+      "sha256": "04951784da9fce3a00fe06afb7484877842e051a8ad30898a9fd07d207f8a0b2",
+      "physical_lines": 129,
+      "nonblank_lines": 120
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/audit_build.py",
+      "sha256": "4323ffb6409c7f64ad9e2b7c8d6fbed22dba7ae89551143a425c005703e90c6a",
+      "physical_lines": 57,
+      "nonblank_lines": 52
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/analyze_application.py",
+      "sha256": "a8ac0b5290a4826a2dc3c8262b5d92a40773609fde1d1cd9c88a28384438357d",
+      "physical_lines": 81,
+      "nonblank_lines": 75
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/freeze.py",
+      "sha256": "b3eed9b7a76218d673879764ca57902df68b9d322d2d1312fd929ebba7619185",
+      "physical_lines": 65,
+      "nonblank_lines": 60
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/campaign_queue.py",
+      "sha256": "5d415ba510ca1b68b2e0654a3333d4920c413c9c78286b80f7ebd1ef4f32bc1f",
+      "physical_lines": 57,
+      "nonblank_lines": 53
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/application_images.py",
+      "sha256": "43fe330b867d45b13a2fdf073c18be22eca22f83bac1ff895f71e44dab96969b",
+      "physical_lines": 62,
+      "nonblank_lines": 57
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/maintenance_guest.py",
+      "sha256": "3617e3d2e0346f62321352bb77938b4dab71c05bfd0a148fa1268e3cd08081c5",
+      "physical_lines": 145,
+      "nonblank_lines": 135
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/cost_ledger.py",
+      "sha256": "b640cd687860ce9ad0ca307f8ec67576647d624dfc1fdc1f8914308a071c7f7b",
+      "physical_lines": 145,
+      "nonblank_lines": 140
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/apptainer_bench.py",
+      "sha256": "6b7b3a5cec7ae6f79505442fcb583af1a4b5bc6114c83e781ec48f6bba2184b0",
+      "physical_lines": 341,
+      "nonblank_lines": 330
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/maintenance_reference.py",
+      "sha256": "87eea6e2de74571faeff126ca1bfd3a7192e866f6f7156b64cf918766c6aeb04",
+      "physical_lines": 93,
+      "nonblank_lines": 88
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/export_guest.py",
+      "sha256": "83e0b123ad700cb4ef9328f68314f68306a6d846e494936236f9c4606c957a26",
+      "physical_lines": 84,
+      "nonblank_lines": 75
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/build_debug_types.py",
+      "sha256": "d81beaff6e1060fc5e2eaf17ba6709e09338cb6aac0b8d4ece569cfd91f548c7",
+      "physical_lines": 42,
+      "nonblank_lines": 35
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/audit_reference_build.py",
+      "sha256": "334cfd8bf8aeaeb7938d03256e28b70fa6c0e89af9fa898f3446894eb6374f30",
+      "physical_lines": 52,
+      "nonblank_lines": 47
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/maintenance_artifacts.py",
+      "sha256": "2ef543ef509428104a758f2d74a3d0a0ab25438362a69de80af0107a9713c42f",
+      "physical_lines": 57,
+      "nonblank_lines": 50
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/validate_analysis.py",
+      "sha256": "38a340653001a348d7171e294046689a8887ce9202bc39b96918e38193945918",
+      "physical_lines": 79,
+      "nonblank_lines": 75
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/audit_application.py",
+      "sha256": "4e775c35d839202d09ba309c77ccb64c302087d1c8ee726bd98b012806836837",
+      "physical_lines": 86,
+      "nonblank_lines": 80
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/apptainer_preflight.py",
+      "sha256": "4a554fd1ebf3ed274f63e93f247565f4473f445e83e392d2f40b8b4f7029741d",
+      "physical_lines": 138,
+      "nonblank_lines": 126
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/apptainer_shared.py",
+      "sha256": "b7f102c70c5a09437541504558947152a4b2b229adc3c050d40351caafd9db0f",
+      "physical_lines": 221,
+      "nonblank_lines": 210
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/private_state_gdb.py",
+      "sha256": "0a81af6b1d573a132b83092cef2058a238e587cd55b8eb5a4788568d3d680d72",
+      "physical_lines": 62,
+      "nonblank_lines": 58
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/preflight.py",
+      "sha256": "c63c42e4e9975e52e8e7b5bba9ad5b2084f54f4a0092f6afea9ed75f2f08bd58",
+      "physical_lines": 64,
+      "nonblank_lines": 59
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/audit_existing.py",
+      "sha256": "b665607a90f111a44011d6348fb469180f222d361cd9598b858b3812759be32e",
+      "physical_lines": 88,
+      "nonblank_lines": 81
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/native_cost.py",
+      "sha256": "7d096d91e25823786038c3ad942dc07fd2485fe7942e77b73b4629007c42006b",
+      "physical_lines": 196,
+      "nonblank_lines": 183
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/check_fuse.py",
+      "sha256": "5cf55d3f5c8a89174dd8334b183f0d5299a2624fe958c0f79b87e0190bc62e89",
+      "physical_lines": 219,
+      "nonblank_lines": 208
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/maintenance.py",
+      "sha256": "2f373f66bd6cedc9f4c36e6db5920ab816c6240c826a8ca91da6d1e918d946dd",
+      "physical_lines": 173,
+      "nonblank_lines": 162
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/kernel_guest.py",
+      "sha256": "00fde8a71c9f7714311e7fdbd2d34d249c675742afa29251839ba1231e98ef52",
+      "physical_lines": 63,
+      "nonblank_lines": 56
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/audit_native.py",
+      "sha256": "dc6ead69c1a34cd831076be5577f1bd86070a9508574a5e413c5c31d7bfce29f",
+      "physical_lines": 66,
+      "nonblank_lines": 62
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/functional_extra.py",
+      "sha256": "b3bef1177ef78bbaeed696102fe496bbe7a2bd0d16d1b132ef8f728d1884b3fc",
+      "physical_lines": 163,
+      "nonblank_lines": 158
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/analyze.py",
+      "sha256": "29d65a3a9f8b5bbbc70f45b9ad72410a0c8ab5313976e1a35a7b35e912c5b0a8",
+      "physical_lines": 107,
+      "nonblank_lines": 103
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/audit_manuscript_numbers.py",
+      "sha256": "63abd2471ca2d989deac0a557fde996e7df1833445cf419deda4f820a713a74d",
+      "physical_lines": 93,
+      "nonblank_lines": 89
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/build_native_controls.py",
+      "sha256": "3fd62ec5a26ea8dd87fa08a6dede1e28fc278cd5e8d33ea7c965da71c1cb3710",
+      "physical_lines": 33,
+      "nonblank_lines": 32
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/business_costs.py",
+      "sha256": "520e9f1f58980c468aa88658c452681c2b2a267c42c39dae812497b7d5a76d5b",
+      "physical_lines": 103,
+      "nonblank_lines": 99
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/check_candidates.py",
+      "sha256": "b964f16b53a56d2382c5b6dc059b7af5b55056822b7c2a095f1f377e81ff4199",
+      "physical_lines": 39,
+      "nonblank_lines": 34
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/check_directory.py",
+      "sha256": "a27083de1d41288551c10f19322ed3ea953eb46271fc368e2a1b1d62ac6df77c",
+      "physical_lines": 46,
+      "nonblank_lines": 43
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/count_native.py",
+      "sha256": "ee89e30a43f6d5e759d7c3b7083bb3c6a4a29d907530ed66bdb064255488dbfd",
+      "physical_lines": 78,
+      "nonblank_lines": 73
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/directory_memory.py",
+      "sha256": "c5a1ff8f5405b75e3c1362d9b97675b1f178c4c228bc38b9268a1706cc3ea711",
+      "physical_lines": 42,
+      "nonblank_lines": 41
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/final_evidence.py",
+      "sha256": "0fdaa38053e488f27fa45040fb8c3a3c9cec3dba4cc5b60b6203c7278c71e54b",
+      "physical_lines": 100,
+      "nonblank_lines": 100
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/guest_regression.py",
+      "sha256": "a32c9992617e183c7a00e683827576db84aa94656b972088f21b406454de3408",
+      "physical_lines": 28,
+      "nonblank_lines": 27
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/maintenance_ledger.py",
+      "sha256": "969f7d1474f6bb4b3ff626c9f425f0ee967e65dd4f7d85bcbc016b9aefb3af7f",
+      "physical_lines": 61,
+      "nonblank_lines": 60
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/make_replay.py",
+      "sha256": "6820ce22b47caa87c6131a1a73f9da23332d02d53158a570227c66ebd774adff",
+      "physical_lines": 49,
+      "nonblank_lines": 49
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/minimal_deployment.py",
+      "sha256": "c0bb4c24c33f10eab0bf139bab08d76c12e26a786a0b8a2842b65fe2b9c59dd6",
+      "physical_lines": 58,
+      "nonblank_lines": 57
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/native_compare.py",
+      "sha256": "09989d137da54dc7ef093e1599f93c3c1e3d3e3830d9fd1e2f692dcb063821de",
+      "physical_lines": 99,
+      "nonblank_lines": 98
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/path_layout.py",
+      "sha256": "09b8a036d82c5062aaef30aba53d888abde7a513d8ed1cb2480eea7c8014f67e",
+      "physical_lines": 123,
+      "nonblank_lines": 114
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/profile_native.py",
+      "sha256": "8ee07f5f41654cbbe5b8bb432cc543211df123468019b3e9871767ce50293a66",
+      "physical_lines": 103,
+      "nonblank_lines": 98
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/profile_user.py",
+      "sha256": "c24891f55279b03a83f619e1ab87f3bef679f0663c3a208bf7862679a3225b64",
+      "physical_lines": 75,
+      "nonblank_lines": 70
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/resource_ledger.py",
+      "sha256": "f77d46c835b8696b45bf9b0244a5e9fd8eed2f4e532dd6edcd61b65f9911a8cc",
+      "physical_lines": 120,
+      "nonblank_lines": 120
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/simultaneous.py",
+      "sha256": "ad5a2f8d106a40d45406dc46c99f7d7c6b5c731b6be1f4551f64b836264a05d5",
+      "physical_lines": 215,
+      "nonblank_lines": 212
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/simultaneous_images.py",
+      "sha256": "e270ac6d05993f35e10175b54eb20806fc2a2401592741ad34104d2879b64082",
+      "physical_lines": 43,
+      "nonblank_lines": 42
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/improvement/validate_analysis.py",
+      "sha256": "3f12f2ebef33374235e3684916e2f052af2de0e04fbdccaf5240d0b3a5c9c246",
+      "physical_lines": 115,
+      "nonblank_lines": 115
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/analyze.py",
+      "sha256": "dca0ce132896a376ec02e6a69a5d93a77a874b818ee9bacdee7827598cd903da",
+      "physical_lines": 78,
+      "nonblank_lines": 73
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/audit.py",
+      "sha256": "706d9532ead3f19c0c32ed01f9b3c67a7f914e20767c567aec5a6c8a3795cbb4",
+      "physical_lines": 95,
+      "nonblank_lines": 90
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/baseline_audit.py",
+      "sha256": "df21a862dd2b0563160fc0bf8437af87bb0ab83f6d22bf756ef607764c85b573",
+      "physical_lines": 62,
+      "nonblank_lines": 57
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/clone_queue.py",
+      "sha256": "32f78b632efa97212b9a294429cb85d3a9d5b9d760b1864a1af1dfa0de9bbf55",
+      "physical_lines": 29,
+      "nonblank_lines": 27
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/decoder_controls.py",
+      "sha256": "5ce9a1d6b4a5911c4468e415de956977de836d43da0c98faa1a265b8d37f76b4",
+      "physical_lines": 40,
+      "nonblank_lines": 35
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/final_evidence.py",
+      "sha256": "09aca6656f0b5244e622b9cb371357320a8c441e21b342790543d1b2a25e5208",
+      "physical_lines": 119,
+      "nonblank_lines": 114
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/hardening.py",
+      "sha256": "c697b9b3d62539981c43ad016f9fbfca73570f35a22cb67f6bb14904d81ebf9e",
+      "physical_lines": 100,
+      "nonblank_lines": 91
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/heldout_images.py",
+      "sha256": "361c9630a288b7246117f108bc14d525adeff3b427ac142be6ce7210835ed866",
+      "physical_lines": 59,
+      "nonblank_lines": 54
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/metadata_work.py",
+      "sha256": "35862141df523705d94786222ab8cf594a6570211cf7c0301a114b15b3085584",
+      "physical_lines": 52,
+      "nonblank_lines": 47
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/recover_interrupted.py",
+      "sha256": "9529c557e62eb927983dfe5bc05599069bc90ff682a12fa38f18f87caa7196ba",
+      "physical_lines": 46,
+      "nonblank_lines": 43
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/resources.py",
+      "sha256": "43353a092ad0bdbba95723b2fd3bf39beffbd2c18f15768aec59322fb27393a0",
+      "physical_lines": 96,
+      "nonblank_lines": 91
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/reuse_audit.py",
+      "sha256": "bfe422d68a58d20b683e2ec5a2064222f33a778bc13a5e72be5d03ed93520d11",
+      "physical_lines": 65,
+      "nonblank_lines": 60
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/scale_images.py",
+      "sha256": "d268a487cbbf4214a55b36d0e2954d3724b410d80c6ab3d2271143384e86d5a9",
+      "physical_lines": 38,
+      "nonblank_lines": 33
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/refinement/write_section.py",
+      "sha256": "4d3cb296e67630193c56350d44bdccc74c45703cd272e2a856a0c2550befcd80",
+      "physical_lines": 119,
+      "nonblank_lines": 114
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/analyze.py",
+      "sha256": "d54bc7a38c3aa67260c68a2f60560b58de4e63364a6a08c573f136e5bed9acfb",
+      "physical_lines": 81,
+      "nonblank_lines": 76
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/archive_publication.py",
+      "sha256": "73bb43d40eccf3cd9e6548980efedfc6b08ada92c260ac40d8a97daea1597839",
+      "physical_lines": 30,
+      "nonblank_lines": 30
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/audit.py",
+      "sha256": "973c5cd8c60b5793e5840c3079649a06571ec63d6ff1356257773cc7c68ebcfc",
+      "physical_lines": 133,
+      "nonblank_lines": 128
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/bittree_diagnostic.py",
+      "sha256": "3226a46e7d3678c4832fba610b4169c61146ba02b9ae18bc454ce8bfefd74ee7",
+      "physical_lines": 114,
+      "nonblank_lines": 112
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/cache_sanitize.py",
+      "sha256": "f402c1b67bfe8a591af96513062058656e138f69657af21c9d94d5062d023556",
+      "physical_lines": 38,
+      "nonblank_lines": 36
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/cache_scale.py",
+      "sha256": "d516da17fb8e5f2a0e042d7f237b65a070a5fdaad7fb2b067d094b89711a58b4",
+      "physical_lines": 20,
+      "nonblank_lines": 20
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/cache_validate.py",
+      "sha256": "e2d9018200af33c307468613b955d21e14e8cc9e8af80ffb2d55ac6ee6d04b60",
+      "physical_lines": 113,
+      "nonblank_lines": 108
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/clone_confirmation.py",
+      "sha256": "a60e7db406f972a7272da9a3152f7d85696d2e49239aafcb505d32214b475ebc",
+      "physical_lines": 27,
+      "nonblank_lines": 27
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/closeout_control.py",
+      "sha256": "4de701688829a1a4479986048529880a3a440dc37fe2ac0c6f8349264e60989d",
+      "physical_lines": 55,
+      "nonblank_lines": 55
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/closeout_evidence.py",
+      "sha256": "57c5afb6fd712b9287c7210be2a2acd576584eeda5b057094097a1cf6e17868f",
+      "physical_lines": 36,
+      "nonblank_lines": 36
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/component_ledger.py",
+      "sha256": "e076c2ca58d2530fbb8d65de0dc637d6386c49950a46526a2dc2bf7e3a04eea3",
+      "physical_lines": 135,
+      "nonblank_lines": 131
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/core_closeout_analysis.py",
+      "sha256": "9432396139d0aca5fd2786ef4619f69c1cdcd48b52c3a67c3de48d94607fcfca",
+      "physical_lines": 142,
+      "nonblank_lines": 142
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/cost_ledger.py",
+      "sha256": "6cb63f743cb5112a37f0618bd487ea38186fe57bc3555c812a95302d7863f8e1",
+      "physical_lines": 175,
+      "nonblank_lines": 169
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/diagnose.py",
+      "sha256": "bb2afa6c823af94bdebfe11177bcd21512089acf516fe3469f136f2e2064b9c9",
+      "physical_lines": 192,
+      "nonblank_lines": 185
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/final_evidence.py",
+      "sha256": "1c34fd7aeea1e285a03012837592906930c1446f50b8c9e8ae88ff677cae9583",
+      "physical_lines": 173,
+      "nonblank_lines": 168
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/followup_queue.py",
+      "sha256": "27698339bc1177fb8bcfa8a6d9c4c178faa9d815b9135b1be6b918ac0ab151f1",
+      "physical_lines": 79,
+      "nonblank_lines": 76
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/freeze.py",
+      "sha256": "6ba9a6943deac85005b8d53176df2a3aad179d7fc35c019e07bf56b2e622e097",
+      "physical_lines": 66,
+      "nonblank_lines": 61
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/fuse_lifetime.py",
+      "sha256": "e3ff6477040a42ddfffc83403aad55c56e0c42760e3b2e3abf11548a65bf3285",
+      "physical_lines": 70,
+      "nonblank_lines": 66
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/fuse_memory_diagnostic.py",
+      "sha256": "ec61e8c8bd79ee5fac37fb5ef1d940d987ba1a37169af2a0a81b8ba4d6c6e214",
+      "physical_lines": 88,
+      "nonblank_lines": 84
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/hardening.py",
+      "sha256": "b900e6403b2ecba9207f4fe899797adcc449ee49e1742867f5b981aaf9946980",
+      "physical_lines": 106,
+      "nonblank_lines": 97
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/metadata_work.py",
+      "sha256": "d77dc15601a4c9ce6c93ead6a0614d096ffa87b8798a069afa372873cf044f3a",
+      "physical_lines": 54,
+      "nonblank_lines": 49
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/native_controls_guest.py",
+      "sha256": "7f00098be0adca5a055033694125e46b93f8d3225c21dabe7382414543a05367",
+      "physical_lines": 33,
+      "nonblank_lines": 31
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/perf_range.py",
+      "sha256": "811966a04017734da5f51be711e33a19017d362f46912300da9518fae1d35456",
+      "physical_lines": 19,
+      "nonblank_lines": 17
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/pilot_summary.py",
+      "sha256": "c80f500a0a5f4d3206dd5808ee2d15712a98cd5998cbbc7dce89f5e35a35cc33",
+      "physical_lines": 50,
+      "nonblank_lines": 48
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/postprocess.py",
+      "sha256": "d4cb8025708df5c0db697ccf1fbe108fa3325096e9bc3693d5ca39aeed366535",
+      "physical_lines": 47,
+      "nonblank_lines": 47
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/prepare_confirmation.py",
+      "sha256": "7a4e3e5ff49add40f888efa748e7d18110230eaa505cfaa1f484300dea069fa4",
+      "physical_lines": 93,
+      "nonblank_lines": 93
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/prepare_pilots.py",
+      "sha256": "5d7679688d6a2fe86f348c485604be8163a7616f1953f6227925509594ceaa8a",
+      "physical_lines": 67,
+      "nonblank_lines": 64
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/prepare_validation_queue.py",
+      "sha256": "eb635d7954b2ccd7ccc876b9aed4c07746c40fa63aad2733af5a56df51b2b5da",
+      "physical_lines": 21,
+      "nonblank_lines": 19
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/progress.py",
+      "sha256": "bb92f9a27922c375b953f7c7e2598cfe506f58b01f262c027af58fc9f4ef18d7",
+      "physical_lines": 38,
+      "nonblank_lines": 37
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/recover_confirmation.py",
+      "sha256": "b2155d6f930289608ad452a7d0ff1a393b8ab2ebf5c299bc1b2c3234133104aa",
+      "physical_lines": 113,
+      "nonblank_lines": 109
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/resources.py",
+      "sha256": "a901071f7c579e98a5ead2b6328bc446c85ceade672a2f9400a6cb37beb1c5e7",
+      "physical_lines": 102,
+      "nonblank_lines": 97
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/reuse_audit.py",
+      "sha256": "9959867f42a77cb671cf51d0015254981c88ce4709e8abd0e5753655d550c8fe",
+      "physical_lines": 67,
+      "nonblank_lines": 62
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/shared_diagnostic.py",
+      "sha256": "cd84c1a3d99638b5c5ada74a1f217383e47ca776ce707bbeb79563720a7cfd36",
+      "physical_lines": 79,
+      "nonblank_lines": 77
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/validate_dictionary.py",
+      "sha256": "7e1b6225876fc89402bdd8bb8fbbabb9c164d38bad160d2d4b052d72b54b00e5",
+      "physical_lines": 79,
+      "nonblank_lines": 77
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/validate_native_controls.py",
+      "sha256": "98af8e24ab1978818477dc00788812afdf3a11592b013acf08bf746051ed568a",
+      "physical_lines": 24,
+      "nonblank_lines": 22
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/validate_range.py",
+      "sha256": "9c4128ab28fd4ffd6e4a545be7d2d7585c5d026aea1ade329cb234dc0f1d2c26",
+      "physical_lines": 53,
+      "nonblank_lines": 50
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/write_reports.py",
+      "sha256": "fd97eaf817a0c5e297ade6d43c99732b4585a751ac38685dc3987e4332a113cb",
+      "physical_lines": 114,
+      "nonblank_lines": 114
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/optimization-20261030-01/write_section.py",
+      "sha256": "f5ef1262650f42735a4d56fd27c2a601efde470345116beeb1bdb5ffa1475882",
+      "physical_lines": 147,
+      "nonblank_lines": 142
+    },
+    {
+      "category": "assembled_existing_codec_sources",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/shared_lz4.c",
+      "sha256": "ff9927a2fe08a6faf531179800d046984986838fb07d2703a22a94528db1a2fc",
+      "physical_lines": 501,
+      "nonblank_lines": 445
+    },
+    {
+      "category": "assembled_existing_codec_sources",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/lz4defs.h",
+      "sha256": "45a6de2a59590d99b733d02c9ef1380006fc063957baee895557d85f6289e027",
+      "physical_lines": 269,
+      "nonblank_lines": 227
+    },
+    {
+      "category": "improvement_build_generators",
+      "path": "test/section65/squashfs/improvement/build_native_copy.py",
+      "sha256": "3b4f39dfb7fbdbe2638f4a4b7485edd264d017b436092dff1a90b8243288cbb0",
+      "physical_lines": 72,
+      "nonblank_lines": 66
+    },
+    {
+      "category": "improvement_build_generators",
+      "path": "test/section65/squashfs/improvement/build_codec.py",
+      "sha256": "2e956fb04e4483deb45ed8d5ed670d51f9bc862464be56447ef436a0ae1e2648",
+      "physical_lines": 54,
+      "nonblank_lines": 53
+    },
+    {
+      "category": "diagnostic_profile_header",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz-user-source/profile.h",
+      "sha256": "7f80d69d8d799c5a8a78b72bdac920c23bc6fc5c20c5b1fb99dd0f25634fe8b5",
+      "physical_lines": 22,
+      "nonblank_lines": 22
+    },
+    {
+      "category": "reused_and_modified_xz_algorithm_sources",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz_dec_stream.c",
+      "sha256": "2bbe132a973b3405522f735897fb6973fab15bd9397a56d1b5b8ba9eb031795c",
+      "physical_lines": 837,
+      "nonblank_lines": 681
+    },
+    {
+      "category": "reused_and_modified_xz_algorithm_sources",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz_dec_lzma2.c",
+      "sha256": "03b3e9aacb0bbb25f7e0d25e1a60d1983d3eca0221849075ab4423f36ffb9099",
+      "physical_lines": 1226,
+      "nonblank_lines": 1027
+    },
+    {
+      "category": "reused_and_modified_xz_algorithm_sources",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz_dec_bcj.c",
+      "sha256": "8a28ce7be16894feba0382f7b2e4d76949d1a79ec057d535ba061fd417764d6b",
+      "physical_lines": 574,
+      "nonblank_lines": 489
+    },
+    {
+      "category": "xz_headers_and_generated_service_binding",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz_lzma2.h",
+      "sha256": "9212655a1eac8a24a9fedb618d10b30dfa9a3fca19e36d738b7d06ea3e90c80a",
+      "physical_lines": 204,
+      "nonblank_lines": 178
+    },
+    {
+      "category": "xz_headers_and_generated_service_binding",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz_stream.h",
+      "sha256": "aafcd37de278a70b490237321a6e3ae65f76827aea22d5ef4822027a1de64ca0",
+      "physical_lines": 62,
+      "nonblank_lines": 50
+    },
+    {
+      "category": "xz_headers_and_generated_service_binding",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz_private.h",
+      "sha256": "2f4e5e96e49892851dd229a0571838984460b38d6e0db30bbcd4164b5ea00c40",
+      "physical_lines": 172,
+      "nonblank_lines": 154
+    },
+    {
+      "category": "xz_headers_and_generated_service_binding",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/sq_xz_api.h",
+      "sha256": "a425bcf5ccc229f6bbe11895b70bb4fdd06dc8110c92de5ce32fdaa42bece0fe",
+      "physical_lines": 265,
+      "nonblank_lines": 250
+    },
+    {
+      "category": "xz_headers_and_generated_service_binding",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz_names.h",
+      "sha256": "4e6462188f216520d327f4f4f20d67b35dda43a9a74b303567333ed746d62a7d",
+      "physical_lines": 13,
+      "nonblank_lines": 13
+    },
+    {
+      "category": "xz_headers_and_generated_service_binding",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz_services.h",
+      "sha256": "51e37fd07a6a1a83e90c96069c94a1d66b3316f96044f8b7e66bf5ac34b48a4f",
+      "physical_lines": 19,
+      "nonblank_lines": 19
+    },
+    {
+      "category": "xz_headers_and_generated_service_binding",
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/xz_support.c",
+      "sha256": "74404675a69183528a965c3328f86cf9e840256c70ab03940ea99876ba26be7a",
+      "physical_lines": 12,
+      "nonblank_lines": 11
+    },
+    {
+      "category": "xz_composition_generator",
+      "path": "test/section65/squashfs/refinement/build_xz.py",
+      "sha256": "220dc28c8328addaeba6ffa91a3bfe0aa16f412958011102069de170c9ece0bd",
+      "physical_lines": 149,
+      "nonblank_lines": 144
+    },
+    {
+      "category": "optimization_build_generators",
+      "path": "test/section65/squashfs/optimization-20261030-01/build_candidate.py",
+      "sha256": "343c29f9e684bc206c50fbecbf3020fee96976a131b3a6bf55554a33893ac380",
+      "physical_lines": 56,
+      "nonblank_lines": 52
+    },
+    {
+      "category": "optimization_build_generators",
+      "path": "test/section65/squashfs/optimization-20261030-01/build_native_controls.py",
+      "sha256": "e9fe005b36b7e5f561359442010ebad0e0be433be944c243040e909710eb7229",
+      "physical_lines": 50,
+      "nonblank_lines": 47
+    },
+    {
+      "category": "optimization_algorithm_patch",
+      "path": "test/section65/squashfs/optimization-20261030-01/dictionary_word.inc",
+      "sha256": "00aa34fcbb2ee1a728342d99116d552d517dd3b180521d8c19e5275f639dbfe2",
+      "physical_lines": 38,
+      "nonblank_lines": 38
+    }
+  ],
+  "native_changed_files": 16,
+  "native_file_deltas": [
+    {
+      "file": "block.c",
+      "upstream_lines": 235,
+      "prepared_lines": 155,
+      "changed": true,
+      "added": 14,
+      "removed": 94,
+      "extracted_functions": [
+        "squashfs_read_data"
+      ]
+    },
+    {
+      "file": "cache.c",
+      "upstream_lines": 448,
+      "prepared_lines": 327,
+      "changed": true,
+      "added": 5,
+      "removed": 126,
+      "extracted_functions": [
+        "squashfs_copy_data",
+        "squashfs_read_metadata",
+        "squashfs_get_fragment",
+        "squashfs_get_datablock",
+        "squashfs_read_table"
+      ]
+    },
+    {
+      "file": "decompressor.c",
+      "upstream_lines": 142,
+      "prepared_lines": 91,
+      "changed": true,
+      "added": 1,
+      "removed": 52,
+      "extracted_functions": [
+        "get_comp_opts",
+        "squashfs_decompressor_setup"
+      ]
+    },
+    {
+      "file": "decompressor.h",
+      "upstream_lines": 53,
+      "prepared_lines": 53,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "decompressor_multi.c",
+      "upstream_lines": 197,
+      "prepared_lines": 197,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "decompressor_multi_percpu.c",
+      "upstream_lines": 102,
+      "prepared_lines": 102,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "decompressor_single.c",
+      "upstream_lines": 84,
+      "prepared_lines": 84,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "dir.c",
+      "upstream_lines": 223,
+      "prepared_lines": 46,
+      "changed": true,
+      "added": 2,
+      "removed": 179,
+      "extracted_functions": [
+        "get_dir_index_using_offset",
+        "squashfs_readdir"
+      ]
+    },
+    {
+      "file": "export.c",
+      "upstream_lines": 179,
+      "prepared_lines": 123,
+      "changed": true,
+      "added": 1,
+      "removed": 57,
+      "extracted_functions": [
+        "squashfs_read_inode_lookup_table"
+      ]
+    },
+    {
+      "file": "file.c",
+      "upstream_lines": 500,
+      "prepared_lines": 230,
+      "changed": true,
+      "added": 4,
+      "removed": 274,
+      "extracted_functions": [
+        "locate_meta_index",
+        "empty_meta_index",
+        "release_meta_index",
+        "read_indexes",
+        "calculate_skip",
+        "fill_meta_index",
+        "read_blocklist"
+      ]
+    },
+    {
+      "file": "file_cache.c",
+      "upstream_lines": 36,
+      "prepared_lines": 36,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "file_direct.c",
+      "upstream_lines": 174,
+      "prepared_lines": 174,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "fragment.c",
+      "upstream_lines": 89,
+      "prepared_lines": 43,
+      "changed": true,
+      "added": 2,
+      "removed": 48,
+      "extracted_functions": [
+        "squashfs_frag_lookup",
+        "squashfs_read_fragment_index_table"
+      ]
+    },
+    {
+      "file": "id.c",
+      "upstream_lines": 115,
+      "prepared_lines": 40,
+      "changed": true,
+      "added": 2,
+      "removed": 77,
+      "extracted_functions": [
+        "squashfs_get_id",
+        "squashfs_read_id_index_table"
+      ]
+    },
+    {
+      "file": "inode.c",
+      "upstream_lines": 452,
+      "prepared_lines": 81,
+      "changed": true,
+      "added": 1,
+      "removed": 372,
+      "extracted_functions": [
+        "squashfs_new_inode",
+        "squashfs_read_inode"
+      ]
+    },
+    {
+      "file": "lz4_wrapper.c",
+      "upstream_lines": 143,
+      "prepared_lines": 133,
+      "changed": true,
+      "added": 9,
+      "removed": 19,
+      "extracted_functions": [
+        "lz4_comp_opts"
+      ]
+    },
+    {
+      "file": "lzo_wrapper.c",
+      "upstream_lines": 120,
+      "prepared_lines": 120,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "namei.c",
+      "upstream_lines": 238,
+      "prepared_lines": 73,
+      "changed": true,
+      "added": 2,
+      "removed": 167,
+      "extracted_functions": [
+        "get_dir_index_using_name",
+        "squashfs_lookup"
+      ]
+    },
+    {
+      "file": "page_actor.c",
+      "upstream_lines": 98,
+      "prepared_lines": 98,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "page_actor.h",
+      "upstream_lines": 79,
+      "prepared_lines": 79,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "squashfs.h",
+      "upstream_lines": 101,
+      "prepared_lines": 103,
+      "changed": true,
+      "added": 2,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "squashfs_fs.h",
+      "upstream_lines": 452,
+      "prepared_lines": 452,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "squashfs_fs_i.h",
+      "upstream_lines": 41,
+      "prepared_lines": 41,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "squashfs_fs_sb.h",
+      "upstream_lines": 70,
+      "prepared_lines": 70,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "super.c",
+      "upstream_lines": 591,
+      "prepared_lines": 279,
+      "changed": true,
+      "added": 10,
+      "removed": 322,
+      "extracted_functions": [
+        "supported_squashfs_filesystem",
+        "squashfs_fill_super"
+      ]
+    },
+    {
+      "file": "symlink.c",
+      "upstream_lines": 111,
+      "prepared_lines": 111,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "xattr.c",
+      "upstream_lines": 271,
+      "prepared_lines": 102,
+      "changed": true,
+      "added": 5,
+      "removed": 174,
+      "extracted_functions": [
+        "squashfs_listxattr",
+        "squashfs_xattr_get"
+      ]
+    },
+    {
+      "file": "xattr.h",
+      "upstream_lines": 41,
+      "prepared_lines": 41,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "xattr_id.c",
+      "upstream_lines": 132,
+      "prepared_lines": 36,
+      "changed": true,
+      "added": 2,
+      "removed": 98,
+      "extracted_functions": [
+        "squashfs_xattr_lookup",
+        "squashfs_read_xattr_id_table"
+      ]
+    },
+    {
+      "file": "xz_wrapper.c",
+      "upstream_lines": 187,
+      "prepared_lines": 148,
+      "changed": true,
+      "added": 3,
+      "removed": 42,
+      "extracted_functions": [
+        "squashfs_xz_comp_opts"
+      ]
+    },
+    {
+      "file": "zlib_wrapper.c",
+      "upstream_lines": 127,
+      "prepared_lines": 127,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "zstd_wrapper.c",
+      "upstream_lines": 144,
+      "prepared_lines": 144,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    }
+  ],
+  "xz_increment_from_composed_lz4": [
+    {
+      "file": "Makefile",
+      "new_file": false,
+      "added": 21,
+      "removed": 1,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "core_metadata.c",
+      "new_file": false,
+      "added": 8,
+      "removed": 0,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "kernel_support.c",
+      "new_file": false,
+      "added": 12,
+      "removed": 1,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "sq_xz_api.h",
+      "new_file": true,
+      "added": 265,
+      "removed": 0,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "symbols.txt",
+      "new_file": false,
+      "added": 7,
+      "removed": 0,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "vkso_sq_core.mod.c",
+      "new_file": false,
+      "added": 1,
+      "removed": 1,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "xz_dec_bcj.c",
+      "new_file": true,
+      "added": 574,
+      "removed": 0,
+      "unchanged_upstream_algorithm": true,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "xz_dec_lzma2.c",
+      "new_file": true,
+      "added": 1226,
+      "removed": 0,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": true
+    },
+    {
+      "file": "xz_dec_stream.c",
+      "new_file": true,
+      "added": 837,
+      "removed": 0,
+      "unchanged_upstream_algorithm": true,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "xz_lzma2.h",
+      "new_file": true,
+      "added": 204,
+      "removed": 0,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "xz_names.h",
+      "new_file": true,
+      "added": 13,
+      "removed": 0,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "xz_private.h",
+      "new_file": true,
+      "added": 172,
+      "removed": 0,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "xz_services.h",
+      "new_file": true,
+      "added": 19,
+      "removed": 0,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "xz_stream.h",
+      "new_file": true,
+      "added": 62,
+      "removed": 0,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "xz_support.c",
+      "new_file": true,
+      "added": 12,
+      "removed": 0,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    },
+    {
+      "file": "xz_wrapper.c",
+      "new_file": false,
+      "added": 1,
+      "removed": 1,
+      "unchanged_upstream_algorithm": false,
+      "changed_upstream_algorithm_body": false
+    }
+  ],
+  "patches": {
+    "composition.patch": "ebceed026d27ebd6381f9ad757fb550445ab954fece90ae4713543c21f0a6d8d",
+    "native-consumer.patch": "e36095e2af672806c4afcf21d2be5351061a808801dfd789d83269f46e2cfaea"
+  },
+  "interpretation": "Native file changes include mechanical moves, renaming and service exposure. The filesystem-body count excludes new support, generators, wrappers and user adapters. XZ reuses the original 2604-line algorithm source extent but now changes dict_repeat; nine private service slots and six exported entry/binding symbols remain. Bounded private cache and explicit handle lifetime work are additional user-adapter maintenance. Neither physical lines nor changed function counts estimate developer hours.",
+  "maintained_surfaces": [
+    "Original filesystem/codec algorithms and their upstream fixes",
+    "Per-subsystem preparation generator and generated native glue",
+    "Domain service contract and private object/cache adapter",
+    "FUSE frontend and Apptainer argument translator",
+    "General exporter fixes, accounted separately from this subsystem"
+  ]
+}

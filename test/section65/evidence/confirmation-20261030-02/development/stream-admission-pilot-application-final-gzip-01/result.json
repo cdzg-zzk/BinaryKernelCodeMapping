@@ -1,0 +1,17 @@
+{
+  "status": "complete",
+  "scope": "application pilot",
+  "runner_sha256": "b7f102c70c5a09437541504558947152a4b2b229adc3c050d40351caafd9db0f",
+  "stage_resource_observer": false,
+  "campaign": "stream-admission-pilot-application-final-gzip-01",
+  "pilot": true,
+  "partition_offset": 36864,
+  "user": "zzk",
+  "stage": "complete",
+  "native_entries": 6185,
+  "benchmark_evidence": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-gzip-01/benchmark",
+  "restored": true,
+  "application_entries": 5866,
+  "application_evidence": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-gzip-01/application",
+  "modules_unloaded": true
+}

@@ -1,0 +1,5 @@
+{
+  "status": "complete",
+  "scope": "ASAN/UBSAN private adapter plus intercepted allocator; common core remains uninstrumented",
+  "leak_scope": "Python runtime leak scanning disabled; this checks invalid accesses, not a whole-process leak proof"
+}

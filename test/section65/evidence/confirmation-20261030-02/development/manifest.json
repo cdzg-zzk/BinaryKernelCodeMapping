@@ -1,0 +1,190 @@
+{
+  "scope": "Development and correctness evidence. Pilot elapsed samples are excluded from formal inference. Binaries, images and full logs remain at the recorded server paths.",
+  "files": [
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-pilot-summary-01.json",
+      "snapshot": "stream-pilot-summary-01.json",
+      "sha256": "4ec47096b46975c6f4f17e63a773b9ba784984d6dbddbdbbe004db80883f9fb2"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/cache-pilot-summary-01.json",
+      "snapshot": "cache-pilot-summary-01.json",
+      "sha256": "030844dfab09646f95aa21135a6aa391ddec119f48d1dd966e2679ea745d00e8"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-costs-01.json",
+      "snapshot": "data48-costs-01.json",
+      "sha256": "307e19d47a22f55f05f208f3844a08ab2cbf5378a4e6906684cc1aae2a1f1499"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-reuse-01.json/result.json",
+      "snapshot": "data48-reuse-01.json/result.json",
+      "sha256": "06707d92ac038908f4fef188021c755d8416a40da7016c695db6bc900fdec03e"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-profile-01/result.json",
+      "snapshot": "stream-profile-01/result.json",
+      "sha256": "b9a52027612ac8e538cc7b91bc7f3a7e5da51d5bd0d05c3e2013c1ce49996f7d"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-pilot-queue-01/result.json",
+      "snapshot": "stream-pilot-queue-01/result.json",
+      "sha256": "4ae1fb807276fc5f5bfe71a880f1b98f5edb6f1c95f0402bcd8605280625098f"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-functional-01/result.json",
+      "snapshot": "data48-functional-01/result.json",
+      "sha256": "7fad2309547734cd81b641b0f32aade7ee5b70122f5451ffd5e4f89f825b5543"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-bcj-01/result.json",
+      "snapshot": "data48-bcj-01/result.json",
+      "sha256": "c57799a3efa8bcff953fc5bc3a1267432504d9a59db64cb35b18ee2dfabb34e9"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-lifetime-01/result.json",
+      "snapshot": "data48-lifetime-01/result.json",
+      "sha256": "3fd0b5448bc83a2f179c278be7966630ba850914d0df3e8210fa11cd0d9a5658"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-guest-01/result.json",
+      "snapshot": "data48-guest-01/result.json",
+      "sha256": "15ed80b5ed8d894a74378377d58bd54dde1fa48581c274456428c5edf3e2b6ec"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-simultaneous-01/result.json",
+      "snapshot": "data48-simultaneous-01/result.json",
+      "sha256": "1efe201c445bd7e366726cb858a243fcde253ab72871cb1b5fa3a34051d49ad5"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-minimal-01/result.json",
+      "snapshot": "data48-minimal-01/result.json",
+      "sha256": "530de68958daf50481cbd3038fb7881f228d1e13af21d3df4d86b7472f18b3ab"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-resource-queue-01/result.json",
+      "snapshot": "data48-resource-queue-01/result.json",
+      "sha256": "d8696c391069f5cf8921bb2f7a899b549939296f2a1c269b739614acfef8d19b"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-metadata-work-01/result.json",
+      "snapshot": "data48-metadata-work-01/result.json",
+      "sha256": "51ba093c76698139592f001e4335df7aa41c8d48bcaacbf1c732709cf3ea9832"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-cache-sanitize-01/sanitizer.json",
+      "snapshot": "data48-cache-sanitize-01/sanitizer.json",
+      "sha256": "0f9a981764e033b2a54e9e64ab558cdc09fd57241cd8b1ee717eae03dba535fb"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-gzip-01/result.json",
+      "snapshot": "stream-admission-pilot-application-final-gzip-01/result.json",
+      "sha256": "e6719d94b8ca2ba9bf19c96088b604027bd32c490d7a5913228083942d14c5ae"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-gzip-01/benchmark/result.json",
+      "snapshot": "stream-admission-pilot-application-final-gzip-01/benchmark/result.json",
+      "sha256": "74421bb4d252d902259749ca7da74d2965bd108c414970734b15097b2b23f462"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-gzip-01/benchmark/samples.jsonl",
+      "snapshot": "stream-admission-pilot-application-final-gzip-01/benchmark/samples.jsonl",
+      "sha256": "3009b2aae588614f716be991dfbe0c228c6168c239572c26b64fefa2b2d46053"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-gzip-01/benchmark/environment.json",
+      "snapshot": "stream-admission-pilot-application-final-gzip-01/benchmark/environment.json",
+      "sha256": "4ed625bb203ba59975994255445e5a01f65a1d60b9e63dca770456ac9684d7d1"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-xz-01/result.json",
+      "snapshot": "stream-admission-pilot-application-final-xz-01/result.json",
+      "sha256": "c01e0b7f521237d50291919513a8be915b93f34515cbdb3b206f99b70394a0c1"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-xz-01/benchmark/result.json",
+      "snapshot": "stream-admission-pilot-application-final-xz-01/benchmark/result.json",
+      "sha256": "db2aab26cfbfe7d91a9fb813ff63bc20c799b3d01a7508bfe9707aebe4a52e66"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-xz-01/benchmark/samples.jsonl",
+      "snapshot": "stream-admission-pilot-application-final-xz-01/benchmark/samples.jsonl",
+      "sha256": "4781d17e636abdd1e96c089bee34e1eacd76af3e3f18d62bc610fc1fb7b7a08f"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-xz-01/benchmark/environment.json",
+      "snapshot": "stream-admission-pilot-application-final-xz-01/benchmark/environment.json",
+      "sha256": "cd81081b8e7b4a15df8d09ef94847b12d192b23380bf6e3ca10fbebdcf980ea1"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-lz4-01/result.json",
+      "snapshot": "stream-admission-pilot-application-final-lz4-01/result.json",
+      "sha256": "6ddfc249b4b60d6e1d3a47a327b5ad67c0263d82373546ad1b0e80e1b784527a"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-lz4-01/benchmark/result.json",
+      "snapshot": "stream-admission-pilot-application-final-lz4-01/benchmark/result.json",
+      "sha256": "cc342db83c0baee5a453c0b043cb940b254a2da95686d21aa29f88bb990773cf"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-lz4-01/benchmark/samples.jsonl",
+      "snapshot": "stream-admission-pilot-application-final-lz4-01/benchmark/samples.jsonl",
+      "sha256": "3cb308f92e07e8a2c33ce3a5f42b06b7a6186dfadcda0acb0d0242446cf0f494"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-lz4-01/benchmark/environment.json",
+      "snapshot": "stream-admission-pilot-application-final-lz4-01/benchmark/environment.json",
+      "sha256": "a52ac7895457586e52e582ad4f2c49ef58f88f74f75922279f5bc5f3d505ba1c"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-heldout-xz-01/result.json",
+      "snapshot": "stream-admission-pilot-heldout-xz-01/result.json",
+      "sha256": "1d7851c35eb2fce83140cf1b34f7dc8cdf10d3e266754f5615ac74fb14ca8ef6"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-heldout-xz-01/benchmark/result.json",
+      "snapshot": "stream-admission-pilot-heldout-xz-01/benchmark/result.json",
+      "sha256": "227c3f19e56bffe3aab5c7455851a87e00e74ee8c787c0c2c50a069a312afa8c"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-heldout-xz-01/benchmark/samples.jsonl",
+      "snapshot": "stream-admission-pilot-heldout-xz-01/benchmark/samples.jsonl",
+      "sha256": "e72875a0fda7464b0ec35bbb99fdacdea1a02ac599f1973cf7dccebe92aa2877"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-heldout-xz-01/benchmark/environment.json",
+      "snapshot": "stream-admission-pilot-heldout-xz-01/benchmark/environment.json",
+      "sha256": "5779396b6d988ff2f272bc80f844cd8e504ffc1dc509d1cbdfadaf83f6570b9e"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-resource-scale-01-01/result.json",
+      "snapshot": "data48-resource-scale-01-01/result.json",
+      "sha256": "5618d5e3538dd4da27b4df16181a42df7e9b909c3f5074bb10ad9d380456e344"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-resource-scale-01-01/benchmark/resources.json",
+      "snapshot": "data48-resource-scale-01-01/benchmark/resources.json",
+      "sha256": "6a5981260aa8cd50763e90d9a4987c9ae9bb731c1d501b8fcdb5fdd0d499aa80"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-resource-scale-04-01/result.json",
+      "snapshot": "data48-resource-scale-04-01/result.json",
+      "sha256": "d695c226e76cb656a9dfa93ad83b2520bdeb8d4ac75d019e61c871c91d7d0a60"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-resource-scale-04-01/benchmark/resources.json",
+      "snapshot": "data48-resource-scale-04-01/benchmark/resources.json",
+      "sha256": "77b7e255af27e8ed6d7f10c301dc1963cc96f0b03a9b09b630277d86894cc6ed"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-resource-scale-16-01/result.json",
+      "snapshot": "data48-resource-scale-16-01/result.json",
+      "sha256": "5412053687f19951e5cb136c9252b981d07a06192e652380ab5f0689a57c29b4"
+    },
+    {
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-resource-scale-16-01/benchmark/resources.json",
+      "snapshot": "data48-resource-scale-16-01/benchmark/resources.json",
+      "sha256": "0cef6b2e7b4581043a2e7287d714116c628e2cac42ae93a0a0cb542145957326"
+    }
+  ]
+}

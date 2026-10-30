@@ -1,0 +1,1580 @@
+{
+  "status": "complete",
+  "scope": "Descriptive full pilot groups; no formal confidence interval or significance claim.",
+  "inputs": [
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "samples": 128,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-gzip-01/benchmark/samples.jsonl",
+      "sha256": "3009b2aae588614f716be991dfbe0c228c6168c239572c26b64fefa2b2d46053"
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "samples": 128,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-xz-01/benchmark/samples.jsonl",
+      "sha256": "4781d17e636abdd1e96c089bee34e1eacd76af3e3f18d62bc610fc1fb7b7a08f"
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "samples": 128,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-application-final-lz4-01/benchmark/samples.jsonl",
+      "sha256": "3cb308f92e07e8a2c33ce3a5f42b06b7a6186dfadcda0acb0d0242446cf0f494"
+    },
+    {
+      "campaign": "stream-admission-pilot-heldout-xz-01",
+      "samples": 32,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/stream-admission-pilot-heldout-xz-01/benchmark/samples.jsonl",
+      "sha256": "e72875a0fda7464b0ec35bbb99fdacdea1a02ac599f1973cf7dccebe92aa2877"
+    }
+  ],
+  "comparisons": [
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "archive",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 1.0094647535270431,
+      "block_ratios": [
+        0.9902187266023248,
+        1.0035600241053386,
+        0.9964960044701283,
+        1.0486114332987286
+      ],
+      "baseline_seconds": 0.9173246060090605,
+      "treatment_seconds": 0.9150977135141147,
+      "cpu_ratio": 0.9953671501412042
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "archive",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.006798866861152,
+      "block_ratios": [
+        0.9905880908707753,
+        0.993199423844027,
+        1.0142327562848423,
+        1.0296833215302177
+      ],
+      "baseline_seconds": 0.9173246060090605,
+      "treatment_seconds": 0.9186431859998265,
+      "cpu_ratio": 0.9980951344531257
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "archive",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 0.9980644859659501,
+      "block_ratios": [
+        0.9940652935209986,
+        0.9980228899501844,
+        0.9844445844845796,
+        1.0159859965793467
+      ],
+      "baseline_seconds": 0.9173246060090605,
+      "treatment_seconds": 0.9136929999949643,
+      "cpu_ratio": 0.9870494189456971
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "archive",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9380404095305597,
+      "block_ratios": [
+        0.946638632005984,
+        0.9417582001451013,
+        0.9292332749780385,
+        0.9346258810024458
+      ],
+      "baseline_seconds": 0.98189672800072,
+      "treatment_seconds": 0.9186431859998265,
+      "cpu_ratio": 0.9477232724962555
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "archive",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.0244635537659306,
+      "block_ratios": [
+        1.0044578419260288,
+        1.0121045969115592,
+        1.031785710222268,
+        1.0501212103499062
+      ],
+      "baseline_seconds": 0.9000549014890566,
+      "treatment_seconds": 0.9186431859998265,
+      "cpu_ratio": 1.018951694541645
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "archive",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9973591087191737,
+      "block_ratios": [
+        1.0003730128087134,
+        0.9896761528832838,
+        1.0177991198511078,
+        0.9819493559125455
+      ],
+      "baseline_seconds": 0.9150977135141147,
+      "treatment_seconds": 0.9186431859998265,
+      "cpu_ratio": 1.0027406814777187
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "archive",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.6829560959175928,
+      "block_ratios": [
+        0.6876123124566856,
+        0.6851903722629251,
+        0.6784862992855153,
+        0.6805737031208187
+      ],
+      "baseline_seconds": 1.3471311624889495,
+      "treatment_seconds": 0.9186431859998265,
+      "cpu_ratio": 0.6538753205790173
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "scan",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 1.1046481057186404,
+      "block_ratios": [
+        1.1125500320987023,
+        1.0121918265351786,
+        1.1446714660095967,
+        1.1551345531637953
+      ],
+      "baseline_seconds": 0.4563225329911802,
+      "treatment_seconds": 0.5166285799932666,
+      "cpu_ratio": 0.9985657797980655
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "scan",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.086747922878668,
+      "block_ratios": [
+        1.0411859955882192,
+        1.0098624859583307,
+        1.140082982286466,
+        1.163558584200154
+      ],
+      "baseline_seconds": 0.4563225329911802,
+      "treatment_seconds": 0.49932379300298635,
+      "cpu_ratio": 1.0035661514563186
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "scan",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 1.0289054101498536,
+      "block_ratios": [
+        0.9872978804411784,
+        0.9876833257508082,
+        0.9835412734667431,
+        1.1685392035128022
+      ],
+      "baseline_seconds": 0.4563225329911802,
+      "treatment_seconds": 0.4513416050176602,
+      "cpu_ratio": 0.9843562371624416
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "scan",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9882022708700742,
+      "block_ratios": [
+        0.9785477482483976,
+        0.9427034653666998,
+        1.0752537425641988,
+        0.9614247586599797
+      ],
+      "baseline_seconds": 0.4880419754917966,
+      "treatment_seconds": 0.49932379300298635,
+      "cpu_ratio": 0.9394435137509705
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "scan",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.0871456732760951,
+      "block_ratios": [
+        1.0428424309201074,
+        1.0080178796017685,
+        1.1429192843802967,
+        1.1626486125018778
+      ],
+      "baseline_seconds": 0.4564266454835888,
+      "treatment_seconds": 0.49932379300298635,
+      "cpu_ratio": 1.0107276919327235
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "scan",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9837955791103927,
+      "block_ratios": [
+        0.9358554362037428,
+        0.997698716275134,
+        0.9959914404618415,
+        1.0072926837945293
+      ],
+      "baseline_seconds": 0.5166285799932666,
+      "treatment_seconds": 0.49932379300298635,
+      "cpu_ratio": 1.0050075535927783
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "scan",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.7315652976810867,
+      "block_ratios": [
+        0.714500805808829,
+        0.6966343858468224,
+        0.744337199393383,
+        0.773098855796207
+      ],
+      "baseline_seconds": 0.6748745509976288,
+      "treatment_seconds": 0.49932379300298635,
+      "cpu_ratio": 0.6303791340140895
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "startup",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 0.8544209031225107,
+      "block_ratios": [
+        0.9987117924810344,
+        1.0321918156774583,
+        0.7360326073177016,
+        0.7024085914669692
+      ],
+      "baseline_seconds": 0.1771286235016305,
+      "treatment_seconds": 0.15093670500209555,
+      "cpu_ratio": 1.0001054917453833
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "startup",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9195166957135705,
+      "block_ratios": [
+        1.015063676394406,
+        1.0134084418108489,
+        0.7092175906613237,
+        0.9798986809800319
+      ],
+      "baseline_seconds": 0.1771286235016305,
+      "treatment_seconds": 0.14935043250443414,
+      "cpu_ratio": 1.0046626210642517
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "startup",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 0.7942305646314582,
+      "block_ratios": [
+        0.9365928655421936,
+        0.9133769415016952,
+        0.7171777657031831,
+        0.6485727220048416
+      ],
+      "baseline_seconds": 0.1771286235016305,
+      "treatment_seconds": 0.138319589997991,
+      "cpu_ratio": 0.9203445467548771
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "startup",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.8797118611281469,
+      "block_ratios": [
+        0.7487088598495906,
+        1.0499243412469366,
+        0.7224860935152364,
+        1.0545357838776066
+      ],
+      "baseline_seconds": 0.19919613350066356,
+      "treatment_seconds": 0.14935043250443414,
+      "cpu_ratio": 1.052643948592758
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "startup",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.036971861594735,
+      "block_ratios": [
+        0.7516079481070238,
+        1.01706315733956,
+        1.0360015304446268,
+        1.460051598486088
+      ],
+      "baseline_seconds": 0.14496500650420785,
+      "treatment_seconds": 0.14935043250443414,
+      "cpu_ratio": 1.070016595725477
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "startup",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.0761870318869367,
+      "block_ratios": [
+        1.0163729757037812,
+        0.981802438673396,
+        0.9635681675108132,
+        1.395055090276628
+      ],
+      "baseline_seconds": 0.15093670500209555,
+      "treatment_seconds": 0.14935043250443414,
+      "cpu_ratio": 1.0045566486300515
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "startup",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.7200582364943836,
+      "block_ratios": [
+        0.618248128839127,
+        0.629521851392952,
+        0.6686586652704292,
+        1.0329811409964502
+      ],
+      "baseline_seconds": 0.22807141298835631,
+      "treatment_seconds": 0.14935043250443414,
+      "cpu_ratio": 0.4803701123027574
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "stream",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 0.9772598712131305,
+      "block_ratios": [
+        0.9908092574121217,
+        1.0053906479735688,
+        0.9893165279883223,
+        0.9255078401453103
+      ],
+      "baseline_seconds": 0.6232066209922777,
+      "treatment_seconds": 0.6150447185063967,
+      "cpu_ratio": 0.9887067252776577
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "stream",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9875977754539933,
+      "block_ratios": [
+        0.9652731778607012,
+        0.9860190900685176,
+        1.0432728275004943,
+        0.9580473061920748
+      ],
+      "baseline_seconds": 0.6232066209922777,
+      "treatment_seconds": 0.6252707780076889,
+      "cpu_ratio": 0.9736145117822408
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "stream",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 0.9874929465410538,
+      "block_ratios": [
+        0.9712588735753251,
+        0.9681441293458994,
+        0.9804347560068388,
+        1.031436021771255
+      ],
+      "baseline_seconds": 0.6232066209922777,
+      "treatment_seconds": 0.6050428409944288,
+      "cpu_ratio": 0.9881515971130305
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "stream",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9141985591332032,
+      "block_ratios": [
+        0.8353573051134875,
+        0.9339433812268041,
+        0.9858383390433153,
+        0.9081625787213752
+      ],
+      "baseline_seconds": 0.6791477975057205,
+      "treatment_seconds": 0.6252707780076889,
+      "cpu_ratio": 0.9152316446323872
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "stream",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9827322074241922,
+      "block_ratios": [
+        0.944172678064223,
+        0.9632391870962221,
+        1.0210440569506207,
+        1.0044092531886386
+      ],
+      "baseline_seconds": 0.63424907749868,
+      "treatment_seconds": 0.6252707780076889,
+      "cpu_ratio": 0.9460185199281707
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "stream",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.0105784597785947,
+      "block_ratios": [
+        0.9742270478799141,
+        0.9807323074427877,
+        1.054538965018493,
+        1.0351584985402777
+      ],
+      "baseline_seconds": 0.6150447185063967,
+      "treatment_seconds": 0.6252707780076889,
+      "cpu_ratio": 0.9847353991739274
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-gzip-01",
+      "workload": "stream",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.6624846652095643,
+      "block_ratios": [
+        0.6306923759185851,
+        0.6428243296500757,
+        0.6910864882187401,
+        0.6874815241580774
+      ],
+      "baseline_seconds": 0.9425011915009236,
+      "treatment_seconds": 0.6252707780076889,
+      "cpu_ratio": 0.6004524403834041
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "archive",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 0.975423663655803,
+      "block_ratios": [
+        0.9774081266472816,
+        0.9773111455887903,
+        0.9739989361718492,
+        0.972984382570249
+      ],
+      "baseline_seconds": 1.6464231754944194,
+      "treatment_seconds": 1.6072729434963549,
+      "cpu_ratio": 0.9778964980441
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "archive",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9779990007547132,
+      "block_ratios": [
+        0.9777407015544604,
+        0.9867786041122844,
+        0.9798225063085831,
+        0.9677491857954437
+      ],
+      "baseline_seconds": 1.6464231754944194,
+      "treatment_seconds": 1.614796045498224,
+      "cpu_ratio": 0.9802253132434252
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "archive",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 0.9494084744569686,
+      "block_ratios": [
+        0.9479887877943851,
+        0.9900116683592572,
+        0.9356434307734695,
+        0.9252487966239249
+      ],
+      "baseline_seconds": 1.6464231754944194,
+      "treatment_seconds": 1.5514078960113693,
+      "cpu_ratio": 0.9475633748559074
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "archive",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.7916065538784792,
+      "block_ratios": [
+        0.788989485089042,
+        0.7946747334045704,
+        0.7929754590738363,
+        0.7898000508615166
+      ],
+      "baseline_seconds": 2.0399842789920513,
+      "treatment_seconds": 1.614796045498224,
+      "cpu_ratio": 0.7861615080607597
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "archive",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.8123653110962991,
+      "block_ratios": [
+        0.8061907168336773,
+        0.8183172839819809,
+        0.8127326935769686,
+        0.8122659228116309
+      ],
+      "baseline_seconds": 1.9874430855124956,
+      "treatment_seconds": 1.614796045498224,
+      "cpu_ratio": 0.808287366645526
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "archive",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.002640224135283,
+      "block_ratios": [
+        1.0003402620646502,
+        1.0096872511545851,
+        1.0059790313114947,
+        0.9946194441878132
+      ],
+      "baseline_seconds": 1.6072729434963549,
+      "treatment_seconds": 1.614796045498224,
+      "cpu_ratio": 1.002381453665069
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "archive",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.876911287163042,
+      "block_ratios": [
+        0.889006162588328,
+        0.888288150532365,
+        0.8394908244873673,
+        0.8919654788708926
+      ],
+      "baseline_seconds": 1.818450003003818,
+      "treatment_seconds": 1.614796045498224,
+      "cpu_ratio": 0.8611293627746803
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "scan",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 1.0056089333321176,
+      "block_ratios": [
+        0.9872288528542643,
+        1.0157899477545427,
+        1.0215904748717795,
+        0.9982007817870583
+      ],
+      "baseline_seconds": 0.5867785989976255,
+      "treatment_seconds": 0.5908616890083067,
+      "cpu_ratio": 1.0031351969315094
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "scan",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.0123810513392975,
+      "block_ratios": [
+        0.9872352479585933,
+        1.0607255530062565,
+        1.008037543172792,
+        0.9951204251292569
+      ],
+      "baseline_seconds": 0.5867785989976255,
+      "treatment_seconds": 0.5866418194927974,
+      "cpu_ratio": 1.0035857368384415
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "scan",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 0.9144154236303322,
+      "block_ratios": [
+        0.9077896123976367,
+        0.9190180457356074,
+        0.9189197569906334,
+        0.9119842412072232
+      ],
+      "baseline_seconds": 0.5867785989976255,
+      "treatment_seconds": 0.5362206195131876,
+      "cpu_ratio": 0.9088151250188452
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "scan",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.4585638426146872,
+      "block_ratios": [
+        0.4490679381850035,
+        0.4809388284536465,
+        0.4539083121597961,
+        0.45105469306629997
+      ],
+      "baseline_seconds": 1.294862930488307,
+      "treatment_seconds": 0.5866418194927974,
+      "cpu_ratio": 0.429646536323992
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "scan",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.46765573485437806,
+      "block_ratios": [
+        0.4600889172991633,
+        0.4880724535151392,
+        0.46338326965418036,
+        0.45966203891248314
+      ],
+      "baseline_seconds": 1.26824598100211,
+      "treatment_seconds": 0.5866418194927974,
+      "cpu_ratio": 0.43790295244545296
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "scan",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.0067343455121665,
+      "block_ratios": [
+        1.0000064778336963,
+        1.044237103695549,
+        0.9867334983710684,
+        0.996914091118736
+      ],
+      "baseline_seconds": 0.5908616890083067,
+      "treatment_seconds": 0.5866418194927974,
+      "cpu_ratio": 1.000449131790321
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "scan",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9237638742929071,
+      "block_ratios": [
+        0.9271798822679784,
+        0.9582874021316097,
+        0.9056287528285746,
+        0.9049694444141825
+      ],
+      "baseline_seconds": 0.647358879505191,
+      "treatment_seconds": 0.5866418194927974,
+      "cpu_ratio": 0.8743041147047211
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "startup",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 1.0073089299751508,
+      "block_ratios": [
+        1.0191946207587286,
+        1.0230736677905024,
+        0.9834764782302194,
+        1.003974608644035
+      ],
+      "baseline_seconds": 0.25774949898186605,
+      "treatment_seconds": 0.2596534800104564,
+      "cpu_ratio": 1.0094271667923347
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "startup",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9949693142894139,
+      "block_ratios": [
+        0.9920401431566429,
+        1.0103395977661376,
+        0.9964751673151183,
+        0.9812409101997759
+      ],
+      "baseline_seconds": 0.25774949898186605,
+      "treatment_seconds": 0.25511199250468053,
+      "cpu_ratio": 1.0081890936993327
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "startup",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 0.7989401584237175,
+      "block_ratios": [
+        0.8215274158809411,
+        0.7825042578405061,
+        0.8082803082987066,
+        0.7841266897096263
+      ],
+      "baseline_seconds": 0.25774949898186605,
+      "treatment_seconds": 0.20645190551294945,
+      "cpu_ratio": 0.7529910894115747
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "startup",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.5628758740099656,
+      "block_ratios": [
+        0.5611822899875046,
+        0.5653837558312075,
+        0.5615327171609774,
+        0.5634147192398979
+      ],
+      "baseline_seconds": 0.45290299849875737,
+      "treatment_seconds": 0.25511199250468053,
+      "cpu_ratio": 0.5034009739753331
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "startup",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.5674426154222147,
+      "block_ratios": [
+        0.5649538007319451,
+        0.5639457956678952,
+        0.5748700365004773,
+        0.5660669816326684
+      ],
+      "baseline_seconds": 0.449934737989679,
+      "treatment_seconds": 0.25511199250468053,
+      "cpu_ratio": 0.5072498579509198
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "startup",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9877499192963163,
+      "block_ratios": [
+        0.9733569260973229,
+        0.9875531250336388,
+        1.0132170818241533,
+        0.9773563013959454
+      ],
+      "baseline_seconds": 0.2596534800104564,
+      "treatment_seconds": 0.25511199250468053,
+      "cpu_ratio": 0.9987734894267448
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "startup",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9182617328259303,
+      "block_ratios": [
+        0.9166965623182153,
+        0.9030910712256202,
+        0.8983891411376165,
+        0.955970078782481
+      ],
+      "baseline_seconds": 0.28039778300444596,
+      "treatment_seconds": 0.25511199250468053,
+      "cpu_ratio": 0.8144983586908366
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "stream",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 0.9569905235054286,
+      "block_ratios": [
+        0.952373192705638,
+        0.9391121066503757,
+        0.9724161956201549,
+        0.9643923657623946
+      ],
+      "baseline_seconds": 0.9335128079983406,
+      "treatment_seconds": 0.8936416579963407,
+      "cpu_ratio": 0.9551700617365602
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "stream",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9526742331554058,
+      "block_ratios": [
+        0.9285234281788112,
+        0.961731248109353,
+        0.9637138264387337,
+        0.9571565884447149
+      ],
+      "baseline_seconds": 0.9335128079983406,
+      "treatment_seconds": 0.8905183960014256,
+      "cpu_ratio": 0.9458185185637679
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "stream",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 0.8878443645474222,
+      "block_ratios": [
+        0.8681296074848985,
+        0.8889052900187554,
+        0.8979237087042675,
+        0.8967427456835215
+      ],
+      "baseline_seconds": 0.9335128079983406,
+      "treatment_seconds": 0.8319280570140108,
+      "cpu_ratio": 0.8825438493509085
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "stream",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9366830121407599,
+      "block_ratios": [
+        0.9282518825766691,
+        0.9496534827691119,
+        0.9337314336268099,
+        0.9352281965199226
+      ],
+      "baseline_seconds": 0.9520094220060855,
+      "treatment_seconds": 0.8905183960014256,
+      "cpu_ratio": 0.9292992238312565
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "stream",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9678398962779976,
+      "block_ratios": [
+        0.962709609778064,
+        0.9771227159074525,
+        0.9641922423668071,
+        0.9673998880543825
+      ],
+      "baseline_seconds": 0.9220560510002542,
+      "treatment_seconds": 0.8905183960014256,
+      "cpu_ratio": 0.962963339583937
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "stream",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.995489725087128,
+      "block_ratios": [
+        0.9749575432094314,
+        1.024085666981395,
+        0.991050777207725,
+        0.9924970607663827
+      ],
+      "baseline_seconds": 0.8936416579963407,
+      "treatment_seconds": 0.8905183960014256,
+      "cpu_ratio": 0.9902095516312659
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-xz-01",
+      "workload": "stream",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.7191012936053716,
+      "block_ratios": [
+        0.7307668223058382,
+        0.7268457997216607,
+        0.715606336985606,
+        0.7035014478320744
+      ],
+      "baseline_seconds": 1.2430159484938486,
+      "treatment_seconds": 0.8905183960014256,
+      "cpu_ratio": 0.6922759225877295
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "archive",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 1.0059062272616546,
+      "block_ratios": [
+        1.010096607969248,
+        1.007401261473611,
+        0.9969993199685593,
+        1.0091825253942928
+      ],
+      "baseline_seconds": 0.7965977445128374,
+      "treatment_seconds": 0.8014194329880411,
+      "cpu_ratio": 1.0026445623004279
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "archive",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9993512812286086,
+      "block_ratios": [
+        0.9968344831119546,
+        1.0019028158821959,
+        1.0128584586836133,
+        0.9859962991152846
+      ],
+      "baseline_seconds": 0.7965977445128374,
+      "treatment_seconds": 0.8000674569921102,
+      "cpu_ratio": 1.0032936791852787
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "archive",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 0.998842105794207,
+      "block_ratios": [
+        1.0045113712273235,
+        1.0034100995804394,
+        0.9963594667491552,
+        0.991146814213121
+      ],
+      "baseline_seconds": 0.7965977445128374,
+      "treatment_seconds": 0.7976157039956888,
+      "cpu_ratio": 1.0072483533113235
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "archive",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9795245162868008,
+      "block_ratios": [
+        0.973351781669057,
+        0.9728804260987276,
+        0.9819594146789739,
+        0.9900073276384059
+      ],
+      "baseline_seconds": 0.8159041015023831,
+      "treatment_seconds": 0.8000674569921102,
+      "cpu_ratio": 0.9761763578366404
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "archive",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.0247297812660612,
+      "block_ratios": [
+        1.0096460402862617,
+        1.0166470052368353,
+        1.04305541810943,
+        1.0298897053295335
+      ],
+      "baseline_seconds": 0.7818841875123326,
+      "treatment_seconds": 0.8000674569921102,
+      "cpu_ratio": 1.0238151658124723
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "archive",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9934835416509049,
+      "block_ratios": [
+        0.9868704391712033,
+        0.9945419508574248,
+        1.0159068701426537,
+        0.9770247445872599
+      ],
+      "baseline_seconds": 0.8014194329880411,
+      "treatment_seconds": 0.8000674569921102,
+      "cpu_ratio": 1.0006474047825697
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "archive",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.7131174612105114,
+      "block_ratios": [
+        0.7175721653198404,
+        0.6891553196731546,
+        0.7351467479943535,
+        0.7113568944942591
+      ],
+      "baseline_seconds": 1.1164433640078641,
+      "treatment_seconds": 0.8000674569921102,
+      "cpu_ratio": 0.6819563211045382
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "scan",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 0.987270290373435,
+      "block_ratios": [
+        0.985948393686464,
+        1.0232960213322706,
+        0.9467663488029402,
+        0.9945943547176737
+      ],
+      "baseline_seconds": 0.4412259305099724,
+      "treatment_seconds": 0.439199884494883,
+      "cpu_ratio": 1.0041424459866213
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "scan",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.988355027702234,
+      "block_ratios": [
+        1.0074060037978687,
+        1.0102692548647725,
+        0.9382661631641108,
+        0.9992730562258306
+      ],
+      "baseline_seconds": 0.4412259305099724,
+      "treatment_seconds": 0.4393285800033482,
+      "cpu_ratio": 1.0067071886372092
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "scan",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 0.9885239661920712,
+      "block_ratios": [
+        0.9895592720062734,
+        1.0136739056632313,
+        0.9538885250161792,
+        0.9979553443564997
+      ],
+      "baseline_seconds": 0.4412259305099724,
+      "treatment_seconds": 0.4397787694906583,
+      "cpu_ratio": 1.0005981382474074
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "scan",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9524913560730073,
+      "block_ratios": [
+        0.9689844547074551,
+        0.9536964291867469,
+        0.9448059809926977,
+        0.9427023120942236
+      ],
+      "baseline_seconds": 0.4614933670090977,
+      "treatment_seconds": 0.4393285800033482,
+      "cpu_ratio": 0.9494386545977405
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "scan",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.008031979758525,
+      "block_ratios": [
+        1.029072420213803,
+        1.0034695724938856,
+        1.000060556626585,
+        0.9998176412184183
+      ],
+      "baseline_seconds": 0.43729615800839383,
+      "treatment_seconds": 0.4393285800033482,
+      "cpu_ratio": 1.0143081075822808
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "scan",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.0010987237632651,
+      "block_ratios": [
+        1.021763421137261,
+        0.9872697966219608,
+        0.9910218760419858,
+        1.0047041303682898
+      ],
+      "baseline_seconds": 0.439199884494883,
+      "treatment_seconds": 0.4393285800033482,
+      "cpu_ratio": 1.0025541621717504
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "scan",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.7115323881241955,
+      "block_ratios": [
+        0.7412618673492185,
+        0.7363353374250852,
+        0.6433167231903817,
+        0.7299725852679717
+      ],
+      "baseline_seconds": 0.6018165789864725,
+      "treatment_seconds": 0.4393285800033482,
+      "cpu_ratio": 0.6615057050839442
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "startup",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 0.9769609468897681,
+      "block_ratios": [
+        1.0001270651156193,
+        1.028224896818302,
+        0.9164210387211458,
+        0.9666526985266909
+      ],
+      "baseline_seconds": 0.1320049795031082,
+      "treatment_seconds": 0.13115163499605842,
+      "cpu_ratio": 1.008866181006784
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "startup",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.960191053186477,
+      "block_ratios": [
+        1.002341595908577,
+        1.0119804887410035,
+        0.8822794140904563,
+        0.9498096578308204
+      ],
+      "baseline_seconds": 0.1320049795031082,
+      "treatment_seconds": 0.1284448295045877,
+      "cpu_ratio": 1.0085782430663093
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "startup",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 0.959076890409275,
+      "block_ratios": [
+        1.01466113086964,
+        0.9921561635605683,
+        0.8943345527385614,
+        0.9397506553980071
+      ],
+      "baseline_seconds": 0.1320049795031082,
+      "treatment_seconds": 0.12884033750742674,
+      "cpu_ratio": 1.01367563135285
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "startup",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9801539628426621,
+      "block_ratios": [
+        0.986011080229654,
+        0.9943751262020463,
+        0.9361118951081661,
+        1.0055817649150705
+      ],
+      "baseline_seconds": 0.1296550289989682,
+      "treatment_seconds": 0.1284448295045877,
+      "cpu_ratio": 1.0007689201592098
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "startup",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9856439222490939,
+      "block_ratios": [
+        0.9996008997112996,
+        0.9551110602670925,
+        0.9909871482543304,
+        0.9975430752283353
+      ],
+      "baseline_seconds": 0.1295428370067384,
+      "treatment_seconds": 0.1284448295045877,
+      "cpu_ratio": 0.9923537327346704
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "startup",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9828346324828241,
+      "block_ratios": [
+        1.0022142494390969,
+        0.984201502873968,
+        0.9627446084407516,
+        0.9825759130228038
+      ],
+      "baseline_seconds": 0.13115163499605842,
+      "treatment_seconds": 0.1284448295045877,
+      "cpu_ratio": 0.9997145925337813
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "startup",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.6323195382992565,
+      "block_ratios": [
+        0.707014740558586,
+        0.64881107771462,
+        0.6309959426416346,
+        0.552297546951618
+      ],
+      "baseline_seconds": 0.2007604599930346,
+      "treatment_seconds": 0.1284448295045877,
+      "cpu_ratio": 0.430745551239639
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "stream",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 1.069794906766244,
+      "block_ratios": [
+        1.1103932255538989,
+        1.0672969673740416,
+        1.0648810337894934,
+        1.0378603787164484
+      ],
+      "baseline_seconds": 0.5184142564976355,
+      "treatment_seconds": 0.5529168390057748,
+      "cpu_ratio": 1.0752416619640357
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "stream",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.0739239749833773,
+      "block_ratios": [
+        1.0623214298263814,
+        1.0818474146820387,
+        1.1039726827896237,
+        1.048368276323989
+      ],
+      "baseline_seconds": 0.5184142564976355,
+      "treatment_seconds": 0.5594835094962036,
+      "cpu_ratio": 1.0741201364174582
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "stream",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 1.0344529546580996,
+      "block_ratios": [
+        1.0171607496732487,
+        1.0174468812139947,
+        1.0465033696568313,
+        1.0573067588195044
+      ],
+      "baseline_seconds": 0.5184142564976355,
+      "treatment_seconds": 0.5345033805060666,
+      "cpu_ratio": 1.0207278220771383
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "stream",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.0122326896349998,
+      "block_ratios": [
+        0.9970290597977071,
+        1.0106835897591948,
+        1.0295832804559248,
+        1.011898429855995
+      ],
+      "baseline_seconds": 0.5536375079973368,
+      "treatment_seconds": 0.5594835094962036,
+      "cpu_ratio": 0.9971470136756302
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "stream",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.0226649437709465,
+      "block_ratios": [
+        1.0007732535189242,
+        1.0049172102710116,
+        1.0499163941347303,
+        1.0358879578029188
+      ],
+      "baseline_seconds": 0.5473071589949541,
+      "treatment_seconds": 0.5594835094962036,
+      "cpu_ratio": 1.0226976517292419
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "stream",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.003859682067112,
+      "block_ratios": [
+        0.9567074126343506,
+        1.0136329885240813,
+        1.0367098743988505,
+        1.0101245772774716
+      ],
+      "baseline_seconds": 0.5529168390057748,
+      "treatment_seconds": 0.5594835094962036,
+      "cpu_ratio": 0.9989569549002325
+    },
+    {
+      "campaign": "stream-admission-pilot-application-final-lz4-01",
+      "workload": "stream",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.6929902033262055,
+      "block_ratios": [
+        0.6827112095364455,
+        0.695323777246586,
+        0.7083617764565363,
+        0.6858500073828399
+      ],
+      "baseline_seconds": 0.8067126045061741,
+      "treatment_seconds": 0.5594835094962036,
+      "cpu_ratio": 0.642460028003406
+    },
+    {
+      "campaign": "stream-admission-pilot-heldout-xz-01",
+      "workload": "compile",
+      "baseline": "copied-small",
+      "treatment": "copied",
+      "blocks": 4,
+      "time_ratio": 0.9814792487479477,
+      "block_ratios": [
+        0.981354548117449,
+        0.9833017268679977,
+        0.977140473017174,
+        0.9841351503223112
+      ],
+      "baseline_seconds": 2.51586966899049,
+      "treatment_seconds": 2.471526696012006,
+      "cpu_ratio": 0.9813939942851263
+    },
+    {
+      "campaign": "stream-admission-pilot-heldout-xz-01",
+      "workload": "compile",
+      "baseline": "copied-small",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9810592740409835,
+      "block_ratios": [
+        0.9797658863238132,
+        0.978219569930375,
+        0.9817580571006946,
+        0.9845048390596981
+      ],
+      "baseline_seconds": 2.51586966899049,
+      "treatment_seconds": 2.468445280013839,
+      "cpu_ratio": 0.9799098527390181
+    },
+    {
+      "campaign": "stream-admission-pilot-heldout-xz-01",
+      "workload": "compile",
+      "baseline": "copied-small",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "time_ratio": 0.8909274200771333,
+      "block_ratios": [
+        0.8874887826562254,
+        0.8842471053118539,
+        0.8863399795008364,
+        0.9058002646493888
+      ],
+      "baseline_seconds": 2.51586966899049,
+      "treatment_seconds": 2.232697780505987,
+      "cpu_ratio": 0.8841313699461838
+    },
+    {
+      "campaign": "stream-admission-pilot-heldout-xz-01",
+      "workload": "compile",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.135047349274699,
+      "block_ratios": [
+        1.1384906005026287,
+        1.138972977034551,
+        1.136826295938031,
+        1.1259495582239478
+      ],
+      "baseline_seconds": 2.1693016270000953,
+      "treatment_seconds": 2.468445280013839,
+      "cpu_ratio": 1.1422415874788745
+    },
+    {
+      "campaign": "stream-admission-pilot-heldout-xz-01",
+      "workload": "compile",
+      "baseline": "stock-single",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.1447506073820186,
+      "block_ratios": [
+        1.1432271900886566,
+        1.1465513186549021,
+        1.141972175861494,
+        1.1472602985680578
+      ],
+      "baseline_seconds": 2.156739901009132,
+      "treatment_seconds": 2.468445280013839,
+      "cpu_ratio": 1.1478308580032963
+    },
+    {
+      "campaign": "stream-admission-pilot-heldout-xz-01",
+      "workload": "compile",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 0.9995721002685489,
+      "block_ratios": [
+        0.9983811540928981,
+        0.9948315386836446,
+        1.0047256092762822,
+        1.0003756483418622
+      ],
+      "baseline_seconds": 2.471526696012006,
+      "treatment_seconds": 2.468445280013839,
+      "cpu_ratio": 0.9984877209818374
+    },
+    {
+      "campaign": "stream-admission-pilot-heldout-xz-01",
+      "workload": "compile",
+      "baseline": "lkl-cache-512",
+      "treatment": "vkso",
+      "blocks": 4,
+      "time_ratio": 1.0489561717443265,
+      "block_ratios": [
+        1.0507310712267055,
+        1.0460917870187145,
+        1.0462633174093128,
+        1.0527542512394146
+      ],
+      "baseline_seconds": 2.354477359505836,
+      "treatment_seconds": 2.468445280013839,
+      "cpu_ratio": 1.0417021051043183
+    }
+  ],
+  "observations": 416
+}

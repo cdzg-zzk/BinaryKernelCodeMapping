@@ -1,0 +1,1885 @@
+{
+  "stock": {
+    "before": {
+      "helper": {
+        "pid": 2407092,
+        "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+        "memory": {
+          "Rss": 6776,
+          "Pss": 4693,
+          "Private_Clean": 200,
+          "Private_Dirty": 4364,
+          "VmSize": 453148,
+          "VmHWM": 4808,
+          "VmRSS": 4808,
+          "Threads": 7
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407059,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4448,
+            "Pss": 851,
+            "Private_Clean": 60,
+            "Private_Dirty": 564,
+            "VmSize": 10572,
+            "VmHWM": 4076,
+            "VmRSS": 4076,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407062,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25912,
+            "Pss": 24148,
+            "Private_Clean": 18376,
+            "Private_Dirty": 5712,
+            "VmSize": 1877548,
+            "VmHWM": 24916,
+            "VmRSS": 24916,
+            "Threads": 9
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407078,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1680,
+            "Pss": 972,
+            "Private_Clean": 204,
+            "Private_Dirty": 64,
+            "VmSize": 2456,
+            "VmHWM": 1548,
+            "VmRSS": 1548,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407092,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+          "memory": {
+            "Rss": 6776,
+            "Pss": 4693,
+            "Private_Clean": 200,
+            "Private_Dirty": 4364,
+            "VmSize": 453148,
+            "VmHWM": 4808,
+            "VmRSS": 4808,
+            "Threads": 7
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407097,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 2320,
+            "Pss": 580,
+            "Private_Clean": 108,
+            "Private_Dirty": 356,
+            "VmSize": 4364,
+            "VmHWM": 2176,
+            "VmRSS": 2176,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407111,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1484,
+            "Pss": 776,
+            "Private_Clean": 20,
+            "Private_Dirty": 52,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 32020
+    },
+    "after": {
+      "helper": {
+        "pid": 2407092,
+        "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+        "memory": {
+          "Rss": 19792,
+          "Pss": 17709,
+          "Private_Clean": 200,
+          "Private_Dirty": 17380,
+          "VmSize": 602544,
+          "VmHWM": 17484,
+          "VmRSS": 17460,
+          "Threads": 9
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407059,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4448,
+            "Pss": 851,
+            "Private_Clean": 60,
+            "Private_Dirty": 564,
+            "VmSize": 10572,
+            "VmHWM": 4076,
+            "VmRSS": 4076,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407062,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25912,
+            "Pss": 24148,
+            "Private_Clean": 18376,
+            "Private_Dirty": 5712,
+            "VmSize": 1877548,
+            "VmHWM": 24916,
+            "VmRSS": 24916,
+            "Threads": 9
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407078,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1680,
+            "Pss": 972,
+            "Private_Clean": 204,
+            "Private_Dirty": 64,
+            "VmSize": 2456,
+            "VmHWM": 1548,
+            "VmRSS": 1548,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407092,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+          "memory": {
+            "Rss": 19792,
+            "Pss": 17709,
+            "Private_Clean": 200,
+            "Private_Dirty": 17380,
+            "VmSize": 602544,
+            "VmHWM": 17484,
+            "VmRSS": 17460,
+            "Threads": 9
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407097,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 5036,
+            "Pss": 3296,
+            "Private_Clean": 108,
+            "Private_Dirty": 3072,
+            "VmSize": 7116,
+            "VmHWM": 4824,
+            "VmRSS": 4824,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407122,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1512,
+            "Pss": 804,
+            "Private_Clean": 44,
+            "Private_Dirty": 56,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 47780
+    },
+    "entries": 5867
+  },
+  "copied": {
+    "before": {
+      "helper": {
+        "pid": 2407182,
+        "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+        "memory": {
+          "Rss": 5508,
+          "Pss": 3539,
+          "Private_Clean": 116,
+          "Private_Dirty": 3304,
+          "VmSize": 8612,
+          "VmHWM": 5452,
+          "VmRSS": 5452,
+          "Threads": 1
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407149,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4556,
+            "Pss": 852,
+            "Private_Clean": 60,
+            "Private_Dirty": 568,
+            "VmSize": 10572,
+            "VmHWM": 4228,
+            "VmRSS": 4228,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407152,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25716,
+            "Pss": 23895,
+            "Private_Clean": 18100,
+            "Private_Dirty": 5732,
+            "VmSize": 1951284,
+            "VmHWM": 24628,
+            "VmRSS": 24628,
+            "Threads": 10
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407168,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1676,
+            "Pss": 968,
+            "Private_Clean": 204,
+            "Private_Dirty": 60,
+            "VmSize": 2456,
+            "VmHWM": 1544,
+            "VmRSS": 1544,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407182,
+          "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+          "memory": {
+            "Rss": 5508,
+            "Pss": 3539,
+            "Private_Clean": 116,
+            "Private_Dirty": 3304,
+            "VmSize": 8612,
+            "VmHWM": 5452,
+            "VmRSS": 5452,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407185,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 2392,
+            "Pss": 558,
+            "Private_Clean": 104,
+            "Private_Dirty": 344,
+            "VmSize": 4364,
+            "VmHWM": 2392,
+            "VmRSS": 2392,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407196,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1492,
+            "Pss": 784,
+            "Private_Clean": 20,
+            "Private_Dirty": 60,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 30596
+    },
+    "after": {
+      "helper": {
+        "pid": 2407182,
+        "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+        "memory": {
+          "Rss": 12212,
+          "Pss": 10242,
+          "Private_Clean": 116,
+          "Private_Dirty": 10008,
+          "VmSize": 15176,
+          "VmHWM": 12052,
+          "VmRSS": 12052,
+          "Threads": 1
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407149,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4556,
+            "Pss": 852,
+            "Private_Clean": 60,
+            "Private_Dirty": 568,
+            "VmSize": 10572,
+            "VmHWM": 4228,
+            "VmRSS": 4228,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407152,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25716,
+            "Pss": 23895,
+            "Private_Clean": 18100,
+            "Private_Dirty": 5732,
+            "VmSize": 1951284,
+            "VmHWM": 24628,
+            "VmRSS": 24628,
+            "Threads": 10
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407168,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1676,
+            "Pss": 968,
+            "Private_Clean": 204,
+            "Private_Dirty": 60,
+            "VmSize": 2456,
+            "VmHWM": 1544,
+            "VmRSS": 1544,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407182,
+          "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+          "memory": {
+            "Rss": 12212,
+            "Pss": 10242,
+            "Private_Clean": 116,
+            "Private_Dirty": 10008,
+            "VmSize": 15176,
+            "VmHWM": 12052,
+            "VmRSS": 12052,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407185,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 5080,
+            "Pss": 3246,
+            "Private_Clean": 104,
+            "Private_Dirty": 3032,
+            "VmSize": 7044,
+            "VmHWM": 4952,
+            "VmRSS": 4952,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407210,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1516,
+            "Pss": 808,
+            "Private_Clean": 44,
+            "Private_Dirty": 60,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 40011
+    },
+    "entries": 5867
+  },
+  "vkso": {
+    "before": {
+      "helper": {
+        "pid": 2407290,
+        "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+        "memory": {
+          "Rss": 5496,
+          "Pss": 3531,
+          "Private_Clean": 156,
+          "Private_Dirty": 3252,
+          "VmSize": 8612,
+          "VmHWM": 5440,
+          "VmRSS": 5440,
+          "Threads": 1
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407257,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4548,
+            "Pss": 850,
+            "Private_Clean": 60,
+            "Private_Dirty": 564,
+            "VmSize": 10572,
+            "VmHWM": 4216,
+            "VmRSS": 4216,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407260,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25944,
+            "Pss": 24141,
+            "Private_Clean": 18368,
+            "Private_Dirty": 5712,
+            "VmSize": 1877552,
+            "VmHWM": 25088,
+            "VmRSS": 25088,
+            "Threads": 9
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407276,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1680,
+            "Pss": 972,
+            "Private_Clean": 204,
+            "Private_Dirty": 64,
+            "VmSize": 2456,
+            "VmHWM": 1548,
+            "VmRSS": 1548,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407290,
+          "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+          "memory": {
+            "Rss": 5496,
+            "Pss": 3531,
+            "Private_Clean": 156,
+            "Private_Dirty": 3252,
+            "VmSize": 8612,
+            "VmHWM": 5440,
+            "VmRSS": 5440,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407293,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 2272,
+            "Pss": 551,
+            "Private_Clean": 92,
+            "Private_Dirty": 348,
+            "VmSize": 4364,
+            "VmHWM": 2272,
+            "VmRSS": 2272,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407303,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1492,
+            "Pss": 784,
+            "Private_Clean": 20,
+            "Private_Dirty": 60,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 30829
+    },
+    "after": {
+      "helper": {
+        "pid": 2407290,
+        "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+        "memory": {
+          "Rss": 12200,
+          "Pss": 10235,
+          "Private_Clean": 156,
+          "Private_Dirty": 9956,
+          "VmSize": 15176,
+          "VmHWM": 12040,
+          "VmRSS": 12040,
+          "Threads": 1
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407257,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4548,
+            "Pss": 850,
+            "Private_Clean": 60,
+            "Private_Dirty": 564,
+            "VmSize": 10572,
+            "VmHWM": 4216,
+            "VmRSS": 4216,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407260,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25944,
+            "Pss": 24141,
+            "Private_Clean": 18368,
+            "Private_Dirty": 5712,
+            "VmSize": 1877552,
+            "VmHWM": 25088,
+            "VmRSS": 25088,
+            "Threads": 9
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407276,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1680,
+            "Pss": 972,
+            "Private_Clean": 204,
+            "Private_Dirty": 64,
+            "VmSize": 2456,
+            "VmHWM": 1548,
+            "VmRSS": 1548,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407290,
+          "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+          "memory": {
+            "Rss": 12200,
+            "Pss": 10235,
+            "Private_Clean": 156,
+            "Private_Dirty": 9956,
+            "VmSize": 15176,
+            "VmHWM": 12040,
+            "VmRSS": 12040,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407293,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 5024,
+            "Pss": 3241,
+            "Private_Clean": 92,
+            "Private_Dirty": 3036,
+            "VmSize": 7044,
+            "VmHWM": 4896,
+            "VmRSS": 4896,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407310,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1512,
+            "Pss": 804,
+            "Private_Clean": 44,
+            "Private_Dirty": 56,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 40243
+    },
+    "entries": 5867
+  },
+  "stock-single": {
+    "before": {
+      "helper": {
+        "pid": 2407367,
+        "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+        "memory": {
+          "Rss": 5028,
+          "Pss": 2916,
+          "Private_Clean": 156,
+          "Private_Dirty": 2616,
+          "VmSize": 7816,
+          "VmHWM": 5032,
+          "VmRSS": 5028,
+          "Threads": 1
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407334,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4440,
+            "Pss": 852,
+            "Private_Clean": 60,
+            "Private_Dirty": 564,
+            "VmSize": 10572,
+            "VmHWM": 4108,
+            "VmRSS": 4108,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407337,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25660,
+            "Pss": 23872,
+            "Private_Clean": 18096,
+            "Private_Dirty": 5716,
+            "VmSize": 1877552,
+            "VmHWM": 24664,
+            "VmRSS": 24664,
+            "Threads": 9
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407353,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1680,
+            "Pss": 972,
+            "Private_Clean": 204,
+            "Private_Dirty": 64,
+            "VmSize": 2456,
+            "VmHWM": 1548,
+            "VmRSS": 1548,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407367,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+          "memory": {
+            "Rss": 5028,
+            "Pss": 2916,
+            "Private_Clean": 156,
+            "Private_Dirty": 2616,
+            "VmSize": 7816,
+            "VmHWM": 5032,
+            "VmRSS": 5028,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407370,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 2328,
+            "Pss": 554,
+            "Private_Clean": 92,
+            "Private_Dirty": 356,
+            "VmSize": 4364,
+            "VmHWM": 2132,
+            "VmRSS": 2132,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407380,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1488,
+            "Pss": 780,
+            "Private_Clean": 20,
+            "Private_Dirty": 56,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 29946
+    },
+    "after": {
+      "helper": {
+        "pid": 2407367,
+        "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+        "memory": {
+          "Rss": 14352,
+          "Pss": 12240,
+          "Private_Clean": 156,
+          "Private_Dirty": 11940,
+          "VmSize": 17132,
+          "VmHWM": 14088,
+          "VmRSS": 14088,
+          "Threads": 1
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407334,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4440,
+            "Pss": 852,
+            "Private_Clean": 60,
+            "Private_Dirty": 564,
+            "VmSize": 10572,
+            "VmHWM": 4108,
+            "VmRSS": 4108,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407337,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25660,
+            "Pss": 23872,
+            "Private_Clean": 18096,
+            "Private_Dirty": 5716,
+            "VmSize": 1877552,
+            "VmHWM": 24664,
+            "VmRSS": 24664,
+            "Threads": 9
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407353,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1680,
+            "Pss": 972,
+            "Private_Clean": 204,
+            "Private_Dirty": 64,
+            "VmSize": 2456,
+            "VmHWM": 1548,
+            "VmRSS": 1548,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407367,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+          "memory": {
+            "Rss": 14352,
+            "Pss": 12240,
+            "Private_Clean": 156,
+            "Private_Dirty": 11940,
+            "VmSize": 17132,
+            "VmHWM": 14088,
+            "VmRSS": 14088,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407370,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 5044,
+            "Pss": 3270,
+            "Private_Clean": 92,
+            "Private_Dirty": 3072,
+            "VmSize": 7116,
+            "VmHWM": 4828,
+            "VmRSS": 4828,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407383,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1512,
+            "Pss": 804,
+            "Private_Clean": 44,
+            "Private_Dirty": 56,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 42010
+    },
+    "entries": 5867
+  },
+  "lkl-cache-512": {
+    "before": {
+      "helper": {
+        "pid": 2407423,
+        "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/cache-frontend-01/lklfuse-cache",
+        "memory": {
+          "Rss": 24708,
+          "Pss": 22619,
+          "Private_Clean": 3984,
+          "Private_Dirty": 18488,
+          "VmSize": 1870360,
+          "VmHWM": 23752,
+          "VmRSS": 23752,
+          "Threads": 18
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407390,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4444,
+            "Pss": 854,
+            "Private_Clean": 60,
+            "Private_Dirty": 568,
+            "VmSize": 10572,
+            "VmHWM": 4112,
+            "VmRSS": 4112,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407393,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25448,
+            "Pss": 23684,
+            "Private_Clean": 17868,
+            "Private_Dirty": 5756,
+            "VmSize": 1951284,
+            "VmHWM": 24356,
+            "VmRSS": 24356,
+            "Threads": 10
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407409,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1684,
+            "Pss": 976,
+            "Private_Clean": 204,
+            "Private_Dirty": 68,
+            "VmSize": 2456,
+            "VmHWM": 1536,
+            "VmRSS": 1536,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407423,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/cache-frontend-01/lklfuse-cache",
+          "memory": {
+            "Rss": 24708,
+            "Pss": 22619,
+            "Private_Clean": 3984,
+            "Private_Dirty": 18488,
+            "VmSize": 1870360,
+            "VmHWM": 23752,
+            "VmRSS": 23752,
+            "Threads": 18
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407449,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 2324,
+            "Pss": 545,
+            "Private_Clean": 92,
+            "Private_Dirty": 344,
+            "VmSize": 4364,
+            "VmHWM": 2324,
+            "VmRSS": 2324,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407473,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1488,
+            "Pss": 780,
+            "Private_Clean": 20,
+            "Private_Dirty": 56,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 49458
+    },
+    "after": {
+      "helper": {
+        "pid": 2407423,
+        "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/cache-frontend-01/lklfuse-cache",
+        "memory": {
+          "Rss": 86788,
+          "Pss": 84699,
+          "Private_Clean": 3984,
+          "Private_Dirty": 80568,
+          "VmSize": 1871232,
+          "VmHWM": 85736,
+          "VmRSS": 85736,
+          "Threads": 18
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407390,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4444,
+            "Pss": 854,
+            "Private_Clean": 60,
+            "Private_Dirty": 568,
+            "VmSize": 10572,
+            "VmHWM": 4112,
+            "VmRSS": 4112,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407393,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25448,
+            "Pss": 23684,
+            "Private_Clean": 17868,
+            "Private_Dirty": 5756,
+            "VmSize": 1951284,
+            "VmHWM": 24356,
+            "VmRSS": 24356,
+            "Threads": 10
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407409,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1684,
+            "Pss": 976,
+            "Private_Clean": 204,
+            "Private_Dirty": 68,
+            "VmSize": 2456,
+            "VmHWM": 1536,
+            "VmRSS": 1536,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407423,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/cache-frontend-01/lklfuse-cache",
+          "memory": {
+            "Rss": 86788,
+            "Pss": 84699,
+            "Private_Clean": 3984,
+            "Private_Dirty": 80568,
+            "VmSize": 1871232,
+            "VmHWM": 85736,
+            "VmRSS": 85736,
+            "Threads": 18
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407449,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 5012,
+            "Pss": 3233,
+            "Private_Clean": 92,
+            "Private_Dirty": 3032,
+            "VmSize": 7044,
+            "VmHWM": 4884,
+            "VmRSS": 4884,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407620,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1512,
+            "Pss": 804,
+            "Private_Clean": 44,
+            "Private_Dirty": 56,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 114250
+    },
+    "entries": 5867
+  },
+  "copied-unbounded": {
+    "before": {
+      "helper": {
+        "pid": 2407678,
+        "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-word-01/vkso-squashfuse",
+        "memory": {
+          "Rss": 3308,
+          "Pss": 1403,
+          "Private_Clean": 116,
+          "Private_Dirty": 1168,
+          "VmSize": 6448,
+          "VmHWM": 3384,
+          "VmRSS": 3308,
+          "Threads": 1
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407645,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4552,
+            "Pss": 848,
+            "Private_Clean": 60,
+            "Private_Dirty": 564,
+            "VmSize": 10572,
+            "VmHWM": 4224,
+            "VmRSS": 4224,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407648,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25500,
+            "Pss": 23729,
+            "Private_Clean": 17952,
+            "Private_Dirty": 5716,
+            "VmSize": 1877552,
+            "VmHWM": 24296,
+            "VmRSS": 24296,
+            "Threads": 9
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407664,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1680,
+            "Pss": 972,
+            "Private_Clean": 204,
+            "Private_Dirty": 64,
+            "VmSize": 2456,
+            "VmHWM": 1548,
+            "VmRSS": 1548,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407678,
+          "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-word-01/vkso-squashfuse",
+          "memory": {
+            "Rss": 3308,
+            "Pss": 1403,
+            "Private_Clean": 116,
+            "Private_Dirty": 1168,
+            "VmSize": 6448,
+            "VmHWM": 3384,
+            "VmRSS": 3308,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407681,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 2324,
+            "Pss": 545,
+            "Private_Clean": 92,
+            "Private_Dirty": 344,
+            "VmSize": 4364,
+            "VmHWM": 2324,
+            "VmRSS": 2324,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407691,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1488,
+            "Pss": 780,
+            "Private_Clean": 20,
+            "Private_Dirty": 56,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 28277
+    },
+    "after": {
+      "helper": {
+        "pid": 2407678,
+        "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-word-01/vkso-squashfuse",
+        "memory": {
+          "Rss": 9080,
+          "Pss": 7175,
+          "Private_Clean": 116,
+          "Private_Dirty": 6940,
+          "VmSize": 12040,
+          "VmHWM": 9056,
+          "VmRSS": 9056,
+          "Threads": 1
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407645,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4552,
+            "Pss": 849,
+            "Private_Clean": 60,
+            "Private_Dirty": 564,
+            "VmSize": 10572,
+            "VmHWM": 4224,
+            "VmRSS": 4224,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407648,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25500,
+            "Pss": 23729,
+            "Private_Clean": 17952,
+            "Private_Dirty": 5716,
+            "VmSize": 1877552,
+            "VmHWM": 24296,
+            "VmRSS": 24296,
+            "Threads": 9
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407664,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1680,
+            "Pss": 972,
+            "Private_Clean": 204,
+            "Private_Dirty": 64,
+            "VmSize": 2456,
+            "VmHWM": 1548,
+            "VmRSS": 1548,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407678,
+          "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-word-01/vkso-squashfuse",
+          "memory": {
+            "Rss": 9080,
+            "Pss": 7175,
+            "Private_Clean": 116,
+            "Private_Dirty": 6940,
+            "VmSize": 12040,
+            "VmHWM": 9056,
+            "VmRSS": 9056,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407681,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 5012,
+            "Pss": 3233,
+            "Private_Clean": 92,
+            "Private_Dirty": 3032,
+            "VmSize": 7044,
+            "VmHWM": 4884,
+            "VmRSS": 4884,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407699,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1512,
+            "Pss": 804,
+            "Private_Clean": 44,
+            "Private_Dirty": 56,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 36762
+    },
+    "entries": 5867
+  },
+  "copied-small": {
+    "before": {
+      "helper": {
+        "pid": 2407763,
+        "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+        "memory": {
+          "Rss": 3440,
+          "Pss": 1513,
+          "Private_Clean": 140,
+          "Private_Dirty": 1256,
+          "VmSize": 6596,
+          "VmHWM": 3436,
+          "VmRSS": 3352,
+          "Threads": 1
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407729,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4460,
+            "Pss": 852,
+            "Private_Clean": 60,
+            "Private_Dirty": 568,
+            "VmSize": 10572,
+            "VmHWM": 4128,
+            "VmRSS": 4128,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407732,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25464,
+            "Pss": 23676,
+            "Private_Clean": 17868,
+            "Private_Dirty": 5748,
+            "VmSize": 1943160,
+            "VmHWM": 24384,
+            "VmRSS": 24384,
+            "Threads": 9
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407749,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1680,
+            "Pss": 972,
+            "Private_Clean": 204,
+            "Private_Dirty": 64,
+            "VmSize": 2456,
+            "VmHWM": 1548,
+            "VmRSS": 1548,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407763,
+          "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "memory": {
+            "Rss": 3440,
+            "Pss": 1513,
+            "Private_Clean": 140,
+            "Private_Dirty": 1256,
+            "VmSize": 6596,
+            "VmHWM": 3436,
+            "VmRSS": 3352,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407766,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 2272,
+            "Pss": 547,
+            "Private_Clean": 100,
+            "Private_Dirty": 348,
+            "VmSize": 4364,
+            "VmHWM": 2272,
+            "VmRSS": 2272,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407776,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1488,
+            "Pss": 780,
+            "Private_Clean": 20,
+            "Private_Dirty": 56,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 28340
+    },
+    "after": {
+      "helper": {
+        "pid": 2407763,
+        "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+        "memory": {
+          "Rss": 6208,
+          "Pss": 4281,
+          "Private_Clean": 140,
+          "Private_Dirty": 4024,
+          "VmSize": 9108,
+          "VmHWM": 5988,
+          "VmRSS": 5988,
+          "Threads": 1
+        },
+        "affinity": [
+          1,
+          2
+        ]
+      },
+      "processes": [
+        {
+          "pid": 2407729,
+          "executable": "/usr/sbin/runuser",
+          "memory": {
+            "Rss": 4460,
+            "Pss": 852,
+            "Private_Clean": 60,
+            "Private_Dirty": 568,
+            "VmSize": 10572,
+            "VmHWM": 4128,
+            "VmRSS": 4128,
+            "Threads": 1
+          },
+          "affinity": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "pid": 2407732,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+          "memory": {
+            "Rss": 25464,
+            "Pss": 23676,
+            "Private_Clean": 17868,
+            "Private_Dirty": 5748,
+            "VmSize": 1943160,
+            "VmHWM": 24384,
+            "VmRSS": 24384,
+            "Threads": 9
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407749,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1680,
+            "Pss": 972,
+            "Private_Clean": 204,
+            "Private_Dirty": 64,
+            "VmSize": 2456,
+            "VmHWM": 1548,
+            "VmRSS": 1548,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407763,
+          "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "memory": {
+            "Rss": 6208,
+            "Pss": 4281,
+            "Private_Clean": 140,
+            "Private_Dirty": 4024,
+            "VmSize": 9108,
+            "VmHWM": 5988,
+            "VmRSS": 5988,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407766,
+          "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+          "memory": {
+            "Rss": 4960,
+            "Pss": 3235,
+            "Private_Clean": 100,
+            "Private_Dirty": 3036,
+            "VmSize": 7044,
+            "VmHWM": 4832,
+            "VmRSS": 4832,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        },
+        {
+          "pid": 2407782,
+          "executable": "/usr/bin/busybox",
+          "memory": {
+            "Rss": 1512,
+            "Pss": 804,
+            "Private_Clean": 44,
+            "Private_Dirty": 56,
+            "VmSize": 2456,
+            "VmHWM": 4,
+            "VmRSS": 4,
+            "Threads": 1
+          },
+          "affinity": [
+            1,
+            2
+          ]
+        }
+      ],
+      "descendant_pss_kib": 33820
+    },
+    "entries": 5867
+  }
+}

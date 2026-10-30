@@ -1,0 +1,77 @@
+{
+  "status": "complete",
+  "scope": "Real SIF application with only owner+registration resident; then identical copied image after all task modules unload.",
+  "binaries": {
+    "vkso_sq_core.ko": "64ab8c7e8bb313d56b8721ae7c8c5e752dfc824a091073f9f18f6044f574ec98",
+    "libsq-bridge.so": "c3a687df6f9e26d1ccb66c1ec1c71bd9208710168f057c371994548f5083d316",
+    "vkso-squashfuse": "7d5d40526cc92483c3a4fd70e5b374dd263ec658c67c7de0d2947cb29026f46a"
+  },
+  "copy_materialization": {
+    "wall_seconds": 0.00014267698861658573,
+    "bytes": 65016,
+    "sha256": "40e3b02f47f68e157160ce72bb72df158098037be69da2fcba79e0ed21995767"
+  },
+  "runtime_modules": [
+    {
+      "name": "page_cache_replace",
+      "reported_bytes": 32768
+    },
+    {
+      "name": "vkso_sq_core",
+      "reported_bytes": 69632
+    }
+  ],
+  "shared_application": {
+    "status": "pass",
+    "scope": "SIF application integration; no performance or PFN claim",
+    "entries": 5866,
+    "helper_invocations": [
+      {
+        "pid": 2406586,
+        "source": "/proc/self/fd/3",
+        "target": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/var/lib/apptainer/mnt/session/rootfs",
+        "offset": 36864,
+        "options": "allow_other,ro,uid=1000,gid=1000",
+        "command": [
+          "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+          "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-minimal-01/carrier/libvkso_sq_core.so",
+          "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/libsq-bridge.so",
+          "/proc/self/fd/3",
+          "36864",
+          "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/var/lib/apptainer/mnt/session/rootfs",
+          "allow_other,ro,uid=1000,gid=1000"
+        ]
+      }
+    ],
+    "image": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/application-images-01/xz.sif",
+    "apptainer_version": "apptainer version 1.5.5"
+  },
+  "copied_modules_absent": true,
+  "copied_application": {
+    "status": "pass",
+    "scope": "SIF application integration; no performance or PFN claim",
+    "entries": 5866,
+    "helper_invocations": [
+      {
+        "pid": 2406750,
+        "source": "/proc/self/fd/3",
+        "target": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/var/lib/apptainer/mnt/session/rootfs",
+        "offset": 36864,
+        "options": "allow_other,ro,uid=1000,gid=1000",
+        "command": [
+          "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+          "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-minimal-01/libsq-materialized.so",
+          "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/libsq-bridge.so",
+          "/proc/self/fd/3",
+          "36864",
+          "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/var/lib/apptainer/mnt/session/rootfs",
+          "allow_other,ro,uid=1000,gid=1000"
+        ]
+      }
+    ],
+    "image": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/application-images-01/xz.sif",
+    "apptainer_version": "apptainer version 1.5.5"
+  },
+  "restored": true,
+  "modules_unloaded": true
+}

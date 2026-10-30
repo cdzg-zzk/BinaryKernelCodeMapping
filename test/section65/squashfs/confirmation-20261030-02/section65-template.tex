@@ -1,0 +1,261 @@
+\subsection{Filesystem Reuse in Applications}
+\label{sec:filesystem-reuse}
+
+Container image access puts the same filesystem format in two execution
+environments: the native kernel serves mounted filesystems, while a user
+reader serves container images. SquashFUSE implements the latter directly;
+LKL and Rump instead bring kernel filesystem implementations into user
+environments~\cite{ev_squashfuse062,ev_lkl_source,kantee2009rump}.
+We test whether VKSO can use one resident native execution body for both
+purposes, with independent objects and practical application costs.
+Native SquashFS and real Apptainer SIF execution provide the case study.
+SquashFUSE and LKL are executable application baselines; an identical-code
+copied backend isolates VKSO's additional physical-sharing property.
+
+\paragraph{What is reused.}
+The prepared Linux~5.15.198 filesystem places 34 functions, containing
+2,103 original physical source lines, in a common owner. They implement
+superblock, inode, directory, block-list, metadata and data-access logic.
+The native consumer retains VFS objects, synchronization and BIO services.
+The user bridge supplies its own objects, caches and POSIX input through
+46 filesystem service bindings; ten further fields hold native operation
+tables and are null in the FUSE bridge.
+
+The final owner also contains the safe LZ4 decoder from Section~6.3 and the
+matching kernel's XZ stream, LZMA2 and BCJ decoder bodies. The three XZ
+algorithm files reuse an original 2,604-line source extent, but this version
+changes the dictionary-repetition body with scalar word copies. The identical
+edit serves native and user execution; it is not a zero-body-edit port.
+Nine private allocation, memory and CRC services supply their environment.
+LZ4 uses three private memory-service slots. Native XZ retains its PREALLOC
+mode, while the user interface supplies complete contiguous blocks in SINGLE
+mode. Both user backends remove their liblz4 and liblzma dependencies.
+Thus composition extends the executed reuse boundary beyond filesystem
+parsing, while leaving gzip, zstd and lzo decoding as domain-specific services.
+@@REUSE_RESULTS@@
+
+A single-threaded, read-only FUSE frontend connects the bridge to
+Apptainer~1.5.5~\cite{ev_apptainer155}. A 96-line C translator accepts the
+application's helper arguments, including its open file descriptor and SIF
+partition offset. Apptainer and the container programs retain their sources.
+The private bridge evicts unpinned inodes and positive names with LRU budgets
+of 2,048 and 4,096 entries. Names retain image-local identifiers and disk
+locations, not pointers into evictable objects. Root and open file/directory
+handles pin their inodes; closing a handle releases that pin. Live pinned
+objects and per-open-directory name lists are outside the retention budgets.
+Decoded data use a separate, lazily allocated 48-block FIFO cache (6~MiB
+at the evaluated 128~KiB block size); fragment and metadata caches retain
+three and eight blocks. The data capacity matches the stock multithread
+build, including its single-thread launch mode; the fragment policies differ.
+These bounds cover private cache entries rather than total process memory.
+
+\paragraph{Functional and physical evidence.}
+Original native, prepared native before/after sharing, copied and shared
+readers pass 30 six-fixture mounts (five formats plus x86 BCJ) with content, metadata, links, extended
+attributes and boundary checks. Each user backend additionally passes
+22,032 boundary/random-offset reads over six cases. A separate x86 BCJ
+fixture verifies the selected filter chain and both-domain reads.
+The interface exposes read-only operations and user/security attributes.
+Three-pass cache churn, open descriptors exceeding the inode budget, and
+directory-cursor round trips check lifetimes across eviction. Private-adapter
+sanitizer checks do not instrument the shared core or prove absence of all leaks.
+
+The final owner shares seven code and two readonly pages (36~KiB) with
+the kernel; copied execution uses identical mapped bytes on different PFNs.
+The filesystem and codec bindings have private backing and user-space
+targets. Native xz and lz4 scans record 190 and 73 calls to their respective
+common decoder entries. A hardware breakpoint during actual SIF execution
+also reaches the shared XZ entry; its arguments, available stack and
+unchanged post-debug PFNs are recorded.
+
+Native image A and two actual SIF consumers B/C remain live together on xz
+images with conflicting contents and metadata at the same paths. Eight
+phases per backing variant verify each consumer's own data, disjoint private
+objects, overlapping task lifetimes, and continued service as C, A and then B
+exit. Both user processes share ordinary copied backing with each other;
+VKSO additionally shares it with the native owner. Native regression,
+restoration and module unload complete the checks.
+
+\paragraph{Comparisons and measurement.}
+We separate three questions: final prepared versus original/optimized native
+measures preparation cost; copied versus VKSO measures the physical-backing
+increment; complete backends measure application effects. Native controls
+include the same bounded-copy optimization in normal and relaxed-options
+modules. Two further normal/relaxed native references receive the identical
+XZ dictionary edit, without VKSO service bindings; the preceding common-XZ
+owner remains a separately labeled version. The fair optimized native
+references bundle their XZ decoder to avoid replacing the host kernel.
+All use the same kernel
+source, configuration, compiler and optimization level where applicable.
+The shared core uses PIC and omits native stack checks and external
+indirect/return thunks, as confirmed in machine code. A build-only probe
+retains them with PIC and an explicit native GS-canary convention; their
+cross-domain runtime bindings are not implemented. The native comparison
+therefore measures the complete prototype preparation, including this
+hardening change.
+
+The ordinary application matrix uses the same gzip, xz and lz4 SIF contents:
+an empty command, an include-tree scan/archive, and an archive of two
+128~MiB files (repeated text and seeded pseudorandom data). Five-format native
+tests use the same logical include tree and 128~KiB blocks, with separate
+fresh-mount and subsequent warm traversals. Compressed image pages are warm;
+filesystem caches start fresh for each application invocation.
+SquashFUSE~0.6.2 uses its actual \texttt{squashfuse\_ll} helper in default and
+single-thread modes, with an additional common-translator control.
+LKL~6.12 uses a 512~MiB heap and both default and matched one-second positive
+FUSE caches. All 16--512~MiB heap pilots completed the tasks; 512~MiB had the
+lowest include-archive point times in those exploratory pilots. It is a
+performance-oriented choice, not a minimum memory requirement.
+
+The frozen confirmation contains 30 campaigns and 8,172 observations on one
+Core i7-1165G7 host/boot, with SMT and turbo disabled and the powersave
+frequency policy. Each cell has three campaigns with new process/mount or
+module-load cycles and randomized paired blocks; all completed-campaign observations are retained.
+Native/Python cells use eight blocks, ordinary applications twelve, and
+bounded decoder diagnostics four. End-to-end application time includes
+launch, execution and cleanup, using CPUs~1--2; native traversals use CPU~1.
+A separate gzip-stream diagnostic uses CPU~1 only. Ratios and pointwise
+95\% intervals use three campaign mean log ratios. Absolute times are means
+of campaign medians, so dividing adjacent absolute values need not recover
+the paired ratio. Instrumented diagnostics and pilots supply no formal times.
+The private cache policy was fixed before the new application campaigns.
+Four existing native campaigns retain identical owner/consumer binaries and
+runners; two new native campaigns complete their three-campaign comparisons.
+All user measurements use the new bridge. The ordinary and Python matrices
+also include the prior one-block-data-cache copied bridge, keeping the common
+owner fixed to isolate the cache-policy change.
+
+\paragraph{Bounded optimization.}
+@@OPTIMIZATION_RESULTS@@
+
+\paragraph{Native preparation and sharing increment.}
+@@NATIVE_RESULTS@@
+Warm traversals remain separate because they can bypass common-core work.
+The direct final-owner comparisons replace reliance on transitive comparisons
+between intermediate builds.
+
+\begin{figure*}[t]\centering
+\includegraphics[width=\textwidth]{figures/section65/filesystem-native.pdf}
+\caption{Final prepared native versus original, equally optimized normal and
+equally optimized relaxed native references. Fresh-mount scan/archive;
+pointwise 95\% campaign intervals. Negative values mean lower elapsed time.}
+\label{fig:filesystem-native}
+\end{figure*}
+
+@@SHARING_RESULTS@@
+These comparisons hold the owner instructions, bridge, frontend, cache
+policy and translator fixed. Ordinary deployment retains its carrier
+paths; the separate xz/lz4 scan/stream diagnostic also equalizes loader-path
+lengths. The latter provides the tighter backing control for those four cells.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\columnwidth]{figures/section65/filesystem-sharing.pdf}
+\caption{VKSO versus identical-core copied execution. All ordinary tasks are
+shown; the selected gzip-stream single-CPU check remains a separate condition.
+Pointwise 95\% campaign intervals.}
+\label{fig:filesystem-sharing}
+\end{figure}
+
+\paragraph{Application effects.}
+@@APPLICATION_RESULTS@@
+@@THREAD_RESULTS@@
+In a separate xz metadata-work diagnostic, default and single-thread
+SquashFUSE each decode 137 blocks and 1,106,363 bytes; the common parser
+decodes 76 blocks and 558,231 bytes, whether it uses library or common XZ.
+Three replays agree. Reduced decompression work contributes to the metadata
+advantage; these counts do not assign the whole time difference to one cause.
+
+\begin{figure*}[t]\centering
+\includegraphics[width=\textwidth]{figures/section65/filesystem-application.pdf}
+\caption{Complete VKSO application time relative to default/single-thread
+SquashFUSE and cache-matched LKL512. Startup, metadata and sequential tasks
+retain their own outcomes and pointwise 95\% intervals.}
+\label{fig:filesystem-application}
+\end{figure*}
+
+A separate distribution task compiles the Python~3.10 standard library
+through real gzip/xz SIFs into a fresh writable bytecode cache. The task and
+images were fixed in the preceding evaluation and remain unchanged. This
+task was consulted during the current optimization diagnostics; it is not
+an unseen holdout for this version. Every backend generates the same 647
+bytecode files.
+@@HELDOUT_RESULTS@@
+The gzip and xz outcomes measure the same fixed application task.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\columnwidth]{figures/section65/filesystem-heldout.pdf}
+\caption{Fixed standard-library compilation: mean campaign medians with
+pointwise 95\% intervals. SF/SF1: default/single-thread SquashFUSE; C/V:
+copied/VKSO; L/LC: default/cache-matched LKL512.}
+\label{fig:filesystem-heldout}
+\end{figure}
+
+@@DECODER_RESULTS@@
+The controlled comparison separates the decoder switch from dependency
+removal. It does not assign the total library/common difference to physical
+sharing, nor explain the complete Python application from one hot loop.
+These diagnostics compare library decoding, common decoding with both
+libraries retained, and common decoding after dependency removal on the
+same owner. They explain final-build tradeoffs without assigning prior
+layout-sensitive results to physical sharing.
+
+\paragraph{Engineering and maintenance.}
+Reuse preserves the original format/decoder implementations, but requires
+explicit preparation and domain support. Sixteen native source/header files
+change, largely through extraction and service exposure. Three of the
+34 extracted filesystem bodies differ: device-size access, BIO input
+handling, and the maintained/bounded-copy helper. @@ENGINEERING_RESULTS@@
+Generators, reused LZ4 sources, the edited XZ algorithm and general-exporter
+fixes are accounted separately in the artifact. These measures describe maintenance surfaces;
+they do not establish reduced developer hours. LKL's SIF integration adds
+30 lines to its existing frontend; incremental application adapters are
+compared from an existing-platform starting point in both cases.
+
+The known upstream negative-offset repair is reproduced in isolated guests
+across old/fixed native, copied and shared paths. The repair changes the
+common implementation while preserving the bridge/frontend in that
+maintenance experiment. The final composed owner retains the repaired
+filesystem source and passes a new guest regression: native/copied/shared
+report EIO, user daemons survive, and normal five-format reads, restoration
+and unloading pass. A repair requires rebuilding and redeploying the owner;
+copied execution receives the same source-maintenance benefit. The shared
+XZ hardware breakpoint and the retained ISO9660 replay demonstrate debugging
+of common instructions from the user environment.
+
+\paragraph{Resources and deployment.}
+@@MEMORY_RESULTS@@
+\begin{figure*}[t]\centering
+\includegraphics[width=0.90\textwidth]{figures/section65/filesystem-memory-scale.pdf}
+\caption{Retained helper PSS on the original metadata scales; both axes are
+logarithmic. Single untimed observations, not peak or interval estimates.
+SF/SF1: default/single-thread SquashFUSE; C/V: bounded copied/VKSO;
+CU: same-core unbounded copied; LC: cache-matched LKL512.}
+\label{fig:filesystem-memory-scale}
+\end{figure*}
+A separate live-object probe locates substantial residual growth in the
+libfuse high-level node tables: at 93,856 entries, its node slabs allocate
+14,786,560 bytes and its hash arrays 2,097,152 bytes. Bridge inode/name counts
+remain at 2,048/4,096, and a second traversal leaves the node count unchanged.
+This explains why bounding the private bridge does not bound the complete
+FUSE process. Open handles and directory lists also remain outside the budgets.
+\input{tables/filesystem-resources.tex}
+The installed-platform premise treats the generic 32~KiB
+\texttt{page\_cache\_replace} module as one-time infrastructure. Filesystem
+preparation and per-core registration remain business costs
+(Table~\ref{tab:filesystem-business}).
+@@COMPONENT_RESULTS@@
+Ordinary copied DSOs share between user processes, so avoided backing has
+no process-count multiplier.
+\input{tables/filesystem-business.tex}
+@@DEPLOYMENT_RESULTS@@
+Module residency, requested allocations and process PSS remain separate
+ledgers; the case does not establish whole-machine net-memory savings.
+
+The results support a common resident filesystem/decoder body serving
+native and real application consumers with private state and one source
+repair point. Complete-backend efficiency and maintenance benefits also
+apply to copied execution; VKSO adds native/user physical identity with the
+measured incremental cost. Performance conclusions cover these read-only
+SIFs and tasks on this host/boot. Five-format functionality, boundary-read
+correctness and simultaneous lifetimes do not by themselves establish
+five-format application speed, random-I/O performance or concurrent scaling.

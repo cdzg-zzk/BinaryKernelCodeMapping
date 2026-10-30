@@ -41,3 +41,30 @@ only with byte identity and the original native protocol; finish its missing
 registered third campaign rather than relabel private-adapter samples as native.
 The old 14-campaign closeout remains a separate historical analysis. No claim
 of no memory cost, universal superiority or net machine savings follows.
+
+## Streaming admission follow-up (before final promotion)
+
+The first full pilots retain an LZ4 stream regression of 8.91% for copied
+16-slot versus old copied. The 16-slot Python/XZ point improvement is 9.03%.
+The original three memory scales meet the default-stock criterion but still
+exceed stock-single at 16x. These observations do not permit promotion yet.
+
+An instrumented replay of each original stream finds the same 1,027 decoder
+calls and 2,052 cache misses for 1/16/48 data slots. The larger working set
+therefore adds no hits in that task. Diagnostic elapsed/counter timings are
+not formal samples and do not establish an exact hardware cause.
+
+One admission candidate retains the 16-slot cache for files fitting its byte
+budget and uses one reusable scratch slot for files larger than that budget.
+The threshold is cache capacity, independent of codec and test filename.
+This adds at most one block buffer and its actor to private memory. The native
+owner, instructions, decoder and native consumer remain byte-identical.
+Do not tune additional capacities or thresholds against the results.
+
+Before selection, validate five-format content/PFNs, private-adapter sanitizers
+and real FUSE handle/cursor lifetimes. Replay the three existing ordinary
+application pilots and Python/XZ with the original stock, LKL, old copied and
+48-slot controls, four blocks each (416 observations). Preserve all cells.
+Use the same >5% regression investigation rule and Python/memory criteria.
+If selected, remeasure resource scales and rerun the full affected application
+confirmation; pilot samples remain outside formal inference.

@@ -1,0 +1,190 @@
+{
+  "status": "complete",
+  "scope": "end-to-end Apptainer hardware timing including helper startup and cleanup",
+  "variants": [
+    "stock",
+    "copied",
+    "vkso",
+    "stock-single",
+    "lkl-512",
+    "lkl-cache-512",
+    "copied-small",
+    "copied-data48"
+  ],
+  "blocks": 4,
+  "repeats": 1,
+  "cpus": [
+    1,
+    2
+  ],
+  "image": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+  "compressed_image_cache": "warm",
+  "mount": "fresh for each sample",
+  "helper_implementation": "c translator followed by execv",
+  "launcher": "common runuser and taskset included",
+  "stock_wrapped_control": false,
+  "seed": 69101,
+  "campaign": "stream-admission-pilot-heldout-xz-01",
+  "workloads": [
+    "compile"
+  ],
+  "pilot": true,
+  "analysis_group": "stream-admission-pilot",
+  "image_sha256": "cffd22ff2a0c0f3138792a823dc223607b8ce81ae28d7b04767d56622b09b2a2",
+  "stock_single_scope": "Same squashfuse_ll binary with -s, reached through a shell exec wrapper configured as the helper; startup includes that wrapper. Default stock retained.",
+  "equal_loader_paths": false,
+  "resource_observation_order": "Before workload and after workload snapshots precede PFN/debugger reads, which may fault additional pages.",
+  "extra_readers": {
+    "copied-small": {
+      "build": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01"
+    },
+    "copied-data48": {
+      "build": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48"
+    }
+  },
+  "loader_padding_order": [
+    null,
+    null,
+    null,
+    null
+  ],
+  "completed_blocks": 4,
+  "observations": 32,
+  "summary": [
+    {
+      "workload": "compile",
+      "baseline": "stock",
+      "treatment": "copied",
+      "blocks": 4,
+      "paired_time_ratio": 1.1355332436447083,
+      "bootstrap_95_percent": [
+        1.1284991364067862,
+        1.1426111955458993
+      ],
+      "median_seconds": {
+        "stock": 2.1693016270000953,
+        "copied": 2.471526696012006
+      }
+    },
+    {
+      "workload": "compile",
+      "baseline": "stock",
+      "treatment": "copied-data48",
+      "blocks": 4,
+      "paired_time_ratio": 1.0307683065768072,
+      "bootstrap_95_percent": [
+        1.0275666100378644,
+        1.034338814401687
+      ],
+      "median_seconds": {
+        "stock": 2.1693016270000953,
+        "copied-data48": 2.232697780505987
+      }
+    },
+    {
+      "workload": "compile",
+      "baseline": "stock",
+      "treatment": "copied-small",
+      "blocks": 4,
+      "paired_time_ratio": 1.1569610311102188,
+      "bootstrap_95_percent": [
+        1.1482265736783868,
+        1.16316708554116
+      ],
+      "median_seconds": {
+        "stock": 2.1693016270000953,
+        "copied-small": 2.51586966899049
+      }
+    },
+    {
+      "workload": "compile",
+      "baseline": "stock",
+      "treatment": "lkl-512",
+      "blocks": 4,
+      "paired_time_ratio": 1.1509190835402767,
+      "bootstrap_95_percent": [
+        1.1409216682812346,
+        1.1612408192390367
+      ],
+      "median_seconds": {
+        "stock": 2.1693016270000953,
+        "lkl-512": 2.498894031494274
+      }
+    },
+    {
+      "workload": "compile",
+      "baseline": "stock",
+      "treatment": "lkl-cache-512",
+      "blocks": 4,
+      "paired_time_ratio": 1.0820731884223629,
+      "bootstrap_95_percent": [
+        1.073760011621325,
+        1.087673054807616
+      ],
+      "median_seconds": {
+        "stock": 2.1693016270000953,
+        "lkl-cache-512": 2.354477359505836
+      }
+    },
+    {
+      "workload": "compile",
+      "baseline": "stock",
+      "treatment": "stock-single",
+      "blocks": 4,
+      "paired_time_ratio": 0.9915236925451296,
+      "bootstrap_95_percent": [
+        0.9849232160835133,
+        0.9956753291587667
+      ],
+      "median_seconds": {
+        "stock": 2.1693016270000953,
+        "stock-single": 2.156739901009132
+      }
+    },
+    {
+      "workload": "compile",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "blocks": 4,
+      "paired_time_ratio": 1.135047349274699,
+      "bootstrap_95_percent": [
+        1.1290718078068671,
+        1.1387317632262361
+      ],
+      "median_seconds": {
+        "stock": 2.1693016270000953,
+        "vkso": 2.468445280013839
+      }
+    },
+    {
+      "workload": "compile",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "blocks": 4,
+      "paired_time_ratio": 0.9995721002685489,
+      "bootstrap_95_percent": [
+        0.9962146788998143,
+        1.003135725698578
+      ],
+      "median_seconds": {
+        "copied": 2.471526696012006,
+        "vkso": 2.468445280013839
+      }
+    },
+    {
+      "workload": "compile",
+      "baseline": "lkl-512",
+      "treatment": "lkl-cache-512",
+      "blocks": 4,
+      "paired_time_ratio": 0.9401818111259908,
+      "bootstrap_95_percent": [
+        0.9355631773747347,
+        0.9452013733777533
+      ],
+      "median_seconds": {
+        "lkl-512": 2.498894031494274,
+        "lkl-cache-512": 2.354477359505836
+      }
+    }
+  ]
+}
