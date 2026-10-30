@@ -1,0 +1,11 @@
+{
+  "status": "complete",
+  "scope": "Offline archive integrity and independent timing replay; no kernel, binaries or image assets needed.",
+  "archives": 50,
+  "files": 7674,
+  "observations": 8172,
+  "campaigns": 30,
+  "comparisons": 541,
+  "excluded_interrupted_observations": 790,
+  "manifest_sha256": "138855016a87e7e94811fcd7b20989b772afa7cf732747dffb160e2489fe473b"
+}

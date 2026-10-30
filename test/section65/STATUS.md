@@ -1,26 +1,56 @@
-# Section 6.5 — active optimization and confirmation
+# Section 6.5 — optimization experiments complete
 
-Current source and work: [confirmation-20261030-02](squashfs/confirmation-20261030-02/PROTOCOL.md).
-The previous budget closeout completed 14/30 campaigns and 4,580 observations;
-its cancellation remains preserved. The user subsequently authorized continued
-optimization, confirmation and manuscript completion.
+Current version: **word-copy XZ + bounded inode/name caches + 48 lazy data slots**.
+Completed **30 campaigns / 8,172 observations**, with three campaigns per cell.
+Independent replay verified **541 comparisons**; offline archive verification
+checked **7,674 files in 50 archives**, including raw wall/CPU timing and intervals.
 
-Three new complete Python decoder campaigns (120 observations) isolate a
-+2.60% common-decoder cost relative to retained-library decoding; library
-execution through the same bridge still costs +13.01% versus stock. Instrumented
-full tasks show 352 versus 243 decodes. Private data-cache candidates reduce
-redundant work, but the 16-slot pilot also regresses LZ4 sequential time by
-8.91% versus the one-slot bridge. It is not promoted; diagnosis continues.
+- [Experiment report](evidence/confirmation-20261030-02/final/analysis/EXPERIMENT_REPORT.md)
+- [Claim coverage](squashfs/confirmation-20261030-02/CLAIM_COVERAGE.md)
+- [Reproduction and sources](squashfs/confirmation-20261030-02/README.md)
+- [Analysis / raw archive manifest](evidence/confirmation-20261030-02/final/manifest.json)
+- [Completion and cleanup audit](evidence/confirmation-20261030-02/final/analysis/completion-audit.json)
+- [Offline verification](squashfs/confirmation-20261030-02/bundle-verification.json)
 
-Live libfuse measurements explain a material part of remaining process growth:
-16x retains 93,859 nodes and 14.1 MiB of node slabs plus 2 MiB hash buckets.
-Bridge inode/name caches retain their 2048/4096 bounds. Repeated traversals
-retain the same node count. Neither this nor helper PSS proves whole-machine savings.
+## Main measured effects
 
-Selected [server evidence snapshot](evidence/optimization-20261030/manifest.json)
-is committed with core scripts. Large images, build trees and all raw logs
-remain at the documented paths. The manuscript/PDF below still describe the
-preceding common-XZ version; they have not been relabeled as optimization results.
+- Python/XZ: VKSO/stock **+2.98%** [95% CI +2.82%, +3.14%].
+  Final copied versus old one-slot copied: **−11.32%** [−12.03%, −10.62%].
+- XZ application stream: VKSO/stock **−12.87%** [−14.70%, −11.00%].
+  Native fresh XZ stream word-copy versus prior prepared: **−27.02%** [−28.21%, −25.82%].
+- Tradeoffs remain: LZ4 stream copied versus old one-slot copied **+1.88%**
+  [+0.37%, +3.41%], and up to 6 MiB requested private data buffers.
+  LZ4 shared/copied wall-time CI remains wide: **[−11.73%, +10.50%]**.
+- At 16×, final copied PSS **25,968 KiB** versus old unbounded **91,014 KiB**
+  (−71.47%). Shared is **25,990 KiB**, above stock-single **13,237 KiB**.
+  Snapshots are not peak or net machine memory. Libfuse live-node accounting
+  explains substantial remaining growth.
+- Same nine physical pages / **36 KiB**; filesystem source reuse and native
+  changes are itemized. Business disk allocation remains 288/324 KiB for
+  shared/copied with prepared native, and 228/184 KiB for user-only deployment.
+  Installed generic platform 32 KiB is separate; business preparation and
+  registration remain charged. No developer-hour or net-machine saving claim.
+
+The final bridge passed five-format/BCJ, isolated malformed-input regression,
+private-adapter sanitizers, real FUSE lifetimes, simultaneous native/SIF private
+objects, breakpoint/PFNs, native regression and minimal-deployment checks.
+The final audit confirms **no active task runner/helper/queue and no task module**.
+
+Four byte/runner-matched native campaigns (2,688 observations) are explicitly
+reused; all 5,484 user/new-native observations are new. An interrupted native
+campaign's **790 rows are retained and excluded in full**, and its whole
+replacement uses the original seed/conditions. The prior reduced 14/30,
+4,580-observation closeout and its 127 partial rows remain separate.
+Old `running` fields are historical; recovery and completion audits prevail.
+
+**Delivery scope:** raw data and experiment report only. Existing manuscript,
+PDF and figures are unchanged; the publication below is the preserved
+predecessor and does not represent these optimized results. No publication or
+follow-up optimization job is queued.
+
+Branch: `experiment/section65-filesystem-reuse`. Frozen-input checkpoint:
+`ebe40754b34fbe0b5bbf316e628c4d13a61bd151`. The user will push the final local
+commit; no agent push attempt is pending.
 
 ---
 

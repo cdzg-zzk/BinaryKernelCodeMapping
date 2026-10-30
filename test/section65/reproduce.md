@@ -1,5 +1,9 @@
 # Reproducing the Section 6.5 filesystem evaluation
 
+Current optimization/confirmation: [squashfs/confirmation-20261030-02/README.md](squashfs/confirmation-20261030-02/README.md). The 48-slot version completed its fixed 30-campaign / 8,172-observation matrix and independent replay of 541 comparisons. Delivery is raw evidence and an experiment report; manuscript and figures are deferred. The publication and counts below describe the preserved predecessor.
+
+## Preserved predecessor
+
 The final XZ-composed implementation and serial confirmation are documented in
 [squashfs/refinement/README.md](squashfs/refinement/README.md). Production binaries
 are in `build/squashfs/refine-xz-01`; final sources/publication are frozen in

@@ -1,0 +1,11 @@
+{
+  "status": "complete",
+  "scope": "Experiment report only",
+  "inputs": {
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-analysis-01/analysis.json": "e9ea78f73bf474f9ce21d1485abf2d5cacb111947e031a9a61b7979323d89d9e",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-analysis-01/audit.json": "9d2297c10e607dea162f16cf3596075ad059be926f04adba4a6fc887f4fff068",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-analysis-01/costs.json": "307e19d47a22f55f05f208f3844a08ab2cbf5378a4e6906684cc1aae2a1f1499",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-analysis-01/resource-ledger/resources.json": "7ac30d5c533b15353fb0d86f6998030689fc59150240a6b6c5324f7248d98be8",
+    "/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/confirmation-20261030-02/experiment_report.py": "f6273fd69c5fedc47058ef328e3d79c566781791a741b6623f61e1f71aea9fcf"
+  }
+}

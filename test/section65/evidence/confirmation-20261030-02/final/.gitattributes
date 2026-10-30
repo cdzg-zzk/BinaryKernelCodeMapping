@@ -1,0 +1,4 @@
+# Preserve measured/generated evidence byte-for-byte, including CSV CRLF and
+# upstream patch whitespace. Source-code style checks remain enabled outside
+# this immutable evidence snapshot.
+* -text -whitespace

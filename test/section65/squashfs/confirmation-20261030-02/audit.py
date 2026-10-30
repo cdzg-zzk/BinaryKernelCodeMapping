@@ -98,6 +98,31 @@ def main():
         assert hashlib.sha256(Path(path).read_bytes()).hexdigest()==digest
         assert read(Path(path))['status']=='complete'
     interruptions=[]
+    if 'data48_recovery' in registration:
+        path=Path(registration['data48_recovery']);recovery=read(path)
+        assert hashlib.sha256(path.read_bytes()).hexdigest()==registration['data48_recovery_sha256']
+        old_queue=Path(recovery['original_queue']);old_reg=Path(recovery['original_registration'])
+        assert hashlib.sha256(old_queue.read_bytes()).hexdigest()==recovery['original_queue_sha256']
+        assert hashlib.sha256(old_reg.read_bytes()).hexdigest()==recovery['original_registration_sha256']
+        original=read(old_reg);expected_jobs=copy.deepcopy(read(old_queue))
+        old,new=recovery['old_campaign'],recovery['new_campaign']
+        target=next(j for j in expected_jobs if j['name']==old)
+        replacement=next(j for j in jobs if j['name']==new)
+        target['name']=new;target['result']=replacement['result']
+        for flag in ['--campaign','--output']:
+            target['argv'][target['argv'].index(flag)+1]=replacement['argv'][replacement['argv'].index(flag)+1]
+        assert expected_jobs==jobs, 'recovery changed experimental conditions'
+        cells_expected=copy.deepcopy(original['expected_campaigns'])
+        next(c for c in cells_expected if c['name']==old)['name']=new
+        assert cells_expected==registration['expected_campaigns']
+        assert original['identities']==registration['identities']
+        partial=Path(recovery['partial_samples'])
+        assert hashlib.sha256(partial.read_bytes()).hexdigest()==recovery['partial_sha256']
+        assert len(partial.read_text().splitlines())==recovery['partial_observations']==790
+        assert old not in {j['name'] for j in jobs}
+        cleanup=Path(recovery['cleanup']);assert hashlib.sha256(cleanup.read_bytes()).hexdigest()==recovery['cleanup_sha256']
+        assert read(cleanup)['task_modules_unloaded']
+        interruptions.append(recovery)
     if 'recovery_manifest' in registration:
         recovery=Path(registration['recovery_manifest']);interrupted=read(recovery)
         assert hashlib.sha256(recovery.read_bytes()).hexdigest()==registration['recovery_manifest_sha256']

@@ -1,0 +1,7 @@
+{
+  "status": "failed",
+  "category": "audit script schema mismatch; no experiment failed",
+  "script_sha256": "86a6e31edc90c1c036181275818683eace1a58faf6fc35a92a17c51c1aa960a3",
+  "error": "KeyError: xz_filter_chains in ordinary five-format result",
+  "correction": "Only the BCJ run records filter chains. Check that record directly; retain 25+5 passing cases."
+}

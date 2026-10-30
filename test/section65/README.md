@@ -1,5 +1,9 @@
 # Section 6.5: filesystem reuse evidence
 
+Current optimization/confirmation: [squashfs/confirmation-20261030-02/README.md](squashfs/confirmation-20261030-02/README.md). The 48-slot version completed its fixed 30-campaign / 8,172-observation matrix and independent replay of 541 comparisons. Delivery is raw evidence and an experiment report; manuscript and figures are deferred. The publication and counts below describe the preserved predecessor.
+
+## Preserved predecessor
+
 The final XZ-composed evaluation is complete: 30 campaigns / 6,540 timed
 observations, independent replay of 403 comparisons, final-core functional and
 maintenance checks, actual shared decoder execution, private-state/PFN evidence,

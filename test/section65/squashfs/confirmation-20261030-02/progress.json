@@ -1,6 +1,6 @@
 {
-  "status": "active",
-  "phase": "Frozen 8172-observation confirmation; all correctness and resource prerequisites complete",
+  "status": "complete",
+  "phase": "Fixed confirmation, independent raw replay, report and cleanup complete",
   "completed": [
     "313 baseline identities verified",
     "3 Python decoder campaigns / 120 complete observations",
@@ -15,7 +15,12 @@
     "48-slot isolated malformed-image EIO regression and minimal deployment",
     "48-slot original 1/4/16 resource replay",
     "Final metadata work: 76 common vs 137 stock decoder calls, three replays",
-    "8172-observation registration and same-native reuse audit"
+    "8172-observation registration and same-native reuse audit",
+    "30 campaigns / 8172 observations complete",
+    "Independent raw replay of 541 paired comparisons",
+    "50 archives / 7674 files verified offline, including wall/CPU campaign ratios and intervals",
+    "Final functional/source identities and unload/process cleanup verified",
+    "Experiment report complete; manuscript and figures unchanged"
   ],
   "findings": {
     "python_library_vs_stock": 1.130081,
@@ -26,17 +31,32 @@
       2048,
       4096
     ],
-    "libfuse_16x_node_slab_bytes": 14786560
+    "libfuse_16x_node_slab_bytes": 14786560,
+    "python_xz_vkso_vs_stock_ratio": 1.0298104604012739,
+    "python_xz_data48_vs_old_copied_ratio": 0.8867616459493441,
+    "xz_stream_vkso_vs_stock_ratio": 0.8713336814567288,
+    "lz4_stream_data48_vs_old_copied_ratio": 1.0187985837663658
   },
   "candidate": "data-cache-controls-02/data-48",
-  "scope": "Same owner/native consumer; private data-cache policy change. Rejected 16-slot and stream-admission tradeoffs retained. No final paper estimates yet.",
+  "scope": "Experiment report and raw evidence only. No manuscript or figure generation. User pushes the local commit.",
   "protocols": [
     "PROTOCOL.md",
     "CACHE_PROTOCOL.md"
   ],
   "next": [
-    "Finish 1/4/16 resource replay and final metadata counts",
-    "Freeze 30 campaigns / 8172 observations; reuse four identical native campaigns only",
-    "Run 26 pending campaigns, audit, regenerate publication, and commit"
-  ]
+    "User pushes the local commit; no further experiment or publication queue is active."
+  ],
+  "active_queue": null,
+  "recovery": "recovered-registration.json",
+  "report": "../../evidence/confirmation-20261030-02/final/analysis/EXPERIMENT_REPORT.md",
+  "evidence": "../../evidence/confirmation-20261030-02/final",
+  "campaigns": 30,
+  "observations": 8172,
+  "comparisons": 541,
+  "reused_native_observations": 2688,
+  "new_observations": 5484,
+  "excluded_interrupted_observations": 790,
+  "modules_unloaded": true,
+  "publication_deferred": true,
+  "branch": "experiment/section65-filesystem-reuse"
 }

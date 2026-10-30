@@ -1,0 +1,215 @@
+{
+  "status": "complete",
+  "campaigns": [
+    {
+      "campaign": "squash-optimized-native-final-01",
+      "samples": 1120,
+      "complete": true
+    },
+    {
+      "campaign": "squash-optimized-native-stream-01",
+      "samples": 224,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "samples": 384,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "samples": 384,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "samples": 384,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-heldout-gzip-01",
+      "samples": 56,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-heldout-xz-01",
+      "samples": 56,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-decoder-diagnostic-xz-01",
+      "samples": 40,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-decoder-diagnostic-lz4-01",
+      "samples": 40,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-sharing-singlecpu-gzip-01",
+      "samples": 36,
+      "complete": true
+    },
+    {
+      "campaign": "squash-optimized-native-final-02",
+      "samples": 1120,
+      "complete": true
+    },
+    {
+      "campaign": "squash-optimized-native-stream-02",
+      "samples": 224,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "samples": 384,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "samples": 384,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "samples": 384,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-heldout-gzip-02",
+      "samples": 56,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-heldout-xz-02",
+      "samples": 56,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-decoder-diagnostic-xz-02",
+      "samples": 40,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-decoder-diagnostic-lz4-02",
+      "samples": 40,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-sharing-singlecpu-gzip-02",
+      "samples": 36,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-native-final-03-recovery01",
+      "samples": 1120,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-native-stream-03",
+      "samples": 224,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "samples": 384,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "samples": 384,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "samples": 384,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-heldout-gzip-03-recovery-01",
+      "samples": 56,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-heldout-xz-03",
+      "samples": 56,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-decoder-diagnostic-xz-03",
+      "samples": 40,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-decoder-diagnostic-lz4-03",
+      "samples": 40,
+      "complete": true
+    },
+    {
+      "campaign": "squash-data48-sharing-singlecpu-gzip-03",
+      "samples": 36,
+      "complete": true
+    }
+  ],
+  "observations": 8172,
+  "analysis_sha256": "e9ea78f73bf474f9ce21d1485abf2d5cacb111947e031a9a61b7979323d89d9e",
+  "registration_sha256": "980b3534d2fec9330c687e050d7f6cd65e039f8703205d837bbe7fc863e81263",
+  "comparisons": 541,
+  "boot_ids": [
+    "4d29e579-2621-4df3-97a2-8d359ed1f5ea"
+  ],
+  "excluded_observations": 0,
+  "excluded_observations_scope": "No observations excluded within completed campaigns; interrupted partial campaigns are separately retained below.",
+  "reused_native": [
+    {
+      "name": "squash-optimized-native-final-01",
+      "result": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-optimized-native-final-01/result.json",
+      "samples_sha256": "68efbc8525e91ee5b6f6006d2976e8508107f4dbcd1cf6a62435636ec60fd30b",
+      "result_sha256": "2e7256c832ed904d1bf2d4a5dcf1a240cf6dae0e68b484b9fe5c4ca3292c6df7",
+      "observations": 1120
+    },
+    {
+      "name": "squash-optimized-native-stream-01",
+      "result": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-optimized-native-stream-01/result.json",
+      "samples_sha256": "f5862f157a165f0339cd7ad81ad1e079591a33a52fe5e65691f7f6b51554d915",
+      "result_sha256": "dc969b12b9780f27512fdd31e862f1d231d5753b937b6bfe0879236a36a9920b",
+      "observations": 224
+    },
+    {
+      "name": "squash-optimized-native-final-02",
+      "result": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-optimized-native-final-02/result.json",
+      "samples_sha256": "4ab77b440678db6a642c17ebf48b0df9cb7904df0c39136956dcc26c3814f27a",
+      "result_sha256": "8305e7ea6c235975e0c8f2b09e75ebd130d92e5a9745f28c877f920c46b75a28",
+      "observations": 1120
+    },
+    {
+      "name": "squash-optimized-native-stream-02",
+      "result": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-optimized-native-stream-02/result.json",
+      "samples_sha256": "56d2acafe6564588b0fe27e998d3accee87b41038af01587839989f31ab0b8fe",
+      "result_sha256": "b6f2b8a578e17629c8a238345ae6bce84408e7d807f7d77de032014fa1844a01",
+      "observations": 224
+    }
+  ],
+  "historical_closeout": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/budget-closeout-01",
+  "interrupted_campaigns": [
+    {
+      "status": "registered",
+      "time": 1793355645.305983,
+      "old_campaign": "squash-data48-native-final-03",
+      "new_campaign": "squash-data48-native-final-03-recovery01",
+      "partial_samples": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-native-final-03/samples.jsonl",
+      "partial_observations": 790,
+      "partial_sha256": "741826ed117b046d689b9a0b8f010dbc56d31235053032f76dc2a6f0f20b9034",
+      "original_queue": "/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/confirmation-20261030-02/formal-queue.json",
+      "original_queue_sha256": "9402aee66aba62092528b50dad45a585fb3c7eba990693015f908d67c4c2d8e7",
+      "original_registration": "/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/confirmation-20261030-02/registration.json",
+      "original_registration_sha256": "ff62301acd95b52b286aeba8c2a811f57e44a16f00b2819568c8670f601659a1",
+      "cleanup": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-recovery-01/cleanup.json",
+      "cleanup_sha256": "5a1042e3907621f630d1a394d42a4a481481c4c02f3c760cafbde7c8c973b7cc",
+      "reason": "Turn interruption killed runner; full native campaign repeated with unchanged seed, images, conditions and sample count. User requests data/report only. Queue files were written before launch; writing this companion record required correcting the root-owned cleanup-directory permissions."
+    }
+  ],
+  "interrupted_partial_observations": 790,
+  "scope": "Independent raw-data replay, not independent hardware replication; one host/boot scope retained."
+}

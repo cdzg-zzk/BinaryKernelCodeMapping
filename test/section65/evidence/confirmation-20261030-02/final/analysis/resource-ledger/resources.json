@@ -1,0 +1,3809 @@
+{
+  "status": "complete",
+  "inputs": [
+    {
+      "run": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-gzip-01",
+      "resources_sha256": "a517629ff277b5df453d26b8ed4be96e553933511afbcbd6b7735069b687d282"
+    },
+    {
+      "run": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-xz-01-recovery01",
+      "resources_sha256": "637409cfefd646afaaf93ca961b6093d3d8c6e7a1c5a574c2d9602eb973f8239"
+    },
+    {
+      "run": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-lz4-01",
+      "resources_sha256": "2483de396b544dc13475ded8d55f14e182004a701d79a038fbb66304a9e84de2"
+    },
+    {
+      "run": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-gzip-02",
+      "resources_sha256": "24ae90f9530d232b498172f8e02df19fa98f71018b4db16164d51c1c6fa984d9"
+    },
+    {
+      "run": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-xz-02",
+      "resources_sha256": "b9feb5cb74f452a62c148e7d76599c13c8f47fcb084396236cec45cbfa893140"
+    },
+    {
+      "run": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-lz4-02",
+      "resources_sha256": "f42ad6bdbb951ec1c239f9b68c35f6c72acd725f2630d6a9bcc091986d9fe67b"
+    },
+    {
+      "run": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-gzip-03",
+      "resources_sha256": "ca5a539a82a23d19f2e04605741b8309010d1b4c73d79a37743721e801b22c40"
+    },
+    {
+      "run": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-xz-03",
+      "resources_sha256": "d43a1b10e92e6ffcef6bb0cecdee67ede5b472cc302f5c5d2da57dbf45cfbe05"
+    },
+    {
+      "run": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-lz4-03",
+      "resources_sha256": "eb9ce5fab2a49646edcfd231ffa24d2673eb9dd7f048a980846d2d006ee62d0f"
+    }
+  ],
+  "records": [
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 5444,
+      "pss_kib": 3358,
+      "uss_kib": 3216,
+      "reported_vm_hwm_kib": 3948,
+      "threads": 5
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 17360,
+      "pss_kib": 15274,
+      "uss_kib": 15132,
+      "reported_vm_hwm_kib": 15684,
+      "threads": 6
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 5648,
+      "pss_kib": 3544,
+      "uss_kib": 3404,
+      "reported_vm_hwm_kib": 4100,
+      "threads": 5
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 16792,
+      "pss_kib": 14688,
+      "uss_kib": 14548,
+      "reported_vm_hwm_kib": 14920,
+      "threads": 6
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 5508,
+      "pss_kib": 3548,
+      "uss_kib": 3420,
+      "reported_vm_hwm_kib": 5508,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 12244,
+      "pss_kib": 10284,
+      "uss_kib": 10156,
+      "reported_vm_hwm_kib": 12056,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 5476,
+      "pss_kib": 3551,
+      "uss_kib": 3416,
+      "reported_vm_hwm_kib": 5476,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 12212,
+      "pss_kib": 10287,
+      "uss_kib": 10152,
+      "reported_vm_hwm_kib": 12024,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "stock-single",
+      "phase": "before",
+      "rss_kib": 4692,
+      "pss_kib": 2638,
+      "uss_kib": 2492,
+      "reported_vm_hwm_kib": 4464,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "stock-single",
+      "phase": "after",
+      "rss_kib": 14008,
+      "pss_kib": 11954,
+      "uss_kib": 11808,
+      "reported_vm_hwm_kib": 13820,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24568,
+      "pss_kib": 22526,
+      "uss_kib": 22352,
+      "reported_vm_hwm_kib": 23724,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86652,
+      "pss_kib": 84610,
+      "uss_kib": 84436,
+      "reported_vm_hwm_kib": 85700,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "lkl-cache-512",
+      "phase": "before",
+      "rss_kib": 24488,
+      "pss_kib": 22436,
+      "uss_kib": 22280,
+      "reported_vm_hwm_kib": 23656,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "lkl-cache-512",
+      "phase": "after",
+      "rss_kib": 86568,
+      "pss_kib": 84516,
+      "uss_kib": 84360,
+      "reported_vm_hwm_kib": 85636,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "copied-small",
+      "phase": "before",
+      "rss_kib": 3332,
+      "pss_kib": 1387,
+      "uss_kib": 1240,
+      "reported_vm_hwm_kib": 3416,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "codec": "gzip",
+      "variant": "copied-small",
+      "phase": "after",
+      "rss_kib": 6196,
+      "pss_kib": 4251,
+      "uss_kib": 4104,
+      "reported_vm_hwm_kib": 5940,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 8840,
+      "pss_kib": 6718,
+      "uss_kib": 6592,
+      "reported_vm_hwm_kib": 6296,
+      "threads": 11
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 26624,
+      "pss_kib": 24502,
+      "uss_kib": 24376,
+      "reported_vm_hwm_kib": 24488,
+      "threads": 11
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 8952,
+      "pss_kib": 6615,
+      "uss_kib": 6448,
+      "reported_vm_hwm_kib": 6000,
+      "threads": 11
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 26584,
+      "pss_kib": 24247,
+      "uss_kib": 24080,
+      "reported_vm_hwm_kib": 23780,
+      "threads": 11
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 5540,
+      "pss_kib": 3550,
+      "uss_kib": 3424,
+      "reported_vm_hwm_kib": 5488,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 12248,
+      "pss_kib": 10258,
+      "uss_kib": 10132,
+      "reported_vm_hwm_kib": 12088,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 5516,
+      "pss_kib": 3558,
+      "uss_kib": 3420,
+      "reported_vm_hwm_kib": 5464,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 12224,
+      "pss_kib": 10266,
+      "uss_kib": 10128,
+      "reported_vm_hwm_kib": 12064,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "stock-single",
+      "phase": "before",
+      "rss_kib": 4980,
+      "pss_kib": 2894,
+      "uss_kib": 2744,
+      "reported_vm_hwm_kib": 4984,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "stock-single",
+      "phase": "after",
+      "rss_kib": 14920,
+      "pss_kib": 12834,
+      "uss_kib": 12684,
+      "reported_vm_hwm_kib": 14728,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24756,
+      "pss_kib": 22646,
+      "uss_kib": 22472,
+      "reported_vm_hwm_kib": 23860,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86832,
+      "pss_kib": 84722,
+      "uss_kib": 84548,
+      "reported_vm_hwm_kib": 85836,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "lkl-cache-512",
+      "phase": "before",
+      "rss_kib": 24760,
+      "pss_kib": 22635,
+      "uss_kib": 22460,
+      "reported_vm_hwm_kib": 23916,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "lkl-cache-512",
+      "phase": "after",
+      "rss_kib": 86840,
+      "pss_kib": 84715,
+      "uss_kib": 84540,
+      "reported_vm_hwm_kib": 85896,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "copied-small",
+      "phase": "before",
+      "rss_kib": 3380,
+      "pss_kib": 1535,
+      "uss_kib": 1396,
+      "reported_vm_hwm_kib": 3376,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "codec": "xz",
+      "variant": "copied-small",
+      "phase": "after",
+      "rss_kib": 6100,
+      "pss_kib": 4255,
+      "uss_kib": 4116,
+      "reported_vm_hwm_kib": 6100,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 5848,
+      "pss_kib": 3814,
+      "uss_kib": 3672,
+      "reported_vm_hwm_kib": 4052,
+      "threads": 4
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 16724,
+      "pss_kib": 14690,
+      "uss_kib": 14548,
+      "reported_vm_hwm_kib": 15264,
+      "threads": 4
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 5872,
+      "pss_kib": 3785,
+      "uss_kib": 3652,
+      "reported_vm_hwm_kib": 4048,
+      "threads": 4
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 16768,
+      "pss_kib": 14681,
+      "uss_kib": 14548,
+      "reported_vm_hwm_kib": 15244,
+      "threads": 4
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 5500,
+      "pss_kib": 3572,
+      "uss_kib": 3436,
+      "reported_vm_hwm_kib": 5500,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 12224,
+      "pss_kib": 10296,
+      "uss_kib": 10160,
+      "reported_vm_hwm_kib": 12020,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 5444,
+      "pss_kib": 3583,
+      "uss_kib": 3452,
+      "reported_vm_hwm_kib": 5444,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 12168,
+      "pss_kib": 10307,
+      "uss_kib": 10176,
+      "reported_vm_hwm_kib": 11964,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "stock-single",
+      "phase": "before",
+      "rss_kib": 5344,
+      "pss_kib": 3261,
+      "uss_kib": 3132,
+      "reported_vm_hwm_kib": 5312,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "stock-single",
+      "phase": "after",
+      "rss_kib": 15224,
+      "pss_kib": 13141,
+      "uss_kib": 13012,
+      "reported_vm_hwm_kib": 14988,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24856,
+      "pss_kib": 22745,
+      "uss_kib": 22572,
+      "reported_vm_hwm_kib": 23964,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86940,
+      "pss_kib": 84829,
+      "uss_kib": 84656,
+      "reported_vm_hwm_kib": 85968,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "lkl-cache-512",
+      "phase": "before",
+      "rss_kib": 24588,
+      "pss_kib": 22694,
+      "uss_kib": 22556,
+      "reported_vm_hwm_kib": 23636,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "lkl-cache-512",
+      "phase": "after",
+      "rss_kib": 86668,
+      "pss_kib": 84774,
+      "uss_kib": 84636,
+      "reported_vm_hwm_kib": 85644,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "copied-small",
+      "phase": "before",
+      "rss_kib": 3300,
+      "pss_kib": 1386,
+      "uss_kib": 1248,
+      "reported_vm_hwm_kib": 3412,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "codec": "lz4",
+      "variant": "copied-small",
+      "phase": "after",
+      "rss_kib": 6184,
+      "pss_kib": 4270,
+      "uss_kib": 4132,
+      "reported_vm_hwm_kib": 5932,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 5640,
+      "pss_kib": 3559,
+      "uss_kib": 3424,
+      "reported_vm_hwm_kib": 3948,
+      "threads": 5
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 16896,
+      "pss_kib": 14815,
+      "uss_kib": 14680,
+      "reported_vm_hwm_kib": 15224,
+      "threads": 6
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 5620,
+      "pss_kib": 3512,
+      "uss_kib": 3376,
+      "reported_vm_hwm_kib": 4080,
+      "threads": 5
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 17008,
+      "pss_kib": 14900,
+      "uss_kib": 14764,
+      "reported_vm_hwm_kib": 15336,
+      "threads": 6
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 5512,
+      "pss_kib": 3560,
+      "uss_kib": 3432,
+      "reported_vm_hwm_kib": 5512,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 12248,
+      "pss_kib": 10296,
+      "uss_kib": 10168,
+      "reported_vm_hwm_kib": 12060,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 5472,
+      "pss_kib": 3559,
+      "uss_kib": 3420,
+      "reported_vm_hwm_kib": 5472,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 12208,
+      "pss_kib": 10295,
+      "uss_kib": 10156,
+      "reported_vm_hwm_kib": 12020,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "stock-single",
+      "phase": "before",
+      "rss_kib": 4688,
+      "pss_kib": 2638,
+      "uss_kib": 2500,
+      "reported_vm_hwm_kib": 4460,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "stock-single",
+      "phase": "after",
+      "rss_kib": 14004,
+      "pss_kib": 11954,
+      "uss_kib": 11816,
+      "reported_vm_hwm_kib": 13816,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24572,
+      "pss_kib": 22533,
+      "uss_kib": 22360,
+      "reported_vm_hwm_kib": 23716,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86648,
+      "pss_kib": 84609,
+      "uss_kib": 84436,
+      "reported_vm_hwm_kib": 85692,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "lkl-cache-512",
+      "phase": "before",
+      "rss_kib": 24516,
+      "pss_kib": 22472,
+      "uss_kib": 22300,
+      "reported_vm_hwm_kib": 23628,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "lkl-cache-512",
+      "phase": "after",
+      "rss_kib": 86596,
+      "pss_kib": 84552,
+      "uss_kib": 84380,
+      "reported_vm_hwm_kib": 85608,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "copied-small",
+      "phase": "before",
+      "rss_kib": 3348,
+      "pss_kib": 1387,
+      "uss_kib": 1260,
+      "reported_vm_hwm_kib": 3432,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "codec": "gzip",
+      "variant": "copied-small",
+      "phase": "after",
+      "rss_kib": 6212,
+      "pss_kib": 4251,
+      "uss_kib": 4124,
+      "reported_vm_hwm_kib": 5956,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 9380,
+      "pss_kib": 7222,
+      "uss_kib": 7080,
+      "reported_vm_hwm_kib": 6396,
+      "threads": 11
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 26784,
+      "pss_kib": 24626,
+      "uss_kib": 24484,
+      "reported_vm_hwm_kib": 24380,
+      "threads": 11
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 9276,
+      "pss_kib": 7110,
+      "uss_kib": 6952,
+      "reported_vm_hwm_kib": 6176,
+      "threads": 11
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 25556,
+      "pss_kib": 23390,
+      "uss_kib": 23232,
+      "reported_vm_hwm_kib": 22532,
+      "threads": 11
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 5500,
+      "pss_kib": 3568,
+      "uss_kib": 3440,
+      "reported_vm_hwm_kib": 5448,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 12208,
+      "pss_kib": 10276,
+      "uss_kib": 10148,
+      "reported_vm_hwm_kib": 12048,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 5452,
+      "pss_kib": 3562,
+      "uss_kib": 3420,
+      "reported_vm_hwm_kib": 5400,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 12160,
+      "pss_kib": 10270,
+      "uss_kib": 10128,
+      "reported_vm_hwm_kib": 12000,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "stock-single",
+      "phase": "before",
+      "rss_kib": 5008,
+      "pss_kib": 2964,
+      "uss_kib": 2804,
+      "reported_vm_hwm_kib": 5012,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "stock-single",
+      "phase": "after",
+      "rss_kib": 14948,
+      "pss_kib": 12904,
+      "uss_kib": 12744,
+      "reported_vm_hwm_kib": 14756,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24668,
+      "pss_kib": 22629,
+      "uss_kib": 22456,
+      "reported_vm_hwm_kib": 23724,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86760,
+      "pss_kib": 84721,
+      "uss_kib": 84548,
+      "reported_vm_hwm_kib": 85700,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "lkl-cache-512",
+      "phase": "before",
+      "rss_kib": 24432,
+      "pss_kib": 22540,
+      "uss_kib": 22404,
+      "reported_vm_hwm_kib": 23552,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "lkl-cache-512",
+      "phase": "after",
+      "rss_kib": 86512,
+      "pss_kib": 84620,
+      "uss_kib": 84484,
+      "reported_vm_hwm_kib": 85532,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "copied-small",
+      "phase": "before",
+      "rss_kib": 3472,
+      "pss_kib": 1517,
+      "uss_kib": 1396,
+      "reported_vm_hwm_kib": 3468,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "codec": "xz",
+      "variant": "copied-small",
+      "phase": "after",
+      "rss_kib": 6192,
+      "pss_kib": 4237,
+      "uss_kib": 4116,
+      "reported_vm_hwm_kib": 6192,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 5844,
+      "pss_kib": 3819,
+      "uss_kib": 3692,
+      "reported_vm_hwm_kib": 4108,
+      "threads": 4
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 16740,
+      "pss_kib": 14715,
+      "uss_kib": 14588,
+      "reported_vm_hwm_kib": 15360,
+      "threads": 4
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 5852,
+      "pss_kib": 3813,
+      "uss_kib": 3672,
+      "reported_vm_hwm_kib": 4212,
+      "threads": 4
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 16488,
+      "pss_kib": 14449,
+      "uss_kib": 14308,
+      "reported_vm_hwm_kib": 15140,
+      "threads": 4
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 5484,
+      "pss_kib": 3560,
+      "uss_kib": 3420,
+      "reported_vm_hwm_kib": 5484,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 12208,
+      "pss_kib": 10284,
+      "uss_kib": 10144,
+      "reported_vm_hwm_kib": 12004,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 5408,
+      "pss_kib": 3580,
+      "uss_kib": 3444,
+      "reported_vm_hwm_kib": 5408,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 12132,
+      "pss_kib": 10304,
+      "uss_kib": 10168,
+      "reported_vm_hwm_kib": 11928,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "stock-single",
+      "phase": "before",
+      "rss_kib": 5276,
+      "pss_kib": 3270,
+      "uss_kib": 3132,
+      "reported_vm_hwm_kib": 5244,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "stock-single",
+      "phase": "after",
+      "rss_kib": 15156,
+      "pss_kib": 13150,
+      "uss_kib": 13012,
+      "reported_vm_hwm_kib": 14920,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24716,
+      "pss_kib": 22647,
+      "uss_kib": 22472,
+      "reported_vm_hwm_kib": 23768,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86800,
+      "pss_kib": 84731,
+      "uss_kib": 84556,
+      "reported_vm_hwm_kib": 85772,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "lkl-cache-512",
+      "phase": "before",
+      "rss_kib": 24796,
+      "pss_kib": 22744,
+      "uss_kib": 22584,
+      "reported_vm_hwm_kib": 23852,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "lkl-cache-512",
+      "phase": "after",
+      "rss_kib": 86884,
+      "pss_kib": 84832,
+      "uss_kib": 84672,
+      "reported_vm_hwm_kib": 85860,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "copied-small",
+      "phase": "before",
+      "rss_kib": 3316,
+      "pss_kib": 1402,
+      "uss_kib": 1280,
+      "reported_vm_hwm_kib": 3428,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "codec": "lz4",
+      "variant": "copied-small",
+      "phase": "after",
+      "rss_kib": 6200,
+      "pss_kib": 4286,
+      "uss_kib": 4164,
+      "reported_vm_hwm_kib": 5948,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 5648,
+      "pss_kib": 3560,
+      "uss_kib": 3416,
+      "reported_vm_hwm_kib": 4168,
+      "threads": 5
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 17544,
+      "pss_kib": 15456,
+      "uss_kib": 15312,
+      "reported_vm_hwm_kib": 15924,
+      "threads": 6
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 5628,
+      "pss_kib": 3578,
+      "uss_kib": 3440,
+      "reported_vm_hwm_kib": 4012,
+      "threads": 5
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 17040,
+      "pss_kib": 14990,
+      "uss_kib": 14852,
+      "reported_vm_hwm_kib": 15224,
+      "threads": 6
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 5444,
+      "pss_kib": 3571,
+      "uss_kib": 3444,
+      "reported_vm_hwm_kib": 5444,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 12180,
+      "pss_kib": 10307,
+      "uss_kib": 10180,
+      "reported_vm_hwm_kib": 11992,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 5472,
+      "pss_kib": 3565,
+      "uss_kib": 3432,
+      "reported_vm_hwm_kib": 5472,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 12208,
+      "pss_kib": 10301,
+      "uss_kib": 10168,
+      "reported_vm_hwm_kib": 12020,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "stock-single",
+      "phase": "before",
+      "rss_kib": 4684,
+      "pss_kib": 2626,
+      "uss_kib": 2476,
+      "reported_vm_hwm_kib": 4456,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "stock-single",
+      "phase": "after",
+      "rss_kib": 14000,
+      "pss_kib": 11942,
+      "uss_kib": 11792,
+      "reported_vm_hwm_kib": 13812,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24440,
+      "pss_kib": 22459,
+      "uss_kib": 22292,
+      "reported_vm_hwm_kib": 23524,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86524,
+      "pss_kib": 84543,
+      "uss_kib": 84376,
+      "reported_vm_hwm_kib": 85500,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "lkl-cache-512",
+      "phase": "before",
+      "rss_kib": 24608,
+      "pss_kib": 22506,
+      "uss_kib": 22340,
+      "reported_vm_hwm_kib": 23584,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "lkl-cache-512",
+      "phase": "after",
+      "rss_kib": 86688,
+      "pss_kib": 84586,
+      "uss_kib": 84420,
+      "reported_vm_hwm_kib": 85564,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "copied-small",
+      "phase": "before",
+      "rss_kib": 3344,
+      "pss_kib": 1402,
+      "uss_kib": 1268,
+      "reported_vm_hwm_kib": 3428,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "codec": "gzip",
+      "variant": "copied-small",
+      "phase": "after",
+      "rss_kib": 6208,
+      "pss_kib": 4266,
+      "uss_kib": 4132,
+      "reported_vm_hwm_kib": 5952,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 9016,
+      "pss_kib": 6761,
+      "uss_kib": 6616,
+      "reported_vm_hwm_kib": 6204,
+      "threads": 11
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 25296,
+      "pss_kib": 23041,
+      "uss_kib": 22896,
+      "reported_vm_hwm_kib": 22840,
+      "threads": 11
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 9164,
+      "pss_kib": 7015,
+      "uss_kib": 6864,
+      "reported_vm_hwm_kib": 6280,
+      "threads": 11
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 26724,
+      "pss_kib": 24575,
+      "uss_kib": 24424,
+      "reported_vm_hwm_kib": 24588,
+      "threads": 11
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 5508,
+      "pss_kib": 3545,
+      "uss_kib": 3412,
+      "reported_vm_hwm_kib": 5456,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 12216,
+      "pss_kib": 10253,
+      "uss_kib": 10120,
+      "reported_vm_hwm_kib": 12056,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 5480,
+      "pss_kib": 3538,
+      "uss_kib": 3412,
+      "reported_vm_hwm_kib": 5428,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 12188,
+      "pss_kib": 10246,
+      "uss_kib": 10120,
+      "reported_vm_hwm_kib": 12028,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "stock-single",
+      "phase": "before",
+      "rss_kib": 4972,
+      "pss_kib": 2945,
+      "uss_kib": 2784,
+      "reported_vm_hwm_kib": 4976,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "stock-single",
+      "phase": "after",
+      "rss_kib": 14912,
+      "pss_kib": 12885,
+      "uss_kib": 12724,
+      "reported_vm_hwm_kib": 14720,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24552,
+      "pss_kib": 22508,
+      "uss_kib": 22336,
+      "reported_vm_hwm_kib": 23676,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86628,
+      "pss_kib": 84584,
+      "uss_kib": 84412,
+      "reported_vm_hwm_kib": 85652,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "lkl-cache-512",
+      "phase": "before",
+      "rss_kib": 24696,
+      "pss_kib": 22626,
+      "uss_kib": 22452,
+      "reported_vm_hwm_kib": 23856,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "lkl-cache-512",
+      "phase": "after",
+      "rss_kib": 86776,
+      "pss_kib": 84706,
+      "uss_kib": 84532,
+      "reported_vm_hwm_kib": 85836,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "copied-small",
+      "phase": "before",
+      "rss_kib": 3460,
+      "pss_kib": 1531,
+      "uss_kib": 1404,
+      "reported_vm_hwm_kib": 3456,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "codec": "xz",
+      "variant": "copied-small",
+      "phase": "after",
+      "rss_kib": 6180,
+      "pss_kib": 4251,
+      "uss_kib": 4124,
+      "reported_vm_hwm_kib": 6180,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 5840,
+      "pss_kib": 3783,
+      "uss_kib": 3652,
+      "reported_vm_hwm_kib": 4152,
+      "threads": 4
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 16568,
+      "pss_kib": 14511,
+      "uss_kib": 14380,
+      "reported_vm_hwm_kib": 15248,
+      "threads": 4
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 5876,
+      "pss_kib": 3814,
+      "uss_kib": 3672,
+      "reported_vm_hwm_kib": 4052,
+      "threads": 4
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 16664,
+      "pss_kib": 14602,
+      "uss_kib": 14460,
+      "reported_vm_hwm_kib": 15044,
+      "threads": 4
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 5504,
+      "pss_kib": 3564,
+      "uss_kib": 3440,
+      "reported_vm_hwm_kib": 5504,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 12228,
+      "pss_kib": 10288,
+      "uss_kib": 10164,
+      "reported_vm_hwm_kib": 12024,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 5504,
+      "pss_kib": 3560,
+      "uss_kib": 3432,
+      "reported_vm_hwm_kib": 5504,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 12228,
+      "pss_kib": 10284,
+      "uss_kib": 10156,
+      "reported_vm_hwm_kib": 12024,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "stock-single",
+      "phase": "before",
+      "rss_kib": 5336,
+      "pss_kib": 3284,
+      "uss_kib": 3144,
+      "reported_vm_hwm_kib": 5304,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "stock-single",
+      "phase": "after",
+      "rss_kib": 15216,
+      "pss_kib": 13164,
+      "uss_kib": 13024,
+      "reported_vm_hwm_kib": 14980,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24888,
+      "pss_kib": 22755,
+      "uss_kib": 22580,
+      "reported_vm_hwm_kib": 23876,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86972,
+      "pss_kib": 84839,
+      "uss_kib": 84664,
+      "reported_vm_hwm_kib": 85880,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "lkl-cache-512",
+      "phase": "before",
+      "rss_kib": 24800,
+      "pss_kib": 22762,
+      "uss_kib": 22588,
+      "reported_vm_hwm_kib": 23780,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "lkl-cache-512",
+      "phase": "after",
+      "rss_kib": 86880,
+      "pss_kib": 84842,
+      "uss_kib": 84668,
+      "reported_vm_hwm_kib": 85788,
+      "threads": 18
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "copied-small",
+      "phase": "before",
+      "rss_kib": 3304,
+      "pss_kib": 1379,
+      "uss_kib": 1236,
+      "reported_vm_hwm_kib": 3416,
+      "threads": 1
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "codec": "lz4",
+      "variant": "copied-small",
+      "phase": "after",
+      "rss_kib": 6188,
+      "pss_kib": 4263,
+      "uss_kib": 4120,
+      "reported_vm_hwm_kib": 5936,
+      "threads": 1
+    }
+  ],
+  "scale": [
+    {
+      "scale": 1,
+      "entries": 5866,
+      "visited_entries_including_root": 5867,
+      "variant": "stock",
+      "rss_kib": 19792,
+      "pss_kib": 17709,
+      "uss_kib": 17580,
+      "reported_vm_hwm_kib": 17484,
+      "before_pss_kib": 4693,
+      "after_minus_before_pss_kib": 13016
+    },
+    {
+      "scale": 1,
+      "entries": 5866,
+      "visited_entries_including_root": 5867,
+      "variant": "copied",
+      "rss_kib": 12212,
+      "pss_kib": 10242,
+      "uss_kib": 10124,
+      "reported_vm_hwm_kib": 12052,
+      "before_pss_kib": 3539,
+      "after_minus_before_pss_kib": 6703
+    },
+    {
+      "scale": 1,
+      "entries": 5866,
+      "visited_entries_including_root": 5867,
+      "variant": "vkso",
+      "rss_kib": 12200,
+      "pss_kib": 10235,
+      "uss_kib": 10112,
+      "reported_vm_hwm_kib": 12040,
+      "before_pss_kib": 3531,
+      "after_minus_before_pss_kib": 6704
+    },
+    {
+      "scale": 1,
+      "entries": 5866,
+      "visited_entries_including_root": 5867,
+      "variant": "stock-single",
+      "rss_kib": 14352,
+      "pss_kib": 12240,
+      "uss_kib": 12096,
+      "reported_vm_hwm_kib": 14088,
+      "before_pss_kib": 2916,
+      "after_minus_before_pss_kib": 9324
+    },
+    {
+      "scale": 1,
+      "entries": 5866,
+      "visited_entries_including_root": 5867,
+      "variant": "lkl-cache-512",
+      "rss_kib": 86788,
+      "pss_kib": 84699,
+      "uss_kib": 84552,
+      "reported_vm_hwm_kib": 85736,
+      "before_pss_kib": 22619,
+      "after_minus_before_pss_kib": 62080
+    },
+    {
+      "scale": 1,
+      "entries": 5866,
+      "visited_entries_including_root": 5867,
+      "variant": "copied-unbounded",
+      "rss_kib": 9080,
+      "pss_kib": 7175,
+      "uss_kib": 7056,
+      "reported_vm_hwm_kib": 9056,
+      "before_pss_kib": 1403,
+      "after_minus_before_pss_kib": 5772
+    },
+    {
+      "scale": 1,
+      "entries": 5866,
+      "visited_entries_including_root": 5867,
+      "variant": "copied-small",
+      "rss_kib": 6208,
+      "pss_kib": 4281,
+      "uss_kib": 4164,
+      "reported_vm_hwm_kib": 5988,
+      "before_pss_kib": 1513,
+      "after_minus_before_pss_kib": 2768
+    },
+    {
+      "scale": 4,
+      "entries": 23464,
+      "visited_entries_including_root": 23465,
+      "variant": "stock",
+      "rss_kib": 30604,
+      "pss_kib": 28440,
+      "uss_kib": 28320,
+      "reported_vm_hwm_kib": 27868,
+      "before_pss_kib": 4636,
+      "after_minus_before_pss_kib": 23804
+    },
+    {
+      "scale": 4,
+      "entries": 23464,
+      "visited_entries_including_root": 23465,
+      "variant": "copied",
+      "rss_kib": 15372,
+      "pss_kib": 13430,
+      "uss_kib": 13308,
+      "reported_vm_hwm_kib": 15200,
+      "before_pss_kib": 3546,
+      "after_minus_before_pss_kib": 9884
+    },
+    {
+      "scale": 4,
+      "entries": 23464,
+      "visited_entries_including_root": 23465,
+      "variant": "vkso",
+      "rss_kib": 15340,
+      "pss_kib": 13434,
+      "uss_kib": 13312,
+      "reported_vm_hwm_kib": 15168,
+      "before_pss_kib": 3550,
+      "after_minus_before_pss_kib": 9884
+    },
+    {
+      "scale": 4,
+      "entries": 23464,
+      "visited_entries_including_root": 23465,
+      "variant": "stock-single",
+      "rss_kib": 15532,
+      "pss_kib": 13429,
+      "uss_kib": 13292,
+      "reported_vm_hwm_kib": 15280,
+      "before_pss_kib": 2948,
+      "after_minus_before_pss_kib": 10481
+    },
+    {
+      "scale": 4,
+      "entries": 23464,
+      "visited_entries_including_root": 23465,
+      "variant": "lkl-cache-512",
+      "rss_kib": 262304,
+      "pss_kib": 260307,
+      "uss_kib": 260172,
+      "reported_vm_hwm_kib": 261516,
+      "before_pss_kib": 22607,
+      "after_minus_before_pss_kib": 237700
+    },
+    {
+      "scale": 4,
+      "entries": 23464,
+      "visited_entries_including_root": 23465,
+      "variant": "copied-unbounded",
+      "rss_kib": 25900,
+      "pss_kib": 23980,
+      "uss_kib": 23860,
+      "reported_vm_hwm_kib": 25788,
+      "before_pss_kib": 1436,
+      "after_minus_before_pss_kib": 22544
+    },
+    {
+      "scale": 4,
+      "entries": 23464,
+      "visited_entries_including_root": 23465,
+      "variant": "copied-small",
+      "rss_kib": 9384,
+      "pss_kib": 7439,
+      "uss_kib": 7300,
+      "reported_vm_hwm_kib": 9200,
+      "before_pss_kib": 1447,
+      "after_minus_before_pss_kib": 5992
+    },
+    {
+      "scale": 16,
+      "entries": 93856,
+      "visited_entries_including_root": 93857,
+      "variant": "stock",
+      "rss_kib": 31772,
+      "pss_kib": 29563,
+      "uss_kib": 29432,
+      "reported_vm_hwm_kib": 29128,
+      "before_pss_kib": 4418,
+      "after_minus_before_pss_kib": 25145
+    },
+    {
+      "scale": 16,
+      "entries": 93856,
+      "visited_entries_including_root": 93857,
+      "variant": "copied",
+      "rss_kib": 27924,
+      "pss_kib": 25968,
+      "uss_kib": 25840,
+      "reported_vm_hwm_kib": 27772,
+      "before_pss_kib": 3560,
+      "after_minus_before_pss_kib": 22408
+    },
+    {
+      "scale": 16,
+      "entries": 93856,
+      "visited_entries_including_root": 93857,
+      "variant": "vkso",
+      "rss_kib": 27896,
+      "pss_kib": 25990,
+      "uss_kib": 25844,
+      "reported_vm_hwm_kib": 27744,
+      "before_pss_kib": 3582,
+      "after_minus_before_pss_kib": 22408
+    },
+    {
+      "scale": 16,
+      "entries": 93856,
+      "visited_entries_including_root": 93857,
+      "variant": "stock-single",
+      "rss_kib": 15308,
+      "pss_kib": 13237,
+      "uss_kib": 13084,
+      "reported_vm_hwm_kib": 15052,
+      "before_pss_kib": 2993,
+      "after_minus_before_pss_kib": 10244
+    },
+    {
+      "scale": 16,
+      "entries": 93856,
+      "visited_entries_including_root": 93857,
+      "variant": "lkl-cache-512",
+      "rss_kib": 515184,
+      "pss_kib": 513097,
+      "uss_kib": 512948,
+      "reported_vm_hwm_kib": 514164,
+      "before_pss_kib": 22653,
+      "after_minus_before_pss_kib": 490444
+    },
+    {
+      "scale": 16,
+      "entries": 93856,
+      "visited_entries_including_root": 93857,
+      "variant": "copied-unbounded",
+      "rss_kib": 92940,
+      "pss_kib": 91014,
+      "uss_kib": 90888,
+      "reported_vm_hwm_kib": 92840,
+      "before_pss_kib": 1438,
+      "after_minus_before_pss_kib": 89576
+    },
+    {
+      "scale": 16,
+      "entries": 93856,
+      "visited_entries_including_root": 93857,
+      "variant": "copied-small",
+      "rss_kib": 21884,
+      "pss_kib": 19888,
+      "uss_kib": 19756,
+      "reported_vm_hwm_kib": 21712,
+      "before_pss_kib": 1515,
+      "after_minus_before_pss_kib": 18373
+    }
+  ],
+  "native_reference_residencies": {
+    "native-small-normal": 61440,
+    "native-small-relaxed": 61440,
+    "native-word-normal": 73728,
+    "native-word-relaxed": 73728
+  },
+  "native_reference_boundary": "Word references bundle the optimized XZ decoder in their module without replacing host kernel XZ. Original small references call the host decoder. These residency boundaries differ; neither difference estimates whole-kernel replacement or net machine memory.",
+  "platform": {
+    "module": "page_cache_replace",
+    "resident_bytes": 32768,
+    "charged_to_business_bytes": 0
+  },
+  "business": {
+    "owner_resident_bytes": 69632,
+    "native_consumer_resident_bytes": 40960,
+    "native_reference": "native-word-normal (bundled optimized XZ)",
+    "native_reference_resident_bytes": 73728,
+    "prepared_native_resident_bytes": 110592,
+    "native_preparation_delta_bytes": 36864,
+    "shared_backing_avoided_once_bytes": 36864,
+    "registration_requested_bytes": 1264,
+    "user_only_owner_resident_bytes": 69632
+  },
+  "registration": {
+    "transaction_bytes": 688,
+    "binding_bytes": 64,
+    "pages": 9,
+    "debug_type_output": "$1 = 688\n$2 = 64\n",
+    "note": "Requested metadata, excluding allocator rounding and other kernel allocations."
+  },
+  "deployment_stages": [
+    {
+      "campaign": "squash-data48-application-final-gzip-01",
+      "core_export_registration": 3.999719443003414,
+      "construction_export": 3.8857380260014907,
+      "business_setup": 4.008585471980041,
+      "registration": 0.11398141700192355,
+      "restore_unload": 0.16347685104119591
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-01-recovery01",
+      "core_export_registration": 2.7460057720309123,
+      "construction_export": 2.582021666021319,
+      "business_setup": 2.7559926220274065,
+      "registration": 0.16398410600959323,
+      "restore_unload": 0.1619015619799029
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-01",
+      "core_export_registration": 2.747817426978145,
+      "construction_export": 2.5837793319660705,
+      "business_setup": 2.755889246967854,
+      "registration": 0.16403809501207434,
+      "restore_unload": 0.12913721895893104
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-02",
+      "core_export_registration": 2.6962401940254495,
+      "construction_export": 2.581909146014368,
+      "business_setup": 2.7044063890061807,
+      "registration": 0.1143310480110813,
+      "restore_unload": 0.12857409895514138
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-02",
+      "core_export_registration": 2.746382250013994,
+      "construction_export": 2.6324742599972524,
+      "business_setup": 2.7546024459879845,
+      "registration": 0.11390799001674168,
+      "restore_unload": 0.11258982896106318
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-02",
+      "core_export_registration": 2.6974516850314103,
+      "construction_export": 2.5836269250139594,
+      "business_setup": 2.705626724025933,
+      "registration": 0.1138247600174509,
+      "restore_unload": 0.1460532829805743
+    },
+    {
+      "campaign": "squash-data48-application-final-gzip-03",
+      "core_export_registration": 2.696359593013767,
+      "construction_export": 2.582233200984774,
+      "business_setup": 2.706152964005014,
+      "registration": 0.114126392028993,
+      "restore_unload": 0.16178791798301972
+    },
+    {
+      "campaign": "squash-data48-application-final-xz-03",
+      "core_export_registration": 2.746041355014313,
+      "construction_export": 2.631638071005,
+      "business_setup": 2.754177172027994,
+      "registration": 0.11440328400931321,
+      "restore_unload": 0.16961234400514513
+    },
+    {
+      "campaign": "squash-data48-application-final-lz4-03",
+      "core_export_registration": 2.699273695005104,
+      "construction_export": 2.5840876389993355,
+      "business_setup": 2.7075643350253813,
+      "registration": 0.11518605600576848,
+      "restore_unload": 0.13195617802557535
+    }
+  ],
+  "deployment_summary": {
+    "core_export_registration": {
+      "n": 9,
+      "median": 2.7460057720309123,
+      "minimum": 2.6962401940254495,
+      "maximum": 3.999719443003414
+    },
+    "construction_export": {
+      "n": 9,
+      "median": 2.5837793319660705,
+      "minimum": 2.581909146014368,
+      "maximum": 3.8857380260014907
+    },
+    "business_setup": {
+      "n": 9,
+      "median": 2.754177172027994,
+      "minimum": 2.7044063890061807,
+      "maximum": 4.008585471980041
+    },
+    "registration": {
+      "n": 9,
+      "median": 0.1143310480110813,
+      "minimum": 0.1138247600174509,
+      "maximum": 0.16403809501207434
+    },
+    "restore_unload": {
+      "n": 9,
+      "median": 0.1460532829805743,
+      "minimum": 0.11258982896106318,
+      "maximum": 0.16961234400514513
+    }
+  },
+  "minimal_deployment": {
+    "status": "complete",
+    "scope": "Real SIF application with only owner+registration resident; then identical copied image after all task modules unload.",
+    "binaries": {
+      "vkso_sq_core.ko": "64ab8c7e8bb313d56b8721ae7c8c5e752dfc824a091073f9f18f6044f574ec98",
+      "libsq-bridge.so": "c3a687df6f9e26d1ccb66c1ec1c71bd9208710168f057c371994548f5083d316",
+      "vkso-squashfuse": "7d5d40526cc92483c3a4fd70e5b374dd263ec658c67c7de0d2947cb29026f46a"
+    },
+    "copy_materialization": {
+      "wall_seconds": 0.00014267698861658573,
+      "bytes": 65016,
+      "sha256": "40e3b02f47f68e157160ce72bb72df158098037be69da2fcba79e0ed21995767"
+    },
+    "runtime_modules": [
+      {
+        "name": "page_cache_replace",
+        "reported_bytes": 32768
+      },
+      {
+        "name": "vkso_sq_core",
+        "reported_bytes": 69632
+      }
+    ],
+    "shared_application": {
+      "status": "pass",
+      "scope": "SIF application integration; no performance or PFN claim",
+      "entries": 5866,
+      "helper_invocations": [
+        {
+          "pid": 2406586,
+          "source": "/proc/self/fd/3",
+          "target": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/var/lib/apptainer/mnt/session/rootfs",
+          "offset": 36864,
+          "options": "allow_other,ro,uid=1000,gid=1000",
+          "command": [
+            "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+            "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-minimal-01/carrier/libvkso_sq_core.so",
+            "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/libsq-bridge.so",
+            "/proc/self/fd/3",
+            "36864",
+            "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/var/lib/apptainer/mnt/session/rootfs",
+            "allow_other,ro,uid=1000,gid=1000"
+          ]
+        }
+      ],
+      "image": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/application-images-01/xz.sif",
+      "apptainer_version": "apptainer version 1.5.5"
+    },
+    "copied_modules_absent": true,
+    "copied_application": {
+      "status": "pass",
+      "scope": "SIF application integration; no performance or PFN claim",
+      "entries": 5866,
+      "helper_invocations": [
+        {
+          "pid": 2406750,
+          "source": "/proc/self/fd/3",
+          "target": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/var/lib/apptainer/mnt/session/rootfs",
+          "offset": 36864,
+          "options": "allow_other,ro,uid=1000,gid=1000",
+          "command": [
+            "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+            "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data48-minimal-01/libsq-materialized.so",
+            "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/libsq-bridge.so",
+            "/proc/self/fd/3",
+            "36864",
+            "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/var/lib/apptainer/mnt/session/rootfs",
+            "allow_other,ro,uid=1000,gid=1000"
+          ]
+        }
+      ],
+      "image": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/application-images-01/xz.sif",
+      "apptainer_version": "apptainer version 1.5.5"
+    },
+    "restored": true,
+    "modules_unloaded": true
+  },
+  "premises": [
+    "Prepared native already resident: no second owner; avoid one shared code/RO backing, with registration and private state still required.",
+    "Original native to prepared native: charge the owner/consumer increment before considering the avoided user backing.",
+    "User-only: retain the owner but omit native consumer and construction observer; copied runs after all task modules unload."
+  ],
+  "scope": "RSS/PSS/USS are helper snapshots around include archive, before PFN/debug reads. VmHWM is the process-reported resident high-water mark. Scale runs are separate untimed observations. Module residency, backing, requested metadata, private allocations and process metrics are not summed into a calibrated whole-machine total. Ordinary copied DSOs also share among user processes.",
+  "setup_scope": "Per owner deployment/export/registration, reused by later invocations while owner and registration remain installed. Core version/owner reload needs fresh construction and registration. Times sum stages within each campaign before aggregation, exclude compilation/validation, and do not establish copied setup is free.",
+  "disk_files": {
+    "owner": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso_sq_core.ko",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso_sq_core.ko",
+      "role": "owner",
+      "logical_bytes": 80832,
+      "allocated_bytes": 81920,
+      "device": 66307,
+      "inode": 6821894,
+      "links": 1,
+      "sha256": "64ab8c7e8bb313d56b8721ae7c8c5e752dfc824a091073f9f18f6044f574ec98",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".note.gnu.build-id",
+          "type": "SHT_NOTE",
+          "offset": 64,
+          "bytes": 36,
+          "flags": 2
+        },
+        {
+          "name": ".note.Linux",
+          "type": "SHT_NOTE",
+          "offset": 100,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 160,
+          "bytes": 28052,
+          "flags": 6
+        },
+        {
+          "name": ".rela.text",
+          "type": "SHT_RELA",
+          "offset": 56032,
+          "bytes": 12480,
+          "flags": 64
+        },
+        {
+          "name": ".init.text",
+          "type": "SHT_PROGBITS",
+          "offset": 28212,
+          "bytes": 230,
+          "flags": 6
+        },
+        {
+          "name": ".rela.init.text",
+          "type": "SHT_RELA",
+          "offset": 68512,
+          "bytes": 408,
+          "flags": 64
+        },
+        {
+          "name": ".exit.text",
+          "type": "SHT_PROGBITS",
+          "offset": 28442,
+          "bytes": 5,
+          "flags": 6
+        },
+        {
+          "name": ".rela.exit.text",
+          "type": "SHT_RELA",
+          "offset": 68920,
+          "bytes": 24,
+          "flags": 64
+        },
+        {
+          "name": "__ksymtab_gpl",
+          "type": "SHT_PROGBITS",
+          "offset": 28448,
+          "bytes": 408,
+          "flags": 2
+        },
+        {
+          "name": ".rela__ksymtab_gpl",
+          "type": "SHT_RELA",
+          "offset": 68944,
+          "bytes": 2448,
+          "flags": 64
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 28864,
+          "bytes": 544,
+          "flags": 2
+        },
+        {
+          "name": ".rodata.str1.8",
+          "type": "SHT_PROGBITS",
+          "offset": 29408,
+          "bytes": 3420,
+          "flags": 50
+        },
+        {
+          "name": ".rodata.str1.1",
+          "type": "SHT_PROGBITS",
+          "offset": 32828,
+          "bytes": 184,
+          "flags": 50
+        },
+        {
+          "name": "__ksymtab_strings",
+          "type": "SHT_PROGBITS",
+          "offset": 33012,
+          "bytes": 716,
+          "flags": 50
+        },
+        {
+          "name": ".modinfo",
+          "type": "SHT_PROGBITS",
+          "offset": 33728,
+          "bytes": 130,
+          "flags": 2
+        },
+        {
+          "name": ".return_sites",
+          "type": "SHT_PROGBITS",
+          "offset": 33858,
+          "bytes": 8,
+          "flags": 2
+        },
+        {
+          "name": ".rela.return_sites",
+          "type": "SHT_RELA",
+          "offset": 71392,
+          "bytes": 48,
+          "flags": 64
+        },
+        {
+          "name": "__jump_table",
+          "type": "SHT_PROGBITS",
+          "offset": 33872,
+          "bytes": 656,
+          "flags": 3
+        },
+        {
+          "name": ".rela__jump_table",
+          "type": "SHT_RELA",
+          "offset": 71440,
+          "bytes": 2952,
+          "flags": 64
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 34528,
+          "bytes": 0,
+          "flags": 3
+        },
+        {
+          "name": "__dyndbg",
+          "type": "SHT_PROGBITS",
+          "offset": 34528,
+          "bytes": 2296,
+          "flags": 3
+        },
+        {
+          "name": ".rela__dyndbg",
+          "type": "SHT_RELA",
+          "offset": 74392,
+          "bytes": 3936,
+          "flags": 64
+        },
+        {
+          "name": ".vkso_owner",
+          "type": "SHT_PROGBITS",
+          "offset": 36864,
+          "bytes": 4096,
+          "flags": 3
+        },
+        {
+          "name": ".rela.vkso_owner",
+          "type": "SHT_RELA",
+          "offset": 78328,
+          "bytes": 24,
+          "flags": 64
+        },
+        {
+          "name": ".gnu.linkonce.this_module",
+          "type": "SHT_PROGBITS",
+          "offset": 40960,
+          "bytes": 768,
+          "flags": 3
+        },
+        {
+          "name": ".rela.gnu.linkonce.this_module",
+          "type": "SHT_RELA",
+          "offset": 78352,
+          "bytes": 48,
+          "flags": 64
+        },
+        {
+          "name": ".bss",
+          "type": "SHT_NOBITS",
+          "offset": 41728,
+          "bytes": 576,
+          "flags": 3
+        },
+        {
+          "name": ".comment",
+          "type": "SHT_PROGBITS",
+          "offset": 41728,
+          "bytes": 368,
+          "flags": 48
+        },
+        {
+          "name": ".note.GNU-stack",
+          "type": "SHT_PROGBITS",
+          "offset": 42096,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 42096,
+          "bytes": 8280,
+          "flags": 0
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 50376,
+          "bytes": 5650,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 78400,
+          "bytes": 320,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 28287,
+        "allocated_readonly": 5494,
+        "allocated_writable": 7816,
+        "debug": 0
+      }
+    },
+    "consumer": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso_squashfs.ko",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso_squashfs.ko",
+      "role": "consumer",
+      "logical_bytes": 60232,
+      "allocated_bytes": 61440,
+      "device": 66307,
+      "inode": 6821988,
+      "links": 1,
+      "sha256": "31a6187c8370c30eec97f75a6f1e2cdb68aca2757e7180e5ab5a84ea9b79dd22",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".note.gnu.build-id",
+          "type": "SHT_NOTE",
+          "offset": 64,
+          "bytes": 36,
+          "flags": 2
+        },
+        {
+          "name": ".note.Linux",
+          "type": "SHT_NOTE",
+          "offset": 100,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 160,
+          "bytes": 12876,
+          "flags": 6
+        },
+        {
+          "name": ".rela.text",
+          "type": "SHT_RELA",
+          "offset": 35648,
+          "bytes": 10560,
+          "flags": 64
+        },
+        {
+          "name": ".text.unlikely",
+          "type": "SHT_PROGBITS",
+          "offset": 13036,
+          "bytes": 499,
+          "flags": 6
+        },
+        {
+          "name": ".rela.text.unlikely",
+          "type": "SHT_RELA",
+          "offset": 46208,
+          "bytes": 1320,
+          "flags": 64
+        },
+        {
+          "name": ".altinstr_replacement",
+          "type": "SHT_PROGBITS",
+          "offset": 13535,
+          "bytes": 21,
+          "flags": 6
+        },
+        {
+          "name": ".init.text",
+          "type": "SHT_PROGBITS",
+          "offset": 13556,
+          "bytes": 128,
+          "flags": 6
+        },
+        {
+          "name": ".rela.init.text",
+          "type": "SHT_RELA",
+          "offset": 47528,
+          "bytes": 336,
+          "flags": 64
+        },
+        {
+          "name": ".exit.text",
+          "type": "SHT_PROGBITS",
+          "offset": 13684,
+          "bytes": 39,
+          "flags": 6
+        },
+        {
+          "name": ".rela.exit.text",
+          "type": "SHT_RELA",
+          "offset": 47864,
+          "bytes": 144,
+          "flags": 64
+        },
+        {
+          "name": ".altinstructions",
+          "type": "SHT_PROGBITS",
+          "offset": 13728,
+          "bytes": 84,
+          "flags": 2
+        },
+        {
+          "name": ".rela.altinstructions",
+          "type": "SHT_RELA",
+          "offset": 48008,
+          "bytes": 336,
+          "flags": 64
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 13824,
+          "bytes": 3392,
+          "flags": 2
+        },
+        {
+          "name": ".rela.rodata",
+          "type": "SHT_RELA",
+          "offset": 48344,
+          "bytes": 3192,
+          "flags": 64
+        },
+        {
+          "name": ".rodata.str1.8",
+          "type": "SHT_PROGBITS",
+          "offset": 17216,
+          "bytes": 2173,
+          "flags": 50
+        },
+        {
+          "name": ".retpoline_sites",
+          "type": "SHT_PROGBITS",
+          "offset": 19389,
+          "bytes": 100,
+          "flags": 2
+        },
+        {
+          "name": ".rela.retpoline_sites",
+          "type": "SHT_RELA",
+          "offset": 51536,
+          "bytes": 600,
+          "flags": 64
+        },
+        {
+          "name": ".return_sites",
+          "type": "SHT_PROGBITS",
+          "offset": 19489,
+          "bytes": 380,
+          "flags": 2
+        },
+        {
+          "name": ".rela.return_sites",
+          "type": "SHT_RELA",
+          "offset": 52136,
+          "bytes": 2280,
+          "flags": 64
+        },
+        {
+          "name": ".parainstructions",
+          "type": "SHT_PROGBITS",
+          "offset": 19872,
+          "bytes": 108,
+          "flags": 2
+        },
+        {
+          "name": ".rela.parainstructions",
+          "type": "SHT_RELA",
+          "offset": 54416,
+          "bytes": 168,
+          "flags": 64
+        },
+        {
+          "name": ".rodata.str1.1",
+          "type": "SHT_PROGBITS",
+          "offset": 19980,
+          "bytes": 298,
+          "flags": 50
+        },
+        {
+          "name": ".smp_locks",
+          "type": "SHT_PROGBITS",
+          "offset": 20280,
+          "bytes": 52,
+          "flags": 2
+        },
+        {
+          "name": ".rela.smp_locks",
+          "type": "SHT_RELA",
+          "offset": 54584,
+          "bytes": 312,
+          "flags": 64
+        },
+        {
+          "name": ".modinfo",
+          "type": "SHT_PROGBITS",
+          "offset": 20332,
+          "bytes": 227,
+          "flags": 2
+        },
+        {
+          "name": "__bug_table",
+          "type": "SHT_PROGBITS",
+          "offset": 20560,
+          "bytes": 12,
+          "flags": 3
+        },
+        {
+          "name": ".rela__bug_table",
+          "type": "SHT_RELA",
+          "offset": 54896,
+          "bytes": 48,
+          "flags": 64
+        },
+        {
+          "name": "__jump_table",
+          "type": "SHT_PROGBITS",
+          "offset": 20576,
+          "bytes": 224,
+          "flags": 3
+        },
+        {
+          "name": ".rela__jump_table",
+          "type": "SHT_RELA",
+          "offset": 54944,
+          "bytes": 1008,
+          "flags": 64
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 20800,
+          "bytes": 128,
+          "flags": 3
+        },
+        {
+          "name": ".rela.data",
+          "type": "SHT_RELA",
+          "offset": 55952,
+          "bytes": 192,
+          "flags": 64
+        },
+        {
+          "name": "__dyndbg",
+          "type": "SHT_PROGBITS",
+          "offset": 20928,
+          "bytes": 504,
+          "flags": 3
+        },
+        {
+          "name": ".rela__dyndbg",
+          "type": "SHT_RELA",
+          "offset": 56144,
+          "bytes": 864,
+          "flags": 64
+        },
+        {
+          "name": ".gnu.linkonce.this_module",
+          "type": "SHT_PROGBITS",
+          "offset": 21440,
+          "bytes": 768,
+          "flags": 3
+        },
+        {
+          "name": ".rela.gnu.linkonce.this_module",
+          "type": "SHT_RELA",
+          "offset": 57008,
+          "bytes": 48,
+          "flags": 64
+        },
+        {
+          "name": ".bss",
+          "type": "SHT_NOBITS",
+          "offset": 22208,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".comment",
+          "type": "SHT_PROGBITS",
+          "offset": 22208,
+          "bytes": 1104,
+          "flags": 48
+        },
+        {
+          "name": ".note.GNU-stack",
+          "type": "SHT_PROGBITS",
+          "offset": 23312,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 23312,
+          "bytes": 7584,
+          "flags": 0
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 30896,
+          "bytes": 4749,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 57056,
+          "bytes": 418,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 13563,
+        "allocated_readonly": 6898,
+        "allocated_writable": 1636,
+        "debug": 0
+      }
+    },
+    "bridge": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/libsq-bridge.so",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/libsq-bridge.so",
+      "role": "bridge",
+      "logical_bytes": 44344,
+      "allocated_bytes": 45056,
+      "device": 66307,
+      "inode": 6821860,
+      "links": 25,
+      "sha256": "c3a687df6f9e26d1ccb66c1ec1c71bd9208710168f057c371994548f5083d316",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".note.gnu.build-id",
+          "type": "SHT_NOTE",
+          "offset": 568,
+          "bytes": 36,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.hash",
+          "type": "SHT_GNU_HASH",
+          "offset": 608,
+          "bytes": 180,
+          "flags": 2
+        },
+        {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "offset": 792,
+          "bytes": 1824,
+          "flags": 2
+        },
+        {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "offset": 2616,
+          "bytes": 1177,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.version",
+          "type": "SHT_GNU_versym",
+          "offset": 3794,
+          "bytes": 152,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.version_r",
+          "type": "SHT_GNU_verneed",
+          "offset": 3952,
+          "bytes": 112,
+          "flags": 2
+        },
+        {
+          "name": ".rela.dyn",
+          "type": "SHT_RELA",
+          "offset": 4064,
+          "bytes": 1704,
+          "flags": 2
+        },
+        {
+          "name": ".rela.plt",
+          "type": "SHT_RELA",
+          "offset": 5768,
+          "bytes": 1008,
+          "flags": 66
+        },
+        {
+          "name": ".init",
+          "type": "SHT_PROGBITS",
+          "offset": 8192,
+          "bytes": 27,
+          "flags": 6
+        },
+        {
+          "name": ".plt",
+          "type": "SHT_PROGBITS",
+          "offset": 8224,
+          "bytes": 688,
+          "flags": 6
+        },
+        {
+          "name": ".plt.got",
+          "type": "SHT_PROGBITS",
+          "offset": 8912,
+          "bytes": 40,
+          "flags": 6
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 8960,
+          "bytes": 9615,
+          "flags": 6
+        },
+        {
+          "name": ".fini",
+          "type": "SHT_PROGBITS",
+          "offset": 18576,
+          "bytes": 13,
+          "flags": 6
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 20480,
+          "bytes": 120,
+          "flags": 2
+        },
+        {
+          "name": ".eh_frame_hdr",
+          "type": "SHT_PROGBITS",
+          "offset": 20600,
+          "bytes": 92,
+          "flags": 2
+        },
+        {
+          "name": ".eh_frame",
+          "type": "SHT_PROGBITS",
+          "offset": 20696,
+          "bytes": 440,
+          "flags": 2
+        },
+        {
+          "name": ".init_array",
+          "type": "SHT_INIT_ARRAY",
+          "offset": 23000,
+          "bytes": 32,
+          "flags": 3
+        },
+        {
+          "name": ".fini_array",
+          "type": "SHT_FINI_ARRAY",
+          "offset": 23032,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".data.rel.ro",
+          "type": "SHT_PROGBITS",
+          "offset": 23040,
+          "bytes": 912,
+          "flags": 3
+        },
+        {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "offset": 23952,
+          "bytes": 528,
+          "flags": 3
+        },
+        {
+          "name": ".got",
+          "type": "SHT_PROGBITS",
+          "offset": 24480,
+          "bytes": 72,
+          "flags": 3
+        },
+        {
+          "name": ".got.plt",
+          "type": "SHT_PROGBITS",
+          "offset": 24576,
+          "bytes": 360,
+          "flags": 3
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 24936,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".bss",
+          "type": "SHT_NOBITS",
+          "offset": 24944,
+          "bytes": 480,
+          "flags": 3
+        },
+        {
+          "name": ".comment",
+          "type": "SHT_PROGBITS",
+          "offset": 24944,
+          "bytes": 45,
+          "flags": 48
+        },
+        {
+          "name": ".debug_aranges",
+          "type": "SHT_PROGBITS",
+          "offset": 24989,
+          "bytes": 80,
+          "flags": 0
+        },
+        {
+          "name": ".debug_info",
+          "type": "SHT_PROGBITS",
+          "offset": 25069,
+          "bytes": 4410,
+          "flags": 0
+        },
+        {
+          "name": ".debug_abbrev",
+          "type": "SHT_PROGBITS",
+          "offset": 29479,
+          "bytes": 937,
+          "flags": 0
+        },
+        {
+          "name": ".debug_line",
+          "type": "SHT_PROGBITS",
+          "offset": 30416,
+          "bytes": 1130,
+          "flags": 0
+        },
+        {
+          "name": ".debug_str",
+          "type": "SHT_PROGBITS",
+          "offset": 31546,
+          "bytes": 1643,
+          "flags": 48
+        },
+        {
+          "name": ".debug_line_str",
+          "type": "SHT_PROGBITS",
+          "offset": 33189,
+          "bytes": 858,
+          "flags": 48
+        },
+        {
+          "name": ".debug_loclists",
+          "type": "SHT_PROGBITS",
+          "offset": 34047,
+          "bytes": 1827,
+          "flags": 0
+        },
+        {
+          "name": ".debug_rnglists",
+          "type": "SHT_PROGBITS",
+          "offset": 35874,
+          "bytes": 79,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 35960,
+          "bytes": 3528,
+          "flags": 0
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 39488,
+          "bytes": 2117,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 41605,
+          "bytes": 366,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 10383,
+        "allocated_readonly": 6845,
+        "allocated_writable": 1920,
+        "debug": 10964
+      }
+    },
+    "frontend": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squashfuse",
+      "role": "frontend",
+      "logical_bytes": 45688,
+      "allocated_bytes": 49152,
+      "device": 66307,
+      "inode": 6821880,
+      "links": 25,
+      "sha256": "7d5d40526cc92483c3a4fd70e5b374dd263ec658c67c7de0d2947cb29026f46a",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".interp",
+          "type": "SHT_PROGBITS",
+          "offset": 792,
+          "bytes": 28,
+          "flags": 2
+        },
+        {
+          "name": ".note.gnu.property",
+          "type": "SHT_NOTE",
+          "offset": 824,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".note.gnu.build-id",
+          "type": "SHT_NOTE",
+          "offset": 872,
+          "bytes": 36,
+          "flags": 2
+        },
+        {
+          "name": ".note.ABI-tag",
+          "type": "SHT_NOTE",
+          "offset": 908,
+          "bytes": 32,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.hash",
+          "type": "SHT_GNU_HASH",
+          "offset": 944,
+          "bytes": 40,
+          "flags": 2
+        },
+        {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "offset": 984,
+          "bytes": 648,
+          "flags": 2
+        },
+        {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "offset": 1632,
+          "bytes": 364,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.version",
+          "type": "SHT_GNU_versym",
+          "offset": 1996,
+          "bytes": 54,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.version_r",
+          "type": "SHT_GNU_verneed",
+          "offset": 2056,
+          "bytes": 112,
+          "flags": 2
+        },
+        {
+          "name": ".rela.dyn",
+          "type": "SHT_RELA",
+          "offset": 2168,
+          "bytes": 504,
+          "flags": 2
+        },
+        {
+          "name": ".rela.plt",
+          "type": "SHT_RELA",
+          "offset": 2672,
+          "bytes": 480,
+          "flags": 66
+        },
+        {
+          "name": ".init",
+          "type": "SHT_PROGBITS",
+          "offset": 4096,
+          "bytes": 27,
+          "flags": 6
+        },
+        {
+          "name": ".plt",
+          "type": "SHT_PROGBITS",
+          "offset": 4128,
+          "bytes": 336,
+          "flags": 6
+        },
+        {
+          "name": ".plt.got",
+          "type": "SHT_PROGBITS",
+          "offset": 4464,
+          "bytes": 16,
+          "flags": 6
+        },
+        {
+          "name": ".plt.sec",
+          "type": "SHT_PROGBITS",
+          "offset": 4480,
+          "bytes": 320,
+          "flags": 6
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 4800,
+          "bytes": 3861,
+          "flags": 6
+        },
+        {
+          "name": ".fini",
+          "type": "SHT_PROGBITS",
+          "offset": 8664,
+          "bytes": 13,
+          "flags": 6
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 12288,
+          "bytes": 491,
+          "flags": 2
+        },
+        {
+          "name": ".eh_frame_hdr",
+          "type": "SHT_PROGBITS",
+          "offset": 12780,
+          "bytes": 180,
+          "flags": 2
+        },
+        {
+          "name": ".eh_frame",
+          "type": "SHT_PROGBITS",
+          "offset": 12960,
+          "bytes": 928,
+          "flags": 2
+        },
+        {
+          "name": ".init_array",
+          "type": "SHT_INIT_ARRAY",
+          "offset": 15280,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".fini_array",
+          "type": "SHT_FINI_ARRAY",
+          "offset": 15288,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".data.rel.ro",
+          "type": "SHT_PROGBITS",
+          "offset": 15296,
+          "bytes": 336,
+          "flags": 3
+        },
+        {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "offset": 15632,
+          "bytes": 512,
+          "flags": 3
+        },
+        {
+          "name": ".got",
+          "type": "SHT_PROGBITS",
+          "offset": 16144,
+          "bytes": 224,
+          "flags": 3
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 16384,
+          "bytes": 16,
+          "flags": 3
+        },
+        {
+          "name": ".bss",
+          "type": "SHT_NOBITS",
+          "offset": 16400,
+          "bytes": 168,
+          "flags": 3
+        },
+        {
+          "name": ".comment",
+          "type": "SHT_PROGBITS",
+          "offset": 16400,
+          "bytes": 45,
+          "flags": 48
+        },
+        {
+          "name": ".debug_aranges",
+          "type": "SHT_PROGBITS",
+          "offset": 16445,
+          "bytes": 64,
+          "flags": 0
+        },
+        {
+          "name": ".debug_info",
+          "type": "SHT_PROGBITS",
+          "offset": 16509,
+          "bytes": 10998,
+          "flags": 0
+        },
+        {
+          "name": ".debug_abbrev",
+          "type": "SHT_PROGBITS",
+          "offset": 27507,
+          "bytes": 1306,
+          "flags": 0
+        },
+        {
+          "name": ".debug_line",
+          "type": "SHT_PROGBITS",
+          "offset": 28813,
+          "bytes": 3334,
+          "flags": 0
+        },
+        {
+          "name": ".debug_str",
+          "type": "SHT_PROGBITS",
+          "offset": 32147,
+          "bytes": 2813,
+          "flags": 48
+        },
+        {
+          "name": ".debug_line_str",
+          "type": "SHT_PROGBITS",
+          "offset": 34960,
+          "bytes": 734,
+          "flags": 48
+        },
+        {
+          "name": ".debug_loclists",
+          "type": "SHT_PROGBITS",
+          "offset": 35694,
+          "bytes": 3861,
+          "flags": 0
+        },
+        {
+          "name": ".debug_rnglists",
+          "type": "SHT_PROGBITS",
+          "offset": 39555,
+          "bytes": 239,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 39800,
+          "bytes": 1824,
+          "flags": 0
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 41624,
+          "bytes": 1091,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 42715,
+          "bytes": 407,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 4573,
+        "allocated_readonly": 3945,
+        "allocated_writable": 1104,
+        "debug": 23349
+      }
+    },
+    "translator": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squash-helper",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/data-cache-controls-02/data-48/vkso-squash-helper",
+      "role": "translator",
+      "logical_bytes": 28120,
+      "allocated_bytes": 28672,
+      "device": 66307,
+      "inode": 6821908,
+      "links": 1,
+      "sha256": "ed624b2b7bf1b9289f66d5df9fb07a36af5eb87f2aa903c38eac87dca5bd7ec1",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".interp",
+          "type": "SHT_PROGBITS",
+          "offset": 792,
+          "bytes": 28,
+          "flags": 2
+        },
+        {
+          "name": ".note.gnu.property",
+          "type": "SHT_NOTE",
+          "offset": 824,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".note.gnu.build-id",
+          "type": "SHT_NOTE",
+          "offset": 872,
+          "bytes": 36,
+          "flags": 2
+        },
+        {
+          "name": ".note.ABI-tag",
+          "type": "SHT_NOTE",
+          "offset": 908,
+          "bytes": 32,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.hash",
+          "type": "SHT_GNU_HASH",
+          "offset": 944,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "offset": 992,
+          "bytes": 744,
+          "flags": 2
+        },
+        {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "offset": 1736,
+          "bytes": 382,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.version",
+          "type": "SHT_GNU_versym",
+          "offset": 2118,
+          "bytes": 62,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.version_r",
+          "type": "SHT_GNU_verneed",
+          "offset": 2184,
+          "bytes": 96,
+          "flags": 2
+        },
+        {
+          "name": ".rela.dyn",
+          "type": "SHT_RELA",
+          "offset": 2280,
+          "bytes": 384,
+          "flags": 2
+        },
+        {
+          "name": ".rela.plt",
+          "type": "SHT_RELA",
+          "offset": 2664,
+          "bytes": 552,
+          "flags": 66
+        },
+        {
+          "name": ".init",
+          "type": "SHT_PROGBITS",
+          "offset": 4096,
+          "bytes": 27,
+          "flags": 6
+        },
+        {
+          "name": ".plt",
+          "type": "SHT_PROGBITS",
+          "offset": 4128,
+          "bytes": 384,
+          "flags": 6
+        },
+        {
+          "name": ".plt.got",
+          "type": "SHT_PROGBITS",
+          "offset": 4512,
+          "bytes": 16,
+          "flags": 6
+        },
+        {
+          "name": ".plt.sec",
+          "type": "SHT_PROGBITS",
+          "offset": 4528,
+          "bytes": 368,
+          "flags": 6
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 4896,
+          "bytes": 2300,
+          "flags": 6
+        },
+        {
+          "name": ".fini",
+          "type": "SHT_PROGBITS",
+          "offset": 7196,
+          "bytes": 13,
+          "flags": 6
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 8192,
+          "bytes": 376,
+          "flags": 2
+        },
+        {
+          "name": ".eh_frame_hdr",
+          "type": "SHT_PROGBITS",
+          "offset": 8568,
+          "bytes": 60,
+          "flags": 2
+        },
+        {
+          "name": ".eh_frame",
+          "type": "SHT_PROGBITS",
+          "offset": 8632,
+          "bytes": 296,
+          "flags": 2
+        },
+        {
+          "name": ".init_array",
+          "type": "SHT_INIT_ARRAY",
+          "offset": 11280,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".fini_array",
+          "type": "SHT_FINI_ARRAY",
+          "offset": 11288,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".data.rel.ro",
+          "type": "SHT_PROGBITS",
+          "offset": 11296,
+          "bytes": 224,
+          "flags": 3
+        },
+        {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "offset": 11520,
+          "bytes": 496,
+          "flags": 3
+        },
+        {
+          "name": ".got",
+          "type": "SHT_PROGBITS",
+          "offset": 12016,
+          "bytes": 248,
+          "flags": 3
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 12288,
+          "bytes": 16,
+          "flags": 3
+        },
+        {
+          "name": ".bss",
+          "type": "SHT_NOBITS",
+          "offset": 12304,
+          "bytes": 48,
+          "flags": 3
+        },
+        {
+          "name": ".comment",
+          "type": "SHT_PROGBITS",
+          "offset": 12304,
+          "bytes": 45,
+          "flags": 48
+        },
+        {
+          "name": ".debug_aranges",
+          "type": "SHT_PROGBITS",
+          "offset": 12349,
+          "bytes": 64,
+          "flags": 0
+        },
+        {
+          "name": ".debug_info",
+          "type": "SHT_PROGBITS",
+          "offset": 12413,
+          "bytes": 4195,
+          "flags": 0
+        },
+        {
+          "name": ".debug_abbrev",
+          "type": "SHT_PROGBITS",
+          "offset": 16608,
+          "bytes": 733,
+          "flags": 0
+        },
+        {
+          "name": ".debug_line",
+          "type": "SHT_PROGBITS",
+          "offset": 17341,
+          "bytes": 1585,
+          "flags": 0
+        },
+        {
+          "name": ".debug_str",
+          "type": "SHT_PROGBITS",
+          "offset": 18926,
+          "bytes": 1112,
+          "flags": 48
+        },
+        {
+          "name": ".debug_line_str",
+          "type": "SHT_PROGBITS",
+          "offset": 20038,
+          "bytes": 535,
+          "flags": 48
+        },
+        {
+          "name": ".debug_loclists",
+          "type": "SHT_PROGBITS",
+          "offset": 20573,
+          "bytes": 1882,
+          "flags": 0
+        },
+        {
+          "name": ".debug_rnglists",
+          "type": "SHT_PROGBITS",
+          "offset": 22455,
+          "bytes": 203,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 22664,
+          "bytes": 1488,
+          "flags": 0
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 24152,
+          "bytes": 1000,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 25152,
+          "bytes": 407,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 3108,
+        "allocated_readonly": 3144,
+        "allocated_writable": 1000,
+        "debug": 10309
+      }
+    },
+    "carrier": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-gzip-01/carrier/libvkso_sq_core.so",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-gzip-01/carrier/libvkso_sq_core.so",
+      "role": "carrier",
+      "logical_bytes": 65016,
+      "allocated_bytes": 28672,
+      "device": 66307,
+      "inode": 6827012,
+      "links": 1,
+      "sha256": "4ecb1f22b377101decebe7297c00778cc272632caedfc59fdf395c77ccdc4f97",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 4096,
+          "bytes": 28672,
+          "flags": 6
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 32768,
+          "bytes": 8192,
+          "flags": 2
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 40960,
+          "bytes": 16384,
+          "flags": 3
+        },
+        {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "offset": 57344,
+          "bytes": 701,
+          "flags": 2
+        },
+        {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "offset": 58048,
+          "bytes": 864,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.hash",
+          "type": "SHT_GNU_HASH",
+          "offset": 58912,
+          "bytes": 304,
+          "flags": 2
+        },
+        {
+          "name": ".rela.dyn",
+          "type": "SHT_RELA",
+          "offset": 59216,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "offset": 59264,
+          "bytes": 144,
+          "flags": 3
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 59424,
+          "bytes": 2208,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 61632,
+          "bytes": 2520,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 64152,
+          "bytes": 92,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 28672,
+        "allocated_readonly": 10109,
+        "allocated_writable": 16528,
+        "debug": 0
+      }
+    },
+    "copied": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-gzip-01/libsq-materialized.so",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-data48-application-final-gzip-01/libsq-materialized.so",
+      "role": "copied",
+      "logical_bytes": 65016,
+      "allocated_bytes": 65536,
+      "device": 66307,
+      "inode": 6827040,
+      "links": 1,
+      "sha256": "40e3b02f47f68e157160ce72bb72df158098037be69da2fcba79e0ed21995767",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 4096,
+          "bytes": 28672,
+          "flags": 6
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 32768,
+          "bytes": 8192,
+          "flags": 2
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 40960,
+          "bytes": 16384,
+          "flags": 3
+        },
+        {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "offset": 57344,
+          "bytes": 701,
+          "flags": 2
+        },
+        {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "offset": 58048,
+          "bytes": 864,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.hash",
+          "type": "SHT_GNU_HASH",
+          "offset": 58912,
+          "bytes": 304,
+          "flags": 2
+        },
+        {
+          "name": ".rela.dyn",
+          "type": "SHT_RELA",
+          "offset": 59216,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "offset": 59264,
+          "bytes": 144,
+          "flags": 3
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 59424,
+          "bytes": 2208,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 61632,
+          "bytes": 2520,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 64152,
+          "bytes": 92,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 28672,
+        "allocated_readonly": 10109,
+        "allocated_writable": 16528,
+        "debug": 0
+      }
+    }
+  },
+  "disk_scenarios": {
+    "prepared-native-shared": {
+      "roles": [
+        "owner",
+        "consumer",
+        "carrier",
+        "bridge",
+        "frontend",
+        "translator"
+      ],
+      "logical_bytes": 324232,
+      "allocated_bytes": 294912
+    },
+    "prepared-native-copied": {
+      "roles": [
+        "owner",
+        "consumer",
+        "copied",
+        "bridge",
+        "frontend",
+        "translator"
+      ],
+      "logical_bytes": 324232,
+      "allocated_bytes": 331776
+    },
+    "user-only-shared": {
+      "roles": [
+        "owner",
+        "carrier",
+        "bridge",
+        "frontend",
+        "translator"
+      ],
+      "logical_bytes": 264000,
+      "allocated_bytes": 233472
+    },
+    "user-only-copied": {
+      "roles": [
+        "copied",
+        "bridge",
+        "frontend",
+        "translator"
+      ],
+      "logical_bytes": 183168,
+      "allocated_bytes": 188416
+    }
+  },
+  "private_data_cache": {
+    "entries": 48,
+    "block_bytes": 131072,
+    "lazy_data_byte_cap": 6291456,
+    "note": "Requested data capacity, excluding actors/pointer arrays, metadata, fragment cache and libfuse nodes."
+  },
+  "disk_scope": "Evaluated unstripped files, inode-deduplicated st_blocks; common platform, dependencies and images excluded equally. No claim those dependencies are removable."
+}

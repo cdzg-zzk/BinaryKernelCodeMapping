@@ -1,0 +1,135 @@
+{
+  "status": "complete",
+  "version": "xz-word-data48-bounded-cache",
+  "campaigns": 30,
+  "timed_observations": 8172,
+  "completed_at": 1793357869.7840042,
+  "reused_native_observations": 2688,
+  "new_observations": 5484,
+  "excluded_partial_observations": 790,
+  "publication": "Deferred at user request; existing manuscript and PDF unchanged.",
+  "accounting": "Installed generic platform; business preparation, per-core metadata and private runtime retained.",
+  "scope": "Experiment report and raw evidence, one host/boot. No hardening-equivalence, human-time or whole-machine net-saving claim.",
+  "task_modules_unloaded": true,
+  "active_task_processes": [],
+  "preserved_publication": [
+    {
+      "path": "paper/filesystem-section.tex",
+      "sha256": "5b9474746a83c0c05a0f2fba248cf4d3ec8c030d8aecebed41513f1c08996b3a"
+    },
+    {
+      "path": "paper/filesystem-section-preview.pdf",
+      "sha256": "9a2751a51ed2015574424b05e4548adfcec00cd74e91a823962e6902f70cf967"
+    },
+    {
+      "path": "paper/paper_content/sections/06-evaluation.tex",
+      "sha256": "0d8bff01e3831cf9db74d0ac0ba395c13608574e12f9631fa95a7ff89f38c5be"
+    }
+  ],
+  "records": [
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-functional-01/result.json",
+      "sha256": "7fad2309547734cd81b641b0f32aade7ee5b70122f5451ffd5e4f89f825b5543"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-guest-01/result.json",
+      "sha256": "15ed80b5ed8d894a74378377d58bd54dde1fa48581c274456428c5edf3e2b6ec"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-simultaneous-01/result.json",
+      "sha256": "1efe201c445bd7e366726cb858a243fcde253ab72871cb1b5fa3a34051d49ad5"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-bcj-01/result.json",
+      "sha256": "c57799a3efa8bcff953fc5bc3a1267432504d9a59db64cb35b18ee2dfabb34e9"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/native-calls-01/result.json",
+      "sha256": "288b68fa37e8fd47b8786dc35a226b83cbb3ded79cb78b832d0fcca4894aec21"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/hardening-01/result.json",
+      "sha256": "3a8ded8564b870fb06dc04d8f55525ece78280fa821e3ffe00c8291bff4c385b"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-metadata-work-01/result.json",
+      "sha256": "51ba093c76698139592f001e4335df7aa41c8d48bcaacbf1c732709cf3ea9832"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-minimal-01/result.json",
+      "sha256": "530de68958daf50481cbd3038fb7881f228d1e13af21d3df4d86b7472f18b3ab"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/shared-decoder-01/result.json",
+      "sha256": "7bc8954d89113053300bb75cf9ddfe1748a7bc087d48e9a9171d324e42a85ae1"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/cache-scale-direct-01/result.json",
+      "sha256": "60e94c96f4eb56602c6e330f1e2bfe76918d89c2309f5efae86a9c134420cbc8"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-xz-valid-01/result.json",
+      "sha256": "1d603ac600fe6419dd3f3a6cd113279385c5f955ed6a7d597f94e2d1708aff62"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-cache-valid-01/result.json",
+      "sha256": "b5db43454bfbaa4d9bbe5c6fd29e2cdedd3527402cd0a7d2b34cd41c806cf715"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-cache-sanitize-01/result.json",
+      "sha256": "784ac0dc7e31e7f4dfcf41690ef3e357a331f582dab9fa2971937a84289f0f23"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-cache-sanitize-01/sanitizer.json",
+      "sha256": "0f9a981764e033b2a54e9e64ab558cdc09fd57241cd8b1ee717eae03dba535fb"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-cache-sanitize-01/result.json",
+      "sha256": "91d8b63348723b92018adc3dae3126c52efc84ea7c1d96dc3427c278c8a1102c"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-lifetime-01/result.json",
+      "sha256": "3fd0b5448bc83a2f179c278be7966630ba850914d0df3e8210fa11cd0d9a5658"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/native-controls-guest-01/result.json",
+      "sha256": "c8c71bbeec33816dd2f91a06f911b65616dbba20c49d5a4462a2df717684e8ad"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-analysis-01/analysis.json",
+      "sha256": "e9ea78f73bf474f9ce21d1485abf2d5cacb111947e031a9a61b7979323d89d9e"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-analysis-01/audit.json",
+      "sha256": "9d2297c10e607dea162f16cf3596075ad059be926f04adba4a6fc887f4fff068"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-analysis-01/resource-ledger/resources.json",
+      "sha256": "7ac30d5c533b15353fb0d86f6998030689fc59150240a6b6c5324f7248d98be8"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-analysis-01/costs.json",
+      "sha256": "307e19d47a22f55f05f208f3844a08ab2cbf5378a4e6906684cc1aae2a1f1499"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-analysis-01/reuse-audit/result.json",
+      "sha256": "06707d92ac038908f4fef188021c755d8416a40da7016c695db6bc900fdec03e"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-analysis-01/EXPERIMENT_REPORT.md",
+      "sha256": "25ea3263bf7ceb458faca1aa352cedfd71a9b3d533ea2487dc2934e699dc7243"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-recovery-01/recovery.json",
+      "sha256": "3ea730808d07546878f7b5ae3afba2790e64f3e563f06f9b84d1fac53262902d"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-confirmation-queue-02/result.json",
+      "sha256": "1e8d9de144003980563bd0fe101161d9b85bedacffa3152dee9d1ec43e73395d"
+    },
+    {
+      "path": "test/section65/build/squashfs/optimization-runs-01/data48-postprocess-02/result.json",
+      "sha256": "49dbca7e39def449e875c3fcd49a7afeeae9bb45629edc7dc0620546d84859b5"
+    }
+  ]
+}
