@@ -1,0 +1,219 @@
+{
+  "status": "complete",
+  "inputs": [
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-pilot-02/benchmark",
+      "samples_sha256": "a303b9399e5d82f8176a11fe02c2ea08c0cec0ec992b9c57334383fd00005c11"
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-pilot-02/benchmark",
+      "samples_sha256": "bf0200e1c7dd986cc65706904130be20aeafaacaedefa3ffde15b4a5e455f1b5"
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-pilot-02/benchmark",
+      "samples_sha256": "cedaf8708231ac535697956a85079db4b6965de9b6a4832be74fba5d4445bc74"
+    }
+  ],
+  "lkl_heap_pilot": [
+    {
+      "codec": "gzip",
+      "heap_mib": 16,
+      "all_tasks_passed": true,
+      "blocks": 4,
+      "repeats": 1,
+      "task_median_seconds": {
+        "startup": 0.23919780849973904,
+        "archive": 3.384428363002371,
+        "scan": 2.041290197004855,
+        "stream": 0.9406555035020574
+      },
+      "helper_after_include_archive_rss_kib": 25640,
+      "helper_after_include_archive_pss_kib": 23630,
+      "threads": 18
+    },
+    {
+      "codec": "gzip",
+      "heap_mib": 64,
+      "all_tasks_passed": true,
+      "blocks": 4,
+      "repeats": 1,
+      "task_median_seconds": {
+        "startup": 0.21751817900076276,
+        "archive": 2.5095550494952477,
+        "scan": 2.031631116500648,
+        "stream": 0.9176555614976678
+      },
+      "helper_after_include_archive_rss_kib": 63532,
+      "helper_after_include_archive_pss_kib": 61471,
+      "threads": 18
+    },
+    {
+      "codec": "gzip",
+      "heap_mib": 256,
+      "all_tasks_passed": true,
+      "blocks": 4,
+      "repeats": 1,
+      "task_median_seconds": {
+        "startup": 0.21137026250653435,
+        "archive": 2.2742132304992992,
+        "scan": 2.0081145700023626,
+        "stream": 0.9428534670078079
+      },
+      "helper_after_include_archive_rss_kib": 82656,
+      "helper_after_include_archive_pss_kib": 80541,
+      "threads": 18
+    },
+    {
+      "codec": "gzip",
+      "heap_mib": 512,
+      "all_tasks_passed": true,
+      "blocks": 4,
+      "repeats": 1,
+      "task_median_seconds": {
+        "startup": 0.23281618949840777,
+        "archive": 2.1939499484942644,
+        "scan": 2.05217662799987,
+        "stream": 0.9323912280015065
+      },
+      "helper_after_include_archive_rss_kib": 86632,
+      "helper_after_include_archive_pss_kib": 84519,
+      "threads": 18
+    },
+    {
+      "codec": "xz",
+      "heap_mib": 16,
+      "all_tasks_passed": true,
+      "blocks": 1,
+      "repeats": 1,
+      "task_median_seconds": {
+        "startup": 0.268609730002936,
+        "archive": 3.985386981003103,
+        "scan": 1.031100954991416,
+        "stream": 1.250620209990302
+      },
+      "helper_after_include_archive_rss_kib": 25732,
+      "helper_after_include_archive_pss_kib": 23670,
+      "threads": 18
+    },
+    {
+      "codec": "xz",
+      "heap_mib": 64,
+      "all_tasks_passed": true,
+      "blocks": 1,
+      "repeats": 1,
+      "task_median_seconds": {
+        "startup": 0.2877982939971844,
+        "archive": 3.0592497659963556,
+        "scan": 1.0654997949895915,
+        "stream": 1.1783862140000565
+      },
+      "helper_after_include_archive_rss_kib": 63640,
+      "helper_after_include_archive_pss_kib": 61594,
+      "threads": 18
+    },
+    {
+      "codec": "xz",
+      "heap_mib": 256,
+      "all_tasks_passed": true,
+      "blocks": 1,
+      "repeats": 1,
+      "task_median_seconds": {
+        "startup": 0.2836820790107595,
+        "archive": 2.8661778859968763,
+        "scan": 1.0443882639956428,
+        "stream": 1.2359415649989387
+      },
+      "helper_after_include_archive_rss_kib": 82740,
+      "helper_after_include_archive_pss_kib": 80730,
+      "threads": 18
+    },
+    {
+      "codec": "xz",
+      "heap_mib": 512,
+      "all_tasks_passed": true,
+      "blocks": 1,
+      "repeats": 1,
+      "task_median_seconds": {
+        "startup": 0.30239279501256533,
+        "archive": 2.7716676109994296,
+        "scan": 1.055471014988143,
+        "stream": 1.222975452998071
+      },
+      "helper_after_include_archive_rss_kib": 86836,
+      "helper_after_include_archive_pss_kib": 84701,
+      "threads": 18
+    },
+    {
+      "codec": "lz4",
+      "heap_mib": 16,
+      "all_tasks_passed": true,
+      "blocks": 1,
+      "repeats": 1,
+      "task_median_seconds": {
+        "startup": 0.21135301499452908,
+        "archive": 3.0733438979950733,
+        "scan": 1.9832495039881906,
+        "stream": 0.8212852229917189
+      },
+      "helper_after_include_archive_rss_kib": 25724,
+      "helper_after_include_archive_pss_kib": 23661,
+      "threads": 18
+    },
+    {
+      "codec": "lz4",
+      "heap_mib": 64,
+      "all_tasks_passed": true,
+      "blocks": 1,
+      "repeats": 1,
+      "task_median_seconds": {
+        "startup": 0.21063651899748947,
+        "archive": 2.080542662006337,
+        "scan": 1.945674695991329,
+        "stream": 0.7778240979969269
+      },
+      "helper_after_include_archive_rss_kib": 63092,
+      "helper_after_include_archive_pss_kib": 60969,
+      "threads": 18
+    },
+    {
+      "codec": "lz4",
+      "heap_mib": 256,
+      "all_tasks_passed": true,
+      "blocks": 1,
+      "repeats": 1,
+      "task_median_seconds": {
+        "startup": 0.2379999509867048,
+        "archive": 1.998551087002852,
+        "scan": 1.9721329319872893,
+        "stream": 0.7742729629972018
+      },
+      "helper_after_include_archive_rss_kib": 82924,
+      "helper_after_include_archive_pss_kib": 80795,
+      "threads": 18
+    },
+    {
+      "codec": "lz4",
+      "heap_mib": 512,
+      "all_tasks_passed": true,
+      "blocks": 1,
+      "repeats": 1,
+      "task_median_seconds": {
+        "startup": 0.19176401000004262,
+        "archive": 1.9939456319989404,
+        "scan": 1.987714685004903,
+        "stream": 0.8105505190033
+      },
+      "helper_after_include_archive_rss_kib": 86884,
+      "helper_after_include_archive_pss_kib": 84781,
+      "threads": 18
+    }
+  ],
+  "interpretation": "All four tested heaps complete all tasks. 512 MiB is a performance-oriented evaluation configuration, not a minimum memory requirement. These exploratory pilots have only one campaign per codec (gzip four blocks, xz/lz4 one); report descriptive timings, not confirmatory confidence intervals. Memory snapshots follow include archive, not the sequential workload peak.",
+  "stock": {
+    "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+    "sha256": "d37f5b387c36d58a32831c2e6e6db2573fa31117b8e51b88c92be096c1b4f499",
+    "single_thread_option": "-s",
+    "default": "multithreaded low-level FUSE frontend",
+    "diagnostic": "Retain default deployment and add the same executable with -s; record actual helper thread counts in resource snapshots."
+  }
+}

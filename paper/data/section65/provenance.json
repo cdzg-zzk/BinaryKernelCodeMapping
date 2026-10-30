@@ -1,0 +1,33 @@
+{
+  "status": "complete",
+  "sources": [
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/refined-analysis-01/analysis.json",
+      "sha256": "f9d8f77c57f7db7d2e700e6f954209d780c96b64b232459bc70a519c93f126fd",
+      "snapshot": "source-refinement-analysis.json"
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/refined-analysis-01/resource-ledger/resources.json",
+      "sha256": "8b6d3e3bbd1c2d0dc05d70e255d7bec72ec3fb7935b47c47aaf004d1d98d2418",
+      "snapshot": "source-refinement-resources.json"
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/refinement-baseline-audit-02/result.json",
+      "sha256": "a40dfdb696bb82924fae691fb9cd09472181b610e7fbef0e21540a8ad0f05c5d",
+      "snapshot": "source-refinement-baselines.json"
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-refine-metadata-work-01/result.json",
+      "sha256": "9c4786e0d9d4d71ae1e5aebb035b9662870f7b17c4f8de647ef9b13a8f22983e",
+      "snapshot": "source-refinement-work.json"
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-refine-hardening-02/result.json",
+      "sha256": "f7d0da130547e335f80c84ea41684f745e10d4347acf302137215ba55d7e50dd",
+      "snapshot": "source-refinement-hardening.json"
+    }
+  ],
+  "plotting_script": "/home/zzk/BinaryKernelCodeMapping/paper/plot_filesystem_refined.py",
+  "script_sha256": "eb2624fe1298a64b93f68424884ded2aa1cdaeaade622cab055ec2e0b8d4b27e",
+  "observations": 6540
+}

@@ -1,0 +1,15 @@
+[
+  {
+    "name": "final-analysis",
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "python3",
+      "test/section65/squashfs/final_analysis.py",
+      "--output",
+      "test/section65/build/squashfs/final-analysis-01"
+    ],
+    "result": "test/section65/build/squashfs/final-analysis-01/result.json"
+  }
+]

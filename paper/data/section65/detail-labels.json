@@ -1,0 +1,19 @@
+{
+  "original": "O",
+  "prepared-before": "P0",
+  "prepared-small-copy": "P16",
+  "prepared-composed": "PC",
+  "stock": "SF",
+  "stock-wrapped": "SF+T",
+  "copied-old": "A0",
+  "copied-directory": "AD",
+  "copied-direct": "AX",
+  "copied-library": "AL",
+  "copied": "C",
+  "vkso": "V",
+  "lkl-512": "L",
+  "lkl-cache-512": "LC",
+  "native-normal": "N",
+  "native-small-normal": "N16",
+  "native-small-relaxed": "NR16"
+}

@@ -1,0 +1,1789 @@
+{
+  "accounting": "Physical lines include comments/blanks; no reliable developer-hour measurements.",
+  "services": 46,
+  "operation_tables": 10,
+  "moved_functions": [
+    {
+      "function": "supported_squashfs_filesystem",
+      "source": "super.c",
+      "original_lines": 26,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_fill_super",
+      "source": "super.c",
+      "original_lines": 285,
+      "added": 1,
+      "removed": 1,
+      "body_changed": true
+    },
+    {
+      "function": "squashfs_new_inode",
+      "source": "inode.c",
+      "original_lines": 29,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_read_inode",
+      "source": "inode.c",
+      "original_lines": 344,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "get_dir_index_using_name",
+      "source": "namei.c",
+      "original_lines": 61,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_lookup",
+      "source": "namei.c",
+      "original_lines": 107,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "get_dir_index_using_offset",
+      "source": "dir.c",
+      "original_lines": 57,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_readdir",
+      "source": "dir.c",
+      "original_lines": 120,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "locate_meta_index",
+      "source": "file.c",
+      "original_lines": 34,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "empty_meta_index",
+      "source": "file.c",
+      "original_lines": 59,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "release_meta_index",
+      "source": "file.c",
+      "original_lines": 7,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "read_indexes",
+      "source": "file.c",
+      "original_lines": 41,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "calculate_skip",
+      "source": "file.c",
+      "original_lines": 6,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "fill_meta_index",
+      "source": "file.c",
+      "original_lines": 93,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "read_blocklist",
+      "source": "file.c",
+      "original_lines": 37,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_copy_data",
+      "source": "cache.c",
+      "original_lines": 30,
+      "added": 1,
+      "removed": 1,
+      "body_changed": true
+    },
+    {
+      "function": "squashfs_read_metadata",
+      "source": "cache.c",
+      "original_lines": 42,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_get_fragment",
+      "source": "cache.c",
+      "original_lines": 8,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_get_datablock",
+      "source": "cache.c",
+      "original_lines": 7,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_read_table",
+      "source": "cache.c",
+      "original_lines": 43,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_frag_lookup",
+      "source": "fragment.c",
+      "original_lines": 23,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_read_fragment_index_table",
+      "source": "fragment.c",
+      "original_lines": 27,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_get_id",
+      "source": "id.c",
+      "original_lines": 23,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_read_id_index_table",
+      "source": "id.c",
+      "original_lines": 56,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_read_inode_lookup_table",
+      "source": "export.c",
+      "original_lines": 58,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_xattr_lookup",
+      "source": "xattr_id.c",
+      "original_lines": 25,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_read_xattr_id_table",
+      "source": "xattr_id.c",
+      "original_lines": 75,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_read_data",
+      "source": "block.c",
+      "original_lines": 95,
+      "added": 8,
+      "removed": 22,
+      "body_changed": true
+    },
+    {
+      "function": "get_comp_opts",
+      "source": "decompressor.c",
+      "original_lines": 39,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_decompressor_setup",
+      "source": "decompressor.c",
+      "original_lines": 14,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_xz_comp_opts",
+      "source": "xz_wrapper.c",
+      "original_lines": 41,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "lz4_comp_opts",
+      "source": "lz4_wrapper.c",
+      "original_lines": 18,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_listxattr",
+      "source": "xattr.c",
+      "original_lines": 77,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    },
+    {
+      "function": "squashfs_xattr_get",
+      "source": "xattr.c",
+      "original_lines": 96,
+      "added": 0,
+      "removed": 0,
+      "body_changed": false
+    }
+  ],
+  "source_lines": [
+    {
+      "category": "handwritten_preparation_generator",
+      "path": "test/section65/squashfs/prepare.py",
+      "physical_lines": 364,
+      "nonblank_lines": 348
+    },
+    {
+      "category": "first_user_integration",
+      "path": "test/section65/squashfs/user_bridge.c",
+      "physical_lines": 369,
+      "nonblank_lines": 362
+    },
+    {
+      "category": "first_user_integration",
+      "path": "test/section65/squashfs/posix_io.c",
+      "physical_lines": 87,
+      "nonblank_lines": 82
+    },
+    {
+      "category": "first_user_integration",
+      "path": "test/section65/squashfs/fuse_frontend.c",
+      "physical_lines": 221,
+      "nonblank_lines": 219
+    },
+    {
+      "category": "specific_apptainer_integration",
+      "path": "test/section65/squashfs/apptainer_helper.c",
+      "physical_lines": 96,
+      "nonblank_lines": 95
+    },
+    {
+      "category": "user_build_generator",
+      "path": "test/section65/squashfs/build_user.py",
+      "physical_lines": 41,
+      "nonblank_lines": 36
+    },
+    {
+      "category": "generated_native_support",
+      "path": "test/section65/build/squashfs/evaluation-fixed-01/build/kernel_support.c",
+      "physical_lines": 99,
+      "nonblank_lines": 98
+    },
+    {
+      "category": "generated_native_support",
+      "path": "test/section65/build/squashfs/evaluation-fixed-01/build/core_metadata.c",
+      "physical_lines": 51,
+      "nonblank_lines": 51
+    },
+    {
+      "category": "generated_native_support",
+      "path": "test/section65/build/squashfs/evaluation-fixed-01/build/shared_types.h",
+      "physical_lines": 114,
+      "nonblank_lines": 114
+    },
+    {
+      "category": "generated_native_support",
+      "path": "test/section65/build/squashfs/evaluation-fixed-01/build/shared_remap.h",
+      "physical_lines": 95,
+      "nonblank_lines": 95
+    },
+    {
+      "category": "generated_common_owner",
+      "path": "test/section65/build/squashfs/evaluation-fixed-01/build/shared_core.c",
+      "physical_lines": 2238,
+      "nonblank_lines": 1898
+    },
+    {
+      "category": "inherited_owner_runtime_header",
+      "path": "test/section65/build/squashfs/evaluation-fixed-01/build/owner.h",
+      "physical_lines": 45,
+      "nonblank_lines": 43
+    },
+    {
+      "category": "lkl_application_generator",
+      "path": "test/section65/lkl/sif_frontend.py",
+      "physical_lines": 72,
+      "nonblank_lines": 64
+    },
+    {
+      "category": "lkl_cache_diagnostic_generator",
+      "path": "test/section65/lkl/cache_frontend.py",
+      "physical_lines": 44,
+      "nonblank_lines": 40
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/final_analysis.py",
+      "physical_lines": 83,
+      "nonblank_lines": 78
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/monitor_environment.py",
+      "physical_lines": 33,
+      "nonblank_lines": 29
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/final_evidence.py",
+      "physical_lines": 68,
+      "nonblank_lines": 61
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/fixtures.py",
+      "physical_lines": 56,
+      "nonblank_lines": 51
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/native_images.py",
+      "physical_lines": 37,
+      "nonblank_lines": 32
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/resource_ledger.py",
+      "physical_lines": 150,
+      "nonblank_lines": 144
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/analyze_campaigns.py",
+      "physical_lines": 129,
+      "nonblank_lines": 120
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/audit_build.py",
+      "physical_lines": 57,
+      "nonblank_lines": 52
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/analyze_application.py",
+      "physical_lines": 81,
+      "nonblank_lines": 75
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/freeze.py",
+      "physical_lines": 54,
+      "nonblank_lines": 49
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/campaign_queue.py",
+      "physical_lines": 55,
+      "nonblank_lines": 51
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/application_images.py",
+      "physical_lines": 62,
+      "nonblank_lines": 57
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/maintenance_guest.py",
+      "physical_lines": 145,
+      "nonblank_lines": 135
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/cost_ledger.py",
+      "physical_lines": 101,
+      "nonblank_lines": 96
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/apptainer_bench.py",
+      "physical_lines": 265,
+      "nonblank_lines": 254
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/maintenance_reference.py",
+      "physical_lines": 93,
+      "nonblank_lines": 88
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/export_guest.py",
+      "physical_lines": 84,
+      "nonblank_lines": 75
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/build_debug_types.py",
+      "physical_lines": 42,
+      "nonblank_lines": 35
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/audit_reference_build.py",
+      "physical_lines": 52,
+      "nonblank_lines": 47
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/maintenance_artifacts.py",
+      "physical_lines": 57,
+      "nonblank_lines": 50
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/validate_analysis.py",
+      "physical_lines": 79,
+      "nonblank_lines": 75
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/audit_application.py",
+      "physical_lines": 86,
+      "nonblank_lines": 80
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/apptainer_preflight.py",
+      "physical_lines": 138,
+      "nonblank_lines": 126
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/apptainer_shared.py",
+      "physical_lines": 206,
+      "nonblank_lines": 195
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/private_state_gdb.py",
+      "physical_lines": 62,
+      "nonblank_lines": 58
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/preflight.py",
+      "physical_lines": 64,
+      "nonblank_lines": 59
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/audit_existing.py",
+      "physical_lines": 88,
+      "nonblank_lines": 81
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/native_cost.py",
+      "physical_lines": 196,
+      "nonblank_lines": 183
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/check_fuse.py",
+      "physical_lines": 177,
+      "nonblank_lines": 166
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/maintenance.py",
+      "physical_lines": 173,
+      "nonblank_lines": 162
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/kernel_guest.py",
+      "physical_lines": 63,
+      "nonblank_lines": 56
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/audit_native.py",
+      "physical_lines": 66,
+      "nonblank_lines": 62
+    },
+    {
+      "category": "experimental_harness",
+      "path": "test/section65/squashfs/functional_extra.py",
+      "physical_lines": 135,
+      "nonblank_lines": 130
+    }
+  ],
+  "binaries": [
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/evaluation-fixed-01/build/vkso_sq_core.ko",
+      "disk_bytes": 63304,
+      "allocated_sections": [
+        {
+          "name": ".note.gnu.build-id",
+          "bytes": 36,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".note.Linux",
+          "bytes": 48,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".text",
+          "bytes": 15433,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".init.text",
+          "bytes": 230,
+          "writable": false,
+          "executable": true,
+          "initialization": true
+        },
+        {
+          "name": ".exit.text",
+          "bytes": 5,
+          "writable": false,
+          "executable": true,
+          "initialization": true
+        },
+        {
+          "name": "__ksymtab_gpl",
+          "bytes": 312,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".rodata",
+          "bytes": 432,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".rodata.str1.8",
+          "bytes": 3437,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".rodata.str1.1",
+          "bytes": 175,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": "__ksymtab_strings",
+          "bytes": 571,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".modinfo",
+          "bytes": 130,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".return_sites",
+          "bytes": 8,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": "__jump_table",
+          "bytes": 656,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".data",
+          "bytes": 0,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": "__dyndbg",
+          "bytes": 2296,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".vkso_owner",
+          "bytes": 4096,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".gnu.linkonce.this_module",
+          "bytes": 768,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".bss",
+          "bytes": 448,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        }
+      ],
+      "note": "Allocated ELF bytes are not page-rounded module residency or process RSS."
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/evaluation-fixed-01/build/vkso_squashfs.ko",
+      "disk_bytes": 59472,
+      "allocated_sections": [
+        {
+          "name": ".note.gnu.build-id",
+          "bytes": 36,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".note.Linux",
+          "bytes": 48,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".text",
+          "bytes": 12774,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".text.unlikely",
+          "bytes": 499,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".altinstr_replacement",
+          "bytes": 21,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".init.text",
+          "bytes": 128,
+          "writable": false,
+          "executable": true,
+          "initialization": true
+        },
+        {
+          "name": ".exit.text",
+          "bytes": 39,
+          "writable": false,
+          "executable": true,
+          "initialization": true
+        },
+        {
+          "name": ".altinstructions",
+          "bytes": 84,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".rodata",
+          "bytes": 3296,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".rodata.str1.8",
+          "bytes": 2293,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".retpoline_sites",
+          "bytes": 100,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".return_sites",
+          "bytes": 372,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".parainstructions",
+          "bytes": 108,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".rodata.str1.1",
+          "bytes": 298,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".smp_locks",
+          "bytes": 52,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".modinfo",
+          "bytes": 227,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": "__bug_table",
+          "bytes": 12,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": "__jump_table",
+          "bytes": 224,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".data",
+          "bytes": 128,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": "__dyndbg",
+          "bytes": 504,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".gnu.linkonce.this_module",
+          "bytes": 768,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".bss",
+          "bytes": 8,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        }
+      ],
+      "note": "Allocated ELF bytes are not page-rounded module residency or process RSS."
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/evaluation-fixed-01/build/libsq-bridge.so",
+      "disk_bytes": 37976,
+      "allocated_sections": [
+        {
+          "name": ".note.gnu.build-id",
+          "bytes": 36,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".gnu.hash",
+          "bytes": 168,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".dynsym",
+          "bytes": 1656,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".dynstr",
+          "bytes": 1099,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".gnu.version",
+          "bytes": 138,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".gnu.version_r",
+          "bytes": 112,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".rela.dyn",
+          "bytes": 1536,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".rela.plt",
+          "bytes": 1008,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".init",
+          "bytes": 27,
+          "writable": false,
+          "executable": true,
+          "initialization": true
+        },
+        {
+          "name": ".plt",
+          "bytes": 688,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".plt.got",
+          "bytes": 8,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".text",
+          "bytes": 6761,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".fini",
+          "bytes": 13,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".rodata",
+          "bytes": 116,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".eh_frame_hdr",
+          "bytes": 60,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".eh_frame",
+          "bytes": 336,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".init_array",
+          "bytes": 16,
+          "writable": true,
+          "executable": false,
+          "initialization": true
+        },
+        {
+          "name": ".fini_array",
+          "bytes": 8,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".data.rel.ro",
+          "bytes": 912,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".dynamic",
+          "bytes": 560,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".got",
+          "bytes": 32,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".got.plt",
+          "bytes": 360,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".data",
+          "bytes": 8,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".bss",
+          "bytes": 480,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        }
+      ],
+      "note": "Allocated ELF bytes are not page-rounded module residency or process RSS."
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/evaluation-fixed-01/build/vkso-squashfuse",
+      "disk_bytes": 38656,
+      "allocated_sections": [
+        {
+          "name": ".interp",
+          "bytes": 28,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".note.gnu.property",
+          "bytes": 48,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".note.gnu.build-id",
+          "bytes": 36,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".note.ABI-tag",
+          "bytes": 32,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".gnu.hash",
+          "bytes": 40,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".dynsym",
+          "bytes": 624,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".dynstr",
+          "bytes": 357,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".gnu.version",
+          "bytes": 52,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".gnu.version_r",
+          "bytes": 112,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".rela.dyn",
+          "bytes": 456,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".rela.plt",
+          "bytes": 456,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".init",
+          "bytes": 27,
+          "writable": false,
+          "executable": true,
+          "initialization": true
+        },
+        {
+          "name": ".plt",
+          "bytes": 320,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".plt.got",
+          "bytes": 16,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".plt.sec",
+          "bytes": 304,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".text",
+          "bytes": 3301,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".fini",
+          "bytes": 13,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".rodata",
+          "bytes": 459,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".eh_frame_hdr",
+          "bytes": 156,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".eh_frame",
+          "bytes": 820,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".init_array",
+          "bytes": 8,
+          "writable": true,
+          "executable": false,
+          "initialization": true
+        },
+        {
+          "name": ".fini_array",
+          "bytes": 8,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".data.rel.ro",
+          "bytes": 336,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".dynamic",
+          "bytes": 512,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".got",
+          "bytes": 216,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".data",
+          "bytes": 16,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".bss",
+          "bytes": 152,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        }
+      ],
+      "note": "Allocated ELF bytes are not page-rounded module residency or process RSS."
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/evaluation-fixed-01/build/vkso-squash-helper",
+      "disk_bytes": 27952,
+      "allocated_sections": [
+        {
+          "name": ".interp",
+          "bytes": 28,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".note.gnu.property",
+          "bytes": 48,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".note.gnu.build-id",
+          "bytes": 36,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".note.ABI-tag",
+          "bytes": 32,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".gnu.hash",
+          "bytes": 48,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".dynsym",
+          "bytes": 744,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".dynstr",
+          "bytes": 382,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".gnu.version",
+          "bytes": 62,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".gnu.version_r",
+          "bytes": 96,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".rela.dyn",
+          "bytes": 384,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".rela.plt",
+          "bytes": 552,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".init",
+          "bytes": 27,
+          "writable": false,
+          "executable": true,
+          "initialization": true
+        },
+        {
+          "name": ".plt",
+          "bytes": 384,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".plt.got",
+          "bytes": 16,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".plt.sec",
+          "bytes": 368,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".text",
+          "bytes": 2300,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".fini",
+          "bytes": 13,
+          "writable": false,
+          "executable": true,
+          "initialization": false
+        },
+        {
+          "name": ".rodata",
+          "bytes": 376,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".eh_frame_hdr",
+          "bytes": 60,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".eh_frame",
+          "bytes": 296,
+          "writable": false,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".init_array",
+          "bytes": 8,
+          "writable": true,
+          "executable": false,
+          "initialization": true
+        },
+        {
+          "name": ".fini_array",
+          "bytes": 8,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".data.rel.ro",
+          "bytes": 224,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".dynamic",
+          "bytes": 496,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".got",
+          "bytes": 248,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".data",
+          "bytes": 16,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        },
+        {
+          "name": ".bss",
+          "bytes": 48,
+          "writable": true,
+          "executable": false,
+          "initialization": false
+        }
+      ],
+      "note": "Allocated ELF bytes are not page-rounded module residency or process RSS."
+    }
+  ],
+  "native_files": [
+    {
+      "file": "block.c",
+      "upstream_lines": 235,
+      "prepared_lines": 155,
+      "changed": true,
+      "added": 14,
+      "removed": 94,
+      "extracted_functions": [
+        "squashfs_read_data"
+      ]
+    },
+    {
+      "file": "cache.c",
+      "upstream_lines": 448,
+      "prepared_lines": 327,
+      "changed": true,
+      "added": 5,
+      "removed": 126,
+      "extracted_functions": [
+        "squashfs_copy_data",
+        "squashfs_read_metadata",
+        "squashfs_get_fragment",
+        "squashfs_get_datablock",
+        "squashfs_read_table"
+      ]
+    },
+    {
+      "file": "decompressor.c",
+      "upstream_lines": 142,
+      "prepared_lines": 91,
+      "changed": true,
+      "added": 1,
+      "removed": 52,
+      "extracted_functions": [
+        "get_comp_opts",
+        "squashfs_decompressor_setup"
+      ]
+    },
+    {
+      "file": "decompressor.h",
+      "upstream_lines": 53,
+      "prepared_lines": 53,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "decompressor_multi.c",
+      "upstream_lines": 197,
+      "prepared_lines": 197,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "decompressor_multi_percpu.c",
+      "upstream_lines": 102,
+      "prepared_lines": 102,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "decompressor_single.c",
+      "upstream_lines": 84,
+      "prepared_lines": 84,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "dir.c",
+      "upstream_lines": 223,
+      "prepared_lines": 46,
+      "changed": true,
+      "added": 2,
+      "removed": 179,
+      "extracted_functions": [
+        "get_dir_index_using_offset",
+        "squashfs_readdir"
+      ]
+    },
+    {
+      "file": "export.c",
+      "upstream_lines": 179,
+      "prepared_lines": 123,
+      "changed": true,
+      "added": 1,
+      "removed": 57,
+      "extracted_functions": [
+        "squashfs_read_inode_lookup_table"
+      ]
+    },
+    {
+      "file": "file.c",
+      "upstream_lines": 500,
+      "prepared_lines": 230,
+      "changed": true,
+      "added": 4,
+      "removed": 274,
+      "extracted_functions": [
+        "locate_meta_index",
+        "empty_meta_index",
+        "release_meta_index",
+        "read_indexes",
+        "calculate_skip",
+        "fill_meta_index",
+        "read_blocklist"
+      ]
+    },
+    {
+      "file": "file_cache.c",
+      "upstream_lines": 36,
+      "prepared_lines": 36,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "file_direct.c",
+      "upstream_lines": 174,
+      "prepared_lines": 174,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "fragment.c",
+      "upstream_lines": 89,
+      "prepared_lines": 43,
+      "changed": true,
+      "added": 2,
+      "removed": 48,
+      "extracted_functions": [
+        "squashfs_frag_lookup",
+        "squashfs_read_fragment_index_table"
+      ]
+    },
+    {
+      "file": "id.c",
+      "upstream_lines": 115,
+      "prepared_lines": 40,
+      "changed": true,
+      "added": 2,
+      "removed": 77,
+      "extracted_functions": [
+        "squashfs_get_id",
+        "squashfs_read_id_index_table"
+      ]
+    },
+    {
+      "file": "inode.c",
+      "upstream_lines": 452,
+      "prepared_lines": 81,
+      "changed": true,
+      "added": 1,
+      "removed": 372,
+      "extracted_functions": [
+        "squashfs_new_inode",
+        "squashfs_read_inode"
+      ]
+    },
+    {
+      "file": "lz4_wrapper.c",
+      "upstream_lines": 143,
+      "prepared_lines": 127,
+      "changed": true,
+      "added": 2,
+      "removed": 18,
+      "extracted_functions": [
+        "lz4_comp_opts"
+      ]
+    },
+    {
+      "file": "lzo_wrapper.c",
+      "upstream_lines": 120,
+      "prepared_lines": 120,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "namei.c",
+      "upstream_lines": 238,
+      "prepared_lines": 73,
+      "changed": true,
+      "added": 2,
+      "removed": 167,
+      "extracted_functions": [
+        "get_dir_index_using_name",
+        "squashfs_lookup"
+      ]
+    },
+    {
+      "file": "page_actor.c",
+      "upstream_lines": 98,
+      "prepared_lines": 98,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "page_actor.h",
+      "upstream_lines": 79,
+      "prepared_lines": 79,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "squashfs.h",
+      "upstream_lines": 101,
+      "prepared_lines": 103,
+      "changed": true,
+      "added": 2,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "squashfs_fs.h",
+      "upstream_lines": 452,
+      "prepared_lines": 452,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "squashfs_fs_i.h",
+      "upstream_lines": 41,
+      "prepared_lines": 41,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "squashfs_fs_sb.h",
+      "upstream_lines": 70,
+      "prepared_lines": 70,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "super.c",
+      "upstream_lines": 591,
+      "prepared_lines": 279,
+      "changed": true,
+      "added": 10,
+      "removed": 322,
+      "extracted_functions": [
+        "supported_squashfs_filesystem",
+        "squashfs_fill_super"
+      ]
+    },
+    {
+      "file": "symlink.c",
+      "upstream_lines": 111,
+      "prepared_lines": 111,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "xattr.c",
+      "upstream_lines": 271,
+      "prepared_lines": 102,
+      "changed": true,
+      "added": 5,
+      "removed": 174,
+      "extracted_functions": [
+        "squashfs_listxattr",
+        "squashfs_xattr_get"
+      ]
+    },
+    {
+      "file": "xattr.h",
+      "upstream_lines": 41,
+      "prepared_lines": 41,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "xattr_id.c",
+      "upstream_lines": 132,
+      "prepared_lines": 36,
+      "changed": true,
+      "added": 2,
+      "removed": 98,
+      "extracted_functions": [
+        "squashfs_xattr_lookup",
+        "squashfs_read_xattr_id_table"
+      ]
+    },
+    {
+      "file": "xz_wrapper.c",
+      "upstream_lines": 187,
+      "prepared_lines": 148,
+      "changed": true,
+      "added": 2,
+      "removed": 41,
+      "extracted_functions": [
+        "squashfs_xz_comp_opts"
+      ]
+    },
+    {
+      "file": "zlib_wrapper.c",
+      "upstream_lines": 127,
+      "prepared_lines": 127,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    },
+    {
+      "file": "zstd_wrapper.c",
+      "upstream_lines": 144,
+      "prepared_lines": 144,
+      "changed": false,
+      "added": 0,
+      "removed": 0,
+      "extracted_functions": []
+    }
+  ],
+  "native_file_accounting": "Raw upstream-to-generated-consumer deltas include mechanical extraction, public declarations, native service exposure, owner binding and filesystem renaming. They are not handwritten semantic-edit counts. See kernel.patch in the frozen build.",
+  "native_changed_file_count": 16,
+  "lkl_application_added_lines": 30,
+  "lkl_cache_diagnostic": "Two timeout assignments changed in a separate frontend; not part of the 30-line SIF application integration.",
+  "runtime_support": "Existing page_cache_replace/manager/krg and owner ABI reused; no new registration implementation for this SquashFS case. Incremental exporter corrections are accounted separately.",
+  "tracked_exporter_change_numstat": "75\t4\tmake_dll/build_PIC_so.py",
+  "exporter_attribution": {
+    "baseline": "Git HEAD; current worktree diff retained in the evaluation freeze",
+    "inspected_changes": [
+      "Retain relocation-referenced readonly sections, including local literals and section-symbol addends (squash-export-02 failure).",
+      "Preserve the page-aligned ro-after-init group and validate runtime symbol offsets (squash-export-03 failure)."
+    ],
+    "exporter_sha256": "4aef9708df43c11e84dad781689be177082d698aee72e4a861559b5f53660de6",
+    "scope": "All current exporter diff hunks implement these two fixes. This is incremental general-exporter work, not the cost of developing the whole exporter.",
+    "regression_sources": [
+      "make_dll/tests/test_module_ro_closure.py",
+      "make_dll/tests/test_ko_core_layout.py"
+    ]
+  },
+  "limitations": [
+    "Generated glue and its generator are distinct maintenance surfaces; do not sum them as handwritten implementation.",
+    "Baseline begins with existing SquashFUSE/LKL and existing Apptainer. LKL project size is not integration effort.",
+    "Known upstream patch is reproduced, not independently discovered."
+  ]
+}

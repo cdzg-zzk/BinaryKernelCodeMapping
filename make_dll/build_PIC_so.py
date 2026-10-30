@@ -689,10 +689,19 @@ class KoFile:
         ro_end = cursor
 
         data_start = cursor
-        for sec in data_secs:
-            cursor = align(cursor, max(1, sec.sh_addralign))
-            section_offsets[sec.index] = cursor
-            cursor += sec.sh_size
+        # Linux 5.15 puts these writable ELF sections in a separate, page-ended
+        # ro-after-init group before ordinary writable sections (module.c,
+        # layout_sections). Keep them private here, but preserve that spacing:
+        # shared RIP-relative accesses must reach the native .data/.bss offsets.
+        ro_after_init = [s for s in data_secs if s.sh_flags & 0x00200000 or
+                         s.name in (".data..ro_after_init", "__jump_table")]
+        ordinary_data = [s for s in data_secs if s not in ro_after_init]
+        for group in (ro_after_init, ordinary_data):
+            for sec in group:
+                cursor = align(cursor, max(1, sec.sh_addralign))
+                section_offsets[sec.index] = cursor
+                cursor += sec.sh_size
+            cursor = align(cursor, PAGE_SIZE)
         cursor = align(cursor, PAGE_SIZE)
         data_end = cursor
 
@@ -1937,6 +1946,57 @@ def validate_executable_shim_bindings(
             "native dependency closure. " + "; ".join(sorted(set(conflicts)))
         )
 
+def module_referenced_ro_ranges(
+    ko: KoFile, layout: KoCoreLayout, symbols: Sequence[ResolvedSymbol],
+    owner_module: str, module_base: int,
+) -> List[tuple[int, int]]:
+    """Keep readonly sections referenced by the selected module code/data.
+
+    KRG can omit local literals and zero-sized section symbols. Their ET_REL
+    relocations still identify the containing section, including targets reached
+    through an addend. Keep that section in full because those symbols do not
+    provide an object extent. Unreferenced readonly sections remain sparse.
+    This collects pages only; it does not rewrite pointers in shared rodata.
+    """
+    referenced: Set[int] = set()
+    pending: List[int] = []
+
+    def include(reloc: KoDataReloc) -> None:
+        index = reloc.sym_shndx
+        if reloc.is_undef or index not in layout.section_offsets:
+            return
+        section = ko.sections[index]
+        if (section.is_alloc and not section.is_exec and not section.is_write
+                and section.sh_size and index not in referenced):
+            referenced.add(index)
+            pending.append(index)
+
+    for selected in symbols:
+        if (not selected.defined or selected.module_name != owner_module
+                or selected.st_type != STT_FUNC or not selected.replace_from_kernel):
+            continue
+        found = ko.find_symbol(selected.name)
+        if found is None:
+            continue  # Synthetic relocation symbols have no named ELF entry.
+        symbol = found[1]
+        if symbol.is_undef or symbol.st_shndx not in layout.section_offsets:
+            continue
+        section = ko.sections[symbol.st_shndx]
+        if not section.is_exec:
+            continue
+        for reloc in ko.relocations_for(section):
+            if symbol.st_value <= reloc.offset < symbol.st_value + symbol.st_size:
+                include(reloc)
+    for reloc in layout.data_relocs:
+        include(reloc)
+    while pending:
+        for reloc in ko.relocations_for(ko.sections[pending.pop()]):
+            include(reloc)
+    return sorted((module_base + layout.section_offsets[index],
+                   module_base + layout.section_offsets[index] + ko.sections[index].sh_size)
+                  for index in referenced)
+
+
 def infer_default_krg_path() -> Path | None:
     script_path = Path(__file__).resolve()
     for parent in script_path.parents:
@@ -2059,6 +2119,7 @@ def build_shared_object(
     data_relocations: List[DataRelocation] = []
     bindings: Dict[int, dict] = {}
     rw_base_vaddr: int | None = None
+    extra_ro_ranges: List[tuple[int, int]] = []
     if data_bindings_path is not None and ko_path is None:
         raise ValueError("--data-bindings requires an owner --ko")
 
@@ -2173,6 +2234,13 @@ def build_shared_object(
         for sym in resolved:
             if not sym.defined or sym.module_name != owner_module:
                 continue
+            found = ko.find_symbol(sym.name)
+            if found is not None and found[1].st_shndx in layout.section_offsets:
+                expected = (module_core_base_kernel +
+                            layout.section_offsets[found[1].st_shndx] + found[1].st_value)
+                if sym.address != expected:
+                    raise ValueError(f"{ko_path}: runtime layout mismatch for {sym.name}: "
+                                     f"KRG=0x{sym.address:x}, ELF layout=0x{expected:x}")
             if sym.st_type == STT_FUNC:
                 sym.reuse_kind = "text"
             elif ro_kernel_start <= sym.address < ro_kernel_end:
@@ -2282,6 +2350,8 @@ def build_shared_object(
 
     if ko_path is not None:
         validate_executable_shim_bindings(ko, resolved, owner_module)
+        extra_ro_ranges = module_referenced_ro_ranges(
+            ko, layout, resolved, owner_module, module_core_base_kernel)
 
     dep_modules = ["shim"] if LIB_SHIM in needed_libs else []
     module_deps_path = symbols_path.parent / "module_deps.txt"
@@ -2316,6 +2386,7 @@ def build_shared_object(
         symbols=resolved, needed_libraries=needed_libs, export_stub_size=export_stub_size,
         data_bytes=data_bytes, data_relocations=data_relocations, rw_base_vaddr=rw_base_vaddr,
         synthetic_text_pages=synthetic_text_pages,
+        extra_ro_ranges=extra_ro_ranges,
     )
     builder.write(Path(owner_lib), page_map_path=page_map_path)
     owner_manifest.write_text("# descriptor_symbol module_srcversion module_name gnu_build_id\n" + "".join(owner_lines))

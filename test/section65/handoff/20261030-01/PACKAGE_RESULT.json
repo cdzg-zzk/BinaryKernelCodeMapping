@@ -1,0 +1,12 @@
+{
+  "status": "complete",
+  "archive": "test/evaluation-local/vkso-section65-handoff-20261030-01.zip",
+  "archive_sha256": "e713e6ec1143b3f17e237493c6cc5d83bd5a21a4d065bd2a84a3f5b6b0f0ecd8",
+  "archive_bytes": 34464308,
+  "files": 3781,
+  "uncompressed_payload_bytes": 180864024,
+  "formal_campaigns": 30,
+  "formal_observations": 6540,
+  "manifest_hashes_verified": true,
+  "zip_crc_verified": true
+}

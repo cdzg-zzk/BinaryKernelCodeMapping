@@ -14,6 +14,37 @@ from build_PIC_so import KoFile, PAGE_SIZE  # noqa: E402
 
 
 class KoCoreLayoutTests(unittest.TestCase):
+    def test_ro_after_init_group_precedes_data_with_page_padding(self) -> None:
+        assembly = r'''
+            .text
+            ret
+            .section .rodata, "a", @progbits
+            .quad 1
+            .data
+            .quad external_target
+            .section __jump_table, "aw", @progbits
+            .skip 24
+            .section .data..ro_after_init, "aw", @progbits
+            .quad 2
+            .section .bss, "aw", @nobits
+            .balign 16
+            .skip 448
+            .section .note.GNU-stack, "", @progbits
+        '''
+        with tempfile.TemporaryDirectory() as tmp:
+            source, obj = Path(tmp)/'groups.S', Path(tmp)/'groups.ko'
+            source.write_text(assembly)
+            subprocess.run(['gcc', '-c', str(source), '-o', str(obj)], check=True)
+            ko = KoFile(obj)
+            layout = ko.compute_core_layout()
+        offset = lambda name: layout.section_offsets[ko.find_section(name).index]
+        self.assertEqual(offset('__jump_table'), layout.ro_end)
+        self.assertEqual(offset('.data..ro_after_init'), layout.ro_end+24)
+        self.assertEqual(offset('.data'), layout.ro_end+PAGE_SIZE)
+        self.assertEqual(offset('.bss'), layout.ro_end+PAGE_SIZE+16)
+        self.assertEqual(len(layout.data_image), 2*PAGE_SIZE)
+        self.assertEqual(layout.data_relocs[0].offset, PAGE_SIZE)
+
     def test_layout_is_computed_by_ko_file(self) -> None:
         assembly = r"""
             .section .text.core, "ax", @progbits

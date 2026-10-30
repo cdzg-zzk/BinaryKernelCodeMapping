@@ -1,0 +1,5 @@
+{
+  "copied-library": {
+    "build": "test/section65/build/squashfs/improve-codec-library-01"
+  }
+}

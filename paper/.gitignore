@@ -1,0 +1,4 @@
+# Regenerable LaTeX intermediates; source, PDFs, CSVs and vector figures remain visible.
+/build/
+__pycache__/
+*.pyc

@@ -1,0 +1,52 @@
+{
+  "status": "verified",
+  "scope": "read-only ISO9660 VKSO+FUSE feasibility, not performance or productivity",
+  "run": "test/evaluation-local/runs/iso9660/fuse-export-01/run.json",
+  "cases": {
+    "fuse-vkso": {
+      "cases": 6,
+      "entries": 200,
+      "files": 145,
+      "random_and_eof_reads": 870
+    },
+    "fuse-copied": {
+      "cases": 6,
+      "entries": 200,
+      "files": 145,
+      "random_and_eof_reads": 870
+    },
+    "kernel-after-debug": {
+      "cases": 6,
+      "entries": 200,
+      "files": 145
+    }
+  },
+  "shared_text_pages": 4,
+  "shared_rodata_pages": 1,
+  "debug": {
+    "function": "isofs_get_blocks",
+    "source_line": 572,
+    "inode_size": 65537,
+    "hardware_breakpoint": true,
+    "single_step": true,
+    "pages_remained_shared": true,
+    "client_completed": true
+  },
+  "kernel_regression_after_debug": true,
+  "restoration_verified": true,
+  "frontend_lines": 169,
+  "original_user_bridge_lines": 251,
+  "container_scenario": {
+    "candidate": "SquashFS + Apptainer",
+    "source_audit": true,
+    "implemented": false,
+    "benchmarked": false
+  },
+  "limits": [
+    "single-threaded FUSE",
+    "selected read-only profile",
+    "no native performance claim",
+    "no comparative development-effort result",
+    "no historical-bug repair case"
+  ]
+}

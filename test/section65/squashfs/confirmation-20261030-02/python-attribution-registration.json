@@ -1,0 +1,10 @@
+{
+  "created": 1793338674.4850433,
+  "queue_sha256": "348475f69632ff053d0c2f74d39174788bef1fe4e9b8d8aecda7b8ea4cef11ee",
+  "campaigns": 3,
+  "blocks": 8,
+  "observations": 120,
+  "production_registration": "/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/optimization-20261030-01/confirmation-registration.json",
+  "production_registration_sha256": "00048a7e24b9317176b9865b39813c3a744a50025ab4f7b2abe746c2adcd85ff",
+  "scope": "Previously planned complete Python/XZ task; separates decoder choice, unused dependency retention and physical backing, three paired campaigns with equal loader paths; no significance stopping."
+}

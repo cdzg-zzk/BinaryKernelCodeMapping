@@ -1,0 +1,50 @@
+{
+  "status": "complete",
+  "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-apptainer-copied-02/rootfs",
+  "rootfs": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/application-images-01/rootfs",
+  "logical_stream_bytes": 268435456,
+  "payloads": {
+    "compressible.bin": {
+      "bytes": 134217728,
+      "sha256": "28b1224d00153efd69f0990c5d1ccc2b0c2d127695d3b34d81b8aeff2ad07370"
+    },
+    "random.bin": {
+      "bytes": 134217728,
+      "sha256": "774bc0d6b707c84358002faf92c2ce19d09863ec34363c7f9fad3fc6e664dadf"
+    }
+  },
+  "cases": [
+    {
+      "compressor": "xz",
+      "image": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/application-images-01/xz.sif",
+      "offset": 36864,
+      "bytes": 144281600,
+      "sha256": "80b3b10b49e186bfe0110a2378a0205d5d906c6760c6f27947c2d0f096f4886c",
+      "command": [
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "build",
+        "--mksquashfs-args",
+        "-comp xz -processors 1 -b 131072 -all-time 1700000000 -mkfs-time 1700000000",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/application-images-01/xz.sif",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/application-images-01/rootfs"
+      ],
+      "partitions": "------------------------------------------------------------------------------\nID   |GROUP   |LINK    |SIF POSITION (start-end)  |TYPE\n------------------------------------------------------------------------------\n1    |1       |NONE    |32176-32298               |Def.FILE\n2    |1       |NONE    |32298-34658               |JSON.Generic\n3    |1       |NONE    |36864-144281600           |FS (Squashfs/*System/amd64)\n"
+    },
+    {
+      "compressor": "lz4",
+      "image": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/application-images-01/lz4.sif",
+      "offset": 36864,
+      "bytes": 152309760,
+      "sha256": "782c3db7842720071207eacd7a7eb95549ba45d5ac5b2665010f7e9391144c42",
+      "command": [
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "build",
+        "--mksquashfs-args",
+        "-comp lz4 -processors 1 -b 131072 -all-time 1700000000 -mkfs-time 1700000000",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/application-images-01/lz4.sif",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/application-images-01/rootfs"
+      ],
+      "partitions": "------------------------------------------------------------------------------\nID   |GROUP   |LINK    |SIF POSITION (start-end)  |TYPE\n------------------------------------------------------------------------------\n1    |1       |NONE    |32176-32298               |Def.FILE\n2    |1       |NONE    |32298-34658               |JSON.Generic\n3    |1       |NONE    |36864-152309760           |FS (Squashfs/*System/amd64)\n"
+    }
+  ]
+}

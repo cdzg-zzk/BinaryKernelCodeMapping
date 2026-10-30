@@ -1,0 +1,54 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+\usepackage[margin=0.75in,columnsep=0.25in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext,newtxmath,graphicx,booktabs,longtable,microtype}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parindent}{1em}
+\raggedbottom
+\begin{document}
+\setcounter{section}{6}\setcounter{subsection}{4}
+\input{filesystem-section.tex}
+\bibliographystyle{plain}
+\bibliography{paper_content/references}
+\clearpage\onecolumn
+\section*{Filesystem evaluation: final-owner results}
+\small
+The final XZ-composed owner is evaluated in 30 campaigns with
+6,540 observations. The table retains all paired comparisons.
+Absolute times are means of campaign medians. Ratios instead average paired
+log ratios within each campaign and weight the three campaigns equally;
+adjacent absolute times therefore need not divide to the paired ratio.
+Intervals are pointwise 95\% Student-t intervals over campaign estimates.
+
+O denotes original native, N the equally optimized normal native reference,
+NR its relaxed-options counterpart, PL the preceding LZ4-composed owner, and
+PX the final XZ-composed owner. SF and SF1 are the same squashfuse\_ll binary
+with default and single-thread operation; SF+T adds the common translator.
+C and V use identical common instructions with copied and kernel-shared
+backing. L and LC are LKL512 with default and matched positive caches.
+CL uses library decoders with both libraries present; CR uses common
+decoders while retaining both libraries. Their separate diagnostic uses
+equal-length loader paths. The single-CPU group is separate from the default
+two-CPU application matrix.
+
+\begin{figure}[h]\centering
+\includegraphics[width=\textwidth]{figures/section65/filesystem-native-warm.pdf}
+\caption{Warm traversals after the fresh-mount native task. These accesses
+can bypass common-core work and are not the sole preparation-cost evidence.}
+\end{figure}
+\begin{figure}[h]\centering
+\includegraphics[width=.9\textwidth]{figures/section65/filesystem-memory-scale.pdf}
+\caption{Untimed metadata-scale observations after complete include archives.
+The tree distribution is replicated with distinct inodes; SquashFS may
+deduplicate file data. Each point is one separate process/mount observation,
+not a population confidence interval or a whole-machine memory measurement.}
+\end{figure}
+\clearpage
+\section*{Bounded diagnostic evidence}
+\input{tables/filesystem-refinement-hardening.tex}
+\input{tables/filesystem-refinement-work.tex}
+\input{tables/filesystem-refinement-heap.tex}
+\clearpage
+\setlength{\LTcapwidth}{\linewidth}
+\input{tables/filesystem-detail.tex}
+\end{document}

@@ -1,0 +1,38 @@
+[
+  {
+    "name": "squash-simultaneous-final-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/improvement/simultaneous.py",
+      "--build",
+      "test/section65/build/squashfs/evaluation-improved-01/build",
+      "--images",
+      "test/section65/build/squashfs/simultaneous-images-01/images.json",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-simultaneous-final-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-simultaneous-final-01/result.json"
+  },
+  {
+    "name": "squash-minimal-deployment-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/improvement/minimal_deployment.py",
+      "--build",
+      "test/section65/build/squashfs/evaluation-improved-01/build",
+      "--image",
+      "test/section65/build/squashfs/application-images-01/lz4.sif",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-minimal-deployment-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-minimal-deployment-01/result.json"
+  }
+]

@@ -1,0 +1,316 @@
+{
+  "status": "pass",
+  "runs": [
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-native-five-formal-01",
+      "status": "pass",
+      "observations": 960,
+      "complete_pairs": 480,
+      "pilot": false,
+      "campaign": "five-codec-formal-01",
+      "seed": 65201,
+      "summary": [
+        {
+          "compressor": "gzip",
+          "workload": "archive",
+          "phase": "fresh-mount",
+          "blocks": 12,
+          "paired_time_ratio": 1.006325072593257,
+          "bootstrap_95_percent": [
+            1.0039313794940103,
+            1.0085469416506516
+          ],
+          "medians_seconds": {
+            "original": 0.27592570949491346,
+            "prepared": 0.2775359235020005
+          }
+        },
+        {
+          "compressor": "gzip",
+          "workload": "archive",
+          "phase": "warm",
+          "blocks": 12,
+          "paired_time_ratio": 1.0012078409282663,
+          "bootstrap_95_percent": [
+            0.9963409826028387,
+            1.0061229001897551
+          ],
+          "medians_seconds": {
+            "original": 0.05212103049416328,
+            "prepared": 0.052287048994912766
+          }
+        },
+        {
+          "compressor": "gzip",
+          "workload": "scan",
+          "phase": "fresh-mount",
+          "blocks": 12,
+          "paired_time_ratio": 1.0422951691495868,
+          "bootstrap_95_percent": [
+            1.036680727259977,
+            1.0481745645584375
+          ],
+          "medians_seconds": {
+            "original": 0.063205200000084,
+            "prepared": 0.06593073849217035
+          }
+        },
+        {
+          "compressor": "gzip",
+          "workload": "scan",
+          "phase": "warm",
+          "blocks": 12,
+          "paired_time_ratio": 1.0184495256277972,
+          "bootstrap_95_percent": [
+            0.9921182605928764,
+            1.0615123960460373
+          ],
+          "medians_seconds": {
+            "original": 0.013602225000795443,
+            "prepared": 0.013729235499340575
+          }
+        },
+        {
+          "compressor": "xz",
+          "workload": "archive",
+          "phase": "fresh-mount",
+          "blocks": 12,
+          "paired_time_ratio": 1.0015472126583036,
+          "bootstrap_95_percent": [
+            0.9964130612118697,
+            1.0069522173589613
+          ],
+          "medians_seconds": {
+            "original": 0.780413510503422,
+            "prepared": 0.783364912495017
+          }
+        },
+        {
+          "compressor": "xz",
+          "workload": "archive",
+          "phase": "warm",
+          "blocks": 12,
+          "paired_time_ratio": 0.9998510432848705,
+          "bootstrap_95_percent": [
+            0.9938845211643076,
+            1.0055775761951038
+          ],
+          "medians_seconds": {
+            "original": 0.056826273998012766,
+            "prepared": 0.0566908590044477
+          }
+        },
+        {
+          "compressor": "xz",
+          "workload": "scan",
+          "phase": "fresh-mount",
+          "blocks": 12,
+          "paired_time_ratio": 1.0347430447565866,
+          "bootstrap_95_percent": [
+            1.027366053416869,
+            1.042410844076319
+          ],
+          "medians_seconds": {
+            "original": 0.07767089749540901,
+            "prepared": 0.08024741750705289
+          }
+        },
+        {
+          "compressor": "xz",
+          "workload": "scan",
+          "phase": "warm",
+          "blocks": 12,
+          "paired_time_ratio": 1.0044418159808532,
+          "bootstrap_95_percent": [
+            0.9963709379270772,
+            1.012016458197738
+          ],
+          "medians_seconds": {
+            "original": 0.01798595700529404,
+            "prepared": 0.018079468507494312
+          }
+        },
+        {
+          "compressor": "zstd",
+          "workload": "archive",
+          "phase": "fresh-mount",
+          "blocks": 12,
+          "paired_time_ratio": 1.0078794738613885,
+          "bootstrap_95_percent": [
+            1.0006815251500845,
+            1.0149937202910522
+          ],
+          "medians_seconds": {
+            "original": 0.17422653199901106,
+            "prepared": 0.17546425399632426
+          }
+        },
+        {
+          "compressor": "zstd",
+          "workload": "archive",
+          "phase": "warm",
+          "blocks": 12,
+          "paired_time_ratio": 0.9966331091004411,
+          "bootstrap_95_percent": [
+            0.9853546185318273,
+            1.0080353201859285
+          ],
+          "medians_seconds": {
+            "original": 0.05176737099100137,
+            "prepared": 0.05189859699748922
+          }
+        },
+        {
+          "compressor": "zstd",
+          "workload": "scan",
+          "phase": "fresh-mount",
+          "blocks": 12,
+          "paired_time_ratio": 1.0345483468358831,
+          "bootstrap_95_percent": [
+            1.0204528510464046,
+            1.0489077570907093
+          ],
+          "medians_seconds": {
+            "original": 0.06160188149806345,
+            "prepared": 0.06378604500059737
+          }
+        },
+        {
+          "compressor": "zstd",
+          "workload": "scan",
+          "phase": "warm",
+          "blocks": 12,
+          "paired_time_ratio": 1.0159441322214673,
+          "bootstrap_95_percent": [
+            0.9940198933055531,
+            1.0443961209279418
+          ],
+          "medians_seconds": {
+            "original": 0.01315744299790822,
+            "prepared": 0.013199986504332628
+          }
+        },
+        {
+          "compressor": "lz4",
+          "workload": "archive",
+          "phase": "fresh-mount",
+          "blocks": 12,
+          "paired_time_ratio": 1.017339799624458,
+          "bootstrap_95_percent": [
+            1.0107418980563547,
+            1.025937060782646
+          ],
+          "medians_seconds": {
+            "original": 0.1375632140043308,
+            "prepared": 0.13943602799554355
+          }
+        },
+        {
+          "compressor": "lz4",
+          "workload": "archive",
+          "phase": "warm",
+          "blocks": 12,
+          "paired_time_ratio": 1.0063512163434425,
+          "bootstrap_95_percent": [
+            1.0002297207406177,
+            1.013270824502799
+          ],
+          "medians_seconds": {
+            "original": 0.05113090999657288,
+            "prepared": 0.051307789501152
+          }
+        },
+        {
+          "compressor": "lz4",
+          "workload": "scan",
+          "phase": "fresh-mount",
+          "blocks": 12,
+          "paired_time_ratio": 1.0423851375732396,
+          "bootstrap_95_percent": [
+            1.030234810589005,
+            1.0561142647214534
+          ],
+          "medians_seconds": {
+            "original": 0.06032410650368547,
+            "prepared": 0.06258811850420898
+          }
+        },
+        {
+          "compressor": "lz4",
+          "workload": "scan",
+          "phase": "warm",
+          "blocks": 12,
+          "paired_time_ratio": 0.9809342739047363,
+          "bootstrap_95_percent": [
+            0.9087916979619648,
+            1.050027385336267
+          ],
+          "medians_seconds": {
+            "original": 0.012750244997732807,
+            "prepared": 0.012729660993500147
+          }
+        },
+        {
+          "compressor": "lzo",
+          "workload": "archive",
+          "phase": "fresh-mount",
+          "blocks": 12,
+          "paired_time_ratio": 1.012834072969876,
+          "bootstrap_95_percent": [
+            1.0092634158017701,
+            1.0161780326565775
+          ],
+          "medians_seconds": {
+            "original": 0.15331551499548368,
+            "prepared": 0.15544883499387652
+          }
+        },
+        {
+          "compressor": "lzo",
+          "workload": "archive",
+          "phase": "warm",
+          "blocks": 12,
+          "paired_time_ratio": 1.0003534594226113,
+          "bootstrap_95_percent": [
+            0.9901352182700252,
+            1.010688841916074
+          ],
+          "medians_seconds": {
+            "original": 0.0513662325029145,
+            "prepared": 0.05140555600519292
+          }
+        },
+        {
+          "compressor": "lzo",
+          "workload": "scan",
+          "phase": "fresh-mount",
+          "blocks": 12,
+          "paired_time_ratio": 1.049369031467886,
+          "bootstrap_95_percent": [
+            1.0293177364563364,
+            1.0758706019730284
+          ],
+          "medians_seconds": {
+            "original": 0.06064384648925625,
+            "prepared": 0.06287883399636485
+          }
+        },
+        {
+          "compressor": "lzo",
+          "workload": "scan",
+          "phase": "warm",
+          "blocks": 12,
+          "paired_time_ratio": 1.0591708393627421,
+          "bootstrap_95_percent": [
+            1.0023589595384972,
+            1.1622175158253154
+          ],
+          "medians_seconds": {
+            "original": 0.012676317506702617,
+            "prepared": 0.012833763496018946
+          }
+        }
+      ]
+    }
+  ]
+}

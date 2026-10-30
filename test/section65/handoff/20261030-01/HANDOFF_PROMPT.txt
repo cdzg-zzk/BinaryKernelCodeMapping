@@ -1,0 +1,501 @@
+# VKSO Section 6.5 后续优化任务：完整交接 Prompt
+
+你将接手一个已经完成上一轮实现、实验和论文交付的操作系统研究项目。请先读清当前状态，再实际完成下一轮诊断、实现优化、验证、复测和正文更新。
+
+## 1. 当前任务与用户意图
+
+项目是 VKSO，原工作目录为 `/home/zzk/BinaryKernelCodeMapping`。研究在研究者拥有和控制的机器、Linux 内核上进行。仓库 `AGENTS.md` 的规则适用。
+
+Section 6.5 的主问题是：复杂的原生内核实现能否通过同一份驻留机器码服务真实内核消费者和真实用户应用，同时让对象、缓存和环境服务保持各域私有？SquashFS + 实际 Apptainer/SIF 是主案例；ISO9660 是互补功能/调试证据。前面算法小节和 Clocktime 不代替本节的应用证据。
+
+用户最新判断是：**实验规模基本够了，下一阶段应提高实现效果。扩大实际复用范围是正确方向，但不能以其他路径的性能、内存或功能明显退化为代价，不能“拆东墙补西墙”。**
+
+本轮目标，按优先级：
+
+1. 定位并尽量解决公共 XZ 解码导致的应用性能回退，保留真实跨域 XZ 复用。
+2. 改善用户桥 inode/name 缓存随访问条目增长的问题，同时保住访问性能和对象生命周期正确性。
+3. 有证据时再处理剩余适配开销；沿用已有工作负载和强基线，避免无边界增加实验场景。
+4. 对最终候选实际复测，更新 Section 6.5、分析图表、成本记录、主张判断和统一状态。
+
+注意：仓库 `STATUS.md`、`final-evidence.json`、`refinement/progress.json` 的 complete 表示**上一轮评估已完整交付**，不是这次优化目标已经完成。不能读完它们就结束，也不能只提出计划而不实现和执行。
+
+## 2. 如何使用交接包
+
+包根目录的 `START_HERE.md` 给出入口，`BUNDLE_MANIFEST.json` 列出打包文件，`EXTERNAL_ASSETS.json` 列出未随包提供的大型运行资产。`repo/` 下保持原仓库相对路径。包是核心源码/证据包，不是完整的可启动实验环境。
+
+若你在原工作区，直接使用现有资产，并在新目录构建/运行。若只有压缩包，先完成源码与证据分析、诊断脚本准备；具体列出运行时缺失的资产/权限，不能假装完成硬件实验。包内没有密码或凭据；已有授权不等于新环境自动拥有 sudo 凭据。
+
+优先阅读，不要从头遍历全部原始记录：
+
+- `test/section65/STATUS.md`、`claim-experiment-map.md`、`claim-verdicts.json`、`backend-conditions.md`。
+- `test/section65/squashfs/refinement/{PROTOCOL.md,README.md,RESULTS.md}`。
+- 论文 Introduction/贡献：`paper/paper_content/Paper Draft.md`；Design：`paper/design/`；对齐记录：`paper/notes/section65-alignment.md`。
+- 当前正文：`paper/paper_content/sections/06-evaluation.tex` 中的 `Filesystem Reuse in Applications`；独立预览：`paper/filesystem-section-preview.pdf`。
+- 当前分析：`test/section65/build/squashfs/refined-analysis-01/{analysis.json,audit.json,summary.csv,costs.json,section65.numbers.json}` 和 `resource-ledger/resources.json`。
+- 当前构建/源码冻结：`test/section65/build/squashfs/refine-xz-01`、`evaluation-refined-02/identity.json`。
+
+`.codegraph/` 在原仓库存在，但前一代理反复遇到 CodeGraph 超时并已转用定向搜索。不要为了工具反复重试而阻塞任务；根据实际可用性及仓库规则处理。不要 reset/clean 巨大的已有工作区，不要覆盖历史结果。默认不提交、不推送。
+
+## 3. 必须区分的两个实现版本
+
+### 上一版：公共文件系统 + LZ4，XZ 留在域内服务
+
+生产构建：`test/section65/build/squashfs/evaluation-improved-01/build`。
+主要分析：`improvement-analysis-01`；另外还有 xz attribution、loader、singlecpu 三组分析。
+共 39 个 campaign、11,328 条计时观测。冻结：`evaluation-improved-03`。
+论文归档：`paper/build/section65-composed-publication-01`。
+
+- 原生和 prepared native 的 XZ 由 Linux 5.15.198 的内核解码器提供。
+- 用户 copied/VKSO 的 XZ 使用 liblzma；公共核心当时没有包含 XZ 解码器。
+- XZ 大文件顺序任务相对默认 SquashFUSE 慢约 5.02%，不是 13.10%。
+- 此版共享 7 页、28 KiB。旧版不利的布局/依赖敏感性结果保留。
+
+### 当前版：公共文件系统 + LZ4 + XZ
+
+生产构建：`test/section65/build/squashfs/refine-xz-01`。
+测量前冻结：`evaluation-refined-01`；最终源码/正文冻结：`evaluation-refined-02`（318 文件）。
+共 30 个完整 campaign、6,540 条计时观测、403 项独立复算的配对比较。
+
+| 测试对象 | 当前 XZ 路径 |
+|---|---|
+| 原始 native / 优化 normal、relaxed native 参考 | Linux 5.15.198 自带内核 XZ；没有切换成 VKSO owner |
+| prepared native | 调用公共 owner 的 `vkso_xz_*`；保留 `XZ_PREALLOC`，BIO 输入和分页输出 |
+| copied 用户版 | 执行公共 owner 同指令内容的用户物理副本；用 `XZ_SINGLE` 处理完整压缩块和连续输出 |
+| VKSO 用户版 | 与 native owner 共享代码/只读 PFN；同 copied 用户桥及 `XZ_SINGLE` 路径 |
+| SquashFUSE 0.6.2 | 自身解析 + liblzma；实际 helper 是 `squashfuse_ll`，保留默认和 `-s` 单线程对照 |
+| LKL Linux 6.12 | 自身用户态内核环境中的 SquashFS/XZ；不共享宿主内核 PFN；XZ 使用 PREALLOC |
+
+XZ 来自匹配 Linux 5.15.198 的 `xz_dec_stream.c`、`xz_dec_lzma2.c`、`xz_dec_bcj.c`，2,604 行原始物理源码未改写。分配/释放、内存操作、CRC 等 9 个服务槽各域私有。当前用户桥移除了 liblzma 和 liblz4 依赖。
+
+核心构建脚本：`squashfs/refinement/build_xz.py`；绑定定义：`refinement/xz_services.h`；用户调用：`squashfs/posix_io.c`；对象/缓存：`user_bridge.c`；FUSE：`fuse_frontend.c`。精确评估源码在构建的 `xz-user-source/`，前一版在 `evaluation-improved-01/build/codec-user-source/`。
+
+当前 owner `.text` 为 27,828 字节，上一版为 16,695 字节；共享 7 个代码页 + 2 个只读页，共 36 KiB。不能把源码行数、机器码字节和模块驻留页混为一谈。
+
+## 4. 已完成的数据及其正确解释
+
+以下性能比例均有对应配对统计，具体区间以分析 JSON 为准：
+
+- 最终 native 对同样 bounded-copy 优化的 normal native：fresh scan 点变化 −1.34% 至 +1.29%，archive −1.05% 至 −0.18%；十格最大 CI 上端为 +4.82%。大型 xz/lz4 archive 分别约 −0.14%/−0.13%，区间跨零。
+- 新 owner 对上一版 owner，native xz sequential 为 −1.90% [−2.13%, −1.67%]。
+- 九个普通非空应用任务的 VKSO/copied 比值 0.9901–1.0056，逐点 CI 总端点 0.9584–1.0255；equal-path xz/lz4 scan/stream 的区间更宽，不能宣称统一 1% 上界或等价。
+- 对默认 SquashFUSE：scan 降低 4.42–54.58%，include archive 降低 3.30–19.46%；gzip/lz4 sequential 约快 7%，**xz sequential 慢 13.10% [11.45%,14.78%]**。
+- 对单线程 stock：gzip/lz4 archive 反而慢 1.18%/0.89%，scan 点估计接近；xz scan 仍快 53.59%。不能把默认 stock 的线程成本全归成 VKSO 架构收益。
+- 独立任务是在真实 gzip/xz SIF 内执行 Python 3.10 标准库 byte compilation，产生 647 个一致文件，不是“编译 XZ 源码”。对默认 stock，gzip 慢 0.68%，**xz 慢 16.18% [15.56%,16.80%]**。
+- 普通十二项任务均优于匹配 positive-cache 的 LKL512；但独立 xz 编译比这个 LKL 慢 6.72%。不能说所有应用均优于 LKL。
+
+解码诊断 (`refinement/decoder_controls.py`) 使用同一 final owner：
+
+1. `copied-library`：调用外部 liblzma/liblz4，保留两项依赖；私有服务表仍绑定。
+2. `copied-retained`：调用公共解码器，但仍保留两项外部依赖。
+3. `copied`：调用公共解码器并移除未使用依赖。
+
+该诊断在 equal-length loader paths 和平衡 padding 条件下运行。xz sequential 从 1→2 增加 14.79% [13.43%,16.16%]，所记录 child CPU time 增加 14.87%；2→3 为 −0.51% [−2.45%,1.47%]。因此已定位到**解码执行选择**，没有定位到具体内循环、调用模式或编译/绑定热点，不能直接宣布“内核 XZ 天生慢”或“PGOT 导致 15%”。
+
+三次单独的元数据工作量回放：stock 默认/单线程都解码 137 块、1,106,363 输出字节；公共 parser 使用库或公共 XZ 都为 76 块、558,231 字节。计数包含挂载启动，不用于正式时间，也不能将不同层 API 重复相加。
+
+## 5. 缓存、成本与加固约束
+
+- 小树 helper PSS：VKSO 7.00–7.04 MiB，默认 stock 14.16–23.95，单线程 stock 11.64–12.85，matched-cache LKL 82.57–82.85。
+- 5,866 / 23,464 / 93,856 条目下 VKSO 为 7.02 / 23.43 / 88.89 MiB；最大规模默认/单线程 stock 为 28.52 / 12.91 MiB，LKL 为 500.92 MiB。
+- `u_new_inode` 分配 cached inode，`sq_lookup_child` 保留 cached name，`u_inode_noop` 不释放，`sq_close` 在卸载时清理。当前缺少淘汰政策。这个实现选择会增长，不能称为固定小运行时；也不能未验证就称它为泄漏。
+- 用户已经明确：通用 `page_cache_replace.ko` 的 **32 KiB 是平台一次性成本，不计入每个文件系统业务的小计**。不要再次征求该前提，也不能据此隐去业务自己的成本。
+- owner 68 KiB + native consumer 40 KiB，较匹配 native module 60 KiB 增加 48 KiB。已有 prepared native 驻留时避免一份 36 KiB backing；请求注册元数据 1,264 字节。普通 copied DSO 也在用户进程之间共享，不允许按进程数重复乘代码页。
+- 构造/导出/注册按每 campaign 内部阶段求和，中位数 2.698 s，范围 2.696–6.088 s；编译和装载另列。owner 重载/版本变化需重新部署；后续应用可摊销。copied 构造成本不假定为零。
+- current prepared code 没有 native 的栈 canary 和外部 indirect/return thunks。PIC build-only probe 可带这些检查，但跨域 GS canary/失败路径/thunk 绑定未实现。`CONFIG_FTRACE=n`，不要声称移除了运行中的 ftrace。不要进一步放松加固来换取好成绩，也不能将 prepared/native 差异都归为间接调用成本。
+
+## 6. 已有功能、维护、调试证据
+
+原始 native / prepared before / copied / shared / prepared after 的五格式 25 次挂载通过；gzip/xz/zstd/lz4/lzo 的内容、目录、链接、声明范围内 xattr 和边界行为有记录。两种用户 backing 各完成 22,032 次边界/随机偏移读取。另有真实 x86 BCJ 链检查。
+
+native xz/LZ4 probe 分别记录公共入口 190/73 次调用。实际 xz SIF 的硬件断点记录参数、可见调用栈，调试后仍有九个共享 PFN。native A、SIF B/C 使用冲突内容并保持私有对象和独立退出；不是吞吐扩展实验。
+
+关键 raw run 位于 `test/evaluation-local/runs/iso9660/`：
+
+- `squash-refine-xz-functional-01`、`squash-refine-xz-guest-01`。
+- `squash-refine-xz-execution-01`、`squash-refine-xz-native-calls-01`、`squash-refine-xz-bcj-02`。
+- `squash-refine-hardening-02`、`squash-refine-metadata-work-01`、`squash-refine-minimal-deployment-01`。
+- `squash-maintenance-02`：已完成已知上游负偏移修复 old/fixed × native/copied/shared；保留目标内核 panic、daemon signal、client errno 等组合分类。不要再把已修正的 maintenance.py 旧故障当作当前任务。
+- `maintenance-oneshot-01`：ISO9660 硬件断点、参数、栈和单步，调试前后 PFN 以及后续原生回归。单步证据属于 ISO9660，不要挪用为 XZ 单步。
+
+异常镜像只能进入隔离客体，不能在宿主触发已知 panic。修复需要重建和重新部署；copied 同样获得公共修复，不证明热更新或开发工时下降。
+
+## 7. 下一阶段的具体推进方式
+
+先做有限的 XZ 诊断，使用**现有 SIF 的相同压缩块**，覆盖已有可压缩/伪随机顺序文件，以及独立 Python 任务中的代表性块。不要通过换输入消除退化。
+
+建立可分离的路径：liblzma；普通用户环境中的同源 Linux XZ；prepared copied；prepared shared。明确每格编译选项、SINGLE/PREALLOC 模式、CRC、输入/输出方式和服务绑定，不能把四格当成天然单因素。先匹配能匹配的条件，再逐个改变因素。
+
+观察实际热点、CPU 时间/必要计数、分配/复制/解码工作量、状态初始化与复用。必要时把两个大文件分开观察，但最终完整应用仍报告原任务。仪器化只用于诊断，正式时间使用未插桩版本。
+
+值得检查、**尚未证实是根因**的两个代码点：
+
+- XZ 继承了公共文件系统编译选项，包括 `-fno-jump-tables`；检查这些限制的必要性和机器码影响。
+- `memcpy/memmove/memset/memcmp` 统一改为服务指针，可能丢失固定小尺寸操作的编译优化；不能因为以前类似优化有效就未经证据照搬。
+
+若热点在适配边界，修正调用/编译/缓冲策略；若主要在共同算法，允许有机制依据的共同优化，让两域都获益。不能为了声称 2,604 行“原样复用”拒绝合理优化；若改了原始算法，必须更新语义修改和维护成本核算，不再保留“零 body edit”的旧描述。
+
+不要用切回用户 liblzma、保留未执行的 XZ 代码来冒充问题已解决。旧库路径保留作对照；当前目标仍是实际共同执行的 XZ。也不要在用户侧单独启用内核不能合法使用的指令/配置来伪装同一核心优化。
+
+XZ 候选先独立评估，再处理缓存。缓存先定位必要常驻状态和可淘汰状态，考虑减少对象占用、按需分配或有界缓存；维护 open handle、目录、hardlink、查找和 private-state 生命周期。不能仅通过关闭缓存把内存降低后忽略性能回退，也不能无限扩缓存换时间。
+
+每个新增小实验说明：它回答哪项不确定性、为什么旧数据不够、什么结果支持/否定解释。针对一个假说先导验证，失败候选保留；不要不断换布局、输入、采样窗口直至有利。
+
+## 8. 不“拆东墙补西墙”的验收
+
+- 保留实际公共 XZ 执行、同核心 copied 对照、PFN 身份及用户私有服务/状态。
+- 同时看 native/copied/shared，不把原生变慢转移为用户收益。
+- 检查 xz 元数据、顺序和独立编译，也检查 gzip/lz4 等未执行 XZ 的任务，避免链接布局带来的新退化。
+- 同时记录执行时间、CPU、代码/驻留规模、私有内存和部署成本。
+- 对通用算法优化，必要时让原生参考也获得同样优化，继续区分一般优化收益与 VKSO 增量。
+- 明确工程上可接受的变化和测量精度，再固定确认协议；不把不显著等同于无回退。
+- 诊断完成不等于优化完成。继续实现有证据支持的候选并验证；若目标确实不能兼得，给出已执行的候选、原因、可复现取舍和明确需要用户决定的设计问题，不能提前用“这是算法特性”结束。
+
+## 9. 测量与运行纪律
+
+已有 matrix 在 `refinement/formal-queue.json`：native-final 3/2400、native-stream 3/480、application-final 9/3024、heldout 6/288、decoder-diagnostic 6/240、singlecpu 3/108（campaign/观测）。三档资源另行测量。主推断基于三个 campaign 的均值，保存 block 配对与顺序，不把访问次数当独立环境重复。
+
+开发阶段只跑诊断所需小对照；候选稳定后重跑受影响的既有正式矩阵。owner/bridge 变化不能默默复用旧版性能；特别注意未调用新解码器的任务也可能受代码/装载布局影响。无需机械增加新格式、新应用或新机器。
+
+硬件环境为研究者的 Linux 5.15.198 / i7-1165G7；既有 SMT/turbo 关闭、powersave，普通应用 CPU 1–2、native CPU 1，另有 CPU 1 诊断。先确认当前环境，不擅自改变宿主启动配置。正式计时期间不并行编译、QEMU 或其他本任务负载；TCG 仅作功能验证。保留实际配置、二进制、输入和统计版本。
+
+每个 build/run/analysis 用新名称，保留本次 handoff 基线。`campaign_queue.py` 可串行运行；`clone_queue.py` 可复制队列并更换 campaign/output 名称，注意新候选还需修改 build/control 路径。不要直接重跑指向既有输出的队列。
+
+上一轮曾服务重启：前 25 个 campaign 完成，`squash-refine-heldout-gzip-03` 中断留下 28 条样本。已恢复注册、卸载模块，并以同参数完整重跑 `-03-recovery-01`。正式分析只使用完整 campaign；部分记录保留。`formal-queue-01` 的旧 running 不代表活进程。`recover_interrupted.py` 是已执行的一次性恢复脚本，**不要把它当新任务启动脚本再运行**。
+
+## 10. 最终交付与沟通
+
+交付可复现的诊断、修改、构建、功能/维护/PFN 回归、正式结果和成本比较；明确每项变化解决了什么、仍有什么限制。更新 canonical Section 6.5（保留 6.1–6.4），重新生成图表和 PDF、逐项主张判断、README/STATUS 及新版本冻结。旧版 PDF、数据、失败候选不得覆盖。
+
+当前图表脚本 `paper/plot_filesystem_refined.py`，正文生成 `refinement/write_section.py` + `section65-template.tex`，导出 `paper/build_filesystem_section.py`。绘图环境 `paper/build/section65-plot-env-02/venv/bin/python`，PDF 构建 `make -C paper filesystem-section TECTONIC=build/tools/tectonic`。新版本分析脚本/校验器中存在旧计数、页数和版本断言，必要时按新协议明确更新，不要为了通过而关闭校验。
+
+沿用用户要求：源码复用、完整后端效率和物理页共享的独有收益分开解释；没有工时数据不宣称节省工时，没有整机总账不宣称净内存收益。核心维护和优化也惠及 copied 是合理结果，不需要人为让 copied 更差。
+
+请先简短说明你核对出的版本状态、优先诊断假说和第一批有限对照，随后直接推进已授权且可执行的工作。只在方向实质歧义、必要资产缺失或真实权限阻塞时具体询问；不要重复征求已明确的研究范围和平台成本口径。更新简短、讲结果和下一步，不用长篇计划代替执行
+
+
+补充内容：
+**我对这版的评价是：实验的可信度和完整性明显提高了，VKSO 能复用复杂文件系统与解码核心的证据更强；但新增实验也确认了几个真实的性能和内存问题，因此当前实现还不能被描述为普遍更优的应用后端。**
+
+这轮很有价值，因为它把上次尚属“怀疑”的问题变成了可以定位、可以改进的具体结果。现在已经比较清楚：**主要工程问题集中在公共 XZ 的执行成本，以及用户桥的元数据缓存保留策略。**
+
+我这次核对了源码、当前论文预览、实验协议和原始记录：
+
+- 清单列出的 **3,780 个文件**，大小与 SHA-256 均对应。
+- 从 **30 个完整 campaign、6,540 条原始样本**复算了 **403 组配对比较**及相关绝对时间，与包内分析一致，没有发现汇总计算错误。
+- **28 条中断样本**单独保留，恢复时使用相同参数重跑整个 campaign，没有从完整 campaign 中挑选样本。
+- 中断发生在实验工具服务器及 PTY，记录中的宿主机 `boot_id` 没有变化。因此，当前仍是同一宿主、同一次启动的证据，不能当成跨启动复现。
+
+这里完成的是材料审查与数据复算，没有重新运行硬件实验。当前论文为 filesystem-section-preview\.pdf，以下评价以这个版本为准。
+
+---
+
+## 一、相对上一版，哪些问题已经真正解决了？
+
+**这次不能再沿用上一轮“还缺这些实验”的评价。很多关键对照已经补齐，而且结果确实改变了我们对系统的认识。**
+
+| 上次的问题 | 本轮实际完成的工作 | 我的评价 |
+|---|---|---|
+| 最终版本与匹配原生参考没有直接比较 | 最终 XZ owner 与原始、优化 normal、优化 relaxed 原生版本同轮比较 | **已补齐**，不再依赖中间版本的间接推导 |
+| SquashFUSE 默认多线程是否让比较偏向我们 | 加入同一 `squashfuse_ll` 的 `-s` 对照 | **已解决重要公平性疑问**，也削弱了原来的部分优势 |
+| LKL512 的选择是否有依据 | 展示 16/64/256/512 MiB pilot，明确所有配置都通过，512 是性能取向 | **依据更清楚**，不能再把 512 MiB 说成最低要求 |
+| 解码器变化和动态依赖移除混在一起 | 同一 owner 下比较库解码、公共解码但保留库、公共解码并移除库 | **取得了有效归因**，主要回退定位到执行路径选择 |
+| 优势是否只存在于用于优化的任务 | 增加独立 Python 标准库字节码编译任务 | **外推检验有效**，且保留了不利结果 |
+| 小树低内存是否能推广到更大规模 | 增加 5,866 / 23,464 / 93,856 条目的规模测试 | **确认了结构性问题**，大树内存优势反转 |
+| 公共解码器是否只是被链接进去 | 原生调用计数、真实 SIF 硬件断点、PFN 和私有服务绑定验证 | **实际执行证据充分** |
+| 加固差异是否只是含糊说明 | 增加对象代码审计和 PIC 加固编译探针 | **解释取得进展**，但加固后的跨域运行尚未实现 |
+
+这些变化说明，这轮做的是实质性的研究工作。尤其重要的是，实验没有因为结果不利就更换任务、隐藏单线程 baseline 或删掉大规模内存结果。
+
+相关协议和结果解释分别见 PROTOCOL.md[PROTOCOL.md](sandbox:/workspace/scratch/bd046159dc11/review/latest-20261030/vkso-section65-handoff-20261030-01/repo/test/section65/squashfs/refinement/PROTOCOL.md) 与 RESULTS.md[RESULTS.md](sandbox:/workspace/scratch/bd046159dc11/review/latest-20261030/vkso-section65-handoff-20261030-01/repo/test/section65/squashfs/refinement/RESULTS.md)。
+
+---
+
+## 二、对论文 motivation 的支持，比上一版更扎实了
+
+我核对了包内 Introduction。它主要问的是：
+
+> 哪些驻留二进制闭包可以复用，如何在不复制执行体的情况下重宿主，以及减少了什么重复、付出了什么执行和部署成本？
+
+**按这个目标，当前 6.5 是符合 motivation 的。** 它没有必要在每个任务上都比独立用户态实现更快，才能成为有效案例。但它必须准确解释复用能力、复用边界和付出的代价。
+
+### 1. 复用范围的扩大有实际内容
+
+当前版本在文件系统核心和 LZ4 之外，又加入了匹配内核版本的 XZ stream、LZMA2 和 BCJ 解码实现：
+
+- 新增复用 **2,604 行原始 XZ 算法源码**；
+- owner 的可执行代码由 **16,695 字节增至 27,828 字节**；
+- 内核与用户实际共享的 backing 从 **28 KiB 增至 36 KiB**；
+- 原生 xz/LZ4 扫描分别记录了 **190 / 73 次公共入口调用**；
+- 真实 SIF 执行能在共享 XZ 入口命中硬件断点。（当前 PDF 第 1 页）
+
+这能够排除“只是把更多代码放进模块，实际没有使用”的质疑。
+
+同时，native 使用 XZ 的 `PREALLOC` 模式，用户侧使用完整连续输入输出的 `SINGLE` 模式。这不妨碍两侧共享同一个执行体，但提醒我们：**同一份代码可以根据输入和环境走不同分支，不要求两侧每次执行完全相同的指令序列。**
+
+### 2. 本节与前面实验的区别，现在已经很明确
+
+这一案例验证的不仅是算法能运行，还包括：
+
+- 复杂格式解析和解码核心组合；
+- 两域分别提供对象、缓存、I/O、分配和 CRC 等服务；
+- 原生消费者与两个真实 Apptainer 消费者同时存活；
+- 同路径不同内容不串扰；
+- 消费者分别退出，其他消费者仍继续工作；
+- 用户调试后，物理共享和原生功能仍成立。
+
+所以，**我认为“复杂内核实现能够服务两域的私有对象并进入真实应用”这一核心贡献，当前证据已经很强。**
+
+仍需保持的区别是：公共实现、适配和维护收益，copied 也可以获得；VKSO 额外提供的是与原生驻留执行体的物理身份。当前正文对此已经交代得比较准确。
+
+---
+
+## 三、新数据要求我们修正对“应用效果”的判断
+
+这是这次评价中最重要的部分。
+
+### 1. gzip/lz4 的部分 metadata 优势，主要来自 stock 的线程配置
+
+上一版相对默认 SquashFUSE 的 metadata 优势比较醒目。这次加入 `-s` 后：
+
+- gzip include archive：VKSO **慢 1.18%**；
+- lz4 include archive：VKSO **慢 0.89%**；
+- 对应 scan 的点估计接近；
+- xz scan 仍然 **快 53.59%**。（当前 PDF 第 2 页）
+
+这意味着，我们需要把原来的表述调整为：
+
+> 当前实现对默认 SquashFUSE 的一些 metadata 任务有优势，但其中 gzip/lz4 的主要优势对 stock 线程配置敏感；xz 的显著差距在单线程对照下仍然存在。
+
+**这项对照并没有把实验“做坏”，而是使结论变得更可信。**
+
+现在如果正文仍只突出对默认多线程 stock 的加速，而把单线程结果放在不显眼的位置，就会有公平性问题。当前 PDF 已把两种配置共同放进主要应用比较图，这是正确的处理。
+
+### 2. xz metadata 优势现在有了有用的工作量解释
+
+新的诊断发现：
+
+| xz metadata 回放 | 解码块数 | 解码输出字节 |
+|---|---:|---:|
+| SquashFUSE 默认 | 137 | 1,106,363 |
+| SquashFUSE 单线程 | 137 | 1,106,363 |
+| 公共 parser，使用库或公共 XZ | 76 | 558,231 |
+
+这说明，公共 parser 完成任务时确实做了更少的解码工作。stock 改成单线程没有改变这个工作量，因此不能用线程开销解释全部 xz 差距。（当前 PDF 第 2 页）
+
+这是一个值得保留的正面发现：
+
+> 复用原生文件系统核心，可以把其已有的处理策略带入用户应用，并在某些任务中产生实际收益。
+
+不过，当前文稿只说“减少的解码工作有贡献”，没有把约 54% 的全部时间改善归给这一项，这种表述是合适的。计数本身尚未完成全部时间的因果分解。
+
+### 3. 独立 Python 任务明确限制了“应用普遍更快”的主张
+
+这一轮增加的独立任务很重要。它通过真实 gzip/xz SIF 执行 Python 标准库字节码编译，各后端生成相同的 **647 个文件**。
+
+结果是：
+
+| 独立 Python 任务 | VKSO 相对默认 SquashFUSE | VKSO 相对匹配缓存 LKL |
+|---|---:|---:|
+| gzip SIF | **慢 0.68%** | 快 6.05% |
+| xz SIF | **慢 16.18%** | **慢 6.72%** |
+
+这意味着：
+
+- “所有普通任务都快于所选 LKL 配置”仍然是那十二项普通任务的有效结论。
+- “所有应用都比 LKL 快”已经有明确反例。
+- “进入真实应用后通常可以加速”不能仅靠目前的任务集合成立。
+- “正确完成真实应用，并测出任务相关的收益和代价”已经成立。
+
+**独立任务的不利结果应该继续保留。** 它比再增加一个表现良好的目录扫描，更能帮助我们判断实现是否真正有用。（当前 PDF 第 2、4 页）
+
+---
+
+## 四、公共 XZ 回退已经定位了一层，但尚未解决
+
+我会把这个问题列为下一阶段的第一优先级。
+
+### 1. 新版回退是真实而且有重复性的
+
+当前普通 xz 顺序归档相对默认 SquashFUSE：
+
+> **慢 13.10%，95% CI 为 [11.45%, 14.78%]。**
+
+独立 xz Python 编译：
+
+> **慢 16.18%，95% CI 为 [15.56%, 16.80%]。**
+
+这些结果不能用“可能只是测量噪声”来解释。（当前 PDF 第 2 页）
+
+也要注意版本边界：上一版用户侧仍使用 liblzma，约 5% 的回退属于上一版；这一版真正换成了公共内核 XZ，13.10% 属于新实现。两版数据不应混在一起，也不能直接把百分比相减当成受控的因果估计。
+
+### 2. 本轮控制已经把主要问题定位到解码执行选择
+
+最有价值的新增对照是：
+
+| 同一 final owner 下的变化 | xz 顺序时间变化 |
+|---|---:|
+| 保留外部库，改用公共解码器 | **+14.79% [13.43%, 16.16%]** |
+| 保持公共解码，移除未使用依赖 | **−0.51% [−2.45%, 1.47%]** |
+
+切换公共解码时，记录到的子进程 CPU 时间也增加约 **14.87%**。
+
+因此，现在已经有依据说：
+
+> 新版本的主要 xz 顺序回退来自改用公共 XZ 执行路径，而不是简单来自移除动态库，也不能归因于物理页共享本身。
+
+但这个结论仍然包括公共解码器的调用模式、编译结果、服务绑定和内部执行。它尚不能进一步推出：
+
+- Linux XZ 算法天然慢；
+- `SINGLE` 模式就是根因；
+- PGOT 间接调用造成全部 15%；
+- 某一个内存 helper 就是主要瓶颈。
+
+### 3. 下一步最需要的是同源解码器对照
+
+包内后续 prompt 提出的方向是合理的：用现有任务中的相同压缩块，比较以下路径：
+
+| 路径 | 能进一步回答什么 |
+|---|---|
+| liblzma | 现有专用用户解码器的表现 |
+| 普通用户环境中的同源 Linux XZ | 内核 XZ 实现本身及调用模式的成本 |
+| prepared copied | 为共同执行进行的编译和服务适配增加了什么 |
+| prepared shared | 物理共享是否进一步改变执行 |
+
+这些路径并非天然单因素，需要明确模式、CRC、输入输出方式和编译设置，再逐项改变。
+
+我检查源码后认为，交接包列出的两个候选值得调查，但仍只能称为假说：
+
+- XZ 继承了 `-fno-jump-tables` 等公共核心构建约束；
+- `memcpy/memmove/memset/memcmp` 被统一改为服务指针，可能影响原有的编译优化。
+
+它们在 build_xz.py[build_xz.py](sandbox:/workspace/scratch/bd046159dc11/review/latest-20261030/vkso-section65-handoff-20261030-01/repo/test/section65/squashfs/refinement/build_xz.py) 和当前构建中都有直接对应，用户侧调用模式见 posix_io.c[posix_io.c](sandbox:/workspace/scratch/bd046159dc11/review/latest-20261030/vkso-section65-handoff-20261030-01/repo/test/section65/squashfs/posix_io.c)。
+
+**这里已经有足够具体的问题值得继续优化。继续扩大格式和应用数量，对定位这次回退帮助有限。**
+
+---
+
+## 五、私有缓存增长是另一个明确的实现问题
+
+这次规模测试非常有价值，因为它改变了“小 helper”的整体印象。
+
+三档规模的任务后 PSS 为：
+
+| 条目规模 | Copied | VKSO | SquashFUSE 默认 | SquashFUSE 单线程 |
+|---:|---:|---:|---:|---:|
+| 5,866 | 7.04 MiB | 7.02 MiB | 15.93 MiB | 11.98 MiB |
+| 23,464 | 23.42 MiB | 23.43 MiB | 26.74 MiB | 13.12 MiB |
+| 93,856 | 88.87 MiB | **88.89 MiB** | 28.52 MiB | **12.91 MiB** |
+
+这三项是各规模的独立观察，并不是每个规模三次重复后的精确曲线。但数量级差异，加上源码行为，已经足以确认问题。原始汇总见 resources.json[resources.json](sandbox:/workspace/scratch/bd046159dc11/review/latest-20261030/vkso-section65-handoff-20261030-01/repo/test/section65/build/squashfs/refined-analysis-01/resource-ledger/resources.json)。
+
+### 1. 原因能够与源码直接对应
+
+当前桥的行为是：
+
+- `u_new_inode` 分配 inode 缓存对象；
+- `sq_lookup_child` 保留成功查找的名字；
+- `iput` 等入口绑定到不释放对象的实现；
+- `sq_close_image` 在卸载时统一清理；
+- 没有元数据淘汰策略。
+
+这些行为在 user_bridge.c[user_bridge.c](sandbox:/workspace/scratch/bd046159dc11/review/latest-20261030/vkso-section65-handoff-20261030-01/repo/test/section65/squashfs/user_bridge.c) 中都能核对。
+
+因此，准确的问题名称是：
+
+> 当前用户桥采用了随已访问元数据增长、直到卸载才释放的保留策略。
+
+它不是已经证实的跨域页泄漏，也不能仅凭增长就称为永不释放的内存泄漏。
+
+### 2. copied 同样增长，说明这主要是适配器策略问题
+
+两种 backing 的 PSS 几乎一致，这一点很关键。
+
+它说明几十 MiB 的增长主要来自用户私有对象和缓存，不能记在“共享物理页机制开销”上。但这些私有支撑仍然是完整 VKSO 应用方案的一部分，论文也不能把它们排除在实用性评价之外。
+
+**36 KiB 的代码去重并不能自动抵消不合理的私有工作集增长。** 本节现在把这件事测出来了，是对完整成本模型的实质补充。
+
+### 3. 后续缓存优化需要同时约束性能和对象生命周期
+
+我赞成交接包把缓存作为第二优先级，但不能直接“加一个 LRU”就算解决。
+
+需要先明确哪些对象被打开的文件、目录句柄、硬链接或其他缓存引用；再决定哪些对象可以释放、重新加载，以及如何避免悬空指针。
+
+最终应同时检查：
+
+- 大规模访问后的保留内存；
+- 原有 metadata 和独立应用任务的时间；
+- 打开文件、目录游标、硬链接和重复查找的正确性；
+- copied/VKSO 两条路径的一致行为。
+
+关闭缓存能减少内存，但可能显著增加查找和解码工作。有效改进应当给出这两方面的实际取舍。
+
+---
+
+## 六、还有三项边界需要继续明确
+
+### 1. 原生准备成本的对照已经补齐，但“无成本”仍未证明
+
+最终版本对同样优化的 normal native：
+
+- fresh scan 点变化：**−1.34% 到 +1.29%**；
+- fresh archive 点变化：**−1.05% 到 −0.18%**；
+- 这十个单元的逐点区间最高上端：**+4.82%**。
+
+这比上一版依靠中间版本控制的证据完整得多。
+
+但 +4.82% 仅属于这组 normal-native 比较。对 optimized-relaxed reference，部分 scan 区间更宽，例如 lz4 的上端达到约 **+9.58%**。因此，不能把 +4.82% 写成覆盖所有条件的准备成本上界。
+
+### 2. 加固问题已解释得更具体，但运行实现仍缺失
+
+这次新增的编译探针说明：
+
+> PIC 编译本身并不必然要求去掉 stack protector 和外部 thunks。
+
+真正尚未实现的是对应的跨域运行依赖，例如 canary 存储约定、失败路径和 thunk 绑定。当前 production 共享核心仍然没有相应的原生检查。
+
+所以，我对这项的评价是：**调查取得了明确进展，设计限制尚未解决。**
+
+它与“是否快几百分点”是不同问题。如果论文只报告这一原型配置，可以明确限定；如果要进一步主张保持目标部署的加固属性，就需要实际跨域运行验证，不能用 build-only probe 代替。
+
+### 3. shared 相对 copied 的普遍采用价值仍然没有建立
+
+当前账本更清楚了：
+
+- 匹配 native 模块：60 KiB；
+- owner + native consumer：108 KiB；
+- native 准备增量：48 KiB；
+- 避免一份 copied backing：36 KiB；
+- 请求的注册元数据：1,264 字节；
+- 构造、导出、注册中位数约 2.698 秒。
+
+按已经确定的前提，通用 **32 KiB 平台模块作为一次性基础设施另列**，这个口径可以保留。
+
+但即使按这个口径，本例也尚未证明从 original native 开始部署后整机净内存更省。用户专用部署中，copied 还能在任务模块全部卸载后运行，而 shared 需要保留 owner。
+
+当前正文已经将这些作为条件和成本说明，没有隐去，这是正确的。后续优化能让完整方案更好，但不应人为要求 shared 比同一核心的 copied 更快，或把 copied 同样获得的收益重新归给物理共享。
+
+---
+
+## 七、现在应该怎样判断“完成度”？
+
+我会分成三个层面判断：
+
+| 层面 | 当前状态 |
+|---|---|
+| **这一轮实验是否完成** | 已完成。版本冻结、正式矩阵、原始记录、复算、论文与附录基本形成完整交付 |
+| **6.5 的核心科学问题是否有答案** | 有。同一驻留的复杂文件系统/解码执行体可以服务真实两域消费者，状态独立，成本有明确条件 |
+| **当前实现是否达到理想应用效果** | 尚未。公共 XZ 回退、元数据保留增长和跨域加固仍是实质边界 |
+
+所以，包内 `complete` 与“下一阶段仍要优化”并不矛盾。
+
+**我赞成最新交接包的推进方向：先处理公共 XZ，再处理私有缓存，随后用已有强基线和原有任务验证最终候选。** 这不是降低目标，也不是为了结束而缩小结论；它是在已有充分实验的基础上，把工作集中到已经确认会影响采用价值的问题。
+
+下一轮验收最应该关注的是：
+
+1. **共同 XZ 仍然真实执行，回退来源得到解释，并有实际候选改进。**
+2. **内存增长得到约束，同时没有把成本明显转移到 metadata 时间或其他任务。**
+3. **native、copied、shared 都重新验证，修改后的性能不沿用旧版数字。**
+4. **原来暴露问题的 xz 顺序、独立 Python 和大树任务继续保留。**
+5. **若仍存在无法兼得的代价，给出已经尝试的实现、可复现结果和明确设计取舍。**
+
+**这版最有价值的进步，是已经能区分“共享机制成立”和“支撑它的具体实现还需要改进”。前者的证据很强；后者现在也有清楚的优化对象。接下来的工作应当让这条已成立的复用路径具有更好的实际效果。**

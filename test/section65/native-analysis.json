@@ -1,0 +1,1623 @@
+{
+  "status": "audited",
+  "campaigns": [
+    {
+      "label": "initial",
+      "path": "test/evaluation-local/runs/iso9660/native-20261029-agent-01",
+      "formal_observations": 480,
+      "correctness_cases": 35,
+      "shared_pages": 5,
+      "environment": {
+        "kernel": "5.15.198",
+        "build_id": "b08b4bea4d223bac75d119e5213d121a40b71a12",
+        "cmdline": "BOOT_IMAGE=/vkso-final-raw-normal-5.15.198.bzImage root=PARTUUID=f6ddb63b-3f79-43f3-873c-0a595f939776 rootwait ro nokaslr clocksource=tsc tsc=reliable nosmt isolcpus=domain,managed_irq,1-3 nohz_full=1-3 rcu_nocbs=1-3 irqaffinity=0 idle=poll intel_pstate=active processor.max_cstate=0 intel_idle.max_cstate=0 nmi_watchdog=0 nowatchdog audit=0\n",
+        "cpuinfo": "processor\t: 0\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2515.536\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 0\ncpu cores\t: 4\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 1\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 1\ncpu cores\t: 4\napicid\t\t: 2\ninitial apicid\t: 2\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 2\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 2\ncpu cores\t: 4\napicid\t\t: 4\ninitial apicid\t: 4\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 3\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 3\ncpu cores\t: 4\napicid\t\t: 6\ninitial apicid\t: 6\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\n",
+        "client_cpu": 1,
+        "server_cpu": 2,
+        "blocks": 8,
+        "repeats": 3,
+        "functional": false,
+        "cache_policy": "fresh filesystem mount / FUSE process for each pass; warm backing image; no global cache drop",
+        "package": {
+          "name": "ISO9660 native reassessment",
+          "kernel_build_id": "b08b4bea4d223bac75d119e5213d121a40b71a12",
+          "kernel_release": "5.15.198",
+          "expected_native_image": "vkso-final-raw-normal-5.15.198.bzImage",
+          "variants": [
+            "original",
+            "compat",
+            "prepared",
+            "copied-fuse",
+            "vkso-fuse"
+          ],
+          "benchmark_images": [
+            "alpine-virt-3.20.10-x86_64.iso",
+            "kernel-include.iso"
+          ],
+          "tools": {
+            "find": "find (GNU findutils) 4.8.0",
+            "tar": "tar (GNU tar) 1.34",
+            "taskset": "taskset from util-linux 2.37.2",
+            "unshare": "unshare from util-linux 2.37.2"
+          },
+          "limits": "Read-only, single-threaded FUSE service; no claim of complete Linux isofs feature parity."
+        }
+      },
+      "medians": [
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "compat",
+          "median_wall_ms": 48.07181349679013
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "copied-fuse",
+          "median_wall_ms": 50.459931499062805
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "original",
+          "median_wall_ms": 47.983534499508096
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "prepared",
+          "median_wall_ms": 48.37248500189162
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "vkso-fuse",
+          "median_wall_ms": 50.41547049768269
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "compat",
+          "median_wall_ms": 3.718992000358412
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "copied-fuse",
+          "median_wall_ms": 5.3342725004768
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "original",
+          "median_wall_ms": 3.7027289981779177
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "prepared",
+          "median_wall_ms": 3.7906075012870133
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "vkso-fuse",
+          "median_wall_ms": 5.310848999215523
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "compat",
+          "median_wall_ms": 217.2794710022572
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "copied-fuse",
+          "median_wall_ms": 1071.9024444988463
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "original",
+          "median_wall_ms": 215.52369750133948
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "prepared",
+          "median_wall_ms": 239.5538509990729
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "vkso-fuse",
+          "median_wall_ms": 1063.550511498761
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "compat",
+          "median_wall_ms": 118.02202899707481
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "copied-fuse",
+          "median_wall_ms": 423.9689245005138
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "original",
+          "median_wall_ms": 115.82993699994404
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "prepared",
+          "median_wall_ms": 140.3532955009723
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "vkso-fuse",
+          "median_wall_ms": 416.64341949945083
+        }
+      ],
+      "comparisons": [
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "baseline": "original",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0168649851820066,
+            1.0077023033126409,
+            0.9970015200057117,
+            1.0028673213440293,
+            1.0351915397237366,
+            1.0149713960499684,
+            0.9965986976984066,
+            1.0134917169005182
+          ],
+          "geometric_mean_time_ratio": 1.0105172583055995,
+          "bootstrap_95_percent": [
+            1.0030695602324622,
+            1.0189867315846497
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "baseline": "original",
+          "treatment": "compat",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9956051403134404,
+            0.9944912517278555,
+            0.9984820654979173,
+            0.9923985125426351,
+            1.0125672244329322,
+            1.008655403129841,
+            0.9952992073017409,
+            1.004392420645408
+          ],
+          "geometric_mean_time_ratio": 1.000212505266687,
+          "bootstrap_95_percent": [
+            0.9958056094606963,
+            1.0052301878227314
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "baseline": "compat",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0213536913458212,
+            1.0132842310697376,
+            0.9985172037201617,
+            1.01054899686878,
+            1.0223435192695227,
+            1.0062617945638612,
+            1.0013056278826833,
+            1.0090595031066274
+          ],
+          "geometric_mean_time_ratio": 1.010302563689868,
+          "bootstrap_95_percent": [
+            1.0049219830101597,
+            1.0157609131834089
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "baseline": "copied-fuse",
+          "treatment": "vkso-fuse",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9937068745598596,
+            1.0073035762243203,
+            0.9927366929032493,
+            0.9936843838068945,
+            0.9996583902431546,
+            0.9919104979720871,
+            1.0044773211126206,
+            1.0039494690160478
+          ],
+          "geometric_mean_time_ratio": 0.9984117022568394,
+          "bootstrap_95_percent": [
+            0.9944518468384757,
+            1.0024148154403985
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "baseline": "original",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9801932784347785,
+            1.0063260146081716,
+            0.9904370685024318,
+            1.1369754719331027,
+            1.0060535346520825,
+            0.790586996911371,
+            1.0430671133832528,
+            1.0024497040540905
+          ],
+          "geometric_mean_time_ratio": 0.9901403304909429,
+          "bootstrap_95_percent": [
+            0.9174619526768649,
+            1.049242065649551
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "baseline": "original",
+          "treatment": "compat",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9623404904676517,
+            0.9573903335888886,
+            0.9739553692617712,
+            1.082213332048309,
+            1.0049063366538167,
+            0.7711025383907584,
+            1.3598276354983472,
+            0.9763777588700908
+          ],
+          "geometric_mean_time_ratio": 0.9998875226949351,
+          "bootstrap_95_percent": [
+            0.9043602485839184,
+            1.1143853393865308
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "baseline": "compat",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0185514255546404,
+            1.0511136151081055,
+            1.016922437886608,
+            1.0506019823107753,
+            1.0011415969393584,
+            1.0252683106986984,
+            0.7670583286836874,
+            1.0267027233538906
+          ],
+          "geometric_mean_time_ratio": 0.9902517113347697,
+          "bootstrap_95_percent": [
+            0.9179992636421777,
+            1.0355468174011249
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "baseline": "copied-fuse",
+          "treatment": "vkso-fuse",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9868809156885374,
+            1.0307898299061737,
+            1.0150493778945546,
+            0.9945666302381934,
+            0.9884871909807464,
+            0.9720499273668999,
+            0.9780226208341675,
+            1.0202312220327956
+          ],
+          "geometric_mean_time_ratio": 0.9980628305900489,
+          "bootstrap_95_percent": [
+            0.9847956452534017,
+            1.011513710604547
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "baseline": "original",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.1008878197254215,
+            1.111277109039352,
+            1.095889904785069,
+            1.1160559004593165,
+            1.1143457059664357,
+            1.1128612703751832,
+            1.1098216790471873,
+            1.111266487179384
+          ],
+          "geometric_mean_time_ratio": 1.109031388201201,
+          "bootstrap_95_percent": [
+            1.1041645043570716,
+            1.1130674424241154
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "baseline": "original",
+          "treatment": "compat",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9983375912106832,
+            1.0054499595943216,
+            0.9917385463092583,
+            1.0107258977650808,
+            1.0137406314379684,
+            1.0107774356747696,
+            1.0094438287613114,
+            1.0065944230840933
+          ],
+          "geometric_mean_time_ratio": 1.00582735491567,
+          "bootstrap_95_percent": [
+            1.0006941761325585,
+            1.0101555825879918
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "baseline": "compat",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.1027209927960098,
+            1.1052535220029545,
+            1.1050189678150644,
+            1.1042122329378732,
+            1.0992414345529005,
+            1.1009953636650636,
+            1.0994387675924964,
+            1.1039863342125293
+          ],
+          "geometric_mean_time_ratio": 1.1026061110598684,
+          "bootstrap_95_percent": [
+            1.100941995450176,
+            1.1040771287977094
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "baseline": "copied-fuse",
+          "treatment": "vkso-fuse",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9932971994693469,
+            0.99745196898541,
+            0.9902440313593521,
+            0.9883066116822717,
+            0.9940226445591736,
+            0.9906421738226264,
+            0.9926109700607095,
+            0.9926691314236914
+          ],
+          "geometric_mean_time_ratio": 0.9924022196591983,
+          "bootstrap_95_percent": [
+            0.9906721333931205,
+            0.994195334046224
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "baseline": "original",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.2096138827558127,
+            1.2094992636507715,
+            1.2550903167477347,
+            1.2140659193476369,
+            1.2095967512240693,
+            1.2027251025167671,
+            1.2133732870756622,
+            1.214851889083148
+          ],
+          "geometric_mean_time_ratio": 1.2160090187524262,
+          "bootstrap_95_percent": [
+            1.2084220830594001,
+            1.2276683642417023
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "baseline": "original",
+          "treatment": "compat",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0172726183553158,
+            1.0133697694107782,
+            1.0082468782776293,
+            1.0144419684907373,
+            1.0176169708769214,
+            1.0191256325433562,
+            1.018873816358651,
+            1.0272595074179174
+          ],
+          "geometric_mean_time_ratio": 1.0170129987420466,
+          "bootstrap_95_percent": [
+            1.013633569024843,
+            1.0207002035661081
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "baseline": "compat",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.1890754365446956,
+            1.1935418838811744,
+            1.2448244014321017,
+            1.1967820309661432,
+            1.188656229054151,
+            1.1801539124427822,
+            1.1908965247650902,
+            1.1826144029922447
+          ],
+          "geometric_mean_time_ratio": 1.195667135283934,
+          "bootstrap_95_percent": [
+            1.1858719587384652,
+            1.2104443870565333
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "baseline": "copied-fuse",
+          "treatment": "vkso-fuse",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9825314256696148,
+            0.9814687387935077,
+            0.9864887068590188,
+            0.9834027638819114,
+            0.9814953263220036,
+            0.9811254498968587,
+            0.9786652051544718,
+            0.9875729127673067
+          ],
+          "geometric_mean_time_ratio": 0.9828399921562077,
+          "bootstrap_95_percent": [
+            0.9810158037864081,
+            0.9848224405030802
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        }
+      ]
+    },
+    {
+      "label": "memops",
+      "path": "test/evaluation-local/runs/iso9660/native-memops-20261029-agent-01",
+      "formal_observations": 480,
+      "correctness_cases": 35,
+      "shared_pages": 5,
+      "environment": {
+        "kernel": "5.15.198",
+        "build_id": "b08b4bea4d223bac75d119e5213d121a40b71a12",
+        "cmdline": "BOOT_IMAGE=/vkso-final-raw-normal-5.15.198.bzImage root=PARTUUID=f6ddb63b-3f79-43f3-873c-0a595f939776 rootwait ro nokaslr clocksource=tsc tsc=reliable nosmt isolcpus=domain,managed_irq,1-3 nohz_full=1-3 rcu_nocbs=1-3 irqaffinity=0 idle=poll intel_pstate=active processor.max_cstate=0 intel_idle.max_cstate=0 nmi_watchdog=0 nowatchdog audit=0\n",
+        "cpuinfo": "processor\t: 0\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2515.206\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 0\ncpu cores\t: 4\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 1\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 1\ncpu cores\t: 4\napicid\t\t: 2\ninitial apicid\t: 2\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 2\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 2\ncpu cores\t: 4\napicid\t\t: 4\ninitial apicid\t: 4\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 3\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 3\ncpu cores\t: 4\napicid\t\t: 6\ninitial apicid\t: 6\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\n",
+        "client_cpu": 1,
+        "server_cpu": 2,
+        "blocks": 8,
+        "repeats": 3,
+        "functional": false,
+        "cache_policy": "fresh filesystem mount / FUSE process for each pass; warm backing image; no global cache drop",
+        "package": {
+          "name": "ISO9660 constant-memory-operation candidate",
+          "kernel_build_id": "b08b4bea4d223bac75d119e5213d121a40b71a12",
+          "kernel_release": "5.15.198",
+          "expected_native_image": "vkso-final-raw-normal-5.15.198.bzImage",
+          "variants": [
+            "original",
+            "compat",
+            "prepared",
+            "copied-fuse",
+            "vkso-fuse"
+          ],
+          "benchmark_images": [
+            "alpine-virt-3.20.10-x86_64.iso",
+            "kernel-include.iso"
+          ],
+          "tools": {
+            "find": "find (GNU findutils) 4.8.0",
+            "tar": "tar (GNU tar) 1.34",
+            "taskset": "taskset from util-linux 2.37.2",
+            "unshare": "unshare from util-linux 2.37.2"
+          },
+          "limits": "Read-only, single-threaded FUSE service; no claim of complete Linux isofs feature parity.",
+          "inline_constant_memops": true
+        }
+      },
+      "medians": [
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "compat",
+          "median_wall_ms": 47.17080749105662
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "copied-fuse",
+          "median_wall_ms": 48.45760500029428
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "original",
+          "median_wall_ms": 47.47315949498443
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "prepared",
+          "median_wall_ms": 47.18602749926504
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "vkso-fuse",
+          "median_wall_ms": 48.933242505881935
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "compat",
+          "median_wall_ms": 3.7039305025245994
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "copied-fuse",
+          "median_wall_ms": 5.313367502822075
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "original",
+          "median_wall_ms": 3.710655502800364
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "prepared",
+          "median_wall_ms": 3.8109110028017312
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "vkso-fuse",
+          "median_wall_ms": 5.206390495004598
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "compat",
+          "median_wall_ms": 216.2819130026037
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "copied-fuse",
+          "median_wall_ms": 1031.4555799996015
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "original",
+          "median_wall_ms": 214.55128149682423
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "prepared",
+          "median_wall_ms": 218.1447099937941
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "vkso-fuse",
+          "median_wall_ms": 1033.5756304993993
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "compat",
+          "median_wall_ms": 117.61972649401287
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "copied-fuse",
+          "median_wall_ms": 404.989997507073
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "original",
+          "median_wall_ms": 116.36965799698373
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "prepared",
+          "median_wall_ms": 119.5317974925274
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "vkso-fuse",
+          "median_wall_ms": 406.471327500185
+        }
+      ],
+      "comparisons": [
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "baseline": "original",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9852585657738867,
+            1.0147304666787864,
+            0.986718491262462,
+            0.9937008293292833,
+            0.9819929538535589,
+            1.0134019371758556,
+            0.9759446735746188,
+            1.0005093660840438
+          ],
+          "geometric_mean_time_ratio": 0.9939414154740291,
+          "bootstrap_95_percent": [
+            0.9848742071341345,
+            1.0035900178123829
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "baseline": "original",
+          "treatment": "compat",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9905392562791835,
+            0.9831389324898943,
+            0.983708244250661,
+            0.9864284866258892,
+            1.0112406909341018,
+            1.0268396391962016,
+            0.9799517220107357,
+            1.0053109366459485
+          ],
+          "geometric_mean_time_ratio": 0.9957724216008412,
+          "bootstrap_95_percent": [
+            0.9860786523442403,
+            1.0073867420143996
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "baseline": "compat",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9946688730690666,
+            1.0321333365457144,
+            1.0030601014369807,
+            1.0073723972918394,
+            0.9710773732280034,
+            0.9869135340053049,
+            0.9959109736264405,
+            0.9952237955572986
+          ],
+          "geometric_mean_time_ratio": 0.9981612202877957,
+          "bootstrap_95_percent": [
+            0.9870764792997931,
+            1.0099139356458293
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "baseline": "copied-fuse",
+          "treatment": "vkso-fuse",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0027035578249655,
+            0.989614788290378,
+            1.006096521713046,
+            1.0100278841594443,
+            0.9951278623747962,
+            1.0080680877103085,
+            1.0142051158786718,
+            1.0111672323172094
+          ],
+          "geometric_mean_time_ratio": 1.0045953418989957,
+          "bootstrap_95_percent": [
+            0.9989650844725075,
+            1.0097193084735845
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "baseline": "original",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0495184282524894,
+            1.035585967015417,
+            1.212727229336001,
+            1.1922922202636645,
+            1.0651529695131143,
+            1.0215507720858001,
+            0.5465372170013338,
+            1.0480899438126157
+          ],
+          "geometric_mean_time_ratio": 0.9974164745953826,
+          "bootstrap_95_percent": [
+            0.8311044091336784,
+            1.1237109635996492
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "baseline": "original",
+          "treatment": "compat",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0197656966284698,
+            1.0366912608143934,
+            0.76279981381499,
+            1.1284178551496473,
+            0.9973869008981584,
+            1.699207909580075,
+            0.5556044235893114,
+            1.5542443646025836
+          ],
+          "geometric_mean_time_ratio": 1.036461543190199,
+          "bootstrap_95_percent": [
+            0.8164656115754854,
+            1.302797409499209
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "baseline": "compat",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0291760467354292,
+            0.9989338254881128,
+            1.5898368187464404,
+            1.056605241420561,
+            1.0679436120064658,
+            0.6011923357502825,
+            0.9836804636482163,
+            0.6743405140674964
+          ],
+          "geometric_mean_time_ratio": 0.9623284926957958,
+          "bootstrap_95_percent": [
+            0.792983011459879,
+            1.1539262342255785
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "baseline": "copied-fuse",
+          "treatment": "vkso-fuse",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9245587487902889,
+            1.0049775397087177,
+            1.0028377822741374,
+            1.1828770171175085,
+            1.0670522790844628,
+            0.9295928245198867,
+            0.7470853305920463,
+            0.9793204868068526
+          ],
+          "geometric_mean_time_ratio": 0.972476985960863,
+          "bootstrap_95_percent": [
+            0.89043068609941,
+            1.0538247644439198
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "baseline": "original",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.01830688016943,
+            1.0229298290150564,
+            1.0190981628604714,
+            1.0127456482879853,
+            1.0131126172475395,
+            1.0730739905332702,
+            1.012042908221052,
+            1.016449587883348
+          ],
+          "geometric_mean_time_ratio": 1.0232968470764405,
+          "bootstrap_95_percent": [
+            1.0145118186533282,
+            1.0380734430192669
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "baseline": "original",
+          "treatment": "compat",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0084763240185721,
+            1.0098320808419274,
+            1.0114858943777971,
+            1.0051564406280762,
+            1.002319065385151,
+            1.0070129075827516,
+            1.0058138164787382,
+            1.011791983475333
+          ],
+          "geometric_mean_time_ratio": 1.0077313688027865,
+          "bootstrap_95_percent": [
+            1.005525708187495,
+            1.0097829500158841
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "baseline": "compat",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0097479295415532,
+            1.0129702238833698,
+            1.0075258276215082,
+            1.007550275114555,
+            1.0107685788239906,
+            1.0656010289968305,
+            1.0061930862752724,
+            1.004603322109765
+          ],
+          "geometric_mean_time_ratio": 1.015446059094247,
+          "bootstrap_95_percent": [
+            1.0071102321043304,
+            1.030180003187364
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "baseline": "copied-fuse",
+          "treatment": "vkso-fuse",
+          "blocks": 8,
+          "paired_ratios": [
+            1.002866540911888,
+            1.002432886026483,
+            1.0038782912985305,
+            1.0060273252981855,
+            0.9989485988085833,
+            0.9992034620425131,
+            0.9989692005193624,
+            1.0034592546167556
+          ],
+          "geometric_mean_time_ratio": 1.0019701306235402,
+          "bootstrap_95_percent": [
+            1.0002222304747679,
+            1.0036637511178903
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "baseline": "original",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0331397209709559,
+            1.045763437415709,
+            1.0240728397495773,
+            1.0211767721434333,
+            1.042858303128314,
+            1.0312689848799983,
+            1.0094523940272973,
+            1.0258520309316133
+          ],
+          "geometric_mean_time_ratio": 1.0291389472786967,
+          "bootstrap_95_percent": [
+            1.021594857488526,
+            1.0364679790371594
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "baseline": "original",
+          "treatment": "compat",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0109604363730904,
+            1.0039116518262516,
+            1.0043172908123272,
+            0.9991148110116165,
+            1.0036316069650555,
+            1.017572107028008,
+            0.9946179678360118,
+            1.0213327939403458
+          ],
+          "geometric_mean_time_ratio": 1.0068966283689704,
+          "bootstrap_95_percent": [
+            1.0013005484634576,
+            1.013034802632907
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "baseline": "compat",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0219388254969062,
+            1.0416887138557693,
+            1.0196706251281116,
+            1.0220815074390488,
+            1.039084755692259,
+            1.01346035112145,
+            1.0149146975733414,
+            1.0044248427330253
+          ],
+          "geometric_mean_time_ratio": 1.0220899725781738,
+          "bootstrap_95_percent": [
+            1.0142757381065335,
+            1.0303047339798377
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "baseline": "copied-fuse",
+          "treatment": "vkso-fuse",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9927844913253978,
+            1.0098102323403422,
+            1.0037528669617233,
+            1.0075201218960521,
+            1.0007890665487433,
+            1.0014660382142333,
+            1.0010424812921084,
+            1.0066060681587834
+          ],
+          "geometric_mean_time_ratio": 1.002959193465075,
+          "bootstrap_95_percent": [
+            0.9993214182411414,
+            1.0061894718946218
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        }
+      ]
+    },
+    {
+      "label": "private_helpers",
+      "path": "test/evaluation-local/runs/iso9660/native-private-20261029-agent-01",
+      "formal_observations": 480,
+      "correctness_cases": 35,
+      "shared_pages": 5,
+      "environment": {
+        "kernel": "5.15.198",
+        "build_id": "b08b4bea4d223bac75d119e5213d121a40b71a12",
+        "cmdline": "BOOT_IMAGE=/vkso-final-raw-normal-5.15.198.bzImage root=PARTUUID=f6ddb63b-3f79-43f3-873c-0a595f939776 rootwait ro nokaslr clocksource=tsc tsc=reliable nosmt isolcpus=domain,managed_irq,1-3 nohz_full=1-3 rcu_nocbs=1-3 irqaffinity=0 idle=poll intel_pstate=active processor.max_cstate=0 intel_idle.max_cstate=0 nmi_watchdog=0 nowatchdog audit=0\n",
+        "cpuinfo": "processor\t: 0\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2512.102\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 0\ncpu cores\t: 4\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 1\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 1\ncpu cores\t: 4\napicid\t\t: 2\ninitial apicid\t: 2\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 2\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 2\ncpu cores\t: 4\napicid\t\t: 4\ninitial apicid\t: 4\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 3\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 3\ncpu cores\t: 4\napicid\t\t: 6\ninitial apicid\t: 6\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\n",
+        "client_cpu": 1,
+        "server_cpu": 2,
+        "blocks": 8,
+        "repeats": 3,
+        "functional": false,
+        "cache_policy": "fresh filesystem mount / FUSE process for each pass; warm backing image; no global cache drop",
+        "package": {
+          "name": "ISO9660 preserved-private-helper candidate",
+          "kernel_build_id": "b08b4bea4d223bac75d119e5213d121a40b71a12",
+          "kernel_release": "5.15.198",
+          "expected_native_image": "vkso-final-raw-normal-5.15.198.bzImage",
+          "variants": [
+            "original",
+            "compat",
+            "prepared",
+            "copied-fuse",
+            "vkso-fuse"
+          ],
+          "benchmark_images": [
+            "alpine-virt-3.20.10-x86_64.iso",
+            "kernel-include.iso"
+          ],
+          "tools": {
+            "find": "find (GNU findutils) 4.8.0",
+            "tar": "tar (GNU tar) 1.34",
+            "taskset": "taskset from util-linux 2.37.2",
+            "unshare": "unshare from util-linux 2.37.2"
+          },
+          "limits": "Read-only, single-threaded FUSE service; no claim of complete Linux isofs feature parity.",
+          "inline_constant_memops": true,
+          "keep_private_helpers": true
+        }
+      },
+      "medians": [
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "compat",
+          "median_wall_ms": 48.692322001443245
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "copied-fuse",
+          "median_wall_ms": 50.300406001042575
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "original",
+          "median_wall_ms": 48.59227250562981
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "prepared",
+          "median_wall_ms": 48.561200994299725
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "variant": "vkso-fuse",
+          "median_wall_ms": 50.51040049875155
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "compat",
+          "median_wall_ms": 3.6827599979005754
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "copied-fuse",
+          "median_wall_ms": 5.244421001407318
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "original",
+          "median_wall_ms": 3.7064409989397973
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "prepared",
+          "median_wall_ms": 3.7219290097709745
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "variant": "vkso-fuse",
+          "median_wall_ms": 5.201431500609033
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "compat",
+          "median_wall_ms": 216.74710300430888
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "copied-fuse",
+          "median_wall_ms": 1036.6829304985004
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "original",
+          "median_wall_ms": 215.81259399681585
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "prepared",
+          "median_wall_ms": 218.00964149588253
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "variant": "vkso-fuse",
+          "median_wall_ms": 1039.6913105068961
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "compat",
+          "median_wall_ms": 117.28314949868945
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "copied-fuse",
+          "median_wall_ms": 406.58354550396325
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "original",
+          "median_wall_ms": 115.94701150170295
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "prepared",
+          "median_wall_ms": 118.7318439988303
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "variant": "vkso-fuse",
+          "median_wall_ms": 407.81964200141374
+        }
+      ],
+      "comparisons": [
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "baseline": "original",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0261276819966638,
+            0.9988834106912104,
+            0.998950582564885,
+            1.002907827154501,
+            0.9987699594920215,
+            1.0039984954040957,
+            1.016009357601382,
+            0.9913841039166581
+          ],
+          "geometric_mean_time_ratio": 1.0045751426861154,
+          "bootstrap_95_percent": [
+            0.9981415818307834,
+            1.0124238635750595
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "baseline": "original",
+          "treatment": "compat",
+          "blocks": 8,
+          "paired_ratios": [
+            1.008725224810026,
+            0.996656344618869,
+            1.003100583934938,
+            1.0135232689140854,
+            1.0057582770013118,
+            1.010014652881005,
+            1.0110225266839217,
+            0.9940714003756462
+          ],
+          "geometric_mean_time_ratio": 1.005337837341776,
+          "bootstrap_95_percent": [
+            1.0007444201578548,
+            1.0095805399758266
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "baseline": "compat",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0172519302170868,
+            1.0022345375959987,
+            0.9958628262843059,
+            0.9895261982776598,
+            0.9930516927684392,
+            0.9940434948545067,
+            1.0049324627155605,
+            0.997296676619031
+          ],
+          "geometric_mean_time_ratio": 0.9992413548686504,
+          "bootstrap_95_percent": [
+            0.9941537911241671,
+            1.005414949218678
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "archive",
+          "baseline": "copied-fuse",
+          "treatment": "vkso-fuse",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9988277200089188,
+            1.0100850128425618,
+            0.9990528013523242,
+            0.9942133819828768,
+            1.0099832796471726,
+            1.015441622751359,
+            1.0043079796255054,
+            1.0072623747494525
+          ],
+          "geometric_mean_time_ratio": 1.004874680977798,
+          "bootstrap_95_percent": [
+            1.0003613504973823,
+            1.0093149434155708
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "baseline": "original",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0076427508169252,
+            1.0952062902449295,
+            0.9658860724138215,
+            1.3943630427515479,
+            1.0039434944865777,
+            1.0194934725002438,
+            1.0200377414274546,
+            0.9793473101207485
+          ],
+          "geometric_mean_time_ratio": 1.0537045905116762,
+          "bootstrap_95_percent": [
+            0.9939886716145292,
+            1.1498990897622934
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "baseline": "original",
+          "treatment": "compat",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9933256945723362,
+            1.0797600034056662,
+            0.9529416286152672,
+            1.0129379604980977,
+            0.9949314147567169,
+            0.9893583796130112,
+            1.2849177124877265,
+            0.9780589304255981
+          ],
+          "geometric_mean_time_ratio": 1.031411326633702,
+          "bootstrap_95_percent": [
+            0.9822947325393998,
+            1.1051204253363418
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "baseline": "compat",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0144132547087217,
+            1.0143052963533972,
+            1.0135836691459938,
+            1.3765532511644543,
+            1.0090579909290176,
+            1.0304592284335026,
+            0.7938545258688682,
+            1.0013172822772445
+          ],
+          "geometric_mean_time_ratio": 1.0216143291258344,
+          "bootstrap_95_percent": [
+            0.9264188724631968,
+            1.1369483867615704
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "alpine-virt-3.20.10-x86_64.iso",
+          "workload": "scan",
+          "baseline": "copied-fuse",
+          "treatment": "vkso-fuse",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0233896732603254,
+            0.9802846940438584,
+            1.005218727137919,
+            0.979826773159048,
+            0.9858164349500381,
+            1.4086091350009948,
+            1.0140878497824592,
+            0.998014809386641
+          ],
+          "geometric_mean_time_ratio": 1.0418981828599447,
+          "bootstrap_95_percent": [
+            0.9902814975767019,
+            1.1394325739174769
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "baseline": "original",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9980533631498995,
+            1.0081602267427103,
+            1.0067551671834472,
+            1.014578955870348,
+            1.0096598610376932,
+            1.0199711242102774,
+            1.0164602226365942,
+            1.0056559141664534
+          ],
+          "geometric_mean_time_ratio": 1.0098909398439457,
+          "bootstrap_95_percent": [
+            1.005404486126878,
+            1.0142912725855753
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "baseline": "original",
+          "treatment": "compat",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9891891973420162,
+            1.0063614148765407,
+            1.01098150116037,
+            1.0059807858398175,
+            1.0037551735479797,
+            1.0107501707102007,
+            1.0016568798410415,
+            0.9973538958372813
+          ],
+          "geometric_mean_time_ratio": 1.0032305887759105,
+          "bootstrap_95_percent": [
+            0.9983441863248159,
+            1.0075831418460157
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "baseline": "compat",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0089610418630748,
+            1.0017874412110586,
+            0.9958195733828245,
+            1.008547051943296,
+            1.0058825973158794,
+            1.009122880972256,
+            1.014778856006961,
+            1.008324044618287
+          ],
+          "geometric_mean_time_ratio": 1.0066389035009007,
+          "bootstrap_95_percent": [
+            1.0028339906015797,
+            1.0100773272028807
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "archive",
+          "baseline": "copied-fuse",
+          "treatment": "vkso-fuse",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9993026744990026,
+            1.0030836736432343,
+            1.0024646513930449,
+            1.0035200003104032,
+            0.9996779645761441,
+            1.0037740941985496,
+            1.0030125732559636,
+            1.0037920771162328
+          ],
+          "geometric_mean_time_ratio": 1.0023270348037248,
+          "bootstrap_95_percent": [
+            1.0010509366184697,
+            1.0033949039212504
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "baseline": "original",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0251926276281234,
+            1.0218639344660028,
+            1.0211838975046452,
+            1.0221876797110307,
+            1.0299060633009185,
+            1.022172645554897,
+            1.0241892162224515,
+            1.0308121744092222
+          ],
+          "geometric_mean_time_ratio": 1.0246825590056379,
+          "bootstrap_95_percent": [
+            1.0224375954562832,
+            1.0272951216692383
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "baseline": "original",
+          "treatment": "compat",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0128280031109207,
+            1.0104579972228591,
+            1.009008511458253,
+            1.0010985750671906,
+            1.0161198926766544,
+            1.0193347307606808,
+            1.0083526418403346,
+            1.0168008715191135
+          ],
+          "geometric_mean_time_ratio": 1.0117354573094932,
+          "bootstrap_95_percent": [
+            1.007858637619456,
+            1.01540841809716
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "baseline": "compat",
+          "treatment": "prepared",
+          "blocks": 8,
+          "paired_ratios": [
+            1.0122080199986814,
+            1.0112878885361805,
+            1.0120666831925886,
+            1.0210659621031073,
+            1.013567464551795,
+            1.0027840852553882,
+            1.0157053928605908,
+            1.0137797904020043
+          ],
+          "geometric_mean_time_ratio": 1.012796923941536,
+          "bootstrap_95_percent": [
+            1.0092327697403016,
+            1.0159588148728715
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        },
+        {
+          "image": "kernel-include.iso",
+          "workload": "scan",
+          "baseline": "copied-fuse",
+          "treatment": "vkso-fuse",
+          "blocks": 8,
+          "paired_ratios": [
+            0.9988644024004673,
+            1.0056647017020706,
+            1.0012655730703524,
+            0.9988273565879296,
+            1.002872848794953,
+            1.009723667432556,
+            1.0044322492202928,
+            1.003150185864901
+          ],
+          "geometric_mean_time_ratio": 1.0030944069699266,
+          "bootstrap_95_percent": [
+            1.0008856474999486,
+            1.0055051186586657
+          ],
+          "direction": "ratio > 1 means treatment takes longer"
+        }
+      ]
+    }
+  ],
+  "interpretation": [
+    "Each ratio pairs treatments with their own contemporaneous control, not another campaign.",
+    "Eight blocks with three fresh mounts each; medians within blocks and geometric mean of paired ratios.",
+    "Reported percentile bootstrap intervals are descriptive for these exploratory optimization runs.",
+    "Warm backing images; filesystem caches begin with a fresh mount/process; output goes to tmpfs.",
+    "Prepared and original differ in compiler instrumentation; compat is a diagnostic control.",
+    "User-domain comparison uses identical copied/shared code and FUSE frontend; it is not an LKL comparison.",
+    "Short Alpine scans are noisy; no equivalence conclusion follows merely from a non-significant difference.",
+    "No net deployment memory saving or developer-time reduction follows from these timings."
+  ]
+}

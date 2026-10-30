@@ -1,0 +1,35 @@
+{
+  "status": "active",
+  "phase": "private data working-set candidate correctness before complete-task pilots",
+  "completed": [
+    "313 baseline identities verified",
+    "3 Python decoder campaigns / 120 complete observations",
+    "3 repetitions full Python decoder work plus keep-cache diagnostic",
+    "1/4/16 live libfuse memory attribution",
+    "bit-tree candidate state/stream/200-observation diagnostic",
+    "Python data/fragment/metadata cache request trace"
+  ],
+  "findings": {
+    "python_library_vs_stock": 1.130081,
+    "python_common_retained_vs_library": 1.02599,
+    "old_python_decoded_output_bytes": 37602020,
+    "stock_python_decoded_output_bytes": 26999864,
+    "bridge_cache_bounds": [
+      2048,
+      4096
+    ],
+    "libfuse_16x_node_slab_bytes": 14786560
+  },
+  "candidate": "data-cache-controls-02/data-16",
+  "scope": "Existing word-copy owner unchanged; 16/48 lazy data-cache controls only. Tree build remains unpromoted; no paper data mixed.",
+  "protocols": [
+    "PROTOCOL.md",
+    "CACHE_PROTOCOL.md"
+  ],
+  "next": [
+    "Finish data-cache sanitizer and functional checks",
+    "Run fixed 5 pilot groups / 448 observations",
+    "Measure original memory scale and choose from recorded criteria",
+    "Confirm final version and update paper/figures/status"
+  ]
+}

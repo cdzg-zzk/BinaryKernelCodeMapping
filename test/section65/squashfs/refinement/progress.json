@@ -1,0 +1,20 @@
+{
+  "status": "complete",
+  "build": "test/section65/build/squashfs/refine-xz-01",
+  "premeasurement_freeze": "test/section65/build/squashfs/evaluation-refined-01/identity.json",
+  "formal_queue": "test/evaluation-local/runs/iso9660/squash-refine-formal-recovery-01/result.json",
+  "resource_queue": "test/evaluation-local/runs/iso9660/squash-refine-resource-queue-02/result.json",
+  "postprocess_queue": "test/evaluation-local/runs/iso9660/squash-refine-postprocess-queue-02/result.json",
+  "analysis": "test/section65/build/squashfs/refined-analysis-01/analysis.json",
+  "draft": "test/section65/build/squashfs/refined-analysis-01/section65.tex",
+  "figures": "paper/build/section65-refined-figures-01",
+  "remaining_after_queues": [],
+  "note": "Final-owner measurements and independent replay complete; adverse held-out, decoder and metadata-scale results retained. Server-interrupted partial campaign remains separate. Preceding publication archived.",
+  "interruption_record": "test/evaluation-local/runs/iso9660/squash-refine-interruption-recovery-01/interruption.json",
+  "final_freeze": "test/section65/build/squashfs/evaluation-refined-02/identity.json",
+  "paper": "paper/filesystem-section-preview.pdf",
+  "completion": "test/section65/final-evidence.json",
+  "campaigns": 30,
+  "observations": 6540,
+  "comparisons": 403
+}

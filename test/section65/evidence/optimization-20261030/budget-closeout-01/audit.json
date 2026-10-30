@@ -1,0 +1,14 @@
+{
+  "status": "complete",
+  "observations": 4580,
+  "campaigns": 14,
+  "raw_cell_counts_valid": true,
+  "complete_blocks": true,
+  "frozen_identities_verified": 313,
+  "pfn_and_mapped_bytes": true,
+  "cleanup": true,
+  "independent_numeric_replay": true,
+  "comparisons": 423,
+  "analysis_sha256": "846ef6d0e9332b7c1bbd40171158ebb70f88383f76d7c01e166e15e7753dbc5a",
+  "scope": "Independent numeric reconstruction in the closeout script; not independent hardware replication. No inference-grade CI with the truncated campaign count."
+}

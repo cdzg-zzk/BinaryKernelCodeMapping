@@ -1,0 +1,14 @@
+{
+  "copied-old": {
+    "build": "test/section65/build/squashfs/improve-composed-copied-old-01"
+  },
+  "copied-directory": {
+    "build": "test/section65/build/squashfs/improve-composed-copied-directory-01"
+  },
+  "copied-direct": {
+    "build": "test/section65/build/squashfs/improve-composed-copied-direct-01"
+  },
+  "copied-library": {
+    "build": "test/section65/build/squashfs/improve-codec-library-01"
+  }
+}

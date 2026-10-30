@@ -1,0 +1,34 @@
+{
+  "status": "pass",
+  "runs": [
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "status": "pass",
+      "campaign": "squash-application-gzip-formal-01",
+      "pilot": false,
+      "observations": 384,
+      "blocks": 8,
+      "variants": [
+        "stock",
+        "stock-wrapped",
+        "copied",
+        "vkso",
+        "lkl-64",
+        "lkl-512"
+      ],
+      "physical": {
+        "copied": {
+          "pages": 6,
+          "kernel_shared_pages": 0
+        },
+        "vkso": {
+          "pages": 6,
+          "kernel_shared_pages": 6
+        }
+      },
+      "seeded_order_verified": true,
+      "native_entries": 6185,
+      "correctness_record": "Runner checks each program exit and output against its oracle before appending a sample. Per-sample manifests are not retained; saved native manifests and application preflight remain available."
+    }
+  ]
+}

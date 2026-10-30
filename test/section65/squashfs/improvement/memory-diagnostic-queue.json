@@ -1,0 +1,20 @@
+[
+  {
+    "name": "squash-directory-memory-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/improvement/directory_memory.py",
+      "--build",
+      "test/section65/build/squashfs/evaluation-improved-01/build",
+      "--core",
+      "test/evaluation-local/runs/iso9660/squash-minimal-deployment-01/libsq-materialized.so",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-directory-memory-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-directory-memory-01/result.json"
+  }
+]

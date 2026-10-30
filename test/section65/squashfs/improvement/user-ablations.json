@@ -1,0 +1,11 @@
+{
+  "copied-old": {
+    "build": "test/section65/build/squashfs/evaluation-fixed-01/build"
+  },
+  "copied-directory": {
+    "build": "test/section65/build/squashfs/improve-directory-01"
+  },
+  "copied-direct": {
+    "build": "test/section65/build/squashfs/improve-direct-01"
+  }
+}

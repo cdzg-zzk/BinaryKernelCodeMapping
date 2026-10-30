@@ -1,0 +1,5064 @@
+{
+  "status": "complete",
+  "scope": "Untimed per-campaign idle snapshots before/after include archive; descriptive ranges, not memory peaks or net machine savings.",
+  "records": [
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "campaign": "squash-application-gzip-formal-01",
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 5744,
+      "pss_kib": 3684,
+      "uss_kib": 3532,
+      "threads": 5,
+      "descendant_pss_kib": 30804
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "campaign": "squash-application-gzip-formal-01",
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 17092,
+      "pss_kib": 15032,
+      "uss_kib": 14880,
+      "threads": 6,
+      "descendant_pss_kib": 44812
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "campaign": "squash-application-gzip-formal-01",
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 5756,
+      "pss_kib": 3671,
+      "uss_kib": 3540,
+      "threads": 5,
+      "descendant_pss_kib": 30624
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "campaign": "squash-application-gzip-formal-01",
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 16676,
+      "pss_kib": 14591,
+      "uss_kib": 14460,
+      "threads": 6,
+      "descendant_pss_kib": 44204
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "campaign": "squash-application-gzip-formal-01",
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 3600,
+      "pss_kib": 1509,
+      "uss_kib": 1364,
+      "threads": 1,
+      "descendant_pss_kib": 28700
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "campaign": "squash-application-gzip-formal-01",
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 9404,
+      "pss_kib": 7313,
+      "uss_kib": 7168,
+      "threads": 1,
+      "descendant_pss_kib": 37192
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "campaign": "squash-application-gzip-formal-01",
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 3580,
+      "pss_kib": 1528,
+      "uss_kib": 1376,
+      "threads": 1,
+      "descendant_pss_kib": 28857
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "campaign": "squash-application-gzip-formal-01",
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 9384,
+      "pss_kib": 7332,
+      "uss_kib": 7180,
+      "threads": 1,
+      "descendant_pss_kib": 37337
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "campaign": "squash-application-gzip-formal-01",
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "before",
+      "rss_kib": 17596,
+      "pss_kib": 15546,
+      "uss_kib": 15388,
+      "threads": 18,
+      "descendant_pss_kib": 42572
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "campaign": "squash-application-gzip-formal-01",
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "after",
+      "rss_kib": 63588,
+      "pss_kib": 61538,
+      "uss_kib": 61380,
+      "threads": 18,
+      "descendant_pss_kib": 91204
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "campaign": "squash-application-gzip-formal-01",
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24496,
+      "pss_kib": 22493,
+      "uss_kib": 22324,
+      "threads": 18,
+      "descendant_pss_kib": 49808
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "campaign": "squash-application-gzip-formal-01",
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86580,
+      "pss_kib": 84577,
+      "uss_kib": 84408,
+      "threads": 18,
+      "descendant_pss_kib": 114572
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "campaign": "squash-application-xz-formal-01",
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 9100,
+      "pss_kib": 7014,
+      "uss_kib": 6868,
+      "threads": 11,
+      "descendant_pss_kib": 34050
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "campaign": "squash-application-xz-formal-01",
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 25352,
+      "pss_kib": 23266,
+      "uss_kib": 23120,
+      "threads": 11,
+      "descendant_pss_kib": 52982
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "campaign": "squash-application-xz-formal-01",
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 9020,
+      "pss_kib": 6753,
+      "uss_kib": 6592,
+      "threads": 11,
+      "descendant_pss_kib": 33965
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "campaign": "squash-application-xz-formal-01",
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 25768,
+      "pss_kib": 23501,
+      "uss_kib": 23340,
+      "threads": 11,
+      "descendant_pss_kib": 53389
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "campaign": "squash-application-xz-formal-01",
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 3820,
+      "pss_kib": 1763,
+      "uss_kib": 1596,
+      "threads": 1,
+      "descendant_pss_kib": 28985
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "campaign": "squash-application-xz-formal-01",
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 9744,
+      "pss_kib": 7687,
+      "uss_kib": 7520,
+      "threads": 1,
+      "descendant_pss_kib": 37549
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "campaign": "squash-application-xz-formal-01",
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 3852,
+      "pss_kib": 1750,
+      "uss_kib": 1588,
+      "threads": 1,
+      "descendant_pss_kib": 29106
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "campaign": "squash-application-xz-formal-01",
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 9776,
+      "pss_kib": 7674,
+      "uss_kib": 7512,
+      "threads": 1,
+      "descendant_pss_kib": 37674
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "campaign": "squash-application-xz-formal-01",
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "before",
+      "rss_kib": 17688,
+      "pss_kib": 15683,
+      "uss_kib": 15508,
+      "threads": 18,
+      "descendant_pss_kib": 42754
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "campaign": "squash-application-xz-formal-01",
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "after",
+      "rss_kib": 63636,
+      "pss_kib": 61631,
+      "uss_kib": 61456,
+      "threads": 18,
+      "descendant_pss_kib": 91382
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "campaign": "squash-application-xz-formal-01",
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24580,
+      "pss_kib": 22513,
+      "uss_kib": 22336,
+      "threads": 18,
+      "descendant_pss_kib": 49566
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "campaign": "squash-application-xz-formal-01",
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86664,
+      "pss_kib": 84597,
+      "uss_kib": 84420,
+      "threads": 18,
+      "descendant_pss_kib": 114326
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "campaign": "squash-application-lz4-formal-01",
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 5808,
+      "pss_kib": 3797,
+      "uss_kib": 3656,
+      "threads": 4,
+      "descendant_pss_kib": 30822
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "campaign": "squash-application-lz4-formal-01",
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 16912,
+      "pss_kib": 14901,
+      "uss_kib": 14760,
+      "threads": 4,
+      "descendant_pss_kib": 44754
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "campaign": "squash-application-lz4-formal-01",
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 5820,
+      "pss_kib": 3781,
+      "uss_kib": 3656,
+      "threads": 4,
+      "descendant_pss_kib": 30783
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "campaign": "squash-application-lz4-formal-01",
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 16668,
+      "pss_kib": 14629,
+      "uss_kib": 14504,
+      "threads": 4,
+      "descendant_pss_kib": 44351
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "campaign": "squash-application-lz4-formal-01",
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 3568,
+      "pss_kib": 1526,
+      "uss_kib": 1400,
+      "threads": 1,
+      "descendant_pss_kib": 28795
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "campaign": "squash-application-lz4-formal-01",
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 9388,
+      "pss_kib": 7346,
+      "uss_kib": 7220,
+      "threads": 1,
+      "descendant_pss_kib": 37255
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "campaign": "squash-application-lz4-formal-01",
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 3588,
+      "pss_kib": 1501,
+      "uss_kib": 1368,
+      "threads": 1,
+      "descendant_pss_kib": 28476
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "campaign": "squash-application-lz4-formal-01",
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 9408,
+      "pss_kib": 7321,
+      "uss_kib": 7188,
+      "threads": 1,
+      "descendant_pss_kib": 36930
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "campaign": "squash-application-lz4-formal-01",
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "before",
+      "rss_kib": 17648,
+      "pss_kib": 15734,
+      "uss_kib": 15572,
+      "threads": 18,
+      "descendant_pss_kib": 42796
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "campaign": "squash-application-lz4-formal-01",
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "after",
+      "rss_kib": 62924,
+      "pss_kib": 61010,
+      "uss_kib": 60848,
+      "threads": 18,
+      "descendant_pss_kib": 90761
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "campaign": "squash-application-lz4-formal-01",
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24856,
+      "pss_kib": 22768,
+      "uss_kib": 22620,
+      "threads": 18,
+      "descendant_pss_kib": 49615
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "campaign": "squash-application-lz4-formal-01",
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86932,
+      "pss_kib": 84844,
+      "uss_kib": 84696,
+      "threads": 18,
+      "descendant_pss_kib": 114371
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "campaign": "squash-application-gzip-formal-02",
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 5644,
+      "pss_kib": 3545,
+      "uss_kib": 3404,
+      "threads": 5,
+      "descendant_pss_kib": 30767
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "campaign": "squash-application-gzip-formal-02",
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 17328,
+      "pss_kib": 15229,
+      "uss_kib": 15088,
+      "threads": 6,
+      "descendant_pss_kib": 45179
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "campaign": "squash-application-gzip-formal-02",
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 5624,
+      "pss_kib": 3570,
+      "uss_kib": 3428,
+      "threads": 5,
+      "descendant_pss_kib": 30480
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "campaign": "squash-application-gzip-formal-02",
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 17460,
+      "pss_kib": 15406,
+      "uss_kib": 15264,
+      "threads": 6,
+      "descendant_pss_kib": 45038
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "campaign": "squash-application-gzip-formal-02",
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 3612,
+      "pss_kib": 1504,
+      "uss_kib": 1376,
+      "threads": 1,
+      "descendant_pss_kib": 29266
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "campaign": "squash-application-gzip-formal-02",
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 9416,
+      "pss_kib": 7308,
+      "uss_kib": 7180,
+      "threads": 1,
+      "descendant_pss_kib": 37706
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "campaign": "squash-application-gzip-formal-02",
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 3580,
+      "pss_kib": 1524,
+      "uss_kib": 1380,
+      "threads": 1,
+      "descendant_pss_kib": 28837
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "campaign": "squash-application-gzip-formal-02",
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 9384,
+      "pss_kib": 7328,
+      "uss_kib": 7184,
+      "threads": 1,
+      "descendant_pss_kib": 37285
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "campaign": "squash-application-gzip-formal-02",
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "before",
+      "rss_kib": 17636,
+      "pss_kib": 15572,
+      "uss_kib": 15408,
+      "threads": 18,
+      "descendant_pss_kib": 42699
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "campaign": "squash-application-gzip-formal-02",
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "after",
+      "rss_kib": 63628,
+      "pss_kib": 61564,
+      "uss_kib": 61400,
+      "threads": 18,
+      "descendant_pss_kib": 91371
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "campaign": "squash-application-gzip-formal-02",
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24432,
+      "pss_kib": 22515,
+      "uss_kib": 22356,
+      "threads": 18,
+      "descendant_pss_kib": 49442
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "campaign": "squash-application-gzip-formal-02",
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86508,
+      "pss_kib": 84591,
+      "uss_kib": 84432,
+      "threads": 18,
+      "descendant_pss_kib": 114198
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "campaign": "squash-application-xz-formal-02",
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 9016,
+      "pss_kib": 6832,
+      "uss_kib": 6700,
+      "threads": 11,
+      "descendant_pss_kib": 33776
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "campaign": "squash-application-xz-formal-02",
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 26128,
+      "pss_kib": 23944,
+      "uss_kib": 23812,
+      "threads": 11,
+      "descendant_pss_kib": 53564
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "campaign": "squash-application-xz-formal-02",
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 9304,
+      "pss_kib": 7159,
+      "uss_kib": 7016,
+      "threads": 11,
+      "descendant_pss_kib": 34268
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "campaign": "squash-application-xz-formal-02",
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 27724,
+      "pss_kib": 25579,
+      "uss_kib": 25436,
+      "threads": 11,
+      "descendant_pss_kib": 55360
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "campaign": "squash-application-xz-formal-02",
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 3856,
+      "pss_kib": 1743,
+      "uss_kib": 1588,
+      "threads": 1,
+      "descendant_pss_kib": 28944
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "campaign": "squash-application-xz-formal-02",
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 9780,
+      "pss_kib": 7667,
+      "uss_kib": 7512,
+      "threads": 1,
+      "descendant_pss_kib": 37548
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "campaign": "squash-application-xz-formal-02",
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 3840,
+      "pss_kib": 1745,
+      "uss_kib": 1584,
+      "threads": 1,
+      "descendant_pss_kib": 28604
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "campaign": "squash-application-xz-formal-02",
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 9764,
+      "pss_kib": 7669,
+      "uss_kib": 7508,
+      "threads": 1,
+      "descendant_pss_kib": 37160
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "campaign": "squash-application-xz-formal-02",
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "before",
+      "rss_kib": 17668,
+      "pss_kib": 15683,
+      "uss_kib": 15516,
+      "threads": 18,
+      "descendant_pss_kib": 42883
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "campaign": "squash-application-xz-formal-02",
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "after",
+      "rss_kib": 63692,
+      "pss_kib": 61707,
+      "uss_kib": 61540,
+      "threads": 18,
+      "descendant_pss_kib": 91539
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "campaign": "squash-application-xz-formal-02",
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24752,
+      "pss_kib": 22640,
+      "uss_kib": 22476,
+      "threads": 18,
+      "descendant_pss_kib": 49503
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "campaign": "squash-application-xz-formal-02",
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86828,
+      "pss_kib": 84716,
+      "uss_kib": 84552,
+      "threads": 18,
+      "descendant_pss_kib": 114211
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "campaign": "squash-application-lz4-formal-02",
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 5844,
+      "pss_kib": 3816,
+      "uss_kib": 3688,
+      "threads": 4,
+      "descendant_pss_kib": 30780
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "campaign": "squash-application-lz4-formal-02",
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 16728,
+      "pss_kib": 14700,
+      "uss_kib": 14572,
+      "threads": 4,
+      "descendant_pss_kib": 44484
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "campaign": "squash-application-lz4-formal-02",
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 5836,
+      "pss_kib": 3808,
+      "uss_kib": 3680,
+      "threads": 4,
+      "descendant_pss_kib": 30642
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "campaign": "squash-application-lz4-formal-02",
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 16912,
+      "pss_kib": 14884,
+      "uss_kib": 14756,
+      "threads": 4,
+      "descendant_pss_kib": 44435
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "campaign": "squash-application-lz4-formal-02",
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 3576,
+      "pss_kib": 1503,
+      "uss_kib": 1368,
+      "threads": 1,
+      "descendant_pss_kib": 28327
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "campaign": "squash-application-lz4-formal-02",
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 9396,
+      "pss_kib": 7323,
+      "uss_kib": 7188,
+      "threads": 1,
+      "descendant_pss_kib": 36783
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "campaign": "squash-application-lz4-formal-02",
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 3588,
+      "pss_kib": 1500,
+      "uss_kib": 1372,
+      "threads": 1,
+      "descendant_pss_kib": 28346
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "campaign": "squash-application-lz4-formal-02",
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 9408,
+      "pss_kib": 7320,
+      "uss_kib": 7192,
+      "threads": 1,
+      "descendant_pss_kib": 36842
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "campaign": "squash-application-lz4-formal-02",
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "before",
+      "rss_kib": 17816,
+      "pss_kib": 15760,
+      "uss_kib": 15608,
+      "threads": 18,
+      "descendant_pss_kib": 42745
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "campaign": "squash-application-lz4-formal-02",
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "after",
+      "rss_kib": 63100,
+      "pss_kib": 61044,
+      "uss_kib": 60892,
+      "threads": 18,
+      "descendant_pss_kib": 90706
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "campaign": "squash-application-lz4-formal-02",
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24644,
+      "pss_kib": 22633,
+      "uss_kib": 22464,
+      "threads": 18,
+      "descendant_pss_kib": 49627
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "campaign": "squash-application-lz4-formal-02",
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86720,
+      "pss_kib": 84709,
+      "uss_kib": 84540,
+      "threads": 18,
+      "descendant_pss_kib": 114339
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "campaign": "squash-application-gzip-formal-03",
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 5776,
+      "pss_kib": 3662,
+      "uss_kib": 3532,
+      "threads": 5,
+      "descendant_pss_kib": 30776
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "campaign": "squash-application-gzip-formal-03",
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 16940,
+      "pss_kib": 14826,
+      "uss_kib": 14696,
+      "threads": 6,
+      "descendant_pss_kib": 44600
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "campaign": "squash-application-gzip-formal-03",
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 5620,
+      "pss_kib": 3562,
+      "uss_kib": 3424,
+      "threads": 5,
+      "descendant_pss_kib": 30593
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "campaign": "squash-application-gzip-formal-03",
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 17200,
+      "pss_kib": 15142,
+      "uss_kib": 15004,
+      "threads": 6,
+      "descendant_pss_kib": 44905
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "campaign": "squash-application-gzip-formal-03",
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 3544,
+      "pss_kib": 1498,
+      "uss_kib": 1368,
+      "threads": 1,
+      "descendant_pss_kib": 28848
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "campaign": "squash-application-gzip-formal-03",
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 9348,
+      "pss_kib": 7301,
+      "uss_kib": 7172,
+      "threads": 1,
+      "descendant_pss_kib": 37327
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "campaign": "squash-application-gzip-formal-03",
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 3600,
+      "pss_kib": 1502,
+      "uss_kib": 1364,
+      "threads": 1,
+      "descendant_pss_kib": 28448
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "campaign": "squash-application-gzip-formal-03",
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 9404,
+      "pss_kib": 7306,
+      "uss_kib": 7168,
+      "threads": 1,
+      "descendant_pss_kib": 36936
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "campaign": "squash-application-gzip-formal-03",
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "before",
+      "rss_kib": 17508,
+      "pss_kib": 15536,
+      "uss_kib": 15388,
+      "threads": 18,
+      "descendant_pss_kib": 42521
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "campaign": "squash-application-gzip-formal-03",
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "after",
+      "rss_kib": 63508,
+      "pss_kib": 61536,
+      "uss_kib": 61388,
+      "threads": 18,
+      "descendant_pss_kib": 91205
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "campaign": "squash-application-gzip-formal-03",
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24400,
+      "pss_kib": 22480,
+      "uss_kib": 22324,
+      "threads": 18,
+      "descendant_pss_kib": 49448
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "campaign": "squash-application-gzip-formal-03",
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86476,
+      "pss_kib": 84556,
+      "uss_kib": 84400,
+      "threads": 18,
+      "descendant_pss_kib": 114200
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "campaign": "squash-application-xz-formal-03",
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 9000,
+      "pss_kib": 6855,
+      "uss_kib": 6728,
+      "threads": 11,
+      "descendant_pss_kib": 33880
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "campaign": "squash-application-xz-formal-03",
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 25500,
+      "pss_kib": 23355,
+      "uss_kib": 23228,
+      "threads": 11,
+      "descendant_pss_kib": 53064
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "campaign": "squash-application-xz-formal-03",
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 9216,
+      "pss_kib": 6920,
+      "uss_kib": 6760,
+      "threads": 11,
+      "descendant_pss_kib": 34162
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "campaign": "squash-application-xz-formal-03",
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 26992,
+      "pss_kib": 24696,
+      "uss_kib": 24536,
+      "threads": 11,
+      "descendant_pss_kib": 54607
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "campaign": "squash-application-xz-formal-03",
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 3772,
+      "pss_kib": 1736,
+      "uss_kib": 1576,
+      "threads": 1,
+      "descendant_pss_kib": 28816
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "campaign": "squash-application-xz-formal-03",
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 9696,
+      "pss_kib": 7660,
+      "uss_kib": 7500,
+      "threads": 1,
+      "descendant_pss_kib": 37377
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "campaign": "squash-application-xz-formal-03",
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 3792,
+      "pss_kib": 1772,
+      "uss_kib": 1632,
+      "threads": 1,
+      "descendant_pss_kib": 29121
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "campaign": "squash-application-xz-formal-03",
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 9716,
+      "pss_kib": 7696,
+      "uss_kib": 7556,
+      "threads": 1,
+      "descendant_pss_kib": 37729
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "campaign": "squash-application-xz-formal-03",
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "before",
+      "rss_kib": 17620,
+      "pss_kib": 15609,
+      "uss_kib": 15440,
+      "threads": 18,
+      "descendant_pss_kib": 42821
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "campaign": "squash-application-xz-formal-03",
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "after",
+      "rss_kib": 63652,
+      "pss_kib": 61641,
+      "uss_kib": 61472,
+      "threads": 18,
+      "descendant_pss_kib": 91529
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "campaign": "squash-application-xz-formal-03",
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24544,
+      "pss_kib": 22643,
+      "uss_kib": 22500,
+      "threads": 18,
+      "descendant_pss_kib": 50002
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "campaign": "squash-application-xz-formal-03",
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86628,
+      "pss_kib": 84727,
+      "uss_kib": 84584,
+      "threads": 18,
+      "descendant_pss_kib": 114718
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "campaign": "squash-application-lz4-formal-03",
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "before",
+      "rss_kib": 5812,
+      "pss_kib": 3814,
+      "uss_kib": 3692,
+      "threads": 4,
+      "descendant_pss_kib": 30789
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "campaign": "squash-application-lz4-formal-03",
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "after",
+      "rss_kib": 16460,
+      "pss_kib": 14462,
+      "uss_kib": 14340,
+      "threads": 4,
+      "descendant_pss_kib": 44153
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "campaign": "squash-application-lz4-formal-03",
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "rss_kib": 5840,
+      "pss_kib": 3804,
+      "uss_kib": 3668,
+      "threads": 4,
+      "descendant_pss_kib": 31086
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "campaign": "squash-application-lz4-formal-03",
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "rss_kib": 16864,
+      "pss_kib": 14828,
+      "uss_kib": 14692,
+      "threads": 4,
+      "descendant_pss_kib": 44826
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "campaign": "squash-application-lz4-formal-03",
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "before",
+      "rss_kib": 3620,
+      "pss_kib": 1495,
+      "uss_kib": 1368,
+      "threads": 1,
+      "descendant_pss_kib": 29151
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "campaign": "squash-application-lz4-formal-03",
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "after",
+      "rss_kib": 9440,
+      "pss_kib": 7315,
+      "uss_kib": 7188,
+      "threads": 1,
+      "descendant_pss_kib": 37651
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "campaign": "squash-application-lz4-formal-03",
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "before",
+      "rss_kib": 3620,
+      "pss_kib": 1497,
+      "uss_kib": 1372,
+      "threads": 1,
+      "descendant_pss_kib": 28415
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "campaign": "squash-application-lz4-formal-03",
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "after",
+      "rss_kib": 9440,
+      "pss_kib": 7317,
+      "uss_kib": 7192,
+      "threads": 1,
+      "descendant_pss_kib": 36923
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "campaign": "squash-application-lz4-formal-03",
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "before",
+      "rss_kib": 17844,
+      "pss_kib": 15725,
+      "uss_kib": 15560,
+      "threads": 18,
+      "descendant_pss_kib": 42828
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "campaign": "squash-application-lz4-formal-03",
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "after",
+      "rss_kib": 63120,
+      "pss_kib": 61001,
+      "uss_kib": 60836,
+      "threads": 18,
+      "descendant_pss_kib": 90776
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "campaign": "squash-application-lz4-formal-03",
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "before",
+      "rss_kib": 24788,
+      "pss_kib": 22741,
+      "uss_kib": 22572,
+      "threads": 18,
+      "descendant_pss_kib": 49607
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "campaign": "squash-application-lz4-formal-03",
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "after",
+      "rss_kib": 86872,
+      "pss_kib": 84825,
+      "uss_kib": 84656,
+      "threads": 18,
+      "descendant_pss_kib": 114369
+    }
+  ],
+  "summaries": [
+    {
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 37327,
+      "minimum": 37192,
+      "maximum": 37706
+    },
+    {
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 7308,
+      "minimum": 7301,
+      "maximum": 7313
+    },
+    {
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 9404,
+      "minimum": 9348,
+      "maximum": 9416
+    },
+    {
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 1,
+      "minimum": 1,
+      "maximum": 1
+    },
+    {
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 7172,
+      "minimum": 7168,
+      "maximum": 7180
+    },
+    {
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 28848,
+      "minimum": 28700,
+      "maximum": 29266
+    },
+    {
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 1504,
+      "minimum": 1498,
+      "maximum": 1509
+    },
+    {
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 3600,
+      "minimum": 3544,
+      "maximum": 3612
+    },
+    {
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 1,
+      "minimum": 1,
+      "maximum": 1
+    },
+    {
+      "codec": "gzip",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 1368,
+      "minimum": 1364,
+      "maximum": 1376
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 114200,
+      "minimum": 114198,
+      "maximum": 114572
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 84577,
+      "minimum": 84556,
+      "maximum": 84591
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 86508,
+      "minimum": 86476,
+      "maximum": 86580
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 18,
+      "minimum": 18,
+      "maximum": 18
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 84408,
+      "minimum": 84400,
+      "maximum": 84432
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 49448,
+      "minimum": 49442,
+      "maximum": 49808
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 22493,
+      "minimum": 22480,
+      "maximum": 22515
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 24432,
+      "minimum": 24400,
+      "maximum": 24496
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 18,
+      "minimum": 18,
+      "maximum": 18
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 22324,
+      "minimum": 22324,
+      "maximum": 22356
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 91205,
+      "minimum": 91204,
+      "maximum": 91371
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 61538,
+      "minimum": 61536,
+      "maximum": 61564
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 63588,
+      "minimum": 63508,
+      "maximum": 63628
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 18,
+      "minimum": 18,
+      "maximum": 18
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 61388,
+      "minimum": 61380,
+      "maximum": 61400
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 42572,
+      "minimum": 42521,
+      "maximum": 42699
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 15546,
+      "minimum": 15536,
+      "maximum": 15572
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 17596,
+      "minimum": 17508,
+      "maximum": 17636
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 18,
+      "minimum": 18,
+      "maximum": 18
+    },
+    {
+      "codec": "gzip",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 15388,
+      "minimum": 15388,
+      "maximum": 15408
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 44812,
+      "minimum": 44600,
+      "maximum": 45179
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 15032,
+      "minimum": 14826,
+      "maximum": 15229
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 17092,
+      "minimum": 16940,
+      "maximum": 17328
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 6,
+      "minimum": 6,
+      "maximum": 6
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 14880,
+      "minimum": 14696,
+      "maximum": 15088
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 30776,
+      "minimum": 30767,
+      "maximum": 30804
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 3662,
+      "minimum": 3545,
+      "maximum": 3684
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 5744,
+      "minimum": 5644,
+      "maximum": 5776
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 5,
+      "minimum": 5,
+      "maximum": 5
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 3532,
+      "minimum": 3404,
+      "maximum": 3532
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 44905,
+      "minimum": 44204,
+      "maximum": 45038
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 15142,
+      "minimum": 14591,
+      "maximum": 15406
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 17200,
+      "minimum": 16676,
+      "maximum": 17460
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 6,
+      "minimum": 6,
+      "maximum": 6
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 15004,
+      "minimum": 14460,
+      "maximum": 15264
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 30593,
+      "minimum": 30480,
+      "maximum": 30624
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 3570,
+      "minimum": 3562,
+      "maximum": 3671
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 5624,
+      "minimum": 5620,
+      "maximum": 5756
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 5,
+      "minimum": 5,
+      "maximum": 5
+    },
+    {
+      "codec": "gzip",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 3428,
+      "minimum": 3424,
+      "maximum": 3540
+    },
+    {
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 37285,
+      "minimum": 36936,
+      "maximum": 37337
+    },
+    {
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 7328,
+      "minimum": 7306,
+      "maximum": 7332
+    },
+    {
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 9384,
+      "minimum": 9384,
+      "maximum": 9404
+    },
+    {
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 1,
+      "minimum": 1,
+      "maximum": 1
+    },
+    {
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 7180,
+      "minimum": 7168,
+      "maximum": 7184
+    },
+    {
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 28837,
+      "minimum": 28448,
+      "maximum": 28857
+    },
+    {
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 1524,
+      "minimum": 1502,
+      "maximum": 1528
+    },
+    {
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 3580,
+      "minimum": 3580,
+      "maximum": 3600
+    },
+    {
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 1,
+      "minimum": 1,
+      "maximum": 1
+    },
+    {
+      "codec": "gzip",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 1376,
+      "minimum": 1364,
+      "maximum": 1380
+    },
+    {
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 37255,
+      "minimum": 36783,
+      "maximum": 37651
+    },
+    {
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 7323,
+      "minimum": 7315,
+      "maximum": 7346
+    },
+    {
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 9396,
+      "minimum": 9388,
+      "maximum": 9440
+    },
+    {
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 1,
+      "minimum": 1,
+      "maximum": 1
+    },
+    {
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 7188,
+      "minimum": 7188,
+      "maximum": 7220
+    },
+    {
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 28795,
+      "minimum": 28327,
+      "maximum": 29151
+    },
+    {
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 1503,
+      "minimum": 1495,
+      "maximum": 1526
+    },
+    {
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 3576,
+      "minimum": 3568,
+      "maximum": 3620
+    },
+    {
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 1,
+      "minimum": 1,
+      "maximum": 1
+    },
+    {
+      "codec": "lz4",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 1368,
+      "minimum": 1368,
+      "maximum": 1400
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 114369,
+      "minimum": 114339,
+      "maximum": 114371
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 84825,
+      "minimum": 84709,
+      "maximum": 84844
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 86872,
+      "minimum": 86720,
+      "maximum": 86932
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 18,
+      "minimum": 18,
+      "maximum": 18
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 84656,
+      "minimum": 84540,
+      "maximum": 84696
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 49615,
+      "minimum": 49607,
+      "maximum": 49627
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 22741,
+      "minimum": 22633,
+      "maximum": 22768
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 24788,
+      "minimum": 24644,
+      "maximum": 24856
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 18,
+      "minimum": 18,
+      "maximum": 18
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 22572,
+      "minimum": 22464,
+      "maximum": 22620
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 90761,
+      "minimum": 90706,
+      "maximum": 90776
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 61010,
+      "minimum": 61001,
+      "maximum": 61044
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 63100,
+      "minimum": 62924,
+      "maximum": 63120
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 18,
+      "minimum": 18,
+      "maximum": 18
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 60848,
+      "minimum": 60836,
+      "maximum": 60892
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 42796,
+      "minimum": 42745,
+      "maximum": 42828
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 15734,
+      "minimum": 15725,
+      "maximum": 15760
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 17816,
+      "minimum": 17648,
+      "maximum": 17844
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 18,
+      "minimum": 18,
+      "maximum": 18
+    },
+    {
+      "codec": "lz4",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 15572,
+      "minimum": 15560,
+      "maximum": 15608
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 44484,
+      "minimum": 44153,
+      "maximum": 44754
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 14700,
+      "minimum": 14462,
+      "maximum": 14901
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 16728,
+      "minimum": 16460,
+      "maximum": 16912
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 4,
+      "minimum": 4,
+      "maximum": 4
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 14572,
+      "minimum": 14340,
+      "maximum": 14760
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 30789,
+      "minimum": 30780,
+      "maximum": 30822
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 3814,
+      "minimum": 3797,
+      "maximum": 3816
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 5812,
+      "minimum": 5808,
+      "maximum": 5844
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 4,
+      "minimum": 4,
+      "maximum": 4
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 3688,
+      "minimum": 3656,
+      "maximum": 3692
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 44435,
+      "minimum": 44351,
+      "maximum": 44826
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 14828,
+      "minimum": 14629,
+      "maximum": 14884
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 16864,
+      "minimum": 16668,
+      "maximum": 16912
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 4,
+      "minimum": 4,
+      "maximum": 4
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 14692,
+      "minimum": 14504,
+      "maximum": 14756
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 30783,
+      "minimum": 30642,
+      "maximum": 31086
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 3804,
+      "minimum": 3781,
+      "maximum": 3808
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 5836,
+      "minimum": 5820,
+      "maximum": 5840
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 4,
+      "minimum": 4,
+      "maximum": 4
+    },
+    {
+      "codec": "lz4",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 3668,
+      "minimum": 3656,
+      "maximum": 3680
+    },
+    {
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 36923,
+      "minimum": 36842,
+      "maximum": 36930
+    },
+    {
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 7320,
+      "minimum": 7317,
+      "maximum": 7321
+    },
+    {
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 9408,
+      "minimum": 9408,
+      "maximum": 9440
+    },
+    {
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 1,
+      "minimum": 1,
+      "maximum": 1
+    },
+    {
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 7192,
+      "minimum": 7188,
+      "maximum": 7192
+    },
+    {
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 28415,
+      "minimum": 28346,
+      "maximum": 28476
+    },
+    {
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 1500,
+      "minimum": 1497,
+      "maximum": 1501
+    },
+    {
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 3588,
+      "minimum": 3588,
+      "maximum": 3620
+    },
+    {
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 1,
+      "minimum": 1,
+      "maximum": 1
+    },
+    {
+      "codec": "lz4",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 1372,
+      "minimum": 1368,
+      "maximum": 1372
+    },
+    {
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 37548,
+      "minimum": 37377,
+      "maximum": 37549
+    },
+    {
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 7667,
+      "minimum": 7660,
+      "maximum": 7687
+    },
+    {
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 9744,
+      "minimum": 9696,
+      "maximum": 9780
+    },
+    {
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 1,
+      "minimum": 1,
+      "maximum": 1
+    },
+    {
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 7512,
+      "minimum": 7500,
+      "maximum": 7520
+    },
+    {
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 28944,
+      "minimum": 28816,
+      "maximum": 28985
+    },
+    {
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 1743,
+      "minimum": 1736,
+      "maximum": 1763
+    },
+    {
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 3820,
+      "minimum": 3772,
+      "maximum": 3856
+    },
+    {
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 1,
+      "minimum": 1,
+      "maximum": 1
+    },
+    {
+      "codec": "xz",
+      "variant": "copied",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 1588,
+      "minimum": 1576,
+      "maximum": 1596
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 114326,
+      "minimum": 114211,
+      "maximum": 114718
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 84716,
+      "minimum": 84597,
+      "maximum": 84727
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 86664,
+      "minimum": 86628,
+      "maximum": 86828
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 18,
+      "minimum": 18,
+      "maximum": 18
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 84552,
+      "minimum": 84420,
+      "maximum": 84584
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 49566,
+      "minimum": 49503,
+      "maximum": 50002
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 22640,
+      "minimum": 22513,
+      "maximum": 22643
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 24580,
+      "minimum": 24544,
+      "maximum": 24752
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 18,
+      "minimum": 18,
+      "maximum": 18
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-512",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 22476,
+      "minimum": 22336,
+      "maximum": 22500
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 91529,
+      "minimum": 91382,
+      "maximum": 91539
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 61641,
+      "minimum": 61631,
+      "maximum": 61707
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 63652,
+      "minimum": 63636,
+      "maximum": 63692
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 18,
+      "minimum": 18,
+      "maximum": 18
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 61472,
+      "minimum": 61456,
+      "maximum": 61540
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 42821,
+      "minimum": 42754,
+      "maximum": 42883
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 15683,
+      "minimum": 15609,
+      "maximum": 15683
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 17668,
+      "minimum": 17620,
+      "maximum": 17688
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 18,
+      "minimum": 18,
+      "maximum": 18
+    },
+    {
+      "codec": "xz",
+      "variant": "lkl-64",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 15508,
+      "minimum": 15440,
+      "maximum": 15516
+    },
+    {
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 53064,
+      "minimum": 52982,
+      "maximum": 53564
+    },
+    {
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 23355,
+      "minimum": 23266,
+      "maximum": 23944
+    },
+    {
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 25500,
+      "minimum": 25352,
+      "maximum": 26128
+    },
+    {
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 11,
+      "minimum": 11,
+      "maximum": 11
+    },
+    {
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 23228,
+      "minimum": 23120,
+      "maximum": 23812
+    },
+    {
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 33880,
+      "minimum": 33776,
+      "maximum": 34050
+    },
+    {
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 6855,
+      "minimum": 6832,
+      "maximum": 7014
+    },
+    {
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 9016,
+      "minimum": 9000,
+      "maximum": 9100
+    },
+    {
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 11,
+      "minimum": 11,
+      "maximum": 11
+    },
+    {
+      "codec": "xz",
+      "variant": "stock",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 6728,
+      "minimum": 6700,
+      "maximum": 6868
+    },
+    {
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 54607,
+      "minimum": 53389,
+      "maximum": 55360
+    },
+    {
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 24696,
+      "minimum": 23501,
+      "maximum": 25579
+    },
+    {
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 26992,
+      "minimum": 25768,
+      "maximum": 27724
+    },
+    {
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 11,
+      "minimum": 11,
+      "maximum": 11
+    },
+    {
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 24536,
+      "minimum": 23340,
+      "maximum": 25436
+    },
+    {
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 34162,
+      "minimum": 33965,
+      "maximum": 34268
+    },
+    {
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 6920,
+      "minimum": 6753,
+      "maximum": 7159
+    },
+    {
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 9216,
+      "minimum": 9020,
+      "maximum": 9304
+    },
+    {
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 11,
+      "minimum": 11,
+      "maximum": 11
+    },
+    {
+      "codec": "xz",
+      "variant": "stock-wrapped",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 6760,
+      "minimum": 6592,
+      "maximum": 7016
+    },
+    {
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 37674,
+      "minimum": 37160,
+      "maximum": 37729
+    },
+    {
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 7674,
+      "minimum": 7669,
+      "maximum": 7696
+    },
+    {
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 9764,
+      "minimum": 9716,
+      "maximum": 9776
+    },
+    {
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "threads",
+      "n": 3,
+      "median": 1,
+      "minimum": 1,
+      "maximum": 1
+    },
+    {
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "after",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 7512,
+      "minimum": 7508,
+      "maximum": 7556
+    },
+    {
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "descendant_pss_kib",
+      "n": 3,
+      "median": 29106,
+      "minimum": 28604,
+      "maximum": 29121
+    },
+    {
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "pss_kib",
+      "n": 3,
+      "median": 1750,
+      "minimum": 1745,
+      "maximum": 1772
+    },
+    {
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "rss_kib",
+      "n": 3,
+      "median": 3840,
+      "minimum": 3792,
+      "maximum": 3852
+    },
+    {
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "threads",
+      "n": 3,
+      "median": 1,
+      "minimum": 1,
+      "maximum": 1
+    },
+    {
+      "codec": "xz",
+      "variant": "vkso",
+      "phase": "before",
+      "metric": "uss_kib",
+      "n": 3,
+      "median": 1588,
+      "minimum": 1584,
+      "maximum": 1632
+    }
+  ],
+  "stages": [
+    {
+      "stage": "export",
+      "samples": [
+        {
+          "campaign": "squash-application-gzip-formal-01",
+          "seconds": 0.11457690100360196
+        },
+        {
+          "campaign": "squash-application-xz-formal-01",
+          "seconds": 0.1810637129965471
+        },
+        {
+          "campaign": "squash-application-lz4-formal-01",
+          "seconds": 0.11402828800783027
+        },
+        {
+          "campaign": "squash-application-gzip-formal-02",
+          "seconds": 0.11403929599327967
+        },
+        {
+          "campaign": "squash-application-xz-formal-02",
+          "seconds": 0.1155251719901571
+        },
+        {
+          "campaign": "squash-application-lz4-formal-02",
+          "seconds": 0.16413539300265256
+        },
+        {
+          "campaign": "squash-application-gzip-formal-03",
+          "seconds": 0.11402556700340938
+        },
+        {
+          "campaign": "squash-application-xz-formal-03",
+          "seconds": 0.11515565399895422
+        },
+        {
+          "campaign": "squash-application-lz4-formal-03",
+          "seconds": 0.11402118499972858
+        }
+      ],
+      "seconds": {
+        "n": 9,
+        "median": 0.11457690100360196,
+        "minimum": 0.11402118499972858,
+        "maximum": 0.1810637129965471
+      }
+    },
+    {
+      "stage": "krg",
+      "samples": [
+        {
+          "campaign": "squash-application-gzip-formal-01",
+          "seconds": 2.2680912369978614
+        },
+        {
+          "campaign": "squash-application-xz-formal-01",
+          "seconds": 2.467997669009492
+        },
+        {
+          "campaign": "squash-application-lz4-formal-01",
+          "seconds": 2.2682184130098904
+        },
+        {
+          "campaign": "squash-application-gzip-formal-02",
+          "seconds": 2.2675778310076566
+        },
+        {
+          "campaign": "squash-application-xz-formal-02",
+          "seconds": 2.619065427003079
+        },
+        {
+          "campaign": "squash-application-lz4-formal-02",
+          "seconds": 2.318200916997739
+        },
+        {
+          "campaign": "squash-application-gzip-formal-03",
+          "seconds": 2.317132283002138
+        },
+        {
+          "campaign": "squash-application-xz-formal-03",
+          "seconds": 2.318922324993764
+        },
+        {
+          "campaign": "squash-application-lz4-formal-03",
+          "seconds": 2.318079360004049
+        }
+      ],
+      "seconds": {
+        "n": 9,
+        "median": 2.318079360004049,
+        "minimum": 2.2675778310076566,
+        "maximum": 2.619065427003079
+      }
+    },
+    {
+      "stage": "load-page_cache_replace",
+      "samples": [
+        {
+          "campaign": "squash-application-gzip-formal-01",
+          "seconds": 0.003942190989619121
+        },
+        {
+          "campaign": "squash-application-xz-formal-01",
+          "seconds": 0.003907963007804938
+        },
+        {
+          "campaign": "squash-application-lz4-formal-01",
+          "seconds": 0.003506894994643517
+        },
+        {
+          "campaign": "squash-application-gzip-formal-02",
+          "seconds": 0.003888925988576375
+        },
+        {
+          "campaign": "squash-application-xz-formal-02",
+          "seconds": 0.0039451069897040725
+        },
+        {
+          "campaign": "squash-application-lz4-formal-02",
+          "seconds": 0.0034936219890369102
+        },
+        {
+          "campaign": "squash-application-gzip-formal-03",
+          "seconds": 0.003948477999074385
+        },
+        {
+          "campaign": "squash-application-xz-formal-03",
+          "seconds": 0.003927288998966105
+        },
+        {
+          "campaign": "squash-application-lz4-formal-03",
+          "seconds": 0.003850750988931395
+        }
+      ],
+      "seconds": {
+        "n": 9,
+        "median": 0.003907963007804938,
+        "minimum": 0.0034936219890369102,
+        "maximum": 0.003948477999074385
+      }
+    },
+    {
+      "stage": "load-vkso_kernel_reader",
+      "samples": [
+        {
+          "campaign": "squash-application-gzip-formal-01",
+          "seconds": 0.003887220998876728
+        },
+        {
+          "campaign": "squash-application-xz-formal-01",
+          "seconds": 0.004026833004900254
+        },
+        {
+          "campaign": "squash-application-lz4-formal-01",
+          "seconds": 0.003928667996660806
+        },
+        {
+          "campaign": "squash-application-gzip-formal-02",
+          "seconds": 0.0038581179978791624
+        },
+        {
+          "campaign": "squash-application-xz-formal-02",
+          "seconds": 0.0038877219922142103
+        },
+        {
+          "campaign": "squash-application-lz4-formal-02",
+          "seconds": 0.003974259001552127
+        },
+        {
+          "campaign": "squash-application-gzip-formal-03",
+          "seconds": 0.004618239996489137
+        },
+        {
+          "campaign": "squash-application-xz-formal-03",
+          "seconds": 0.003938616006053053
+        },
+        {
+          "campaign": "squash-application-lz4-formal-03",
+          "seconds": 0.003965768002672121
+        }
+      ],
+      "seconds": {
+        "n": 9,
+        "median": 0.003938616006053053,
+        "minimum": 0.0038581179978791624,
+        "maximum": 0.004618239996489137
+      }
+    },
+    {
+      "stage": "load-vkso_sq_core",
+      "samples": [
+        {
+          "campaign": "squash-application-gzip-formal-01",
+          "seconds": 0.00419533799868077
+        },
+        {
+          "campaign": "squash-application-xz-formal-01",
+          "seconds": 0.004720266006188467
+        },
+        {
+          "campaign": "squash-application-lz4-formal-01",
+          "seconds": 0.004144518010434695
+        },
+        {
+          "campaign": "squash-application-gzip-formal-02",
+          "seconds": 0.004208599988487549
+        },
+        {
+          "campaign": "squash-application-xz-formal-02",
+          "seconds": 0.004193293003481813
+        },
+        {
+          "campaign": "squash-application-lz4-formal-02",
+          "seconds": 0.004124796992982738
+        },
+        {
+          "campaign": "squash-application-gzip-formal-03",
+          "seconds": 0.00412862999655772
+        },
+        {
+          "campaign": "squash-application-xz-formal-03",
+          "seconds": 0.004197403002763167
+        },
+        {
+          "campaign": "squash-application-lz4-formal-03",
+          "seconds": 0.00418770000396762
+        }
+      ],
+      "seconds": {
+        "n": 9,
+        "median": 0.004193293003481813,
+        "minimum": 0.004124796992982738,
+        "maximum": 0.004720266006188467
+      }
+    },
+    {
+      "stage": "load-vkso_squashfs",
+      "samples": [
+        {
+          "campaign": "squash-application-gzip-formal-01",
+          "seconds": 0.0039930729981279
+        },
+        {
+          "campaign": "squash-application-xz-formal-01",
+          "seconds": 0.0040739419928286225
+        },
+        {
+          "campaign": "squash-application-lz4-formal-01",
+          "seconds": 0.003543330996762961
+        },
+        {
+          "campaign": "squash-application-gzip-formal-02",
+          "seconds": 0.004176703005214222
+        },
+        {
+          "campaign": "squash-application-xz-formal-02",
+          "seconds": 0.004199486997094937
+        },
+        {
+          "campaign": "squash-application-lz4-formal-02",
+          "seconds": 0.0039657700108364224
+        },
+        {
+          "campaign": "squash-application-gzip-formal-03",
+          "seconds": 0.003916200992534868
+        },
+        {
+          "campaign": "squash-application-xz-formal-03",
+          "seconds": 0.0040128859982360154
+        },
+        {
+          "campaign": "squash-application-lz4-formal-03",
+          "seconds": 0.00393591400643345
+        }
+      ],
+      "seconds": {
+        "n": 9,
+        "median": 0.0039930729981279,
+        "minimum": 0.003543330996762961,
+        "maximum": 0.004199486997094937
+      }
+    },
+    {
+      "stage": "register",
+      "samples": [
+        {
+          "campaign": "squash-application-gzip-formal-01",
+          "seconds": 0.11389696400146931
+        },
+        {
+          "campaign": "squash-application-xz-formal-01",
+          "seconds": 0.11391054499836173
+        },
+        {
+          "campaign": "squash-application-lz4-formal-01",
+          "seconds": 0.11497030800092034
+        },
+        {
+          "campaign": "squash-application-gzip-formal-02",
+          "seconds": 0.11393922199204098
+        },
+        {
+          "campaign": "squash-application-xz-formal-02",
+          "seconds": 0.11391235300106928
+        },
+        {
+          "campaign": "squash-application-lz4-formal-02",
+          "seconds": 0.11387057500542141
+        },
+        {
+          "campaign": "squash-application-gzip-formal-03",
+          "seconds": 0.11392547099967487
+        },
+        {
+          "campaign": "squash-application-xz-formal-03",
+          "seconds": 0.16520385500916746
+        },
+        {
+          "campaign": "squash-application-lz4-formal-03",
+          "seconds": 0.11441131800529547
+        }
+      ],
+      "seconds": {
+        "n": 9,
+        "median": 0.11392547099967487,
+        "minimum": 0.11387057500542141,
+        "maximum": 0.16520385500916746
+      }
+    },
+    {
+      "stage": "restore",
+      "samples": [
+        {
+          "campaign": "squash-application-gzip-formal-01",
+          "seconds": 0.0015205179952317849
+        },
+        {
+          "campaign": "squash-application-xz-formal-01",
+          "seconds": 0.001464034998207353
+        },
+        {
+          "campaign": "squash-application-lz4-formal-01",
+          "seconds": 0.001462098996853456
+        },
+        {
+          "campaign": "squash-application-gzip-formal-02",
+          "seconds": 0.001444541005184874
+        },
+        {
+          "campaign": "squash-application-xz-formal-02",
+          "seconds": 0.0014470349997282028
+        },
+        {
+          "campaign": "squash-application-lz4-formal-02",
+          "seconds": 0.0014386460097739473
+        },
+        {
+          "campaign": "squash-application-gzip-formal-03",
+          "seconds": 0.01480164700478781
+        },
+        {
+          "campaign": "squash-application-xz-formal-03",
+          "seconds": 0.001467693000449799
+        },
+        {
+          "campaign": "squash-application-lz4-formal-03",
+          "seconds": 0.0029232320084702224
+        }
+      ],
+      "seconds": {
+        "n": 9,
+        "median": 0.001464034998207353,
+        "minimum": 0.0014386460097739473,
+        "maximum": 0.01480164700478781
+      }
+    },
+    {
+      "stage": "unload-page_cache_replace",
+      "samples": [
+        {
+          "campaign": "squash-application-gzip-formal-01",
+          "seconds": 0.01570554899808485
+        },
+        {
+          "campaign": "squash-application-xz-formal-01",
+          "seconds": 0.03381106299639214
+        },
+        {
+          "campaign": "squash-application-lz4-formal-01",
+          "seconds": 0.03175147599540651
+        },
+        {
+          "campaign": "squash-application-gzip-formal-02",
+          "seconds": 0.031743387997266836
+        },
+        {
+          "campaign": "squash-application-xz-formal-02",
+          "seconds": 0.03184858299209736
+        },
+        {
+          "campaign": "squash-application-lz4-formal-02",
+          "seconds": 0.03182839599321596
+        },
+        {
+          "campaign": "squash-application-gzip-formal-03",
+          "seconds": 0.03846839000470936
+        },
+        {
+          "campaign": "squash-application-xz-formal-03",
+          "seconds": 0.03178960100922268
+        },
+        {
+          "campaign": "squash-application-lz4-formal-03",
+          "seconds": 0.015740250993985683
+        }
+      ],
+      "seconds": {
+        "n": 9,
+        "median": 0.03178960100922268,
+        "minimum": 0.01570554899808485,
+        "maximum": 0.03846839000470936
+      }
+    },
+    {
+      "stage": "unload-vkso_kernel_reader",
+      "samples": [
+        {
+          "campaign": "squash-application-gzip-formal-01",
+          "seconds": 0.015842345004784875
+        },
+        {
+          "campaign": "squash-application-xz-formal-01",
+          "seconds": 0.03196571698936168
+        },
+        {
+          "campaign": "squash-application-lz4-formal-01",
+          "seconds": 0.03190595799242146
+        },
+        {
+          "campaign": "squash-application-gzip-formal-02",
+          "seconds": 0.015819883003132418
+        },
+        {
+          "campaign": "squash-application-xz-formal-02",
+          "seconds": 0.016662620997522026
+        },
+        {
+          "campaign": "squash-application-lz4-formal-02",
+          "seconds": 0.03196658300294075
+        },
+        {
+          "campaign": "squash-application-gzip-formal-03",
+          "seconds": 0.04030559299280867
+        },
+        {
+          "campaign": "squash-application-xz-formal-03",
+          "seconds": 0.03186262400413398
+        },
+        {
+          "campaign": "squash-application-lz4-formal-03",
+          "seconds": 0.01627852499950677
+        }
+      ],
+      "seconds": {
+        "n": 9,
+        "median": 0.03186262400413398,
+        "minimum": 0.015819883003132418,
+        "maximum": 0.04030559299280867
+      }
+    },
+    {
+      "stage": "unload-vkso_sq_core",
+      "samples": [
+        {
+          "campaign": "squash-application-gzip-formal-01",
+          "seconds": 0.016910222999285907
+        },
+        {
+          "campaign": "squash-application-xz-formal-01",
+          "seconds": 0.03197336300218012
+        },
+        {
+          "campaign": "squash-application-lz4-formal-01",
+          "seconds": 0.0318028830079129
+        },
+        {
+          "campaign": "squash-application-gzip-formal-02",
+          "seconds": 0.015669892993173562
+        },
+        {
+          "campaign": "squash-application-xz-formal-02",
+          "seconds": 0.016163452004548162
+        },
+        {
+          "campaign": "squash-application-lz4-formal-02",
+          "seconds": 0.03178174200002104
+        },
+        {
+          "campaign": "squash-application-gzip-formal-03",
+          "seconds": 0.04034928500186652
+        },
+        {
+          "campaign": "squash-application-xz-formal-03",
+          "seconds": 0.03297859299345873
+        },
+        {
+          "campaign": "squash-application-lz4-formal-03",
+          "seconds": 0.01568816498911474
+        }
+      ],
+      "seconds": {
+        "n": 9,
+        "median": 0.03178174200002104,
+        "minimum": 0.015669892993173562,
+        "maximum": 0.04034928500186652
+      }
+    },
+    {
+      "stage": "unload-vkso_squashfs",
+      "samples": [
+        {
+          "campaign": "squash-application-gzip-formal-01",
+          "seconds": 0.06386219798878301
+        },
+        {
+          "campaign": "squash-application-xz-formal-01",
+          "seconds": 0.06467683200025931
+        },
+        {
+          "campaign": "squash-application-lz4-formal-01",
+          "seconds": 0.06418079700961243
+        },
+        {
+          "campaign": "squash-application-gzip-formal-02",
+          "seconds": 0.06382665700220969
+        },
+        {
+          "campaign": "squash-application-xz-formal-02",
+          "seconds": 0.06386881299840752
+        },
+        {
+          "campaign": "squash-application-lz4-formal-02",
+          "seconds": 0.06374543100537267
+        },
+        {
+          "campaign": "squash-application-gzip-formal-03",
+          "seconds": 0.07125608099158853
+        },
+        {
+          "campaign": "squash-application-xz-formal-03",
+          "seconds": 0.06394504199852236
+        },
+        {
+          "campaign": "squash-application-lz4-formal-03",
+          "seconds": 0.06387631500547286
+        }
+      ],
+      "seconds": {
+        "n": 9,
+        "median": 0.06387631500547286,
+        "minimum": 0.06374543100537267,
+        "maximum": 0.07125608099158853
+      }
+    }
+  ],
+  "deployment_command_sums": [
+    {
+      "campaign": "squash-application-gzip-formal-01",
+      "setup_command_sum_seconds": 2.512582924988237,
+      "teardown_command_sum_seconds": 0.11384083298617043,
+      "export_construction_seconds": 2.3826681380014634
+    },
+    {
+      "campaign": "squash-application-xz-formal-01",
+      "setup_command_sum_seconds": 2.779700931016123,
+      "teardown_command_sum_seconds": 0.1638910099864006,
+      "export_construction_seconds": 2.649061382006039
+    },
+    {
+      "campaign": "squash-application-lz4-formal-01",
+      "setup_command_sum_seconds": 2.512340421017143,
+      "teardown_command_sum_seconds": 0.16110321300220676,
+      "export_construction_seconds": 2.3822467010177206
+    },
+    {
+      "campaign": "squash-application-gzip-formal-02",
+      "setup_command_sum_seconds": 2.5116886959731346,
+      "teardown_command_sum_seconds": 0.12850436200096738,
+      "export_construction_seconds": 2.3816171270009363
+    },
+    {
+      "campaign": "squash-application-xz-formal-02",
+      "setup_command_sum_seconds": 2.8647285609768005,
+      "teardown_command_sum_seconds": 0.12999050399230327,
+      "export_construction_seconds": 2.734590598993236
+    },
+    {
+      "campaign": "squash-application-lz4-formal-02",
+      "setup_command_sum_seconds": 2.6117653330002213,
+      "teardown_command_sum_seconds": 0.16076079801132437,
+      "export_construction_seconds": 2.4823363100003917
+    },
+    {
+      "campaign": "squash-application-gzip-formal-03",
+      "setup_command_sum_seconds": 2.5616948699898785,
+      "teardown_command_sum_seconds": 0.2051809959957609,
+      "export_construction_seconds": 2.4311578500055475
+    },
+    {
+      "campaign": "squash-application-xz-formal-03",
+      "setup_command_sum_seconds": 2.615358028007904,
+      "teardown_command_sum_seconds": 0.16204355300578754,
+      "export_construction_seconds": 2.4340779789927183
+    },
+    {
+      "campaign": "squash-application-lz4-formal-03",
+      "setup_command_sum_seconds": 2.5624519960110774,
+      "teardown_command_sum_seconds": 0.11450648799655028,
+      "export_construction_seconds": 2.4321005450037774
+    }
+  ],
+  "deployment_scope": "Measured setup/teardown sums include loading/unloading the optional PFN observer used by this evidence harness. Individual stages are retained. Observer-free evidence proves subsequent real application execution without that module; it is not a separately measured observer-free construction workflow.",
+  "deployment_summary": {
+    "setup_command_sum_seconds": {
+      "n": 9,
+      "median": 2.5624519960110774,
+      "minimum": 2.5116886959731346,
+      "maximum": 2.8647285609768005
+    },
+    "teardown_command_sum_seconds": {
+      "n": 9,
+      "median": 0.16076079801132437,
+      "minimum": 0.11384083298617043,
+      "maximum": 0.2051809959957609
+    },
+    "export_construction_seconds": {
+      "n": 9,
+      "median": 2.4321005450037774,
+      "minimum": 2.3816171270009363,
+      "maximum": 2.734590598993236
+    }
+  },
+  "kernel_module_residency": [
+    {
+      "name": "page_cache_replace",
+      "reported_bytes": 32768,
+      "references": 0
+    },
+    {
+      "name": "vkso_kernel_reader",
+      "reported_bytes": 20480,
+      "references": 0
+    },
+    {
+      "name": "vkso_squashfs",
+      "reported_bytes": 40960,
+      "references": 0
+    },
+    {
+      "name": "vkso_sq_core",
+      "reported_bytes": 53248,
+      "references": 1
+    }
+  ],
+  "registration": {
+    "binary": "test/evaluation-local/packages/iso9660-native-optimized-20261029/modules/page_cache_replace.ko",
+    "sha256": "c483fee64b76d3a50cb0e7ad871c2fa665388d8531a53025cebf0ce48ac91b30",
+    "source": "test/section65/build/native/modules/registration/page_cache_replace.c",
+    "source_sha256": "ca8e2c34e3702168c41160ac858e24e31fe183be956e3ffe414ed79ad58fe4af",
+    "dwarf_size_output": "$1 = 688\n$2 = 64\n",
+    "transaction_requested_bytes": 688,
+    "binding_requested_bytes": 64,
+    "shared_pages": 6,
+    "direct_requested_bytes": 1072,
+    "mechanism": "kzalloc(transaction) and kvcalloc(page_count,binding). Successful apply drops both references to displaced ordinary pages; restore reloads unchanged carrier data from its filesystem.",
+    "exclusions": [
+      "slab rounding and allocator metadata",
+      "netlink sockets and transient messages",
+      "file/inode/xarray objects",
+      "page tables",
+      "exporter and manager peak memory"
+    ]
+  },
+  "deployment_artifact_files": [
+    {
+      "path": "test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+      "bytes": 39144,
+      "sha256": "d37f5b387c36d58a32831c2e6e6db2573fa31117b8e51b88c92be096c1b4f499",
+      "role": "Evaluated executable or library; includes alternative backends, not a summed deployment package."
+    },
+    {
+      "path": "test/section65/build/squashfs/evaluation-fixed-01/build/vkso_sq_core.ko",
+      "bytes": 63304,
+      "sha256": "b1ae55e3f1ca3ff565939b32685d4908e57d85fdf9a6ba846e18999e3868882a",
+      "role": "Evaluated executable or library; includes alternative backends, not a summed deployment package."
+    },
+    {
+      "path": "test/section65/build/squashfs/evaluation-fixed-01/build/vkso-squashfuse",
+      "bytes": 38656,
+      "sha256": "afec5d2f45bf13aa061fbf47649d877b210089fd5542da5da53f85c60ddb63ab",
+      "role": "Evaluated executable or library; includes alternative backends, not a summed deployment package."
+    },
+    {
+      "path": "test/section65/build/squashfs/evaluation-fixed-01/build/vkso-squash-helper",
+      "bytes": 27952,
+      "sha256": "322451ec63dfee682caa006c517938b5533036598174b271b09af94001b4da98",
+      "role": "Evaluated executable or library; includes alternative backends, not a summed deployment package."
+    },
+    {
+      "path": "test/section65/build/squashfs/evaluation-fixed-01/build/libsq-bridge.so",
+      "bytes": 37976,
+      "sha256": "edea5e69776d8017e856fb3a28af3c6551a4179ae9bf42f0c831b1f8d9d292a6",
+      "role": "Evaluated executable or library; includes alternative backends, not a summed deployment package."
+    },
+    {
+      "path": "test/section65/build/squashfs/evaluation-fixed-01/build/vkso_squashfs.ko",
+      "bytes": 59472,
+      "sha256": "986d4856ba885ba50166803add304aabd75ef7c373192b22831c1c3ec74f134b",
+      "role": "Evaluated executable or library; includes alternative backends, not a summed deployment package."
+    },
+    {
+      "path": "test/section65/build/lkl/build-squash-only/sif-frontend/lklfuse",
+      "bytes": 69222784,
+      "sha256": "6d2263f7fe4d09041678527dbd0e1845c88ac3054dd5914e79d2baf2c4a28a80",
+      "role": "Evaluated executable or library; includes alternative backends, not a summed deployment package."
+    },
+    {
+      "path": "test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+      "bytes": 47810032,
+      "sha256": "395b83ad05496750dda58b9e31c079df8508d1d3a50f53f581fafc04c8d67e7b",
+      "role": "Evaluated executable or library; includes alternative backends, not a summed deployment package."
+    },
+    {
+      "path": "test/evaluation-local/packages/iso9660-native-optimized-20261029/modules/page_cache_replace.ko",
+      "bytes": 631480,
+      "sha256": "c483fee64b76d3a50cb0e7ad871c2fa665388d8531a53025cebf0ce48ac91b30",
+      "role": "Registration module"
+    },
+    {
+      "path": "test/evaluation-local/packages/iso9660-native-optimized-20261029/manager",
+      "bytes": 2565200,
+      "sha256": "0ef0cc0268c51506180e9faacfa9426bc7a3c057c66c2698790953febfddc9b8",
+      "role": "One-shot registration/restore command"
+    },
+    {
+      "path": "test/evaluation-local/packages/iso9660-native-optimized-20261029/krg",
+      "bytes": 252576,
+      "sha256": "584a689e1e8b1f20b892f992f639f8f4568b062306e66f945a844bb7d7bad6db",
+      "role": "Offline export construction tool"
+    },
+    {
+      "path": "test/evaluation-local/packages/iso9660-native-optimized-20261029/vmlinux",
+      "bytes": 56625736,
+      "sha256": "092d5c59136a3d37f103a43bdc12382a9c367096f00e6c467628e5fa5c2ccd3b",
+      "role": "Offline matching-kernel export input"
+    },
+    {
+      "path": "test/evaluation-local/packages/iso9660-native-optimized-20261029/modules/vkso_kernel_reader.ko",
+      "bytes": 296496,
+      "sha256": "50417cc219f962632f41e17361b1ca6c437ce2ca084a5b42e1be51887f44067e",
+      "role": "Optional PFN observation module"
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01/carrier/libvkso_sq_core.so",
+      "bytes": 50976,
+      "sha256": "a48b9a9903da9570a52d6a96389de07c8be78aab48e2a9f474871eabfa182f0d",
+      "role": "One completed campaign carrier after restoration; disk footprint, not unique live physical backing."
+    }
+  ],
+  "deployment_artifact_scope": "Raw file sizes identify retained deployment/construction inputs with their respective debug/symbol information; this is not a normalized stripped-binary comparison. They are not summed into an installed-package total: shared dynamic libraries, Python, kernel SDK/source and ordinary application assets are separate prerequisites. vmlinux/krg are offline construction inputs, not resident helper processes.",
+  "native_preparation_module_residency": [
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-native-normal-module-formal-01",
+      "reference": "normal-module",
+      "reference_module_bytes": 61440,
+      "prepared_owner_and_consumer_bytes": 94208,
+      "preparation_residency_delta_bytes": 32768,
+      "scope": "Same-version patched module comparison; reported resident module bytes only. Dynamic allocations and the original built-in driver are excluded from both sides."
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-native-normal-module-formal-02",
+      "reference": "normal-module",
+      "reference_module_bytes": 61440,
+      "prepared_owner_and_consumer_bytes": 94208,
+      "preparation_residency_delta_bytes": 32768,
+      "scope": "Same-version patched module comparison; reported resident module bytes only. Dynamic allocations and the original built-in driver are excluded from both sides."
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-native-normal-module-formal-03",
+      "reference": "normal-module",
+      "reference_module_bytes": 61440,
+      "prepared_owner_and_consumer_bytes": 94208,
+      "preparation_residency_delta_bytes": 32768,
+      "scope": "Same-version patched module comparison; reported resident module bytes only. Dynamic allocations and the original built-in driver are excluded from both sides."
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-native-relaxed-module-formal-01",
+      "reference": "relaxed-module",
+      "reference_module_bytes": 61440,
+      "prepared_owner_and_consumer_bytes": 94208,
+      "preparation_residency_delta_bytes": 32768,
+      "scope": "Same-version patched module comparison; reported resident module bytes only. Dynamic allocations and the original built-in driver are excluded from both sides."
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-native-relaxed-module-formal-02",
+      "reference": "relaxed-module",
+      "reference_module_bytes": 61440,
+      "prepared_owner_and_consumer_bytes": 94208,
+      "preparation_residency_delta_bytes": 32768,
+      "scope": "Same-version patched module comparison; reported resident module bytes only. Dynamic allocations and the original built-in driver are excluded from both sides."
+    },
+    {
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-native-relaxed-module-formal-03",
+      "reference": "relaxed-module",
+      "reference_module_bytes": 61440,
+      "prepared_owner_and_consumer_bytes": 94208,
+      "preparation_residency_delta_bytes": 32768,
+      "scope": "Same-version patched module comparison; reported resident module bytes only. Dynamic allocations and the original built-in driver are excluded from both sides."
+    }
+  ],
+  "unique_shared_bytes": 24576,
+  "private_state": [
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "variant": "copied",
+      "status": "pass",
+      "image_address": "0x563ee15533f0",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-01",
+      "variant": "vkso",
+      "status": "pass",
+      "image_address": "0x55d2d3512400",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "variant": "copied",
+      "status": "pass",
+      "image_address": "0x5568cfff13f0",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-01",
+      "variant": "vkso",
+      "status": "pass",
+      "image_address": "0x5595553db3f0",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "variant": "copied",
+      "status": "pass",
+      "image_address": "0x55ffd221f3f0",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-01",
+      "variant": "vkso",
+      "status": "pass",
+      "image_address": "0x563fd206a400",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "variant": "copied",
+      "status": "pass",
+      "image_address": "0x563ea7ec83f0",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-02",
+      "variant": "vkso",
+      "status": "pass",
+      "image_address": "0x5621206bf400",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "variant": "copied",
+      "status": "pass",
+      "image_address": "0x55a70e67f3f0",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-02",
+      "variant": "vkso",
+      "status": "pass",
+      "image_address": "0x563a36d3d3f0",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "variant": "copied",
+      "status": "pass",
+      "image_address": "0x55afb65393f0",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-02",
+      "variant": "vkso",
+      "status": "pass",
+      "image_address": "0x5650e42bc400",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "variant": "copied",
+      "status": "pass",
+      "image_address": "0x55b869d9d3f0",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-gzip-formal-03",
+      "variant": "vkso",
+      "status": "pass",
+      "image_address": "0x56447742d400",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "variant": "copied",
+      "status": "pass",
+      "image_address": "0x55bbd4e843f0",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-xz-formal-03",
+      "variant": "vkso",
+      "status": "pass",
+      "image_address": "0x55a85ba9f3f0",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "variant": "copied",
+      "status": "pass",
+      "image_address": "0x55ff5f2b53f0",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    },
+    {
+      "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-application-lz4-formal-03",
+      "variant": "vkso",
+      "status": "pass",
+      "image_address": "0x55cbe5104400",
+      "inode_count": 6184,
+      "name_count": 6183,
+      "caches": [
+        {
+          "kind": "block_cache",
+          "entries": 8,
+          "pages_per_entry": 2,
+          "block_size": 8192,
+          "buffer_bytes": 65536,
+          "requested_bytes": 66888
+        },
+        {
+          "kind": "fragment_cache",
+          "entries": 3,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 393216,
+          "requested_bytes": 394488
+        },
+        {
+          "kind": "read_page",
+          "entries": 1,
+          "pages_per_entry": 32,
+          "block_size": 131072,
+          "buffer_bytes": 131072,
+          "requested_bytes": 131544
+        }
+      ],
+      "requested_bytes_by_category": {
+        "image_object": 17920,
+        "filesystem_object": 192,
+        "inode_objects": 4452480,
+        "name_objects": 262350,
+        "caches": 592920,
+        "stream_object": 24,
+        "stream_output": 131072
+      },
+      "accounted_requested_bytes": 5456958,
+      "scope": "Live user-owned allocations read through DWARF; subset, not RSS or full allocator usage.",
+      "excluded": [
+        "allocator metadata and rounding",
+        "codec-library internal allocations",
+        "filesystem index tables and meta-index",
+        "FUSE and dynamic-loader allocations",
+        "transient I/O buffers absent at this idle snapshot"
+      ]
+    }
+  ],
+  "observer_free_evidence": {
+    "path": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01",
+    "result": {
+      "status": "complete",
+      "scope": "hardware application correctness and PFN identity; no performance claim",
+      "runner_sha256": "2cde3f106ec84735bf527adf556cd8af6b803b827554ba458026be3d29c898d4",
+      "stage_resource_observer": true,
+      "partition_offset": 36864,
+      "user": "zzk",
+      "stage": "complete",
+      "native_entries": 6185,
+      "observer_free_application": {
+        "status": "pass",
+        "entries": 5866,
+        "scope": "Actual new Apptainer invocation after observer-module unload; registration remains active."
+      },
+      "restored": true,
+      "application_entries": 5866,
+      "application_evidence": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/application",
+      "modules_unloaded": true
+    }
+  },
+  "deployment_command_resources": [
+    {
+      "stage": "application-without-observer",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/application-without-observer-resource.txt",
+      "sha256": "c415d0b01acc4a4f3927c7cc1fe2cc419c5b9bd61635976057476fc6d67566b2",
+      "user_seconds": 1.34,
+      "system_seconds": 0.99,
+      "maxrss_kib": 41436.0
+    },
+    {
+      "stage": "export",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/export-resource.txt",
+      "sha256": "591392c02e70eb608ad54c4fffe3e67a0550fb5b63942021dfdf488cba293a3e",
+      "user_seconds": 0.09,
+      "system_seconds": 0.0,
+      "maxrss_kib": 20072.0
+    },
+    {
+      "stage": "krg",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/krg-resource.txt",
+      "sha256": "519d0eddd61b264cd449f715a6e72d9e973d637f523768013be4c6967f9ac8a7",
+      "user_seconds": 2.06,
+      "system_seconds": 0.08,
+      "maxrss_kib": 88788.0
+    },
+    {
+      "stage": "load-page_cache_replace",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/load-page_cache_replace-resource.txt",
+      "sha256": "418e23815cb2d16734c83b6ba833500b8da3298e1b0d6d5013f3aedfd0c46d17",
+      "user_seconds": 0.0,
+      "system_seconds": 0.0,
+      "maxrss_kib": 3380.0
+    },
+    {
+      "stage": "load-vkso_kernel_reader",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/load-vkso_kernel_reader-resource.txt",
+      "sha256": "93121a9ab474bb3b673235127255d3ebebe210215caded6ed21a20f8d415208e",
+      "user_seconds": 0.0,
+      "system_seconds": 0.0,
+      "maxrss_kib": 3296.0
+    },
+    {
+      "stage": "load-vkso_sq_core",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/load-vkso_sq_core-resource.txt",
+      "sha256": "2e44352229dcffafac444c7df2ccb8477b20eb13c67685111b744e1e6b47c481",
+      "user_seconds": 0.0,
+      "system_seconds": 0.0,
+      "maxrss_kib": 3424.0
+    },
+    {
+      "stage": "load-vkso_squashfs",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/load-vkso_squashfs-resource.txt",
+      "sha256": "40a286202c3e13e5314c835a40766550286c334e016368c6b06b3fb013e97ef9",
+      "user_seconds": 0.0,
+      "system_seconds": 0.0,
+      "maxrss_kib": 3480.0
+    },
+    {
+      "stage": "native-after-mount",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/native-after-mount-resource.txt",
+      "sha256": "73f06dbbb392254bb4eac752f3173e726892d0de5dd5e4136115042eb7c119d8",
+      "user_seconds": 0.0,
+      "system_seconds": 0.0,
+      "maxrss_kib": 3124.0
+    },
+    {
+      "stage": "native-after-unmount",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/native-after-unmount-resource.txt",
+      "sha256": "ca3ce311c44d098ec5ff940c9128c15d2e50840a76df3a69b5b86b135f6cba39",
+      "user_seconds": 0.0,
+      "system_seconds": 0.02,
+      "maxrss_kib": 2856.0
+    },
+    {
+      "stage": "native-before-mount",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/native-before-mount-resource.txt",
+      "sha256": "d951b28588d9f8e7c1e8d29c4715c100755c5084374c806afcd7895164f21f81",
+      "user_seconds": 0.0,
+      "system_seconds": 0.0,
+      "maxrss_kib": 3120.0
+    },
+    {
+      "stage": "native-before-unmount",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/native-before-unmount-resource.txt",
+      "sha256": "a39ed1b701cd65fd592f77392c77453a167c2f31cb67344a296aecd25f62eb20",
+      "user_seconds": 0.0,
+      "system_seconds": 0.02,
+      "maxrss_kib": 2872.0
+    },
+    {
+      "stage": "native-original-mount",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/native-original-mount-resource.txt",
+      "sha256": "47e57120ef7adc378ccad2bc5fd87fee1121f9a73a33164400b414c3fc6765b5",
+      "user_seconds": 0.0,
+      "system_seconds": 0.0,
+      "maxrss_kib": 2924.0
+    },
+    {
+      "stage": "native-original-unmount",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/native-original-unmount-resource.txt",
+      "sha256": "8e0d31ee808945a9efa1eb56a21872e6b111f4a2bc43cf626b40b708440947c4",
+      "user_seconds": 0.0,
+      "system_seconds": 0.02,
+      "maxrss_kib": 2828.0
+    },
+    {
+      "stage": "register",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/register-resource.txt",
+      "sha256": "b7d0bc8546c329c03193bd6a967c30c97d3dd7cf3d8c47512488b25c76671078",
+      "user_seconds": 0.04,
+      "system_seconds": 0.03,
+      "maxrss_kib": 1672.0
+    },
+    {
+      "stage": "remove-observer",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/remove-observer-resource.txt",
+      "sha256": "6f9e7244fd96ade01182e5b16f5394c0ad0033fd018c001cc9068c08261030f9",
+      "user_seconds": 0.0,
+      "system_seconds": 0.0,
+      "maxrss_kib": 3404.0
+    },
+    {
+      "stage": "restore",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/restore-resource.txt",
+      "sha256": "8ee9b913d9d4d38246a786dfeb8d7016cc25b0f8a1e47a5a277e9ee554ba892d",
+      "user_seconds": 0.0,
+      "system_seconds": 0.0,
+      "maxrss_kib": 1604.0
+    },
+    {
+      "stage": "unload-page_cache_replace",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/unload-page_cache_replace-resource.txt",
+      "sha256": "a832ce2891ca794343cfc555bf5bb1ad606cc1aa01b6e321ad2821f22d985a59",
+      "user_seconds": 0.0,
+      "system_seconds": 0.0,
+      "maxrss_kib": 3492.0
+    },
+    {
+      "stage": "unload-vkso_sq_core",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/unload-vkso_sq_core-resource.txt",
+      "sha256": "1ef6d123de42ddef3dcb0602d8fd50e083e89b11ad41f40f22db29d274603d16",
+      "user_seconds": 0.0,
+      "system_seconds": 0.0,
+      "maxrss_kib": 3536.0
+    },
+    {
+      "stage": "unload-vkso_squashfs",
+      "source": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-observer-free-01/unload-vkso_squashfs-resource.txt",
+      "sha256": "d1cca1b74a6b822148729f50bc05032b6cd7caf5747a715fdacb60baf1e578a7",
+      "user_seconds": 0.0,
+      "system_seconds": 0.0,
+      "maxrss_kib": 3492.0
+    }
+  ],
+  "accounting_cases": [
+    {
+      "assumption": "Prepared owner and native consumer already resident for kernel work; registration support already deployed.",
+      "scope": "24 KiB of duplicate file backing avoided once per common core, with per-registration metadata and user-private state additional. No N-times code saving over an ordinary shared DSO."
+    },
+    {
+      "assumption": "Prepared owner and native consumer already resident; registration module dedicated to this user task.",
+      "scope": "32 KiB registration module alone exceeds the 24 KiB duplicated code/rodata removed; this deployment does not establish net memory savings."
+    },
+    {
+      "assumption": "Owner, native consumer and registration added solely for user reuse.",
+      "scope": "52+40+32 KiB reported module residency, plus dynamic allocation. Original built-in SquashFS remains resident in this experiment. Optional observation module adds 20 KiB during evidence collection."
+    }
+  ],
+  "limitations": [
+    "PFN count is physical reuse, not process RSS or net savings.",
+    "Process PSS does not account kernel-owner residency; summing it with module bytes is not a calibrated whole-machine total.",
+    "Resident module sizes omit dynamic allocations; source-request accounting is a subset.",
+    "Process snapshots omit host backing-image cache, FUSE kernel caches, tmpfs output and page tables.",
+    "Archive snapshots do not establish peak memory or concurrent scaling.",
+    "GNU time maxrss describes the maximum resident-set counter returned for the command/children, not simultaneous process-tree PSS or whole-machine peak memory.",
+    "Setup command sums add actual stages within each campaign, excluding compilation, package acquisition and functional validation between stages. They are not sums of unrelated medians.",
+    "Deployment stage samples are whole command durations; startup and cleanup components are not obtained by subtracting unrelated medians."
+  ]
+}

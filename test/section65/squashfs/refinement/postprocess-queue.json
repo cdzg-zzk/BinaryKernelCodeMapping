@@ -1,0 +1,105 @@
+[
+  {
+    "name": "analyze",
+    "argv": [
+      "runuser",
+      "-u",
+      "zzk",
+      "--",
+      "taskset",
+      "-c",
+      "0",
+      "paper/build/section65-plot-env-02/venv/bin/python",
+      "test/section65/squashfs/refinement/analyze.py",
+      "--queue",
+      "test/section65/squashfs/refinement/formal-queue.json",
+      "--output",
+      "test/section65/build/squashfs/refined-analysis-01"
+    ],
+    "result": "test/section65/build/squashfs/refined-analysis-01/analysis.json"
+  },
+  {
+    "name": "independent-audit",
+    "argv": [
+      "runuser",
+      "-u",
+      "zzk",
+      "--",
+      "taskset",
+      "-c",
+      "0",
+      "python3",
+      "test/section65/squashfs/refinement/audit.py",
+      "--queue",
+      "test/section65/squashfs/refinement/formal-queue.json",
+      "--analysis",
+      "test/section65/build/squashfs/refined-analysis-01/analysis.json",
+      "--output",
+      "test/section65/build/squashfs/refined-analysis-01/audit.json"
+    ],
+    "result": "test/section65/build/squashfs/refined-analysis-01/audit.json"
+  },
+  {
+    "name": "resource-ledger",
+    "argv": [
+      "runuser",
+      "-u",
+      "zzk",
+      "--",
+      "taskset",
+      "-c",
+      "0",
+      "python3",
+      "test/section65/squashfs/refinement/resources.py",
+      "--queue",
+      "test/section65/squashfs/refinement/formal-queue.json",
+      "--output",
+      "test/section65/build/squashfs/refined-analysis-01/resource-ledger"
+    ],
+    "result": "test/section65/build/squashfs/refined-analysis-01/resource-ledger/resources.json"
+  },
+  {
+    "name": "figures",
+    "argv": [
+      "runuser",
+      "-u",
+      "zzk",
+      "--",
+      "taskset",
+      "-c",
+      "0",
+      "paper/build/section65-plot-env-02/venv/bin/python",
+      "paper/plot_filesystem_refined.py",
+      "--analysis",
+      "test/section65/build/squashfs/refined-analysis-01/analysis.json",
+      "--resources",
+      "test/section65/build/squashfs/refined-analysis-01/resource-ledger/resources.json",
+      "--output",
+      "paper/build/section65-refined-figures-01"
+    ],
+    "result": "paper/build/section65-refined-figures-01/provenance.json"
+  },
+  {
+    "name": "section-draft",
+    "argv": [
+      "runuser",
+      "-u",
+      "zzk",
+      "--",
+      "taskset",
+      "-c",
+      "0",
+      "python3",
+      "test/section65/squashfs/refinement/write_section.py",
+      "--analysis",
+      "test/section65/build/squashfs/refined-analysis-01/analysis.json",
+      "--audit",
+      "test/section65/build/squashfs/refined-analysis-01/audit.json",
+      "--resources",
+      "test/section65/build/squashfs/refined-analysis-01/resource-ledger/resources.json",
+      "--output",
+      "test/section65/build/squashfs/refined-analysis-01/section65.tex"
+    ],
+    "result": "test/section65/build/squashfs/refined-analysis-01/section65.numbers.json"
+  }
+]

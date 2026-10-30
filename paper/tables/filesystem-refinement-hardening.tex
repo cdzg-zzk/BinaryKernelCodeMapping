@@ -1,0 +1,8 @@
+\begin{table}[h]\centering\small
+\caption{Actual object-code audit. The PIC probe is a build-only feasibility check with an explicit GS canary convention; it is not a runnable hardened VKSO configuration.}
+\begin{tabular}{lrrr}\toprule Object configuration & GS canary & Indirect thunks & Return thunks \\\midrule
+Optimized normal native & yes & yes & yes \\
+Optimized relaxed native & no & no & no \\
+Final prepared filesystem & no & no & no \\
+PIC hardened build-only probe & yes & yes & yes \\
+\bottomrule\end{tabular}\end{table}

@@ -1,0 +1,35 @@
+[
+  {
+    "name": "singlecpu-analysis",
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "/home/zzk/BinaryKernelCodeMapping/paper/build/section65-plot-env-02/venv/bin/python",
+      "test/section65/squashfs/improvement/analyze.py",
+      "--queue",
+      "test/section65/squashfs/improvement/singlecpu-analysis-queue.json",
+      "--output",
+      "test/section65/build/squashfs/improvement-singlecpu-analysis-01",
+      "--loader-control"
+    ],
+    "result": "test/section65/build/squashfs/improvement-singlecpu-analysis-01/analysis.json"
+  },
+  {
+    "name": "singlecpu-analysis-validation",
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "python3",
+      "test/section65/squashfs/improvement/validate_analysis.py",
+      "--analysis",
+      "test/section65/build/squashfs/improvement-singlecpu-analysis-01/analysis.json",
+      "--output",
+      "test/section65/build/squashfs/improvement-singlecpu-analysis-01/analysis-audit.json",
+      "--loader-control",
+      "--single-cpu"
+    ],
+    "result": "test/section65/build/squashfs/improvement-singlecpu-analysis-01/analysis-audit.json"
+  }
+]

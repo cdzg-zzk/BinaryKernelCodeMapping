@@ -1,0 +1,2230 @@
+{
+  "status": "audited",
+  "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/lkl-namecache-native-01",
+  "observations": 768,
+  "correctness_cases": 56,
+  "shared_pages": 5,
+  "table": [
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "copied-fuse",
+      "trials": 24,
+      "task_ms": 109.93194200273138,
+      "client_cpu_ms": 55.27350000001263,
+      "daemon_cpu_ms": 50.0,
+      "ready_ms": 7.025045502814464,
+      "before_Rss": {
+        "median": 2198.0,
+        "min": 2176,
+        "max": 2268
+      },
+      "before_Pss": {
+        "median": 1978.0,
+        "min": 1956,
+        "max": 2048
+      },
+      "before_VmHWM": {
+        "median": 1486.0,
+        "min": 1392,
+        "max": 1600
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 2462.0,
+        "min": 2440,
+        "max": 2532
+      },
+      "after_Pss": {
+        "median": 2242.0,
+        "min": 2220,
+        "max": 2312
+      },
+      "after_VmHWM": {
+        "median": 2298.0,
+        "min": 2276,
+        "max": 2368
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "lookup_cache": {
+        "calls_median": 2163.0,
+        "hits_median": 2037.0,
+        "entries_median": 126.0,
+        "hit_fraction_median": 0.941747572815534
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "lkl-default64",
+      "trials": 24,
+      "task_ms": 132.64191500638844,
+      "client_cpu_ms": 55.330000000004986,
+      "daemon_cpu_ms": 80.0,
+      "ready_ms": 141.92838999588275,
+      "before_Rss": {
+        "median": 20078.0,
+        "min": 19772,
+        "max": 20272
+      },
+      "before_Pss": {
+        "median": 19799.0,
+        "min": 19493,
+        "max": 19993
+      },
+      "before_VmHWM": {
+        "median": 19164.0,
+        "min": 18072,
+        "max": 19340
+      },
+      "before_Threads": {
+        "median": 25.0,
+        "min": 25,
+        "max": 25
+      },
+      "after_Rss": {
+        "median": 72360.0,
+        "min": 72056,
+        "max": 72556
+      },
+      "after_Pss": {
+        "median": 72081.0,
+        "min": 71777,
+        "max": 72277
+      },
+      "after_VmHWM": {
+        "median": 71764.0,
+        "min": 70708,
+        "max": 71976
+      },
+      "after_Threads": {
+        "median": 26.0,
+        "min": 26,
+        "max": 26
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "lkl-iso16",
+      "trials": 24,
+      "task_ms": 133.12441799644148,
+      "client_cpu_ms": 55.63649999999498,
+      "daemon_cpu_ms": 90.00000000000001,
+      "ready_ms": 99.09884400258306,
+      "before_Rss": {
+        "median": 13430.0,
+        "min": 13280,
+        "max": 13520
+      },
+      "before_Pss": {
+        "median": 13151.0,
+        "min": 13001,
+        "max": 13241
+      },
+      "before_VmHWM": {
+        "median": 12904.0,
+        "min": 12772,
+        "max": 13020
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 24680.0,
+        "min": 24248,
+        "max": 24832
+      },
+      "after_Pss": {
+        "median": 24401.0,
+        "min": 23969,
+        "max": 24553
+      },
+      "after_VmHWM": {
+        "median": 24086.0,
+        "min": 23600,
+        "max": 24276
+      },
+      "after_Threads": {
+        "median": 18.0,
+        "min": 18,
+        "max": 18
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "lkl-iso64",
+      "trials": 24,
+      "task_ms": 137.2399654937908,
+      "client_cpu_ms": 55.96800000000357,
+      "daemon_cpu_ms": 90.0,
+      "ready_ms": 100.64394649816677,
+      "before_Rss": {
+        "median": 14154.0,
+        "min": 14024,
+        "max": 14292
+      },
+      "before_Pss": {
+        "median": 13875.0,
+        "min": 13745,
+        "max": 14013
+      },
+      "before_VmHWM": {
+        "median": 13686.0,
+        "min": 13516,
+        "max": 13820
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 68456.0,
+        "min": 68328,
+        "max": 68584
+      },
+      "after_Pss": {
+        "median": 68177.0,
+        "min": 68049,
+        "max": 68305
+      },
+      "after_VmHWM": {
+        "median": 67974.0,
+        "min": 67812,
+        "max": 68120
+      },
+      "after_Threads": {
+        "median": 18.0,
+        "min": 17,
+        "max": 18
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "lkl-iso8",
+      "trials": 24,
+      "task_ms": 150.59833900158992,
+      "client_cpu_ms": 56.05149999999526,
+      "daemon_cpu_ms": 100.0,
+      "ready_ms": 102.5721890036948,
+      "before_Rss": {
+        "median": 13312.0,
+        "min": 13196,
+        "max": 13416
+      },
+      "before_Pss": {
+        "median": 13033.0,
+        "min": 12917,
+        "max": 13137
+      },
+      "before_VmHWM": {
+        "median": 12096.0,
+        "min": 11920,
+        "max": 12284
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 16348.0,
+        "min": 16148,
+        "max": 16532
+      },
+      "after_Pss": {
+        "median": 16069.0,
+        "min": 15869,
+        "max": 16253
+      },
+      "after_VmHWM": {
+        "median": 14962.0,
+        "min": 14656,
+        "max": 15304
+      },
+      "after_Threads": {
+        "median": 18.0,
+        "min": 18,
+        "max": 18
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "original",
+      "trials": 24,
+      "task_ms": 47.24265900586033,
+      "client_cpu_ms": 42.62900000000247,
+      "daemon_cpu_ms": 0.0
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "vkso-fuse",
+      "trials": 24,
+      "task_ms": 110.60011749941623,
+      "client_cpu_ms": 55.41899999998634,
+      "daemon_cpu_ms": 50.0,
+      "ready_ms": 6.984078994719312,
+      "before_Rss": {
+        "median": 2196.0,
+        "min": 2180,
+        "max": 2264
+      },
+      "before_Pss": {
+        "median": 1976.0,
+        "min": 1960,
+        "max": 2044
+      },
+      "before_VmHWM": {
+        "median": 1484.0,
+        "min": 1416,
+        "max": 1600
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 2460.0,
+        "min": 2444,
+        "max": 2528
+      },
+      "after_Pss": {
+        "median": 2240.0,
+        "min": 2224,
+        "max": 2308
+      },
+      "after_VmHWM": {
+        "median": 2296.0,
+        "min": 2280,
+        "max": 2364
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "lookup_cache": {
+        "calls_median": 2163.0,
+        "hits_median": 2037.0,
+        "entries_median": 126.0,
+        "hit_fraction_median": 0.941747572815534
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "vkso-uncached",
+      "trials": 24,
+      "task_ms": 113.75280850188574,
+      "client_cpu_ms": 55.38800000000421,
+      "daemon_cpu_ms": 50.0,
+      "ready_ms": 6.995559997449163,
+      "before_Rss": {
+        "median": 2200.0,
+        "min": 2180,
+        "max": 2272
+      },
+      "before_Pss": {
+        "median": 1980.0,
+        "min": 1960,
+        "max": 2052
+      },
+      "before_VmHWM": {
+        "median": 1486.0,
+        "min": 1420,
+        "max": 1600
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 2456.0,
+        "min": 2436,
+        "max": 2528
+      },
+      "after_Pss": {
+        "median": 2236.0,
+        "min": 2216,
+        "max": 2308
+      },
+      "after_VmHWM": {
+        "median": 2296.0,
+        "min": 2276,
+        "max": 2368
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "copied-fuse",
+      "trials": 24,
+      "task_ms": 5.546464497456327,
+      "client_cpu_ms": 2.288500000005911,
+      "daemon_cpu_ms": 0.0,
+      "ready_ms": 6.939940503798425,
+      "before_Rss": {
+        "median": 2198.0,
+        "min": 2176,
+        "max": 2260
+      },
+      "before_Pss": {
+        "median": 1978.0,
+        "min": 1956,
+        "max": 2040
+      },
+      "before_VmHWM": {
+        "median": 1486.0,
+        "min": 1364,
+        "max": 1532
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 2338.0,
+        "min": 2316,
+        "max": 2400
+      },
+      "after_Pss": {
+        "median": 2118.0,
+        "min": 2096,
+        "max": 2180
+      },
+      "after_VmHWM": {
+        "median": 2236.0,
+        "min": 2212,
+        "max": 2296
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "lookup_cache": {
+        "calls_median": 783.0,
+        "hits_median": 657.0,
+        "entries_median": 126.0,
+        "hit_fraction_median": 0.8390804597701149
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "lkl-default64",
+      "trials": 24,
+      "task_ms": 5.847404499945696,
+      "client_cpu_ms": 2.414999999999168,
+      "daemon_cpu_ms": 0.0,
+      "ready_ms": 141.15630699961912,
+      "before_Rss": {
+        "median": 20006.0,
+        "min": 19764,
+        "max": 20232
+      },
+      "before_Pss": {
+        "median": 19727.0,
+        "min": 19485,
+        "max": 19953
+      },
+      "before_VmHWM": {
+        "median": 19100.0,
+        "min": 18276,
+        "max": 19272
+      },
+      "before_Threads": {
+        "median": 25.0,
+        "min": 25,
+        "max": 25
+      },
+      "after_Rss": {
+        "median": 20206.0,
+        "min": 19964,
+        "max": 20432
+      },
+      "after_Pss": {
+        "median": 19927.0,
+        "min": 19685,
+        "max": 20153
+      },
+      "after_VmHWM": {
+        "median": 19626.0,
+        "min": 18840,
+        "max": 19884
+      },
+      "after_Threads": {
+        "median": 25.0,
+        "min": 25,
+        "max": 25
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "lkl-iso16",
+      "trials": 24,
+      "task_ms": 5.815501004690304,
+      "client_cpu_ms": 2.401499999997725,
+      "daemon_cpu_ms": 9.999999999999995,
+      "ready_ms": 100.30862200073898,
+      "before_Rss": {
+        "median": 13470.0,
+        "min": 13232,
+        "max": 13532
+      },
+      "before_Pss": {
+        "median": 13191.0,
+        "min": 12953,
+        "max": 13253
+      },
+      "before_VmHWM": {
+        "median": 12944.0,
+        "min": 12732,
+        "max": 13024
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 13662.0,
+        "min": 13420,
+        "max": 13724
+      },
+      "after_Pss": {
+        "median": 13383.0,
+        "min": 13141,
+        "max": 13445
+      },
+      "after_VmHWM": {
+        "median": 13110.0,
+        "min": 12732,
+        "max": 13292
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "lkl-iso64",
+      "trials": 24,
+      "task_ms": 5.84789600543445,
+      "client_cpu_ms": 2.401499999997725,
+      "daemon_cpu_ms": 0.0,
+      "ready_ms": 100.70964400074445,
+      "before_Rss": {
+        "median": 14208.0,
+        "min": 14012,
+        "max": 14292
+      },
+      "before_Pss": {
+        "median": 13929.0,
+        "min": 13733,
+        "max": 14013
+      },
+      "before_VmHWM": {
+        "median": 13696.0,
+        "min": 13560,
+        "max": 13836
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 14398.0,
+        "min": 14204,
+        "max": 14484
+      },
+      "after_Pss": {
+        "median": 14119.0,
+        "min": 13925,
+        "max": 14205
+      },
+      "after_VmHWM": {
+        "median": 13816.0,
+        "min": 13580,
+        "max": 14104
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "lkl-iso8",
+      "trials": 24,
+      "task_ms": 5.812925002828706,
+      "client_cpu_ms": 2.384499999998013,
+      "daemon_cpu_ms": 0.0,
+      "ready_ms": 99.38864799914882,
+      "before_Rss": {
+        "median": 13300.0,
+        "min": 13140,
+        "max": 13412
+      },
+      "before_Pss": {
+        "median": 13021.0,
+        "min": 12861,
+        "max": 13133
+      },
+      "before_VmHWM": {
+        "median": 12038.0,
+        "min": 11912,
+        "max": 12292
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 13488.0,
+        "min": 13332,
+        "max": 13608
+      },
+      "after_Pss": {
+        "median": 13209.0,
+        "min": 13053,
+        "max": 13329
+      },
+      "after_VmHWM": {
+        "median": 12098.0,
+        "min": 11916,
+        "max": 12560
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "original",
+      "trials": 24,
+      "task_ms": 3.751077500055544,
+      "client_cpu_ms": 2.325000000002575,
+      "daemon_cpu_ms": 0.0
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "vkso-fuse",
+      "trials": 24,
+      "task_ms": 5.541245991480537,
+      "client_cpu_ms": 2.2950000000037107,
+      "daemon_cpu_ms": 0.0,
+      "ready_ms": 6.958157006010879,
+      "before_Rss": {
+        "median": 2202.0,
+        "min": 2180,
+        "max": 2260
+      },
+      "before_Pss": {
+        "median": 1982.0,
+        "min": 1960,
+        "max": 2040
+      },
+      "before_VmHWM": {
+        "median": 1484.0,
+        "min": 1420,
+        "max": 1536
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 2342.0,
+        "min": 2320,
+        "max": 2400
+      },
+      "after_Pss": {
+        "median": 2122.0,
+        "min": 2100,
+        "max": 2180
+      },
+      "after_VmHWM": {
+        "median": 2240.0,
+        "min": 2212,
+        "max": 2296
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "lookup_cache": {
+        "calls_median": 783.0,
+        "hits_median": 657.0,
+        "entries_median": 126.0,
+        "hit_fraction_median": 0.8390804597701149
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "vkso-uncached",
+      "trials": 24,
+      "task_ms": 6.721306504914537,
+      "client_cpu_ms": 2.3189999999928546,
+      "daemon_cpu_ms": 0.0,
+      "ready_ms": 6.956886005355045,
+      "before_Rss": {
+        "median": 2208.0,
+        "min": 2180,
+        "max": 2264
+      },
+      "before_Pss": {
+        "median": 1988.0,
+        "min": 1960,
+        "max": 2044
+      },
+      "before_VmHWM": {
+        "median": 1486.0,
+        "min": 1428,
+        "max": 1532
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 2344.0,
+        "min": 2316,
+        "max": 2400
+      },
+      "after_Pss": {
+        "median": 2124.0,
+        "min": 2096,
+        "max": 2180
+      },
+      "after_VmHWM": {
+        "median": 2244.0,
+        "min": 2188,
+        "max": 2296
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "copied-fuse",
+      "trials": 24,
+      "task_ms": 617.3719450089266,
+      "client_cpu_ms": 176.4505000000014,
+      "daemon_cpu_ms": 450.0,
+      "ready_ms": 7.000776000495534,
+      "before_Rss": {
+        "median": 2194.0,
+        "min": 2180,
+        "max": 2264
+      },
+      "before_Pss": {
+        "median": 1974.0,
+        "min": 1960,
+        "max": 2044
+      },
+      "before_VmHWM": {
+        "median": 1482.0,
+        "min": 1420,
+        "max": 1600
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 7520.0,
+        "min": 7504,
+        "max": 7592
+      },
+      "after_Pss": {
+        "median": 7300.0,
+        "min": 7284,
+        "max": 7372
+      },
+      "after_VmHWM": {
+        "median": 7432.0,
+        "min": 7416,
+        "max": 7504
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "lookup_cache": {
+        "calls_median": 94199.0,
+        "hits_median": 88334.0,
+        "entries_median": 5865.0,
+        "hit_fraction_median": 0.9377381925498147
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "lkl-default64",
+      "trials": 24,
+      "task_ms": 1040.293230995303,
+      "client_cpu_ms": 216.20399999999762,
+      "daemon_cpu_ms": 930.0,
+      "ready_ms": 142.37879299616907,
+      "before_Rss": {
+        "median": 20132.0,
+        "min": 19740,
+        "max": 20272
+      },
+      "before_Pss": {
+        "median": 19853.0,
+        "min": 19461,
+        "max": 19993
+      },
+      "before_VmHWM": {
+        "median": 19164.0,
+        "min": 18228,
+        "max": 19364
+      },
+      "before_Threads": {
+        "median": 25.0,
+        "min": 25,
+        "max": 25
+      },
+      "after_Rss": {
+        "median": 71470.0,
+        "min": 71108,
+        "max": 71652
+      },
+      "after_Pss": {
+        "median": 71191.0,
+        "min": 70829,
+        "max": 71373
+      },
+      "after_VmHWM": {
+        "median": 70728.0,
+        "min": 69812,
+        "max": 70952
+      },
+      "after_Threads": {
+        "median": 26.0,
+        "min": 26,
+        "max": 26
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "lkl-iso16",
+      "trials": 24,
+      "task_ms": 1009.7615869963192,
+      "client_cpu_ms": 216.72800000000336,
+      "daemon_cpu_ms": 909.9999999999999,
+      "ready_ms": 117.2461454916629,
+      "before_Rss": {
+        "median": 13412.0,
+        "min": 13296,
+        "max": 13524
+      },
+      "before_Pss": {
+        "median": 13133.0,
+        "min": 13017,
+        "max": 13245
+      },
+      "before_VmHWM": {
+        "median": 12872.0,
+        "min": 12700,
+        "max": 13012
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 25848.0,
+        "min": 25576,
+        "max": 26036
+      },
+      "after_Pss": {
+        "median": 25569.0,
+        "min": 25297,
+        "max": 25757
+      },
+      "after_VmHWM": {
+        "median": 25198.0,
+        "min": 24888,
+        "max": 25484
+      },
+      "after_Threads": {
+        "median": 18.0,
+        "min": 18,
+        "max": 18
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "lkl-iso64",
+      "trials": 24,
+      "task_ms": 1069.2544035046012,
+      "client_cpu_ms": 221.75750000000605,
+      "daemon_cpu_ms": 970.0000000000001,
+      "ready_ms": 101.40251199482009,
+      "before_Rss": {
+        "median": 14218.0,
+        "min": 14052,
+        "max": 14284
+      },
+      "before_Pss": {
+        "median": 13939.0,
+        "min": 13773,
+        "max": 14005
+      },
+      "before_VmHWM": {
+        "median": 13720.0,
+        "min": 13552,
+        "max": 13816
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 69358.0,
+        "min": 69184,
+        "max": 69428
+      },
+      "after_Pss": {
+        "median": 69079.0,
+        "min": 68905,
+        "max": 69149
+      },
+      "after_VmHWM": {
+        "median": 68732.0,
+        "min": 68556,
+        "max": 68828
+      },
+      "after_Threads": {
+        "median": 18.0,
+        "min": 17,
+        "max": 19
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "lkl-iso8",
+      "trials": 24,
+      "task_ms": 1068.0127770028776,
+      "client_cpu_ms": 224.36100000001602,
+      "daemon_cpu_ms": 980.0000000000001,
+      "ready_ms": 100.1429294992704,
+      "before_Rss": {
+        "median": 13326.0,
+        "min": 13140,
+        "max": 13428
+      },
+      "before_Pss": {
+        "median": 13047.0,
+        "min": 12861,
+        "max": 13149
+      },
+      "before_VmHWM": {
+        "median": 12046.0,
+        "min": 11848,
+        "max": 12356
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 17520.0,
+        "min": 17216,
+        "max": 17740
+      },
+      "after_Pss": {
+        "median": 17241.0,
+        "min": 16937,
+        "max": 17461
+      },
+      "after_VmHWM": {
+        "median": 16358.0,
+        "min": 15936,
+        "max": 16552
+      },
+      "after_Threads": {
+        "median": 18.0,
+        "min": 18,
+        "max": 18
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "original",
+      "trials": 24,
+      "task_ms": 215.66999049537117,
+      "client_cpu_ms": 182.3200000000078,
+      "daemon_cpu_ms": 0.0
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "vkso-fuse",
+      "trials": 24,
+      "task_ms": 616.3757629983593,
+      "client_cpu_ms": 176.60000000000053,
+      "daemon_cpu_ms": 450.0,
+      "ready_ms": 6.98882999131456,
+      "before_Rss": {
+        "median": 2192.0,
+        "min": 2180,
+        "max": 2264
+      },
+      "before_Pss": {
+        "median": 1972.0,
+        "min": 1959,
+        "max": 2044
+      },
+      "before_VmHWM": {
+        "median": 1484.0,
+        "min": 1420,
+        "max": 1596
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 7520.0,
+        "min": 7508,
+        "max": 7592
+      },
+      "after_Pss": {
+        "median": 7300.0,
+        "min": 7288,
+        "max": 7372
+      },
+      "after_VmHWM": {
+        "median": 7432.0,
+        "min": 7420,
+        "max": 7504
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "lookup_cache": {
+        "calls_median": 94199.0,
+        "hits_median": 88334.0,
+        "entries_median": 5865.0,
+        "hit_fraction_median": 0.9377381925498147
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "vkso-uncached",
+      "trials": 24,
+      "task_ms": 1925.8786415011855,
+      "client_cpu_ms": 192.05700000000192,
+      "daemon_cpu_ms": 1740.0,
+      "ready_ms": 6.993208990024868,
+      "before_Rss": {
+        "median": 2204.0,
+        "min": 2180,
+        "max": 2272
+      },
+      "before_Pss": {
+        "median": 1984.0,
+        "min": 1960,
+        "max": 2052
+      },
+      "before_VmHWM": {
+        "median": 1484.0,
+        "min": 1396,
+        "max": 1600
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 7314.0,
+        "min": 7292,
+        "max": 7380
+      },
+      "after_Pss": {
+        "median": 7094.0,
+        "min": 7072,
+        "max": 7160
+      },
+      "after_VmHWM": {
+        "median": 7086.0,
+        "min": 7064,
+        "max": 7152
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "copied-fuse",
+      "trials": 24,
+      "task_ms": 332.44962499884423,
+      "client_cpu_ms": 51.033500000009724,
+      "daemon_cpu_ms": 270.0,
+      "ready_ms": 7.3601239928393625,
+      "before_Rss": {
+        "median": 2200.0,
+        "min": 2176,
+        "max": 2264
+      },
+      "before_Pss": {
+        "median": 1980.0,
+        "min": 1956,
+        "max": 2044
+      },
+      "before_VmHWM": {
+        "median": 1478.0,
+        "min": 1420,
+        "max": 1536
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 7508.0,
+        "min": 7480,
+        "max": 7568
+      },
+      "after_Pss": {
+        "median": 7288.0,
+        "min": 7260,
+        "max": 7348
+      },
+      "after_VmHWM": {
+        "median": 7464.0,
+        "min": 7324,
+        "max": 7528
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "lookup_cache": {
+        "calls_median": 34379.0,
+        "hits_median": 28514.0,
+        "entries_median": 5865.0,
+        "hit_fraction_median": 0.8294016696238983
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "lkl-default64",
+      "trials": 24,
+      "task_ms": 280.2605124961701,
+      "client_cpu_ms": 51.91049999999109,
+      "daemon_cpu_ms": 240.0,
+      "ready_ms": 141.85374549560947,
+      "before_Rss": {
+        "median": 20036.0,
+        "min": 19712,
+        "max": 20280
+      },
+      "before_Pss": {
+        "median": 19757.0,
+        "min": 19433,
+        "max": 20001
+      },
+      "before_VmHWM": {
+        "median": 19068.0,
+        "min": 17800,
+        "max": 19344
+      },
+      "before_Threads": {
+        "median": 25.0,
+        "min": 25,
+        "max": 26
+      },
+      "after_Rss": {
+        "median": 27312.0,
+        "min": 26992,
+        "max": 27552
+      },
+      "after_Pss": {
+        "median": 27033.0,
+        "min": 26713,
+        "max": 27273
+      },
+      "after_VmHWM": {
+        "median": 26548.0,
+        "min": 25304,
+        "max": 26836
+      },
+      "after_Threads": {
+        "median": 25.0,
+        "min": 25,
+        "max": 26
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "lkl-iso16",
+      "trials": 24,
+      "task_ms": 279.5491860015318,
+      "client_cpu_ms": 52.331500000001085,
+      "daemon_cpu_ms": 240.0,
+      "ready_ms": 103.82454399223207,
+      "before_Rss": {
+        "median": 13472.0,
+        "min": 13268,
+        "max": 13548
+      },
+      "before_Pss": {
+        "median": 13193.0,
+        "min": 12989,
+        "max": 13269
+      },
+      "before_VmHWM": {
+        "median": 12914.0,
+        "min": 12772,
+        "max": 13028
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 20408.0,
+        "min": 20208,
+        "max": 20488
+      },
+      "after_Pss": {
+        "median": 20129.0,
+        "min": 19929,
+        "max": 20209
+      },
+      "after_VmHWM": {
+        "median": 19786.0,
+        "min": 19636,
+        "max": 19892
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "lkl-iso64",
+      "trials": 24,
+      "task_ms": 278.70971949596424,
+      "client_cpu_ms": 51.99849999999362,
+      "daemon_cpu_ms": 240.00000000000003,
+      "ready_ms": 100.16348200588254,
+      "before_Rss": {
+        "median": 14202.0,
+        "min": 14008,
+        "max": 14280
+      },
+      "before_Pss": {
+        "median": 13923.0,
+        "min": 13729,
+        "max": 14001
+      },
+      "before_VmHWM": {
+        "median": 13686.0,
+        "min": 13492,
+        "max": 13808
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 21144.0,
+        "min": 20940,
+        "max": 21220
+      },
+      "after_Pss": {
+        "median": 20865.0,
+        "min": 20661,
+        "max": 20941
+      },
+      "after_VmHWM": {
+        "median": 20568.0,
+        "min": 20356,
+        "max": 20676
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 18
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "lkl-iso8",
+      "trials": 24,
+      "task_ms": 286.95298951060977,
+      "client_cpu_ms": 52.3725000000006,
+      "daemon_cpu_ms": 250.0,
+      "ready_ms": 100.12744349660352,
+      "before_Rss": {
+        "median": 13346.0,
+        "min": 13108,
+        "max": 13412
+      },
+      "before_Pss": {
+        "median": 13069.0,
+        "min": 12829,
+        "max": 13133
+      },
+      "before_VmHWM": {
+        "median": 12092.0,
+        "min": 11844,
+        "max": 12288
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 17242.0,
+        "min": 17116,
+        "max": 17520
+      },
+      "after_Pss": {
+        "median": 16963.0,
+        "min": 16837,
+        "max": 17241
+      },
+      "after_VmHWM": {
+        "median": 16056.0,
+        "min": 15756,
+        "max": 16272
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "original",
+      "trials": 24,
+      "task_ms": 116.38941099954536,
+      "client_cpu_ms": 110.60999999999943,
+      "daemon_cpu_ms": 0.0
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "vkso-fuse",
+      "trials": 24,
+      "task_ms": 336.5045155005646,
+      "client_cpu_ms": 50.98599999998399,
+      "daemon_cpu_ms": 280.0,
+      "ready_ms": 7.020737502898555,
+      "before_Rss": {
+        "median": 2194.0,
+        "min": 2176,
+        "max": 2268
+      },
+      "before_Pss": {
+        "median": 1974.0,
+        "min": 1956,
+        "max": 2048
+      },
+      "before_VmHWM": {
+        "median": 1478.0,
+        "min": 1416,
+        "max": 1600
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 7500.0,
+        "min": 7484,
+        "max": 7572
+      },
+      "after_Pss": {
+        "median": 7280.0,
+        "min": 7264,
+        "max": 7352
+      },
+      "after_VmHWM": {
+        "median": 7460.0,
+        "min": 7444,
+        "max": 7532
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "lookup_cache": {
+        "calls_median": 34379.0,
+        "hits_median": 28514.0,
+        "entries_median": 5865.0,
+        "hit_fraction_median": 0.8294016696238983
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "vkso-uncached",
+      "trials": 24,
+      "task_ms": 723.1334600000991,
+      "client_cpu_ms": 52.977499999997235,
+      "daemon_cpu_ms": 660.0,
+      "ready_ms": 7.006916493992321,
+      "before_Rss": {
+        "median": 2198.0,
+        "min": 2168,
+        "max": 2268
+      },
+      "before_Pss": {
+        "median": 1978.0,
+        "min": 1948,
+        "max": 2048
+      },
+      "before_VmHWM": {
+        "median": 1486.0,
+        "min": 1416,
+        "max": 1596
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 7286.0,
+        "min": 7256,
+        "max": 7356
+      },
+      "after_Pss": {
+        "median": 7066.0,
+        "min": 7036,
+        "max": 7136
+      },
+      "after_VmHWM": {
+        "median": 7172.0,
+        "min": 7152,
+        "max": 7284
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "copied-fuse",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.0090861249368515,
+        1.0072165971190774,
+        1.0087419090391352,
+        1.0107663125135757,
+        1.0049801633825124,
+        1.0065651031823537,
+        1.0079049758595102,
+        1.0049292225250577
+      ],
+      "geometric_mean_time_ratio": 1.0075220147573842,
+      "bootstrap_95_percent": [
+        1.0062287813053745,
+        1.0088374370400452
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "original",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        2.3428101869274647,
+        2.350437099055141,
+        2.34916984935448,
+        2.3612352932418927,
+        2.3181071732396754,
+        2.355296219649005,
+        2.309366301291488,
+        2.3222691096912667
+      ],
+      "geometric_mean_time_ratio": 2.3385167210840305,
+      "bootstrap_95_percent": [
+        2.3257478908359963,
+        2.3505114432957765
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "lkl-default64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.8342521333771207,
+        0.83139733522656,
+        0.8350166732272538,
+        0.8401413647671527,
+        0.817499841799512,
+        0.8356230332678295,
+        0.8356527961193531,
+        0.8269242998966958
+      ],
+      "geometric_mean_time_ratio": 0.8320374929813099,
+      "bootstrap_95_percent": [
+        0.8271761639634014,
+        0.8360523481850392
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "lkl-iso64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.808400248698115,
+        0.800782942737085,
+        0.8063385647370782,
+        0.8121303267517395,
+        0.8096377872900683,
+        0.7736885691536867,
+        0.8082772248966068,
+        0.8054286370065855
+      ],
+      "geometric_mean_time_ratio": 0.8030010187669483,
+      "bootstrap_95_percent": [
+        0.793836618567885,
+        0.8089631448103141
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "lkl-iso16",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.8376281059460058,
+        0.8277594118922416,
+        0.8412502500925633,
+        0.8321662684917004,
+        0.8392764743797333,
+        0.7641888145071822,
+        0.8454914674412127,
+        0.7474250347890073
+      ],
+      "geometric_mean_time_ratio": 0.8160826782520607,
+      "bootstrap_95_percent": [
+        0.7878745641042887,
+        0.8386814626163314
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "lkl-iso8",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.7260661176947337,
+        0.7821012898974646,
+        0.7800742832311112,
+        0.7204013684858112,
+        0.7310414455609678,
+        0.7343846249481897,
+        0.7376620292566349,
+        0.7178548085408786
+      ],
+      "geometric_mean_time_ratio": 0.7408216402616133,
+      "bootstrap_95_percent": [
+        0.7261840198120741,
+        0.758036556349566
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "vkso-uncached",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.9756973819868627,
+        0.9661737677813639,
+        0.9738681601261538,
+        0.9771999235492613,
+        0.9575108337495839,
+        0.9787471410935816,
+        0.9658539334519672,
+        0.973886915621512
+      ],
+      "geometric_mean_time_ratio": 0.9710934391890081,
+      "bootstrap_95_percent": [
+        0.9661506826260648,
+        0.9753776468146633
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "copied-fuse",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.9929867198293255,
+        1.0460199118557452,
+        1.006509058726342,
+        1.017281093986381,
+        1.0167750621197698,
+        0.9672714365163331,
+        1.021172076035381,
+        0.9960386033374358
+      ],
+      "geometric_mean_time_ratio": 1.0077697090797473,
+      "bootstrap_95_percent": [
+        0.9923881524933482,
+        1.0222120699786088
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "original",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.488861201345395,
+        1.5212839702295342,
+        1.4345109671027765,
+        1.5060411977590238,
+        1.4936483814653587,
+        1.5333007730639583,
+        1.5200944908194813,
+        1.4380893275376514
+      ],
+      "geometric_mean_time_ratio": 1.4915649702198246,
+      "bootstrap_95_percent": [
+        1.465847479464032,
+        1.5147650779675013
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "lkl-default64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.947648742974704,
+        0.9801089762977232,
+        0.9531949193412078,
+        0.950732191109205,
+        0.9428754424598251,
+        0.9445107044819694,
+        0.6956272257356262,
+        0.9536272211590158
+      ],
+      "geometric_mean_time_ratio": 0.9163729519155701,
+      "bootstrap_95_percent": [
+        0.8447839222867926,
+        0.9593306143623416
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "lkl-iso64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.9581859774114244,
+        0.9481593869896527,
+        0.9263184885951931,
+        0.9334762255324177,
+        0.9286411219558224,
+        0.9372584138854014,
+        0.964969988672857,
+        0.965706526756529
+      ],
+      "geometric_mean_time_ratio": 0.945219392560679,
+      "bootstrap_95_percent": [
+        0.9349331150968455,
+        0.9556509721745301
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "lkl-iso16",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.9538985945193141,
+        1.0023727801672258,
+        0.9456422433111206,
+        0.9509204185439177,
+        0.9568142000955895,
+        0.9395969189113794,
+        0.9904097685831329,
+        0.9326080942050236
+      ],
+      "geometric_mean_time_ratio": 0.9587618071810604,
+      "bootstrap_95_percent": [
+        0.9442803966740767,
+        0.9750867333344568
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "lkl-iso8",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.9475864851786215,
+        0.978092683837285,
+        0.95975365441541,
+        0.9191981298531849,
+        0.9607847736043201,
+        0.9313739131937008,
+        0.9969091034762911,
+        0.9492172075682533
+      ],
+      "geometric_mean_time_ratio": 0.9550858043596863,
+      "bootstrap_95_percent": [
+        0.9397492387017548,
+        0.9713635644498907
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "vkso-uncached",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.8295680947720977,
+        0.8467682683130632,
+        0.7623481968865224,
+        0.8303024624716736,
+        0.8261987983260465,
+        0.8036723166407278,
+        0.8563479881934064,
+        0.8209821446780039
+      ],
+      "geometric_mean_time_ratio": 0.8215693618137788,
+      "bootstrap_95_percent": [
+        0.800789904412902,
+        0.8381829831344896
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "copied-fuse",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.0043224469567786,
+        0.99274403639413,
+        0.9969063797747203,
+        1.003501148259554,
+        1.001394550029782,
+        0.995865834757689,
+        1.0048371788436132,
+        1.0024648460929693
+      ],
+      "geometric_mean_time_ratio": 1.0002457187667249,
+      "bootstrap_95_percent": [
+        0.9972472883571956,
+        1.002985900546259
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "original",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        2.87426129138135,
+        2.8399924906166882,
+        2.853313693878238,
+        2.891824591894511,
+        2.8287001855784975,
+        2.836858289800646,
+        2.87294088050545,
+        2.8645860002211974
+      ],
+      "geometric_mean_time_ratio": 2.8577369653924065,
+      "bootstrap_95_percent": [
+        2.8439630537609104,
+        2.871842068488717
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "lkl-default64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.5973929887892026,
+        0.5917004797206205,
+        0.5933986677390504,
+        0.5970563997846664,
+        0.5913419625906149,
+        0.5905401674000497,
+        0.5975924414231484,
+        0.5900477274171898
+      ],
+      "geometric_mean_time_ratio": 0.5936261764696986,
+      "bootstrap_95_percent": [
+        0.5916210013356816,
+        0.5957562881469685
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "lkl-iso64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.5799350656439619,
+        0.5756222816215584,
+        0.5765010221833684,
+        0.5819451580824784,
+        0.5780221032628744,
+        0.5726319145224089,
+        0.5791989929166694,
+        0.5787621682909228
+      ],
+      "geometric_mean_time_ratio": 0.5778210768313424,
+      "bootstrap_95_percent": [
+        0.5758715560356872,
+        0.5795892552016618
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "lkl-iso16",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.6188568157319541,
+        0.6104573512159368,
+        0.6034123206373735,
+        0.6213594511259787,
+        0.614228165157798,
+        0.6046862912754434,
+        0.6132323967201521,
+        0.60543449337176
+      ],
+      "geometric_mean_time_ratio": 0.6114266104208196,
+      "bootstrap_95_percent": [
+        0.6071463442425864,
+        0.6157607835448698
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "lkl-iso8",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.5946898310126847,
+        0.5688509473663861,
+        0.5737951493393261,
+        0.5679765511660901,
+        0.5859990649743446,
+        0.5847504861028038,
+        0.5756929951470758,
+        0.570079820203524
+      ],
+      "geometric_mean_time_ratio": 0.5776586760855723,
+      "bootstrap_95_percent": [
+        0.5718499327306952,
+        0.5843072631336336
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "vkso-uncached",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.3226161351513673,
+        0.32006880940356147,
+        0.3197698727277357,
+        0.32207560859562584,
+        0.32029181965872616,
+        0.319298300027083,
+        0.3212559961891631,
+        0.3201888605016571
+      ],
+      "geometric_mean_time_ratio": 0.3206938205640393,
+      "bootstrap_95_percent": [
+        0.3199826958804045,
+        0.3214699069770724
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "copied-fuse",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.0220437528184958,
+        1.0018292654317922,
+        1.0222950048339094,
+        1.0176370611465833,
+        1.0017266282975275,
+        1.0152813128442386,
+        0.9975884803177894,
+        1.0041767510331445
+      ],
+      "geometric_mean_time_ratio": 1.0102786944860693,
+      "bootstrap_95_percent": [
+        1.0038556758888535,
+        1.0167547850037457
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "original",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        2.9367916628705943,
+        2.8532770472143865,
+        2.8933099587730697,
+        2.8991143262529553,
+        2.8382228222227717,
+        2.9001436994162444,
+        2.8481706080198785,
+        2.8740445945225095
+      ],
+      "geometric_mean_time_ratio": 2.880218009821678,
+      "bootstrap_95_percent": [
+        2.859585978179935,
+        2.902230237431959
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "lkl-default64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.2184741902985534,
+        1.1858061513763758,
+        1.2120433270394466,
+        1.2093641617974062,
+        1.1932633676782376,
+        1.2100720395402007,
+        1.1736892879971748,
+        1.1782312340650085
+      ],
+      "geometric_mean_time_ratio": 1.1975111337834814,
+      "bootstrap_95_percent": [
+        1.1862943869360316,
+        1.2085188340922057
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "lkl-iso64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.226499948983534,
+        1.1891941223220834,
+        1.2068569665663444,
+        1.2225386806312004,
+        1.2024491803318818,
+        1.2121223463084403,
+        1.2024607741308697,
+        1.2142976947989508
+      ],
+      "geometric_mean_time_ratio": 1.2095003462396456,
+      "bootstrap_95_percent": [
+        1.201798213844753,
+        1.2170552899395424
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "lkl-iso16",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.2092267778960086,
+        1.1992909063062023,
+        1.2007853165019153,
+        1.218488762987093,
+        1.1994753893389645,
+        1.2072966377220948,
+        1.1790589376433935,
+        1.1891925127886627
+      ],
+      "geometric_mean_time_ratio": 1.2002978437134244,
+      "bootstrap_95_percent": [
+        1.1922201739822675,
+        1.2078573585884245
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "lkl-iso8",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.1902717005062575,
+        1.1570360380988935,
+        1.168091689552441,
+        1.1814501153041488,
+        1.1715732724566226,
+        1.1690239665469435,
+        1.1523635286799931,
+        1.1568417902346653
+      ],
+      "geometric_mean_time_ratio": 1.1682686094229846,
+      "bootstrap_95_percent": [
+        1.1603388870189446,
+        1.17704719233946
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "vkso-uncached",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.47142293849372435,
+        0.4618649199368187,
+        0.4672583225406727,
+        0.4675222035219979,
+        0.4618797727651153,
+        0.4665118619984649,
+        0.45534902881649036,
+        0.461770907060305
+      ],
+      "geometric_mean_time_ratio": 0.4641741480133157,
+      "bootstrap_95_percent": [
+        0.46079366045436465,
+        0.46735355774541865
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    }
+  ],
+  "environment": {
+    "kernel": "5.15.198",
+    "build_id": "b08b4bea4d223bac75d119e5213d121a40b71a12",
+    "cmdline": "BOOT_IMAGE=/vkso-final-raw-normal-5.15.198.bzImage root=PARTUUID=f6ddb63b-3f79-43f3-873c-0a595f939776 rootwait ro nokaslr clocksource=tsc tsc=reliable nosmt isolcpus=domain,managed_irq,1-3 nohz_full=1-3 rcu_nocbs=1-3 irqaffinity=0 idle=poll intel_pstate=active processor.max_cstate=0 intel_idle.max_cstate=0 nmi_watchdog=0 nowatchdog audit=0\n",
+    "cpuinfo": "processor\t: 0\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2512.815\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 0\ncpu cores\t: 4\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 1\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 1\ncpu cores\t: 4\napicid\t\t: 2\ninitial apicid\t: 2\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 2\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 2\ncpu cores\t: 4\napicid\t\t: 4\ninitial apicid\t: 4\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 3\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 3\ncpu cores\t: 4\napicid\t\t: 6\ninitial apicid\t: 6\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\n",
+    "client_cpu": 1,
+    "server_cpu": 2,
+    "blocks": 8,
+    "repeats": 3,
+    "functional": false,
+    "cache_policy": "fresh filesystem mount / FUSE process for each pass; warm backing image; no global cache drop",
+    "package": {
+      "name": "ISO9660 native optimized preparation",
+      "kernel_build_id": "b08b4bea4d223bac75d119e5213d121a40b71a12",
+      "kernel_release": "5.15.198",
+      "expected_native_image": "vkso-final-raw-normal-5.15.198.bzImage",
+      "variants": [
+        "original",
+        "compat",
+        "prepared",
+        "copied-fuse",
+        "vkso-fuse"
+      ],
+      "benchmark_images": [
+        "alpine-virt-3.20.10-x86_64.iso",
+        "kernel-include.iso"
+      ],
+      "tools": {
+        "find": "find (GNU findutils) 4.8.0",
+        "tar": "tar (GNU tar) 1.34",
+        "taskset": "taskset from util-linux 2.37.2",
+        "unshare": "unshare from util-linux 2.37.2"
+      },
+      "limits": "Read-only, single-threaded FUSE service; no claim of complete Linux isofs feature parity.",
+      "inline_constant_memops": true,
+      "keep_private_helpers": true
+    },
+    "comparison": {
+      "variants": [
+        "original",
+        "copied-fuse",
+        "vkso-fuse",
+        "vkso-uncached",
+        "lkl-default64",
+        "lkl-iso64",
+        "lkl-iso16",
+        "lkl-iso8"
+      ],
+      "lkl": {
+        "lkl-default64": {
+          "memory_mib": 64,
+          "binary": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/build-default/tools/lkl/lklfuse"
+        },
+        "lkl-iso64": {
+          "memory_mib": 64,
+          "binary": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/build-iso-only/tools/lkl/lklfuse"
+        },
+        "lkl-iso16": {
+          "memory_mib": 16,
+          "binary": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/build-iso-only/tools/lkl/lklfuse"
+        },
+        "lkl-iso8": {
+          "memory_mib": 8,
+          "binary": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/build-iso-only/tools/lkl/lklfuse"
+        }
+      },
+      "frontend": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/vkso-isofuse-stats",
+      "bridge": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/cached-adapter/libiso-bridge.so",
+      "uncached_bridge": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/uncached-adapter/libiso-bridge.so",
+      "fuse_policy": {
+        "entry_timeout": 0,
+        "attr_timeout": 0,
+        "negative_timeout": 0,
+        "use_ino": 1,
+        "nullpath_ok": 1,
+        "single_threaded": true
+      },
+      "resource_units": "memory fields in KiB, except Threads; startup seconds include a completed root getattr",
+      "preparation": "VKSO owner is the previously verified optimized binary; explicit bridge/frontend paths record user adapter variants",
+      "versions": "ISO preparation uses Linux 5.15.198; LKL uses pinned Linux 6.12 fork; comparisons are complete implementations, not pure mechanism cost"
+    }
+  },
+  "interpretation": [
+    "Tasks use warm backing images, fresh mounts/processes and tmpfs output; startup is separate.",
+    "Memory values are KiB except Threads. Rss/Pss come from smaps_rollup snapshots.",
+    "VmHWM is the asynchronously accounted status counter, not an exact observed peak.",
+    "User RSS/PSS do not measure total deployment memory; kernel module costs are separate.",
+    "LKL memory parameters are not measured RSS. Both default and reduced configurations are retained.",
+    "Linux 5.15.198 and LKL Linux 6.12 differ; cross-system effects are not page-sharing costs.",
+    "Only copied-fuse versus vkso-fuse uses identical core instructions and adapter code."
+  ]
+}

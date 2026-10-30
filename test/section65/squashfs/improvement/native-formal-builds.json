@@ -1,0 +1,5 @@
+{
+  "prepared-before": "test/section65/build/squashfs/evaluation-fixed-01/build",
+  "prepared-small-copy": "test/section65/build/squashfs/improve-native-small-copy-01",
+  "prepared-composed": "test/section65/build/squashfs/evaluation-improved-01/build"
+}

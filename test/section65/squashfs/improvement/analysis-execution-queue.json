@@ -1,0 +1,51 @@
+[
+  {
+    "name": "improvement-analysis",
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "/home/zzk/BinaryKernelCodeMapping/paper/build/section65-plot-env-02/venv/bin/python",
+      "test/section65/squashfs/improvement/analyze.py",
+      "--queue",
+      "test/section65/squashfs/improvement/analysis-queue.json",
+      "--output",
+      "test/section65/build/squashfs/improvement-analysis-01"
+    ],
+    "result": "test/section65/build/squashfs/improvement-analysis-01/analysis.json"
+  },
+  {
+    "name": "independent-analysis-validation",
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "python3",
+      "test/section65/squashfs/improvement/validate_analysis.py",
+      "--analysis",
+      "test/section65/build/squashfs/improvement-analysis-01/analysis.json",
+      "--output",
+      "test/section65/build/squashfs/improvement-analysis-01/analysis-audit.json"
+    ],
+    "result": "test/section65/build/squashfs/improvement-analysis-01/analysis-audit.json"
+  },
+  {
+    "name": "resource-ledger",
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "python3",
+      "test/section65/squashfs/improvement/resource_ledger.py",
+      "--queue",
+      "test/section65/squashfs/improvement/formal-queue.json",
+      "--minimal",
+      "test/evaluation-local/runs/iso9660/squash-minimal-deployment-01",
+      "--directory",
+      "test/evaluation-local/runs/iso9660/squash-directory-memory-01",
+      "--output",
+      "test/section65/build/squashfs/improvement-analysis-01/resources.json"
+    ],
+    "result": "test/section65/build/squashfs/improvement-analysis-01/resources.json"
+  }
+]

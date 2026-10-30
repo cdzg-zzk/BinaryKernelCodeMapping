@@ -1,0 +1,34 @@
+[
+  {
+    "name": "loader-analysis",
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "/home/zzk/BinaryKernelCodeMapping/paper/build/section65-plot-env-02/venv/bin/python",
+      "test/section65/squashfs/improvement/analyze.py",
+      "--queue",
+      "test/section65/squashfs/improvement/loader-analysis-queue.json",
+      "--output",
+      "test/section65/build/squashfs/improvement-loader-analysis-01",
+      "--loader-control"
+    ],
+    "result": "test/section65/build/squashfs/improvement-loader-analysis-01/analysis.json"
+  },
+  {
+    "name": "loader-analysis-validation",
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "python3",
+      "test/section65/squashfs/improvement/validate_analysis.py",
+      "--analysis",
+      "test/section65/build/squashfs/improvement-loader-analysis-01/analysis.json",
+      "--output",
+      "test/section65/build/squashfs/improvement-loader-analysis-01/analysis-audit.json",
+      "--loader-control"
+    ],
+    "result": "test/section65/build/squashfs/improvement-loader-analysis-01/analysis-audit.json"
+  }
+]

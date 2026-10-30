@@ -1,0 +1,10 @@
+\begin{table}[t]\centering\small
+\caption{Filesystem component costs with the generic platform installed. Residency, avoided backing and requested metadata are separate quantities.}
+\label{tab:filesystem-business}
+\begin{tabular}{lr}\toprule Component & Size \\\midrule
+Matched native module & 60 KiB \\
+Prepared owner + consumer & 108 KiB \\
+Native preparation increment & 48 KiB \\
+Avoided core backing & 36 KiB \\
+Requested registration metadata & 1,264 B \\
+\bottomrule\end{tabular}\end{table}

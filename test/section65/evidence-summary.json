@@ -1,0 +1,63 @@
+{
+  "decision": "feasible complete read-only task; current prototype not recommended as main application-benefit experiment in Section 6.5",
+  "run": "test/evaluation-local/runs/iso9660/export-03",
+  "status": "pass",
+  "native_performance_measured": false,
+  "lkl_rump_performance_measured": false,
+  "cases": {
+    "vkso": {
+      "status": "pass",
+      "case_count": 6,
+      "shared_pages": 5
+    },
+    "copied": {
+      "status": "pass",
+      "case_count": 6,
+      "shared_pages": 0
+    },
+    "vkso-parallel-a": {
+      "status": "pass",
+      "case_count": 6,
+      "shared_pages": 5
+    },
+    "vkso-parallel-b": {
+      "status": "pass",
+      "case_count": 6,
+      "shared_pages": 5
+    },
+    "adapted-kernel": {
+      "status": "pass",
+      "case_count": 6
+    },
+    "kernel-while-shared": {
+      "status": "pass",
+      "case_count": 6
+    }
+  },
+  "source_identity": {
+    "vkso_iso_core.ko": "0118d0f88c63eb6030085853da3b0afa373d7b2401faff5c4dd0c9934262a6aa",
+    "vkso_isofs.ko": "a9876116623af3788d81709cd6af39e7cf7726d0990585bfb97a264f9acb6055",
+    "libiso-bridge.so": "94f5e74b6efaacce0601122e1c2accca53c9d96554ccade9f03dee940615996a",
+    "symbols.txt": "c4d4e20c769003f076d0e9f6b7ea2840a02e8b49cba518969df77b6ecee821da",
+    "shim.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "private_state": {
+    "status": "pass",
+    "simultaneous_table_pfns": [
+      340538,
+      377022
+    ]
+  },
+  "restoration": "pass",
+  "eliminated_duplicate_page_bytes": 20480,
+  "module_bytes": {
+    "reference_isofs": 49152,
+    "prepared_isofs_core_and_consumer": 73728,
+    "registration_module": 36864
+  },
+  "manager_kib": {
+    "rss": 1684,
+    "pss": 1681
+  },
+  "semantic_profile": "ISO9660 read-only image API with tested Rock Ridge/Joliet/multi-extent behavior; UTF-8; no user zisofs decoding or general VFS"
+}

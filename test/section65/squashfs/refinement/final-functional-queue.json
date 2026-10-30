@@ -1,0 +1,40 @@
+[
+  {
+    "name": "squash-refine-xz-bcj-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/functional_extra.py",
+      "--build",
+      "test/section65/build/squashfs/refine-xz-01",
+      "--formats",
+      "xz",
+      "xz-bcj",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-refine-xz-bcj-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-refine-xz-bcj-01/result.json"
+  },
+  {
+    "name": "squash-refine-xz-execution-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/improvement/simultaneous.py",
+      "--build",
+      "test/section65/build/squashfs/refine-xz-01",
+      "--images",
+      "test/section65/build/squashfs/simultaneous-xz-images-01/images.json",
+      "--trace-xz",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-refine-xz-execution-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-refine-xz-execution-01/result.json"
+  }
+]

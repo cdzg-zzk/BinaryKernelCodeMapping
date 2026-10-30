@@ -1,0 +1,748 @@
+{
+  "status": "complete",
+  "cases": [
+    {
+      "scale": 1,
+      "variant": "production",
+      "image_sha256": "2d92f5e57d29359bf9c1d570965b59e1aecc01ea2a0f3ee3a27f690cecab6422",
+      "snapshots": [
+        {
+          "phase": "before",
+          "memory_kib": {
+            "Rss": 2680,
+            "Pss": 813,
+            "Pss_Anon": 420,
+            "Pss_File": 393,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1908,
+            "Shared_Dirty": 0,
+            "Private_Clean": 352,
+            "Private_Dirty": 420,
+            "Referenced": 2680,
+            "Anonymous": 420,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          }
+        },
+        {
+          "phase": "after-0",
+          "memory_kib": {
+            "Rss": 6192,
+            "Pss": 4325,
+            "Pss_Anon": 3932,
+            "Pss_File": 393,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1908,
+            "Shared_Dirty": 0,
+            "Private_Clean": 352,
+            "Private_Dirty": 3932,
+            "Referenced": 6192,
+            "Anonymous": 3932,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          }
+        },
+        {
+          "phase": "after-1",
+          "memory_kib": {
+            "Rss": 6260,
+            "Pss": 4393,
+            "Pss_Anon": 4000,
+            "Pss_File": 393,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1908,
+            "Shared_Dirty": 0,
+            "Private_Clean": 352,
+            "Private_Dirty": 4000,
+            "Referenced": 6260,
+            "Anonymous": 4000,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          }
+        }
+      ],
+      "archives": [
+        {
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/scale-1-production/headers-0.tar",
+          "sha256": "4240f2d76962d505192cd59253c66a8061c509da90f7ed8b18ba993fa2399214",
+          "bytes": 40089600
+        },
+        {
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/scale-1-production/headers-1.tar",
+          "sha256": "4240f2d76962d505192cd59253c66a8061c509da90f7ed8b18ba993fa2399214",
+          "bytes": 40089600
+        }
+      ],
+      "unmounted": true,
+      "daemon_returncode": 0
+    },
+    {
+      "scale": 1,
+      "variant": "instrumented",
+      "image_sha256": "2d92f5e57d29359bf9c1d570965b59e1aecc01ea2a0f3ee3a27f690cecab6422",
+      "snapshots": [
+        {
+          "phase": "before",
+          "memory_kib": {
+            "Rss": 2648,
+            "Pss": 850,
+            "Pss_Anon": 416,
+            "Pss_File": 434,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1836,
+            "Shared_Dirty": 0,
+            "Private_Clean": 380,
+            "Private_Dirty": 432,
+            "Referenced": 2648,
+            "Anonymous": 416,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          },
+          "live_objects": {
+            "nodes": 1,
+            "names": 0,
+            "node_slab_pages": 1,
+            "node_slab_mapped_bytes": 4096,
+            "name_buckets": 8192,
+            "id_buckets": 8192,
+            "hash_requested_bytes": 131072,
+            "malloc_arena_used_bytes": 268480,
+            "malloc_arena_free_bytes": 1856,
+            "malloc_mmap_bytes": 1732608,
+            "bridge_inodes": 1,
+            "bridge_names": 0,
+            "inode_evictions": 0,
+            "name_evictions": 0
+          }
+        },
+        {
+          "phase": "after-0",
+          "memory_kib": {
+            "Rss": 6164,
+            "Pss": 4366,
+            "Pss_Anon": 3928,
+            "Pss_File": 438,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1836,
+            "Shared_Dirty": 0,
+            "Private_Clean": 384,
+            "Private_Dirty": 3944,
+            "Referenced": 6164,
+            "Anonymous": 3928,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          },
+          "live_objects": {
+            "nodes": 5869,
+            "names": 5868,
+            "node_slab_pages": 226,
+            "node_slab_mapped_bytes": 925696,
+            "name_buckets": 8192,
+            "id_buckets": 8192,
+            "hash_requested_bytes": 131072,
+            "malloc_arena_used_bytes": 2203808,
+            "malloc_arena_free_bytes": 188256,
+            "malloc_mmap_bytes": 1732608,
+            "bridge_inodes": 2048,
+            "bridge_names": 4096,
+            "inode_evictions": 3821,
+            "name_evictions": 1772
+          }
+        },
+        {
+          "phase": "after-1",
+          "memory_kib": {
+            "Rss": 6232,
+            "Pss": 4434,
+            "Pss_Anon": 3996,
+            "Pss_File": 438,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1836,
+            "Shared_Dirty": 0,
+            "Private_Clean": 384,
+            "Private_Dirty": 4012,
+            "Referenced": 6232,
+            "Anonymous": 3996,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          },
+          "live_objects": {
+            "nodes": 5869,
+            "names": 5868,
+            "node_slab_pages": 226,
+            "node_slab_mapped_bytes": 925696,
+            "name_buckets": 8192,
+            "id_buckets": 8192,
+            "hash_requested_bytes": 131072,
+            "malloc_arena_used_bytes": 2205856,
+            "malloc_arena_free_bytes": 358240,
+            "malloc_mmap_bytes": 1732608,
+            "bridge_inodes": 2048,
+            "bridge_names": 4096,
+            "inode_evictions": 9686,
+            "name_evictions": 7636
+          }
+        }
+      ],
+      "archives": [
+        {
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/scale-1-instrumented/headers-0.tar",
+          "sha256": "4240f2d76962d505192cd59253c66a8061c509da90f7ed8b18ba993fa2399214",
+          "bytes": 40089600
+        },
+        {
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/scale-1-instrumented/headers-1.tar",
+          "sha256": "4240f2d76962d505192cd59253c66a8061c509da90f7ed8b18ba993fa2399214",
+          "bytes": 40089600
+        }
+      ],
+      "unmounted": true,
+      "daemon_returncode": 0
+    },
+    {
+      "scale": 4,
+      "variant": "production",
+      "image_sha256": "105538f27091a69fdf7a9c845d38a3243dd24705686997f9c6311d9888239fe9",
+      "snapshots": [
+        {
+          "phase": "before",
+          "memory_kib": {
+            "Rss": 2708,
+            "Pss": 802,
+            "Pss_Anon": 416,
+            "Pss_File": 386,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1948,
+            "Shared_Dirty": 0,
+            "Private_Clean": 344,
+            "Private_Dirty": 416,
+            "Referenced": 2708,
+            "Anonymous": 416,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          }
+        },
+        {
+          "phase": "after-0",
+          "memory_kib": {
+            "Rss": 9660,
+            "Pss": 7754,
+            "Pss_Anon": 7368,
+            "Pss_File": 386,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1948,
+            "Shared_Dirty": 0,
+            "Private_Clean": 344,
+            "Private_Dirty": 7368,
+            "Referenced": 9660,
+            "Anonymous": 7368,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          }
+        },
+        {
+          "phase": "after-1",
+          "memory_kib": {
+            "Rss": 9660,
+            "Pss": 7754,
+            "Pss_Anon": 7368,
+            "Pss_File": 386,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1948,
+            "Shared_Dirty": 0,
+            "Private_Clean": 344,
+            "Private_Dirty": 7368,
+            "Referenced": 9660,
+            "Anonymous": 7368,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          }
+        }
+      ],
+      "archives": [
+        {
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/scale-4-production/headers-0.tar",
+          "sha256": "dfa98a944775a6c98244d5736a70ec5f53e63688be143bafedba97f48d42bc56",
+          "bytes": 160317440
+        },
+        {
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/scale-4-production/headers-1.tar",
+          "sha256": "dfa98a944775a6c98244d5736a70ec5f53e63688be143bafedba97f48d42bc56",
+          "bytes": 160317440
+        }
+      ],
+      "unmounted": true,
+      "daemon_returncode": 0
+    },
+    {
+      "scale": 4,
+      "variant": "instrumented",
+      "image_sha256": "105538f27091a69fdf7a9c845d38a3243dd24705686997f9c6311d9888239fe9",
+      "snapshots": [
+        {
+          "phase": "before",
+          "memory_kib": {
+            "Rss": 2580,
+            "Pss": 838,
+            "Pss_Anon": 416,
+            "Pss_File": 422,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1780,
+            "Shared_Dirty": 0,
+            "Private_Clean": 368,
+            "Private_Dirty": 432,
+            "Referenced": 2580,
+            "Anonymous": 416,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          },
+          "live_objects": {
+            "nodes": 1,
+            "names": 0,
+            "node_slab_pages": 1,
+            "node_slab_mapped_bytes": 4096,
+            "name_buckets": 8192,
+            "id_buckets": 8192,
+            "hash_requested_bytes": 131072,
+            "malloc_arena_used_bytes": 268528,
+            "malloc_arena_free_bytes": 1808,
+            "malloc_mmap_bytes": 1732608,
+            "bridge_inodes": 1,
+            "bridge_names": 0,
+            "inode_evictions": 0,
+            "name_evictions": 0
+          }
+        },
+        {
+          "phase": "after-0",
+          "memory_kib": {
+            "Rss": 9424,
+            "Pss": 7619,
+            "Pss_Anon": 7196,
+            "Pss_File": 423,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1844,
+            "Shared_Dirty": 0,
+            "Private_Clean": 384,
+            "Private_Dirty": 7196,
+            "Referenced": 9424,
+            "Anonymous": 7196,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          },
+          "live_objects": {
+            "nodes": 23467,
+            "names": 23466,
+            "node_slab_pages": 903,
+            "node_slab_mapped_bytes": 3698688,
+            "name_buckets": 32768,
+            "id_buckets": 32768,
+            "hash_requested_bytes": 524288,
+            "malloc_arena_used_bytes": 2338720,
+            "malloc_arena_free_bytes": 356448,
+            "malloc_mmap_bytes": 1998848,
+            "bridge_inodes": 2048,
+            "bridge_names": 4096,
+            "inode_evictions": 21419,
+            "name_evictions": 19370
+          }
+        },
+        {
+          "phase": "after-1",
+          "memory_kib": {
+            "Rss": 9424,
+            "Pss": 7619,
+            "Pss_Anon": 7196,
+            "Pss_File": 423,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1844,
+            "Shared_Dirty": 0,
+            "Private_Clean": 384,
+            "Private_Dirty": 7196,
+            "Referenced": 9424,
+            "Anonymous": 7196,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          },
+          "live_objects": {
+            "nodes": 23467,
+            "names": 23466,
+            "node_slab_pages": 903,
+            "node_slab_mapped_bytes": 3698688,
+            "name_buckets": 32768,
+            "id_buckets": 32768,
+            "hash_requested_bytes": 524288,
+            "malloc_arena_used_bytes": 2341872,
+            "malloc_arena_free_bytes": 353296,
+            "malloc_mmap_bytes": 1998848,
+            "bridge_inodes": 2048,
+            "bridge_names": 4096,
+            "inode_evictions": 44883,
+            "name_evictions": 42834
+          }
+        }
+      ],
+      "archives": [
+        {
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/scale-4-instrumented/headers-0.tar",
+          "sha256": "dfa98a944775a6c98244d5736a70ec5f53e63688be143bafedba97f48d42bc56",
+          "bytes": 160317440
+        },
+        {
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/scale-4-instrumented/headers-1.tar",
+          "sha256": "dfa98a944775a6c98244d5736a70ec5f53e63688be143bafedba97f48d42bc56",
+          "bytes": 160317440
+        }
+      ],
+      "unmounted": true,
+      "daemon_returncode": 0
+    },
+    {
+      "scale": 16,
+      "variant": "production",
+      "image_sha256": "d3a16951e59010e7c0246225cf51c64f84fb5c71074d1cbf093b18809b912b71",
+      "snapshots": [
+        {
+          "phase": "before",
+          "memory_kib": {
+            "Rss": 2652,
+            "Pss": 843,
+            "Pss_Anon": 424,
+            "Pss_File": 419,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1848,
+            "Shared_Dirty": 0,
+            "Private_Clean": 380,
+            "Private_Dirty": 424,
+            "Referenced": 2652,
+            "Anonymous": 424,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          }
+        },
+        {
+          "phase": "after-0",
+          "memory_kib": {
+            "Rss": 21964,
+            "Pss": 20155,
+            "Pss_Anon": 19736,
+            "Pss_File": 419,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1848,
+            "Shared_Dirty": 0,
+            "Private_Clean": 380,
+            "Private_Dirty": 19736,
+            "Referenced": 21964,
+            "Anonymous": 19736,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          }
+        },
+        {
+          "phase": "after-1",
+          "memory_kib": {
+            "Rss": 21964,
+            "Pss": 20155,
+            "Pss_Anon": 19736,
+            "Pss_File": 419,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1848,
+            "Shared_Dirty": 0,
+            "Private_Clean": 380,
+            "Private_Dirty": 19736,
+            "Referenced": 21964,
+            "Anonymous": 19736,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          }
+        }
+      ],
+      "archives": [
+        {
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/scale-16-production/headers-0.tar",
+          "sha256": "81af372d62a525f5af123f6123d6b0d5aeb103c0843095d636d22dfc0322719d",
+          "bytes": 641259520
+        },
+        {
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/scale-16-production/headers-1.tar",
+          "sha256": "81af372d62a525f5af123f6123d6b0d5aeb103c0843095d636d22dfc0322719d",
+          "bytes": 641259520
+        }
+      ],
+      "unmounted": true,
+      "daemon_returncode": 0
+    },
+    {
+      "scale": 16,
+      "variant": "instrumented",
+      "image_sha256": "d3a16951e59010e7c0246225cf51c64f84fb5c71074d1cbf093b18809b912b71",
+      "snapshots": [
+        {
+          "phase": "before",
+          "memory_kib": {
+            "Rss": 2616,
+            "Pss": 815,
+            "Pss_Anon": 420,
+            "Pss_File": 395,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1840,
+            "Shared_Dirty": 0,
+            "Private_Clean": 356,
+            "Private_Dirty": 420,
+            "Referenced": 2616,
+            "Anonymous": 420,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          },
+          "live_objects": {
+            "nodes": 1,
+            "names": 0,
+            "node_slab_pages": 1,
+            "node_slab_mapped_bytes": 4096,
+            "name_buckets": 8192,
+            "id_buckets": 8192,
+            "hash_requested_bytes": 131072,
+            "malloc_arena_used_bytes": 270304,
+            "malloc_arena_free_bytes": 32,
+            "malloc_mmap_bytes": 1732608,
+            "bridge_inodes": 1,
+            "bridge_names": 0,
+            "inode_evictions": 0,
+            "name_evictions": 0
+          }
+        },
+        {
+          "phase": "after-0",
+          "memory_kib": {
+            "Rss": 21928,
+            "Pss": 20127,
+            "Pss_Anon": 19732,
+            "Pss_File": 395,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1840,
+            "Shared_Dirty": 0,
+            "Private_Clean": 356,
+            "Private_Dirty": 19732,
+            "Referenced": 21904,
+            "Anonymous": 19732,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          },
+          "live_objects": {
+            "nodes": 93859,
+            "names": 93858,
+            "node_slab_pages": 3610,
+            "node_slab_mapped_bytes": 14786560,
+            "name_buckets": 131072,
+            "id_buckets": 131072,
+            "hash_requested_bytes": 2097152,
+            "malloc_arena_used_bytes": 2085232,
+            "malloc_arena_free_bytes": 614032,
+            "malloc_mmap_bytes": 3837952,
+            "bridge_inodes": 2048,
+            "bridge_names": 4096,
+            "inode_evictions": 91811,
+            "name_evictions": 89762
+          }
+        },
+        {
+          "phase": "after-1",
+          "memory_kib": {
+            "Rss": 21928,
+            "Pss": 20127,
+            "Pss_Anon": 19732,
+            "Pss_File": 395,
+            "Pss_Shmem": 0,
+            "Shared_Clean": 1840,
+            "Shared_Dirty": 0,
+            "Private_Clean": 356,
+            "Private_Dirty": 19732,
+            "Referenced": 21844,
+            "Anonymous": 19732,
+            "LazyFree": 0,
+            "AnonHugePages": 0,
+            "ShmemPmdMapped": 0,
+            "FilePmdMapped": 0,
+            "Shared_Hugetlb": 0,
+            "Private_Hugetlb": 0,
+            "Swap": 0,
+            "SwapPss": 0,
+            "Locked": 0
+          },
+          "live_objects": {
+            "nodes": 93859,
+            "names": 93858,
+            "node_slab_pages": 3610,
+            "node_slab_mapped_bytes": 14786560,
+            "name_buckets": 131072,
+            "id_buckets": 131072,
+            "hash_requested_bytes": 2097152,
+            "malloc_arena_used_bytes": 2086208,
+            "malloc_arena_free_bytes": 613056,
+            "malloc_mmap_bytes": 3837952,
+            "bridge_inodes": 2048,
+            "bridge_names": 4096,
+            "inode_evictions": 185667,
+            "name_evictions": 183618
+          }
+        }
+      ],
+      "archives": [
+        {
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/scale-16-instrumented/headers-0.tar",
+          "sha256": "81af372d62a525f5af123f6123d6b0d5aeb103c0843095d636d22dfc0322719d",
+          "bytes": 641259520
+        },
+        {
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/scale-16-instrumented/headers-1.tar",
+          "sha256": "81af372d62a525f5af123f6123d6b0d5aeb103c0843095d636d22dfc0322719d",
+          "bytes": 641259520
+        }
+      ],
+      "unmounted": true,
+      "daemon_returncode": 0
+    }
+  ],
+  "build_argv": [
+    "gcc",
+    "-O2",
+    "-g",
+    "-D_GNU_SOURCE",
+    "-DVKSO_SQ_DIRECTORY_CACHE",
+    "-I/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/optimization-20261030-01",
+    "-I/home/zzk/BinaryKernelCodeMapping/test/section65/build/fuse-deps/usr/include/fuse3",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/frontend.c",
+    "-Wl,-l:libfuse3.so.3",
+    "-ldl",
+    "-o",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/frontend"
+  ],
+  "libfuse_version": "3.10.5-1build1",
+  "libfuse_sha256": "7f402e726457e11bd688637883242f52cf7c3827017ec631802e3d93af00e5bd",
+  "inputs": {
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/xz-user-source/fuse_frontend.c": "e6dd46f3401b68a14f1e7542aaa6103505e70032fbc6f7b94ac4d7420c6356e3",
+    "/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/optimization-20261030-01/fuse_memory_probe.inc": "c5f397303bad53a18fde2e9d0f3866fe5bb0b1f69aebee731e857bcad0799a22",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so": "950f4b8bfe3394e595ce23b058d685886bd0ecc197fbc6a17ee3971e3b9566a7",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-optimized-application-final-gzip-01/libsq-materialized.so": "40e3b02f47f68e157160ce72bb72df158098037be69da2fcba79e0ed21995767"
+  },
+  "scope": "Same original scale SIFs and include-tree tar. Direct FUSE replay excludes Apptainer startup; no timing claim. Private libfuse ABI observations are version/hash-locked and consistency-checked. Slab reservation, hash requested bytes and process PSS are distinct quantities, not an automatic net-memory total."
+}

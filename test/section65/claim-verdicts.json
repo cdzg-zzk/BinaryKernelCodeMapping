@@ -1,0 +1,193 @@
+{
+  "status": "complete",
+  "scope": "Final XZ-composed owner: 30 complete campaigns / 6,540 observations, independently replayed; 28 server-interrupted partial observations are retained separately. Functional, debugging, resource-scale and maintenance evidence have separate scopes.",
+  "claims": [
+    {
+      "id": "C1",
+      "claim": "One resident filesystem core serves real native and user consumers",
+      "verdict": "supported-within-scope",
+      "question": "Do matched outputs, private services/state, real application execution and identical kernel/user PFNs coexist?",
+      "evidence": [
+        "test/evaluation-local/runs/iso9660/squash-refine-xz-functional-01/result.json",
+        "test/evaluation-local/runs/iso9660/squash-refine-xz-guest-01/result.json",
+        "test/evaluation-local/runs/iso9660/squash-refine-xz-execution-01/result.json",
+        "test/evaluation-local/runs/iso9660/squash-refine-xz-native-calls-01/result.json",
+        "test/evaluation-local/runs/iso9660/squash-refine-xz-bcj-02/result.json"
+      ],
+      "finding": "Five-format original/prepared/copied/shared semantics pass. The final owner shares nine pages (36 KiB), including common LZ4 and XZ bodies. Native XZ/LZ4 entry counts are 190/73; a real SIF hardware breakpoint reaches common XZ. Native A and SIF B/C preserve conflicting contents, private objects and independent lifetimes.",
+      "limits": "Read-only adapter and declared user/security xattrs. gzip/zstd/lzo decoder services remain separate. Task-envelope overlap is not throughput scaling.",
+      "paper_action": "Retain shared-core feasibility with explicit reuse boundary."
+    },
+    {
+      "id": "C2",
+      "claim": "Kernel preparation preserves native functionality with measured execution cost",
+      "verdict": "supported-within-scope",
+      "question": "What is prepared/original cost across codecs, fresh/warm traversals and large sequential reads?",
+      "evidence": [
+        "test/section65/build/squashfs/refined-analysis-01/analysis.json",
+        "test/section65/build/squashfs/refined-analysis-01/audit.json",
+        "test/evaluation-local/runs/iso9660/squash-refine-hardening-02/result.json"
+      ],
+      "finding": "Final same-campaign controls cover five formats, fresh/warm scan/archive and larger xz/lz4 archives. Versus equally optimized normal native, fresh scan points range from -1.34% to +1.29%, archive from -1.05% to -0.18%; the largest upper interval endpoint is +4.82%. Large xz/lz4 archive changes are -0.14%/-0.13%, with intervals including zero. Adding common XZ reduces native xz stream time by 1.90% relative to the preceding owner.",
+      "limits": "PIC and omitted native canaries/external thunks are part of this complete prototype preparation. A PIC hardening compile succeeds with explicit GS selection, but cross-domain runtime bindings are unimplemented. No zero-cost or hardening-equivalence claim; one host/boot.",
+      "paper_action": "Lead with final-owner direct controls and actual machine-code differences; retain the prior failed forced-inline candidate and intermediate results separately."
+    },
+    {
+      "id": "C3",
+      "claim": "Physical sharing adds little complete-task time to an identical copied implementation",
+      "verdict": "supported-within-scope",
+      "question": "What changes when only core physical backing changes?",
+      "evidence": [
+        "test/section65/build/squashfs/refined-analysis-01/analysis.json",
+        "test/section65/build/squashfs/refined-analysis-01/audit.json",
+        "test/section65/squashfs/refinement/RESULTS.md"
+      ],
+      "finding": "Nine nonempty ordinary VKSO/copied point ratios are 0.9901–1.0056, with pointwise interval endpoints 0.9584–1.0255. Equal-path xz/lz4 scan/stream controls give 0.9608–1.0188 with broader interval endpoints 0.8435–1.0945. The selected single-CPU gzip stream changes -0.13% [-1.02%, +0.77%]. Instructions, private bridge/frontends and cache policies match, and shared/copied PFNs distinguish backing.",
+      "limits": "The default-task estimates are close, but equal-path controls do not establish a tight universal bound. These are complete-task comparisons under separately retained loader/placement conditions, not proof of equivalence.",
+      "paper_action": "Report all conditions and interval widths. Do not turn close point estimates into a universal one-percent or zero-overhead claim."
+    },
+    {
+      "id": "C4",
+      "claim": "The complete application adapter is useful relative to existing backends",
+      "verdict": "supported-within-scope",
+      "question": "Does actual SIF execution remain competitive after translator, heap and FUSE-cache controls?",
+      "evidence": [
+        "test/section65/build/squashfs/refined-analysis-01/analysis.json",
+        "test/section65/build/squashfs/refined-analysis-01/audit.json",
+        "test/section65/backend-conditions.md",
+        "test/section65/squashfs/refinement/RESULTS.md"
+      ],
+      "finding": "Default SquashFUSE include scans improve 4.42–54.58% and archives 3.30–19.46%. Against single-thread stock, gzip/lz4 archives instead cost 1.18%/0.89% more and scans are close; xz scan still improves 53.59%. Sequential gzip/lz4 improve 7.27%/7.23%, while xz costs 13.10% more than default stock. All twelve ordinary task intervals favor matched-cache LKL. Held-out Python compilation is 0.68%/16.18% slower than default stock for gzip/xz; versus matched-cache LKL it is 6.05% faster/6.72% slower.",
+      "limits": "Useful effects are task-, codec- and thread-dependent. The held-out task rejects general application-speed superiority. Version, cache, decoder, API, thread and mitigation differences remain; no zstd/lzo application-speed or throughput extrapolation.",
+      "paper_action": "Show default and single-thread stock plus both LKL cache settings; retain held-out and sequential losses in the main narrative."
+    },
+    {
+      "id": "C5",
+      "claim": "Common implementation reduces duplicated format logic and supports incremental application integration",
+      "verdict": "supported-within-scope",
+      "question": "How much is moved, edited, generated and supplied privately at each integration stage?",
+      "evidence": [
+        "test/section65/build/squashfs/refined-analysis-01/costs.json",
+        "test/section65/build/squashfs/refinement-reuse-audit-03/result.json"
+      ],
+      "finding": "34 filesystem functions retain 2,103 original physical lines; three bodies differ, while 16 native source/header files change through extraction, naming and support. XZ adds 2,604 unchanged algorithm lines, nine private slots and six exports. Owner executable text grows 16,695 to 27,828 bytes. Generated native support is 390 lines; bridge/POSIX/frontend 408/154/300 and application translator 96. LKL application-only extension is 30 lines at its existing-frontend starting point.",
+      "limits": "Physical lines include comments, blanks and conditional paths. Generator, generated glue, mechanical movement, algorithm reuse and semantic edits are separate surfaces. No human-hour inference.",
+      "paper_action": "Show reuse expansion alongside preparation and integration costs; do not use whole-LKL project size as adaptation effort."
+    },
+    {
+      "id": "C6",
+      "claim": "Physical sharing yields resource savings",
+      "verdict": "supported-within-scope",
+      "question": "Which backing is avoided and what private/kernel/deployment costs remain under each residency premise?",
+      "evidence": [
+        "test/section65/build/squashfs/refined-analysis-01/resource-ledger/resources.json",
+        "test/evaluation-local/runs/iso9660/squash-refine-minimal-deployment-01/result.json",
+        "test/section65/squashfs/refinement/RESULTS.md"
+      ],
+      "finding": "An already prepared native service avoids one 36 KiB copied backing and requests 1,264 bytes of registration metadata. Owner/consumer occupy 68+40 KiB, 48 KiB above the matched 60 KiB native module. Generic page_cache_replace (32 KiB) is excluded from business costs. Small-tree helper PSS is 7.00–7.04 MiB versus stock 14.16–23.95, single-thread stock 11.64–12.85 and matched-cache LKL 82.57–82.85 MiB. Across 5,866/23,464/93,856 entries VKSO retains 7.02/23.43/88.89 MiB; at the largest scale stock/single-thread stock retain 28.52/12.91 MiB and LKL 500.92 MiB.",
+      "limits": "The bridge retains visited inode/name objects until unmount. It is not uniformly more compact than SquashFUSE. Component residency, requested bytes and helper snapshots are separate ledgers; no whole-machine total or N-times copied-page multiplier.",
+      "paper_action": "Report the scale reversal and conditional backing avoidance alongside the installed-platform cost premise."
+    },
+    {
+      "id": "C7",
+      "claim": "One common-core repair reaches both domains without user-adapter changes",
+      "verdict": "supported-within-scope",
+      "question": "Does the known upstream repair fix the targeted old failure in native/copied/shared and preserve normal five-format behavior?",
+      "evidence": [
+        "test/evaluation-local/runs/iso9660/squash-maintenance-02/result.json",
+        "test/section65/build/squashfs/improvement-analysis-01/maintenance.json",
+        "test/evaluation-local/runs/iso9660/squash-refine-xz-guest-01/result.json"
+      ],
+      "finding": "The known old malformed-input native panic and user SIGSEGV/FUSE disconnect are reproduced in isolated guests. The common repaired source fixes native/copied/shared with unchanged bridge/frontend in that maintenance experiment. Final XZ-composed native/copied/shared return EIO, daemons survive, five-format regressions and restore/unload pass. Its filesystem source is byte-identical to the repaired preceding owner.",
+      "limits": "Known upstream defect, not independent discovery. New codec composition changes owner/bridge separately from the repair. Rebuild, redeployment and new consumers are required; copied shares the source-maintenance benefit.",
+      "paper_action": "Retain the exact repair and changed-artifact ledger; distinguish central source maintenance from physical-backing reuse and hot update."
+    },
+    {
+      "id": "C8",
+      "claim": "User-space tools can debug shared instructions",
+      "verdict": "supported-within-scope",
+      "question": "Can GDB inspect and step the native-shared execution without losing physical identity or native correctness?",
+      "evidence": [
+        "test/evaluation-local/runs/iso9660/squash-refine-xz-execution-01/result.json",
+        "test/evaluation-local/runs/iso9660/maintenance-oneshot-01/evidence/debug/result.json"
+      ],
+      "finding": "A hardware breakpoint during real SIF execution records common XZ arguments and available stack; nine shared PFNs remain identical afterward, with subsequent native regression and cleanup. Retained ISO9660 guest evidence additionally demonstrates single stepping and five before/after shared PFNs.",
+      "limits": "The XZ case proves breakpoint inspection; the single-step evidence belongs to ISO9660. Neither measures human debugging time, and TCG supplies no performance evidence.",
+      "paper_action": "Retain debugger feasibility; no human-time inference."
+    },
+    {
+      "id": "C9",
+      "claim": "VKSO saves development/debugging time",
+      "verdict": "not-supported",
+      "question": "Is there reliable timed human-task evidence?",
+      "evidence": [
+        "test/section65/build/squashfs/refined-analysis-01/costs.json",
+        "test/evaluation-local/runs/iso9660/squash-maintenance-02/result.json"
+      ],
+      "finding": "Actual algorithm reuse, support-code changes and common repair are measured, but no reliable historical hours or controlled human-task experiment exists.",
+      "limits": "Code volume and shared repair do not establish a developer/debugger time advantage. Retain the unsupported stronger claim explicitly.",
+      "paper_action": "Explicitly decline this stronger claim rather than silently deleting its evaluation."
+    },
+    {
+      "id": "C10",
+      "claim": "VKSO provides whole-machine net memory savings or lightweight cold deployment",
+      "verdict": "not-supported",
+      "question": "Do avoided pages exceed all incremental system costs, including dedicated support and deployment?",
+      "evidence": [
+        "test/section65/build/squashfs/refined-analysis-01/resource-ledger/resources.json",
+        "test/section65/squashfs/refinement/RESULTS.md"
+      ],
+      "finding": "Whole-machine net savings remain unmeasured. Native preparation adds 48 KiB over the matched native module, while an already prepared service avoids one 36 KiB backing. Export/construction/registration sum has median 2.698 s and observed range 2.696–6.088 s across nine campaigns, excluding compilation and module loading. Generic 32 KiB platform residency is not charged per filesystem.",
+      "limits": "Private/global allocations and allocator effects are not a calibrated system total. Setup is per owner deployment/version, reused while installed. Copied construction is not assumed free.",
+      "paper_action": "Retain conditional business accounting, setup ranges and scale-dependent helper costs; do not claim whole-machine net saving or universally lightweight cold deployment."
+    },
+    {
+      "id": "C11",
+      "claim": "Hot update, multi-process scaling, cross-machine or cross-boot generality",
+      "verdict": "not-supported",
+      "question": "Does this finite matrix establish these stronger extensions?",
+      "evidence": [
+        "test/section65/squashfs/refinement/PROTOCOL.md",
+        "test/evaluation-local/runs/iso9660/squash-refine-xz-execution-01/result.json",
+        "test/section65/build/squashfs/refined-analysis-01/audit.json"
+      ],
+      "finding": "Simultaneous native and two SIF consumers establish private state/lifetime independence. Formal confirmation spans new process/mount/load cycles on one host/boot; repaired consumers are newly started.",
+      "limits": "No filesystem process-count throughput curve, hot-update protocol, or cross-machine/boot replication. Metadata-entry scaling is a different experiment.",
+      "paper_action": "Keep hot update, throughput scaling and cross-host/boot generality explicitly outside established evidence."
+    },
+    {
+      "id": "C12",
+      "claim": "VKSO is generally preferable to an identical-core copied deployment",
+      "verdict": "not-supported",
+      "question": "Which demonstrated benefit is unique to resident physical reuse, and does it exceed dedicated adoption costs?",
+      "evidence": [
+        "test/section65/build/squashfs/refined-analysis-01/resource-ledger/resources.json",
+        "test/section65/build/squashfs/refined-analysis-01/costs.json",
+        "test/evaluation-local/runs/iso9660/squash-refine-minimal-deployment-01/result.json"
+      ],
+      "finding": "Copied also receives common algorithm, integration and repair benefits and runs after all task modules unload. VKSO additionally reuses nine native physical pages. An already installed platform/prepared owner supports this conditional property, but dedicated deployment is not universally preferable.",
+      "limits": "No universal adoption preference over copied or per-user-process multiplication of code-page savings follows.",
+      "paper_action": "Frame the main application contribution through measured related-work baselines. Keep copied as the physical-sharing control and distinguish platform, native-preparation and user-consumer increments."
+    },
+    {
+      "id": "C13",
+      "claim": "Resident kernel closures provide a useful real-application reuse path relative to existing reader/rehosting approaches",
+      "verdict": "supported-within-scope",
+      "question": "Can the same filesystem body serve native and actual SIF consumers with useful complete-task performance, helper resources and common maintenance?",
+      "evidence": [
+        "test/section65/build/squashfs/refined-analysis-01/analysis.json",
+        "test/section65/build/squashfs/refined-analysis-01/audit.json",
+        "test/section65/build/squashfs/refined-analysis-01/resource-ledger/resources.json",
+        "test/section65/build/squashfs/refined-analysis-01/costs.json",
+        "test/evaluation-local/runs/iso9660/squash-refine-xz-execution-01/result.json",
+        "test/section65/squashfs/refinement/RESULTS.md",
+        "test/section65/related-work-comparison.md"
+      ],
+      "finding": "The final filesystem/decoder body serves native and actual SIF consumers with private state, native/user PFN identity and common repair. Selected metadata/sequential tasks and small-tree helper resources are useful relative to executable SquashFUSE/LKL baselines. Single-thread stock controls, the adverse independent xz compilation result and metadata-scale memory reversal delimit that usefulness.",
+      "limits": "The case supports an application reuse path, not universal speed, compactness, or superiority over copied. Rump is conceptual related work, with no measured timing row.",
+      "paper_action": "Connect native/body reuse to the motivation while reporting application and resource tradeoffs in the main section."
+    }
+  ],
+  "version": "xz-composed-refined",
+  "accounting_premise": "VKSO platform is installed. Generic page_cache_replace residency is charged once to the platform, not to each filesystem business or process. Business preparation, per-core metadata and private runtime state remain included."
+}

@@ -1,0 +1,4604 @@
+{
+  "status": "complete",
+  "scope": "Frozen word-copy XZ and bounded-private-cache implementation; no historical observations pooled. Native optimized normal/relaxed references carry the identical edited XZ algorithm, while predecessor references remain explicitly labeled. Separate matrices, equal campaign weight, three campaign means per cell. Pointwise Student-t 95% CIs on campaign mean log paired ratios. Secondary bootstrap resamples campaigns and paired blocks. Absolute times are means of campaign medians, not operands of paired ratios.",
+  "inputs": [
+    {
+      "kind": "python-decoder-attribution",
+      "run": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01",
+      "samples": 40,
+      "sha256": "42e0765b48f96ed9c94966717e943f256a05a35a43206b99c2d5086bedfff19d",
+      "campaign": "python-decoder-attribution-v2-01"
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "run": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02",
+      "samples": 40,
+      "sha256": "f60dead0257a7a3726346bf552b80419a46874ec90f9cd288943597fd881972d",
+      "campaign": "python-decoder-attribution-v2-02"
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "run": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03",
+      "samples": 40,
+      "sha256": "6c16ac157267f8b2b167d3e25e652162db547f89328875cc9911d8abbf81398b",
+      "campaign": "python-decoder-attribution-v2-03"
+    }
+  ],
+  "observations": 120,
+  "results": [
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "baseline": "copied",
+      "treatment": "vkso",
+      "campaigns": 3,
+      "pairs": 24,
+      "time_ratio": 1.002011503717521,
+      "ratio_ci95": [
+        0.999078291206677,
+        1.0049533279014535
+      ],
+      "paired_difference_seconds": 0.005075419750937726,
+      "difference_ci95_seconds": [
+        -0.002354822429386053,
+        0.012505661931261507
+      ],
+      "hierarchical_bootstrap_ratio_ci95": [
+        0.9998519778746368,
+        1.004978212598446
+      ],
+      "absolute_median_seconds": {
+        "copied": 2.5134385645069415,
+        "vkso": 2.5163628880109172
+      },
+      "campaign_ratios": {
+        "python-decoder-attribution-v2-01": 1.0015928221073664,
+        "python-decoder-attribution-v2-02": 1.0010957844754684,
+        "python-decoder-attribution-v2-03": 1.0033473003443634
+      },
+      "blocks_per_campaign": {
+        "python-decoder-attribution-v2-01": 8,
+        "python-decoder-attribution-v2-02": 8,
+        "python-decoder-attribution-v2-03": 8
+      },
+      "cpu_ratio": 1.0010890453038148,
+      "cpu_ratio_ci95": [
+        0.9998964850961478,
+        1.002283027858565
+      ]
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "baseline": "copied-library",
+      "treatment": "copied",
+      "campaigns": 3,
+      "pairs": 24,
+      "time_ratio": 1.0248976077598329,
+      "ratio_ci95": [
+        1.022659894872131,
+        1.0271402170544368
+      ],
+      "paired_difference_seconds": 0.06105825058330083,
+      "difference_ci95_seconds": [
+        0.05561787697110456,
+        0.0664986241954971
+      ],
+      "hierarchical_bootstrap_ratio_ci95": [
+        1.0233103533475245,
+        1.0264224679677294
+      ],
+      "absolute_median_seconds": {
+        "copied-library": 2.4507377124828054,
+        "copied": 2.5134385645069415
+      },
+      "campaign_ratios": {
+        "python-decoder-attribution-v2-01": 1.0256627724805205,
+        "python-decoder-attribution-v2-02": 1.0239037378836497,
+        "python-decoder-attribution-v2-03": 1.0251271062940484
+      },
+      "blocks_per_campaign": {
+        "python-decoder-attribution-v2-01": 8,
+        "python-decoder-attribution-v2-02": 8,
+        "python-decoder-attribution-v2-03": 8
+      },
+      "cpu_ratio": 1.025479821985533,
+      "cpu_ratio_ci95": [
+        1.0228072224050357,
+        1.0281594050799918
+      ]
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "baseline": "copied-library",
+      "treatment": "copied-retained",
+      "campaigns": 3,
+      "pairs": 24,
+      "time_ratio": 1.025990762825612,
+      "ratio_ci95": [
+        1.0215359360404328,
+        1.0304650167116753
+      ],
+      "paired_difference_seconds": 0.06374169191500793,
+      "difference_ci95_seconds": [
+        0.052820087002966795,
+        0.07466329682704907
+      ],
+      "hierarchical_bootstrap_ratio_ci95": [
+        1.024132151013041,
+        1.0281067109617492
+      ],
+      "absolute_median_seconds": {
+        "copied-library": 2.4507377124828054,
+        "copied-retained": 2.5156300029921113
+      },
+      "campaign_ratios": {
+        "python-decoder-attribution-v2-01": 1.027967208358648,
+        "python-decoder-attribution-v2-02": 1.0244516019335057,
+        "python-decoder-attribution-v2-03": 1.0255566269668308
+      },
+      "blocks_per_campaign": {
+        "python-decoder-attribution-v2-01": 8,
+        "python-decoder-attribution-v2-02": 8,
+        "python-decoder-attribution-v2-03": 8
+      },
+      "cpu_ratio": 1.0267358009566365,
+      "cpu_ratio_ci95": [
+        1.0222411597110235,
+        1.031250204466501
+      ]
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "baseline": "copied-retained",
+      "treatment": "copied",
+      "campaigns": 3,
+      "pairs": 24,
+      "time_ratio": 0.998934537127051,
+      "ratio_ci95": [
+        0.9964016163103013,
+        1.0014738968011438
+      ],
+      "paired_difference_seconds": -0.002683441331707096,
+      "difference_ci95_seconds": [
+        -0.009088351923960512,
+        0.00372146926054632
+      ],
+      "hierarchical_bootstrap_ratio_ci95": [
+        0.9974932402233484,
+        1.0003440043060128
+      ],
+      "absolute_median_seconds": {
+        "copied-retained": 2.5156300029921113,
+        "copied": 2.5134385645069415
+      },
+      "campaign_ratios": {
+        "python-decoder-attribution-v2-01": 0.9977582593497248,
+        "python-decoder-attribution-v2-02": 0.9994652123645257,
+        "python-decoder-attribution-v2-03": 0.9995811828801177
+      },
+      "blocks_per_campaign": {
+        "python-decoder-attribution-v2-01": 8,
+        "python-decoder-attribution-v2-02": 8,
+        "python-decoder-attribution-v2-03": 8
+      },
+      "cpu_ratio": 0.9987767262328503,
+      "cpu_ratio_ci95": [
+        0.9966567350558156,
+        1.0009012268487245
+      ]
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "baseline": "stock",
+      "treatment": "copied",
+      "campaigns": 3,
+      "pairs": 24,
+      "time_ratio": 1.1582178024085135,
+      "ratio_ci95": [
+        1.1572885540695508,
+        1.1591477968902357
+      ],
+      "paired_difference_seconds": 0.34334542600117857,
+      "difference_ci95_seconds": [
+        0.34145577303185626,
+        0.3452350789705009
+      ],
+      "hierarchical_bootstrap_ratio_ci95": [
+        1.156135484360677,
+        1.1599568674693324
+      ],
+      "absolute_median_seconds": {
+        "stock": 2.1679485280037625,
+        "copied": 2.5134385645069415
+      },
+      "campaign_ratios": {
+        "python-decoder-attribution-v2-01": 1.1584958268623915,
+        "python-decoder-attribution-v2-02": 1.1583653184767642,
+        "python-decoder-attribution-v2-03": 1.1577923827922068
+      },
+      "blocks_per_campaign": {
+        "python-decoder-attribution-v2-01": 8,
+        "python-decoder-attribution-v2-02": 8,
+        "python-decoder-attribution-v2-03": 8
+      },
+      "cpu_ratio": 1.1636738459160691,
+      "cpu_ratio_ci95": [
+        1.1611629822016751,
+        1.1661901390462204
+      ]
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "baseline": "stock",
+      "treatment": "copied-library",
+      "campaigns": 3,
+      "pairs": 24,
+      "time_ratio": 1.1300814770561176,
+      "ratio_ci95": [
+        1.1274136231358451,
+        1.1327556440494222
+      ],
+      "paired_difference_seconds": 0.28228717541787773,
+      "difference_ci95_seconds": [
+        0.27690879338335195,
+        0.2876655574524035
+      ],
+      "hierarchical_bootstrap_ratio_ci95": [
+        1.1276004344926642,
+        1.1321789776502365
+      ],
+      "absolute_median_seconds": {
+        "stock": 2.1679485280037625,
+        "copied-library": 2.4507377124828054
+      },
+      "campaign_ratios": {
+        "python-decoder-attribution-v2-01": 1.129509482010954,
+        "python-decoder-attribution-v2-02": 1.1313224823956975,
+        "python-decoder-attribution-v2-03": 1.1294134899795583
+      },
+      "blocks_per_campaign": {
+        "python-decoder-attribution-v2-01": 8,
+        "python-decoder-attribution-v2-02": 8,
+        "python-decoder-attribution-v2-03": 8
+      },
+      "cpu_ratio": 1.1347603540974263,
+      "cpu_ratio_ci95": [
+        1.133559821200194,
+        1.1359621584575408
+      ]
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "baseline": "stock",
+      "treatment": "copied-retained",
+      "campaigns": 3,
+      "pairs": 24,
+      "time_ratio": 1.1594531566999007,
+      "ratio_ci95": [
+        1.155813567003769,
+        1.1631042072522932
+      ],
+      "paired_difference_seconds": 0.3460288673328857,
+      "difference_ci95_seconds": [
+        0.33796439272472345,
+        0.3540933419410479
+      ],
+      "hierarchical_bootstrap_ratio_ci95": [
+        1.1566501522492676,
+        1.161458309798902
+      ],
+      "absolute_median_seconds": {
+        "stock": 2.1679485280037625,
+        "copied-retained": 2.5156300029921113
+      },
+      "campaign_ratios": {
+        "python-decoder-attribution-v2-01": 1.1610987090374227,
+        "python-decoder-attribution-v2-02": 1.1589851293936624,
+        "python-decoder-attribution-v2-03": 1.1582774892342722
+      },
+      "blocks_per_campaign": {
+        "python-decoder-attribution-v2-01": 8,
+        "python-decoder-attribution-v2-02": 8,
+        "python-decoder-attribution-v2-03": 8
+      },
+      "cpu_ratio": 1.1650990810580575,
+      "cpu_ratio_ci95": [
+        1.1602016356246068,
+        1.170017199597835
+      ]
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "baseline": "stock",
+      "treatment": "vkso",
+      "campaigns": 3,
+      "pairs": 24,
+      "time_ratio": 1.160547561823757,
+      "ratio_ci95": [
+        1.1579864412439425,
+        1.16311434683831
+      ],
+      "paired_difference_seconds": 0.3484208457521163,
+      "difference_ci95_seconds": [
+        0.3424022426844876,
+        0.354439448819745
+      ],
+      "hierarchical_bootstrap_ratio_ci95": [
+        1.1577195853535855,
+        1.1639184805167666
+      ],
+      "absolute_median_seconds": {
+        "stock": 2.1679485280037625,
+        "vkso": 2.5163628880109172
+      },
+      "campaign_ratios": {
+        "python-decoder-attribution-v2-01": 1.1603411046267098,
+        "python-decoder-attribution-v2-02": 1.159634637209672,
+        "python-decoder-attribution-v2-03": 1.1616678616338283
+      },
+      "blocks_per_campaign": {
+        "python-decoder-attribution-v2-01": 8,
+        "python-decoder-attribution-v2-02": 8,
+        "python-decoder-attribution-v2-03": 8
+      },
+      "cpu_ratio": 1.1649411394531362,
+      "cpu_ratio_ci95": [
+        1.1635522390093462,
+        1.1663316977893508
+      ]
+    }
+  ],
+  "absolute": [
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "variant": "copied",
+      "mean_campaign_median_seconds": 2.5126646913364916,
+      "ci95_seconds": [
+        2.505668991334964,
+        2.5196603913380193
+      ],
+      "campaign_medians": {
+        "python-decoder-attribution-v2-01": 2.5150129935063887,
+        "python-decoder-attribution-v2-02": 2.509542515996145,
+        "python-decoder-attribution-v2-03": 2.5134385645069415
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "variant": "copied-library",
+      "mean_campaign_median_seconds": 2.452170919331062,
+      "ci95_seconds": [
+        2.4468356041245127,
+        2.4575062345376115
+      ],
+      "campaign_medians": {
+        "python-decoder-attribution-v2-01": 2.4520096174965147,
+        "python-decoder-attribution-v2-02": 2.4543947760103038,
+        "python-decoder-attribution-v2-03": 2.4501083644863684
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "variant": "copied-retained",
+      "mean_campaign_median_seconds": 2.515318798662823,
+      "ci95_seconds": [
+        2.50917436361702,
+        2.5214632337086265
+      ],
+      "campaign_medians": {
+        "python-decoder-attribution-v2-01": 2.5181668895093026,
+        "python-decoder-attribution-v2-02": 2.513709475984797,
+        "python-decoder-attribution-v2-03": 2.5140800304943696
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "variant": "stock",
+      "mean_campaign_median_seconds": 2.167797576660329,
+      "ci95_seconds": [
+        2.1618653358620574,
+        2.1737298174586006
+      ],
+      "campaign_medians": {
+        "python-decoder-attribution-v2-01": 2.170349047475611,
+        "python-decoder-attribution-v2-02": 2.1674275300028967,
+        "python-decoder-attribution-v2-03": 2.16561615250248
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "workload": "compile",
+      "phase": "full-application",
+      "variant": "vkso",
+      "mean_campaign_median_seconds": 2.516334703832399,
+      "ci95_seconds": [
+        2.512128022793363,
+        2.5205413848714353
+      ],
+      "campaign_medians": {
+        "python-decoder-attribution-v2-01": 2.51713670148456,
+        "python-decoder-attribution-v2-02": 2.5143892759951996,
+        "python-decoder-attribution-v2-03": 2.5174781340174377
+      }
+    }
+  ],
+  "resources": [
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-01",
+      "variant": "stock",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2279769,
+            "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+            "memory": {
+              "Rss": 6400,
+              "Pss": 4363,
+              "Private_Clean": 208,
+              "Private_Dirty": 4016,
+              "VmSize": 378384,
+              "VmHWM": 4560,
+              "VmRSS": 4560,
+              "Threads": 6
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2279736,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4364,
+                "Pss": 819,
+                "Private_Clean": 60,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4032,
+                "VmRSS": 4032,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2279739,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25540,
+                "Pss": 23647,
+                "Private_Clean": 17868,
+                "Private_Dirty": 5716,
+                "VmSize": 1877548,
+                "VmHWM": 24432,
+                "VmRSS": 24432,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279755,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279769,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+              "memory": {
+                "Rss": 6400,
+                "Pss": 4363,
+                "Private_Clean": 208,
+                "Private_Dirty": 4016,
+                "VmSize": 378384,
+                "VmHWM": 4560,
+                "VmRSS": 4560,
+                "Threads": 6
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279774,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2280,
+                "Pss": 579,
+                "Private_Clean": 92,
+                "Private_Dirty": 360,
+                "VmSize": 4364,
+                "VmHWM": 2084,
+                "VmRSS": 2084,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279787,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1488,
+                "Pss": 780,
+                "Private_Clean": 20,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 31160
+        },
+        "after": {
+          "helper": {
+            "pid": 2279769,
+            "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+            "memory": {
+              "Rss": 19096,
+              "Pss": 17059,
+              "Private_Clean": 208,
+              "Private_Dirty": 16712,
+              "VmSize": 752072,
+              "VmHWM": 17240,
+              "VmRSS": 17240,
+              "Threads": 11
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2279736,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4364,
+                "Pss": 819,
+                "Private_Clean": 60,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4032,
+                "VmRSS": 4032,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2279739,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25540,
+                "Pss": 23647,
+                "Private_Clean": 17868,
+                "Private_Dirty": 5716,
+                "VmSize": 1877548,
+                "VmHWM": 24432,
+                "VmRSS": 24432,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279755,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279769,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+              "memory": {
+                "Rss": 19096,
+                "Pss": 17059,
+                "Private_Clean": 208,
+                "Private_Dirty": 16712,
+                "VmSize": 752072,
+                "VmHWM": 17240,
+                "VmRSS": 17240,
+                "Threads": 11
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279774,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 4948,
+                "Pss": 3247,
+                "Private_Clean": 92,
+                "Private_Dirty": 3028,
+                "VmSize": 7096,
+                "VmHWM": 4780,
+                "VmRSS": 4780,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279800,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1508,
+                "Pss": 800,
+                "Private_Clean": 44,
+                "Private_Dirty": 52,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 46544
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-01",
+      "variant": "copied",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2279839,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/copied__________________/frontend",
+            "memory": {
+              "Rss": 3328,
+              "Pss": 1435,
+              "Private_Clean": 120,
+              "Private_Dirty": 1192,
+              "VmSize": 6472,
+              "VmHWM": 3404,
+              "VmRSS": 3328,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2279805,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4452,
+                "Pss": 821,
+                "Private_Clean": 60,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4120,
+                "VmRSS": 4120,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2279808,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25632,
+                "Pss": 23836,
+                "Private_Clean": 18060,
+                "Private_Dirty": 5716,
+                "VmSize": 1877552,
+                "VmHWM": 23588,
+                "VmRSS": 23556,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279825,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279839,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/copied__________________/frontend",
+              "memory": {
+                "Rss": 3328,
+                "Pss": 1435,
+                "Private_Clean": 120,
+                "Private_Dirty": 1192,
+                "VmSize": 6472,
+                "VmHWM": 3404,
+                "VmRSS": 3328,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279843,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2340,
+                "Pss": 570,
+                "Private_Clean": 104,
+                "Private_Dirty": 352,
+                "VmSize": 4448,
+                "VmHWM": 2172,
+                "VmRSS": 2172,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279852,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1484,
+                "Pss": 776,
+                "Private_Clean": 20,
+                "Private_Dirty": 52,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 28410
+        },
+        "after": {
+          "helper": {
+            "pid": 2279839,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/copied__________________/frontend",
+            "memory": {
+              "Rss": 6120,
+              "Pss": 4227,
+              "Private_Clean": 120,
+              "Private_Dirty": 3984,
+              "VmSize": 9004,
+              "VmHWM": 6120,
+              "VmRSS": 6120,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2279805,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4452,
+                "Pss": 821,
+                "Private_Clean": 60,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4120,
+                "VmRSS": 4120,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2279808,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25632,
+                "Pss": 23836,
+                "Private_Clean": 18060,
+                "Private_Dirty": 5716,
+                "VmSize": 1877552,
+                "VmHWM": 23588,
+                "VmRSS": 23556,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279825,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279839,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/copied__________________/frontend",
+              "memory": {
+                "Rss": 6120,
+                "Pss": 4227,
+                "Private_Clean": 120,
+                "Private_Dirty": 3984,
+                "VmSize": 9004,
+                "VmHWM": 6120,
+                "VmRSS": 6120,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279843,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5144,
+                "Pss": 3374,
+                "Private_Clean": 104,
+                "Private_Dirty": 3156,
+                "VmSize": 7444,
+                "VmHWM": 4952,
+                "VmRSS": 4952,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279858,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1512,
+                "Pss": 804,
+                "Private_Clean": 44,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 34034
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-01",
+      "variant": "vkso",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2279905,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/vkso____________________/frontend",
+            "memory": {
+              "Rss": 3368,
+              "Pss": 1468,
+              "Private_Clean": 180,
+              "Private_Dirty": 1144,
+              "VmSize": 6472,
+              "VmHWM": 3444,
+              "VmRSS": 3368,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2279872,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4484,
+                "Pss": 818,
+                "Private_Clean": 60,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4152,
+                "VmRSS": 4152,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2279875,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25972,
+                "Pss": 24169,
+                "Private_Clean": 18368,
+                "Private_Dirty": 5740,
+                "VmSize": 1877552,
+                "VmHWM": 24976,
+                "VmRSS": 24976,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279891,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1684,
+                "Pss": 976,
+                "Private_Clean": 204,
+                "Private_Dirty": 68,
+                "VmSize": 2456,
+                "VmHWM": 1536,
+                "VmRSS": 1536,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279905,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/vkso____________________/frontend",
+              "memory": {
+                "Rss": 3368,
+                "Pss": 1468,
+                "Private_Clean": 180,
+                "Private_Dirty": 1144,
+                "VmSize": 6472,
+                "VmHWM": 3444,
+                "VmRSS": 3368,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279909,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2304,
+                "Pss": 574,
+                "Private_Clean": 92,
+                "Private_Dirty": 348,
+                "VmSize": 4448,
+                "VmHWM": 2200,
+                "VmRSS": 2200,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279918,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1488,
+                "Pss": 780,
+                "Private_Clean": 20,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 28785
+        },
+        "after": {
+          "helper": {
+            "pid": 2279905,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/vkso____________________/frontend",
+            "memory": {
+              "Rss": 6160,
+              "Pss": 4260,
+              "Private_Clean": 180,
+              "Private_Dirty": 3936,
+              "VmSize": 9004,
+              "VmHWM": 6160,
+              "VmRSS": 6160,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2279872,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4484,
+                "Pss": 818,
+                "Private_Clean": 60,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4152,
+                "VmRSS": 4152,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2279875,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25972,
+                "Pss": 24169,
+                "Private_Clean": 18368,
+                "Private_Dirty": 5740,
+                "VmSize": 1877552,
+                "VmHWM": 24976,
+                "VmRSS": 24976,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279891,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1684,
+                "Pss": 976,
+                "Private_Clean": 204,
+                "Private_Dirty": 68,
+                "VmSize": 2456,
+                "VmHWM": 1536,
+                "VmRSS": 1536,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279905,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/vkso____________________/frontend",
+              "memory": {
+                "Rss": 6160,
+                "Pss": 4260,
+                "Private_Clean": 180,
+                "Private_Dirty": 3936,
+                "VmSize": 9004,
+                "VmHWM": 6160,
+                "VmRSS": 6160,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279909,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5108,
+                "Pss": 3378,
+                "Private_Clean": 92,
+                "Private_Dirty": 3152,
+                "VmSize": 7444,
+                "VmHWM": 4916,
+                "VmRSS": 4916,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279924,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1512,
+                "Pss": 804,
+                "Private_Clean": 44,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 34405
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-01",
+      "variant": "copied-library",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2279972,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/copied-library__________/frontend",
+            "memory": {
+              "Rss": 3816,
+              "Pss": 1728,
+              "Private_Clean": 168,
+              "Private_Dirty": 1400,
+              "VmSize": 7040,
+              "VmHWM": 3728,
+              "VmRSS": 3728,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2279939,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4468,
+                "Pss": 823,
+                "Private_Clean": 60,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4200,
+                "VmRSS": 4200,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2279942,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25840,
+                "Pss": 23966,
+                "Private_Clean": 18164,
+                "Private_Dirty": 5740,
+                "VmSize": 1877552,
+                "VmHWM": 23664,
+                "VmRSS": 23632,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279958,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279972,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/copied-library__________/frontend",
+              "memory": {
+                "Rss": 3816,
+                "Pss": 1728,
+                "Private_Clean": 168,
+                "Private_Dirty": 1400,
+                "VmSize": 7040,
+                "VmHWM": 3728,
+                "VmRSS": 3728,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279976,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2308,
+                "Pss": 586,
+                "Private_Clean": 108,
+                "Private_Dirty": 352,
+                "VmSize": 4448,
+                "VmHWM": 2204,
+                "VmRSS": 2204,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279985,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1488,
+                "Pss": 780,
+                "Private_Clean": 20,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 28855
+        },
+        "after": {
+          "helper": {
+            "pid": 2279972,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/copied-library__________/frontend",
+            "memory": {
+              "Rss": 6416,
+              "Pss": 4328,
+              "Private_Clean": 168,
+              "Private_Dirty": 4000,
+              "VmSize": 9324,
+              "VmHWM": 6660,
+              "VmRSS": 6416,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2279939,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4468,
+                "Pss": 823,
+                "Private_Clean": 60,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4200,
+                "VmRSS": 4200,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2279942,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25840,
+                "Pss": 23966,
+                "Private_Clean": 18164,
+                "Private_Dirty": 5740,
+                "VmSize": 1877552,
+                "VmHWM": 23664,
+                "VmRSS": 23632,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279958,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279972,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/copied-library__________/frontend",
+              "memory": {
+                "Rss": 6416,
+                "Pss": 4328,
+                "Private_Clean": 168,
+                "Private_Dirty": 4000,
+                "VmSize": 9324,
+                "VmHWM": 6660,
+                "VmRSS": 6416,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279976,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5112,
+                "Pss": 3390,
+                "Private_Clean": 108,
+                "Private_Dirty": 3156,
+                "VmSize": 7444,
+                "VmHWM": 4920,
+                "VmRSS": 4920,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2279990,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1508,
+                "Pss": 800,
+                "Private_Clean": 44,
+                "Private_Dirty": 52,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 34279
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-01",
+      "variant": "copied-retained",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2280038,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/copied-retained_________/frontend",
+            "memory": {
+              "Rss": 3572,
+              "Pss": 1462,
+              "Private_Clean": 116,
+              "Private_Dirty": 1212,
+              "VmSize": 6772,
+              "VmHWM": 3648,
+              "VmRSS": 3572,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2280005,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4436,
+                "Pss": 823,
+                "Private_Clean": 60,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4128,
+                "VmRSS": 4128,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2280008,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25996,
+                "Pss": 24228,
+                "Private_Clean": 18432,
+                "Private_Dirty": 5736,
+                "VmSize": 1877552,
+                "VmHWM": 24172,
+                "VmRSS": 24140,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2280024,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2280038,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/copied-retained_________/frontend",
+              "memory": {
+                "Rss": 3572,
+                "Pss": 1462,
+                "Private_Clean": 116,
+                "Private_Dirty": 1212,
+                "VmSize": 6772,
+                "VmHWM": 3648,
+                "VmRSS": 3572,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2280042,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2332,
+                "Pss": 581,
+                "Private_Clean": 112,
+                "Private_Dirty": 352,
+                "VmSize": 4448,
+                "VmHWM": 2228,
+                "VmRSS": 2228,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2280051,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1488,
+                "Pss": 780,
+                "Private_Clean": 20,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 28846
+        },
+        "after": {
+          "helper": {
+            "pid": 2280038,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/copied-retained_________/frontend",
+            "memory": {
+              "Rss": 6416,
+              "Pss": 4306,
+              "Private_Clean": 116,
+              "Private_Dirty": 4056,
+              "VmSize": 9436,
+              "VmHWM": 6180,
+              "VmRSS": 6156,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2280005,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4436,
+                "Pss": 823,
+                "Private_Clean": 60,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4128,
+                "VmRSS": 4128,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2280008,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25996,
+                "Pss": 24228,
+                "Private_Clean": 18432,
+                "Private_Dirty": 5736,
+                "VmSize": 1877552,
+                "VmHWM": 24172,
+                "VmRSS": 24140,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2280024,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2280038,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-01/loader/copied-retained_________/frontend",
+              "memory": {
+                "Rss": 6416,
+                "Pss": 4306,
+                "Private_Clean": 116,
+                "Private_Dirty": 4056,
+                "VmSize": 9436,
+                "VmHWM": 6180,
+                "VmRSS": 6156,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2280042,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5136,
+                "Pss": 3385,
+                "Private_Clean": 112,
+                "Private_Dirty": 3156,
+                "VmSize": 7444,
+                "VmHWM": 4944,
+                "VmRSS": 4944,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2280058,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1512,
+                "Pss": 804,
+                "Private_Clean": 44,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 34518
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-02",
+      "variant": "stock",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2282729,
+            "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+            "memory": {
+              "Rss": 6056,
+              "Pss": 3984,
+              "Private_Clean": 188,
+              "Private_Dirty": 3660,
+              "VmSize": 303620,
+              "VmHWM": 4552,
+              "VmRSS": 4552,
+              "Threads": 5
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2282696,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4548,
+                "Pss": 825,
+                "Private_Clean": 60,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4216,
+                "VmRSS": 4216,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2282699,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 26128,
+                "Pss": 24332,
+                "Private_Clean": 18540,
+                "Private_Dirty": 5732,
+                "VmSize": 1877548,
+                "VmHWM": 25104,
+                "VmRSS": 25104,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282715,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1532,
+                "VmRSS": 1532,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282729,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+              "memory": {
+                "Rss": 6056,
+                "Pss": 3984,
+                "Private_Clean": 188,
+                "Private_Dirty": 3660,
+                "VmSize": 303620,
+                "VmHWM": 4552,
+                "VmRSS": 4552,
+                "Threads": 5
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282734,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2404,
+                "Pss": 590,
+                "Private_Clean": 108,
+                "Private_Dirty": 356,
+                "VmSize": 4364,
+                "VmHWM": 2208,
+                "VmRSS": 2208,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282746,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1488,
+                "Pss": 780,
+                "Private_Clean": 20,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 31483
+        },
+        "after": {
+          "helper": {
+            "pid": 2282729,
+            "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+            "memory": {
+              "Rss": 19372,
+              "Pss": 17300,
+              "Private_Clean": 188,
+              "Private_Dirty": 16976,
+              "VmSize": 752072,
+              "VmHWM": 17180,
+              "VmRSS": 17180,
+              "Threads": 11
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2282696,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4548,
+                "Pss": 825,
+                "Private_Clean": 60,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4216,
+                "VmRSS": 4216,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2282699,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 26128,
+                "Pss": 24332,
+                "Private_Clean": 18540,
+                "Private_Dirty": 5732,
+                "VmSize": 1877548,
+                "VmHWM": 25104,
+                "VmRSS": 25104,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282715,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1532,
+                "VmRSS": 1532,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282729,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+              "memory": {
+                "Rss": 19372,
+                "Pss": 17300,
+                "Private_Clean": 188,
+                "Private_Dirty": 16976,
+                "VmSize": 752072,
+                "VmHWM": 17180,
+                "VmRSS": 17180,
+                "Threads": 11
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282734,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5048,
+                "Pss": 3234,
+                "Private_Clean": 108,
+                "Private_Dirty": 3000,
+                "VmSize": 7072,
+                "VmHWM": 4904,
+                "VmRSS": 4904,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282759,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1512,
+                "Pss": 804,
+                "Private_Clean": 44,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 47467
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-02",
+      "variant": "copied",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2282796,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/copied__________________/frontend",
+            "memory": {
+              "Rss": 3340,
+              "Pss": 1467,
+              "Private_Clean": 148,
+              "Private_Dirty": 1196,
+              "VmSize": 6472,
+              "VmHWM": 3416,
+              "VmRSS": 3340,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2282763,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4448,
+                "Pss": 828,
+                "Private_Clean": 68,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4180,
+                "VmRSS": 4180,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2282766,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25644,
+                "Pss": 23856,
+                "Private_Clean": 18052,
+                "Private_Dirty": 5744,
+                "VmSize": 1877552,
+                "VmHWM": 24716,
+                "VmRSS": 24716,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282782,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282796,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/copied__________________/frontend",
+              "memory": {
+                "Rss": 3340,
+                "Pss": 1467,
+                "Private_Clean": 148,
+                "Private_Dirty": 1196,
+                "VmSize": 6472,
+                "VmHWM": 3416,
+                "VmRSS": 3340,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282800,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2248,
+                "Pss": 562,
+                "Private_Clean": 92,
+                "Private_Dirty": 356,
+                "VmSize": 4448,
+                "VmHWM": 2144,
+                "VmRSS": 2144,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282809,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1492,
+                "Pss": 784,
+                "Private_Clean": 20,
+                "Private_Dirty": 60,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 28469
+        },
+        "after": {
+          "helper": {
+            "pid": 2282796,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/copied__________________/frontend",
+            "memory": {
+              "Rss": 6132,
+              "Pss": 4259,
+              "Private_Clean": 196,
+              "Private_Dirty": 3940,
+              "VmSize": 9004,
+              "VmHWM": 6132,
+              "VmRSS": 6132,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2282763,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4448,
+                "Pss": 828,
+                "Private_Clean": 68,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4180,
+                "VmRSS": 4180,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2282766,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25644,
+                "Pss": 23856,
+                "Private_Clean": 18052,
+                "Private_Dirty": 5744,
+                "VmSize": 1877552,
+                "VmHWM": 24716,
+                "VmRSS": 24716,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282782,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282796,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/copied__________________/frontend",
+              "memory": {
+                "Rss": 6132,
+                "Pss": 4259,
+                "Private_Clean": 196,
+                "Private_Dirty": 3940,
+                "VmSize": 9004,
+                "VmHWM": 6132,
+                "VmRSS": 6132,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282800,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5052,
+                "Pss": 3366,
+                "Private_Clean": 92,
+                "Private_Dirty": 3160,
+                "VmSize": 7444,
+                "VmHWM": 4860,
+                "VmRSS": 4860,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282816,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1512,
+                "Pss": 804,
+                "Private_Clean": 44,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 34085
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-02",
+      "variant": "vkso",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2282862,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/vkso____________________/frontend",
+            "memory": {
+              "Rss": 3384,
+              "Pss": 1459,
+              "Private_Clean": 188,
+              "Private_Dirty": 1144,
+              "VmSize": 6472,
+              "VmHWM": 3460,
+              "VmRSS": 3384,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2282829,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4548,
+                "Pss": 819,
+                "Private_Clean": 60,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4216,
+                "VmRSS": 4216,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2282832,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25824,
+                "Pss": 24060,
+                "Private_Clean": 18244,
+                "Private_Dirty": 5756,
+                "VmSize": 1951284,
+                "VmHWM": 23852,
+                "VmRSS": 23820,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282848,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282862,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/vkso____________________/frontend",
+              "memory": {
+                "Rss": 3384,
+                "Pss": 1459,
+                "Private_Clean": 188,
+                "Private_Dirty": 1144,
+                "VmSize": 6472,
+                "VmHWM": 3460,
+                "VmRSS": 3384,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282867,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2272,
+                "Pss": 557,
+                "Private_Clean": 92,
+                "Private_Dirty": 348,
+                "VmSize": 4448,
+                "VmHWM": 2168,
+                "VmRSS": 2168,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282879,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1488,
+                "Pss": 780,
+                "Private_Clean": 20,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 28647
+        },
+        "after": {
+          "helper": {
+            "pid": 2282862,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/vkso____________________/frontend",
+            "memory": {
+              "Rss": 6176,
+              "Pss": 4251,
+              "Private_Clean": 188,
+              "Private_Dirty": 3936,
+              "VmSize": 9004,
+              "VmHWM": 6176,
+              "VmRSS": 6176,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2282829,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4548,
+                "Pss": 819,
+                "Private_Clean": 60,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4216,
+                "VmRSS": 4216,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2282832,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25824,
+                "Pss": 24060,
+                "Private_Clean": 18244,
+                "Private_Dirty": 5756,
+                "VmSize": 1951284,
+                "VmHWM": 23852,
+                "VmRSS": 23820,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282848,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282862,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/vkso____________________/frontend",
+              "memory": {
+                "Rss": 6176,
+                "Pss": 4251,
+                "Private_Clean": 188,
+                "Private_Dirty": 3936,
+                "VmSize": 9004,
+                "VmHWM": 6176,
+                "VmRSS": 6176,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282867,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5076,
+                "Pss": 3361,
+                "Private_Clean": 92,
+                "Private_Dirty": 3152,
+                "VmSize": 7444,
+                "VmHWM": 4884,
+                "VmRSS": 4884,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282882,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1516,
+                "Pss": 808,
+                "Private_Clean": 44,
+                "Private_Dirty": 60,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 34271
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-02",
+      "variant": "copied-library",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2282930,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/copied-library__________/frontend",
+            "memory": {
+              "Rss": 3776,
+              "Pss": 1739,
+              "Private_Clean": 212,
+              "Private_Dirty": 1364,
+              "VmSize": 7040,
+              "VmHWM": 3688,
+              "VmRSS": 3688,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2282897,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4432,
+                "Pss": 826,
+                "Private_Clean": 64,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4164,
+                "VmRSS": 4164,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2282900,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25548,
+                "Pss": 23752,
+                "Private_Clean": 17948,
+                "Private_Dirty": 5744,
+                "VmSize": 1951284,
+                "VmHWM": 24412,
+                "VmRSS": 24412,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282916,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1676,
+                "Pss": 968,
+                "Private_Clean": 204,
+                "Private_Dirty": 60,
+                "VmSize": 2456,
+                "VmHWM": 1544,
+                "VmRSS": 1544,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282930,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/copied-library__________/frontend",
+              "memory": {
+                "Rss": 3776,
+                "Pss": 1739,
+                "Private_Clean": 212,
+                "Private_Dirty": 1364,
+                "VmSize": 7040,
+                "VmHWM": 3688,
+                "VmRSS": 3688,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282934,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2392,
+                "Pss": 579,
+                "Private_Clean": 100,
+                "Private_Dirty": 348,
+                "VmSize": 4448,
+                "VmHWM": 2288,
+                "VmRSS": 2288,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282944,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1484,
+                "Pss": 776,
+                "Private_Clean": 20,
+                "Private_Dirty": 52,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 28640
+        },
+        "after": {
+          "helper": {
+            "pid": 2282930,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/copied-library__________/frontend",
+            "memory": {
+              "Rss": 6376,
+              "Pss": 4339,
+              "Private_Clean": 212,
+              "Private_Dirty": 3964,
+              "VmSize": 9324,
+              "VmHWM": 6620,
+              "VmRSS": 6376,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2282897,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4432,
+                "Pss": 826,
+                "Private_Clean": 64,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4164,
+                "VmRSS": 4164,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2282900,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25548,
+                "Pss": 23752,
+                "Private_Clean": 17948,
+                "Private_Dirty": 5744,
+                "VmSize": 1951284,
+                "VmHWM": 24412,
+                "VmRSS": 24412,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282916,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1676,
+                "Pss": 968,
+                "Private_Clean": 204,
+                "Private_Dirty": 60,
+                "VmSize": 2456,
+                "VmHWM": 1544,
+                "VmRSS": 1544,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282930,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/copied-library__________/frontend",
+              "memory": {
+                "Rss": 6376,
+                "Pss": 4339,
+                "Private_Clean": 212,
+                "Private_Dirty": 3964,
+                "VmSize": 9324,
+                "VmHWM": 6620,
+                "VmRSS": 6376,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282934,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5196,
+                "Pss": 3383,
+                "Private_Clean": 100,
+                "Private_Dirty": 3152,
+                "VmSize": 7444,
+                "VmHWM": 5004,
+                "VmRSS": 5004,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282950,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1516,
+                "Pss": 808,
+                "Private_Clean": 44,
+                "Private_Dirty": 60,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 34076
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-02",
+      "variant": "copied-retained",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2282995,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/copied-retained_________/frontend",
+            "memory": {
+              "Rss": 3500,
+              "Pss": 1472,
+              "Private_Clean": 172,
+              "Private_Dirty": 1160,
+              "VmSize": 6772,
+              "VmHWM": 3576,
+              "VmRSS": 3500,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2282961,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4492,
+                "Pss": 836,
+                "Private_Clean": 68,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4224,
+                "VmRSS": 4224,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2282964,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25568,
+                "Pss": 23764,
+                "Private_Clean": 17952,
+                "Private_Dirty": 5752,
+                "VmSize": 1951284,
+                "VmHWM": 23464,
+                "VmRSS": 23432,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282981,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282995,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/copied-retained_________/frontend",
+              "memory": {
+                "Rss": 3500,
+                "Pss": 1472,
+                "Private_Clean": 172,
+                "Private_Dirty": 1160,
+                "VmSize": 6772,
+                "VmHWM": 3576,
+                "VmRSS": 3500,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282999,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2332,
+                "Pss": 570,
+                "Private_Clean": 92,
+                "Private_Dirty": 352,
+                "VmSize": 4448,
+                "VmHWM": 2280,
+                "VmRSS": 2280,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2283009,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1488,
+                "Pss": 780,
+                "Private_Clean": 20,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 28394
+        },
+        "after": {
+          "helper": {
+            "pid": 2282995,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/copied-retained_________/frontend",
+            "memory": {
+              "Rss": 6344,
+              "Pss": 4316,
+              "Private_Clean": 172,
+              "Private_Dirty": 4004,
+              "VmSize": 9436,
+              "VmHWM": 6108,
+              "VmRSS": 6084,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2282961,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4492,
+                "Pss": 836,
+                "Private_Clean": 68,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4224,
+                "VmRSS": 4224,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2282964,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25568,
+                "Pss": 23764,
+                "Private_Clean": 17952,
+                "Private_Dirty": 5752,
+                "VmSize": 1951284,
+                "VmHWM": 23464,
+                "VmRSS": 23432,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282981,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282995,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-02/loader/copied-retained_________/frontend",
+              "memory": {
+                "Rss": 6344,
+                "Pss": 4316,
+                "Private_Clean": 172,
+                "Private_Dirty": 4004,
+                "VmSize": 9436,
+                "VmHWM": 6108,
+                "VmRSS": 6084,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2282999,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5136,
+                "Pss": 3374,
+                "Private_Clean": 92,
+                "Private_Dirty": 3156,
+                "VmSize": 7444,
+                "VmHWM": 4944,
+                "VmRSS": 4944,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2283050,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1512,
+                "Pss": 804,
+                "Private_Clean": 44,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 34066
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-03",
+      "variant": "stock",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2285693,
+            "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+            "memory": {
+              "Rss": 6076,
+              "Pss": 4018,
+              "Private_Clean": 208,
+              "Private_Dirty": 3680,
+              "VmSize": 378384,
+              "VmHWM": 4364,
+              "VmRSS": 4364,
+              "Threads": 6
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2285660,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4416,
+                "Pss": 821,
+                "Private_Clean": 60,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4084,
+                "VmRSS": 4084,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2285663,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25996,
+                "Pss": 24208,
+                "Private_Clean": 18412,
+                "Private_Dirty": 5736,
+                "VmSize": 1877548,
+                "VmHWM": 24992,
+                "VmRSS": 24992,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285679,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1532,
+                "VmRSS": 1532,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285693,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+              "memory": {
+                "Rss": 6076,
+                "Pss": 4018,
+                "Private_Clean": 208,
+                "Private_Dirty": 3680,
+                "VmSize": 378384,
+                "VmHWM": 4364,
+                "VmRSS": 4364,
+                "Threads": 6
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285698,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2344,
+                "Pss": 568,
+                "Private_Clean": 92,
+                "Private_Dirty": 356,
+                "VmSize": 4364,
+                "VmHWM": 2084,
+                "VmRSS": 2084,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285711,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1488,
+                "Pss": 780,
+                "Private_Clean": 20,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 31367
+        },
+        "after": {
+          "helper": {
+            "pid": 2285693,
+            "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+            "memory": {
+              "Rss": 19776,
+              "Pss": 17718,
+              "Private_Clean": 208,
+              "Private_Dirty": 17380,
+              "VmSize": 677308,
+              "VmHWM": 17624,
+              "VmRSS": 17624,
+              "Threads": 10
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2285660,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4416,
+                "Pss": 821,
+                "Private_Clean": 60,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4084,
+                "VmRSS": 4084,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2285663,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25996,
+                "Pss": 24208,
+                "Private_Clean": 18412,
+                "Private_Dirty": 5736,
+                "VmSize": 1877548,
+                "VmHWM": 24992,
+                "VmRSS": 24992,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285679,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1532,
+                "VmRSS": 1532,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285693,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll",
+              "memory": {
+                "Rss": 19776,
+                "Pss": 17718,
+                "Private_Clean": 208,
+                "Private_Dirty": 17380,
+                "VmSize": 677308,
+                "VmHWM": 17624,
+                "VmRSS": 17624,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285698,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 4988,
+                "Pss": 3212,
+                "Private_Clean": 92,
+                "Private_Dirty": 3000,
+                "VmSize": 7072,
+                "VmHWM": 4840,
+                "VmRSS": 4840,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285722,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1508,
+                "Pss": 800,
+                "Private_Clean": 44,
+                "Private_Dirty": 52,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 47731
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-03",
+      "variant": "copied",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2285759,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/copied__________________/frontend",
+            "memory": {
+              "Rss": 3380,
+              "Pss": 1460,
+              "Private_Clean": 116,
+              "Private_Dirty": 1192,
+              "VmSize": 6472,
+              "VmHWM": 3456,
+              "VmRSS": 3380,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2285726,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4376,
+                "Pss": 818,
+                "Private_Clean": 60,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4044,
+                "VmRSS": 4044,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2285729,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25628,
+                "Pss": 23840,
+                "Private_Clean": 18040,
+                "Private_Dirty": 5740,
+                "VmSize": 1951284,
+                "VmHWM": 24552,
+                "VmRSS": 24552,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285745,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1684,
+                "Pss": 976,
+                "Private_Clean": 204,
+                "Private_Dirty": 68,
+                "VmSize": 2456,
+                "VmHWM": 1536,
+                "VmRSS": 1536,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285759,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/copied__________________/frontend",
+              "memory": {
+                "Rss": 3380,
+                "Pss": 1460,
+                "Private_Clean": 116,
+                "Private_Dirty": 1192,
+                "VmSize": 6472,
+                "VmHWM": 3456,
+                "VmRSS": 3380,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285763,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2312,
+                "Pss": 581,
+                "Private_Clean": 92,
+                "Private_Dirty": 348,
+                "VmSize": 4448,
+                "VmHWM": 2208,
+                "VmRSS": 2208,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285773,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1492,
+                "Pss": 784,
+                "Private_Clean": 20,
+                "Private_Dirty": 60,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 28459
+        },
+        "after": {
+          "helper": {
+            "pid": 2285759,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/copied__________________/frontend",
+            "memory": {
+              "Rss": 6172,
+              "Pss": 4252,
+              "Private_Clean": 116,
+              "Private_Dirty": 3984,
+              "VmSize": 9004,
+              "VmHWM": 6172,
+              "VmRSS": 6172,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2285726,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4376,
+                "Pss": 818,
+                "Private_Clean": 60,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4044,
+                "VmRSS": 4044,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2285729,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25628,
+                "Pss": 23840,
+                "Private_Clean": 18040,
+                "Private_Dirty": 5740,
+                "VmSize": 1951284,
+                "VmHWM": 24552,
+                "VmRSS": 24552,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285745,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1684,
+                "Pss": 976,
+                "Private_Clean": 204,
+                "Private_Dirty": 68,
+                "VmSize": 2456,
+                "VmHWM": 1536,
+                "VmRSS": 1536,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285759,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/copied__________________/frontend",
+              "memory": {
+                "Rss": 6172,
+                "Pss": 4252,
+                "Private_Clean": 116,
+                "Private_Dirty": 3984,
+                "VmSize": 9004,
+                "VmHWM": 6172,
+                "VmRSS": 6172,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285763,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5116,
+                "Pss": 3385,
+                "Private_Clean": 92,
+                "Private_Dirty": 3152,
+                "VmSize": 7444,
+                "VmHWM": 4924,
+                "VmRSS": 4924,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285780,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1512,
+                "Pss": 804,
+                "Private_Clean": 44,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 34075
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-03",
+      "variant": "vkso",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2285825,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/vkso____________________/frontend",
+            "memory": {
+              "Rss": 3380,
+              "Pss": 1435,
+              "Private_Clean": 164,
+              "Private_Dirty": 1148,
+              "VmSize": 6472,
+              "VmHWM": 3456,
+              "VmRSS": 3380,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2285792,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4544,
+                "Pss": 820,
+                "Private_Clean": 60,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4212,
+                "VmRSS": 4212,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2285795,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25728,
+                "Pss": 23854,
+                "Private_Clean": 18040,
+                "Private_Dirty": 5752,
+                "VmSize": 1951284,
+                "VmHWM": 24636,
+                "VmRSS": 24636,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285811,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1676,
+                "Pss": 968,
+                "Private_Clean": 204,
+                "Private_Dirty": 60,
+                "VmSize": 2456,
+                "VmHWM": 1544,
+                "VmRSS": 1544,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285825,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/vkso____________________/frontend",
+              "memory": {
+                "Rss": 3380,
+                "Pss": 1435,
+                "Private_Clean": 164,
+                "Private_Dirty": 1148,
+                "VmSize": 6472,
+                "VmHWM": 3456,
+                "VmRSS": 3380,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285829,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2268,
+                "Pss": 583,
+                "Private_Clean": 124,
+                "Private_Dirty": 348,
+                "VmSize": 4448,
+                "VmHWM": 2164,
+                "VmRSS": 2164,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285839,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1488,
+                "Pss": 780,
+                "Private_Clean": 20,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 28440
+        },
+        "after": {
+          "helper": {
+            "pid": 2285825,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/vkso____________________/frontend",
+            "memory": {
+              "Rss": 6172,
+              "Pss": 4227,
+              "Private_Clean": 164,
+              "Private_Dirty": 3940,
+              "VmSize": 9004,
+              "VmHWM": 6172,
+              "VmRSS": 6172,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2285792,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4544,
+                "Pss": 820,
+                "Private_Clean": 60,
+                "Private_Dirty": 564,
+                "VmSize": 10572,
+                "VmHWM": 4212,
+                "VmRSS": 4212,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2285795,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25728,
+                "Pss": 23854,
+                "Private_Clean": 18040,
+                "Private_Dirty": 5752,
+                "VmSize": 1951284,
+                "VmHWM": 24636,
+                "VmRSS": 24636,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285811,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1676,
+                "Pss": 968,
+                "Private_Clean": 204,
+                "Private_Dirty": 60,
+                "VmSize": 2456,
+                "VmHWM": 1544,
+                "VmRSS": 1544,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285825,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/vkso____________________/frontend",
+              "memory": {
+                "Rss": 6172,
+                "Pss": 4227,
+                "Private_Clean": 164,
+                "Private_Dirty": 3940,
+                "VmSize": 9004,
+                "VmHWM": 6172,
+                "VmRSS": 6172,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285829,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5072,
+                "Pss": 3387,
+                "Private_Clean": 124,
+                "Private_Dirty": 3152,
+                "VmSize": 7444,
+                "VmHWM": 4992,
+                "VmRSS": 4992,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285852,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1512,
+                "Pss": 804,
+                "Private_Clean": 44,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 34060
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-03",
+      "variant": "copied-library",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2285897,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/copied-library__________/frontend",
+            "memory": {
+              "Rss": 3840,
+              "Pss": 1741,
+              "Private_Clean": 184,
+              "Private_Dirty": 1412,
+              "VmSize": 7040,
+              "VmHWM": 3752,
+              "VmRSS": 3752,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2285864,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4492,
+                "Pss": 821,
+                "Private_Clean": 60,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4160,
+                "VmRSS": 4160,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2285867,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25560,
+                "Pss": 23755,
+                "Private_Clean": 17952,
+                "Private_Dirty": 5744,
+                "VmSize": 1951284,
+                "VmHWM": 24480,
+                "VmRSS": 24480,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285883,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285897,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/copied-library__________/frontend",
+              "memory": {
+                "Rss": 3840,
+                "Pss": 1741,
+                "Private_Clean": 184,
+                "Private_Dirty": 1412,
+                "VmSize": 7040,
+                "VmHWM": 3752,
+                "VmRSS": 3752,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285901,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2308,
+                "Pss": 551,
+                "Private_Clean": 92,
+                "Private_Dirty": 348,
+                "VmSize": 4448,
+                "VmHWM": 2204,
+                "VmRSS": 2204,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285912,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1488,
+                "Pss": 780,
+                "Private_Clean": 20,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 28620
+        },
+        "after": {
+          "helper": {
+            "pid": 2285897,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/copied-library__________/frontend",
+            "memory": {
+              "Rss": 6440,
+              "Pss": 4343,
+              "Private_Clean": 184,
+              "Private_Dirty": 4012,
+              "VmSize": 9324,
+              "VmHWM": 6684,
+              "VmRSS": 6440,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2285864,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4492,
+                "Pss": 822,
+                "Private_Clean": 60,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4160,
+                "VmRSS": 4160,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2285867,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25560,
+                "Pss": 23756,
+                "Private_Clean": 17952,
+                "Private_Dirty": 5744,
+                "VmSize": 1951284,
+                "VmHWM": 24480,
+                "VmRSS": 24480,
+                "Threads": 10
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285883,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285897,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/copied-library__________/frontend",
+              "memory": {
+                "Rss": 6440,
+                "Pss": 4343,
+                "Private_Clean": 184,
+                "Private_Dirty": 4012,
+                "VmSize": 9324,
+                "VmHWM": 6684,
+                "VmRSS": 6440,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285901,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5112,
+                "Pss": 3356,
+                "Private_Clean": 92,
+                "Private_Dirty": 3152,
+                "VmSize": 7444,
+                "VmHWM": 4920,
+                "VmRSS": 4920,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285918,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1516,
+                "Pss": 808,
+                "Private_Clean": 44,
+                "Private_Dirty": 60,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 34057
+        },
+        "entries": 5866
+      }
+    },
+    {
+      "kind": "python-decoder-attribution",
+      "codec": "xz",
+      "campaign": "python-decoder-attribution-v2-03",
+      "variant": "copied-retained",
+      "data": {
+        "before": {
+          "helper": {
+            "pid": 2285965,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/copied-retained_________/frontend",
+            "memory": {
+              "Rss": 3504,
+              "Pss": 1481,
+              "Private_Clean": 132,
+              "Private_Dirty": 1212,
+              "VmSize": 6772,
+              "VmHWM": 3580,
+              "VmRSS": 3504,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2285932,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4504,
+                "Pss": 820,
+                "Private_Clean": 60,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4236,
+                "VmRSS": 4236,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2285935,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25676,
+                "Pss": 23856,
+                "Private_Clean": 18080,
+                "Private_Dirty": 5716,
+                "VmSize": 1877552,
+                "VmHWM": 24640,
+                "VmRSS": 24640,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285951,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285965,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/copied-retained_________/frontend",
+              "memory": {
+                "Rss": 3504,
+                "Pss": 1481,
+                "Private_Clean": 132,
+                "Private_Dirty": 1212,
+                "VmSize": 6772,
+                "VmHWM": 3580,
+                "VmRSS": 3504,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285969,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 2308,
+                "Pss": 590,
+                "Private_Clean": 116,
+                "Private_Dirty": 352,
+                "VmSize": 4448,
+                "VmHWM": 2204,
+                "VmRSS": 2204,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285978,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1488,
+                "Pss": 780,
+                "Private_Clean": 20,
+                "Private_Dirty": 56,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 28499
+        },
+        "after": {
+          "helper": {
+            "pid": 2285965,
+            "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/copied-retained_________/frontend",
+            "memory": {
+              "Rss": 6348,
+              "Pss": 4325,
+              "Private_Clean": 132,
+              "Private_Dirty": 4056,
+              "VmSize": 9436,
+              "VmHWM": 6112,
+              "VmRSS": 6088,
+              "Threads": 1
+            },
+            "affinity": [
+              1,
+              2
+            ]
+          },
+          "processes": [
+            {
+              "pid": 2285932,
+              "executable": "/usr/sbin/runuser",
+              "memory": {
+                "Rss": 4504,
+                "Pss": 820,
+                "Private_Clean": 60,
+                "Private_Dirty": 568,
+                "VmSize": 10572,
+                "VmHWM": 4236,
+                "VmRSS": 4236,
+                "Threads": 1
+              },
+              "affinity": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "pid": 2285935,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/starter",
+              "memory": {
+                "Rss": 25676,
+                "Pss": 23856,
+                "Private_Clean": 18080,
+                "Private_Dirty": 5716,
+                "VmSize": 1877552,
+                "VmHWM": 24640,
+                "VmRSS": 24640,
+                "Threads": 9
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285951,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1680,
+                "Pss": 972,
+                "Private_Clean": 204,
+                "Private_Dirty": 64,
+                "VmSize": 2456,
+                "VmHWM": 1548,
+                "VmRSS": 1548,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285965,
+              "executable": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-decoder-attribution-v2-03/loader/copied-retained_________/frontend",
+              "memory": {
+                "Rss": 6348,
+                "Pss": 4325,
+                "Private_Clean": 132,
+                "Private_Dirty": 4056,
+                "VmSize": 9436,
+                "VmHWM": 6112,
+                "VmRSS": 6088,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285969,
+              "executable": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/fuse-overlayfs",
+              "memory": {
+                "Rss": 5112,
+                "Pss": 3394,
+                "Private_Clean": 116,
+                "Private_Dirty": 3156,
+                "VmSize": 7444,
+                "VmHWM": 4920,
+                "VmRSS": 4920,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            },
+            {
+              "pid": 2285983,
+              "executable": "/usr/bin/busybox",
+              "memory": {
+                "Rss": 1508,
+                "Pss": 800,
+                "Private_Clean": 44,
+                "Private_Dirty": 52,
+                "VmSize": 2456,
+                "VmHWM": 4,
+                "VmRSS": 4,
+                "Threads": 1
+              },
+              "affinity": [
+                1,
+                2
+              ]
+            }
+          ],
+          "descendant_pss_kib": 34167
+        },
+        "entries": 5866
+      }
+    }
+  ],
+  "identities": {
+    "python-decoder-attribution/xz": {
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso_sq_core.ko": "64ab8c7e8bb313d56b8721ae7c8c5e752dfc824a091073f9f18f6044f574ec98",
+      "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/build-squash-only/sif-frontend/lklfuse": "6d2263f7fe4d09041678527dbd0e1845c88ac3054dd5914e79d2baf2c4a28a80",
+      "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll": "d37f5b387c36d58a32831c2e6e6db2573fa31117b8e51b88c92be096c1b4f499",
+      "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/cache-frontend-01/lklfuse-cache": "a16552b50f7b04e1e97f0945e88eb26366da648cf736141ebde1e9b833f68b79",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squash-helper": "e53d464e754b241082d32ff4eb82232828030c451442c65860a4b04c6a59281e",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-decoder-controls-01/copied-library/vkso-squashfuse": "4eb84eca0f986ec002086fc3deb44703a623fdce77c9416d6f2c5f041ae9edd7",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-decoder-controls-01/copied-retained/vkso-squashfuse": "4eb84eca0f986ec002086fc3deb44703a623fdce77c9416d6f2c5f041ae9edd7",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-decoder-controls-01/copied-library/libsq-bridge.so": "8954256c0898ef3507da3509dd15b94af416adc44e57a113814a8e54a595c788",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse": "4eb84eca0f986ec002086fc3deb44703a623fdce77c9416d6f2c5f041ae9edd7",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso_squashfs.ko": "31a6187c8370c30eec97f75a6f1e2cdb68aca2757e7180e5ab5a84ea9b79dd22",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-decoder-controls-01/copied-retained/libsq-bridge.so": "0c9ee55018a77109eca460ebb957bd69fd43fb90e7c17e17940cd7ea5d8cf416",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so": "950f4b8bfe3394e595ce23b058d685886bd0ecc197fbc6a17ee3971e3b9566a7"
+    }
+  }
+}

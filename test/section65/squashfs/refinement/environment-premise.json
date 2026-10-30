@@ -1,0 +1,19 @@
+{
+  "recorded": 1793302327.1107411,
+  "uname": [
+    "Linux",
+    "intelnuczzk",
+    "5.15.198",
+    "#1 SMP 2026-09-23 13:31:29 UTC",
+    "x86_64",
+    "x86_64"
+  ],
+  "controls": {
+    "/sys/devices/system/cpu/smt/control": "off",
+    "/sys/devices/system/cpu/intel_pstate/no_turbo": "1",
+    "/sys/devices/system/cpu/online": "0-3",
+    "/sys/devices/system/cpu/offline": "",
+    "/proc/sys/kernel/random/boot_id": "4d29e579-2621-4df3-97a2-8d359ed1f5ea"
+  },
+  "policy": "Observed settings; this refinement does not change the boot configuration. Formal jobs record their own CPU information, affinity, governor and load average."
+}

@@ -1,0 +1,5742 @@
+{
+  "status": "complete",
+  "scale_snapshots": [
+    {
+      "scale": 1,
+      "variant": "stock",
+      "entries": 5867,
+      "pss_kib": 16742,
+      "rss_kib": 18832,
+      "private_kib": 16612,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-01-01/benchmark/resources.json",
+      "source_sha256": "c9a708e26434e1d8bc7593921d3d9aaab01834f5c906308a0c531ed26ddd1016"
+    },
+    {
+      "scale": 1,
+      "variant": "copied",
+      "entries": 5867,
+      "pss_kib": 4275,
+      "rss_kib": 6176,
+      "private_kib": 4144,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-01-01/benchmark/resources.json",
+      "source_sha256": "c9a708e26434e1d8bc7593921d3d9aaab01834f5c906308a0c531ed26ddd1016"
+    },
+    {
+      "scale": 1,
+      "variant": "vkso",
+      "entries": 5867,
+      "pss_kib": 4279,
+      "rss_kib": 6244,
+      "private_kib": 4148,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-01-01/benchmark/resources.json",
+      "source_sha256": "c9a708e26434e1d8bc7593921d3d9aaab01834f5c906308a0c531ed26ddd1016"
+    },
+    {
+      "scale": 1,
+      "variant": "stock-single",
+      "entries": 5867,
+      "pss_kib": 12196,
+      "rss_kib": 14308,
+      "private_kib": 12044,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-01-01/benchmark/resources.json",
+      "source_sha256": "c9a708e26434e1d8bc7593921d3d9aaab01834f5c906308a0c531ed26ddd1016"
+    },
+    {
+      "scale": 1,
+      "variant": "lkl-cache-512",
+      "entries": 5867,
+      "pss_kib": 84723,
+      "rss_kib": 86788,
+      "private_kib": 84556,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-01-01/benchmark/resources.json",
+      "source_sha256": "c9a708e26434e1d8bc7593921d3d9aaab01834f5c906308a0c531ed26ddd1016"
+    },
+    {
+      "scale": 1,
+      "variant": "copied-unbounded",
+      "entries": 5867,
+      "pss_kib": 7183,
+      "rss_kib": 9084,
+      "private_kib": 7052,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-01-01/benchmark/resources.json",
+      "source_sha256": "c9a708e26434e1d8bc7593921d3d9aaab01834f5c906308a0c531ed26ddd1016"
+    },
+    {
+      "scale": 4,
+      "variant": "stock",
+      "entries": 23465,
+      "pss_kib": 27183,
+      "rss_kib": 29416,
+      "private_kib": 27036,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-04-01/benchmark/resources.json",
+      "source_sha256": "e6f496529cb054f581efed8ae7a1ea68d56251ebb5e76357bb301356ba44d633"
+    },
+    {
+      "scale": 4,
+      "variant": "copied",
+      "entries": 23465,
+      "pss_kib": 7436,
+      "rss_kib": 9324,
+      "private_kib": 7296,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-04-01/benchmark/resources.json",
+      "source_sha256": "e6f496529cb054f581efed8ae7a1ea68d56251ebb5e76357bb301356ba44d633"
+    },
+    {
+      "scale": 4,
+      "variant": "vkso",
+      "entries": 23465,
+      "pss_kib": 7452,
+      "rss_kib": 9360,
+      "private_kib": 7324,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-04-01/benchmark/resources.json",
+      "source_sha256": "e6f496529cb054f581efed8ae7a1ea68d56251ebb5e76357bb301356ba44d633"
+    },
+    {
+      "scale": 4,
+      "variant": "stock-single",
+      "entries": 23465,
+      "pss_kib": 13488,
+      "rss_kib": 15528,
+      "private_kib": 13336,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-04-01/benchmark/resources.json",
+      "source_sha256": "e6f496529cb054f581efed8ae7a1ea68d56251ebb5e76357bb301356ba44d633"
+    },
+    {
+      "scale": 4,
+      "variant": "lkl-cache-512",
+      "entries": 23465,
+      "pss_kib": 260296,
+      "rss_kib": 262304,
+      "private_kib": 260124,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-04-01/benchmark/resources.json",
+      "source_sha256": "e6f496529cb054f581efed8ae7a1ea68d56251ebb5e76357bb301356ba44d633"
+    },
+    {
+      "scale": 4,
+      "variant": "copied-unbounded",
+      "entries": 23465,
+      "pss_kib": 23964,
+      "rss_kib": 25928,
+      "private_kib": 23836,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-04-01/benchmark/resources.json",
+      "source_sha256": "e6f496529cb054f581efed8ae7a1ea68d56251ebb5e76357bb301356ba44d633"
+    },
+    {
+      "scale": 16,
+      "variant": "stock",
+      "entries": 93857,
+      "pss_kib": 28892,
+      "rss_kib": 31036,
+      "private_kib": 28756,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-16-01/benchmark/resources.json",
+      "source_sha256": "4ed51bd9558908d0609c2054cccbef9817ad535ba35b958ac63b7574e8e63c98"
+    },
+    {
+      "scale": 16,
+      "variant": "copied",
+      "entries": 93857,
+      "pss_kib": 19886,
+      "rss_kib": 21828,
+      "private_kib": 19740,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-16-01/benchmark/resources.json",
+      "source_sha256": "4ed51bd9558908d0609c2054cccbef9817ad535ba35b958ac63b7574e8e63c98"
+    },
+    {
+      "scale": 16,
+      "variant": "vkso",
+      "entries": 93857,
+      "pss_kib": 19899,
+      "rss_kib": 21836,
+      "private_kib": 19768,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-16-01/benchmark/resources.json",
+      "source_sha256": "4ed51bd9558908d0609c2054cccbef9817ad535ba35b958ac63b7574e8e63c98"
+    },
+    {
+      "scale": 16,
+      "variant": "stock-single",
+      "entries": 93857,
+      "pss_kib": 13199,
+      "rss_kib": 15244,
+      "private_kib": 13044,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-16-01/benchmark/resources.json",
+      "source_sha256": "4ed51bd9558908d0609c2054cccbef9817ad535ba35b958ac63b7574e8e63c98"
+    },
+    {
+      "scale": 16,
+      "variant": "lkl-cache-512",
+      "entries": 93857,
+      "pss_kib": 513981,
+      "rss_kib": 515964,
+      "private_kib": 513816,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-16-01/benchmark/resources.json",
+      "source_sha256": "4ed51bd9558908d0609c2054cccbef9817ad535ba35b958ac63b7574e8e63c98"
+    },
+    {
+      "scale": 16,
+      "variant": "copied-unbounded",
+      "entries": 93857,
+      "pss_kib": 91004,
+      "rss_kib": 92884,
+      "private_kib": 90872,
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-16-01/benchmark/resources.json",
+      "source_sha256": "4ed51bd9558908d0609c2054cccbef9817ad535ba35b958ac63b7574e8e63c98"
+    }
+  ],
+  "vkso_mappings": [
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-01-01/benchmark/vkso-helper-smaps-after.txt",
+      "sha256": "89debbb202a52e300b91ee4947dbeb9fffe42032162a26c2f90b135189ceda46",
+      "units": "KiB",
+      "total": {
+        "Size": 9108,
+        "Rss": 6244,
+        "Pss": 4274,
+        "Shared_Clean": 2096,
+        "Shared_Dirty": 0,
+        "Private_Clean": 164,
+        "Private_Dirty": 3984,
+        "Anonymous": 3984,
+        "Swap": 0
+      },
+      "groups": {
+        "frontend_file": {
+          "Size": 24,
+          "Rss": 24,
+          "Pss": 24,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 16,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0
+        },
+        "private_heap_mapping": {
+          "Size": 2404,
+          "Rss": 2344,
+          "Pss": 2344,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 2344,
+          "Anonymous": 2344,
+          "Swap": 0
+        },
+        "anonymous_mappings_unattributed": {
+          "Size": 2720,
+          "Rss": 1520,
+          "Pss": 1520,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 1520,
+          "Anonymous": 1520,
+          "Swap": 0
+        },
+        "dynamic_library_files": {
+          "Size": 3720,
+          "Rss": 2248,
+          "Pss": 282,
+          "Shared_Clean": 2092,
+          "Shared_Dirty": 0,
+          "Private_Clean": 76,
+          "Private_Dirty": 80,
+          "Anonymous": 80,
+          "Swap": 0
+        },
+        "core_carrier_or_copy": {
+          "Size": 56,
+          "Rss": 56,
+          "Pss": 56,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 48,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0
+        },
+        "private_bridge_file": {
+          "Size": 32,
+          "Rss": 32,
+          "Pss": 32,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 24,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0
+        },
+        "stack": {
+          "Size": 128,
+          "Rss": 16,
+          "Pss": 16,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 16,
+          "Anonymous": 16,
+          "Swap": 0
+        },
+        "kernel_supplied_special": {
+          "Size": 24,
+          "Rss": 4,
+          "Pss": 0,
+          "Shared_Clean": 4,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0
+        }
+      },
+      "mappings": [
+        {
+          "address": "5608d3182000-5608d3183000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 4,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "5608d3183000-5608d3185000",
+          "permissions": "r-xp",
+          "offset": 4096,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 8,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "5608d3185000-5608d3186000",
+          "permissions": "r--p",
+          "offset": 12288,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 4,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "5608d3186000-5608d3187000",
+          "permissions": "r--p",
+          "offset": 12288,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "5608d3187000-5608d3188000",
+          "permissions": "rw-p",
+          "offset": 16384,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "56090f5a4000-56090f7fd000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "[heap]",
+          "Size": 2404,
+          "Rss": 2344,
+          "Pss": 2344,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 2344,
+          "Anonymous": 2344,
+          "Swap": 0,
+          "group": "private_heap_mapping"
+        },
+        {
+          "address": "7f59806ed000-7f5980977000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 2600,
+          "Rss": 1436,
+          "Pss": 1436,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 1436,
+          "Anonymous": 1436,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f5980977000-7f598097a000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 12,
+          "Rss": 12,
+          "Pss": 12,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 12,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f598097a000-7f5980993000",
+          "permissions": "r-xp",
+          "offset": 12288,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 100,
+          "Rss": 64,
+          "Pss": 64,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 64,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980993000-7f5980996000",
+          "permissions": "r--p",
+          "offset": 114688,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 12,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980996000-7f5980997000",
+          "permissions": "r--p",
+          "offset": 122880,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980997000-7f5980998000",
+          "permissions": "rw-p",
+          "offset": 126976,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980998000-7f59809a2000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 40,
+          "Rss": 40,
+          "Pss": 1,
+          "Shared_Clean": 40,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f59809a2000-7f5980a54000",
+          "permissions": "r-xp",
+          "offset": 40960,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 712,
+          "Rss": 64,
+          "Pss": 2,
+          "Shared_Clean": 64,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980a54000-7f5980a65000",
+          "permissions": "r--p",
+          "offset": 770048,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 68,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980a65000-7f5980a66000",
+          "permissions": "r--p",
+          "offset": 835584,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980a66000-7f5980a67000",
+          "permissions": "rw-p",
+          "offset": 839680,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980a67000-7f5980a69000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 0,
+          "Shared_Clean": 8,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980a69000-7f5980a7a000",
+          "permissions": "r-xp",
+          "offset": 8192,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 68,
+          "Rss": 64,
+          "Pss": 2,
+          "Shared_Clean": 64,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980a7a000-7f5980a80000",
+          "permissions": "r--p",
+          "offset": 77824,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 24,
+          "Rss": 24,
+          "Pss": 3,
+          "Shared_Clean": 24,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980a80000-7f5980a81000",
+          "permissions": "---p",
+          "offset": 102400,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 4,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980a81000-7f5980a82000",
+          "permissions": "r--p",
+          "offset": 102400,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980a82000-7f5980a83000",
+          "permissions": "rw-p",
+          "offset": 106496,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980a83000-7f5980a8c000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 36,
+          "Rss": 36,
+          "Pss": 36,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 36,
+          "Anonymous": 36,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f5980a8c000-7f5980a93000",
+          "permissions": "r-xp",
+          "offset": 4096,
+          "device": "103:03",
+          "inode": 6690086,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-01-01/carrier/libvkso_sq_core.so",
+          "Size": 28,
+          "Rss": 28,
+          "Pss": 28,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 28,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "core_carrier_or_copy"
+        },
+        {
+          "address": "7f5980a93000-7f5980a95000",
+          "permissions": "r--p",
+          "offset": 32768,
+          "device": "103:03",
+          "inode": 6690086,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-01-01/carrier/libvkso_sq_core.so",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 8,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "core_carrier_or_copy"
+        },
+        {
+          "address": "7f5980a95000-7f5980a9a000",
+          "permissions": "rw-p",
+          "offset": 40960,
+          "device": "103:03",
+          "inode": 6690086,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-01-01/carrier/libvkso_sq_core.so",
+          "Size": 20,
+          "Rss": 20,
+          "Pss": 20,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 12,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "core_carrier_or_copy"
+        },
+        {
+          "address": "7f5980a9a000-7f5980a9d000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 12,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f5980a9d000-7f5980ac5000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 160,
+          "Rss": 160,
+          "Pss": 2,
+          "Shared_Clean": 160,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980ac5000-7f5980c5a000",
+          "permissions": "r-xp",
+          "offset": 163840,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 1620,
+          "Rss": 1172,
+          "Pss": 18,
+          "Shared_Clean": 1172,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980c5a000-7f5980cb2000",
+          "permissions": "r--p",
+          "offset": 1822720,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 352,
+          "Rss": 152,
+          "Pss": 2,
+          "Shared_Clean": 152,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980cb2000-7f5980cb3000",
+          "permissions": "---p",
+          "offset": 2183168,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 4,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980cb3000-7f5980cb7000",
+          "permissions": "r--p",
+          "offset": 2183168,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 16,
+          "Rss": 16,
+          "Pss": 16,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 16,
+          "Anonymous": 16,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980cb7000-7f5980cb9000",
+          "permissions": "rw-p",
+          "offset": 2199552,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980cb9000-7f5980cc6000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 52,
+          "Rss": 20,
+          "Pss": 20,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 20,
+          "Anonymous": 20,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f5980cc6000-7f5980ccd000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 28,
+          "Rss": 28,
+          "Pss": 14,
+          "Shared_Clean": 28,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980ccd000-7f5980ce8000",
+          "permissions": "r-xp",
+          "offset": 28672,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 108,
+          "Rss": 108,
+          "Pss": 54,
+          "Shared_Clean": 108,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980ce8000-7f5980cf2000",
+          "permissions": "r--p",
+          "offset": 139264,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 40,
+          "Rss": 40,
+          "Pss": 20,
+          "Shared_Clean": 40,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980cf2000-7f5980d04000",
+          "permissions": "r--p",
+          "offset": 176128,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 72,
+          "Rss": 24,
+          "Pss": 18,
+          "Shared_Clean": 12,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 12,
+          "Anonymous": 12,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980d04000-7f5980d05000",
+          "permissions": "rw-p",
+          "offset": 249856,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980d05000-7f5980d06000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f5980d06000-7f5980d08000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 8,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7f5980d08000-7f5980d0b000",
+          "permissions": "r-xp",
+          "offset": 8192,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 12,
+          "Rss": 12,
+          "Pss": 12,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 12,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7f5980d0b000-7f5980d0c000",
+          "permissions": "r--p",
+          "offset": 20480,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 4,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7f5980d0c000-7f5980d0d000",
+          "permissions": "r--p",
+          "offset": 20480,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7f5980d0d000-7f5980d0e000",
+          "permissions": "rw-p",
+          "offset": 24576,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7f5980d0e000-7f5980d10000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f5980d10000-7f5980d12000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 0,
+          "Shared_Clean": 8,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980d12000-7f5980d3c000",
+          "permissions": "r-xp",
+          "offset": 8192,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 168,
+          "Rss": 168,
+          "Pss": 2,
+          "Shared_Clean": 168,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980d3c000-7f5980d47000",
+          "permissions": "r--p",
+          "offset": 180224,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 44,
+          "Rss": 44,
+          "Pss": 0,
+          "Shared_Clean": 44,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980d47000-7f5980d48000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f5980d48000-7f5980d4a000",
+          "permissions": "r--p",
+          "offset": 225280,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f5980d4a000-7f5980d4c000",
+          "permissions": "rw-p",
+          "offset": 233472,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7ffc5ef54000-7ffc5ef74000",
+          "permissions": "rwxp",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "[stack]",
+          "Size": 128,
+          "Rss": 16,
+          "Pss": 16,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 16,
+          "Anonymous": 16,
+          "Swap": 0,
+          "group": "stack"
+        },
+        {
+          "address": "7ffc5ef74000-7ffc5ef75000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7ffc5efbe000-7ffc5efc2000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "[vvar]",
+          "Size": 16,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "kernel_supplied_special"
+        },
+        {
+          "address": "7ffc5efc2000-7ffc5efc4000",
+          "permissions": "r-xp",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "[vdso]",
+          "Size": 8,
+          "Rss": 4,
+          "Pss": 0,
+          "Shared_Clean": 4,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "kernel_supplied_special"
+        }
+      ],
+      "scale": 1
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-04-01/benchmark/vkso-helper-smaps-after.txt",
+      "sha256": "7bbbff1c7e87868eb139961110d495a79c6fe3eac85dcddb64b8436cdaeec367",
+      "units": "KiB",
+      "total": {
+        "Size": 12272,
+        "Rss": 9360,
+        "Pss": 7448,
+        "Shared_Clean": 2036,
+        "Shared_Dirty": 0,
+        "Private_Clean": 192,
+        "Private_Dirty": 7132,
+        "Anonymous": 7132,
+        "Swap": 0
+      },
+      "groups": {
+        "frontend_file": {
+          "Size": 24,
+          "Rss": 24,
+          "Pss": 24,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 16,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0
+        },
+        "private_heap_mapping": {
+          "Size": 2600,
+          "Rss": 2520,
+          "Pss": 2520,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 2520,
+          "Anonymous": 2520,
+          "Swap": 0
+        },
+        "anonymous_mappings_unattributed": {
+          "Size": 5684,
+          "Rss": 4492,
+          "Pss": 4492,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4492,
+          "Anonymous": 4492,
+          "Swap": 0
+        },
+        "dynamic_library_files": {
+          "Size": 3720,
+          "Rss": 2224,
+          "Pss": 316,
+          "Shared_Clean": 2032,
+          "Shared_Dirty": 0,
+          "Private_Clean": 112,
+          "Private_Dirty": 80,
+          "Anonymous": 80,
+          "Swap": 0
+        },
+        "core_carrier_or_copy": {
+          "Size": 56,
+          "Rss": 48,
+          "Pss": 48,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 40,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0
+        },
+        "private_bridge_file": {
+          "Size": 32,
+          "Rss": 32,
+          "Pss": 32,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 24,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0
+        },
+        "stack": {
+          "Size": 132,
+          "Rss": 16,
+          "Pss": 16,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 16,
+          "Anonymous": 16,
+          "Swap": 0
+        },
+        "kernel_supplied_special": {
+          "Size": 24,
+          "Rss": 4,
+          "Pss": 0,
+          "Shared_Clean": 4,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0
+        }
+      },
+      "mappings": [
+        {
+          "address": "5620c6796000-5620c6797000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 4,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "5620c6797000-5620c6799000",
+          "permissions": "r-xp",
+          "offset": 4096,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 8,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "5620c6799000-5620c679a000",
+          "permissions": "r--p",
+          "offset": 12288,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 4,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "5620c679a000-5620c679b000",
+          "permissions": "r--p",
+          "offset": 12288,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "5620c679b000-5620c679c000",
+          "permissions": "rw-p",
+          "offset": 16384,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "5620f6103000-5620f638d000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "[heap]",
+          "Size": 2600,
+          "Rss": 2520,
+          "Pss": 2520,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 2520,
+          "Anonymous": 2520,
+          "Swap": 0,
+          "group": "private_heap_mapping"
+        },
+        {
+          "address": "7f2224f70000-7f22254e0000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 5568,
+          "Rss": 4412,
+          "Pss": 4412,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4412,
+          "Anonymous": 4412,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f22254e0000-7f22254e3000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 12,
+          "Rss": 12,
+          "Pss": 12,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 12,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22254e3000-7f22254fc000",
+          "permissions": "r-xp",
+          "offset": 12288,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 100,
+          "Rss": 64,
+          "Pss": 64,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 64,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22254fc000-7f22254ff000",
+          "permissions": "r--p",
+          "offset": 114688,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 12,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22254ff000-7f2225500000",
+          "permissions": "r--p",
+          "offset": 122880,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f2225500000-7f2225501000",
+          "permissions": "rw-p",
+          "offset": 126976,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f2225501000-7f222550b000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 40,
+          "Rss": 40,
+          "Pss": 1,
+          "Shared_Clean": 40,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f222550b000-7f22255bd000",
+          "permissions": "r-xp",
+          "offset": 40960,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 712,
+          "Rss": 64,
+          "Pss": 2,
+          "Shared_Clean": 64,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22255bd000-7f22255ce000",
+          "permissions": "r--p",
+          "offset": 770048,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 68,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22255ce000-7f22255cf000",
+          "permissions": "r--p",
+          "offset": 835584,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22255cf000-7f22255d0000",
+          "permissions": "rw-p",
+          "offset": 839680,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22255d0000-7f22255d2000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 0,
+          "Shared_Clean": 8,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22255d2000-7f22255e3000",
+          "permissions": "r-xp",
+          "offset": 8192,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 68,
+          "Rss": 64,
+          "Pss": 2,
+          "Shared_Clean": 64,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22255e3000-7f22255e9000",
+          "permissions": "r--p",
+          "offset": 77824,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 24,
+          "Rss": 24,
+          "Pss": 3,
+          "Shared_Clean": 24,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22255e9000-7f22255ea000",
+          "permissions": "---p",
+          "offset": 102400,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 4,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22255ea000-7f22255eb000",
+          "permissions": "r--p",
+          "offset": 102400,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22255eb000-7f22255ec000",
+          "permissions": "rw-p",
+          "offset": 106496,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22255ec000-7f22255f5000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 36,
+          "Rss": 36,
+          "Pss": 36,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 36,
+          "Anonymous": 36,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f22255f5000-7f22255fc000",
+          "permissions": "r-xp",
+          "offset": 4096,
+          "device": "103:03",
+          "inode": 6690204,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-04-01/carrier/libvkso_sq_core.so",
+          "Size": 28,
+          "Rss": 28,
+          "Pss": 28,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 28,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "core_carrier_or_copy"
+        },
+        {
+          "address": "7f22255fc000-7f22255fe000",
+          "permissions": "r--p",
+          "offset": 32768,
+          "device": "103:03",
+          "inode": 6690204,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-04-01/carrier/libvkso_sq_core.so",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 8,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "core_carrier_or_copy"
+        },
+        {
+          "address": "7f22255fe000-7f2225603000",
+          "permissions": "rw-p",
+          "offset": 40960,
+          "device": "103:03",
+          "inode": 6690204,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-04-01/carrier/libvkso_sq_core.so",
+          "Size": 20,
+          "Rss": 12,
+          "Pss": 12,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 4,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "core_carrier_or_copy"
+        },
+        {
+          "address": "7f2225603000-7f2225606000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 12,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f2225606000-7f222562e000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 160,
+          "Rss": 160,
+          "Pss": 2,
+          "Shared_Clean": 160,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f222562e000-7f22257c3000",
+          "permissions": "r-xp",
+          "offset": 163840,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 1620,
+          "Rss": 1088,
+          "Pss": 17,
+          "Shared_Clean": 1088,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22257c3000-7f222581b000",
+          "permissions": "r--p",
+          "offset": 1822720,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 352,
+          "Rss": 180,
+          "Pss": 3,
+          "Shared_Clean": 180,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f222581b000-7f222581c000",
+          "permissions": "---p",
+          "offset": 2183168,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 4,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f222581c000-7f2225820000",
+          "permissions": "r--p",
+          "offset": 2183168,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 16,
+          "Rss": 16,
+          "Pss": 16,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 16,
+          "Anonymous": 16,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f2225820000-7f2225822000",
+          "permissions": "rw-p",
+          "offset": 2199552,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f2225822000-7f222582f000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 52,
+          "Rss": 20,
+          "Pss": 20,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 20,
+          "Anonymous": 20,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f222582f000-7f2225836000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 28,
+          "Rss": 28,
+          "Pss": 14,
+          "Shared_Clean": 28,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f2225836000-7f2225851000",
+          "permissions": "r-xp",
+          "offset": 28672,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 108,
+          "Rss": 104,
+          "Pss": 52,
+          "Shared_Clean": 104,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f2225851000-7f222585b000",
+          "permissions": "r--p",
+          "offset": 139264,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 40,
+          "Rss": 40,
+          "Pss": 20,
+          "Shared_Clean": 40,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f222585b000-7f222586d000",
+          "permissions": "r--p",
+          "offset": 176128,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 72,
+          "Rss": 60,
+          "Pss": 54,
+          "Shared_Clean": 12,
+          "Shared_Dirty": 0,
+          "Private_Clean": 36,
+          "Private_Dirty": 12,
+          "Anonymous": 12,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f222586d000-7f222586e000",
+          "permissions": "rw-p",
+          "offset": 249856,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f222586e000-7f222586f000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f222586f000-7f2225871000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 8,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7f2225871000-7f2225874000",
+          "permissions": "r-xp",
+          "offset": 8192,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 12,
+          "Rss": 12,
+          "Pss": 12,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 12,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7f2225874000-7f2225875000",
+          "permissions": "r--p",
+          "offset": 20480,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 4,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7f2225875000-7f2225876000",
+          "permissions": "r--p",
+          "offset": 20480,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7f2225876000-7f2225877000",
+          "permissions": "rw-p",
+          "offset": 24576,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7f2225877000-7f2225879000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f2225879000-7f222587b000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 0,
+          "Shared_Clean": 8,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f222587b000-7f22258a5000",
+          "permissions": "r-xp",
+          "offset": 8192,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 168,
+          "Rss": 168,
+          "Pss": 2,
+          "Shared_Clean": 168,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22258a5000-7f22258b0000",
+          "permissions": "r--p",
+          "offset": 180224,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 44,
+          "Rss": 44,
+          "Pss": 0,
+          "Shared_Clean": 44,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22258b0000-7f22258b1000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7f22258b1000-7f22258b3000",
+          "permissions": "r--p",
+          "offset": 225280,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7f22258b3000-7f22258b5000",
+          "permissions": "rw-p",
+          "offset": 233472,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7ffc74550000-7ffc74571000",
+          "permissions": "rwxp",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "[stack]",
+          "Size": 132,
+          "Rss": 16,
+          "Pss": 16,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 16,
+          "Anonymous": 16,
+          "Swap": 0,
+          "group": "stack"
+        },
+        {
+          "address": "7ffc7459b000-7ffc7459f000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "[vvar]",
+          "Size": 16,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "kernel_supplied_special"
+        },
+        {
+          "address": "7ffc7459f000-7ffc745a1000",
+          "permissions": "r-xp",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "[vdso]",
+          "Size": 8,
+          "Rss": 4,
+          "Pss": 0,
+          "Shared_Clean": 4,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "kernel_supplied_special"
+        }
+      ],
+      "scale": 4
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-16-01/benchmark/vkso-helper-smaps-after.txt",
+      "sha256": "ce264c5e77c9166f70b53f2d2b8393cb7b00910354c274d89f867fdf3cf604bf",
+      "units": "KiB",
+      "total": {
+        "Size": 24644,
+        "Rss": 21836,
+        "Pss": 19895,
+        "Shared_Clean": 2068,
+        "Shared_Dirty": 0,
+        "Private_Clean": 180,
+        "Private_Dirty": 19588,
+        "Anonymous": 19588,
+        "Swap": 0
+      },
+      "groups": {
+        "frontend_file": {
+          "Size": 24,
+          "Rss": 24,
+          "Pss": 24,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 16,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0
+        },
+        "private_heap_mapping": {
+          "Size": 2348,
+          "Rss": 2348,
+          "Pss": 2348,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 2348,
+          "Anonymous": 2348,
+          "Swap": 0
+        },
+        "anonymous_mappings_unattributed": {
+          "Size": 18312,
+          "Rss": 17120,
+          "Pss": 17120,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 17120,
+          "Anonymous": 17120,
+          "Swap": 0
+        },
+        "dynamic_library_files": {
+          "Size": 3720,
+          "Rss": 2236,
+          "Pss": 299,
+          "Shared_Clean": 2064,
+          "Shared_Dirty": 0,
+          "Private_Clean": 92,
+          "Private_Dirty": 80,
+          "Anonymous": 80,
+          "Swap": 0
+        },
+        "core_carrier_or_copy": {
+          "Size": 56,
+          "Rss": 56,
+          "Pss": 56,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 48,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0
+        },
+        "private_bridge_file": {
+          "Size": 32,
+          "Rss": 32,
+          "Pss": 32,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 24,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0
+        },
+        "stack": {
+          "Size": 128,
+          "Rss": 16,
+          "Pss": 16,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 16,
+          "Anonymous": 16,
+          "Swap": 0
+        },
+        "kernel_supplied_special": {
+          "Size": 24,
+          "Rss": 4,
+          "Pss": 0,
+          "Shared_Clean": 4,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0
+        }
+      },
+      "mappings": [
+        {
+          "address": "560e64abb000-560e64abc000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 4,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "560e64abc000-560e64abe000",
+          "permissions": "r-xp",
+          "offset": 4096,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 8,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "560e64abe000-560e64abf000",
+          "permissions": "r--p",
+          "offset": 12288,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 4,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "560e64abf000-560e64ac0000",
+          "permissions": "r--p",
+          "offset": 12288,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "560e64ac0000-560e64ac1000",
+          "permissions": "rw-p",
+          "offset": 16384,
+          "device": "103:03",
+          "inode": 6687925,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "frontend_file"
+        },
+        {
+          "address": "560e72d54000-560e72f9f000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "[heap]",
+          "Size": 2348,
+          "Rss": 2348,
+          "Pss": 2348,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 2348,
+          "Anonymous": 2348,
+          "Swap": 0,
+          "group": "private_heap_mapping"
+        },
+        {
+          "address": "7fdedc597000-7fdedc8e2000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 3372,
+          "Rss": 3372,
+          "Pss": 3372,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 3372,
+          "Anonymous": 3372,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7fdedc8e2000-7fdedc9e3000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 1028,
+          "Rss": 1028,
+          "Pss": 1028,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 1028,
+          "Anonymous": 1028,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7fdedc9e3000-7fdedcae4000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 1028,
+          "Rss": 1028,
+          "Pss": 1028,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 1028,
+          "Anonymous": 1028,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7fdedcae4000-7fdedcfd0000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 5040,
+          "Rss": 5040,
+          "Pss": 5040,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 5040,
+          "Anonymous": 5040,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7fdedcfd0000-7fdedd75b000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 7724,
+          "Rss": 6568,
+          "Pss": 6568,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 6568,
+          "Anonymous": 6568,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7fdedd75b000-7fdedd75e000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 12,
+          "Rss": 12,
+          "Pss": 12,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 12,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd75e000-7fdedd777000",
+          "permissions": "r-xp",
+          "offset": 12288,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 100,
+          "Rss": 64,
+          "Pss": 64,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 64,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd777000-7fdedd77a000",
+          "permissions": "r--p",
+          "offset": 114688,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 12,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd77a000-7fdedd77b000",
+          "permissions": "r--p",
+          "offset": 122880,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd77b000-7fdedd77c000",
+          "permissions": "rw-p",
+          "offset": 126976,
+          "device": "103:03",
+          "inode": 12069889,
+          "path": "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd77c000-7fdedd786000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 40,
+          "Rss": 40,
+          "Pss": 1,
+          "Shared_Clean": 40,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd786000-7fdedd838000",
+          "permissions": "r-xp",
+          "offset": 40960,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 712,
+          "Rss": 64,
+          "Pss": 2,
+          "Shared_Clean": 64,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd838000-7fdedd849000",
+          "permissions": "r--p",
+          "offset": 770048,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 68,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd849000-7fdedd84a000",
+          "permissions": "r--p",
+          "offset": 835584,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd84a000-7fdedd84b000",
+          "permissions": "rw-p",
+          "offset": 839680,
+          "device": "103:03",
+          "inode": 12070037,
+          "path": "/usr/lib/x86_64-linux-gnu/libzstd.so.1.4.8",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd84b000-7fdedd84d000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 0,
+          "Shared_Clean": 8,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd84d000-7fdedd85e000",
+          "permissions": "r-xp",
+          "offset": 8192,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 68,
+          "Rss": 68,
+          "Pss": 4,
+          "Shared_Clean": 68,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd85e000-7fdedd864000",
+          "permissions": "r--p",
+          "offset": 77824,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 24,
+          "Rss": 16,
+          "Pss": 2,
+          "Shared_Clean": 16,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd864000-7fdedd865000",
+          "permissions": "---p",
+          "offset": 102400,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 4,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd865000-7fdedd866000",
+          "permissions": "r--p",
+          "offset": 102400,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd866000-7fdedd867000",
+          "permissions": "rw-p",
+          "offset": 106496,
+          "device": "103:03",
+          "inode": 12070036,
+          "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.2.11",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd867000-7fdedd870000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 36,
+          "Rss": 36,
+          "Pss": 36,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 36,
+          "Anonymous": 36,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7fdedd870000-7fdedd877000",
+          "permissions": "r-xp",
+          "offset": 4096,
+          "device": "103:03",
+          "inode": 6690322,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-16-01/carrier/libvkso_sq_core.so",
+          "Size": 28,
+          "Rss": 28,
+          "Pss": 28,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 28,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "core_carrier_or_copy"
+        },
+        {
+          "address": "7fdedd877000-7fdedd879000",
+          "permissions": "r--p",
+          "offset": 32768,
+          "device": "103:03",
+          "inode": 6690322,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-16-01/carrier/libvkso_sq_core.so",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 8,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "core_carrier_or_copy"
+        },
+        {
+          "address": "7fdedd879000-7fdedd87e000",
+          "permissions": "rw-p",
+          "offset": 40960,
+          "device": "103:03",
+          "inode": 6690322,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/resource-scale-16-01/carrier/libvkso_sq_core.so",
+          "Size": 20,
+          "Rss": 20,
+          "Pss": 20,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 12,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "core_carrier_or_copy"
+        },
+        {
+          "address": "7fdedd87e000-7fdedd881000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 12,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7fdedd881000-7fdedd8a9000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 160,
+          "Rss": 160,
+          "Pss": 2,
+          "Shared_Clean": 160,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedd8a9000-7fdedda3e000",
+          "permissions": "r-xp",
+          "offset": 163840,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 1620,
+          "Rss": 1172,
+          "Pss": 18,
+          "Shared_Clean": 1172,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedda3e000-7fdedda96000",
+          "permissions": "r--p",
+          "offset": 1822720,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 352,
+          "Rss": 128,
+          "Pss": 2,
+          "Shared_Clean": 128,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedda96000-7fdedda97000",
+          "permissions": "---p",
+          "offset": 2183168,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 4,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedda97000-7fdedda9b000",
+          "permissions": "r--p",
+          "offset": 2183168,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 16,
+          "Rss": 16,
+          "Pss": 16,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 16,
+          "Anonymous": 16,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedda9b000-7fdedda9d000",
+          "permissions": "rw-p",
+          "offset": 2199552,
+          "device": "103:03",
+          "inode": 12060641,
+          "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdedda9d000-7fdeddaaa000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 52,
+          "Rss": 20,
+          "Pss": 20,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 20,
+          "Anonymous": 20,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7fdeddaaa000-7fdeddab1000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 28,
+          "Rss": 28,
+          "Pss": 14,
+          "Shared_Clean": 28,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdeddab1000-7fdeddacc000",
+          "permissions": "r-xp",
+          "offset": 28672,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 108,
+          "Rss": 108,
+          "Pss": 54,
+          "Shared_Clean": 108,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdeddacc000-7fdeddad6000",
+          "permissions": "r--p",
+          "offset": 139264,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 40,
+          "Rss": 40,
+          "Pss": 20,
+          "Shared_Clean": 40,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdeddad6000-7fdeddae8000",
+          "permissions": "r--p",
+          "offset": 176128,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 72,
+          "Rss": 40,
+          "Pss": 34,
+          "Shared_Clean": 12,
+          "Shared_Dirty": 0,
+          "Private_Clean": 16,
+          "Private_Dirty": 12,
+          "Anonymous": 12,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdeddae8000-7fdeddae9000",
+          "permissions": "rw-p",
+          "offset": 249856,
+          "device": "103:03",
+          "inode": 12069825,
+          "path": "/usr/lib/x86_64-linux-gnu/libfuse3.so.3.10.5",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdeddae9000-7fdeddaea000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7fdeddaea000-7fdeddaec000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 8,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7fdeddaec000-7fdeddaef000",
+          "permissions": "r-xp",
+          "offset": 8192,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 12,
+          "Rss": 12,
+          "Pss": 12,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 12,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7fdeddaef000-7fdeddaf0000",
+          "permissions": "r--p",
+          "offset": 20480,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 4,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7fdeddaf0000-7fdeddaf1000",
+          "permissions": "r--p",
+          "offset": 20480,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7fdeddaf1000-7fdeddaf2000",
+          "permissions": "rw-p",
+          "offset": 24576,
+          "device": "103:03",
+          "inode": 6687975,
+          "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "private_bridge_file"
+        },
+        {
+          "address": "7fdeddaf2000-7fdeddaf4000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7fdeddaf4000-7fdeddaf6000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 0,
+          "Shared_Clean": 8,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdeddaf6000-7fdeddb20000",
+          "permissions": "r-xp",
+          "offset": 8192,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 168,
+          "Rss": 168,
+          "Pss": 2,
+          "Shared_Clean": 168,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdeddb20000-7fdeddb2b000",
+          "permissions": "r--p",
+          "offset": 180224,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 44,
+          "Rss": 44,
+          "Pss": 0,
+          "Shared_Clean": 44,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdeddb2b000-7fdeddb2c000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7fdeddb2c000-7fdeddb2e000",
+          "permissions": "r--p",
+          "offset": 225280,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7fdeddb2e000-7fdeddb30000",
+          "permissions": "rw-p",
+          "offset": 233472,
+          "device": "103:03",
+          "inode": 12060145,
+          "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "Size": 8,
+          "Rss": 8,
+          "Pss": 8,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 8,
+          "Anonymous": 8,
+          "Swap": 0,
+          "group": "dynamic_library_files"
+        },
+        {
+          "address": "7ffd45ed8000-7ffd45ef8000",
+          "permissions": "rwxp",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "[stack]",
+          "Size": 128,
+          "Rss": 16,
+          "Pss": 16,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 16,
+          "Anonymous": 16,
+          "Swap": 0,
+          "group": "stack"
+        },
+        {
+          "address": "7ffd45ef8000-7ffd45ef9000",
+          "permissions": "rw-p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "",
+          "Size": 4,
+          "Rss": 4,
+          "Pss": 4,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 4,
+          "Anonymous": 4,
+          "Swap": 0,
+          "group": "anonymous_mappings_unattributed"
+        },
+        {
+          "address": "7ffd45f37000-7ffd45f3b000",
+          "permissions": "r--p",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "[vvar]",
+          "Size": 16,
+          "Rss": 0,
+          "Pss": 0,
+          "Shared_Clean": 0,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "kernel_supplied_special"
+        },
+        {
+          "address": "7ffd45f3b000-7ffd45f3d000",
+          "permissions": "r-xp",
+          "offset": 0,
+          "device": "00:00",
+          "inode": 0,
+          "path": "[vdso]",
+          "Size": 8,
+          "Rss": 4,
+          "Pss": 0,
+          "Shared_Clean": 4,
+          "Shared_Dirty": 0,
+          "Private_Clean": 0,
+          "Private_Dirty": 0,
+          "Anonymous": 0,
+          "Swap": 0,
+          "group": "kernel_supplied_special"
+        }
+      ],
+      "scale": 16
+    }
+  ],
+  "disk_files": {
+    "owner": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso_sq_core.ko",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso_sq_core.ko",
+      "role": "owner",
+      "logical_bytes": 80832,
+      "allocated_bytes": 81920,
+      "device": 66307,
+      "inode": 6687922,
+      "links": 1,
+      "sha256": "64ab8c7e8bb313d56b8721ae7c8c5e752dfc824a091073f9f18f6044f574ec98",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".note.gnu.build-id",
+          "type": "SHT_NOTE",
+          "offset": 64,
+          "bytes": 36,
+          "flags": 2
+        },
+        {
+          "name": ".note.Linux",
+          "type": "SHT_NOTE",
+          "offset": 100,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 160,
+          "bytes": 28052,
+          "flags": 6
+        },
+        {
+          "name": ".rela.text",
+          "type": "SHT_RELA",
+          "offset": 56032,
+          "bytes": 12480,
+          "flags": 64
+        },
+        {
+          "name": ".init.text",
+          "type": "SHT_PROGBITS",
+          "offset": 28212,
+          "bytes": 230,
+          "flags": 6
+        },
+        {
+          "name": ".rela.init.text",
+          "type": "SHT_RELA",
+          "offset": 68512,
+          "bytes": 408,
+          "flags": 64
+        },
+        {
+          "name": ".exit.text",
+          "type": "SHT_PROGBITS",
+          "offset": 28442,
+          "bytes": 5,
+          "flags": 6
+        },
+        {
+          "name": ".rela.exit.text",
+          "type": "SHT_RELA",
+          "offset": 68920,
+          "bytes": 24,
+          "flags": 64
+        },
+        {
+          "name": "__ksymtab_gpl",
+          "type": "SHT_PROGBITS",
+          "offset": 28448,
+          "bytes": 408,
+          "flags": 2
+        },
+        {
+          "name": ".rela__ksymtab_gpl",
+          "type": "SHT_RELA",
+          "offset": 68944,
+          "bytes": 2448,
+          "flags": 64
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 28864,
+          "bytes": 544,
+          "flags": 2
+        },
+        {
+          "name": ".rodata.str1.8",
+          "type": "SHT_PROGBITS",
+          "offset": 29408,
+          "bytes": 3420,
+          "flags": 50
+        },
+        {
+          "name": ".rodata.str1.1",
+          "type": "SHT_PROGBITS",
+          "offset": 32828,
+          "bytes": 184,
+          "flags": 50
+        },
+        {
+          "name": "__ksymtab_strings",
+          "type": "SHT_PROGBITS",
+          "offset": 33012,
+          "bytes": 716,
+          "flags": 50
+        },
+        {
+          "name": ".modinfo",
+          "type": "SHT_PROGBITS",
+          "offset": 33728,
+          "bytes": 130,
+          "flags": 2
+        },
+        {
+          "name": ".return_sites",
+          "type": "SHT_PROGBITS",
+          "offset": 33858,
+          "bytes": 8,
+          "flags": 2
+        },
+        {
+          "name": ".rela.return_sites",
+          "type": "SHT_RELA",
+          "offset": 71392,
+          "bytes": 48,
+          "flags": 64
+        },
+        {
+          "name": "__jump_table",
+          "type": "SHT_PROGBITS",
+          "offset": 33872,
+          "bytes": 656,
+          "flags": 3
+        },
+        {
+          "name": ".rela__jump_table",
+          "type": "SHT_RELA",
+          "offset": 71440,
+          "bytes": 2952,
+          "flags": 64
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 34528,
+          "bytes": 0,
+          "flags": 3
+        },
+        {
+          "name": "__dyndbg",
+          "type": "SHT_PROGBITS",
+          "offset": 34528,
+          "bytes": 2296,
+          "flags": 3
+        },
+        {
+          "name": ".rela__dyndbg",
+          "type": "SHT_RELA",
+          "offset": 74392,
+          "bytes": 3936,
+          "flags": 64
+        },
+        {
+          "name": ".vkso_owner",
+          "type": "SHT_PROGBITS",
+          "offset": 36864,
+          "bytes": 4096,
+          "flags": 3
+        },
+        {
+          "name": ".rela.vkso_owner",
+          "type": "SHT_RELA",
+          "offset": 78328,
+          "bytes": 24,
+          "flags": 64
+        },
+        {
+          "name": ".gnu.linkonce.this_module",
+          "type": "SHT_PROGBITS",
+          "offset": 40960,
+          "bytes": 768,
+          "flags": 3
+        },
+        {
+          "name": ".rela.gnu.linkonce.this_module",
+          "type": "SHT_RELA",
+          "offset": 78352,
+          "bytes": 48,
+          "flags": 64
+        },
+        {
+          "name": ".bss",
+          "type": "SHT_NOBITS",
+          "offset": 41728,
+          "bytes": 576,
+          "flags": 3
+        },
+        {
+          "name": ".comment",
+          "type": "SHT_PROGBITS",
+          "offset": 41728,
+          "bytes": 368,
+          "flags": 48
+        },
+        {
+          "name": ".note.GNU-stack",
+          "type": "SHT_PROGBITS",
+          "offset": 42096,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 42096,
+          "bytes": 8280,
+          "flags": 0
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 50376,
+          "bytes": 5650,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 78400,
+          "bytes": 320,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 28287,
+        "allocated_readonly": 5494,
+        "allocated_writable": 7816,
+        "debug": 0
+      }
+    },
+    "consumer": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso_squashfs.ko",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso_squashfs.ko",
+      "role": "consumer",
+      "logical_bytes": 60232,
+      "allocated_bytes": 61440,
+      "device": 66307,
+      "inode": 6687860,
+      "links": 1,
+      "sha256": "31a6187c8370c30eec97f75a6f1e2cdb68aca2757e7180e5ab5a84ea9b79dd22",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".note.gnu.build-id",
+          "type": "SHT_NOTE",
+          "offset": 64,
+          "bytes": 36,
+          "flags": 2
+        },
+        {
+          "name": ".note.Linux",
+          "type": "SHT_NOTE",
+          "offset": 100,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 160,
+          "bytes": 12876,
+          "flags": 6
+        },
+        {
+          "name": ".rela.text",
+          "type": "SHT_RELA",
+          "offset": 35648,
+          "bytes": 10560,
+          "flags": 64
+        },
+        {
+          "name": ".text.unlikely",
+          "type": "SHT_PROGBITS",
+          "offset": 13036,
+          "bytes": 499,
+          "flags": 6
+        },
+        {
+          "name": ".rela.text.unlikely",
+          "type": "SHT_RELA",
+          "offset": 46208,
+          "bytes": 1320,
+          "flags": 64
+        },
+        {
+          "name": ".altinstr_replacement",
+          "type": "SHT_PROGBITS",
+          "offset": 13535,
+          "bytes": 21,
+          "flags": 6
+        },
+        {
+          "name": ".init.text",
+          "type": "SHT_PROGBITS",
+          "offset": 13556,
+          "bytes": 128,
+          "flags": 6
+        },
+        {
+          "name": ".rela.init.text",
+          "type": "SHT_RELA",
+          "offset": 47528,
+          "bytes": 336,
+          "flags": 64
+        },
+        {
+          "name": ".exit.text",
+          "type": "SHT_PROGBITS",
+          "offset": 13684,
+          "bytes": 39,
+          "flags": 6
+        },
+        {
+          "name": ".rela.exit.text",
+          "type": "SHT_RELA",
+          "offset": 47864,
+          "bytes": 144,
+          "flags": 64
+        },
+        {
+          "name": ".altinstructions",
+          "type": "SHT_PROGBITS",
+          "offset": 13728,
+          "bytes": 84,
+          "flags": 2
+        },
+        {
+          "name": ".rela.altinstructions",
+          "type": "SHT_RELA",
+          "offset": 48008,
+          "bytes": 336,
+          "flags": 64
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 13824,
+          "bytes": 3392,
+          "flags": 2
+        },
+        {
+          "name": ".rela.rodata",
+          "type": "SHT_RELA",
+          "offset": 48344,
+          "bytes": 3192,
+          "flags": 64
+        },
+        {
+          "name": ".rodata.str1.8",
+          "type": "SHT_PROGBITS",
+          "offset": 17216,
+          "bytes": 2173,
+          "flags": 50
+        },
+        {
+          "name": ".retpoline_sites",
+          "type": "SHT_PROGBITS",
+          "offset": 19389,
+          "bytes": 100,
+          "flags": 2
+        },
+        {
+          "name": ".rela.retpoline_sites",
+          "type": "SHT_RELA",
+          "offset": 51536,
+          "bytes": 600,
+          "flags": 64
+        },
+        {
+          "name": ".return_sites",
+          "type": "SHT_PROGBITS",
+          "offset": 19489,
+          "bytes": 380,
+          "flags": 2
+        },
+        {
+          "name": ".rela.return_sites",
+          "type": "SHT_RELA",
+          "offset": 52136,
+          "bytes": 2280,
+          "flags": 64
+        },
+        {
+          "name": ".parainstructions",
+          "type": "SHT_PROGBITS",
+          "offset": 19872,
+          "bytes": 108,
+          "flags": 2
+        },
+        {
+          "name": ".rela.parainstructions",
+          "type": "SHT_RELA",
+          "offset": 54416,
+          "bytes": 168,
+          "flags": 64
+        },
+        {
+          "name": ".rodata.str1.1",
+          "type": "SHT_PROGBITS",
+          "offset": 19980,
+          "bytes": 298,
+          "flags": 50
+        },
+        {
+          "name": ".smp_locks",
+          "type": "SHT_PROGBITS",
+          "offset": 20280,
+          "bytes": 52,
+          "flags": 2
+        },
+        {
+          "name": ".rela.smp_locks",
+          "type": "SHT_RELA",
+          "offset": 54584,
+          "bytes": 312,
+          "flags": 64
+        },
+        {
+          "name": ".modinfo",
+          "type": "SHT_PROGBITS",
+          "offset": 20332,
+          "bytes": 227,
+          "flags": 2
+        },
+        {
+          "name": "__bug_table",
+          "type": "SHT_PROGBITS",
+          "offset": 20560,
+          "bytes": 12,
+          "flags": 3
+        },
+        {
+          "name": ".rela__bug_table",
+          "type": "SHT_RELA",
+          "offset": 54896,
+          "bytes": 48,
+          "flags": 64
+        },
+        {
+          "name": "__jump_table",
+          "type": "SHT_PROGBITS",
+          "offset": 20576,
+          "bytes": 224,
+          "flags": 3
+        },
+        {
+          "name": ".rela__jump_table",
+          "type": "SHT_RELA",
+          "offset": 54944,
+          "bytes": 1008,
+          "flags": 64
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 20800,
+          "bytes": 128,
+          "flags": 3
+        },
+        {
+          "name": ".rela.data",
+          "type": "SHT_RELA",
+          "offset": 55952,
+          "bytes": 192,
+          "flags": 64
+        },
+        {
+          "name": "__dyndbg",
+          "type": "SHT_PROGBITS",
+          "offset": 20928,
+          "bytes": 504,
+          "flags": 3
+        },
+        {
+          "name": ".rela__dyndbg",
+          "type": "SHT_RELA",
+          "offset": 56144,
+          "bytes": 864,
+          "flags": 64
+        },
+        {
+          "name": ".gnu.linkonce.this_module",
+          "type": "SHT_PROGBITS",
+          "offset": 21440,
+          "bytes": 768,
+          "flags": 3
+        },
+        {
+          "name": ".rela.gnu.linkonce.this_module",
+          "type": "SHT_RELA",
+          "offset": 57008,
+          "bytes": 48,
+          "flags": 64
+        },
+        {
+          "name": ".bss",
+          "type": "SHT_NOBITS",
+          "offset": 22208,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".comment",
+          "type": "SHT_PROGBITS",
+          "offset": 22208,
+          "bytes": 1104,
+          "flags": 48
+        },
+        {
+          "name": ".note.GNU-stack",
+          "type": "SHT_PROGBITS",
+          "offset": 23312,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 23312,
+          "bytes": 7584,
+          "flags": 0
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 30896,
+          "bytes": 4749,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 57056,
+          "bytes": 418,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 13563,
+        "allocated_readonly": 6898,
+        "allocated_writable": 1636,
+        "debug": 0
+      }
+    },
+    "bridge": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so",
+      "role": "bridge",
+      "logical_bytes": 44320,
+      "allocated_bytes": 45056,
+      "device": 66307,
+      "inode": 6687975,
+      "links": 9,
+      "sha256": "950f4b8bfe3394e595ce23b058d685886bd0ecc197fbc6a17ee3971e3b9566a7",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".note.gnu.build-id",
+          "type": "SHT_NOTE",
+          "offset": 568,
+          "bytes": 36,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.hash",
+          "type": "SHT_GNU_HASH",
+          "offset": 608,
+          "bytes": 180,
+          "flags": 2
+        },
+        {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "offset": 792,
+          "bytes": 1824,
+          "flags": 2
+        },
+        {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "offset": 2616,
+          "bytes": 1177,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.version",
+          "type": "SHT_GNU_versym",
+          "offset": 3794,
+          "bytes": 152,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.version_r",
+          "type": "SHT_GNU_verneed",
+          "offset": 3952,
+          "bytes": 112,
+          "flags": 2
+        },
+        {
+          "name": ".rela.dyn",
+          "type": "SHT_RELA",
+          "offset": 4064,
+          "bytes": 1704,
+          "flags": 2
+        },
+        {
+          "name": ".rela.plt",
+          "type": "SHT_RELA",
+          "offset": 5768,
+          "bytes": 984,
+          "flags": 66
+        },
+        {
+          "name": ".init",
+          "type": "SHT_PROGBITS",
+          "offset": 8192,
+          "bytes": 27,
+          "flags": 6
+        },
+        {
+          "name": ".plt",
+          "type": "SHT_PROGBITS",
+          "offset": 8224,
+          "bytes": 672,
+          "flags": 6
+        },
+        {
+          "name": ".plt.got",
+          "type": "SHT_PROGBITS",
+          "offset": 8896,
+          "bytes": 40,
+          "flags": 6
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 8944,
+          "bytes": 9151,
+          "flags": 6
+        },
+        {
+          "name": ".fini",
+          "type": "SHT_PROGBITS",
+          "offset": 18096,
+          "bytes": 13,
+          "flags": 6
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 20480,
+          "bytes": 116,
+          "flags": 2
+        },
+        {
+          "name": ".eh_frame_hdr",
+          "type": "SHT_PROGBITS",
+          "offset": 20596,
+          "bytes": 92,
+          "flags": 2
+        },
+        {
+          "name": ".eh_frame",
+          "type": "SHT_PROGBITS",
+          "offset": 20688,
+          "bytes": 440,
+          "flags": 2
+        },
+        {
+          "name": ".init_array",
+          "type": "SHT_INIT_ARRAY",
+          "offset": 23000,
+          "bytes": 32,
+          "flags": 3
+        },
+        {
+          "name": ".fini_array",
+          "type": "SHT_FINI_ARRAY",
+          "offset": 23032,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".data.rel.ro",
+          "type": "SHT_PROGBITS",
+          "offset": 23040,
+          "bytes": 912,
+          "flags": 3
+        },
+        {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "offset": 23952,
+          "bytes": 528,
+          "flags": 3
+        },
+        {
+          "name": ".got",
+          "type": "SHT_PROGBITS",
+          "offset": 24480,
+          "bytes": 72,
+          "flags": 3
+        },
+        {
+          "name": ".got.plt",
+          "type": "SHT_PROGBITS",
+          "offset": 24576,
+          "bytes": 352,
+          "flags": 3
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 24928,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".bss",
+          "type": "SHT_NOBITS",
+          "offset": 24936,
+          "bytes": 480,
+          "flags": 3
+        },
+        {
+          "name": ".comment",
+          "type": "SHT_PROGBITS",
+          "offset": 24936,
+          "bytes": 45,
+          "flags": 48
+        },
+        {
+          "name": ".debug_aranges",
+          "type": "SHT_PROGBITS",
+          "offset": 24981,
+          "bytes": 80,
+          "flags": 0
+        },
+        {
+          "name": ".debug_info",
+          "type": "SHT_PROGBITS",
+          "offset": 25061,
+          "bytes": 4410,
+          "flags": 0
+        },
+        {
+          "name": ".debug_abbrev",
+          "type": "SHT_PROGBITS",
+          "offset": 29471,
+          "bytes": 937,
+          "flags": 0
+        },
+        {
+          "name": ".debug_line",
+          "type": "SHT_PROGBITS",
+          "offset": 30408,
+          "bytes": 1130,
+          "flags": 0
+        },
+        {
+          "name": ".debug_str",
+          "type": "SHT_PROGBITS",
+          "offset": 31538,
+          "bytes": 1643,
+          "flags": 48
+        },
+        {
+          "name": ".debug_line_str",
+          "type": "SHT_PROGBITS",
+          "offset": 33181,
+          "bytes": 843,
+          "flags": 48
+        },
+        {
+          "name": ".debug_loclists",
+          "type": "SHT_PROGBITS",
+          "offset": 34024,
+          "bytes": 1827,
+          "flags": 0
+        },
+        {
+          "name": ".debug_rnglists",
+          "type": "SHT_PROGBITS",
+          "offset": 35851,
+          "bytes": 79,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 35936,
+          "bytes": 3528,
+          "flags": 0
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 39464,
+          "bytes": 2117,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 41581,
+          "bytes": 366,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 9903,
+        "allocated_readonly": 6817,
+        "allocated_writable": 1912,
+        "debug": 10949
+      }
+    },
+    "frontend": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squashfuse",
+      "role": "frontend",
+      "logical_bytes": 45672,
+      "allocated_bytes": 49152,
+      "device": 66307,
+      "inode": 6687925,
+      "links": 9,
+      "sha256": "4eb84eca0f986ec002086fc3deb44703a623fdce77c9416d6f2c5f041ae9edd7",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".interp",
+          "type": "SHT_PROGBITS",
+          "offset": 792,
+          "bytes": 28,
+          "flags": 2
+        },
+        {
+          "name": ".note.gnu.property",
+          "type": "SHT_NOTE",
+          "offset": 824,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".note.gnu.build-id",
+          "type": "SHT_NOTE",
+          "offset": 872,
+          "bytes": 36,
+          "flags": 2
+        },
+        {
+          "name": ".note.ABI-tag",
+          "type": "SHT_NOTE",
+          "offset": 908,
+          "bytes": 32,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.hash",
+          "type": "SHT_GNU_HASH",
+          "offset": 944,
+          "bytes": 40,
+          "flags": 2
+        },
+        {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "offset": 984,
+          "bytes": 648,
+          "flags": 2
+        },
+        {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "offset": 1632,
+          "bytes": 364,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.version",
+          "type": "SHT_GNU_versym",
+          "offset": 1996,
+          "bytes": 54,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.version_r",
+          "type": "SHT_GNU_verneed",
+          "offset": 2056,
+          "bytes": 112,
+          "flags": 2
+        },
+        {
+          "name": ".rela.dyn",
+          "type": "SHT_RELA",
+          "offset": 2168,
+          "bytes": 504,
+          "flags": 2
+        },
+        {
+          "name": ".rela.plt",
+          "type": "SHT_RELA",
+          "offset": 2672,
+          "bytes": 480,
+          "flags": 66
+        },
+        {
+          "name": ".init",
+          "type": "SHT_PROGBITS",
+          "offset": 4096,
+          "bytes": 27,
+          "flags": 6
+        },
+        {
+          "name": ".plt",
+          "type": "SHT_PROGBITS",
+          "offset": 4128,
+          "bytes": 336,
+          "flags": 6
+        },
+        {
+          "name": ".plt.got",
+          "type": "SHT_PROGBITS",
+          "offset": 4464,
+          "bytes": 16,
+          "flags": 6
+        },
+        {
+          "name": ".plt.sec",
+          "type": "SHT_PROGBITS",
+          "offset": 4480,
+          "bytes": 320,
+          "flags": 6
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 4800,
+          "bytes": 3861,
+          "flags": 6
+        },
+        {
+          "name": ".fini",
+          "type": "SHT_PROGBITS",
+          "offset": 8664,
+          "bytes": 13,
+          "flags": 6
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 12288,
+          "bytes": 491,
+          "flags": 2
+        },
+        {
+          "name": ".eh_frame_hdr",
+          "type": "SHT_PROGBITS",
+          "offset": 12780,
+          "bytes": 180,
+          "flags": 2
+        },
+        {
+          "name": ".eh_frame",
+          "type": "SHT_PROGBITS",
+          "offset": 12960,
+          "bytes": 928,
+          "flags": 2
+        },
+        {
+          "name": ".init_array",
+          "type": "SHT_INIT_ARRAY",
+          "offset": 15280,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".fini_array",
+          "type": "SHT_FINI_ARRAY",
+          "offset": 15288,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".data.rel.ro",
+          "type": "SHT_PROGBITS",
+          "offset": 15296,
+          "bytes": 336,
+          "flags": 3
+        },
+        {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "offset": 15632,
+          "bytes": 512,
+          "flags": 3
+        },
+        {
+          "name": ".got",
+          "type": "SHT_PROGBITS",
+          "offset": 16144,
+          "bytes": 224,
+          "flags": 3
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 16384,
+          "bytes": 16,
+          "flags": 3
+        },
+        {
+          "name": ".bss",
+          "type": "SHT_NOBITS",
+          "offset": 16400,
+          "bytes": 168,
+          "flags": 3
+        },
+        {
+          "name": ".comment",
+          "type": "SHT_PROGBITS",
+          "offset": 16400,
+          "bytes": 45,
+          "flags": 48
+        },
+        {
+          "name": ".debug_aranges",
+          "type": "SHT_PROGBITS",
+          "offset": 16445,
+          "bytes": 64,
+          "flags": 0
+        },
+        {
+          "name": ".debug_info",
+          "type": "SHT_PROGBITS",
+          "offset": 16509,
+          "bytes": 10998,
+          "flags": 0
+        },
+        {
+          "name": ".debug_abbrev",
+          "type": "SHT_PROGBITS",
+          "offset": 27507,
+          "bytes": 1306,
+          "flags": 0
+        },
+        {
+          "name": ".debug_line",
+          "type": "SHT_PROGBITS",
+          "offset": 28813,
+          "bytes": 3334,
+          "flags": 0
+        },
+        {
+          "name": ".debug_str",
+          "type": "SHT_PROGBITS",
+          "offset": 32147,
+          "bytes": 2813,
+          "flags": 48
+        },
+        {
+          "name": ".debug_line_str",
+          "type": "SHT_PROGBITS",
+          "offset": 34960,
+          "bytes": 724,
+          "flags": 48
+        },
+        {
+          "name": ".debug_loclists",
+          "type": "SHT_PROGBITS",
+          "offset": 35684,
+          "bytes": 3861,
+          "flags": 0
+        },
+        {
+          "name": ".debug_rnglists",
+          "type": "SHT_PROGBITS",
+          "offset": 39545,
+          "bytes": 239,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 39784,
+          "bytes": 1824,
+          "flags": 0
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 41608,
+          "bytes": 1091,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 42699,
+          "bytes": 407,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 4573,
+        "allocated_readonly": 3945,
+        "allocated_writable": 1104,
+        "debug": 23339
+      }
+    },
+    "translator": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squash-helper",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/vkso-squash-helper",
+      "role": "translator",
+      "logical_bytes": 28104,
+      "allocated_bytes": 28672,
+      "device": 66307,
+      "inode": 6687927,
+      "links": 1,
+      "sha256": "e53d464e754b241082d32ff4eb82232828030c451442c65860a4b04c6a59281e",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".interp",
+          "type": "SHT_PROGBITS",
+          "offset": 792,
+          "bytes": 28,
+          "flags": 2
+        },
+        {
+          "name": ".note.gnu.property",
+          "type": "SHT_NOTE",
+          "offset": 824,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".note.gnu.build-id",
+          "type": "SHT_NOTE",
+          "offset": 872,
+          "bytes": 36,
+          "flags": 2
+        },
+        {
+          "name": ".note.ABI-tag",
+          "type": "SHT_NOTE",
+          "offset": 908,
+          "bytes": 32,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.hash",
+          "type": "SHT_GNU_HASH",
+          "offset": 944,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "offset": 992,
+          "bytes": 744,
+          "flags": 2
+        },
+        {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "offset": 1736,
+          "bytes": 382,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.version",
+          "type": "SHT_GNU_versym",
+          "offset": 2118,
+          "bytes": 62,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.version_r",
+          "type": "SHT_GNU_verneed",
+          "offset": 2184,
+          "bytes": 96,
+          "flags": 2
+        },
+        {
+          "name": ".rela.dyn",
+          "type": "SHT_RELA",
+          "offset": 2280,
+          "bytes": 384,
+          "flags": 2
+        },
+        {
+          "name": ".rela.plt",
+          "type": "SHT_RELA",
+          "offset": 2664,
+          "bytes": 552,
+          "flags": 66
+        },
+        {
+          "name": ".init",
+          "type": "SHT_PROGBITS",
+          "offset": 4096,
+          "bytes": 27,
+          "flags": 6
+        },
+        {
+          "name": ".plt",
+          "type": "SHT_PROGBITS",
+          "offset": 4128,
+          "bytes": 384,
+          "flags": 6
+        },
+        {
+          "name": ".plt.got",
+          "type": "SHT_PROGBITS",
+          "offset": 4512,
+          "bytes": 16,
+          "flags": 6
+        },
+        {
+          "name": ".plt.sec",
+          "type": "SHT_PROGBITS",
+          "offset": 4528,
+          "bytes": 368,
+          "flags": 6
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 4896,
+          "bytes": 2300,
+          "flags": 6
+        },
+        {
+          "name": ".fini",
+          "type": "SHT_PROGBITS",
+          "offset": 7196,
+          "bytes": 13,
+          "flags": 6
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 8192,
+          "bytes": 376,
+          "flags": 2
+        },
+        {
+          "name": ".eh_frame_hdr",
+          "type": "SHT_PROGBITS",
+          "offset": 8568,
+          "bytes": 60,
+          "flags": 2
+        },
+        {
+          "name": ".eh_frame",
+          "type": "SHT_PROGBITS",
+          "offset": 8632,
+          "bytes": 296,
+          "flags": 2
+        },
+        {
+          "name": ".init_array",
+          "type": "SHT_INIT_ARRAY",
+          "offset": 11280,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".fini_array",
+          "type": "SHT_FINI_ARRAY",
+          "offset": 11288,
+          "bytes": 8,
+          "flags": 3
+        },
+        {
+          "name": ".data.rel.ro",
+          "type": "SHT_PROGBITS",
+          "offset": 11296,
+          "bytes": 224,
+          "flags": 3
+        },
+        {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "offset": 11520,
+          "bytes": 496,
+          "flags": 3
+        },
+        {
+          "name": ".got",
+          "type": "SHT_PROGBITS",
+          "offset": 12016,
+          "bytes": 248,
+          "flags": 3
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 12288,
+          "bytes": 16,
+          "flags": 3
+        },
+        {
+          "name": ".bss",
+          "type": "SHT_NOBITS",
+          "offset": 12304,
+          "bytes": 48,
+          "flags": 3
+        },
+        {
+          "name": ".comment",
+          "type": "SHT_PROGBITS",
+          "offset": 12304,
+          "bytes": 45,
+          "flags": 48
+        },
+        {
+          "name": ".debug_aranges",
+          "type": "SHT_PROGBITS",
+          "offset": 12349,
+          "bytes": 64,
+          "flags": 0
+        },
+        {
+          "name": ".debug_info",
+          "type": "SHT_PROGBITS",
+          "offset": 12413,
+          "bytes": 4195,
+          "flags": 0
+        },
+        {
+          "name": ".debug_abbrev",
+          "type": "SHT_PROGBITS",
+          "offset": 16608,
+          "bytes": 733,
+          "flags": 0
+        },
+        {
+          "name": ".debug_line",
+          "type": "SHT_PROGBITS",
+          "offset": 17341,
+          "bytes": 1585,
+          "flags": 0
+        },
+        {
+          "name": ".debug_str",
+          "type": "SHT_PROGBITS",
+          "offset": 18926,
+          "bytes": 1112,
+          "flags": 48
+        },
+        {
+          "name": ".debug_line_str",
+          "type": "SHT_PROGBITS",
+          "offset": 20038,
+          "bytes": 525,
+          "flags": 48
+        },
+        {
+          "name": ".debug_loclists",
+          "type": "SHT_PROGBITS",
+          "offset": 20563,
+          "bytes": 1882,
+          "flags": 0
+        },
+        {
+          "name": ".debug_rnglists",
+          "type": "SHT_PROGBITS",
+          "offset": 22445,
+          "bytes": 203,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 22648,
+          "bytes": 1488,
+          "flags": 0
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 24136,
+          "bytes": 1000,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 25136,
+          "bytes": 407,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 3108,
+        "allocated_readonly": 3144,
+        "allocated_writable": 1000,
+        "debug": 10299
+      }
+    },
+    "carrier": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-optimized-application-final-gzip-01/carrier/libvkso_sq_core.so",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-optimized-application-final-gzip-01/carrier/libvkso_sq_core.so",
+      "role": "carrier",
+      "logical_bytes": 65016,
+      "allocated_bytes": 28672,
+      "device": 66307,
+      "inode": 6816545,
+      "links": 1,
+      "sha256": "4ecb1f22b377101decebe7297c00778cc272632caedfc59fdf395c77ccdc4f97",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 4096,
+          "bytes": 28672,
+          "flags": 6
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 32768,
+          "bytes": 8192,
+          "flags": 2
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 40960,
+          "bytes": 16384,
+          "flags": 3
+        },
+        {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "offset": 57344,
+          "bytes": 701,
+          "flags": 2
+        },
+        {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "offset": 58048,
+          "bytes": 864,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.hash",
+          "type": "SHT_GNU_HASH",
+          "offset": 58912,
+          "bytes": 304,
+          "flags": 2
+        },
+        {
+          "name": ".rela.dyn",
+          "type": "SHT_RELA",
+          "offset": 59216,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "offset": 59264,
+          "bytes": 144,
+          "flags": 3
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 59424,
+          "bytes": 2208,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 61632,
+          "bytes": 2520,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 64152,
+          "bytes": 92,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 28672,
+        "allocated_readonly": 10109,
+        "allocated_writable": 16528,
+        "debug": 0
+      }
+    },
+    "copied": {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-optimized-application-final-gzip-01/libsq-materialized.so",
+      "resolved": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-optimized-application-final-gzip-01/libsq-materialized.so",
+      "role": "copied",
+      "logical_bytes": 65016,
+      "allocated_bytes": 65536,
+      "device": 66307,
+      "inode": 6816573,
+      "links": 1,
+      "sha256": "40e3b02f47f68e157160ce72bb72df158098037be69da2fcba79e0ed21995767",
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_NULL",
+          "offset": 0,
+          "bytes": 0,
+          "flags": 0
+        },
+        {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "offset": 4096,
+          "bytes": 28672,
+          "flags": 6
+        },
+        {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "offset": 32768,
+          "bytes": 8192,
+          "flags": 2
+        },
+        {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "offset": 40960,
+          "bytes": 16384,
+          "flags": 3
+        },
+        {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "offset": 57344,
+          "bytes": 701,
+          "flags": 2
+        },
+        {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "offset": 58048,
+          "bytes": 864,
+          "flags": 2
+        },
+        {
+          "name": ".gnu.hash",
+          "type": "SHT_GNU_HASH",
+          "offset": 58912,
+          "bytes": 304,
+          "flags": 2
+        },
+        {
+          "name": ".rela.dyn",
+          "type": "SHT_RELA",
+          "offset": 59216,
+          "bytes": 48,
+          "flags": 2
+        },
+        {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "offset": 59264,
+          "bytes": 144,
+          "flags": 3
+        },
+        {
+          "name": ".strtab",
+          "type": "SHT_STRTAB",
+          "offset": 59424,
+          "bytes": 2208,
+          "flags": 0
+        },
+        {
+          "name": ".symtab",
+          "type": "SHT_SYMTAB",
+          "offset": 61632,
+          "bytes": 2520,
+          "flags": 0
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 64152,
+          "bytes": 92,
+          "flags": 0
+        }
+      ],
+      "section_file_bytes": {
+        "executable": 28672,
+        "allocated_readonly": 10109,
+        "allocated_writable": 16528,
+        "debug": 0
+      }
+    }
+  },
+  "disk_scenarios": {
+    "prepared-native-shared": {
+      "roles": [
+        "owner",
+        "consumer",
+        "carrier",
+        "bridge",
+        "frontend",
+        "translator"
+      ],
+      "logical_bytes": 324176,
+      "allocated_bytes": 294912
+    },
+    "prepared-native-copied": {
+      "roles": [
+        "owner",
+        "consumer",
+        "copied",
+        "bridge",
+        "frontend",
+        "translator"
+      ],
+      "logical_bytes": 324176,
+      "allocated_bytes": 331776
+    },
+    "user-only-shared": {
+      "roles": [
+        "owner",
+        "carrier",
+        "bridge",
+        "frontend",
+        "translator"
+      ],
+      "logical_bytes": 263944,
+      "allocated_bytes": 233472
+    },
+    "user-only-copied": {
+      "roles": [
+        "copied",
+        "bridge",
+        "frontend",
+        "translator"
+      ],
+      "logical_bytes": 183112,
+      "allocated_bytes": 188416
+    }
+  },
+  "module_residency": [
+    {
+      "campaign": "squash-optimized-application-final-gzip-01",
+      "residency": {
+        "modules": [
+          {
+            "name": "page_cache_replace",
+            "reported_bytes": 32768,
+            "references": 0
+          },
+          {
+            "name": "vkso_kernel_reader",
+            "reported_bytes": 20480,
+            "references": 0
+          },
+          {
+            "name": "vkso_squashfs",
+            "reported_bytes": 40960,
+            "references": 0
+          },
+          {
+            "name": "vkso_sq_core",
+            "reported_bytes": 69632,
+            "references": 1
+          }
+        ],
+        "note": "Resident module sizes exclude dynamic allocations; original built-in filesystem remains resident in this experimental kernel."
+      }
+    },
+    {
+      "campaign": "squash-optimized-application-final-xz-01-recovery01",
+      "residency": {
+        "modules": [
+          {
+            "name": "page_cache_replace",
+            "reported_bytes": 32768,
+            "references": 0
+          },
+          {
+            "name": "vkso_kernel_reader",
+            "reported_bytes": 20480,
+            "references": 0
+          },
+          {
+            "name": "vkso_squashfs",
+            "reported_bytes": 40960,
+            "references": 0
+          },
+          {
+            "name": "vkso_sq_core",
+            "reported_bytes": 69632,
+            "references": 1
+          }
+        ],
+        "note": "Resident module sizes exclude dynamic allocations; original built-in filesystem remains resident in this experimental kernel."
+      }
+    },
+    {
+      "campaign": "squash-optimized-application-final-lz4-01",
+      "residency": {
+        "modules": [
+          {
+            "name": "page_cache_replace",
+            "reported_bytes": 32768,
+            "references": 0
+          },
+          {
+            "name": "vkso_kernel_reader",
+            "reported_bytes": 20480,
+            "references": 0
+          },
+          {
+            "name": "vkso_squashfs",
+            "reported_bytes": 40960,
+            "references": 0
+          },
+          {
+            "name": "vkso_sq_core",
+            "reported_bytes": 69632,
+            "references": 1
+          }
+        ],
+        "note": "Resident module sizes exclude dynamic allocations; original built-in filesystem remains resident in this experimental kernel."
+      }
+    },
+    {
+      "campaign": "squash-optimized-heldout-gzip-01",
+      "residency": {
+        "modules": [
+          {
+            "name": "page_cache_replace",
+            "reported_bytes": 32768,
+            "references": 0
+          },
+          {
+            "name": "vkso_kernel_reader",
+            "reported_bytes": 20480,
+            "references": 0
+          },
+          {
+            "name": "vkso_squashfs",
+            "reported_bytes": 40960,
+            "references": 0
+          },
+          {
+            "name": "vkso_sq_core",
+            "reported_bytes": 69632,
+            "references": 1
+          }
+        ],
+        "note": "Resident module sizes exclude dynamic allocations; original built-in filesystem remains resident in this experimental kernel."
+      }
+    },
+    {
+      "campaign": "squash-optimized-heldout-xz-01",
+      "residency": {
+        "modules": [
+          {
+            "name": "page_cache_replace",
+            "reported_bytes": 32768,
+            "references": 0
+          },
+          {
+            "name": "vkso_kernel_reader",
+            "reported_bytes": 20480,
+            "references": 0
+          },
+          {
+            "name": "vkso_squashfs",
+            "reported_bytes": 40960,
+            "references": 0
+          },
+          {
+            "name": "vkso_sq_core",
+            "reported_bytes": 69632,
+            "references": 1
+          }
+        ],
+        "note": "Resident module sizes exclude dynamic allocations; original built-in filesystem remains resident in this experimental kernel."
+      }
+    },
+    {
+      "campaign": "squash-optimized-decoder-diagnostic-xz-01",
+      "residency": {
+        "modules": [
+          {
+            "name": "page_cache_replace",
+            "reported_bytes": 32768,
+            "references": 0
+          },
+          {
+            "name": "vkso_kernel_reader",
+            "reported_bytes": 20480,
+            "references": 0
+          },
+          {
+            "name": "vkso_squashfs",
+            "reported_bytes": 40960,
+            "references": 0
+          },
+          {
+            "name": "vkso_sq_core",
+            "reported_bytes": 69632,
+            "references": 1
+          }
+        ],
+        "note": "Resident module sizes exclude dynamic allocations; original built-in filesystem remains resident in this experimental kernel."
+      }
+    },
+    {
+      "campaign": "squash-optimized-decoder-diagnostic-lz4-01",
+      "residency": {
+        "modules": [
+          {
+            "name": "page_cache_replace",
+            "reported_bytes": 32768,
+            "references": 0
+          },
+          {
+            "name": "vkso_kernel_reader",
+            "reported_bytes": 20480,
+            "references": 0
+          },
+          {
+            "name": "vkso_squashfs",
+            "reported_bytes": 40960,
+            "references": 0
+          },
+          {
+            "name": "vkso_sq_core",
+            "reported_bytes": 69632,
+            "references": 1
+          }
+        ],
+        "note": "Resident module sizes exclude dynamic allocations; original built-in filesystem remains resident in this experimental kernel."
+      }
+    },
+    {
+      "campaign": "squash-optimized-sharing-singlecpu-gzip-01",
+      "residency": {
+        "modules": [
+          {
+            "name": "page_cache_replace",
+            "reported_bytes": 32768,
+            "references": 0
+          },
+          {
+            "name": "vkso_kernel_reader",
+            "reported_bytes": 20480,
+            "references": 0
+          },
+          {
+            "name": "vkso_squashfs",
+            "reported_bytes": 40960,
+            "references": 0
+          },
+          {
+            "name": "vkso_sq_core",
+            "reported_bytes": 69632,
+            "references": 1
+          }
+        ],
+        "note": "Resident module sizes exclude dynamic allocations; original built-in filesystem remains resident in this experimental kernel."
+      }
+    },
+    {
+      "campaign": "squash-optimized-application-final-gzip-02",
+      "residency": {
+        "modules": [
+          {
+            "name": "page_cache_replace",
+            "reported_bytes": 32768,
+            "references": 0
+          },
+          {
+            "name": "vkso_kernel_reader",
+            "reported_bytes": 20480,
+            "references": 0
+          },
+          {
+            "name": "vkso_squashfs",
+            "reported_bytes": 40960,
+            "references": 0
+          },
+          {
+            "name": "vkso_sq_core",
+            "reported_bytes": 69632,
+            "references": 1
+          }
+        ],
+        "note": "Resident module sizes exclude dynamic allocations; original built-in filesystem remains resident in this experimental kernel."
+      }
+    },
+    {
+      "campaign": "squash-optimized-application-final-xz-02",
+      "residency": {
+        "modules": [
+          {
+            "name": "page_cache_replace",
+            "reported_bytes": 32768,
+            "references": 0
+          },
+          {
+            "name": "vkso_kernel_reader",
+            "reported_bytes": 20480,
+            "references": 0
+          },
+          {
+            "name": "vkso_squashfs",
+            "reported_bytes": 40960,
+            "references": 0
+          },
+          {
+            "name": "vkso_sq_core",
+            "reported_bytes": 69632,
+            "references": 1
+          }
+        ],
+        "note": "Resident module sizes exclude dynamic allocations; original built-in filesystem remains resident in this experimental kernel."
+      }
+    }
+  ],
+  "native_module_residency": [
+    {
+      "campaign": "squash-optimized-native-final-01",
+      "residency": {
+        "prepared-optimized": {
+          "vkso_squashfs": 40960,
+          "vkso_sq_core": 69632
+        },
+        "native-word-relaxed": {
+          "sq_reference": 73728
+        },
+        "native-word-normal": {
+          "sq_reference": 73728
+        },
+        "native-small-relaxed": {
+          "sq_reference": 61440
+        },
+        "native-small-normal": {
+          "sq_reference": 61440
+        },
+        "prepared-xz": {
+          "vkso_squashfs": 40960,
+          "vkso_sq_core": 69632
+        }
+      }
+    },
+    {
+      "campaign": "squash-optimized-native-stream-01",
+      "residency": {
+        "prepared-optimized": {
+          "vkso_squashfs": 40960,
+          "vkso_sq_core": 69632
+        },
+        "native-small-normal": {
+          "sq_reference": 61440
+        },
+        "native-word-normal": {
+          "sq_reference": 73728
+        },
+        "native-word-relaxed": {
+          "sq_reference": 73728
+        },
+        "prepared-xz": {
+          "vkso_squashfs": 40960,
+          "vkso_sq_core": 69632
+        },
+        "native-small-relaxed": {
+          "sq_reference": 61440
+        }
+      }
+    },
+    {
+      "campaign": "squash-optimized-native-final-02",
+      "residency": {
+        "prepared-xz": {
+          "vkso_squashfs": 40960,
+          "vkso_sq_core": 69632
+        },
+        "native-small-relaxed": {
+          "sq_reference": 61440
+        },
+        "prepared-optimized": {
+          "vkso_squashfs": 40960,
+          "vkso_sq_core": 69632
+        },
+        "native-word-normal": {
+          "sq_reference": 73728
+        },
+        "native-word-relaxed": {
+          "sq_reference": 73728
+        },
+        "native-small-normal": {
+          "sq_reference": 61440
+        }
+      }
+    },
+    {
+      "campaign": "squash-optimized-native-stream-02",
+      "residency": {
+        "prepared-optimized": {
+          "vkso_squashfs": 40960,
+          "vkso_sq_core": 69632
+        },
+        "prepared-xz": {
+          "vkso_squashfs": 40960,
+          "vkso_sq_core": 69632
+        },
+        "native-small-relaxed": {
+          "sq_reference": 61440
+        },
+        "native-small-normal": {
+          "sq_reference": 61440
+        },
+        "native-word-normal": {
+          "sq_reference": 73728
+        },
+        "native-word-relaxed": {
+          "sq_reference": 73728
+        }
+      }
+    }
+  ],
+  "shared_code_ro_pages": 9,
+  "shared_code_ro_bytes": 36864,
+  "registration_requested_bytes": 1264,
+  "boundaries": [
+    "Scale measurements are existing untimed helper snapshots, not replicated peaks or whole-machine memory.",
+    "Mapping buckets do not identify anonymous-allocation ownership; live allocation diagnosis was cancelled.",
+    "Owner/consumer/platform residency, process PSS and shared backing must not be naively added.",
+    "Disk scenarios use evaluated unstripped files and inode-deduplicated st_blocks; common installed platform/dependencies/images excluded equally, not proved removable or reduced.",
+    "Sparse carrier saves 36KiB versus materialized copied core for an already-prepared native deployment; user-only owner cost can outweigh that saving.",
+    "Original host native code remains; no measured host-kernel replacement or whole-machine net saving."
+  ]
+}

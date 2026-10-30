@@ -1,0 +1,74 @@
+[
+  {
+    "name": "squash-native-improved-formal-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/improvement/native_compare.py",
+      "--builds",
+      "test/section65/squashfs/improvement/native-formal-builds.json",
+      "--image-set",
+      "test/section65/build/squashfs/native-images-01/images.json",
+      "--blocks",
+      "12",
+      "--seed",
+      "66001",
+      "--campaign",
+      "squash-native-improved-formal-01",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-native-improved-formal-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-native-improved-formal-01/result.json"
+  },
+  {
+    "name": "squash-native-improved-formal-02",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/improvement/native_compare.py",
+      "--builds",
+      "test/section65/squashfs/improvement/native-formal-builds.json",
+      "--image-set",
+      "test/section65/build/squashfs/native-images-01/images.json",
+      "--blocks",
+      "12",
+      "--seed",
+      "66002",
+      "--campaign",
+      "squash-native-improved-formal-02",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-native-improved-formal-02"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-native-improved-formal-02/result.json"
+  },
+  {
+    "name": "squash-native-improved-formal-03",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/improvement/native_compare.py",
+      "--builds",
+      "test/section65/squashfs/improvement/native-formal-builds.json",
+      "--image-set",
+      "test/section65/build/squashfs/native-images-01/images.json",
+      "--blocks",
+      "12",
+      "--seed",
+      "66003",
+      "--campaign",
+      "squash-native-improved-formal-03",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-native-improved-formal-03"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-native-improved-formal-03/result.json"
+  }
+]

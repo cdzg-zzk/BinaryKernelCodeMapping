@@ -1,0 +1,86 @@
+{
+  "source": "/usr/src/linux-source-5.15.0/linux-source-5.15.0",
+  "component": "fs/isofs",
+  "linux_makefile_version": [
+    "# SPDX-License-Identifier: GPL-2.0",
+    "VERSION = 5",
+    "PATCHLEVEL = 15",
+    "SUBLEVEL = 198",
+    "EXTRAVERSION =",
+    "NAME = Trick or Treat"
+  ],
+  "description": "Unmodified local Linux source snapshot; license notices retained",
+  "files": [
+    {
+      "path": "inode.c",
+      "bytes": 41808,
+      "sha256": "5088950348fbba91ac685785e5a7b868ac287c4d2e70c8ab39a5f29e51e320cd"
+    },
+    {
+      "path": "namei.c",
+      "bytes": 4251,
+      "sha256": "1c94790d2004d964920c4af39bcec597529992ba390165f04daf882ebc3d98f6"
+    },
+    {
+      "path": "dir.c",
+      "bytes": 6708,
+      "sha256": "32f69db79c87a5bfd40e379563821cce3fa6c04d1caf7ccff6b35c1a38d560c8"
+    },
+    {
+      "path": "util.c",
+      "bytes": 2237,
+      "sha256": "39c301b261f2f1dc6d12fabea3ec523cec67628e0ec98f5ea4c6926eb301e932"
+    },
+    {
+      "path": "rock.c",
+      "bytes": 18923,
+      "sha256": "fbdf2a3c35213742c2b540ae8619aaf9843e567c16ea60b543ba4f0306b127c9"
+    },
+    {
+      "path": "export.c",
+      "bytes": 5274,
+      "sha256": "791cab2999f48dc20ef6203bc90af2a5968d91363a8d9b8cbefdd4270712a955"
+    },
+    {
+      "path": "joliet.c",
+      "bytes": 1333,
+      "sha256": "5ca9fc782e6a4fd5a5ec0c55d5dff1c069a2df6a817d57d6347e3f7ef1a8889e"
+    },
+    {
+      "path": "compress.c",
+      "bytes": 10146,
+      "sha256": "e6cb203810eb9fecd64c467d2fea19d8d4d1adad0e34dae089064eadf1803fd1"
+    },
+    {
+      "path": "isofs.h",
+      "bytes": 6515,
+      "sha256": "9371a6050afa07b13308ba50101e31b1a037f6c232beb87bcc3cd3e15f8b27e0"
+    },
+    {
+      "path": "rock.h",
+      "bytes": 2333,
+      "sha256": "5d3b3e31d7ed1bfd694674875c2055d5a49f71666e892e952c890041cdaebfc0"
+    },
+    {
+      "path": "zisofs.h",
+      "bytes": 508,
+      "sha256": "ba4ca87fbc051c464c3f9558aad601b15c5c9113d2bcc154a874de7910e2527d"
+    },
+    {
+      "path": "Kconfig",
+      "bytes": 1787,
+      "sha256": "dc9e8da91bdbbe65fbdcae90c9c5174644ed085c7bd4a0de550b59f1c9dbb976"
+    },
+    {
+      "path": "Makefile",
+      "bytes": 307,
+      "sha256": "392dc47d80953a94df4cc2d6eb96373a12ee5ac70ccb695820013381f4b398c7"
+    },
+    {
+      "path": "nls_base.c",
+      "source_path": "fs/nls/nls_base.c",
+      "bytes": 16232,
+      "sha256": "d4cf77b3ad0a432e7c8506e89de0c5cb4faa544192f4941f4083a36f32f5d45c"
+    }
+  ]
+}

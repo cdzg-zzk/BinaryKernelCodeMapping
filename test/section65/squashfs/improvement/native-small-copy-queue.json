@@ -1,0 +1,63 @@
+[
+  {
+    "name": "squash-native-small-copy-functional-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/functional_extra.py",
+      "--build",
+      "test/section65/build/squashfs/improve-native-small-copy-01",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-native-small-copy-functional-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-native-small-copy-functional-01/result.json"
+  },
+  {
+    "name": "squash-native-small-copy-profile-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/improvement/profile_native.py",
+      "--build",
+      "test/section65/build/squashfs/improve-native-small-copy-01",
+      "--repeats",
+      "24",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-native-small-copy-profile-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-native-small-copy-profile-01/result.json"
+  },
+  {
+    "name": "squash-native-small-copy-pilot-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/native_cost.py",
+      "--build",
+      "test/section65/build/squashfs/improve-native-small-copy-01",
+      "--image-set",
+      "test/section65/build/squashfs/native-images-01/images.json",
+      "--blocks",
+      "4",
+      "--warm-repeats",
+      "1",
+      "--seed",
+      "65901",
+      "--campaign",
+      "squash-native-small-copy-pilot-01",
+      "--pilot",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-native-small-copy-pilot-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-native-small-copy-pilot-01/result.json"
+  }
+]

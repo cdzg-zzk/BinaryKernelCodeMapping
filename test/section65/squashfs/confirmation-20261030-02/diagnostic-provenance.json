@@ -1,0 +1,12 @@
+{
+  "fuse_memory_diagnostic.py": {
+    "source": "/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/optimization-20261030-01/fuse_memory_diagnostic.py",
+    "source_sha256": "ec61e8c8bd79ee5fac37fb5ef1d940d987ba1a37169af2a0a81b8ba4d6c6e214",
+    "change": "Separate output identity and verified stopped-closeout prerequisite, retaining original diagnostic implementation."
+  },
+  "bittree_diagnostic.py": {
+    "source": "/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/optimization-20261030-01/bittree_diagnostic.py",
+    "source_sha256": "3226a46e7d3678c4832fba610b4169c61146ba02b9ae18bc454ce8bfefd74ee7",
+    "change": "Separate output identity and verified stopped-closeout prerequisite, retaining original diagnostic implementation."
+  }
+}

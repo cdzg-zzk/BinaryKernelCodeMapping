@@ -1,0 +1,11 @@
+{
+  "status": "pass",
+  "pdf_sha256": "9a2751a51ed2015574424b05e4548adfcec00cd74e91a823962e6902f70cf967",
+  "pages": 13,
+  "main_pages": 4,
+  "appendix_pages": 9,
+  "review": "Inspected contact sheets for all 13 pages plus full-resolution result/figure pages. No clipping, overlapping text or missing plot labels observed. Main text retains held-out, sequential and memory-scale losses.",
+  "render_directory": "paper/build/section65-refined-render-01",
+  "compile_log": "paper/build/section65-refined-compile-01.log",
+  "notes": "Build completed. Retained font-resolution and underfull-paragraph warnings; no overfull box or unresolved reference observed."
+}

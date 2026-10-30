@@ -1,0 +1,736 @@
+{
+  "status": "complete",
+  "hypothesis": "The Python range-decoder hotspot includes repeated small fixed-depth bit-tree loop control. Unroll only depths 3/6/8; preserve branch-based probability updates, native ISA and hardening flags. This is distinct from the rejected all-mask rc_bit candidate.",
+  "promotion": "Diagnostic only. Any accepted new common owner would need a new version, native/PFN/guest validation and affected-workload confirmation. Current frozen version is unchanged.",
+  "commands": [
+    [
+      "gcc",
+      "-O2",
+      "-I/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/prepared",
+      "-I/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/deps/usr/include",
+      "/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/optimization-20261030-01/bench.c",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/prepared/xz_dec_stream.o",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/prepared/xz_dec_lzma2.o",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/prepared/xz_dec_bcj.o",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/prepared/xz_support.o",
+      "-lz",
+      "-Wl,-l:liblzma.so.5",
+      "-o",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/prepared/bench"
+    ],
+    [
+      "gcc",
+      "-nostdinc",
+      "-isystem",
+      "/usr/lib/gcc/x86_64-linux-gnu/11/include",
+      "-I/home/zzk/BinaryKernelCodeMapping/test/section65/build/native/linux-5.15.198/arch/x86/include",
+      "-I./arch/x86/include/generated",
+      "-I/home/zzk/BinaryKernelCodeMapping/test/section65/build/native/linux-5.15.198/include",
+      "-I./include",
+      "-I/home/zzk/BinaryKernelCodeMapping/test/section65/build/native/linux-5.15.198/arch/x86/include/uapi",
+      "-I./arch/x86/include/generated/uapi",
+      "-I/home/zzk/BinaryKernelCodeMapping/test/section65/build/native/linux-5.15.198/include/uapi",
+      "-I./include/generated/uapi",
+      "-include",
+      "/home/zzk/BinaryKernelCodeMapping/test/section65/build/native/linux-5.15.198/include/linux/compiler-version.h",
+      "-include",
+      "/home/zzk/BinaryKernelCodeMapping/test/section65/build/native/linux-5.15.198/include/linux/kconfig.h",
+      "-include",
+      "/home/zzk/BinaryKernelCodeMapping/test/section65/build/native/linux-5.15.198/include/linux/compiler_types.h",
+      "-D__KERNEL__",
+      "-fmacro-prefix-map=/home/zzk/BinaryKernelCodeMapping/test/section65/build/native/linux-5.15.198/=",
+      "-Wall",
+      "-Wundef",
+      "-Werror=strict-prototypes",
+      "-Wno-trigraphs",
+      "-fno-strict-aliasing",
+      "-fno-common",
+      "-fshort-wchar",
+      "-fno-PIE",
+      "-Werror=implicit-function-declaration",
+      "-Werror=implicit-int",
+      "-Werror=return-type",
+      "-Wno-format-security",
+      "-std=gnu89",
+      "-mno-sse",
+      "-mno-mmx",
+      "-mno-sse2",
+      "-mno-3dnow",
+      "-mno-avx",
+      "-fcf-protection=none",
+      "-m64",
+      "-falign-jumps=1",
+      "-falign-loops=1",
+      "-mno-80387",
+      "-mno-fp-ret-in-387",
+      "-mpreferred-stack-boundary=3",
+      "-mskip-rax-setup",
+      "-mtune=generic",
+      "-mno-red-zone",
+      "-Wno-sign-compare",
+      "-fno-asynchronous-unwind-tables",
+      "-mindirect-branch=thunk-extern",
+      "-mindirect-branch-register",
+      "-mindirect-branch-cs-prefix",
+      "-mfunction-return=thunk-extern",
+      "-fno-jump-tables",
+      "-mharden-sls=all",
+      "-fno-delete-null-pointer-checks",
+      "-Wno-frame-address",
+      "-Wno-format-truncation",
+      "-Wno-format-overflow",
+      "-Wno-address-of-packed-member",
+      "-O2",
+      "-fno-allow-store-data-races",
+      "-Wframe-larger-than=1024",
+      "-Wimplicit-fallthrough=5",
+      "-Wno-main",
+      "-Wno-unused-but-set-variable",
+      "-Wno-unused-const-variable",
+      "-fno-omit-frame-pointer",
+      "-fno-optimize-sibling-calls",
+      "-fno-stack-clash-protection",
+      "-falign-functions=16",
+      "-Wdeclaration-after-statement",
+      "-Wvla",
+      "-Wno-pointer-sign",
+      "-Wno-stringop-truncation",
+      "-Wno-zero-length-bounds",
+      "-Wno-array-bounds",
+      "-Wno-stringop-overflow",
+      "-Wno-restrict",
+      "-Wno-maybe-uninitialized",
+      "-Wno-alloc-size-larger-than",
+      "-fno-strict-overflow",
+      "-fno-stack-check",
+      "-fconserve-stack",
+      "-Werror=date-time",
+      "-Werror=incompatible-pointer-types",
+      "-Werror=designated-init",
+      "-fno-builtin-wcslen",
+      "-Wno-packed-not-aligned",
+      "-mcmodel=small",
+      "-fpie",
+      "-fno-stack-protector",
+      "-fno-sanitize=all",
+      "-fno-jump-tables",
+      "-mfunction-return=keep",
+      "-mindirect-branch=keep",
+      "-mpreferred-stack-boundary=4",
+      "-mincoming-stack-boundary=3",
+      "-D__NO_FORTIFY",
+      "-include",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/tree-unrolled/xz_names.h",
+      "-DMODULE",
+      "-DKBUILD_BASENAME=\"xz_dec_lzma2\"",
+      "-DKBUILD_MODNAME=\"vkso_sq_core\"",
+      "-D__KBUILD_MODNAME=kmod_vkso_sq_core",
+      "-c",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/tree-unrolled/xz_dec_lzma2.c",
+      "-o",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/tree-unrolled/xz_dec_lzma2.o"
+    ],
+    [
+      "gcc",
+      "-O2",
+      "-I/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/tree-unrolled",
+      "-I/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/deps/usr/include",
+      "/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/optimization-20261030-01/bench.c",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/tree-unrolled/xz_dec_stream.o",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/tree-unrolled/xz_dec_lzma2.o",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/tree-unrolled/xz_dec_bcj.o",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/tree-unrolled/xz_support.o",
+      "-lz",
+      "-Wl,-l:liblzma.so.5",
+      "-o",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/tree-unrolled/bench"
+    ],
+    [
+      "gcc",
+      "-O2",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-I/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/prepared",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/tree_states.c",
+      "-o",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/tree_states"
+    ],
+    [
+      "/usr/bin/python3",
+      "/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/optimization-20261030-01/validate_dictionary.py",
+      "--diagnostic",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03",
+      "--variant",
+      "tree-unrolled",
+      "--output",
+      "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/valid-streams"
+    ]
+  ],
+  "differential": "32768 tree transitions passed",
+  "observations": 200,
+  "summary": [
+    {
+      "input": "app-0-data-0-000",
+      "variant": "word-single",
+      "median_paired_cpu_ratio": 1.0,
+      "ratios": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "input": "app-0-data-0-000",
+      "variant": "word-prealloc",
+      "median_paired_cpu_ratio": 1.0219301556574119,
+      "ratios": [
+        1.0219301556574119,
+        0.9754438054540506,
+        1.0281326659880146,
+        1.0039328207280442,
+        1.037498725876658
+      ]
+    },
+    {
+      "input": "app-0-data-0-000",
+      "variant": "tree-single",
+      "median_paired_cpu_ratio": 0.9965164290110169,
+      "ratios": [
+        1.0103363080004821,
+        0.9641158839953843,
+        0.9277515930735676,
+        0.9965164290110169,
+        1.0078543504141817
+      ]
+    },
+    {
+      "input": "app-0-data-0-000",
+      "variant": "tree-prealloc",
+      "median_paired_cpu_ratio": 1.0184010601269262,
+      "ratios": [
+        1.0321386394009544,
+        0.9792239827068927,
+        0.9505232621037425,
+        1.0184010601269262,
+        1.0300286970674533
+      ]
+    },
+    {
+      "input": "app-0-data-0-000",
+      "variant": "library",
+      "median_paired_cpu_ratio": 1.2455654642927392,
+      "ratios": [
+        1.2628414055517783,
+        1.1994473467552156,
+        1.1611575046366973,
+        1.2455654642927392,
+        1.2588805138990502
+      ]
+    },
+    {
+      "input": "app-0-data-1-000",
+      "variant": "word-single",
+      "median_paired_cpu_ratio": 1.0,
+      "ratios": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "input": "app-0-data-1-000",
+      "variant": "word-prealloc",
+      "median_paired_cpu_ratio": 1.0240307149079864,
+      "ratios": [
+        1.0240307149079864,
+        1.0263269846265892,
+        1.0149404426302844,
+        1.0808156690187525,
+        0.984837803391164
+      ]
+    },
+    {
+      "input": "app-0-data-1-000",
+      "variant": "tree-single",
+      "median_paired_cpu_ratio": 0.9915791343014393,
+      "ratios": [
+        1.0052431825313815,
+        0.9915791343014393,
+        1.0043841843239292,
+        0.9819362008955328,
+        0.9757863842298683
+      ]
+    },
+    {
+      "input": "app-0-data-1-000",
+      "variant": "tree-prealloc",
+      "median_paired_cpu_ratio": 1.0093626811824383,
+      "ratios": [
+        1.0224758455037386,
+        1.0093626811824383,
+        1.0262909328182046,
+        0.9999928640574256,
+        0.9922082109758771
+      ]
+    },
+    {
+      "input": "app-0-data-1-000",
+      "variant": "library",
+      "median_paired_cpu_ratio": 1.237143626808291,
+      "ratios": [
+        1.2531332244285855,
+        1.237143626808291,
+        1.2545216296388397,
+        1.2249394266913776,
+        1.2152578903023445
+      ]
+    },
+    {
+      "input": "app-0-data-2-000",
+      "variant": "word-single",
+      "median_paired_cpu_ratio": 1.0,
+      "ratios": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "input": "app-0-data-2-000",
+      "variant": "word-prealloc",
+      "median_paired_cpu_ratio": 1.016317590479895,
+      "ratios": [
+        1.016317590479895,
+        1.0073760565391214,
+        1.0179946417416215,
+        1.108293979737383,
+        1.013514411737299
+      ]
+    },
+    {
+      "input": "app-0-data-2-000",
+      "variant": "tree-single",
+      "median_paired_cpu_ratio": 0.9975901824086127,
+      "ratios": [
+        0.9975901824086127,
+        0.9868616540267672,
+        1.0057911684196759,
+        1.0028114684160216,
+        0.9903883840167914
+      ]
+    },
+    {
+      "input": "app-0-data-2-000",
+      "variant": "tree-prealloc",
+      "median_paired_cpu_ratio": 1.0187571772048765,
+      "ratios": [
+        1.0240191427502978,
+        1.0136215480236779,
+        1.031174263638121,
+        1.0187571772048765,
+        1.01450201549256
+      ]
+    },
+    {
+      "input": "app-0-data-2-000",
+      "variant": "library",
+      "median_paired_cpu_ratio": 1.246401384493067,
+      "ratios": [
+        1.246401384493067,
+        1.2363426167552438,
+        1.2601774981448508,
+        1.2499202354586532,
+        1.2410189318474043
+      ]
+    },
+    {
+      "input": "app-mount-000",
+      "variant": "word-single",
+      "median_paired_cpu_ratio": 1.0,
+      "ratios": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "input": "app-mount-000",
+      "variant": "word-prealloc",
+      "median_paired_cpu_ratio": 1.083476913753419,
+      "ratios": [
+        1.083476913753419,
+        1.165950800468567,
+        0.9206794893066736,
+        0.9268478367924956,
+        1.1179928607919194
+      ]
+    },
+    {
+      "input": "app-mount-000",
+      "variant": "tree-single",
+      "median_paired_cpu_ratio": 0.8801335736114515,
+      "ratios": [
+        0.9127380214196703,
+        0.8801335736114515,
+        0.8523163401425518,
+        0.7952483246079471,
+        0.8863721925497368
+      ]
+    },
+    {
+      "input": "app-mount-000",
+      "variant": "tree-prealloc",
+      "median_paired_cpu_ratio": 0.8805609993139016,
+      "ratios": [
+        0.9053902357287485,
+        0.8805609993139016,
+        0.8817406191750524,
+        0.8126333097943744,
+        0.8487083765466731
+      ]
+    },
+    {
+      "input": "app-mount-000",
+      "variant": "library",
+      "median_paired_cpu_ratio": 0.7063905831737918,
+      "ratios": [
+        0.6924380978754915,
+        0.7108656047950512,
+        0.7063905831737918,
+        0.7207077811279915,
+        0.6952117595338545
+      ]
+    },
+    {
+      "input": "python-0-data-0-000",
+      "variant": "word-single",
+      "median_paired_cpu_ratio": 1.0,
+      "ratios": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "input": "python-0-data-0-000",
+      "variant": "word-prealloc",
+      "median_paired_cpu_ratio": 1.0221120393020455,
+      "ratios": [
+        1.0221120393020455,
+        1.053379375108464,
+        0.9485547815762932,
+        0.9833595804215192,
+        1.0467130318833733
+      ]
+    },
+    {
+      "input": "python-0-data-0-000",
+      "variant": "tree-single",
+      "median_paired_cpu_ratio": 0.9288183859184632,
+      "ratios": [
+        0.9288183859184632,
+        0.971402523454918,
+        0.915055005794821,
+        0.9055173860909613,
+        0.9451418672107694
+      ]
+    },
+    {
+      "input": "python-0-data-0-000",
+      "variant": "tree-prealloc",
+      "median_paired_cpu_ratio": 0.9426006296757198,
+      "ratios": [
+        0.9426006296757198,
+        0.963586956144976,
+        0.9049746180940307,
+        0.9126498458606422,
+        0.9587369875543118
+      ]
+    },
+    {
+      "input": "python-0-data-0-000",
+      "variant": "library",
+      "median_paired_cpu_ratio": 0.8899508493508153,
+      "ratios": [
+        0.8899508493508153,
+        0.9180780532830394,
+        0.8694210417509151,
+        0.8628023383163899,
+        0.9006075822707352
+      ]
+    },
+    {
+      "input": "python-2-data-0-000",
+      "variant": "word-single",
+      "median_paired_cpu_ratio": 1.0,
+      "ratios": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "input": "python-2-data-0-000",
+      "variant": "word-prealloc",
+      "median_paired_cpu_ratio": 0.9934884811426706,
+      "ratios": [
+        1.0191956282159325,
+        0.9886614882599158,
+        0.9934884811426706,
+        1.008962615174502,
+        0.9769924275705896
+      ]
+    },
+    {
+      "input": "python-2-data-0-000",
+      "variant": "tree-single",
+      "median_paired_cpu_ratio": 0.9316473149232499,
+      "ratios": [
+        0.9523115602223999,
+        0.9337550792434874,
+        0.9316473149232499,
+        0.9097744360902257,
+        0.9233803419225041
+      ]
+    },
+    {
+      "input": "python-2-data-0-000",
+      "variant": "tree-prealloc",
+      "median_paired_cpu_ratio": 0.9390734025218245,
+      "ratios": [
+        0.9440412425504761,
+        0.9627964644091925,
+        0.9390734025218245,
+        0.9115040325607057,
+        0.9163214239395169
+      ]
+    },
+    {
+      "input": "python-2-data-0-000",
+      "variant": "library",
+      "median_paired_cpu_ratio": 0.8939543622161766,
+      "ratios": [
+        0.9021674139172597,
+        0.8981032175733794,
+        0.8939543622161766,
+        0.866466592821912,
+        0.8760352490865057
+      ]
+    },
+    {
+      "input": "python-2-data-1-000",
+      "variant": "word-single",
+      "median_paired_cpu_ratio": 1.0,
+      "ratios": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "input": "python-2-data-1-000",
+      "variant": "word-prealloc",
+      "median_paired_cpu_ratio": 0.9905093072935941,
+      "ratios": [
+        0.9893453212496423,
+        0.9905093072935941,
+        1.0160520970330416,
+        0.9798308765994707,
+        1.021435783068636
+      ]
+    },
+    {
+      "input": "python-2-data-1-000",
+      "variant": "tree-single",
+      "median_paired_cpu_ratio": 0.9504310060903651,
+      "ratios": [
+        0.9412937917412668,
+        0.9318490489496007,
+        0.9631335033874765,
+        0.9584355722904759,
+        0.9504310060903651
+      ]
+    },
+    {
+      "input": "python-2-data-1-000",
+      "variant": "tree-prealloc",
+      "median_paired_cpu_ratio": 0.9475924712758153,
+      "ratios": [
+        0.9708399211092671,
+        0.9553351841691162,
+        0.9416131350761161,
+        0.9395682160920493,
+        0.9475924712758153
+      ]
+    },
+    {
+      "input": "python-2-data-1-000",
+      "variant": "library",
+      "median_paired_cpu_ratio": 0.8935295193760848,
+      "ratios": [
+        0.9061148770239119,
+        0.8873633301377346,
+        0.8970602066458058,
+        0.8935295193760848,
+        0.8928117463932296
+      ]
+    },
+    {
+      "input": "python-mount-000",
+      "variant": "word-single",
+      "median_paired_cpu_ratio": 1.0,
+      "ratios": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "input": "python-mount-000",
+      "variant": "word-prealloc",
+      "median_paired_cpu_ratio": 1.0353031189536757,
+      "ratios": [
+        1.1493806397756228,
+        1.0225799075462034,
+        1.0707727697758034,
+        0.8448686335885258,
+        1.0353031189536757
+      ]
+    },
+    {
+      "input": "python-mount-000",
+      "variant": "tree-single",
+      "median_paired_cpu_ratio": 0.9175211912285228,
+      "ratios": [
+        0.991482989205511,
+        0.9175211912285228,
+        1.0019340535842065,
+        0.9148985204463607,
+        0.893009432087432
+      ]
+    },
+    {
+      "input": "python-mount-000",
+      "variant": "tree-prealloc",
+      "median_paired_cpu_ratio": 0.9297366663457557,
+      "ratios": [
+        0.9868707507941747,
+        0.9266071101435748,
+        1.0060866320442863,
+        0.8089725459157331,
+        0.9297366663457557
+      ]
+    },
+    {
+      "input": "python-mount-000",
+      "variant": "library",
+      "median_paired_cpu_ratio": 0.8723615432857335,
+      "ratios": [
+        0.8950508813199979,
+        0.8723615432857335,
+        0.9151264097352397,
+        0.7453914745805339,
+        0.8127090911023008
+      ]
+    }
+  ],
+  "selected_blocks": [
+    {
+      "name": "app-0-data-0-000",
+      "xz": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/app-0-data-0-000.xz",
+      "raw": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/app-0-data-0-000.raw",
+      "input_bytes": 200,
+      "output_bytes": 131072,
+      "input_sha256": "f7fe4c704916e0d9f625d5a677015a2ebc56c77f6110679b1a32cd852e37affc",
+      "output_sha256": "10e3a4d4c189313ef8e2b9f4529f7cad60be0d3828feb373650b3a4d3e09f8fa"
+    },
+    {
+      "name": "app-0-data-1-000",
+      "xz": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/app-0-data-1-000.xz",
+      "raw": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/app-0-data-1-000.raw",
+      "input_bytes": 200,
+      "output_bytes": 131072,
+      "input_sha256": "f7fe4c704916e0d9f625d5a677015a2ebc56c77f6110679b1a32cd852e37affc",
+      "output_sha256": "10e3a4d4c189313ef8e2b9f4529f7cad60be0d3828feb373650b3a4d3e09f8fa"
+    },
+    {
+      "name": "app-0-data-2-000",
+      "xz": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/app-0-data-2-000.xz",
+      "raw": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/app-0-data-2-000.raw",
+      "input_bytes": 200,
+      "output_bytes": 131072,
+      "input_sha256": "1fb74d39309e547b391378b102b72c8059ed4f9f8449bf20fc01c173c578fe30",
+      "output_sha256": "760bb810ae993387c71dc4bd7ea9cadadd437e8610aa9fced9dc47e5b9ded6ce"
+    },
+    {
+      "name": "app-mount-000",
+      "xz": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/app-mount-000.xz",
+      "raw": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/app-mount-000.raw",
+      "input_bytes": 248,
+      "output_bytes": 1683,
+      "input_sha256": "9173343a5e5866d73dd2d142075c60d6d08ec2c1f36aa1ea5b7573be1a2c3501",
+      "output_sha256": "fa08c06060f40c2e8fb17c325756e59e39192e12d536fd8a99c1ec5fd161dfc8"
+    },
+    {
+      "name": "python-0-data-0-000",
+      "xz": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/python-0-data-0-000.xz",
+      "raw": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/python-0-data-0-000.raw",
+      "input_bytes": 20508,
+      "output_bytes": 89132,
+      "input_sha256": "01935fe9a9a289aa61affbfbe47bdba5f2e7f8fe6e5e017dad429ff0d5707180",
+      "output_sha256": "2a58ad7187b4fe05ec5611158abeaeaab8212ae9dc3945418252713f711dc5ae"
+    },
+    {
+      "name": "python-2-data-0-000",
+      "xz": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/python-2-data-0-000.xz",
+      "raw": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/python-2-data-0-000.raw",
+      "input_bytes": 25040,
+      "output_bytes": 131072,
+      "input_sha256": "cc1b663a9d489d0681cb378f73cfc0244118476956deccd2eaea813ae9d46a50",
+      "output_sha256": "e784910c78b92e815b0212b9f7d139db7660a6c12dfa973dc139b8f9ae374656"
+    },
+    {
+      "name": "python-2-data-1-000",
+      "xz": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/python-2-data-1-000.xz",
+      "raw": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/python-2-data-1-000.raw",
+      "input_bytes": 19360,
+      "output_bytes": 97604,
+      "input_sha256": "978979ef895e3781dfe9fe84da89b238c5a556e5f73cc76231201e434b95476a",
+      "output_sha256": "75b2134d53a4c9c01a30a9a2c9976cad99b7f26e06c582820467f9fda87523f9"
+    },
+    {
+      "name": "python-mount-000",
+      "xz": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/python-mount-000.xz",
+      "raw": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/xz-diagnostic-05/blocks/python-mount-000.raw",
+      "input_bytes": 980,
+      "output_bytes": 3719,
+      "input_sha256": "1cccccff475a2f4e78e28ec8c83d4712de6d837777768cc89cb03c4168693323",
+      "output_sha256": "3aab9b3d0eb618db16de36adbe56a9357872f7798a3dd379b04b418e903753c3"
+    }
+  ],
+  "object_size": {
+    "prepared": "   text\t   data\t    bss\t    dec\t    hex\tfilename\n   5908\t      0\t      0\t   5908\t   1714\t/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/prepared/xz_dec_lzma2.o\n",
+    "tree-unrolled": "   text\t   data\t    bss\t    dec\t    hex\tfilename\n   8436\t      0\t      0\t   8436\t   20f4\t/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/tree-unrolled/xz_dec_lzma2.o\n"
+  },
+  "binaries": {
+    "prepared": "fb44f8aad5091ec0778441b10fc123719f8cd8da6a3c453864f22bfd828c1757",
+    "tree-unrolled": "b64ebd61a5b4fc68cad651f07dcc3ae9c878154f1c294d3ab1a5ec22bc2039a2"
+  }
+}

@@ -1,0 +1,294 @@
+{
+  "generated_unix_seconds": 1793259358.289191,
+  "native_performance_runs": [
+    {
+      "path": "test/evaluation-local/runs/iso9660/native-20261029-agent-01",
+      "status": "complete"
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/native-private-20261029-agent-01",
+      "status": "complete"
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/native-memops-20261029-agent-01",
+      "status": "complete"
+    }
+  ],
+  "native_performance_analysis": "test/section65/native-analysis.json",
+  "native_performance_campaigns": [
+    {
+      "label": "initial",
+      "path": "test/evaluation-local/runs/iso9660/native-20261029-agent-01",
+      "formal_observations": 480
+    },
+    {
+      "label": "memops",
+      "path": "test/evaluation-local/runs/iso9660/native-memops-20261029-agent-01",
+      "formal_observations": 480
+    },
+    {
+      "label": "private_helpers",
+      "path": "test/evaluation-local/runs/iso9660/native-private-20261029-agent-01",
+      "formal_observations": 480
+    }
+  ],
+  "functional": {
+    "evidence": "test/evaluation-local/runs/iso9660/native-kernel-guest-01",
+    "kernel": "5.15.198 raw-normal in TCG",
+    "cases": 35,
+    "paths": 5,
+    "workloads": [
+      "GNU find directory index",
+      "GNU tar archive"
+    ],
+    "timings_in_this_functional_run_are_native": false
+  },
+  "preparation": {
+    "original_core_functions": 28,
+    "original_function_lines": 2092,
+    "functions_with_body_edits": [
+      "isofs_fill_super",
+      "isofs_read_inode",
+      "isofs_lookup",
+      "rock_ridge_symlink_readpage"
+    ],
+    "unicode_helper_lines": 122,
+    "explicit_services": 29,
+    "current_source_lines": {
+      "kernel_support.c": 46,
+      "core_metadata.c": 42,
+      "support_types.h": 106,
+      "support_remap.h": 35,
+      "user_bindings.c": 65,
+      "user_bridge.c": 299,
+      "fuse_frontend.c": 197,
+      "adapt.py": 377,
+      "build_user.py": 52
+    },
+    "accounting": "Includes blanks/comments. Counts do not measure developer time. Generated wrappers and first user adapter must not be omitted."
+  },
+  "physical_reuse": {
+    "shared_pages": 5,
+    "page_bytes": 4096,
+    "shared_bytes": 20480,
+    "copied_control_shared_pages": 0,
+    "scope": "kernel-to-user duplication; ordinary DSOs already share pages between user processes"
+  },
+  "resource_observations": {
+    "module_bytes": {
+      "page_cache_replace": 32768,
+      "vkso_kernel_reader": 20480,
+      "vkso_isofs": 32768,
+      "vkso_iso_core": 36864,
+      "iso_compat": 49152,
+      "iso_original": 49152
+    },
+    "original_driver_bytes": 49152,
+    "prepared_driver_bytes": 69632,
+    "prepared_driver_increment_bytes": 20480,
+    "registration_module_bytes": 32768,
+    "pfn_reader_is_measurement_only": true,
+    "hold_manager_observed_rss_bytes": 1789952,
+    "hold_manager_is_mandatory": false,
+    "oneshot_basis": "manager.cpp supports replace without --hold and later explicit restore; page_cache_replace.c permits privileged release from a reconnecting process",
+    "oneshot_functional_run": "test/evaluation-local/runs/iso9660/maintenance-oneshot-01",
+    "oneshot_lifecycle": {
+      "mode": "oneshot",
+      "registration_process_exited": true,
+      "live_manager_pids": [],
+      "release": "explicit restore after consumers finish"
+    },
+    "net_memory_saving_proven": false,
+    "interpretation": "The 20 KiB duplicated pages alone do not establish net memory savings. Module increments and registration infrastructure must be counted. The observed hold-process RSS is optional lifecycle scaffolding, not an inherent always-resident requirement."
+  },
+  "maintenance": {
+    "upstream_commit": "b8253bcf92d6365b20eea6465f5a93c9fc4aa029",
+    "copied_fuse_before_after": [
+      {
+        "fixed": false,
+        "name_bytes": [
+          44
+        ],
+        "full_name_lookup": false,
+        "payload_bytes": null
+      },
+      {
+        "fixed": true,
+        "name_bytes": [
+          300
+        ],
+        "full_name_lookup": true,
+        "payload_bytes": 73
+      }
+    ],
+    "fixed_kernel_and_shared_fuse": {
+      "original_kernel": {
+        "fixed": false,
+        "name_bytes": [
+          44
+        ],
+        "full_name_lookup": false,
+        "payload_bytes": null
+      },
+      "fixed_kernel": {
+        "fixed": true,
+        "name_bytes": [
+          300
+        ],
+        "full_name_lookup": true,
+        "payload_bytes": 73
+      },
+      "original_copy": {
+        "fixed": false,
+        "name_bytes": [
+          44
+        ],
+        "full_name_lookup": false,
+        "payload_bytes": null
+      },
+      "fixed_copy": {
+        "fixed": true,
+        "name_bytes": [
+          300
+        ],
+        "full_name_lookup": true,
+        "payload_bytes": 73
+      },
+      "fixed_vkso": {
+        "fixed": true,
+        "name_bytes": [
+          300
+        ],
+        "full_name_lookup": true,
+        "payload_bytes": 73
+      }
+    },
+    "evidence": "test/evaluation-local/runs/iso9660/maintenance-oneshot-01",
+    "unchanged_bridge_and_frontend": true,
+    "live_replacement_tested": false,
+    "scope": "long-Joliet compatibility extension, not standard 64-unit names",
+    "exclusive_vkso_advantage_proven": false
+  },
+  "related_work": {
+    "lkl_runtime_comparison": "test/section65/lkl-analysis.json",
+    "lkl_formal_observations": 672,
+    "lkl_correctness_cases": 49,
+    "lkl_status": "completed initial comparison and paired positive-name-cache ablation",
+    "cached_analysis": "test/section65/lkl-namecache-analysis.json",
+    "cached_formal_observations": 768,
+    "cached_correctness_cases": 56,
+    "ordinary_shared_source_single_fix_advantage": "not exclusive to VKSO"
+  },
+  "squashfs_preparation": {
+    "evidence": "test/evaluation-local/runs/iso9660/squash-native-guest-03",
+    "native_functional_cases": 10,
+    "common_functions": 34,
+    "original_function_lines": 2103,
+    "services": 46,
+    "operation_tables": 10,
+    "native_performance_measured": true,
+    "native_performance_scope": "initial single-boot, single gzip SIF; fresh mounts and warm VFS caches",
+    "native_performance_evidence": "test/evaluation-local/runs/iso9660/squash-native-cost-01",
+    "native_performance_summary": [
+      {
+        "workload": "archive",
+        "phase": "fresh-mount",
+        "blocks": 8,
+        "paired_time_ratio": 1.0029453895491187,
+        "bootstrap_95_percent": [
+          1.0002486419395755,
+          1.0061449862136815
+        ],
+        "medians_seconds": {
+          "original": 0.27598707000288414,
+          "prepared": 0.276414083004056
+        }
+      },
+      {
+        "workload": "archive",
+        "phase": "warm",
+        "blocks": 8,
+        "paired_time_ratio": 1.008897790612311,
+        "bootstrap_95_percent": [
+          1.0017196886756672,
+          1.021432097402981
+        ],
+        "medians_seconds": {
+          "original": 0.05264326550241094,
+          "prepared": 0.05352431548817549
+        }
+      },
+      {
+        "workload": "scan",
+        "phase": "fresh-mount",
+        "blocks": 8,
+        "paired_time_ratio": 1.0427750776149394,
+        "bootstrap_95_percent": [
+          1.0260006979054448,
+          1.0588657319814359
+        ],
+        "medians_seconds": {
+          "original": 0.06336033599654911,
+          "prepared": 0.0664843939957791
+        }
+      },
+      {
+        "workload": "scan",
+        "phase": "warm",
+        "blocks": 8,
+        "paired_time_ratio": 1.0079560041899227,
+        "bootstrap_95_percent": [
+          0.9650667887410578,
+          1.068657814398088
+        ],
+        "medians_seconds": {
+          "original": 0.01400477800052613,
+          "prepared": 0.013946595499874093
+        }
+      }
+    ],
+    "user_adapter_completed": true,
+    "user_adapter_scope": "read-only single-threaded FUSE; user/security xattrs; per-mount caches",
+    "export_evidence": "test/evaluation-local/runs/iso9660/squash-export-04",
+    "user_paths": {
+      "shared": {
+        "functional_cases": 6,
+        "boundary_reads": 22032,
+        "pfn_observations": 5,
+        "pages_per_mapping": 6,
+        "kernel_shared_bytes": 24576
+      },
+      "copied": {
+        "functional_cases": 6,
+        "boundary_reads": 22032,
+        "pfn_observations": 5,
+        "pages_per_mapping": 6,
+        "kernel_shared_bytes": 0
+      }
+    },
+    "adapter_source_lines": {
+      "user_bridge.c": 369,
+      "posix_io.c": 87,
+      "fuse_frontend.c": 221,
+      "apptainer_helper.c": 96
+    },
+    "apptainer_execution_completed": true,
+    "apptainer_evidence": "test/evaluation-local/runs/iso9660/squash-apptainer-shared-02",
+    "apptainer_version": "apptainer version 1.5.5",
+    "apptainer_task": "GNU tar archives the Linux include tree from a real SIF",
+    "apptainer_entries": 5866,
+    "apptainer_stock_results_identical": true,
+    "apptainer_shared_bytes": 24576
+  },
+  "squashfs_application_comparison": {
+    "analysis": "test/section65/squashfs-application-analysis.json",
+    "observations": 384,
+    "final_campaign": "test/evaluation-local/runs/iso9660/squash-apptainer-comparison-02",
+    "scope": "single gzip SIF, one hardware boot, GNU tar over 5866 Linux include entries; full process lifecycle timing",
+    "memory_scope": "one before/after helper-process snapshot per backend per campaign; not total-machine or exact peak memory",
+    "first_use_development_cost_advantage_demonstrated": false
+  },
+  "next_evidence": [
+    "Concrete SquashFS maintenance case; broader native overhead validation"
+  ]
+}

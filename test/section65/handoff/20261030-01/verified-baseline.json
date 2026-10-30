@@ -1,0 +1,97 @@
+{
+  "status": "complete",
+  "version": "xz-composed-refined",
+  "campaigns": 30,
+  "timed_observations": 6540,
+  "accounting": "Installed generic platform; filesystem preparation, per-core metadata and private runtime costs retained.",
+  "preserved_predecessor": "paper/build/section65-composed-publication-01/identity.json",
+  "scope": "Final-owner confirmation and compiled standalone Section 6.5, one host/boot. Does not claim whole-paper build, hardening equivalence, human-time savings or whole-machine net savings.",
+  "analysis": "test/section65/build/squashfs/refined-analysis-01",
+  "snapshot": "test/section65/build/squashfs/evaluation-refined-02",
+  "records": [
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-xz-functional-01/result.json",
+      "sha256": "cc48754313bf603bdf5f10362c030de52e9f35cd3b8531de3c1d89862ece4248"
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-xz-guest-01/result.json",
+      "sha256": "db7fb21a2676346c2afa2b4e550ba94fe2700ac9428a5041f80342258d282dc4"
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-xz-execution-01/result.json",
+      "sha256": "e918742ef3a7ccd71944d982308b30de371b084c5885ea0a56b766c12228adbb"
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-xz-bcj-02/result.json",
+      "sha256": "30baad09f3371fe50d9f0a9d1da7aae41f0e11afedcc133620e0538de8138695"
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-xz-native-calls-01/result.json",
+      "sha256": "84bad77382011dd1be8f6dd1027c79b8af598b00299e6918b69d62d9233a650c"
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-hardening-02/result.json",
+      "sha256": "f7d0da130547e335f80c84ea41684f745e10d4347acf302137215ba55d7e50dd"
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-metadata-work-01/result.json",
+      "sha256": "9c4786e0d9d4d71ae1e5aebb035b9662870f7b17c4f8de647ef9b13a8f22983e"
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-minimal-deployment-01/result.json",
+      "sha256": "169ab296454945d595f404935be64ea252f64d632b353d159d43a0362a41303c"
+    },
+    {
+      "path": "test/section65/build/squashfs/refined-analysis-01/analysis.json",
+      "sha256": "f9d8f77c57f7db7d2e700e6f954209d780c96b64b232459bc70a519c93f126fd"
+    },
+    {
+      "path": "test/section65/build/squashfs/refined-analysis-01/audit.json",
+      "sha256": "e398d462e1f5cda2eef4e3c393f6395bc5e223e20ac804eac4f5fe44c8149663"
+    },
+    {
+      "path": "test/section65/build/squashfs/refined-analysis-01/resource-ledger/resources.json",
+      "sha256": "8b6d3e3bbd1c2d0dc05d70e255d7bec72ec3fb7935b47c47aaf004d1d98d2418"
+    },
+    {
+      "path": "test/section65/build/squashfs/refined-analysis-01/costs.json",
+      "sha256": "2ef7d7f1fc2bb9cde13d38103177535313ce8129de7aec51b8c59ea73ad775dc"
+    },
+    {
+      "path": "test/section65/build/squashfs/refined-analysis-01/section65.numbers.json",
+      "sha256": "ce289ee44fc642f13706e63b81fe668b673064e62ade5af505eb113d83d4e17d"
+    },
+    {
+      "path": "test/section65/build/squashfs/evaluation-refined-02/identity.json",
+      "sha256": "89687a0d9be598db367362e1d6470cd16655b862dd5d3376f012b5f044d379f2"
+    },
+    {
+      "path": "paper/build/section65-refined-figures-01/provenance.json",
+      "sha256": "255fd4dc8f39f40eb72b2c0dfd11b24e5063dde4962eed5c87ee55a63f9f469c"
+    },
+    {
+      "path": "paper/filesystem-section.tex",
+      "sha256": "5b9474746a83c0c05a0f2fba248cf4d3ec8c030d8aecebed41513f1c08996b3a"
+    },
+    {
+      "path": "paper/filesystem-section-preview.pdf",
+      "sha256": "9a2751a51ed2015574424b05e4548adfcec00cd74e91a823962e6902f70cf967"
+    },
+    {
+      "path": "paper/data/section65/render-qa.json",
+      "sha256": "a5da44aaa894592e83284abfda0ae78f29f196934c5adfc142daea1ab07782de"
+    },
+    {
+      "path": "test/section65/claim-verdicts.json",
+      "sha256": "23b117a6791c37597d3f46cb07cd56308ab02e84e045e4868817144e0ae57916"
+    },
+    {
+      "path": "test/section65/claim-experiment-map.md",
+      "sha256": "0b122930710a4e676ceddad87e12bf22c1c6ffc15f5f0a59d4615090a13ef3ad"
+    },
+    {
+      "path": "paper/paper_content/references.bib",
+      "sha256": "b2da5e9aadd3384563392c62ec7030efab6e9d28eb064f0ece84d6e263cdded2"
+    }
+  ]
+}

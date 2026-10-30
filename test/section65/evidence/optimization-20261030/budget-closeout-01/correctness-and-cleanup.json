@@ -1,0 +1,187 @@
+{
+  "status": "complete",
+  "time": 1793337631.236582,
+  "existing_correctness": [
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/optimization-xz-valid-01/result.json",
+      "sha256": "1d603ac600fe6419dd3f3a6cd113279385c5f955ed6a7d597f94e2d1708aff62",
+      "summary": {
+        "status": "pass",
+        "scope": "Valid user-space inputs only; not a guest malformed-image or native/PFN regression",
+        "dictionary_states": 65536,
+        "state_result": "65536 differential dictionary states passed\n",
+        "decoder_checks": 244,
+        "candidate_sha256": "03b3e9aacb0bbb25f7e0d25e1a60d1983d3eca0221849075ab4423f36ffb9099",
+        "checks_count": 244
+      }
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/optimization-cache-valid-01/result.json",
+      "sha256": "b5db43454bfbaa4d9bbe5c6fd29e2cdedd3527402cd0a7d2b34cd41c806cf715",
+      "summary": {
+        "status": "complete",
+        "scope": "valid-image API lifetime checks, not FUSE/shared-PFN/native/timing evidence",
+        "distinct_regular_files": 8192,
+        "churn_passes": 3,
+        "content_checks": 828,
+        "image_sha256": "81c92c8585e0f2d544e3a70e29516dd2ca022550a9023d2ed3ee4b86f915e590",
+        "bridge_sha256": "3079e2a388394c3e87c0bed1d148426381fefc14054db877be6325dd997382e5",
+        "stats_order_count": 8
+      }
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/optimization-cache-fuse-01/result.json",
+      "sha256": "dadbe6372ceb4af6dfe54a71f3c15ff102050c5a2802152ff3efe1b18e026091",
+      "summary": {
+        "status": "complete",
+        "scope": "FUSE valid-image lifetime/contents/cursors, not performance",
+        "content_checks": 561,
+        "retained_file_handles": 64,
+        "cursor_roundtrips": 3,
+        "daemon_returncode": 0,
+        "unmounted": true,
+        "memory_snapshots_count": 4
+      }
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/optimization-cache-guest-01/result.json",
+      "sha256": "7ad40c59af02188fce968d97a791bd38b4b6ffa68d036b1a8451b46dc77b8147",
+      "summary": {
+        "status": "complete",
+        "scope": "Guest-only repaired-negative-offset and five-format regression of candidate; no timing.",
+        "restored": true,
+        "modules_unloaded": true
+      }
+    },
+    {
+      "path": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/optimization-cache-sanitize-01/sanitizer.json",
+      "sha256": "0f9a981764e033b2a54e9e64ab558cdc09fd57241cd8b1ee717eae03dba535fb",
+      "summary": {
+        "status": "complete",
+        "scope": "ASAN/UBSAN private adapter plus intercepted allocator; common core remains uninstrumented",
+        "leak_scope": "Python runtime leak scanning disabled; this checks invalid accesses, not a whole-process leak proof"
+      }
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/functional-01/result.json",
+      "sha256": "1ed546b6eb313cfe5f903c7dd20e9937fe95e1da6a3cc4b3481320848847d5d4",
+      "summary": {
+        "status": "complete",
+        "scope": "Additional valid-image semantics, no timing. Empty capability set carries no privileges.",
+        "restored": true,
+        "modules_unloaded": true,
+        "cases_count": 30,
+        "xz_block_header_prefixes_count": 5,
+        "xz_filter_chains_count": 5,
+        "images_count": 6
+      }
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/simultaneous-01/result.json",
+      "sha256": "3035f2fd196301c17ec4cb6833ace9f58c9378e8fe8e99e2c5b214d6f478505e",
+      "summary": {
+        "status": "complete",
+        "scope": "Integration correctness and physical/private-state identity, not timing or throughput.",
+        "ownership_scope": "Native retains image uid/gid; Apptainer supplies uid/gid=invoking user through FUSE mount options. Compare those specified application semantics; preserve differing mode, mtime, content and links.",
+        "xz_user_execution": "Hardware breakpoint at the shared decoder entry during actual SIF phase 3; arguments, stack and unchanged shared PFNs recorded.",
+        "restored": true,
+        "native_after": true,
+        "real_fd_and_partition_offsets": true,
+        "modules_unloaded": true,
+        "cases_count": 2,
+        "phases_count": 16
+      }
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/shared-decoder-01/result.json",
+      "sha256": "7bc8954d89113053300bb75cf9ddfe1748a7bc087d48e9a9171d324e42a85ae1",
+      "summary": {
+        "status": "complete",
+        "scope": "Fixed original SIF blocks, copied/shared dynamic harness; diagnostic, not complete-application timing",
+        "observations": 160,
+        "restored": true,
+        "mode_policy": "SINGLE and PREALLOC: same contiguous full blocks, malloc services and zlib CRC. PREALLOC reset per repeat. Not native BIO/scatter execution.",
+        "identity_scope": "Representative live process per backing/mode; same harness and materialized instructions, current owner. Earlier ordinary/library block controls are a separate diagnostic version.",
+        "modules_unloaded": true,
+        "summary_count": 16
+      }
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/minimal-deployment-01/result.json",
+      "sha256": "97f534bc311d239a9ba4ec1463b81c378cd67af669fb6613e74095c65515407d",
+      "summary": {
+        "status": "complete",
+        "scope": "Real SIF application with only owner+registration resident; then identical copied image after all task modules unload.",
+        "copied_modules_absent": true,
+        "restored": true,
+        "modules_unloaded": true,
+        "runtime_modules_count": 2
+      }
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/native-controls-guest-01/result.json",
+      "sha256": "c8c71bbeec33816dd2f91a06f911b65616dbba20c49d5a4462a2df717684e8ad",
+      "summary": {
+        "status": "complete",
+        "modules_unloaded": true,
+        "cases_count": 10
+      }
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/validation-queue-01/result.json",
+      "sha256": "5bd8eeb2be3dcce3c9d0490c8bb7c5badc7db70a6337d574a251561056cf0f29",
+      "summary": {
+        "status": "complete",
+        "pid": 2069303,
+        "started": 1793333176.8866034,
+        "finished": 1793333599.851173,
+        "queue_count": 7,
+        "jobs_count": 7
+      }
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/cache-scale-direct-01/result.json",
+      "sha256": "60e94c96f4eb56602c6e330f1e2bfe76918d89c2309f5efae86a9c134420cbc8",
+      "summary": {
+        "status": "complete",
+        "scope": "Direct private adapter on unchanged original scale SIFs. Excludes FUSE and application startup; not subtracted from process results as a calibrated component cost. malloc_trim is diagnostic-only.",
+        "bridge_sha256": "3079e2a388394c3e87c0bed1d148426381fefc14054db877be6325dd997382e5",
+        "cases_count": 3
+      }
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/hardening-01/result.json",
+      "sha256": "3a8ded8564b870fb06dc04d8f55525ece78280fa821e3ffe00c8291bff4c385b",
+      "summary": {
+        "status": "complete",
+        "compiler": "gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+        "scope": "Object-level evidence. Retained thunk relocations do not by themselves certify runtime mitigation policy.",
+        "conclusion": "PIC compilation can retain kernel SSP and external thunks. Current shared objects deliberately omit them: kernel GS canary storage and external thunk/failure targets are not bound by the current user ABI. The build-only probe is not a runnable hardened VKSO implementation. The prototype changes native hardening properties; prepared/native timing is the cost of that complete prototype configuration, not pure PGOT cost.",
+        "config_count": 16
+      }
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/native-calls-01/result.json",
+      "sha256": "288b68fa37e8fd47b8786dc35a226b83cbb3ded79cb78b832d0fcca4894aec21",
+      "summary": {
+        "status": "complete",
+        "scope": "Dynamic native call counts, not timing. Probes are removed before any physical-sharing test.",
+        "modules_unloaded": true,
+        "cases_count": 6
+      }
+    },
+    {
+      "path": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/metadata-work-01/result.json",
+      "sha256": "62a60cf2b73647670b13e6769bb6ef47229f72cd2b45688fcb00c30b7511c165",
+      "summary": {
+        "status": "complete",
+        "scope": "Current word-copy/bounded-cache build, direct FUSE mount plus original include-tree find task; decoded bytes/calls, not elapsed performance. Includes mount-time decoder work. Stock buffer and internal streaming counters are separate APIs and must not be summed.",
+        "cases_count": 12
+      }
+    }
+  ],
+  "live_queue_or_current_campaign_pids": [],
+  "loaded_task_modules": [],
+  "task_mounts_in_observer_namespace": [],
+  "scope": "Existing tests indexed, not rerun; current queue cleanup plus final process/module checks. No unrelated mount or process was modified."
+}

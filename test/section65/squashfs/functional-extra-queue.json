@@ -1,0 +1,16 @@
+[
+  {
+    "name": "squash-functional-extra-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/functional_extra.py",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-functional-extra-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-functional-extra-01/result.json"
+  }
+]

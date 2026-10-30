@@ -1,0 +1,105 @@
+{
+  "scope": "Selected real evidence snapshot; full raw logs, binaries and images remain at recorded server paths. Closeout and new diagnostic/pilot versions are separate.",
+  "files": [
+    {
+      "path": "budget-closeout-01/analysis.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/budget-closeout-01/analysis.json",
+      "sha256": "846ef6d0e9332b7c1bbd40171158ebb70f88383f76d7c01e166e15e7753dbc5a"
+    },
+    {
+      "path": "budget-closeout-01/audit.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/budget-closeout-01/audit.json",
+      "sha256": "04d4e0816b7cb78af86e6fa3afffdac30be14c218699f4c1ddf9199216c11eaa"
+    },
+    {
+      "path": "budget-closeout-01/CORE_RESULTS.md",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/budget-closeout-01/CORE_RESULTS.md",
+      "sha256": "45d3b9e4493954d9d4a83a0078447ede770c9ee9625e69a9f3cf4fe554e23799"
+    },
+    {
+      "path": "budget-closeout-01/resource-ledger.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/budget-closeout-01/resource-ledger.json",
+      "sha256": "a34b0f416f2a148669e545f5c77009fd46ce8d519fd5717f071f8c7558ff070d"
+    },
+    {
+      "path": "budget-closeout-01/stopped.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/budget-closeout-01/stopped.json",
+      "sha256": "1a6bb0cb883fef315195feff882c4754b9a3b77d9a1d8c88a009d5642abc95d4"
+    },
+    {
+      "path": "budget-closeout-01/correctness-and-cleanup.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/budget-closeout-01/correctness-and-cleanup.json",
+      "sha256": "e36cd16d8d1dd4089261e8acb084cd23f8067352a7779e95fc4202793777f689"
+    },
+    {
+      "path": "python-attribution-analysis-02/analysis.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-attribution-analysis-02/analysis.json",
+      "sha256": "3e17adc6729c53537d632a484255e51326a2be8213bcfb00615a37f7c2ac3486"
+    },
+    {
+      "path": "fuse-memory-diagnostic-03/result.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/fuse-memory-diagnostic-03/result.json",
+      "sha256": "88d31441ce322eb7ca56bfd559998648d2a296d61f97a86d5d6b8cc82f550f40"
+    },
+    {
+      "path": "bittree-diagnostic-03/result.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/bittree-diagnostic-03/result.json",
+      "sha256": "0055e2e0e089a47e50b6ca7745b071bc2819050e3f8eec513d9df39512613ace"
+    },
+    {
+      "path": "python-work-02/result.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/result.json",
+      "sha256": "a04bcd368f0492846e607f2286e2e9990861ff5e725f30d6531cd5ff70a86626"
+    },
+    {
+      "path": "python-work-data-controls-01/result.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-data-controls-01/result.json",
+      "sha256": "ab04d40c41115df84d02040ab23f9797caa3e0d7370946cd6cd4b7bacfe91442"
+    },
+    {
+      "path": "cache-development-queue-01/result.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/cache-development-queue-01/result.json",
+      "sha256": "6834364ff0ccbb32291e9a9a7c1dcbac06535e6a0c141486b14251b84801b26d"
+    },
+    {
+      "path": "data-cache-pilot-application-final-gzip-01/benchmark/samples.jsonl",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data-cache-pilot-application-final-gzip-01/benchmark/samples.jsonl",
+      "sha256": "802a5bcc0e15595b9e33a1c0dcea0e3bb3d69a489a364489215f6542d5c3a405"
+    },
+    {
+      "path": "data-cache-pilot-application-final-lz4-01/benchmark/samples.jsonl",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data-cache-pilot-application-final-lz4-01/benchmark/samples.jsonl",
+      "sha256": "27318b7dad92a20fbf017f2fdfc71772da9aedab321dce68b4b4eec41f6f8923"
+    },
+    {
+      "path": "data-cache-pilot-heldout-gzip-01/benchmark/samples.jsonl",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data-cache-pilot-heldout-gzip-01/benchmark/samples.jsonl",
+      "sha256": "2916248dcde517054952dfcfb8da35de993126834b5208c23510ba7827beaa87"
+    },
+    {
+      "path": "data-cache-pilot-application-final-xz-01/benchmark/samples.jsonl",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data-cache-pilot-application-final-xz-01/benchmark/samples.jsonl",
+      "sha256": "d277952fc0cc25ed9dd8a65936380e6971d922d0cb386055caa6113279410e04"
+    },
+    {
+      "path": "data-cache-pilot-heldout-xz-01/benchmark/samples.jsonl",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data-cache-pilot-heldout-xz-01/benchmark/samples.jsonl",
+      "sha256": "2c5267b7100736032b63a4417e5c0fc54f64184ff29baecccaeb1b381eef7c52"
+    },
+    {
+      "path": "data-cache-resource-scale-01-01/benchmark/resources.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data-cache-resource-scale-01-01/benchmark/resources.json",
+      "sha256": "1dd3ecaa318b7004d5bb1f2777f7bde697111d46b6ccd9f5fdb0118694ec5f35"
+    },
+    {
+      "path": "data-cache-resource-scale-04-01/benchmark/resources.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data-cache-resource-scale-04-01/benchmark/resources.json",
+      "sha256": "d3fe9daeb89569f57e536ad0f979f0e770e1c990329d23a777e67e0b259aef95"
+    },
+    {
+      "path": "data-cache-resource-scale-16-01/benchmark/resources.json",
+      "source": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/data-cache-resource-scale-16-01/benchmark/resources.json",
+      "sha256": "2b6c22eda50ca6757149a44b1374d699778ff021ced49b582e0ec12882b6d206"
+    }
+  ]
+}

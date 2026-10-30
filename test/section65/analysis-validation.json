@@ -1,0 +1,43 @@
+{
+  "status": "pass",
+  "quantile_cdf_checks": [
+    {
+      "campaigns": 2,
+      "cdf": 0.974999999999659
+    },
+    {
+      "campaigns": 3,
+      "cdf": 0.9750000000026953
+    },
+    {
+      "campaigns": 4,
+      "cdf": 0.9749999999945558
+    },
+    {
+      "campaigns": 5,
+      "cdf": 0.9749999999949392
+    },
+    {
+      "campaigns": 6,
+      "cdf": 0.9750000000110361
+    },
+    {
+      "campaigns": 7,
+      "cdf": 0.9749999999950782
+    },
+    {
+      "campaigns": 8,
+      "cdf": 0.9750000000149732
+    },
+    {
+      "campaigns": 9,
+      "cdf": 0.9749999999920325
+    },
+    {
+      "campaigns": 10,
+      "cdf": 0.9750000000082464
+    }
+  ],
+  "absolute_three_campaign_cells": 40,
+  "previous_point_and_interval_estimates_unchanged": true
+}

@@ -1,0 +1,270 @@
+{
+  "status": "pass",
+  "historical": [
+    {
+      "run": "squash-native-guest-03",
+      "record": "test/evaluation-local/runs/iso9660/squash-native-guest-03/run.json",
+      "sha256": "286d00d5c3aec21d49b9819cb6bbe9163d9490383578c476e49965625bd2086f",
+      "role": "Five-format original/prepared native semantic oracle; superseded by fixed-owner regression for final implementation.",
+      "status": "executed-complete"
+    },
+    {
+      "run": "squash-export-04",
+      "record": "test/evaluation-local/runs/iso9660/squash-export-04/run.json",
+      "sha256": "b8e3fd0e6c8551ec4d9ac617ac615e7f9da2034c09c8b9786adcb25035f52321",
+      "role": "Five-format copied/shared functional and physical evidence; final fixed owner independently regressed.",
+      "status": "executed-complete"
+    },
+    {
+      "run": "squash-apptainer-shared-02",
+      "record": "test/evaluation-local/runs/iso9660/squash-apptainer-shared-02/result.json",
+      "sha256": "c488367a4391abe8783c05f3979963d6ec1621e641afe536237d4a7ac09aaa9a",
+      "role": "Real SIF application feasibility with earlier owner and Python translator.",
+      "status": "executed-complete"
+    },
+    {
+      "run": "squash-apptainer-comparison-01",
+      "record": "test/evaluation-local/runs/iso9660/squash-apptainer-comparison-01/result.json",
+      "sha256": "c60fc97250db5e5460e652a07965fe01f59701141dd8619385874f703ff7f6b2",
+      "role": "Python translator diagnostic, excluded from final performance pooling.",
+      "status": "executed-complete"
+    },
+    {
+      "run": "squash-apptainer-comparison-02",
+      "record": "test/evaluation-local/runs/iso9660/squash-apptainer-comparison-02/result.json",
+      "sha256": "b8d8f300ab1057cc6baa4de343181a10b522e5741056688b9fc7319ab8abceed",
+      "role": "C translator single-campaign diagnostic, excluded from fixed-owner formal pooling.",
+      "status": "executed-complete"
+    },
+    {
+      "run": "squash-native-cost-01",
+      "record": "test/evaluation-local/runs/iso9660/squash-native-cost-01/result.json",
+      "sha256": "5872db6e53b526c7632816813e9b3c710920027f9580b2767f5866701427e9a6",
+      "role": "Single gzip native campaign; superseded, not pooled with final five-format matrix.",
+      "status": "executed-complete"
+    },
+    {
+      "run": "native-private-20261029-agent-01",
+      "record": "test/evaluation-local/runs/iso9660/native-private-20261029-agent-01/result.json",
+      "sha256": "e1c44f8988ec8d86ed2cb731d213d6a33d0beb51b70926c872f3a83ddb88dd1a",
+      "role": "Final historical ISO native preparation, one hardware campaign; no SquashFS inference.",
+      "status": "executed-complete"
+    },
+    {
+      "run": "lkl-namecache-native-01",
+      "record": "test/evaluation-local/runs/iso9660/lkl-namecache-native-01/result.json",
+      "sha256": "67d4b4007ec577c400cff4dda8cb947b34c3feac4f76d499da245fc576650d6d",
+      "role": "ISO cache-policy diagnostic against LKL; one campaign, distinct adapter.",
+      "status": "executed-complete"
+    },
+    {
+      "run": "squash-maintenance-01",
+      "record": "test/evaluation-local/runs/iso9660/squash-maintenance-01/result.json",
+      "sha256": "4721e6e5174136edc9124422b78227218b495095035c74ac6eae56058d3bbe47",
+      "recorded_status": "running",
+      "audited_status": "historical interrupted orchestration; not a live campaign",
+      "cause": "Client ENOTCONN 107 violated the old EIO 5 assertion; fixed branch not executed in this attempt.",
+      "resolution": "New multi-signal classification and completed squash-maintenance-02; original failure preserved."
+    }
+  ],
+  "squashfs_maintenance": {
+    "run": "test/evaluation-local/runs/iso9660/squash-maintenance-02",
+    "outcomes": [
+      {
+        "version": "old",
+        "consumer": "copied",
+        "valid": {
+          "client_errno": 0,
+          "bytes": 96,
+          "zero_filled": false,
+          "sha256": "0f390e4071941d458c03e22612d908a7842713c1214cb754b3479628f856f2ea",
+          "daemon_alive_after_read": true,
+          "daemon_returncode": 0
+        },
+        "negative": {
+          "client_errno": 107,
+          "daemon_alive_after_read": false,
+          "daemon_returncode": -11
+        }
+      },
+      {
+        "version": "fixed",
+        "consumer": "copied",
+        "valid": {
+          "client_errno": 0,
+          "bytes": 96,
+          "zero_filled": false,
+          "sha256": "0f390e4071941d458c03e22612d908a7842713c1214cb754b3479628f856f2ea",
+          "daemon_alive_after_read": true,
+          "daemon_returncode": 0
+        },
+        "negative": {
+          "client_errno": 5,
+          "daemon_alive_after_read": true,
+          "daemon_returncode": 0
+        }
+      },
+      {
+        "version": "old",
+        "consumer": "shared",
+        "valid": {
+          "client_errno": 0,
+          "bytes": 96,
+          "zero_filled": false,
+          "sha256": "0f390e4071941d458c03e22612d908a7842713c1214cb754b3479628f856f2ea",
+          "daemon_alive_after_read": true,
+          "daemon_returncode": 0
+        },
+        "negative": {
+          "client_errno": 107,
+          "daemon_alive_after_read": false,
+          "daemon_returncode": -11
+        }
+      },
+      {
+        "version": "fixed",
+        "consumer": "shared",
+        "valid": {
+          "client_errno": 0,
+          "bytes": 96,
+          "zero_filled": false,
+          "sha256": "0f390e4071941d458c03e22612d908a7842713c1214cb754b3479628f856f2ea",
+          "daemon_alive_after_read": true,
+          "daemon_returncode": 0
+        },
+        "negative": {
+          "client_errno": 5,
+          "daemon_alive_after_read": true,
+          "daemon_returncode": 0
+        }
+      }
+    ],
+    "owner_hashes": {
+      "old": "93ef5f5052ea97f49facf0987aa4c7787f0d63be87814e87d67ff606de7aa607",
+      "fixed": "b1ae55e3f1ca3ff565939b32685d4908e57d85fdf9a6ba846e18999e3868882a"
+    },
+    "unchanged_user_binaries": {
+      "libsq-bridge.so": {
+        "old": "edea5e69776d8017e856fb3a28af3c6551a4179ae9bf42f0c831b1f8d9d292a6",
+        "fixed": "edea5e69776d8017e856fb3a28af3c6551a4179ae9bf42f0c831b1f8d9d292a6"
+      },
+      "vkso-squashfuse": {
+        "old": "afec5d2f45bf13aa061fbf47649d877b210089fd5542da5da53f85c60ddb63ab",
+        "fixed": "afec5d2f45bf13aa061fbf47649d877b210089fd5542da5da53f85c60ddb63ab"
+      }
+    },
+    "native_fixed": {
+      "errno": 5
+    },
+    "references": [
+      {
+        "run": "squash-maintenance-reference-01",
+        "result": {
+          "status": "complete",
+          "scope": "unadapted 5.15.198 with same upstream patch; TCG functional only",
+          "cases": [
+            {
+              "image": "valid.squashfs",
+              "errno": 0,
+              "bytes": 96,
+              "zero_filled": false,
+              "sha256": "0f390e4071941d458c03e22612d908a7842713c1214cb754b3479628f856f2ea"
+            },
+            {
+              "image": "negative.squashfs",
+              "errno": 5
+            },
+            {
+              "image": "gzip.squashfs",
+              "entries": 412,
+              "status": "pass"
+            },
+            {
+              "image": "lz4.squashfs",
+              "entries": 412,
+              "status": "pass"
+            },
+            {
+              "image": "lzo.squashfs",
+              "entries": 412,
+              "status": "pass"
+            },
+            {
+              "image": "xz.squashfs",
+              "entries": 412,
+              "status": "pass"
+            },
+            {
+              "image": "zstd.squashfs",
+              "entries": 412,
+              "status": "pass"
+            }
+          ],
+          "modules_unloaded": true
+        }
+      },
+      {
+        "run": "squash-maintenance-relaxed-reference-01",
+        "result": {
+          "status": "complete",
+          "scope": "unadapted 5.15.198 with same upstream patch; TCG functional only",
+          "cases": [
+            {
+              "image": "valid.squashfs",
+              "errno": 0,
+              "bytes": 96,
+              "zero_filled": false,
+              "sha256": "0f390e4071941d458c03e22612d908a7842713c1214cb754b3479628f856f2ea"
+            },
+            {
+              "image": "negative.squashfs",
+              "errno": 5
+            },
+            {
+              "image": "gzip.squashfs",
+              "entries": 412,
+              "status": "pass"
+            },
+            {
+              "image": "lz4.squashfs",
+              "entries": 412,
+              "status": "pass"
+            },
+            {
+              "image": "lzo.squashfs",
+              "entries": 412,
+              "status": "pass"
+            },
+            {
+              "image": "xz.squashfs",
+              "entries": 412,
+              "status": "pass"
+            },
+            {
+              "image": "zstd.squashfs",
+              "entries": 412,
+              "status": "pass"
+            }
+          ],
+          "modules_unloaded": true
+        }
+      }
+    ]
+  },
+  "iso_debug": {
+    "run": "test/evaluation-local/runs/iso9660/maintenance-oneshot-01",
+    "function": "isofs_get_blocks",
+    "inode_size": 65537,
+    "block": 0,
+    "single_step": {
+      "before": "0x7ffff7d48d20",
+      "after": "0x7ffff7d48d25"
+    },
+    "shared_pages_before_and_after": 5,
+    "replay_script": "test/evaluation-local/runs/iso9660/maintenance-oneshot-01/payload/fuse_gdb.py",
+    "replay_script_sha256": "f20e7d2037a87fc914e84693d2c5738c525657c9677f1e8967a8759e167734a4",
+    "owner_sha256": "289b5643629010f35a5beb266a222b3f88e70690de07b6c9b334881eaf55d7d4",
+    "scope": "Ubuntu 119 ABI in TCG; debugger feasibility only, separate from final SquashFS and hardware timing."
+  },
+  "pooling_policy": "No historical performance row enters the final fixed-owner campaign estimates."
+}

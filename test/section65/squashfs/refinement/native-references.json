@@ -1,0 +1,10 @@
+{
+  "native-small-normal": {
+    "module": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-bounded-controls-build-01/native-small-normal/sq_reference.ko",
+    "filesystem": "sqreference"
+  },
+  "native-small-relaxed": {
+    "module": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/squash-bounded-controls-build-01/native-small-relaxed/sq_reference.ko",
+    "filesystem": "sqreference"
+  }
+}

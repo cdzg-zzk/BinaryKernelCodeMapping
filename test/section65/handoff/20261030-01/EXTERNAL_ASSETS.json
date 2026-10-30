@@ -1,0 +1,983 @@
+{
+  "scope": "Not a standalone bootable/runnable environment. Images, VM disks/initramfs, complete kernel/LKL SDKs and runtime installations omitted.",
+  "assets": [
+    {
+      "path": "test/section65/build/squashfs/native-images-01/lz4.squashfs",
+      "bytes": 17465344,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/native-images-01/zstd.squashfs",
+      "bytes": 10383360,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/native-images-01/xz.squashfs",
+      "bytes": 9822208,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/native-images-01/gzip.squashfs",
+      "bytes": 11227136,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/native-images-01/lzo.squashfs",
+      "bytes": 12857344,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/application-images-01/xz.sif",
+      "bytes": 144281600,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/application-images-01/gzip.sif",
+      "bytes": 145948672,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/application-images-01/lz4.sif",
+      "bytes": 152309760,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+      "bytes": 24502272,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/heldout-python-images-01/gzip.sif",
+      "bytes": 29073408,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/refine-scale-images-01/scale-1.sif",
+      "bytes": 9859072,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/refine-scale-images-01/scale-16.sif",
+      "bytes": 11325440,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/refine-scale-images-01/scale-4.sif",
+      "bytes": 10153984,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/simultaneous-xz-images-01/B.sif",
+      "bytes": 2514944,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/simultaneous-xz-images-01/C.sif",
+      "bytes": 2514944,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/squashfs/simultaneous-xz-images-01/A.sif",
+      "bytes": 2514944,
+      "available_in_original_workspace": true,
+      "identity": "Use the included images.json in the same directory."
+    },
+    {
+      "path": "test/section65/build/native/linux-5.15.198",
+      "available_in_original_workspace": true,
+      "reason": "Complete Linux source tree; only XZ sources and selected reference wrapper included."
+    },
+    {
+      "path": "test/section65/build/native/kernel",
+      "available_in_original_workspace": true,
+      "reason": "Configured kernel build/SDK; .config included."
+    },
+    {
+      "path": "test/section65/build/lkl",
+      "available_in_original_workspace": true,
+      "reason": "Full LKL kernel/library/toolchain; generators, selected reference and evidence included."
+    },
+    {
+      "path": "test/section65/build/squashfs/apptainer",
+      "available_in_original_workspace": true,
+      "reason": "Apptainer, bundled stock backend and runtime libraries."
+    },
+    {
+      "path": "test/section65/build/squashfs/deps",
+      "available_in_original_workspace": true,
+      "reason": "Compression/FUSE build dependencies."
+    },
+    {
+      "path": "test/evaluation-local/packages/iso9660-native-optimized-20261029",
+      "available_in_original_workspace": true,
+      "reason": "Matching support package, vmlinux, manager, krg and modules."
+    },
+    {
+      "path": "paper/build/section65-plot-env-02",
+      "available_in_original_workspace": true,
+      "reason": "Plotting virtual environment; requirements/script included."
+    },
+    {
+      "path": "paper/build/tools",
+      "available_in_original_workspace": true,
+      "reason": "Tectonic executable and build tools."
+    }
+  ],
+  "omitted_bulk_evidence": [
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-gzip-01/native-after.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-gzip-01/native-before.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-gzip-01/native-original.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-gzip-01/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-gzip-02/native-after.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-gzip-02/native-before.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-gzip-02/native-original.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-gzip-02/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-gzip-03/native-after.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-gzip-03/native-before.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-gzip-03/native-original.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-gzip-03/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-lz4-01/native-after.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-lz4-01/native-before.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-lz4-01/native-original.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-lz4-01/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-lz4-02/native-after.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-lz4-02/native-before.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-lz4-02/native-original.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-lz4-02/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-lz4-03/native-after.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-lz4-03/native-before.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-lz4-03/native-original.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-lz4-03/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-xz-01/native-after.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-xz-01/native-before.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-xz-01/native-original.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-xz-01/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-xz-02/native-after.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-xz-02/native-before.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-xz-02/native-original.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-xz-02/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-xz-03/native-after.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-xz-03/native-before.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-xz-03/native-original.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-final-xz-03/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-gzip-pilot-01/native-after.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-gzip-pilot-01/native-before.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-gzip-pilot-01/native-original.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-gzip-pilot-01/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-lz4-pilot-01/native-after.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-lz4-pilot-01/native-before.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-lz4-pilot-01/native-original.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-lz4-pilot-01/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-xz-pilot-01/native-after.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-xz-pilot-01/native-before.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-xz-pilot-01/native-original.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-application-xz-pilot-01/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-lz4-01/native-after.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-lz4-01/native-before.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-lz4-01/native-original.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-lz4-01/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-lz4-02/native-after.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-lz4-02/native-before.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-lz4-02/native-original.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-lz4-02/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-lz4-03/native-after.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-lz4-03/native-before.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-lz4-03/native-original.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-lz4-03/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-xz-01/native-after.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-xz-01/native-before.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-xz-01/native-original.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-xz-01/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-xz-02/native-after.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-xz-02/native-before.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-xz-02/native-original.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-xz-02/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-xz-03/native-after.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-xz-03/native-before.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-xz-03/native-original.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-diagnostic-xz-03/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-pilot-lz4-01/native-after.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-pilot-lz4-01/native-before.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-pilot-lz4-01/native-original.json",
+      "bytes": 1579506,
+      "sha256": "22346f181f57decdf670dd131fa92dfbfcadec82360792275fb8f0449f3c44bb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-pilot-lz4-01/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-pilot-xz-01/native-after.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-pilot-xz-01/native-before.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-pilot-xz-01/native-original.json",
+      "bytes": 1579506,
+      "sha256": "d37a61eaa2d7d88cf092ad668e5ed5a9d2d3c4224a1d1a2761a8aa84fe56276a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-decoder-pilot-xz-01/benchmark/workload-oracles.json",
+      "bytes": 1317580,
+      "sha256": "facb6f72718b22b51c7c8a8682b2143214f703dc557a76bb63d476df692a5cf5",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-01/native-after.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-01/native-before.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-01/native-original.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-01/benchmark/workload-oracles.json",
+      "bytes": 1145237,
+      "sha256": "638bf7be855b65239b6760379ccce6831af6b14e54be111bb4f71cc29ad0ff2a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-02/native-after.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-02/native-before.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-02/native-original.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-02/benchmark/workload-oracles.json",
+      "bytes": 1145237,
+      "sha256": "638bf7be855b65239b6760379ccce6831af6b14e54be111bb4f71cc29ad0ff2a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-03/native-before.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-03/native-original.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-03/benchmark/workload-oracles.json",
+      "bytes": 1145237,
+      "sha256": "638bf7be855b65239b6760379ccce6831af6b14e54be111bb4f71cc29ad0ff2a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-03-recovery-01/native-after.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-03-recovery-01/native-before.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-03-recovery-01/native-original.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-03-recovery-01/benchmark/workload-oracles.json",
+      "bytes": 1145237,
+      "sha256": "638bf7be855b65239b6760379ccce6831af6b14e54be111bb4f71cc29ad0ff2a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-pilot-01/native-after.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-pilot-01/native-before.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-pilot-01/native-original.json",
+      "bytes": 1783959,
+      "sha256": "dbdd21e7c5bcb6f345c3080734f35471f402cd79287e09132a5af47adc73b8eb",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-gzip-pilot-01/benchmark/workload-oracles.json",
+      "bytes": 1145237,
+      "sha256": "638bf7be855b65239b6760379ccce6831af6b14e54be111bb4f71cc29ad0ff2a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-01/native-after.json",
+      "bytes": 1783959,
+      "sha256": "b22cb6e9d110869e7d60ad3765e235ccb7bc97725fe43c80876502693e17c063",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-01/native-before.json",
+      "bytes": 1783959,
+      "sha256": "b22cb6e9d110869e7d60ad3765e235ccb7bc97725fe43c80876502693e17c063",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-01/native-original.json",
+      "bytes": 1783959,
+      "sha256": "b22cb6e9d110869e7d60ad3765e235ccb7bc97725fe43c80876502693e17c063",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-01/benchmark/workload-oracles.json",
+      "bytes": 1145237,
+      "sha256": "638bf7be855b65239b6760379ccce6831af6b14e54be111bb4f71cc29ad0ff2a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-02/native-after.json",
+      "bytes": 1783959,
+      "sha256": "b22cb6e9d110869e7d60ad3765e235ccb7bc97725fe43c80876502693e17c063",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-02/native-before.json",
+      "bytes": 1783959,
+      "sha256": "b22cb6e9d110869e7d60ad3765e235ccb7bc97725fe43c80876502693e17c063",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-02/native-original.json",
+      "bytes": 1783959,
+      "sha256": "b22cb6e9d110869e7d60ad3765e235ccb7bc97725fe43c80876502693e17c063",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-02/benchmark/workload-oracles.json",
+      "bytes": 1145237,
+      "sha256": "638bf7be855b65239b6760379ccce6831af6b14e54be111bb4f71cc29ad0ff2a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-03/native-after.json",
+      "bytes": 1783959,
+      "sha256": "b22cb6e9d110869e7d60ad3765e235ccb7bc97725fe43c80876502693e17c063",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-03/native-before.json",
+      "bytes": 1783959,
+      "sha256": "b22cb6e9d110869e7d60ad3765e235ccb7bc97725fe43c80876502693e17c063",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-03/native-original.json",
+      "bytes": 1783959,
+      "sha256": "b22cb6e9d110869e7d60ad3765e235ccb7bc97725fe43c80876502693e17c063",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-03/benchmark/workload-oracles.json",
+      "bytes": 1145237,
+      "sha256": "638bf7be855b65239b6760379ccce6831af6b14e54be111bb4f71cc29ad0ff2a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-pilot-01/native-after.json",
+      "bytes": 1783959,
+      "sha256": "b22cb6e9d110869e7d60ad3765e235ccb7bc97725fe43c80876502693e17c063",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-pilot-01/native-before.json",
+      "bytes": 1783959,
+      "sha256": "b22cb6e9d110869e7d60ad3765e235ccb7bc97725fe43c80876502693e17c063",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-pilot-01/native-original.json",
+      "bytes": 1783959,
+      "sha256": "b22cb6e9d110869e7d60ad3765e235ccb7bc97725fe43c80876502693e17c063",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-heldout-xz-pilot-01/benchmark/workload-oracles.json",
+      "bytes": 1145237,
+      "sha256": "638bf7be855b65239b6760379ccce6831af6b14e54be111bb4f71cc29ad0ff2a",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-01/native-after.json",
+      "bytes": 1620054,
+      "sha256": "b5717fd7681485ba4403ba766e0696d232e3fa34ece46a31e21e5dd56f695f8d",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-01/native-before.json",
+      "bytes": 1620054,
+      "sha256": "b5717fd7681485ba4403ba766e0696d232e3fa34ece46a31e21e5dd56f695f8d",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-01/native-original.json",
+      "bytes": 1620054,
+      "sha256": "b5717fd7681485ba4403ba766e0696d232e3fa34ece46a31e21e5dd56f695f8d",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-04/native-after.json",
+      "bytes": 6310504,
+      "sha256": "e7c1ceaa9215531dd95e22bf499f0d8da8712ee821f95bd222680e9322e06ebc",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-04/native-before.json",
+      "bytes": 6310504,
+      "sha256": "e7c1ceaa9215531dd95e22bf499f0d8da8712ee821f95bd222680e9322e06ebc",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-04/native-original.json",
+      "bytes": 6310504,
+      "sha256": "e7c1ceaa9215531dd95e22bf499f0d8da8712ee821f95bd222680e9322e06ebc",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-04/application/reader/manifest.json",
+      "bytes": 5219671,
+      "sha256": "446a9dce720527577c117cbfc0f1fd2f3b2a0dd93e510b2a775667c2a78450ce",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-04/application/stock/manifest.json",
+      "bytes": 5219671,
+      "sha256": "446a9dce720527577c117cbfc0f1fd2f3b2a0dd93e510b2a775667c2a78450ce",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-16/native-after.json",
+      "bytes": 25107488,
+      "sha256": "dcc0a13fe5d8554b5a2588644cef3b960c57935072794d3d2d1980c85fba676b",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-16/native-before.json",
+      "bytes": 25107488,
+      "sha256": "dcc0a13fe5d8554b5a2588644cef3b960c57935072794d3d2d1980c85fba676b",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-16/native-original.json",
+      "bytes": 25107488,
+      "sha256": "dcc0a13fe5d8554b5a2588644cef3b960c57935072794d3d2d1980c85fba676b",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-16/application/reader/manifest.json",
+      "bytes": 20913535,
+      "sha256": "4eb01a07c97056a7cac8c7da609a9ccff0091fd4709aa31a372774dde3a5ab74",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-resource-scale-16/application/stock/manifest.json",
+      "bytes": 20913535,
+      "sha256": "4eb01a07c97056a7cac8c7da609a9ccff0091fd4709aa31a372774dde3a5ab74",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-sharing-singlecpu-gzip-01/native-after.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-sharing-singlecpu-gzip-01/native-before.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-sharing-singlecpu-gzip-01/native-original.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-sharing-singlecpu-gzip-01/benchmark/workload-oracles.json",
+      "bytes": 1065983,
+      "sha256": "d75004f054606bd5ab5689c88b13312164a4dd06cb04ffe4e26c67ad4dfd8919",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-sharing-singlecpu-gzip-02/native-after.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-sharing-singlecpu-gzip-02/native-before.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-sharing-singlecpu-gzip-02/native-original.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-sharing-singlecpu-gzip-02/benchmark/workload-oracles.json",
+      "bytes": 1065983,
+      "sha256": "d75004f054606bd5ab5689c88b13312164a4dd06cb04ffe4e26c67ad4dfd8919",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-sharing-singlecpu-gzip-03/native-after.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-sharing-singlecpu-gzip-03/native-before.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-sharing-singlecpu-gzip-03/native-original.json",
+      "bytes": 1579506,
+      "sha256": "4f5b8aa323f479095e278537b323a73d28db63e460f9487f2ca31b023753f313",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    },
+    {
+      "path": "test/evaluation-local/runs/iso9660/squash-refine-sharing-singlecpu-gzip-03/benchmark/workload-oracles.json",
+      "bytes": 1065983,
+      "sha256": "d75004f054606bd5ab5689c88b13312164a4dd06cb04ffe4e26c67ad4dfd8919",
+      "reason": "Bulk per-file manifest or oversized diagnostic; aggregate/oracle checks and all timing samples are included."
+    }
+  ]
+}

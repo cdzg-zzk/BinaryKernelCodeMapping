@@ -1,0 +1,31 @@
+{
+  "status": "stopped-at-complete-campaign-boundary",
+  "created": 1793337378.3485875,
+  "dispatcher_pid": 2129032,
+  "active": {
+    "name": "squash-optimized-application-final-xz-02",
+    "started": 1793336950.4712834,
+    "status": "running",
+    "pid": 2244341
+  },
+  "cancelled_waiters": [
+    {
+      "name": "followup-queue-01",
+      "pid": 2187427,
+      "signal": "TERM",
+      "jobs_started": 0
+    },
+    {
+      "name": "postprocess-02",
+      "pid": 2141744,
+      "signal": "TERM",
+      "jobs_started": 0
+    }
+  ],
+  "reason": "User requested quota-conserving core closeout. Selection is chronological completion, not measured effect.",
+  "finished": 1793337461.3836029,
+  "active_result": "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-optimized-application-final-xz-02/result.json",
+  "task_modules_unloaded": true,
+  "background_tasks_alive": false,
+  "scope": "Original queue status files preserved as interrupted/stale; this sidecar is the authoritative budget cancellation record. No samples deleted or modified."
+}

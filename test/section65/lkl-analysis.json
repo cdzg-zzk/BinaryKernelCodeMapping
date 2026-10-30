@@ -1,0 +1,1887 @@
+{
+  "status": "audited",
+  "run": "/home/zzk/BinaryKernelCodeMapping/test/evaluation-local/runs/iso9660/lkl-comparison-native-01",
+  "observations": 672,
+  "correctness_cases": 49,
+  "shared_pages": 5,
+  "table": [
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "copied-fuse",
+      "trials": 24,
+      "task_ms": 113.60065000189934,
+      "client_cpu_ms": 54.973499999992015,
+      "daemon_cpu_ms": 50.0,
+      "ready_ms": 6.98975599516416,
+      "before_Rss": {
+        "median": 2200.0,
+        "min": 2180,
+        "max": 2268
+      },
+      "before_Pss": {
+        "median": 1980.0,
+        "min": 1960,
+        "max": 2048
+      },
+      "before_VmHWM": {
+        "median": 1472.0,
+        "min": 1392,
+        "max": 1536
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 2456.0,
+        "min": 2436,
+        "max": 2524
+      },
+      "after_Pss": {
+        "median": 2236.0,
+        "min": 2216,
+        "max": 2304
+      },
+      "after_VmHWM": {
+        "median": 2296.0,
+        "min": 2276,
+        "max": 2364
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "lkl-default64",
+      "trials": 24,
+      "task_ms": 132.169297998189,
+      "client_cpu_ms": 55.110500000001394,
+      "daemon_cpu_ms": 79.99999999999999,
+      "ready_ms": 141.0291665015393,
+      "before_Rss": {
+        "median": 20068.0,
+        "min": 19708,
+        "max": 20264
+      },
+      "before_Pss": {
+        "median": 19789.0,
+        "min": 19429,
+        "max": 19985
+      },
+      "before_VmHWM": {
+        "median": 19084.0,
+        "min": 18136,
+        "max": 19588
+      },
+      "before_Threads": {
+        "median": 25.0,
+        "min": 25,
+        "max": 26
+      },
+      "after_Rss": {
+        "median": 72338.0,
+        "min": 71992,
+        "max": 72548
+      },
+      "after_Pss": {
+        "median": 72059.0,
+        "min": 71713,
+        "max": 72269
+      },
+      "after_VmHWM": {
+        "median": 71738.0,
+        "min": 70752,
+        "max": 72212
+      },
+      "after_Threads": {
+        "median": 26.0,
+        "min": 26,
+        "max": 27
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "lkl-iso16",
+      "trials": 24,
+      "task_ms": 145.32610400056,
+      "client_cpu_ms": 55.824500000003496,
+      "daemon_cpu_ms": 95.0,
+      "ready_ms": 98.85129550093552,
+      "before_Rss": {
+        "median": 13446.0,
+        "min": 13268,
+        "max": 13556
+      },
+      "before_Pss": {
+        "median": 13167.0,
+        "min": 12989,
+        "max": 13277
+      },
+      "before_VmHWM": {
+        "median": 12922.0,
+        "min": 12700,
+        "max": 13044
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 24726.0,
+        "min": 24576,
+        "max": 24844
+      },
+      "after_Pss": {
+        "median": 24447.0,
+        "min": 24297,
+        "max": 24565
+      },
+      "after_VmHWM": {
+        "median": 24170.0,
+        "min": 23908,
+        "max": 24308
+      },
+      "after_Threads": {
+        "median": 18.0,
+        "min": 18,
+        "max": 18
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "lkl-iso64",
+      "trials": 24,
+      "task_ms": 142.40272949973587,
+      "client_cpu_ms": 55.61549999999826,
+      "daemon_cpu_ms": 90.00000000000001,
+      "ready_ms": 99.8529794960632,
+      "before_Rss": {
+        "median": 14168.0,
+        "min": 14008,
+        "max": 14284
+      },
+      "before_Pss": {
+        "median": 13889.0,
+        "min": 13729,
+        "max": 14005
+      },
+      "before_VmHWM": {
+        "median": 13680.0,
+        "min": 13496,
+        "max": 13804
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 68468.0,
+        "min": 68300,
+        "max": 68592
+      },
+      "after_Pss": {
+        "median": 68189.0,
+        "min": 68021,
+        "max": 68313
+      },
+      "after_VmHWM": {
+        "median": 67988.0,
+        "min": 67772,
+        "max": 68096
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 18
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "lkl-iso8",
+      "trials": 24,
+      "task_ms": 152.110620001622,
+      "client_cpu_ms": 55.51000000000883,
+      "daemon_cpu_ms": 105.0,
+      "ready_ms": 99.33719049877254,
+      "before_Rss": {
+        "median": 13270.0,
+        "min": 13168,
+        "max": 13416
+      },
+      "before_Pss": {
+        "median": 12991.0,
+        "min": 12889,
+        "max": 13137
+      },
+      "before_VmHWM": {
+        "median": 12034.0,
+        "min": 11860,
+        "max": 12284
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 16404.0,
+        "min": 16052,
+        "max": 16548
+      },
+      "after_Pss": {
+        "median": 16125.0,
+        "min": 15773,
+        "max": 16269
+      },
+      "after_VmHWM": {
+        "median": 14928.0,
+        "min": 14672,
+        "max": 15172
+      },
+      "after_Threads": {
+        "median": 18.0,
+        "min": 18,
+        "max": 18
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "original",
+      "trials": 24,
+      "task_ms": 47.17499999969732,
+      "client_cpu_ms": 42.280499999996835,
+      "daemon_cpu_ms": 0.0
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "variant": "vkso-fuse",
+      "trials": 24,
+      "task_ms": 112.91748900111998,
+      "client_cpu_ms": 54.96949999999501,
+      "daemon_cpu_ms": 50.0,
+      "ready_ms": 7.0031774885137565,
+      "before_Rss": {
+        "median": 2198.0,
+        "min": 2184,
+        "max": 2268
+      },
+      "before_Pss": {
+        "median": 1978.0,
+        "min": 1964,
+        "max": 2048
+      },
+      "before_VmHWM": {
+        "median": 1478.0,
+        "min": 1392,
+        "max": 1596
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 2454.0,
+        "min": 2440,
+        "max": 2524
+      },
+      "after_Pss": {
+        "median": 2234.0,
+        "min": 2220,
+        "max": 2304
+      },
+      "after_VmHWM": {
+        "median": 2294.0,
+        "min": 2280,
+        "max": 2364
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "copied-fuse",
+      "trials": 24,
+      "task_ms": 6.7059410066576675,
+      "client_cpu_ms": 2.2979999999961365,
+      "daemon_cpu_ms": 0.0,
+      "ready_ms": 6.967093002458569,
+      "before_Rss": {
+        "median": 2204.0,
+        "min": 2180,
+        "max": 2272
+      },
+      "before_Pss": {
+        "median": 1984.0,
+        "min": 1960,
+        "max": 2052
+      },
+      "before_VmHWM": {
+        "median": 1484.0,
+        "min": 1420,
+        "max": 1600
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 2340.0,
+        "min": 2316,
+        "max": 2408
+      },
+      "after_Pss": {
+        "median": 2120.0,
+        "min": 2096,
+        "max": 2188
+      },
+      "after_VmHWM": {
+        "median": 2240.0,
+        "min": 2212,
+        "max": 2304
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "lkl-default64",
+      "trials": 24,
+      "task_ms": 5.852881004102528,
+      "client_cpu_ms": 2.425000000002342,
+      "daemon_cpu_ms": 0.0,
+      "ready_ms": 140.9903435051092,
+      "before_Rss": {
+        "median": 19998.0,
+        "min": 19784,
+        "max": 20248
+      },
+      "before_Pss": {
+        "median": 19719.0,
+        "min": 19505,
+        "max": 19969
+      },
+      "before_VmHWM": {
+        "median": 19072.0,
+        "min": 18056,
+        "max": 19336
+      },
+      "before_Threads": {
+        "median": 25.0,
+        "min": 25,
+        "max": 25
+      },
+      "after_Rss": {
+        "median": 20198.0,
+        "min": 19984,
+        "max": 20448
+      },
+      "after_Pss": {
+        "median": 19919.0,
+        "min": 19705,
+        "max": 20169
+      },
+      "after_VmHWM": {
+        "median": 19592.0,
+        "min": 18752,
+        "max": 19900
+      },
+      "after_Threads": {
+        "median": 25.0,
+        "min": 25,
+        "max": 25
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "lkl-iso16",
+      "trials": 24,
+      "task_ms": 5.8652104999055155,
+      "client_cpu_ms": 2.404000000000295,
+      "daemon_cpu_ms": 0.0,
+      "ready_ms": 99.59161200094968,
+      "before_Rss": {
+        "median": 13472.0,
+        "min": 13272,
+        "max": 13548
+      },
+      "before_Pss": {
+        "median": 13193.0,
+        "min": 12993,
+        "max": 13269
+      },
+      "before_VmHWM": {
+        "median": 12926.0,
+        "min": 12704,
+        "max": 13032
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 13664.0,
+        "min": 13460,
+        "max": 13740
+      },
+      "after_Pss": {
+        "median": 13385.0,
+        "min": 13181,
+        "max": 13461
+      },
+      "after_VmHWM": {
+        "median": 13160.0,
+        "min": 12704,
+        "max": 13300
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "lkl-iso64",
+      "trials": 24,
+      "task_ms": 5.862537502252962,
+      "client_cpu_ms": 2.4034999999926754,
+      "daemon_cpu_ms": 0.0,
+      "ready_ms": 99.74261799652595,
+      "before_Rss": {
+        "median": 14164.0,
+        "min": 14024,
+        "max": 14296
+      },
+      "before_Pss": {
+        "median": 13885.0,
+        "min": 13745,
+        "max": 14017
+      },
+      "before_VmHWM": {
+        "median": 13690.0,
+        "min": 13564,
+        "max": 13828
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 14354.0,
+        "min": 14216,
+        "max": 14484
+      },
+      "after_Pss": {
+        "median": 14075.0,
+        "min": 13937,
+        "max": 14205
+      },
+      "after_VmHWM": {
+        "median": 13876.0,
+        "min": 13572,
+        "max": 14092
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "lkl-iso8",
+      "trials": 24,
+      "task_ms": 5.906209997192491,
+      "client_cpu_ms": 2.4339999999956063,
+      "daemon_cpu_ms": 9.999999999999995,
+      "ready_ms": 99.51993949653115,
+      "before_Rss": {
+        "median": 13306.0,
+        "min": 13168,
+        "max": 13420
+      },
+      "before_Pss": {
+        "median": 13027.0,
+        "min": 12889,
+        "max": 13141
+      },
+      "before_VmHWM": {
+        "median": 12070.0,
+        "min": 11932,
+        "max": 12312
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 13498.0,
+        "min": 13360,
+        "max": 13616
+      },
+      "after_Pss": {
+        "median": 13219.0,
+        "min": 13081,
+        "max": 13337
+      },
+      "after_VmHWM": {
+        "median": 12324.0,
+        "min": 11984,
+        "max": 12456
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      }
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "original",
+      "trials": 24,
+      "task_ms": 3.835904492007103,
+      "client_cpu_ms": 2.3199999999974352,
+      "daemon_cpu_ms": 0.0
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "variant": "vkso-fuse",
+      "trials": 24,
+      "task_ms": 6.677508499706164,
+      "client_cpu_ms": 2.294500000004973,
+      "daemon_cpu_ms": 0.0,
+      "ready_ms": 6.959372498386074,
+      "before_Rss": {
+        "median": 2206.0,
+        "min": 2184,
+        "max": 2268
+      },
+      "before_Pss": {
+        "median": 1986.0,
+        "min": 1964,
+        "max": 2048
+      },
+      "before_VmHWM": {
+        "median": 1480.0,
+        "min": 1420,
+        "max": 1596
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 2342.0,
+        "min": 2320,
+        "max": 2404
+      },
+      "after_Pss": {
+        "median": 2122.0,
+        "min": 2100,
+        "max": 2184
+      },
+      "after_VmHWM": {
+        "median": 2240.0,
+        "min": 2216,
+        "max": 2304
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "copied-fuse",
+      "trials": 24,
+      "task_ms": 1926.1032444919692,
+      "client_cpu_ms": 191.75600000000514,
+      "daemon_cpu_ms": 1740.0,
+      "ready_ms": 7.001086996751837,
+      "before_Rss": {
+        "median": 2202.0,
+        "min": 2180,
+        "max": 2272
+      },
+      "before_Pss": {
+        "median": 1982.0,
+        "min": 1960,
+        "max": 2052
+      },
+      "before_VmHWM": {
+        "median": 1472.0,
+        "min": 1416,
+        "max": 1600
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 7312.0,
+        "min": 7292,
+        "max": 7380
+      },
+      "after_Pss": {
+        "median": 7092.0,
+        "min": 7072,
+        "max": 7160
+      },
+      "after_VmHWM": {
+        "median": 7084.0,
+        "min": 7064,
+        "max": 7152
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "lkl-default64",
+      "trials": 24,
+      "task_ms": 1039.9822745021083,
+      "client_cpu_ms": 217.6689999999919,
+      "daemon_cpu_ms": 930.0,
+      "ready_ms": 140.76925600966206,
+      "before_Rss": {
+        "median": 20092.0,
+        "min": 19756,
+        "max": 20268
+      },
+      "before_Pss": {
+        "median": 19813.0,
+        "min": 19477,
+        "max": 19989
+      },
+      "before_VmHWM": {
+        "median": 19092.0,
+        "min": 17804,
+        "max": 19356
+      },
+      "before_Threads": {
+        "median": 25.0,
+        "min": 25,
+        "max": 25
+      },
+      "after_Rss": {
+        "median": 71428.0,
+        "min": 71136,
+        "max": 71656
+      },
+      "after_Pss": {
+        "median": 71149.0,
+        "min": 70857,
+        "max": 71377
+      },
+      "after_VmHWM": {
+        "median": 70678.0,
+        "min": 69396,
+        "max": 70964
+      },
+      "after_Threads": {
+        "median": 26.0,
+        "min": 26,
+        "max": 26
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "lkl-iso16",
+      "trials": 24,
+      "task_ms": 1010.6380564975552,
+      "client_cpu_ms": 217.5265000000124,
+      "daemon_cpu_ms": 920.0,
+      "ready_ms": 101.11088150006253,
+      "before_Rss": {
+        "median": 13450.0,
+        "min": 13228,
+        "max": 13536
+      },
+      "before_Pss": {
+        "median": 13171.0,
+        "min": 12949,
+        "max": 13257
+      },
+      "before_VmHWM": {
+        "median": 12908.0,
+        "min": 12712,
+        "max": 13012
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 25906.0,
+        "min": 25676,
+        "max": 26044
+      },
+      "after_Pss": {
+        "median": 25627.0,
+        "min": 25397,
+        "max": 25765
+      },
+      "after_VmHWM": {
+        "median": 25290.0,
+        "min": 25000,
+        "max": 25472
+      },
+      "after_Threads": {
+        "median": 18.0,
+        "min": 18,
+        "max": 18
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "lkl-iso64",
+      "trials": 24,
+      "task_ms": 1070.9088669973426,
+      "client_cpu_ms": 220.46450000000027,
+      "daemon_cpu_ms": 970.0000000000001,
+      "ready_ms": 100.80593249585945,
+      "before_Rss": {
+        "median": 14170.0,
+        "min": 14012,
+        "max": 14280
+      },
+      "before_Pss": {
+        "median": 13899.0,
+        "min": 13733,
+        "max": 14001
+      },
+      "before_VmHWM": {
+        "median": 13680.0,
+        "min": 13516,
+        "max": 13820
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 69310.0,
+        "min": 69152,
+        "max": 69420
+      },
+      "after_Pss": {
+        "median": 69039.0,
+        "min": 68873,
+        "max": 69141
+      },
+      "after_VmHWM": {
+        "median": 68700.0,
+        "min": 68512,
+        "max": 68820
+      },
+      "after_Threads": {
+        "median": 17.5,
+        "min": 17,
+        "max": 18
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "lkl-iso8",
+      "trials": 24,
+      "task_ms": 1063.056383500225,
+      "client_cpu_ms": 223.78450000001493,
+      "daemon_cpu_ms": 980.0000000000001,
+      "ready_ms": 99.76107500551734,
+      "before_Rss": {
+        "median": 13322.0,
+        "min": 13208,
+        "max": 13416
+      },
+      "before_Pss": {
+        "median": 13043.0,
+        "min": 12929,
+        "max": 13137
+      },
+      "before_VmHWM": {
+        "median": 12088.0,
+        "min": 11924,
+        "max": 12204
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 17474.0,
+        "min": 17240,
+        "max": 17740
+      },
+      "after_Pss": {
+        "median": 17195.0,
+        "min": 16961,
+        "max": 17461
+      },
+      "after_VmHWM": {
+        "median": 16298.0,
+        "min": 16048,
+        "max": 16528
+      },
+      "after_Threads": {
+        "median": 18.0,
+        "min": 18,
+        "max": 18
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "original",
+      "trials": 24,
+      "task_ms": 214.46413249941543,
+      "client_cpu_ms": 182.0860000000053,
+      "daemon_cpu_ms": 0.0
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "variant": "vkso-fuse",
+      "trials": 24,
+      "task_ms": 1924.0180740016513,
+      "client_cpu_ms": 191.49499999997488,
+      "daemon_cpu_ms": 1740.0,
+      "ready_ms": 6.991660993662663,
+      "before_Rss": {
+        "median": 2204.0,
+        "min": 2180,
+        "max": 2268
+      },
+      "before_Pss": {
+        "median": 1984.0,
+        "min": 1960,
+        "max": 2048
+      },
+      "before_VmHWM": {
+        "median": 1484.0,
+        "min": 1416,
+        "max": 1600
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 7316.0,
+        "min": 7288,
+        "max": 7380
+      },
+      "after_Pss": {
+        "median": 7096.0,
+        "min": 7068,
+        "max": 7160
+      },
+      "after_VmHWM": {
+        "median": 7088.0,
+        "min": 7060,
+        "max": 7152
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "copied-fuse",
+      "trials": 24,
+      "task_ms": 721.1165754997637,
+      "client_cpu_ms": 52.913500000009606,
+      "daemon_cpu_ms": 660.0,
+      "ready_ms": 7.76203500572592,
+      "before_Rss": {
+        "median": 2208.0,
+        "min": 2184,
+        "max": 2272
+      },
+      "before_Pss": {
+        "median": 1988.0,
+        "min": 1964,
+        "max": 2052
+      },
+      "before_VmHWM": {
+        "median": 1488.0,
+        "min": 1416,
+        "max": 1600
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 7292.0,
+        "min": 7272,
+        "max": 7356
+      },
+      "after_Pss": {
+        "median": 7072.0,
+        "min": 7052,
+        "max": 7136
+      },
+      "after_VmHWM": {
+        "median": 7178.0,
+        "min": 7156,
+        "max": 7264
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "lkl-default64",
+      "trials": 24,
+      "task_ms": 281.7690474985284,
+      "client_cpu_ms": 52.09300000000727,
+      "daemon_cpu_ms": 240.0,
+      "ready_ms": 140.86905899603153,
+      "before_Rss": {
+        "median": 20056.0,
+        "min": 19652,
+        "max": 20252
+      },
+      "before_Pss": {
+        "median": 19777.0,
+        "min": 19373,
+        "max": 19973
+      },
+      "before_VmHWM": {
+        "median": 19074.0,
+        "min": 18088,
+        "max": 19356
+      },
+      "before_Threads": {
+        "median": 25.0,
+        "min": 25,
+        "max": 25
+      },
+      "after_Rss": {
+        "median": 27284.0,
+        "min": 26932,
+        "max": 27464
+      },
+      "after_Pss": {
+        "median": 27005.0,
+        "min": 26653,
+        "max": 27185
+      },
+      "after_VmHWM": {
+        "median": 26582.0,
+        "min": 25576,
+        "max": 26788
+      },
+      "after_Threads": {
+        "median": 25.0,
+        "min": 25,
+        "max": 25
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "lkl-iso16",
+      "trials": 24,
+      "task_ms": 280.2101574925473,
+      "client_cpu_ms": 52.467999999983306,
+      "daemon_cpu_ms": 240.0,
+      "ready_ms": 98.36646149778971,
+      "before_Rss": {
+        "median": 13426.0,
+        "min": 13308,
+        "max": 13536
+      },
+      "before_Pss": {
+        "median": 13147.0,
+        "min": 13029,
+        "max": 13257
+      },
+      "before_VmHWM": {
+        "median": 12880.0,
+        "min": 12744,
+        "max": 12992
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 20366.0,
+        "min": 20240,
+        "max": 20476
+      },
+      "after_Pss": {
+        "median": 20087.0,
+        "min": 19961,
+        "max": 20197
+      },
+      "after_VmHWM": {
+        "median": 19746.0,
+        "min": 19608,
+        "max": 19856
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "lkl-iso64",
+      "trials": 24,
+      "task_ms": 279.6039009990636,
+      "client_cpu_ms": 52.14399999999575,
+      "daemon_cpu_ms": 240.0,
+      "ready_ms": 99.1862195005524,
+      "before_Rss": {
+        "median": 14140.0,
+        "min": 14000,
+        "max": 14284
+      },
+      "before_Pss": {
+        "median": 13861.0,
+        "min": 13721,
+        "max": 14005
+      },
+      "before_VmHWM": {
+        "median": 13654.0,
+        "min": 13468,
+        "max": 13800
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 21078.0,
+        "min": 20940,
+        "max": 21224
+      },
+      "after_Pss": {
+        "median": 20799.0,
+        "min": 20661,
+        "max": 20945
+      },
+      "after_VmHWM": {
+        "median": 20522.0,
+        "min": 20344,
+        "max": 20664
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "lkl-iso8",
+      "trials": 24,
+      "task_ms": 288.3770250045927,
+      "client_cpu_ms": 52.40399999999923,
+      "daemon_cpu_ms": 250.0,
+      "ready_ms": 100.18392049823888,
+      "before_Rss": {
+        "median": 13350.0,
+        "min": 13180,
+        "max": 13424
+      },
+      "before_Pss": {
+        "median": 13071.0,
+        "min": 12901,
+        "max": 13145
+      },
+      "before_VmHWM": {
+        "median": 12088.0,
+        "min": 11916,
+        "max": 12384
+      },
+      "before_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      },
+      "after_Rss": {
+        "median": 17330.0,
+        "min": 17112,
+        "max": 17556
+      },
+      "after_Pss": {
+        "median": 17051.0,
+        "min": 16833,
+        "max": 17277
+      },
+      "after_VmHWM": {
+        "median": 16044.0,
+        "min": 15636,
+        "max": 16496
+      },
+      "after_Threads": {
+        "median": 17.0,
+        "min": 17,
+        "max": 17
+      }
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "original",
+      "trials": 24,
+      "task_ms": 116.4265460029128,
+      "client_cpu_ms": 110.73800000000844,
+      "daemon_cpu_ms": 0.0
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "variant": "vkso-fuse",
+      "trials": 24,
+      "task_ms": 721.0128259976045,
+      "client_cpu_ms": 52.8824999999955,
+      "daemon_cpu_ms": 660.0,
+      "ready_ms": 8.3454715058906,
+      "before_Rss": {
+        "median": 2200.0,
+        "min": 2184,
+        "max": 2272
+      },
+      "before_Pss": {
+        "median": 1982.0,
+        "min": 1964,
+        "max": 2052
+      },
+      "before_VmHWM": {
+        "median": 1488.0,
+        "min": 1416,
+        "max": 1600
+      },
+      "before_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "after_Rss": {
+        "median": 7286.0,
+        "min": 7272,
+        "max": 7356
+      },
+      "after_Pss": {
+        "median": 7068.0,
+        "min": 7052,
+        "max": 7136
+      },
+      "after_VmHWM": {
+        "median": 7172.0,
+        "min": 7156,
+        "max": 7268
+      },
+      "after_Threads": {
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "copied-fuse",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.9872314417482906,
+        0.9958300568142128,
+        0.9911028700009511,
+        0.9923296457133902,
+        0.9918965865953208,
+        0.9948799543782655,
+        0.9911630049038628,
+        0.996775973471021
+      ],
+      "geometric_mean_time_ratio": 0.9926469869778365,
+      "bootstrap_95_percent": [
+        0.9905539821461877,
+        0.9945976012758054
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "original",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        2.406193658186627,
+        2.4033208135848345,
+        2.3924527025190776,
+        2.4276718880373847,
+        2.3889566271699367,
+        2.379682941113331,
+        2.428011080858958,
+        2.4115073854770532
+      ],
+      "geometric_mean_time_ratio": 2.4046689039257263,
+      "bootstrap_95_percent": [
+        2.393338847379154,
+        2.415952967439811
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "lkl-default64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.850900636015352,
+        0.8566813413107399,
+        0.8508412409748984,
+        0.8543385490429378,
+        0.8544639660563522,
+        0.8522947231574899,
+        0.8499687749240333,
+        0.8533922669186219
+      ],
+      "geometric_mean_time_ratio": 0.8528575329944433,
+      "bootstrap_95_percent": [
+        0.8514327106893462,
+        0.8543098116220349
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "lkl-iso64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.8115756723481002,
+        0.7832715154755739,
+        0.8263528168025536,
+        0.831289011286386,
+        0.7882055815401517,
+        0.7884696623305104,
+        0.7833249565054159,
+        0.8085687076970699
+      ],
+      "geometric_mean_time_ratio": 0.8024265437986473,
+      "bootstrap_95_percent": [
+        0.7908009175109466,
+        0.8154143864673326
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "lkl-iso16",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.774861240744025,
+        0.8474370095815958,
+        0.7480529944332736,
+        0.8517506715546431,
+        0.8616741753713791,
+        0.7922863042919178,
+        0.7638143723645683,
+        0.7533192430005764
+      ],
+      "geometric_mean_time_ratio": 0.7979414783067075,
+      "bootstrap_95_percent": [
+        0.7692198611394577,
+        0.8296201666767503
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "archive",
+      "baseline": "lkl-iso8",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.8047040081822919,
+        0.7266689310094013,
+        0.7354977184088881,
+        0.746177681175999,
+        0.7747002779896808,
+        0.7416453516253979,
+        0.7329974850309049,
+        0.7880138767498562
+      ],
+      "geometric_mean_time_ratio": 0.7558234032827611,
+      "bootstrap_95_percent": [
+        0.7390615134962369,
+        0.7749931624551255
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "copied-fuse",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.0238648723045103,
+        0.9907579375550799,
+        0.9967305509920434,
+        1.0100520142505458,
+        0.9968235503449879,
+        0.9847320479851248,
+        0.9948964651750101,
+        1.0014177463870066
+      ],
+      "geometric_mean_time_ratio": 0.9998449461264598,
+      "bootstrap_95_percent": [
+        0.9926701157970197,
+        1.0082221663469513
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "original",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.7883942570370128,
+        1.7040537321554106,
+        1.569671126821533,
+        1.8164725722257284,
+        1.7303783870446525,
+        1.7009390939813733,
+        1.753078254072134,
+        1.7665293215683904
+      ],
+      "geometric_mean_time_ratio": 1.727197528858151,
+      "bootstrap_95_percent": [
+        1.6733231892459506,
+        1.7710749428837878
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "lkl-default64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.1705052280658166,
+        1.1246828154028012,
+        1.134562573428456,
+        1.1772915364874996,
+        1.1367376028881204,
+        1.1270582739133648,
+        1.1640369692937163,
+        1.1539730298302247
+      ],
+      "geometric_mean_time_ratio": 1.1484460948620387,
+      "bootstrap_95_percent": [
+        1.1356535344553618,
+        1.161761882848246
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "lkl-iso64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.1900595117025528,
+        1.1376123478009161,
+        1.1300485119420705,
+        1.1747129619465408,
+        1.1325324927742273,
+        1.1246322418799193,
+        1.1302466652488006,
+        1.1328065953633588
+      ],
+      "geometric_mean_time_ratio": 1.1438596851648672,
+      "bootstrap_95_percent": [
+        1.1303717793231136,
+        1.1606333426927455
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "lkl-iso16",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.170718865937037,
+        1.1487781963123869,
+        1.1443758463109057,
+        1.153671800906969,
+        1.103128744988406,
+        1.1406709587535186,
+        1.1303221240921069,
+        1.1230321359040414
+      ],
+      "geometric_mean_time_ratio": 1.1391740804661974,
+      "bootstrap_95_percent": [
+        1.1252000025929085,
+        1.1520217738715537
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "alpine-virt-3.20.10-x86_64.iso",
+      "workload": "scan",
+      "baseline": "lkl-iso8",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.1842784321305857,
+        1.122895938196244,
+        1.1480428096960866,
+        1.1692087612079822,
+        1.1271551067445107,
+        0.8008194613244468,
+        0.9050434390356337,
+        1.15439657032487
+      ],
+      "geometric_mean_time_ratio": 1.0672674850727655,
+      "bootstrap_95_percent": [
+        0.964761607533364,
+        1.1553774292861108
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "copied-fuse",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.9991324428485684,
+        0.9973624404154928,
+        1.0015933428237718,
+        0.9958392937903294,
+        1.0044459131258954,
+        0.999776628509288,
+        0.9955313671142259,
+        0.9995650498276939
+      ],
+      "geometric_mean_time_ratio": 0.9991519450451338,
+      "bootstrap_95_percent": [
+        0.9973328291726173,
+        1.0011443091931829
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "original",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        8.976984531568668,
+        8.93335842194505,
+        8.983720400679232,
+        8.94944188044154,
+        9.014389121555473,
+        8.979338078752523,
+        8.961506202619741,
+        8.985018091088316
+      ],
+      "geometric_mean_time_ratio": 8.97293972911318,
+      "bootstrap_95_percent": [
+        8.957149605801416,
+        8.989225661567614
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "lkl-default64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.8609741596972904,
+        1.8557471996974537,
+        1.8545443966032829,
+        1.8410313522636583,
+        1.8549115502228928,
+        1.8536037432368737,
+        1.8440174791763373,
+        1.8560107477297383
+      ],
+      "geometric_mean_time_ratio": 1.8525946259157462,
+      "bootstrap_95_percent": [
+        1.848158578742842,
+        1.8565622571889238
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "lkl-iso64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.8003706729416293,
+        1.8018923435762526,
+        1.801380206824382,
+        1.7942228551076909,
+        1.8147189226279348,
+        1.7937821703297954,
+        1.7942778431445818,
+        1.7889927032461272
+      ],
+      "geometric_mean_time_ratio": 1.7986896446951035,
+      "bootstrap_95_percent": [
+        1.794044471319247,
+        1.8042723484406373
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "lkl-iso16",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.907267109195384,
+        1.8992288430826665,
+        1.909747085347111,
+        1.8931488189515977,
+        1.8965287290238073,
+        1.8734426144703615,
+        1.9050017697201918,
+        1.9342814462723883
+      ],
+      "geometric_mean_time_ratio": 1.9022628968438324,
+      "bootstrap_95_percent": [
+        1.8911075139038855,
+        1.9137500148650302
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "archive",
+      "baseline": "lkl-iso8",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        1.7718737276004415,
+        1.8173399525841751,
+        1.8173409697214569,
+        1.8034735100596562,
+        1.8153875629493121,
+        1.79842634628473,
+        1.7725506291087971,
+        1.8201801800049142
+      ],
+      "geometric_mean_time_ratio": 1.8019750405938821,
+      "bootstrap_95_percent": [
+        1.7881482670383988,
+        1.8139363595643638
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "copied-fuse",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        0.9950464361611311,
+        1.001071725860288,
+        0.9977606562187407,
+        1.0020733924011558,
+        0.998377465713394,
+        0.9995808992475956,
+        1.0001867695921447,
+        1.0048832623215256
+      ],
+      "geometric_mean_time_ratio": 0.9998687284917928,
+      "bootstrap_95_percent": [
+        0.99792381096671,
+        1.001810603405044
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "original",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        6.233419422173047,
+        6.156548867229848,
+        6.1823149734231,
+        6.1796521398114495,
+        6.200877286711562,
+        6.232914789421116,
+        6.220691624585515,
+        6.20620324453673
+      ],
+      "geometric_mean_time_ratio": 6.2015247147024555,
+      "bootstrap_95_percent": [
+        6.183539940796752,
+        6.219071839240618
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "lkl-default64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        2.54329605809482,
+        2.555608668955182,
+        2.5611309982481307,
+        2.604432643289123,
+        2.559961673826015,
+        2.5436365531866207,
+        2.550178057713835,
+        2.6008395602801193
+      ],
+      "geometric_mean_time_ratio": 2.5647857829835825,
+      "bootstrap_95_percent": [
+        2.5502559903181456,
+        2.5817868042359464
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "lkl-iso64",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        2.55616480114258,
+        2.5792929208136126,
+        2.5816988816045088,
+        2.6033382692821263,
+        2.58259008988923,
+        2.5692121506343395,
+        2.5803440639254416,
+        2.56294631287107
+      ],
+      "geometric_mean_time_ratio": 2.576913170036408,
+      "bootstrap_95_percent": [
+        2.5678043161744415,
+        2.5865244816419066
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "lkl-iso16",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        2.610680820923409,
+        2.533500872939311,
+        2.578037129412888,
+        2.5584496944540747,
+        2.5733216788652213,
+        2.5930816897041726,
+        2.5640503781354287,
+        2.5848037180703765
+      ],
+      "geometric_mean_time_ratio": 2.574397831700744,
+      "bootstrap_95_percent": [
+        2.559178374435518,
+        2.5896335438000593
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    },
+    {
+      "image": "kernel-include.iso",
+      "workload": "scan",
+      "baseline": "lkl-iso8",
+      "treatment": "vkso-fuse",
+      "blocks": 8,
+      "paired_ratios": [
+        2.496054460054891,
+        2.499641283839156,
+        2.4765964710906823,
+        2.514095628307038,
+        2.4914429855292095,
+        2.480470747316108,
+        2.5177578308394333,
+        2.5099488657920044
+      ],
+      "geometric_mean_time_ratio": 2.4982108202333952,
+      "bootstrap_95_percent": [
+        2.488300910591119,
+        2.507776612205328
+      ],
+      "direction": "ratio > 1 means VKSO takes longer than the listed baseline"
+    }
+  ],
+  "environment": {
+    "kernel": "5.15.198",
+    "build_id": "b08b4bea4d223bac75d119e5213d121a40b71a12",
+    "cmdline": "BOOT_IMAGE=/vkso-final-raw-normal-5.15.198.bzImage root=PARTUUID=f6ddb63b-3f79-43f3-873c-0a595f939776 rootwait ro nokaslr clocksource=tsc tsc=reliable nosmt isolcpus=domain,managed_irq,1-3 nohz_full=1-3 rcu_nocbs=1-3 irqaffinity=0 idle=poll intel_pstate=active processor.max_cstate=0 intel_idle.max_cstate=0 nmi_watchdog=0 nowatchdog audit=0\n",
+    "cpuinfo": "processor\t: 0\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2442.767\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 0\ncpu cores\t: 4\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 1\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 1\ncpu cores\t: 4\napicid\t\t: 2\ninitial apicid\t: 2\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 2\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 2\ncpu cores\t: 4\napicid\t\t: 4\ninitial apicid\t: 4\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\nprocessor\t: 3\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 140\nmodel name\t: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz\nstepping\t: 1\nmicrocode\t: 0x72\ncpu MHz\t\t: 2800.000\ncache size\t: 12288 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 3\ncpu cores\t: 4\napicid\t\t: 6\ninitial apicid\t: 6\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 27\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple pml ept_mode_based_exec tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs eibrs_pbrsb gds bhi its its_native_only\nbogomips\t: 5606.40\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 39 bits physical, 48 bits virtual\npower management:\n\n",
+    "client_cpu": 1,
+    "server_cpu": 2,
+    "blocks": 8,
+    "repeats": 3,
+    "functional": false,
+    "cache_policy": "fresh filesystem mount / FUSE process for each pass; warm backing image; no global cache drop",
+    "package": {
+      "name": "ISO9660 native optimized preparation",
+      "kernel_build_id": "b08b4bea4d223bac75d119e5213d121a40b71a12",
+      "kernel_release": "5.15.198",
+      "expected_native_image": "vkso-final-raw-normal-5.15.198.bzImage",
+      "variants": [
+        "original",
+        "compat",
+        "prepared",
+        "copied-fuse",
+        "vkso-fuse"
+      ],
+      "benchmark_images": [
+        "alpine-virt-3.20.10-x86_64.iso",
+        "kernel-include.iso"
+      ],
+      "tools": {
+        "find": "find (GNU findutils) 4.8.0",
+        "tar": "tar (GNU tar) 1.34",
+        "taskset": "taskset from util-linux 2.37.2",
+        "unshare": "unshare from util-linux 2.37.2"
+      },
+      "limits": "Read-only, single-threaded FUSE service; no claim of complete Linux isofs feature parity.",
+      "inline_constant_memops": true,
+      "keep_private_helpers": true
+    },
+    "comparison": {
+      "variants": [
+        "original",
+        "copied-fuse",
+        "vkso-fuse",
+        "lkl-default64",
+        "lkl-iso64",
+        "lkl-iso16",
+        "lkl-iso8"
+      ],
+      "lkl": {
+        "lkl-default64": {
+          "memory_mib": 64,
+          "binary": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/build-default/tools/lkl/lklfuse"
+        },
+        "lkl-iso64": {
+          "memory_mib": 64,
+          "binary": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/build-iso-only/tools/lkl/lklfuse"
+        },
+        "lkl-iso16": {
+          "memory_mib": 16,
+          "binary": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/build-iso-only/tools/lkl/lklfuse"
+        },
+        "lkl-iso8": {
+          "memory_mib": 8,
+          "binary": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/build-iso-only/tools/lkl/lklfuse"
+        }
+      },
+      "frontend": "/home/zzk/BinaryKernelCodeMapping/test/section65/build/lkl/vkso-isofuse-matched",
+      "fuse_policy": {
+        "entry_timeout": 0,
+        "attr_timeout": 0,
+        "negative_timeout": 0,
+        "use_ino": 1,
+        "nullpath_ok": 1,
+        "single_threaded": true
+      },
+      "resource_units": "memory fields in KiB, except Threads; startup seconds include a completed root getattr",
+      "preparation": "VKSO owner and bridge are the previously verified optimized binaries; FUSE frontend now retains opened inode handles",
+      "versions": "ISO preparation uses Linux 5.15.198; LKL uses pinned Linux 6.12 fork; comparisons are complete implementations, not pure mechanism cost"
+    }
+  },
+  "interpretation": [
+    "Tasks use warm backing images, fresh mounts/processes and tmpfs output; startup is separate.",
+    "Memory values are KiB except Threads. Rss/Pss come from smaps_rollup snapshots.",
+    "VmHWM is the asynchronously accounted status counter, not an exact observed peak.",
+    "User RSS/PSS do not measure total deployment memory; kernel module costs are separate.",
+    "LKL memory parameters are not measured RSS. Both default and reduced configurations are retained.",
+    "Linux 5.15.198 and LKL Linux 6.12 differ; cross-system effects are not page-sharing costs.",
+    "Only copied-fuse versus vkso-fuse uses identical core instructions and adapter code."
+  ]
+}

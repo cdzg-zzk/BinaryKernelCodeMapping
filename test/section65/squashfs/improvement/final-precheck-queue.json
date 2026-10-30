@@ -1,0 +1,43 @@
+[
+  {
+    "name": "squash-codec-guest-regression-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/improvement/guest_regression.py",
+      "--build",
+      "test/section65/build/squashfs/improve-codec-01",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-codec-guest-regression-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-codec-guest-regression-01/result.json"
+  },
+  {
+    "name": "squash-native-compare-pilot-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/improvement/native_compare.py",
+      "--builds",
+      "test/section65/squashfs/improvement/native-builds.json",
+      "--image-set",
+      "test/section65/build/squashfs/native-images-01/images.json",
+      "--blocks",
+      "4",
+      "--seed",
+      "65950",
+      "--campaign",
+      "squash-native-compare-pilot-01",
+      "--pilot",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-native-compare-pilot-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-native-compare-pilot-01/result.json"
+  }
+]

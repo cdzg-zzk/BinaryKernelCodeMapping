@@ -1,0 +1,703 @@
+{
+  "status": "complete",
+  "scope": "Instrumented complete Apptainer Python compilation, original SIF and 647-output oracle. Includes program loading and helper mount-time decoding. No timing estimate. Buffer and streaming APIs are alternatives, not summed.",
+  "cases": [
+    {
+      "variant": "stock",
+      "repeat": 0,
+      "counts": {
+        "common": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "buffer_library": {
+          "calls": 243,
+          "input": 7964096,
+          "output": 26999864
+        },
+        "stream_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/stock-0/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-yscn5pfd:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "stock-single",
+      "repeat": 0,
+      "counts": {
+        "common": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "buffer_library": {
+          "calls": 243,
+          "input": 7964096,
+          "output": 26999864
+        },
+        "stream_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/stock-single-0/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-mmbmas_c:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "copied-library",
+      "repeat": 0,
+      "counts": {
+        "common": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "buffer_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "stream_library": {
+          "calls": 352,
+          "input": 11646772,
+          "output": 37602020
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/copied-library-0/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-u4rypjz9:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "copied",
+      "repeat": 0,
+      "counts": {
+        "common": {
+          "calls": 352,
+          "input": 11646772,
+          "output": 37602020
+        },
+        "buffer_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "stream_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/copied-0/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-u0c159xa:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "copied-cachedata",
+      "repeat": 0,
+      "counts": {
+        "common": {
+          "calls": 352,
+          "input": 11646772,
+          "output": 37602020
+        },
+        "buffer_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "stream_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/copied-cachedata-0/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-00rxzu0i:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "stock",
+      "repeat": 1,
+      "counts": {
+        "common": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "buffer_library": {
+          "calls": 243,
+          "input": 7964096,
+          "output": 26999864
+        },
+        "stream_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/stock-1/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-ssy6r3o8:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "stock-single",
+      "repeat": 1,
+      "counts": {
+        "common": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "buffer_library": {
+          "calls": 243,
+          "input": 7964096,
+          "output": 26999864
+        },
+        "stream_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/stock-single-1/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-eew5w3k4:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "copied-library",
+      "repeat": 1,
+      "counts": {
+        "common": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "buffer_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "stream_library": {
+          "calls": 352,
+          "input": 11646772,
+          "output": 37602020
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/copied-library-1/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-abo6nvtd:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "copied",
+      "repeat": 1,
+      "counts": {
+        "common": {
+          "calls": 352,
+          "input": 11646772,
+          "output": 37602020
+        },
+        "buffer_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "stream_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/copied-1/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-x7z8j6i8:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "copied-cachedata",
+      "repeat": 1,
+      "counts": {
+        "common": {
+          "calls": 352,
+          "input": 11646772,
+          "output": 37602020
+        },
+        "buffer_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "stream_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/copied-cachedata-1/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-b0qy_o1u:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "stock",
+      "repeat": 2,
+      "counts": {
+        "common": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "buffer_library": {
+          "calls": 243,
+          "input": 7964096,
+          "output": 26999864
+        },
+        "stream_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/stock-2/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-u0mxy1a9:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "stock-single",
+      "repeat": 2,
+      "counts": {
+        "common": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "buffer_library": {
+          "calls": 243,
+          "input": 7964096,
+          "output": 26999864
+        },
+        "stream_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/stock-single-2/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-hjc20xi8:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "copied-library",
+      "repeat": 2,
+      "counts": {
+        "common": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "buffer_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "stream_library": {
+          "calls": 352,
+          "input": 11646772,
+          "output": 37602020
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/copied-library-2/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-1ya0dnys:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "copied",
+      "repeat": 2,
+      "counts": {
+        "common": {
+          "calls": 352,
+          "input": 11646772,
+          "output": 37602020
+        },
+        "buffer_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "stream_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/copied-2/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-7g5d_4vw:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    },
+    {
+      "variant": "copied-cachedata",
+      "repeat": 2,
+      "counts": {
+        "common": {
+          "calls": 352,
+          "input": 11646772,
+          "output": 37602020
+        },
+        "buffer_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        },
+        "stream_library": {
+          "calls": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
+      "outputs": 647,
+      "argv": [
+        "taskset",
+        "-c",
+        "1,2",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer",
+        "--config",
+        "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/copied-cachedata-2/apptainer.conf",
+        "exec",
+        "--contain",
+        "--cleanenv",
+        "--no-home",
+        "--no-mount",
+        "cwd",
+        "--pwd",
+        "/work",
+        "--bind",
+        "/dev/shm/vkso-python-count-u80dkebi:/work",
+        "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif",
+        "/bin/sh",
+        "-c",
+        "PYTHONHASHSEED=0 PYTHONPYCACHEPREFIX=/work/pycache /usr/bin/python3.10 -m compileall -q -f --invalidation-mode checked-hash /usr/lib/python3.10"
+      ]
+    }
+  ],
+  "inputs": {
+    "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/bin/apptainer": "395b83ad05496750dda58b9e31c079df8508d1d3a50f53f581fafc04c8d67e7b",
+    "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/apptainer/jammy/usr/libexec/apptainer/bin/squashfuse_ll": "d37f5b387c36d58a32831c2e6e6db2573fa31117b8e51b88c92be096c1b4f499",
+    "/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/heldout-python-images-01/xz.sif": "cffd22ff2a0c0f3138792a823dc223607b8ce81ae28d7b04767d56622b09b2a2",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/squash-optimized-application-final-gzip-01/libsq-materialized.so": "40e3b02f47f68e157160ce72bb72df158098037be69da2fcba79e0ed21995767",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/libsq-bridge.so": "950f4b8bfe3394e595ce23b058d685886bd0ecc197fbc6a17ee3971e3b9566a7",
+    "/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/refinement/decoder_counts.c": "359d69bc71e7e7521acda1da5ab041bdd07c69fc261ae366090e56998d3d18e8",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/decoder-counts.so": "f676eba411afc2b7ae6b4f38485493e0287988420dd51b5964e85d5e89b6ca5e",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01/xz-user-source/fuse_frontend.c": "e6dd46f3401b68a14f1e7542aaa6103505e70032fbc6f7b94ac4d7420c6356e3",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/cache-data-frontend.c": "dae27052ef85463b1639eb73fddce011d7d6c0f0a452936a15e6d6edcaf5d4d5",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/cache-data-frontend": "daff0f3807b0abc8c293e05263ebbbd3ba157d66fb5f40b2363b8208e9960793",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-decoder-controls-01/copied-library/libsq-bridge.so": "8954256c0898ef3507da3509dd15b94af416adc44e57a113814a8e54a595c788"
+  },
+  "build_command": [
+    "gcc",
+    "-O2",
+    "-shared",
+    "-fPIC",
+    "-I/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/builds/optimization-cache-01",
+    "-I/home/zzk/BinaryKernelCodeMapping/test/section65/build/squashfs/deps/usr/include",
+    "/home/zzk/BinaryKernelCodeMapping/test/section65/squashfs/refinement/decoder_counts.c",
+    "-ldl",
+    "-o",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/decoder-counts.so"
+  ],
+  "frontend_build_command": [
+    "gcc",
+    "-O2",
+    "-g",
+    "-DVKSO_SQ_DIRECTORY_CACHE",
+    "-I/home/zzk/BinaryKernelCodeMapping/test/section65/build/fuse-deps/usr/include/fuse3",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/cache-data-frontend.c",
+    "-Wl,-l:libfuse3.so.3",
+    "-ldl",
+    "-o",
+    "/var/tmp/vkso-section65-optimization-20261030-hBcg9Y/python-work-02/cache-data-frontend"
+  ]
+}

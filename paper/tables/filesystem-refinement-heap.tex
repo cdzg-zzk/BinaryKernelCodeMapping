@@ -1,0 +1,16 @@
+\begin{table}[h]\centering\small
+\caption{Exploratory LKL heap pilot: all settings complete all four tasks. Gzip has four blocks; xz/lz4 have one. Times are descriptive medians. PSS follows the include archive, not a sequential-task peak.}
+\begin{tabular}{lrrrrrr}\toprule Codec & Heap MiB & Startup s & Scan s & Archive s & Stream s & PSS MiB \\ \midrule
+gzip & 16 & 0.239 & 2.041 & 3.384 & 0.941 & 23.08 \\
+gzip & 64 & 0.218 & 2.032 & 2.510 & 0.918 & 60.03 \\
+gzip & 256 & 0.211 & 2.008 & 2.274 & 0.943 & 78.65 \\
+gzip & 512 & 0.233 & 2.052 & 2.194 & 0.932 & 82.54 \\
+xz & 16 & 0.269 & 1.031 & 3.985 & 1.251 & 23.12 \\
+xz & 64 & 0.288 & 1.065 & 3.059 & 1.178 & 60.15 \\
+xz & 256 & 0.284 & 1.044 & 2.866 & 1.236 & 78.84 \\
+xz & 512 & 0.302 & 1.055 & 2.772 & 1.223 & 82.72 \\
+lz4 & 16 & 0.211 & 1.983 & 3.073 & 0.821 & 23.11 \\
+lz4 & 64 & 0.211 & 1.946 & 2.081 & 0.778 & 59.54 \\
+lz4 & 256 & 0.238 & 1.972 & 1.999 & 0.774 & 78.90 \\
+lz4 & 512 & 0.192 & 1.988 & 1.994 & 0.811 & 82.79 \\
+\bottomrule\end{tabular}\end{table}

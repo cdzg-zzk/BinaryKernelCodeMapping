@@ -1,0 +1,23 @@
+[
+  {
+    "name": "squash-observer-free-01",
+    "argv": [
+      "unshare",
+      "--mount",
+      "--propagation",
+      "private",
+      "python3",
+      "test/section65/squashfs/apptainer_shared.py",
+      "--user",
+      "zzk",
+      "--build",
+      "test/section65/build/squashfs/evaluation-fixed-01/build",
+      "--image",
+      "test/section65/build/squashfs/application-images-01/gzip.sif",
+      "--verify-without-observer",
+      "--output",
+      "test/evaluation-local/runs/iso9660/squash-observer-free-01"
+    ],
+    "result": "test/evaluation-local/runs/iso9660/squash-observer-free-01/result.json"
+  }
+]
